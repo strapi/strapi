@@ -144,4 +144,27 @@ describe('Env helper', () => {
       expect(envHelper.date('DATE_VAR')).toEqual(new Date(2010, 1, 21, 12, 34, 12));
     });
   });
+
+  describe('env with union cast', () => {
+    test('Throws if expectedValues is not provided', () => {
+      expect(() => envHelper.oneOf('NO_VAR')).toThrow();
+    });
+
+    test('Throws if defaultValue not included in expectedValues', () => {
+      expect(() => envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'test')).toThrow();
+    });
+
+    test('Return undefined if value is missing in expectedValues and no defaultValue', () => {
+      expect(envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'])).toBeUndefined();
+    });
+
+    test('Return defaultValue if value does not exist in expectedValues', () => {
+      expect(envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
+    });
+
+    test('Return defaultValue if value exists and is missing in expectedValues', () => {
+      process.env.WITH_VAR = 'test';
+      expect(envHelper.oneOf('WITH_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
+    });
+  });
 });

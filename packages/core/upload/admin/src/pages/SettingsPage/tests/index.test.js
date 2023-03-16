@@ -57,7 +57,11 @@ describe('Upload | SettingsPage', () => {
         padding-left: 56px;
       }
 
-      .c6 {
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -68,16 +72,16 @@ describe('Upload | SettingsPage', () => {
         cursor: pointer;
       }
 
-      .c12 {
+      .c13 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c14 {
+      .c15 {
         padding-bottom: 56px;
       }
 
-      .c17 {
+      .c18 {
         background: #ffffff;
         padding: 24px;
         border-radius: 4px;
@@ -121,7 +125,7 @@ describe('Upload | SettingsPage', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -135,7 +139,7 @@ describe('Upload | SettingsPage', () => {
         flex-direction: row;
       }
 
-      .c7 {
+      .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -150,7 +154,7 @@ describe('Upload | SettingsPage', () => {
         gap: 8px;
       }
 
-      .c16 {
+      .c17 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -165,7 +169,7 @@ describe('Upload | SettingsPage', () => {
         gap: 12;
       }
 
-      .c18 {
+      .c19 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -180,7 +184,7 @@ describe('Upload | SettingsPage', () => {
         gap: 16px;
       }
 
-      .c23 {
+      .c24 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -192,6 +196,7 @@ describe('Upload | SettingsPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
       .c31 {
@@ -212,27 +217,27 @@ describe('Upload | SettingsPage', () => {
         justify-content: center;
       }
 
-      .c5 {
+      .c6 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c10 {
+      .c11 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
       }
 
-      .c11 {
+      .c12 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
       }
 
-      .c19 {
+      .c20 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -276,35 +281,26 @@ describe('Upload | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c24 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c24 > * + * {
-        margin-top: 4px;
-      }
-
-      .c8 {
+      .c9 {
         position: relative;
         outline: none;
       }
 
-      .c8 svg {
+      .c9 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c9 svg > g,
+      .c9 svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c9[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c9:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -319,11 +315,11 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c9:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c9:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -346,68 +342,68 @@ describe('Upload | SettingsPage', () => {
         width: 1px;
       }
 
-      .c9 {
+      .c10 {
         height: 2rem;
       }
 
-      .c9[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true'] .c4 {
+      .c10[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true'] svg > g,.c9[aria-disabled='true'] svg path {
+      .c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true']:active {
+      .c10[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c9[aria-disabled='true']:active .c4 {
+      .c10[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
-      .c9[aria-disabled='true']:active svg > g,.c9[aria-disabled='true']:active svg path {
+      .c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c9:hover {
+      .c10:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c9:active {
+      .c10:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c10 svg > g,
+      .c10 svg path {
         fill: #ffffff;
       }
 
-      .c20 {
+      .c21 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 24px;
       }
 
-      .c21 {
+      .c22 {
         grid-column: span 6;
         max-width: 100%;
       }
 
-      .c13 {
+      .c14 {
         display: grid;
         grid-template-columns: 1fr;
       }
 
-      .c15 {
+      .c16 {
         overflow-x: hidden;
       }
 
@@ -482,18 +478,18 @@ describe('Upload | SettingsPage', () => {
         width: 100%;
       }
 
-      .c22 {
+      .c23 {
         max-width: 320px;
       }
 
       @media (max-width:68.75rem) {
-        .c21 {
+        .c22 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c21 {
+        .c22 {
           grid-column: span;
         }
       }
@@ -517,17 +513,17 @@ describe('Upload | SettingsPage', () => {
                   class="c2"
                 >
                   <div
-                    class="c3"
+                    class="c3 c4"
                   >
                     <h1
-                      class="c4 c5"
+                      class="c5 c6"
                     >
                       Media Library
                     </h1>
                   </div>
                   <button
                     aria-disabled="true"
-                    class="c6 c7 c8 c9"
+                    class="c7 c8 c9 c10"
                     data-testid="save-button"
                     disabled=""
                     type="submit"
@@ -550,70 +546,70 @@ describe('Upload | SettingsPage', () => {
                       </svg>
                     </div>
                     <span
-                      class="c4 c10"
+                      class="c5 c11"
                     >
                       Save
                     </span>
                   </button>
                 </div>
                 <p
-                  class="c4 c11"
+                  class="c5 c12"
                 >
                   Configure the settings for the Media Library
                 </p>
               </div>
             </div>
             <div
-              class="c12"
+              class="c13"
             >
               <div
-                class="c13"
+                class="c14"
               >
                 <div
-                  class="c14 c15"
+                  class="c15 c16"
                 >
                   <div
-                    class="c16"
+                    class="c17"
                   >
                     <div
-                      class="c17"
+                      class="c18"
                     >
                       <div
-                        class="c18"
+                        class="c19"
                       >
                         <div
-                          class="c3"
+                          class="c4"
                         >
                           <h2
-                            class="c4 c19"
+                            class="c5 c20"
                           >
                             Asset management
                           </h2>
                         </div>
                         <div
-                          class="c20"
+                          class="c21"
                         >
                           <div
-                            class="c21"
+                            class="c22"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c22"
+                                class="c23"
                               >
                                 <div
-                                  class="c23 c24"
+                                  class="c24"
                                 >
                                   <div
-                                    class="c3"
+                                    class="c4"
                                   >
                                     <label
-                                      class="c4 c25"
+                                      class="c5 c25"
                                       for="1"
                                     >
                                       <div
-                                        class="c3"
+                                        class="c4"
                                       >
                                         Responsive friendly upload
                                       </div>
@@ -636,7 +632,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c32"
                                       >
                                         <span
-                                          class="c4 c33"
+                                          class="c5 c33"
                                         >
                                           Off
                                         </span>
@@ -646,7 +642,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c34"
                                       >
                                         <span
-                                          class="c4 c35"
+                                          class="c5 c35"
                                         >
                                           On
                                         </span>
@@ -666,7 +662,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c4 c37"
+                                    class="c5 c37"
                                     id="1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
@@ -676,26 +672,26 @@ describe('Upload | SettingsPage', () => {
                             </div>
                           </div>
                           <div
-                            class="c21"
+                            class="c22"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c22"
+                                class="c23"
                               >
                                 <div
-                                  class="c23 c24"
+                                  class="c24"
                                 >
                                   <div
-                                    class="c3"
+                                    class="c4"
                                   >
                                     <label
-                                      class="c4 c25"
+                                      class="c5 c25"
                                       for="3"
                                     >
                                       <div
-                                        class="c3"
+                                        class="c4"
                                       >
                                         Size optimization
                                       </div>
@@ -718,7 +714,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c34"
                                       >
                                         <span
-                                          class="c4 c38"
+                                          class="c5 c38"
                                         >
                                           Off
                                         </span>
@@ -728,7 +724,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c32"
                                       >
                                         <span
-                                          class="c4 c33"
+                                          class="c5 c33"
                                         >
                                           On
                                         </span>
@@ -747,7 +743,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c4 c37"
+                                    class="c5 c37"
                                     id="3-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
@@ -757,26 +753,26 @@ describe('Upload | SettingsPage', () => {
                             </div>
                           </div>
                           <div
-                            class="c21"
+                            class="c22"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c22"
+                                class="c23"
                               >
                                 <div
-                                  class="c23 c24"
+                                  class="c24"
                                 >
                                   <div
-                                    class="c3"
+                                    class="c4"
                                   >
                                     <label
-                                      class="c4 c25"
+                                      class="c5 c25"
                                       for="5"
                                     >
                                       <div
-                                        class="c3"
+                                        class="c4"
                                       >
                                         Auto orientation
                                       </div>
@@ -799,7 +795,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c32"
                                       >
                                         <span
-                                          class="c4 c33"
+                                          class="c5 c33"
                                         >
                                           Off
                                         </span>
@@ -809,7 +805,7 @@ describe('Upload | SettingsPage', () => {
                                         class="c30 c31 c34"
                                       >
                                         <span
-                                          class="c4 c35"
+                                          class="c5 c35"
                                         >
                                           On
                                         </span>
@@ -829,7 +825,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c4 c37"
+                                    class="c5 c37"
                                     id="5-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
