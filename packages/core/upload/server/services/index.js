@@ -6,7 +6,7 @@ const imageManipulation = require('./image-manipulation');
 const folder = require('./folder');
 const file = require('./file');
 const weeklyMetrics = require('./metrics/weekly-metrics');
-const metrics = require('./metrics/metrics');
+const metrics = require('./metrics');
 const apiUploadFolder = require('./api-upload-folder');
 const extensions = require('./extensions');
 
