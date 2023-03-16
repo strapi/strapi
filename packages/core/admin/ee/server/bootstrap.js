@@ -20,10 +20,6 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
-  if (features.isEnabled('review-workflows')) {
-    await reserveTablesWithPrefix('strapi_workflows');
-  }
-
   await getService('seat-enforcement').seatEnforcementWorkflow();
 
   await executeCEBootstrap();
