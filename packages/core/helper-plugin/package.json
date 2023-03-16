@@ -61,8 +61,8 @@
     "@storybook/builder-webpack5": "6.5.15",
     "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.16",
-    "@strapi/design-system": "1.6.5",
-    "@strapi/icons": "1.6.5",
+    "@strapi/design-system": "1.6.6",
+    "@strapi/icons": "1.6.6",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "browserslist-to-esbuild": "1.2.0",
@@ -81,8 +81,8 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.6.5",
-    "@strapi/icons": "1.6.5",
+    "@strapi/design-system": "1.6.6",
+    "@strapi/icons": "1.6.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",

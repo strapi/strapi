@@ -29,9 +29,9 @@
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
     "@graphql-tools/utils": "^8.12.0",
-    "@strapi/design-system": "1.6.5",
+    "@strapi/design-system": "1.6.6",
     "@strapi/helper-plugin": "4.8.2",
-    "@strapi/icons": "1.6.5",
+    "@strapi/icons": "1.6.6",
     "@strapi/utils": "4.8.2",
     "apollo-server-core": "3.11.1",
     "apollo-server-koa": "3.10.0",

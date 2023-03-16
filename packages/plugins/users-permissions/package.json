@@ -27,9 +27,9 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/design-system": "1.6.5",
+    "@strapi/design-system": "1.6.6",
     "@strapi/helper-plugin": "4.8.2",
-    "@strapi/icons": "1.6.5",
+    "@strapi/icons": "1.6.6",
     "@strapi/utils": "4.8.2",
     "bcryptjs": "2.4.3",
     "formik": "2.2.9",
