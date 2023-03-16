@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 
 export function ReviewWorkflowsStage({ name }) {
   return (
-    <Typography fontWeight="bold" textColor="neutral700">
+    <Typography fontWeight="regular" textColor="neutral700">
       {name}
     </Typography>
   );
