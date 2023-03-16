@@ -163,15 +163,6 @@ const sidebars = {
         },
         {
           type: 'category',
-          label: 'Telemetry',
-          link: {
-            type: 'doc',
-            id: 'core/telemetry/intro',
-          },
-          items: [],
-        },
-        {
-          type: 'category',
           label: 'Utils',
           items: [
             {
