@@ -160,7 +160,7 @@ jobs:
   api_ce_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:latest, driver: ${{ matrix.mysql_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -196,12 +196,12 @@ jobs:
         env:
           MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.mysql_pkg }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_mysql_5:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:5, driver: ${{ matrix.mysql_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -236,12 +236,12 @@ jobs:
         env:
           MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.mysql_pkg }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (sqlite, driver: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -310,7 +310,7 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (mysql:latest, driver: ${{ matrix.mysql_pkg }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -349,7 +349,7 @@ jobs:
         env:
           MYSQL_PKG: ${{ matrix.mysql_pkg }}
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.mysql_pkg }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
 
   api_ee_sqlite:
