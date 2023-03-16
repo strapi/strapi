@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { Box, Flex, Stack } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 
 import { addStage } from '../../actions';
 import { AddStage } from '../AddStage';
@@ -29,7 +29,14 @@ function Stages({ stages }) {
       <StagesContainer spacing={4} width="100%">
         <Background background="neutral200" height="100%" width={2} zIndex={1} />
 
-        <Stack spacing={6} zIndex={2} position="relative" as="ol">
+        <Flex
+          direction="column"
+          alignItems="stretch"
+          gap={6}
+          zIndex={2}
+          position="relative"
+          as="ol"
+        >
           {stages.map((stage, index) => {
             const id = stage?.id ?? stage.__temp_key__;
 
@@ -45,10 +52,10 @@ function Stages({ stages }) {
               </Box>
             );
           })}
-        </Stack>
+        </Flex>
       </StagesContainer>
 
-      <Flex spacing={6}>
+      <Flex direction="column" gap={6}>
         <AddStage type="button" onClick={() => dispatch(addStage({ name: '' }))}>
           {formatMessage({
             id: 'Settings.review-workflows.stage.add',
