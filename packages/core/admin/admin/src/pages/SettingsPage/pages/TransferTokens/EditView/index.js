@@ -89,7 +89,7 @@ const TransferTokenCreateView = () => {
         } else {
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+            message: formatAPIError(err),
           });
         }
       },
