@@ -19,9 +19,8 @@ describe('DynamicTable | PublicationState', () => {
   test('render draft state', () => {
     const { container, getByText } = setup({ isPublished: false });
 
-    const statusNode = container.children[0];
-    const statusNodeStyle = window.getComputedStyle(statusNode);
-
+    // retreive styles of rendered component, rather than the container
+    const statusNodeStyle = window.getComputedStyle(container.firstChild);
     const textNode = getByText('Draft');
 
     expect(textNode).toBeInTheDocument();
@@ -32,9 +31,8 @@ describe('DynamicTable | PublicationState', () => {
   test('render published state', () => {
     const { container, getByText } = setup({ isPublished: true });
 
-    const statusNode = container.children[0];
-    const statusNodeStyle = window.getComputedStyle(statusNode);
-
+    // retreive styles of rendered component, rather than the container
+    const statusNodeStyle = window.getComputedStyle(container.firstChild);
     const textNode = getByText('Published');
 
     expect(textNode).toBeInTheDocument();
