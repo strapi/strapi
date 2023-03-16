@@ -77,7 +77,7 @@ const TransferTokenCreateView = () => {
     {
       enabled: !isCreating && !transferToken,
       onError(err) {
-        if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+        if (err.response.data.error.details?.code === 'INVALID_TOKEN_SALT') {
           toggleNotification({
             type: 'warning',
             message: {
