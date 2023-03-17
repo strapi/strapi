@@ -1,6 +1,6 @@
 // TODO @soupette we need to refactor this file
 
-import { isNil } from 'lodash';
+import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 
 const TOKEN_KEY = 'jwtToken';
