@@ -72,20 +72,6 @@ describe('<InputUID />', () => {
         gap: 4px;
       }
 
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -122,6 +108,20 @@ describe('<InputUID />', () => {
         justify-content: unset;
       }
 
+      .c13 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
       .c1 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -139,6 +139,17 @@ describe('<InputUID />', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c5 {
@@ -224,7 +235,7 @@ describe('<InputUID />', () => {
         fill: #4945ff;
       }
 
-      .c13 {
+      .c14 {
         -webkit-animation: gzYjWD 2s infinite linear;
         animation: gzYjWD 2s infinite linear;
       }
@@ -237,14 +248,10 @@ describe('<InputUID />', () => {
             class="c0"
           >
             <label
-              class="c1"
+              class="c1 c2"
               for="1"
             >
-              <div
-                class="c2"
-              >
-                test
-              </div>
+              test
             </label>
             <div
               class="c3 c4"
@@ -276,7 +283,7 @@ describe('<InputUID />', () => {
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c2 c13"
+                      class="c13 c14"
                       focusable="false"
                     >
                       <svg

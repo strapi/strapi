@@ -34,6 +34,7 @@ const {
   ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
 } = constants;
@@ -261,6 +262,7 @@ module.exports = ({ action, ability, model }) => {
       ...COMPONENT_FIELDS,
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
+      PUBLISHED_AT_ATTRIBUTE,
     ]);
   };
 
