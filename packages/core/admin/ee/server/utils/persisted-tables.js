@@ -14,36 +14,36 @@ const findTablesThatStartWithPrefix = async (prefix) => {
  * Get all reserved table names from the core store
  * @returns {Array}
  */
-const getReservedTables = async () =>
+const getPersistedTables = async () =>
   strapi.store.get({
     type: 'core',
-    key: 'reserved_tables',
-  });
+    key: 'persisted_tables',
+  }) ?? [];
 
 /**
  * Add all table names that start with a prefix to the reserved tables in
  * core store
  * @param {string} tableNamePrefix
  */
-const reserveTablesWithPrefix = async (tableNamePrefix) => {
-  const reservedTables = (await getReservedTables()) || [];
 
+const persistTablesWithPrefix = async (tableNamePrefix) => {
+  const persistedTables = (await getPersistedTables()) || [];
   const tableNames = await findTablesThatStartWithPrefix(tableNamePrefix);
+  const notReservedTableNames = tableNames.filter((name) => !persistedTables.includes(name));
 
-  if (!tableNames.length) {
+  if (!notReservedTableNames.length) {
     return;
   }
 
-  reservedTables.push(...tableNames.filter((name) => !reservedTables.includes(name)));
-
+  persistedTables.push(...notReservedTableNames);
   await strapi.store.set({
     type: 'core',
-    key: 'reserved_tables',
-    value: reservedTables,
+    key: 'persisted_tables',
+    value: persistedTables,
   });
 };
 
 module.exports = {
-  reserveTablesWithPrefix,
+  persistTablesWithPrefix,
   findTablesThatStartWithPrefix,
 };

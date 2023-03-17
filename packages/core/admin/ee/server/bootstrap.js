@@ -5,7 +5,7 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
-const { reserveTablesWithPrefix } = require('./utils/reserved-tables');
+const { persistTablesWithPrefix } = require('./utils/persisted-tables');
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');
@@ -15,7 +15,7 @@ module.exports = async () => {
   }
 
   if (features.isEnabled('audit-logs')) {
-    await reserveTablesWithPrefix('strapi_audit_logs');
+    await persistTablesWithPrefix('strapi_audit_logs');
 
     await actionProvider.registerMany(actions.auditLogs);
   }

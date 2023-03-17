@@ -345,10 +345,10 @@ module.exports = (db) => {
     }
 
     const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
-      ? await strapi.store.get({
+      ? (await strapi.store.get({
           type: 'core',
-          key: 'reserved_tables',
-        })
+          key: 'persisted_tables',
+        })) ?? []
       : [];
 
     for (const srcTable of srcSchema.tables) {
