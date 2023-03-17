@@ -96,9 +96,9 @@ const traverseEntity = async (visitor, options, entity) => {
         : traverseRelationTarget(strapi.getModel(attribute.target));
 
       if (isArray(value)) {
-        const res = [];
+        const res = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await method(visitor, newPath, value[i]));
+          res[i] = await method(visitor, newPath, value[i]);
         }
         copy[key] = res;
       } else {
@@ -112,9 +112,9 @@ const traverseEntity = async (visitor, options, entity) => {
     if (isMedia) {
       // need to update copy
       if (isArray(value)) {
-        const res = [];
+        const res = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await traverseMediaTarget(visitor, newPath, value[i]));
+          res[i] = await traverseMediaTarget(visitor, newPath, value[i]);
         }
         copy[key] = res;
       } else {
@@ -128,9 +128,9 @@ const traverseEntity = async (visitor, options, entity) => {
       const targetSchema = strapi.getModel(attribute.component);
 
       if (isArray(value)) {
-        const res = [];
+        const res = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await traverseComponent(visitor, newPath, targetSchema, value[i]));
+          res[i] = await traverseComponent(visitor, newPath, targetSchema, value[i]);
         }
         copy[key] = res;
       } else {
@@ -141,9 +141,9 @@ const traverseEntity = async (visitor, options, entity) => {
     }
 
     if (isDynamicZone && isArray(value)) {
-      const res = [];
+      const res = new Array(value.length);
       for (let i = 0; i < value.length; i += 1) {
-        res.push(await visitDynamicZoneEntry(visitor, newPath, value[i]));
+        res[i] = await visitDynamicZoneEntry(visitor, newPath, value[i]);
       }
       copy[key] = res;
 

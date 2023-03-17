@@ -37,11 +37,11 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(data);
   };
 
-  const sanitizeOuput = async (data, schema, { auth } = {}) => {
+  const sanitizeOutput = async (data, schema, { auth } = {}) => {
     if (isArray(data)) {
-      const res = [];
+      const res = new Array(data.length);
       for (let i = 0; i < data.length; i += 1) {
-        res.push(await sanitizeOuput(data[i], schema, { auth }));
+        res[i] = await sanitizeOutput(data[i], schema, { auth });
       }
       return res;
     }
@@ -126,7 +126,7 @@ const createContentAPISanitizers = () => {
 
   return {
     input: sanitizeInput,
-    output: sanitizeOuput,
+    output: sanitizeOutput,
     query: sanitizeQuery,
     filters: sanitizeFilters,
     sort: sanitizeSort,
