@@ -2,7 +2,7 @@
 
 const { isPrivateAttribute } = require('../../content-types');
 
-module.exports = ({ schema, data, key, attribute }) => {
+module.exports = ({ schema, key, attribute }, { remove }) => {
   if (!attribute) {
     return;
   }
@@ -10,6 +10,6 @@ module.exports = ({ schema, data, key, attribute }) => {
   const isPrivate = isPrivateAttribute(schema, key) || attribute.private === true;
 
   if (isPrivate) {
-    delete data[key];
+    remove(key);
   }
 };

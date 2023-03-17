@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = ({ data, key, attribute }) => {
+module.exports = ({ key, attribute }, { remove }) => {
   if (attribute?.type === 'password') {
-    delete data[key];
+    remove(key);
   }
 };
