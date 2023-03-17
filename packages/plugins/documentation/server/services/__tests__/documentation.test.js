@@ -4,6 +4,7 @@ const fse = require('fs-extra');
 const SwaggerParser = require('@apidevtools/swagger-parser');
 const { api, plugins, components, contentTypes } = require('../__mocks__/mock-strapi-data');
 const documentation = require('../documentation');
+const override = require('../override');
 const defaultConfig = require('../../config/default-plugin-config');
 
 const mockStrapiInstance = {
@@ -18,7 +19,7 @@ const mockStrapiInstance = {
   api,
   plugins,
   config: {
-    get: jest.fn(() => defaultConfig),
+    get: () => defaultConfig,
   },
   log: {
     info: jest.fn(),
@@ -42,11 +43,26 @@ describe('Documentation service', () => {
       return global.strapi.contentTypes[uid];
     });
     global.strapi.plugin = jest.fn((name) => global.strapi.plugins[name]);
+
+    global.strapi.plugins.documentation = {
+      service: jest.fn((name) => {
+        const mockServices = {
+          override: override({ strapi: global.strapi }),
+        };
+
+        return mockServices[name];
+      }),
+    };
   });
 
   afterAll(() => {
     // Teardown the mocked strapi instance
     global.strapi = {};
+  });
+
+  afterEach(() => {
+    // Reset the mocked strapi config
+    global.strapi.config.get = () => defaultConfig;
   });
 
   it('generates a valid openapi schema', async () => {
@@ -72,7 +88,7 @@ describe('Documentation service', () => {
     });
 
     it("generates documentation only for plugins in the user's config", async () => {
-      global.strapi.config.get.mockReturnValueOnce({
+      global.strapi.config.get = () => ({
         ...defaultConfig,
         'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['upload'] },
       });
@@ -86,7 +102,7 @@ describe('Documentation service', () => {
     });
 
     it('does not generate documentation for any plugins', async () => {
-      global.strapi.config.get.mockReturnValueOnce({
+      global.strapi.config.get = () => ({
         ...defaultConfig,
         'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
       });
@@ -138,7 +154,7 @@ describe('Documentation service', () => {
           },
         ],
       };
-      global.strapi.config.get.mockReturnValueOnce({ ...userConfig });
+      global.strapi.config.get = () => ({ ...userConfig });
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
@@ -150,8 +166,9 @@ describe('Documentation service', () => {
       expect(mockFinalDoc.security).toEqual(userConfig.security);
       expect(mockFinalDoc.webhooks).toEqual(userConfig.webhooks);
     });
+
     it("does not apply an override if the plugin providing the override isn't specified in the x-strapi-config.plugins", async () => {
-      global.strapi.config.get.mockReturnValueOnce({
+      global.strapi.config.get = () => ({
         ...defaultConfig,
         'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
       });
