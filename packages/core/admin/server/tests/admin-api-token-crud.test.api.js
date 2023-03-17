@@ -179,7 +179,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
 
   test('Creates a token with a 7-day lifespan', async () => {
     const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     const body = {
       name: 'api-token_tests-lifespan7',
@@ -193,6 +193,8 @@ describe('Admin API Token v2 CRUD (api)', () => {
       method: 'POST',
       body,
     });
+
+    nowSpy.mockRestore();
 
     expect(res.statusCode).toBe(201);
     expect(res.body.data).toStrictEqual({
@@ -212,13 +214,11 @@ describe('Admin API Token v2 CRUD (api)', () => {
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a token with a 30-day lifespan', async () => {
     const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     const body = {
       name: 'api-token_tests-lifespan30',
@@ -248,16 +248,16 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lifespan: String(body.lifespan),
     });
 
+    nowSpy.mockRestore();
+
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a token with a 90-day lifespan', async () => {
     const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     const body = {
       name: 'api-token_tests-lifespan90',
@@ -287,11 +287,11 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lifespan: String(body.lifespan),
     });
 
+    nowSpy.mockRestore();
+
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a token with a null lifespan', async () => {
