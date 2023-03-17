@@ -8,54 +8,23 @@ const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
+const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
 module.exports = ({ strapi }) => {
+  console.log('documentation arg', strapi.config.get());
   const config = strapi.config.get('plugin.documentation');
-  const registeredDocs = [];
+  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
 
-  const getPluginsThatNeedDocumentation = () => {
-    // Default plugins that need documentation generated
-    const defaultPlugins = ['upload', 'users-permissions'];
-    // User specified plugins that need documentation generated
-    const userPluginsConfig = config['x-strapi-config'].plugins;
-
-    if (userPluginsConfig === null) {
-      // The user hasn't specified any plugins to document, use the defaults
-      return defaultPlugins;
-    }
-
-    if (userPluginsConfig.length) {
-      // The user has specified certain plugins to document, use them
-      return userPluginsConfig;
-    }
-
-    // The user has specified that no plugins should be documented
-    return [];
-  };
+  const overrideService = strapi.plugin('documentation').service('override');
 
   return {
+    /**
+     * @TODO: Make both parameters required in next major release
+     * @param {*} doc - The openapi specifcation to override
+     * @param {*} pluginOrigin - The name of the plugin that is overriding the documentation
+     */
     registerDoc(doc, pluginOrigin) {
-      const plugins = getPluginsThatNeedDocumentation();
-      let registeredDoc = doc;
-
-      if (pluginOrigin) {
-        if (!plugins.includes(pluginOrigin)) {
-          return strapi.log.info(
-            `@strapi/documentation will not use the override provided by ${pluginOrigin} since the plugin was not specified in the x-strapi-config.plugins array`
-          );
-        }
-      } else {
-        strapi.log.warn(
-          '@strapi/documentation received an override that did not specify its origin, this could cause unexpected schema generation'
-        );
-      }
-
-      // parseYaml
-      if (typeof doc === 'string') {
-        registeredDoc = require('yaml').parse(registeredDoc);
-      }
-      // receive an object we can register it directly
-      registeredDocs.push(registeredDoc);
+      overrideService.registerDoc(doc, pluginOrigin);
     },
 
     getDocumentationVersion() {
@@ -138,8 +107,7 @@ module.exports = ({ strapi }) => {
     },
 
     getPluginAndApiInfo() {
-      const plugins = getPluginsThatNeedDocumentation();
-      const pluginsToDocument = plugins.map((plugin) => {
+      const pluginsToDocument = pluginsThatNeedDocumentation.map((plugin) => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -209,7 +177,7 @@ module.exports = ({ strapi }) => {
       ]);
       _.set(config, ['info', 'x-generation-date'], new Date().toISOString());
       _.set(config, ['info', 'version'], version);
-      _.set(config, ['x-strapi-config', 'plugins'], getPluginsThatNeedDocumentation());
+      _.set(config, ['x-strapi-config', 'plugins'], pluginsThatNeedDocumentation);
       // Prepare final doc with default config and generated paths
       const finalDoc = { ...config, paths };
       // Add the default components to the final doc
@@ -217,7 +185,7 @@ module.exports = ({ strapi }) => {
       // Merge the generated component schemas with the defaults
       _.merge(finalDoc.components, { schemas });
       // Apply the the registered overrides
-      registeredDocs.forEach((doc) => {
+      overrideService.registeredDocs.forEach((doc) => {
         // Merge ovveride tags with the generated tags
         finalDoc.tags = finalDoc.tags || [];
         finalDoc.tags.push(...(doc.tags || []));
