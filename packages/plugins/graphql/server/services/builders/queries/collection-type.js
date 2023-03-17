@@ -72,14 +72,15 @@ module.exports = ({ strapi }) => {
 
       args: getContentTypeArgs(contentType, { multiple: false }),
 
-      async resolve(parent, args) {
+      async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType });
 
         const { findOne } = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const value = findOne(parent, transformedArgs);
+        // queryResolvers will sanitize params
+        const value = findOne(parent, transformedArgs, ctx);
 
         return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
@@ -102,14 +103,15 @@ module.exports = ({ strapi }) => {
 
       args: getContentTypeArgs(contentType),
 
-      async resolve(parent, args) {
+      async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
         const { find } = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const nodes = await find(parent, transformedArgs);
+        // queryResolvers will sanitize params
+        const nodes = await find(parent, transformedArgs, ctx);
 
         return toEntityResponseCollection(nodes, { args: transformedArgs, resourceUID: uid });
       },

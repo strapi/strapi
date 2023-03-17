@@ -372,7 +372,9 @@ describe('<SearchURLQuery />', () => {
             <div
               class="c0"
             >
-              <div>
+              <div
+                class=""
+              >
                 <div
                   class="c1"
                 >
@@ -469,7 +471,7 @@ describe('<SearchURLQuery />', () => {
 
   it('should clear value and update query params', async () => {
     const history = createMemoryHistory();
-    const { container } = render(makeApp(history));
+    const { container, getByText } = render(makeApp(history));
 
     fireEvent.click(container.querySelector('button[type="button"]'));
 
@@ -480,7 +482,7 @@ describe('<SearchURLQuery />', () => {
     const urlSearchQuery = history.location.search;
     expect(urlSearchQuery).toEqual('?_q=michka&page=1');
 
-    fireEvent.click(container.querySelector('button[aria-label="Clear"]'));
+    fireEvent.click(getByText('Clear'));
 
     expect(input.value).toEqual('');
 

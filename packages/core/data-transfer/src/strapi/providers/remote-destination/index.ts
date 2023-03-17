@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher } from './utils';
+import { createDispatcher } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
@@ -54,7 +54,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
           try {
             const query = this.dispatcher?.dispatchCommand({
               command: 'init',
-              params: { options: { strategy, restore }, transfer: 'push' },
+              params: { strategy, restore },
             });
 
             const res = (await query) as server.Payload<server.InitMessage>;
@@ -202,7 +202,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
+    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/push`;
+
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = new WebSocket(wsUrl);
@@ -303,15 +304,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
     const flush = async () => {
-      await this.#streamStep('assets', batch);
+      const streamError = await this.#streamStep('assets', batch);
       batch = [];
+      return streamError;
     };
 
     const safePush = async (chunk: client.TransferAssetFlow) => {
       batch.push(chunk);
 
       if (batchLength() >= batchSize) {
-        await flush();
+        const streamError = await flush();
+        if (streamError) {
+          throw streamError;
+        }
       }
     };
 
@@ -347,15 +352,25 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const assetID = v4();
         const { filename, filepath, stats, stream } = asset;
 
-        await safePush({ action: 'start', assetID, data: { filename, filepath, stats } });
+        try {
+          await safePush({
+            action: 'start',
+            assetID,
+            data: { filename, filepath, stats },
+          });
 
-        for await (const chunk of stream) {
-          await safePush({ action: 'stream', assetID, data: chunk });
+          for await (const chunk of stream) {
+            await safePush({ action: 'stream', assetID, data: chunk });
+          }
+
+          await safePush({ action: 'end', assetID });
+
+          callback();
+        } catch (error) {
+          if (error instanceof Error) {
+            callback(error);
+          }
         }
-
-        await safePush({ action: 'end', assetID });
-
-        callback();
       },
     });
   }

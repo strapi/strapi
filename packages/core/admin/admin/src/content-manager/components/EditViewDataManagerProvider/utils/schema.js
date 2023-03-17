@@ -216,6 +216,10 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup
       .mixed(errorsTrads.json)
       .test('isJSON', errorsTrads.json, (value) => {
+        if (!value || !value.length) {
+          return true;
+        }
+
         try {
           JSON.parse(value);
 
@@ -226,7 +230,9 @@ const createYupSchemaAttribute = (type, validations, options) => {
       })
       .nullable()
       .test('required', errorsTrads.required, (value) => {
-        if (validations.required && !value.length) return false;
+        if (validations.required && (!value || !value.length)) {
+          return false;
+        }
 
         return true;
       });

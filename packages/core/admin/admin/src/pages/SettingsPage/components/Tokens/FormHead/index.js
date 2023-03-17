@@ -71,6 +71,7 @@ const FormHead = ({
           })}
         </Link>
       }
+      ellipsis
     />
   );
 };

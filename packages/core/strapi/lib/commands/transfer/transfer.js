@@ -7,6 +7,7 @@ const {
       createRemoteStrapiDestinationProvider,
       createLocalStrapiSourceProvider,
       createLocalStrapiDestinationProvider,
+      createRemoteStrapiSourceProvider,
     },
   },
 } = require('@strapi/data-transfer');
@@ -68,13 +69,24 @@ module.exports = async (opts) => {
       exitWith(1, 'Missing token for remote destination');
     }
 
-    exitWith(1, `Remote Strapi source provider not yet implemented`);
+    source = createRemoteStrapiSourceProvider({
+      getStrapi: () => strapi,
+      url: opts.from,
+      auth: {
+        type: 'token',
+        token: opts.fromToken,
+      },
+    });
   }
 
   // if no URL provided, use local Strapi
   if (!opts.to) {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
+      strategy: 'restore',
+      restore: {
+        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
+      },
     });
   }
   // if URL provided, set up a remote destination provider
