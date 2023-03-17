@@ -15,10 +15,10 @@ const findTablesThatStartWithPrefix = async (prefix) => {
  * @returns {Array}
  */
 const getPersistedTables = async () =>
-  strapi.store.get({
+  (await strapi.store.get({
     type: 'core',
     key: 'persisted_tables',
-  }) ?? [];
+  })) ?? [];
 
 /**
  * Add all table names that start with a prefix to the reserved tables in
