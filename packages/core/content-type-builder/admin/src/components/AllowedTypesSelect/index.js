@@ -4,6 +4,8 @@ import { useIntl } from 'react-intl';
 import { MultiSelectNested } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 
+console.log('cheat');
+
 const options = [
   {
     label: 'All',
