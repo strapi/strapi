@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { getType, getOtherInfos } from '@strapi/helper-plugin';
 
 const removePasswordAndRelationsFieldFromData = (data, contentTypeSchema, componentSchema) => {

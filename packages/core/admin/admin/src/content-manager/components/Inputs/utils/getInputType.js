@@ -1,4 +1,4 @@
-import { toLower } from 'lodash';
+import toLower from 'lodash/toLower';
 
 const getInputType = (type = '') => {
   switch (toLower(type)) {

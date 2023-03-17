@@ -26,7 +26,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
