@@ -23,6 +23,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
 }
 
 .c19 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -390,7 +391,7 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
   outline: none;
 }
 
-.c10[aria-disabled='true'] {
+.c10[data-disabled] {
   cursor: not-allowed;
 }
 
@@ -857,12 +858,13 @@ exports[`Wysiwyg render and actions buttons should render the Wysiwyg 1`] = `
                 class="c7 c9"
               >
                 <button
-                  aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="selectTitle selectTitle-label selectTitle-content"
+                  aria-required="false"
                   class="c10"
                   id="selectTitle"
+                  role="combobox"
                   type="button"
                 />
                 <div

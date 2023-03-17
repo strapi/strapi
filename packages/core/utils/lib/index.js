@@ -42,6 +42,7 @@ const convertQueryParams = require('./convert-query-params');
 const importDefault = require('./import-default');
 const template = require('./template');
 const file = require('./file');
+const traverse = require('./traverse');
 
 module.exports = {
   yup,
@@ -91,4 +92,5 @@ module.exports = {
   convertQueryParams,
   importDefault,
   file,
+  traverse,
 };

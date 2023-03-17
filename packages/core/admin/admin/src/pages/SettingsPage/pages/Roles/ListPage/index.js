@@ -1,49 +1,138 @@
-import React, { useCallback, useState } from 'react';
-import matchSorter from 'match-sorter';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import {
+  ConfirmDialog,
+  LoadingIndicatorPage,
+  SearchURLQuery,
   SettingsPageTitle,
-  useQuery,
-  useTracking,
+  getFetchClient,
+  useNotification,
+  useQueryParams,
+  useRBAC,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Plus, Trash, Pencil, Duplicate } from '@strapi/icons';
+import { Plus, Trash, Duplicate, Pencil } from '@strapi/icons';
 import {
   Button,
+  ActionLayout,
   ContentLayout,
   HeaderLayout,
+  Main,
   Table,
   Tbody,
-  Th,
-  Thead,
-  Tr,
   TFooter,
+  Thead,
+  Th,
+  Tr,
   Typography,
-  Main,
   VisuallyHidden,
 } from '@strapi/design-system';
-
+import { get } from 'lodash';
+import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import RoleRow from './components/RoleRow';
-import EmptyRole from './components/EmptyRole';
-import UpgradePlanModal from '../../../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../../../hooks';
+import adminPermissions from '../../../../../permissions';
+import EmptyRole from './components/EmptyRole';
+import BaseRoleRow from './components/RoleRow';
+import reducer, { initialState } from './reducer';
 
 const useSortedRoles = () => {
-  const { roles, isLoading } = useRolesList();
+  useFocusWhenNavigate();
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate, canDelete, canRead, canUpdate },
+  } = useRBAC(adminPermissions.settings.roles);
 
-  const query = useQuery();
-  const _q = decodeURIComponent(query.get('_q') || '');
+  const { getData, roles, isLoading } = useRolesList(false);
+  const [{ query }] = useQueryParams();
+  const _q = query?._q || '';
   const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
-  return { isLoading, sortedRoles };
+  useEffect(() => {
+    if (!isLoadingForPermissions && canRead) {
+      getData();
+    }
+  }, [isLoadingForPermissions, canRead, getData]);
+
+  return {
+    isLoadingForPermissions,
+    canCreate,
+    canDelete,
+    canRead,
+    canUpdate,
+    isLoading,
+    getData,
+    sortedRoles,
+    roles,
+  };
 };
 
-const useRoleActions = () => {
+const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   const { formatMessage } = useIntl();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { trackUsage } = useTracking();
+
+  const toggleNotification = useNotification();
+  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
+  const [{ selectedRoles, showModalConfirmButtonLoading, roleToDelete }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
+  const { post } = getFetchClient();
+
+  const handleDeleteData = async () => {
+    try {
+      dispatch({
+        type: 'ON_REMOVE_ROLES',
+      });
+
+      await post('/admin/roles/batch-delete', {
+        ids: [roleToDelete],
+      });
+
+      await getData();
+
+      dispatch({
+        type: 'RESET_DATA_TO_DELETE',
+      });
+    } catch (err) {
+      const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
+
+      if (errorIds && Array.isArray(errorIds)) {
+        const errorsMsg = errorIds.join('\n');
+        toggleNotification({
+          type: 'warning',
+          message: errorsMsg,
+        });
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+    }
+    handleToggleModal();
+  };
+
+  const onRoleDuplicate = useCallback(
+    (id) => {
+      push(`/settings/roles/duplicate/${id}`);
+    },
+    [push]
+  );
+
+  const handleNewRoleClick = () => push('/settings/roles/new');
+
+  const onRoleRemove = useCallback((roleId) => {
+    dispatch({
+      type: 'SET_ROLE_TO_DELETE',
+      id: roleId,
+    });
+
+    handleToggleModal();
+  }, []);
+
+  const handleToggleModal = () => setIsWarningDeleteAllOpenend((prev) => !prev);
 
   const handleGoTo = useCallback(
     (id) => {
@@ -52,144 +141,234 @@ const useRoleActions = () => {
     [push]
   );
 
-  const handleToggle = useCallback(() => {
-    setIsModalOpen((prev) => !prev);
-  }, []);
+  const handleClickDelete = useCallback(
+    (e, role) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const handleToggleModalForCreatingRole = useCallback(() => {
-    trackUsage('didShowRBACUpgradeModal');
-    setIsModalOpen(true);
-  }, [trackUsage]);
+      if (role.usersCount) {
+        toggleNotification({
+          type: 'info',
+          message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
+        });
+      } else {
+        onRoleRemove(role.id);
+      }
+    },
+    [toggleNotification, onRoleRemove]
+  );
+
+  const handleClickDuplicate = useCallback(
+    (e, role) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onRoleDuplicate(role.id);
+    },
+    [onRoleDuplicate]
+  );
 
   const getIcons = useCallback(
     (role) => [
-      {
-        onClick: handleToggle,
-        label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
-        icon: <Duplicate />,
-      },
-      {
-        onClick: () => handleGoTo(role.id),
-        label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-        icon: <Pencil />,
-      },
-      {
-        onClick: handleToggle,
-        label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
-        icon: <Trash />,
-      },
+      ...(canCreate
+        ? [
+            {
+              onClick: (e) => handleClickDuplicate(e, role),
+              label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
+              icon: <Duplicate />,
+            },
+          ]
+        : []),
+      ...(canUpdate
+        ? [
+            {
+              onClick: () => handleGoTo(role.id),
+              label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
+              icon: <Pencil />,
+            },
+          ]
+        : []),
+      ...(canDelete
+        ? [
+            {
+              onClick: (e) => handleClickDelete(e, role),
+              label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
+              icon: <Trash />,
+            },
+          ]
+        : []),
     ],
-    [formatMessage, handleToggle, handleGoTo]
+    [
+      formatMessage,
+      handleClickDelete,
+      handleClickDuplicate,
+      handleGoTo,
+      canCreate,
+      canUpdate,
+      canDelete,
+    ]
   );
 
   return {
-    isModalOpen,
-    handleToggleModalForCreatingRole,
-    handleToggle,
+    handleNewRoleClick,
     getIcons,
+    selectedRoles,
+    isWarningDeleteAllOpened,
+    showModalConfirmButtonLoading,
+    handleToggleModal,
+    handleDeleteData,
   };
 };
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
 
-  const { sortedRoles, isLoading } = useSortedRoles();
-  const { isModalOpen, handleToggle, handleToggleModalForCreatingRole, getIcons } =
-    useRoleActions();
+  const {
+    isLoadingForPermissions,
+    canCreate,
+    canRead,
+    canDelete,
+    canUpdate,
+    isLoading,
+    getData,
+    sortedRoles,
+  } = useSortedRoles();
+
+  const {
+    handleNewRoleClick,
+    getIcons,
+    isWarningDeleteAllOpened,
+    showModalConfirmButtonLoading,
+    handleToggleModal,
+    handleDeleteData,
+  } = useRoleActions({ getData, canCreate, canDelete, canUpdate });
+
+  // ! TODO - Show the search bar only if the user is allowed to read - add the search input
+  // canRead
 
   const rowCount = sortedRoles.length + 1;
-  const colCount = 5;
+  const colCount = 6;
 
-  // ! TODO - Add the search input
+  if (isLoadingForPermissions) {
+    return (
+      <Main>
+        <LoadingIndicatorPage />
+      </Main>
+    );
+  }
+
+  const title = formatMessage({
+    id: 'global.roles',
+    defaultMessage: 'roles',
+  });
 
   return (
     <Main>
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="S">
-            {formatMessage({
-              id: 'Settings.roles.list.button.add',
-              defaultMessage: 'Add new role',
-            })}
-          </Button>
-        }
-        title={formatMessage({
-          id: 'global.roles',
-          defaultMessage: 'roles',
-        })}
-        subtitle={formatMessage({
-          id: 'Settings.roles.list.description',
-          defaultMessage: 'List of roles',
-        })}
-      />
-      <ContentLayout>
-        <Table
-          colCount={colCount}
-          rowCount={rowCount}
-          footer={
-            <TFooter onClick={handleToggleModalForCreatingRole} icon={<Plus />}>
+          canCreate ? (
+            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
               })}
-            </TFooter>
+            </Button>
+          ) : null
+        }
+        title={title}
+        subtitle={formatMessage({
+          id: 'Settings.roles.list.description',
+          defaultMessage: 'List of roles',
+        })}
+        as="h2"
+      />
+      {canRead && (
+        <ActionLayout
+          startActions={
+            <SearchURLQuery
+              label={formatMessage(
+                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                { target: title }
+              )}
+            />
           }
-        >
-          <Thead>
-            <Tr>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
+        />
+      )}
+      {canRead && (
+        <ContentLayout>
+          <Table
+            colCount={colCount}
+            rowCount={rowCount}
+            footer={
+              canCreate ? (
+                <TFooter onClick={handleNewRoleClick} icon={<Plus />}>
                   {formatMessage({
-                    id: 'global.name',
-                    defaultMessage: 'Name',
+                    id: 'Settings.roles.list.button.add',
+                    defaultMessage: 'Add new role',
                   })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: 'global.description',
-                    defaultMessage: 'Description',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <Typography variant="sigma" textColor="neutral600">
-                  {formatMessage({
-                    id: 'global.users',
-                    defaultMessage: 'Users',
-                  })}
-                </Typography>
-              </Th>
-              <Th>
-                <VisuallyHidden>
-                  {formatMessage({
-                    id: 'global.actions',
-                    defaultMessage: 'Actions',
-                  })}
-                </VisuallyHidden>
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {sortedRoles?.map((role, rowIndex) => (
-              <RoleRow
-                key={role.id}
-                id={role.id}
-                name={role.name}
-                description={role.description}
-                usersCount={role.usersCount}
-                icons={getIcons(role)}
-                rowIndex={rowIndex + 2}
-              />
-            ))}
-          </Tbody>
-        </Table>
-        {!rowCount && !isLoading && <EmptyRole />}
-      </ContentLayout>
-      <UpgradePlanModal isOpen={isModalOpen} onClose={handleToggle} />
+                </TFooter>
+              ) : null
+            }
+          >
+            <Thead>
+              <Tr aria-rowindex={1}>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'global.name',
+                      defaultMessage: 'Name',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'global.description',
+                      defaultMessage: 'Description',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'global.users',
+                      defaultMessage: 'Users',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: 'global.actions',
+                      defaultMessage: 'Actions',
+                    })}
+                  </VisuallyHidden>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {sortedRoles?.map((role, index) => (
+                <BaseRoleRow
+                  key={role.id}
+                  id={role.id}
+                  name={role.name}
+                  description={role.description}
+                  usersCount={role.usersCount}
+                  icons={getIcons(role)}
+                  rowIndex={index + 2}
+                />
+              ))}
+            </Tbody>
+          </Table>
+          {!rowCount && !isLoading && <EmptyRole />}
+        </ContentLayout>
+      )}
+      <ConfirmDialog
+        isOpen={isWarningDeleteAllOpened}
+        onConfirm={handleDeleteData}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
+        onToggleDialog={handleToggleModal}
+      />
     </Main>
   );
 };

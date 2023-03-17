@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { Grid, GridItem, Box, Checkbox, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
@@ -77,7 +76,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <Box paddingLeft={4}>
             <Checkbox
               name={pathToData.join('..')}
-              disabled={isFormDisabled || IS_DISABLED}
+              disabled={isFormDisabled}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
               onValueChange={(value) => {
                 onChangeParentCheckbox({
@@ -99,13 +98,10 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
                 <GridItem col={3} key={action}>
-                  <CheckboxWrapper
-                    disabled={isFormDisabled || IS_DISABLED}
-                    hasConditions={hasConditions}
-                  >
+                  <CheckboxWrapper disabled={isFormDisabled} hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onValueChange={(value) => {
                         onChangeSimpleCheckbox({
