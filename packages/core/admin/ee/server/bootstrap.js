@@ -18,6 +18,10 @@ module.exports = async () => {
   }
 
   if (features.isEnabled('review-workflows')) {
+    // Decorate the entity service with review workflow logic
+    const { decorator } = getService('review-workflows-decorator');
+    strapi.entityService.decorate(decorator);
+
     const { bootstrap: rwBootstrap } = getService('review-workflows');
 
     await rwBootstrap();

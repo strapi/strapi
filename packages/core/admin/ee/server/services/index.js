@@ -8,4 +8,5 @@ module.exports = {
   workflows: require('./review-workflows/workflows'),
   stages: require('./review-workflows/stages'),
   'review-workflows': require('./review-workflows/review-workflows'),
+  'review-workflows-decorator': require('./review-workflows/entity-service-decorator'),
 };
