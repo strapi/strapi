@@ -88,7 +88,7 @@ describe('Upload | SettingsPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c28 {
+      .c29 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
@@ -101,7 +101,7 @@ describe('Upload | SettingsPage', () => {
         display: flex;
       }
 
-      .c30 {
+      .c31 {
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
@@ -199,7 +199,7 @@ describe('Upload | SettingsPage', () => {
         gap: 4px;
       }
 
-      .c31 {
+      .c32 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -251,7 +251,7 @@ describe('Upload | SettingsPage', () => {
         color: #32324d;
       }
 
-      .c33 {
+      .c34 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -259,7 +259,7 @@ describe('Upload | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c35 {
+      .c36 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -267,13 +267,13 @@ describe('Upload | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c37 {
+      .c38 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c38 {
+      .c39 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -330,7 +330,7 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c27 {
+      .c28 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -387,6 +387,17 @@ describe('Upload | SettingsPage', () => {
         fill: #ffffff;
       }
 
+      .c26 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c21 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
@@ -411,14 +422,14 @@ describe('Upload | SettingsPage', () => {
         outline: none;
       }
 
-      .c26 {
+      .c27 {
         position: relative;
         display: inline-block;
         z-index: 0;
         width: 100%;
       }
 
-      .c29 {
+      .c30 {
         overflow: hidden;
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
@@ -431,12 +442,12 @@ describe('Upload | SettingsPage', () => {
         transition-duration: 0.2s;
       }
 
-      .c29:focus-within {
+      .c30:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c32 {
+      .c33 {
         background-color: transparent;
         border: 1px solid #f6f6f9;
         position: relative;
@@ -452,7 +463,7 @@ describe('Upload | SettingsPage', () => {
         padding-bottom: 6px;
       }
 
-      .c34 {
+      .c35 {
         background-color: #ffffff;
         border: 1px solid #dcdce4;
         position: relative;
@@ -468,7 +479,7 @@ describe('Upload | SettingsPage', () => {
         padding-bottom: 6px;
       }
 
-      .c36 {
+      .c37 {
         height: 100%;
         left: 0;
         opacity: 0;
@@ -605,44 +616,40 @@ describe('Upload | SettingsPage', () => {
                                     class="c4"
                                   >
                                     <label
-                                      class="c5 c25"
+                                      class="c5 c25 c26"
                                       for="1"
                                     >
-                                      <div
-                                        class="c4"
-                                      >
-                                        Responsive friendly upload
-                                      </div>
+                                      Responsive friendly upload
                                     </label>
                                   </div>
                                   <label
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <div
-                                      class="c27"
+                                      class="c28"
                                     >
                                       Responsive friendly upload
                                     </div>
                                     <div
-                                      class="c28 c29"
+                                      class="c29 c30"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c32"
+                                        class="c31 c32 c33"
                                       >
                                         <span
-                                          class="c5 c33"
+                                          class="c5 c34"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c34"
+                                        class="c31 c32 c35"
                                       >
                                         <span
-                                          class="c5 c35"
+                                          class="c5 c36"
                                         >
                                           On
                                         </span>
@@ -653,7 +660,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-label="responsiveDimensions"
                                         aria-required="false"
                                         checked=""
-                                        class="c36"
+                                        class="c37"
                                         data-testid="responsiveDimensions"
                                         id="1"
                                         name="responsiveDimensions"
@@ -662,7 +669,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c37"
+                                    class="c5 c38"
                                     id="1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
@@ -687,44 +694,40 @@ describe('Upload | SettingsPage', () => {
                                     class="c4"
                                   >
                                     <label
-                                      class="c5 c25"
+                                      class="c5 c25 c26"
                                       for="3"
                                     >
-                                      <div
-                                        class="c4"
-                                      >
-                                        Size optimization
-                                      </div>
+                                      Size optimization
                                     </label>
                                   </div>
                                   <label
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <div
-                                      class="c27"
+                                      class="c28"
                                     >
                                       Size optimization
                                     </div>
                                     <div
-                                      class="c28 c29"
+                                      class="c29 c30"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c34"
+                                        class="c31 c32 c35"
                                       >
                                         <span
-                                          class="c5 c38"
+                                          class="c5 c39"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c32"
+                                        class="c31 c32 c33"
                                       >
                                         <span
-                                          class="c5 c33"
+                                          class="c5 c34"
                                         >
                                           On
                                         </span>
@@ -734,7 +737,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         aria-required="false"
-                                        class="c36"
+                                        class="c37"
                                         data-testid="sizeOptimization"
                                         id="3"
                                         name="sizeOptimization"
@@ -743,7 +746,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c37"
+                                    class="c5 c38"
                                     id="3-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
@@ -768,44 +771,40 @@ describe('Upload | SettingsPage', () => {
                                     class="c4"
                                   >
                                     <label
-                                      class="c5 c25"
+                                      class="c5 c25 c26"
                                       for="5"
                                     >
-                                      <div
-                                        class="c4"
-                                      >
-                                        Auto orientation
-                                      </div>
+                                      Auto orientation
                                     </label>
                                   </div>
                                   <label
-                                    class="c26"
+                                    class="c27"
                                   >
                                     <div
-                                      class="c27"
+                                      class="c28"
                                     >
                                       Auto orientation
                                     </div>
                                     <div
-                                      class="c28 c29"
+                                      class="c29 c30"
                                       display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c32"
+                                        class="c31 c32 c33"
                                       >
                                         <span
-                                          class="c5 c33"
+                                          class="c5 c34"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c30 c31 c34"
+                                        class="c31 c32 c35"
                                       >
                                         <span
-                                          class="c5 c35"
+                                          class="c5 c36"
                                         >
                                           On
                                         </span>
@@ -816,7 +815,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-label="autoOrientation"
                                         aria-required="false"
                                         checked=""
-                                        class="c36"
+                                        class="c37"
                                         data-testid="autoOrientation"
                                         id="5"
                                         name="autoOrientation"
@@ -825,7 +824,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c5 c37"
+                                    class="c5 c38"
                                     id="5-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
@@ -844,7 +843,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c27"
+          class="c28"
         >
           <p
             aria-live="polite"
