@@ -11,7 +11,6 @@ const WebpackBar = require('webpackbar');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 
-const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
 
@@ -218,11 +217,9 @@ module.exports = ({
       ],
     },
     resolve: {
-      alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
       mainFields: ['browser', 'jsnext:main', 'main'],
-      modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
       new HtmlWebpackPlugin({
