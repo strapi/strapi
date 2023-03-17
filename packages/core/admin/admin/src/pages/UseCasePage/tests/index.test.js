@@ -45,58 +45,28 @@ describe('Admin | UseCasePage', () => {
     const { container: firstChild } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c28 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #666687;
-      }
-
-      .c33 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c2 {
+      .c1 {
         padding-top: 24px;
         padding-right: 40px;
       }
 
-      .c7 {
-        padding-left: 8px;
+      .c2 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
       }
 
-      .c9 {
+      .c10 {
         padding-top: 8px;
         padding-bottom: 64px;
       }
 
-      .c11 {
+      .c12 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -106,30 +76,46 @@ describe('Admin | UseCasePage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c13 {
+      .c14 {
         padding-bottom: 32px;
       }
 
-      .c16 {
+      .c17 {
         padding-top: 24px;
         padding-bottom: 4px;
         width: 15.625rem;
       }
 
-      .c27 {
+      .c28 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c29 {
+      .c30 {
         padding-left: 12px;
       }
 
-      .c35 {
+      .c33 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        width: 100%;
+        cursor: pointer;
+      }
+
+      .c38 {
         padding-top: 16px;
       }
 
-      .c1 {
+      .c39 {
+        background: transparent;
+      }
+
+      .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -147,7 +133,36 @@ describe('Admin | UseCasePage', () => {
         justify-content: flex-end;
       }
 
-      .c14 {
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c15 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -159,21 +174,6 @@ describe('Admin | UseCasePage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c19 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 24px;
       }
 
       .c20 {
@@ -188,23 +188,25 @@ describe('Admin | UseCasePage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 24px;
       }
 
-      .c22 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c21 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
       }
 
-      .c25 {
+      .c26 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -227,6 +229,25 @@ describe('Admin | UseCasePage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c37 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -240,34 +261,69 @@ describe('Admin | UseCasePage', () => {
         justify-content: center;
       }
 
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c18 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c29 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #666687;
+      }
+
       .c36 {
-        background: transparent;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c41 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c40 {
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c36[aria-disabled='true'] {
+      .c40[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c36[aria-disabled='true'] svg path {
+      .c40[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c36 svg {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        font-size: 0.625rem;
-      }
-
-      .c36 svg path {
+      .c40 svg path {
         fill: #4945ff;
       }
 
-      .c36:after {
+      .c40:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -282,11 +338,11 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid transparent;
       }
 
-      .c36:focus-visible {
+      .c40:focus-visible {
         outline: none;
       }
 
-      .c36:focus-visible:after {
+      .c40:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -297,44 +353,26 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c21 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c21 > * + * {
-        margin-top: 4px;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+      .c4 {
         position: relative;
         outline: none;
       }
 
-      .c3 svg {
+      .c4 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c3 svg > g,
-      .c3 svg path {
+      .c4 svg > g,
+      .c4 svg path {
         fill: #ffffff;
       }
 
-      .c3[aria-disabled='true'] {
+      .c4[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c3:after {
+      .c4:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -349,11 +387,11 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid transparent;
       }
 
-      .c3:focus-visible {
+      .c4:focus-visible {
         outline: none;
       }
 
-      .c3:focus-visible:after {
+      .c4:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -364,7 +402,7 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c38 {
+      .c42 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -376,101 +414,102 @@ describe('Admin | UseCasePage', () => {
         width: 1px;
       }
 
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c5 {
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
         border: 1px solid transparent;
         background: transparent;
       }
 
-      .c4 .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 .c5 {
-        color: #ffffff;
-      }
-
-      .c4[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c4[aria-disabled='true'] .c5 {
+      .c5[aria-disabled='true'] .c6 {
         color: #666687;
       }
 
-      .c4[aria-disabled='true'] svg > g,.c4[aria-disabled='true'] svg path {
+      .c5[aria-disabled='true'] svg > g,.c5[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c4[aria-disabled='true']:active {
+      .c5[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c4[aria-disabled='true']:active .c5 {
+      .c5[aria-disabled='true']:active .c6 {
         color: #666687;
       }
 
-      .c4[aria-disabled='true']:active svg > g,.c4[aria-disabled='true']:active svg path {
+      .c5[aria-disabled='true']:active svg > g,.c5[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c4:hover {
+      .c5:hover {
         background-color: #f6f6f9;
       }
 
-      .c4:active {
+      .c5:active {
         border: 1px solid undefined;
         background: undefined;
       }
 
-      .c4 .c5 {
+      .c5 .c6 {
         color: #32324d;
       }
 
-      .c4 svg > g,
-      .c4 svg path {
+      .c5 svg > g,
+      .c5 svg path {
         fill: #8e8ea9;
       }
 
-      .c32 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c35 {
         height: 2.5rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        width: 100%;
       }
 
-      .c32 .c0 {
+      .c35[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c35[aria-disabled='true'] .c6 {
+        color: #666687;
+      }
+
+      .c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c35[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c35[aria-disabled='true']:active .c6 {
+        color: #666687;
+      }
+
+      .c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c35:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c35:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c35 svg > g,
+      .c35 svg path {
+        fill: #ffffff;
+      }
+
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -481,52 +520,7 @@ describe('Admin | UseCasePage', () => {
         align-items: center;
       }
 
-      .c32 .c5 {
-        color: #ffffff;
-      }
-
-      .c32[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c32[aria-disabled='true'] .c5 {
-        color: #666687;
-      }
-
-      .c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c32[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c32[aria-disabled='true']:active .c5 {
-        color: #666687;
-      }
-
-      .c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c32:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c32:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c32 svg > g,
-      .c32 svg path {
-        fill: #ffffff;
-      }
-
-      .c23 {
+      .c24 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -542,28 +536,28 @@ describe('Admin | UseCasePage', () => {
         transition-duration: 0.2s;
       }
 
-      .c23:focus-within {
+      .c24:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c30 {
+      .c31 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c30 svg {
+      .c31 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c30 svg path {
+      .c31 svg path {
         fill: #666687;
       }
 
-      .c31 {
+      .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -572,11 +566,11 @@ describe('Admin | UseCasePage', () => {
         border: none;
       }
 
-      .c31 svg {
+      .c32 svg {
         width: 0.375rem;
       }
 
-      .c8 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -587,12 +581,12 @@ describe('Admin | UseCasePage', () => {
         align-items: center;
       }
 
-      .c8 svg {
+      .c9 svg {
         height: 4px;
         width: 6px;
       }
 
-      .c24 {
+      .c25 {
         position: absolute;
         left: 0;
         right: 0;
@@ -603,42 +597,42 @@ describe('Admin | UseCasePage', () => {
         border: none;
       }
 
-      .c24:focus {
+      .c25:focus {
         outline: none;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[data-disabled] {
         cursor: not-allowed;
       }
 
-      .c26 {
+      .c27 {
         width: 100%;
       }
 
-      .c10:focus-visible {
+      .c11:focus-visible {
         outline: none;
       }
 
-      .c15 {
+      .c16 {
         height: 4.5rem;
       }
 
-      .c12 {
+      .c13 {
         margin: 0 auto;
         width: 552px;
       }
 
-      .c18 {
+      .c19 {
         text-align: center;
       }
 
       <div>
         <div>
           <header
-            class="c0 c1"
+            class="c0"
           >
             <div
-              class="c0 c2"
+              class="c1"
             >
               <div>
                 <button
@@ -646,33 +640,33 @@ describe('Admin | UseCasePage', () => {
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="true"
-                  class="c3 c4"
+                  class="c2 c3 c4 c5"
                   label="English"
                   type="button"
                 >
                   <span
-                    class="c5 c6"
+                    class="c6 c7"
                   >
                     English
                   </span>
                   <div
                     aria-hidden="true"
-                    class="c0 c7"
+                    class="c8"
                   >
                     <span
-                      class="c8"
+                      class="c9"
                     >
                       <svg
                         aria-hidden="true"
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 14 8"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                           fill="#32324D"
                           fill-rule="evenodd"
                         />
@@ -684,32 +678,32 @@ describe('Admin | UseCasePage', () => {
             </div>
           </header>
           <div
-            class="c0 c9"
+            class="c10"
           >
             <main
               aria-labelledby="usecase-title"
-              class="c10"
+              class="c11"
               id="main-content"
               tabindex="-1"
             >
               <div
-                class="c0 c11 c12"
+                class="c12 c13"
               >
                 <form>
                   <div
-                    class="c0 c13 c14"
+                    class="c14 c15"
                   >
                     <img
                       alt=""
                       aria-hidden="true"
-                      class="c15"
+                      class="c16"
                       src="customAuthLogo.png"
                     />
                     <div
-                      class="c0 c16"
+                      class="c17"
                     >
                       <h1
-                        class="c5 c17 c18"
+                        class="c6 c18 c19"
                         id="usecase-title"
                       >
                         Tell us a bit more about yourself
@@ -717,46 +711,45 @@ describe('Admin | UseCasePage', () => {
                     </div>
                   </div>
                   <div
-                    class="c0 c19"
+                    class="c20"
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c0 c20 c21"
+                        class="c21"
                       >
                         <label
-                          class="c5 c6"
+                          class="c6 c22 c23"
                           for="usecase"
                         >
-                          <div
-                            class="c0 c22"
-                          >
-                            What type of work do you do?
-                          </div>
+                          What type of work do you do?
                         </label>
                         <div
-                          class="c0 c22 c23"
+                          class="c8 c24"
                         >
                           <button
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="usecase usecase-label usecase-content"
-                            class="c24"
+                            aria-required="false"
+                            class="c25"
                             data-testid="usecase"
                             id="usecase"
+                            role="combobox"
                             type="button"
                           />
                           <div
-                            class="c0 c25 c26"
+                            class="c26 c27"
                           >
                             <div
-                              class="c0 c22"
+                              class="c8"
                             >
                               <div
-                                class="c0 c27"
+                                class="c28"
                               >
                                 <span
-                                  class="c5 c28"
+                                  class="c6 c29"
                                   id="usecase-content"
                                 >
                                   Select...
@@ -764,25 +757,25 @@ describe('Admin | UseCasePage', () => {
                               </div>
                             </div>
                             <div
-                              class="c0 c22"
+                              class="c8"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c0 c29 c30 c31"
+                                class="c30 c31 c32"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -795,12 +788,12 @@ describe('Admin | UseCasePage', () => {
                     </div>
                     <button
                       aria-disabled="true"
-                      class="c3 c32"
+                      class="c33 c34 c4 c35"
                       disabled=""
                       type="submit"
                     >
                       <span
-                        class="c5 c33"
+                        class="c6 c36"
                       >
                         Finish
                       </span>
@@ -809,18 +802,18 @@ describe('Admin | UseCasePage', () => {
                 </form>
               </div>
               <div
-                class="c0 c34"
+                class="c37"
               >
                 <div
-                  class="c0 c35"
+                  class="c38"
                 >
                   <button
                     aria-disabled="false"
-                    class="c0 c22 c36"
+                    class="c39 c3 c40"
                     type="button"
                   >
                     <span
-                      class="c5 c37"
+                      class="c6 c41"
                     >
                       Skip this question
                     </span>
@@ -831,7 +824,7 @@ describe('Admin | UseCasePage', () => {
           </div>
         </div>
         <div
-          class="c38"
+          class="c42"
         >
           <p
             aria-live="polite"

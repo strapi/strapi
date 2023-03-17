@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../../../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
@@ -28,10 +27,16 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
-      <Flex alignItems="center" justifyContent="center" gap={0}>
+      <Flex gap={0}>
         {displayedActions.map(({ label, actionId }) => {
           return (
-            <CenteredStack key={actionId} spacing={3}>
+            <CenteredStack
+              direction="column"
+              alignItems="center"
+              justifyContent="center"
+              key={actionId}
+              gap={3}
+            >
               <Typography variant="sigma" textColor="neutral500">
                 {formatMessage({
                   id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
@@ -39,7 +44,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                 })}
               </Typography>
               <BaseCheckbox
-                disabled={isFormDisabled || IS_DISABLED}
+                disabled={isFormDisabled}
                 onValueChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}

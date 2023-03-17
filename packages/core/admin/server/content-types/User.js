@@ -56,16 +56,19 @@ module.exports = {
       configurable: false,
       required: false,
       private: true,
+      searchable: false,
     },
     resetPasswordToken: {
       type: 'string',
       configurable: false,
       private: true,
+      searchable: false,
     },
     registrationToken: {
       type: 'string',
       configurable: false,
       private: true,
+      searchable: false,
     },
     isActive: {
       type: 'boolean',
@@ -93,6 +96,7 @@ module.exports = {
       type: 'string',
       configurable: false,
       required: false,
+      searchable: false,
     },
   },
 };

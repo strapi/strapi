@@ -1,13 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
-.c13 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c0 {
   position: relative;
 }
@@ -96,13 +89,11 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex-direction: row;
 }
 
-.c17 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c17 > * + * {
-  margin-left: 8px;
+.c13 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
 }
 
 .c5 {
@@ -185,6 +176,15 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   width: 1px;
 }
 
+.c17 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c17 > * + * {
+  margin-left: 8px;
+}
+
 .c18 {
   position: absolute;
   top: 12px;
@@ -265,7 +265,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
             fill="#212134"
           />
         </svg>
@@ -325,13 +325,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c0 {
   position: relative;
 }
@@ -415,13 +408,11 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c15 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c15 > * + * {
-  margin-left: 8px;
+.c11 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
 }
 
 .c17 {
@@ -434,6 +425,15 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c15 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c15 > * + * {
+  margin-left: 8px;
 }
 
 .c16 {
@@ -503,7 +503,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
             fill="#212134"
           />
         </svg>

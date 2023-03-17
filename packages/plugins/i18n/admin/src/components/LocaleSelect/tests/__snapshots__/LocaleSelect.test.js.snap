@@ -1,13 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
-.c3 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
 .c9 {
   padding-left: 12px;
 }
@@ -24,6 +17,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
 .c4 {
@@ -57,13 +51,11 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   flex-wrap: wrap;
 }
 
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c2 > * + * {
-  margin-top: 4px;
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
 }
 
 .c0 {
@@ -78,33 +70,15 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   width: 1px;
 }
 
-.c10 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c10 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c10 svg path {
-  fill: #666687;
-}
-
-.c11 {
+.c3 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: none;
-  border: none;
-}
-
-.c11 svg {
-  width: 0.375rem;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c5 {
@@ -162,7 +136,38 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   cursor: not-allowed;
 }
 
-<div>
+.c10 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c10 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c10 svg path {
+  fill: #666687;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c11 svg {
+  width: 0.375rem;
+}
+
+<div
+  class=""
+>
   <div
     aria-atomic="false"
     aria-live="polite"
@@ -170,17 +175,13 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
     class="c0"
   />
   <div
-    class="c1 c2"
+    class="c1"
   >
     <label
-      class="c3"
+      class="c2 c3"
       for="1"
     >
-      <div
-        class="c4"
-      >
-        Locales
-      </div>
+      Locales
     </label>
     <div
       class="c4 c5"
@@ -220,14 +221,14 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         >
           <svg
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 14 8"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
               clip-rule="evenodd"
-              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
               fill="#32324D"
               fill-rule="evenodd"
             />
