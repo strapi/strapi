@@ -36,5 +36,9 @@ module.exports = {
       component: 'default.component-a',
       repeatable: false,
     },
+    dz: {
+      type: 'dynamiczone',
+      components: ['default.component-a', 'default.component-b'],
+    },
   },
 };

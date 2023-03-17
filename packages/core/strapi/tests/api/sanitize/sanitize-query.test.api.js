@@ -131,7 +131,7 @@ describe('Core API - Sanitize', () => {
           });
         });
 
-        describe.only('Private modifier', () => {
+        describe('Private modifier', () => {
           it.each([
             ['$endsWith', { name_private: { $endsWith: 'None' } }],
             ['$not > $endsWith', { name_private: { $not: { $endsWith: 'None' } } }],
@@ -805,10 +805,59 @@ describe('Core API - Sanitize', () => {
       it.todo('Populates a media');
 
       describe('Dynamic Zone', () => {
-        it.todo('Populates a dynamic-zone');
-        it.todo('Populates a dynamic-use using populate fragments');
+        it.each([{ dz: { populate: '*' } }, { dz: { populate: true } }, { dz: '*' }, { dz: true }])(
+          'Populates a dynamic-zone (%s)',
+          async (populate) => {
+            const res = await rq.get('/api/documents', { qs: { populate } });
+
+            checkAPIResultValidity(res);
+
+            res.body.data.forEach((document) => {
+              expect(document.attributes).toHaveProperty(
+                'dz',
+                expect.arrayContaining([
+                  expect.objectContaining({ __component: expect.any(String) }),
+                ])
+              );
+              expect(document.attributes.dz).toHaveLength(3);
+            });
+          }
+        );
+
+        it.each([
+          [{ dz: { on: { 'default.component-a': true } } }, 'default.component-a', 2],
+          [{ dz: { on: { 'default.component-b': true } } }, 'default.component-b', 1],
+        ])(
+          'Populates a dynamic-use using populate fragments (%s)',
+          async (populate, componentUID, expectedLength) => {
+            const res = await rq.get('/api/documents', { qs: { populate } });
+
+            checkAPIResultValidity(res);
+
+            res.body.data.forEach((document) => {
+              expect(document.attributes).toHaveProperty(
+                'dz',
+                expect.arrayContaining([expect.objectContaining({ __component: componentUID })])
+              );
+              expect(document.attributes.dz).toHaveLength(expectedLength);
+            });
+          }
+        );
+
+        it(`Doesn't populate the dynamic zone on empty populate fragment definition`, async () => {
+          const res = await rq.get('/api/documents', { qs: { populate: { dz: { on: {} } } } });
+
+          checkAPIResultValidity(res);
+
+          res.body.data.forEach((document) => {
+            expect(document.attributes).not.toHaveProperty('dz');
+          });
+        });
+
         it.todo('Nested filtering on dynamic zone populate');
+
         it.todo('Nested field selection on dynamic zone populate');
+
         it.todo(`Sort populated dynamic zone's components`);
       });
     });
@@ -832,7 +881,19 @@ describe('Core API - Sanitize', () => {
 
       it.todo('Populates a media');
 
-      it.todo('Populates a dynamic-zone');
+      it('Populates a dynamic-zone', async () => {
+        const populate = 'dz';
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        checkAPIResultValidity(res);
+
+        res.body.data.forEach((document) => {
+          expect(document.attributes).toHaveProperty(
+            'dz',
+            expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
+          );
+        });
+      });
     });
 
     describe('string[] notation', () => {
@@ -854,7 +915,19 @@ describe('Core API - Sanitize', () => {
 
       it.todo('Populates a media');
 
-      it.todo('Populates a dynamic-zone');
+      it('Populates a dynamic-zone', async () => {
+        const populate = ['dz'];
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        checkAPIResultValidity(res);
+
+        res.body.data.forEach((document) => {
+          expect(document.attributes).toHaveProperty(
+            'dz',
+            expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
+          );
+        });
+      });
     });
   });
 });

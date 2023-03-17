@@ -179,7 +179,7 @@ describe('<PageSizeURLQuery />', () => {
         outline: none;
       }
 
-      .c3[aria-disabled='true'] {
+      .c3[data-disabled] {
         cursor: not-allowed;
       }
 
@@ -200,14 +200,16 @@ describe('<PageSizeURLQuery />', () => {
               class="c0 c2"
             >
               <button
-                aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="1 1-label 1-content"
+                aria-required="false"
                 class="c3"
                 id="1"
+                role="combobox"
                 type="button"
+                value="10"
               />
               <div
                 class="c4 c5"
