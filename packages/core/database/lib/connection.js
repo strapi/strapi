@@ -51,7 +51,7 @@ const getMysqlPackageName = () => {
   }
 
   // find the package based on availability
-  return tryResolvePackage('mysql') || tryResolvePackage('mysql2');
+  return tryResolvePackage('mysql2') || tryResolvePackage('mysql');
 };
 
 /**
