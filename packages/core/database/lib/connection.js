@@ -76,6 +76,15 @@ const createConnection = (config) => {
 
   if (knexConfig.client === 'mysql') {
     knexConfig.client = clientMap[getMysqlPackageName()];
+
+    /**
+     * NOTE: connectionString is deprecated in mysql2 but is included in Strapi db configuration
+     * If it is unused, we delete it to suppress the deprecation warning
+     * If the user is attempting to use it, keep it to allow the error to display
+     * */
+    if (knexConfig.client === 'mysql2' && !knexConfig.connection.connectionString) {
+      delete knexConfig.connection.connectionString;
+    }
   }
 
   const knexInstance = knex(knexConfig);
