@@ -13,6 +13,7 @@ import {
   useGuidedTour,
   useRBAC,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { ContentLayout, Main, Flex } from '@strapi/design-system';
 import { formatAPIErrors } from '../../../../../utils';
@@ -52,6 +53,8 @@ const TransferTokenCreateView = () => {
 
   const isCreating = id === 'create';
 
+  const { formatAPIError } = useAPIErrorHandler();
+
   useEffect(() => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList', {
       tokenType: TRANSFER_TOKEN_TYPE,
@@ -73,11 +76,22 @@ const TransferTokenCreateView = () => {
     },
     {
       enabled: !isCreating && !transferToken,
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
+      onError(err) {
+        if (err.response.data.error.details?.code === 'INVALID_TOKEN_SALT') {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'notification.error.invalid.configuration',
+              defaultMessage:
+                'You have an invalid configuration, check your server log for more information.',
+            },
+          });
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(err),
+          });
+        }
       },
     }
   );
@@ -145,6 +159,15 @@ const TransferTokenCreateView = () => {
           type: 'warning',
           message: err.response.data.message || 'notification.error.tokennamenotunique',
         });
+      } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+        toggleNotification({
+          type: 'warning',
+          message: {
+            id: 'notification.error.invalid.configuration',
+            defaultMessage:
+              'You have an invalid configuration, check your server log for more information.',
+          },
+        });
       } else {
         toggleNotification({
           type: 'warning',
@@ -161,6 +184,24 @@ const TransferTokenCreateView = () => {
   if (isLoading) {
     return <LoadingView transferTokenName={transferToken?.name} />;
   }
+
+  const handleErrorRegenerate = (err) => {
+    if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error.invalid.configuration',
+          defaultMessage:
+            'You have an invalid configuration, check your server log for more information.',
+        },
+      });
+    } else {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(err),
+      });
+    }
+  };
 
   return (
     <Main>
@@ -194,6 +235,7 @@ const TransferTokenCreateView = () => {
                 canRegenerate={canRegenerate}
                 isSubmitting={isSubmitting}
                 regenerateUrl="/admin/transfer/tokens/"
+                onErrorRegenerate={handleErrorRegenerate}
               />
               <ContentLayout>
                 <Flex direction="column" alignItems="stretch" gap={6}>
