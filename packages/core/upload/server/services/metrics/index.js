@@ -9,7 +9,10 @@ module.exports = ({ strapi }) => ({
     const isPrivate = await getProviderIsPrivate();
 
     await strapi.telemetry.send('didInitializePluginUpload', {
-      groupProperties: { provider, isPrivate },
+      groupProperties: {
+        uploadProvider: provider,
+        isUploadPrivateProvider: isPrivate,
+      },
     });
   },
 });
