@@ -2,7 +2,7 @@
 
 const { clone, isObject, isArray, isNil, curry } = require('lodash/fp');
 
-const traverseMorphRelationTarget = async (visitor, path, entry) => {
+const traverseMorphRelationTarget = (visitor, path, entry) => {
   const targetSchema = strapi.getModel(entry.__type);
 
   const traverseOptions = { schema: targetSchema, path };
@@ -10,13 +10,13 @@ const traverseMorphRelationTarget = async (visitor, path, entry) => {
   return traverseEntity(visitor, traverseOptions, entry);
 };
 
-const traverseRelationTarget = (schema) => async (visitor, path, entry) => {
+const traverseRelationTarget = (schema) => (visitor, path, entry) => {
   const traverseOptions = { schema, path };
 
   return traverseEntity(visitor, traverseOptions, entry);
 };
 
-const traverseMediaTarget = async (visitor, path, entry) => {
+const traverseMediaTarget = (visitor, path, entry) => {
   const targetSchemaUID = 'plugin::upload.file';
   const targetSchema = strapi.getModel(targetSchemaUID);
 
@@ -25,20 +25,20 @@ const traverseMediaTarget = async (visitor, path, entry) => {
   return traverseEntity(visitor, traverseOptions, entry);
 };
 
-const traverseComponent = async (visitor, path, schema, entry) => {
+const traverseComponent = (visitor, path, schema, entry) => {
   const traverseOptions = { schema, path };
 
   return traverseEntity(visitor, traverseOptions, entry);
 };
 
-const visitDynamicZoneEntry = async (visitor, path, entry) => {
+const visitDynamicZoneEntry = (visitor, path, entry) => {
   const targetSchema = strapi.getModel(entry.__component);
   const traverseOptions = { schema: targetSchema, path };
 
   return traverseEntity(visitor, traverseOptions, entry);
 };
 
-const traverseEntity = async (visitor, options, entity) => {
+const traverseEntity = (visitor, options, entity) => {
   const { path = { raw: null, attribute: null }, schema } = options;
 
   // End recursion
@@ -73,7 +73,7 @@ const traverseEntity = async (visitor, options, entity) => {
     // Visit the current attribute
     const visitorOptions = { data: copy, schema, key, value: copy[key], attribute, path: newPath };
 
-    await visitor(visitorOptions, visitorUtils);
+    visitor(visitorOptions, visitorUtils);
 
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];
@@ -98,12 +98,12 @@ const traverseEntity = async (visitor, options, entity) => {
       if (isArray(value)) {
         const res = [];
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await method(visitor, newPath, value[i]));
+          res.push(method(visitor, newPath, value[i]));
         }
         copy[key] = res;
       } else {
         // need to update copy
-        copy[key] = await method(visitor, newPath, value);
+        copy[key] = method(visitor, newPath, value);
       }
 
       continue;
@@ -114,11 +114,11 @@ const traverseEntity = async (visitor, options, entity) => {
       if (isArray(value)) {
         const res = [];
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await traverseMediaTarget(visitor, newPath, value[i]));
+          res.push(traverseMediaTarget(visitor, newPath, value[i]));
         }
         copy[key] = res;
       } else {
-        copy[key] = await traverseMediaTarget(visitor, newPath, value);
+        copy[key] = traverseMediaTarget(visitor, newPath, value);
       }
 
       continue;
@@ -130,11 +130,11 @@ const traverseEntity = async (visitor, options, entity) => {
       if (isArray(value)) {
         const res = [];
         for (let i = 0; i < value.length; i += 1) {
-          res.push(await traverseComponent(visitor, newPath, targetSchema, value[i]));
+          res.push(traverseComponent(visitor, newPath, targetSchema, value[i]));
         }
         copy[key] = res;
       } else {
-        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value);
+        copy[key] = traverseComponent(visitor, newPath, targetSchema, value);
       }
 
       continue;
@@ -143,7 +143,7 @@ const traverseEntity = async (visitor, options, entity) => {
     if (isDynamicZone && isArray(value)) {
       const res = [];
       for (let i = 0; i < value.length; i += 1) {
-        res.push(await visitDynamicZoneEntry(visitor, newPath, value[i]));
+        res.push(visitDynamicZoneEntry(visitor, newPath, value[i]));
       }
       copy[key] = res;
 
