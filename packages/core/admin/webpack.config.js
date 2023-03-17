@@ -80,6 +80,7 @@ module.exports = ({
       ],
       moduleIds: 'deterministic',
       runtimeChunk: true,
+      usedExports: true,
     },
     module: {
       rules: [
