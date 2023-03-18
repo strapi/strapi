@@ -23,7 +23,7 @@ module.exports = function createBuilder() {
       plugin: compo.modelName,
       uid: compo.uid,
       filename: compo.__filename__,
-      dir: join(strapi.dirs.app.components, compo.category),
+      dir: compo.__dirname__,
       schema: compo.__schema__,
       config: compo.config,
     };

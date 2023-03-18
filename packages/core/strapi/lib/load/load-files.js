@@ -46,6 +46,13 @@ const loadFiles = async (
       value: path.basename(file),
     });
 
+    Object.defineProperty(mod, '__dirname__', {
+      enumerable: true,
+      configurable: false,
+      writable: false,
+      value: path.dirname(absolutePath),
+    });
+
     const propPath = filePathToPath(file, shouldUseFileNameAsKey(file));
 
     if (propPath.length === 0) _.merge(root, mod);

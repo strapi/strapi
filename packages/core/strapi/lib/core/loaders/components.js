@@ -18,7 +18,7 @@ module.exports = async (strapi) => {
 
       if (!schema.collectionName) {
         // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
-        const filePath = join(strapi.dirs.app.components, category, schema.__filename__);
+        const filePath = join(schema.__dirname__, schema.__filename__);
 
         return strapi.stopWithError(
           `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
