@@ -23,6 +23,7 @@ const defaultPlugin = {
   policies: {},
   middlewares: {},
   contentTypes: {},
+  components: {},
 };
 
 const applyUserExtension = async (plugins) => {

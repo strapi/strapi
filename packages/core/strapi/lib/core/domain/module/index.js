@@ -17,6 +17,7 @@ const defaultModule = {
   controllers: {},
   services: {},
   contentTypes: {},
+  components: {},
   policies: {},
   middlewares: {},
 };
@@ -55,6 +56,7 @@ const createModule = (namespace, rawModule, strapi) => {
     },
     load() {
       strapi.container.get('content-types').add(namespace, rawModule.contentTypes);
+      strapi.container.get('components').add(namespace, rawModule.components);
       strapi.container.get('services').add(namespace, rawModule.services);
       strapi.container.get('policies').add(namespace, rawModule.policies);
       strapi.container.get('middlewares').add(namespace, rawModule.middlewares);
@@ -73,6 +75,13 @@ const createModule = (namespace, rawModule, strapi) => {
     get contentTypes() {
       const contentTypes = strapi.container.get('content-types').getAll(namespace);
       return removeNamespacedKeys(contentTypes, namespace);
+    },
+    component(cName) {
+      return strapi.container.get('component').get(`${namespace}.${cName}`);
+    },
+    get components() {
+      const components = strapi.container.get('components').getAll(namespace);
+      return removeNamespacedKeys(components, namespace);
     },
     service(serviceName) {
       return strapi.container.get('services').get(`${namespace}.${serviceName}`);

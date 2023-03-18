@@ -20,6 +20,7 @@ const strapiServerSchema = yup
     policies: yup.object(),
     middlewares: yup.object(),
     contentTypes: yup.object(),
+    components: yup.object(),
   })
   .noUnknown();
 

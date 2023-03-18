@@ -2,17 +2,19 @@
 
 const { yup } = require('@strapi/utils');
 
-const componentSchemaValidator = () =>
-  yup.object().shape({
+const componentSchemaValidator = yup.object().shape({
+  schema: yup.object().shape({
     info: yup
       .object()
       .shape({
-        singularName: yup.string().isCamelCase().required(),
-        pluralName: yup.string().isCamelCase().required(),
         displayName: yup.string().required(),
+        singularName: yup.string().isKebabCase().required(),
+        category: yup.string().isKebabCase().required(),
       })
       .required(),
-  });
+    attributes: yup.object(),
+  }),
+});
 
 const validateComponentDefinition = (data) => {
   return componentSchemaValidator.validateSync(data, { strict: true, abortEarly: false });
