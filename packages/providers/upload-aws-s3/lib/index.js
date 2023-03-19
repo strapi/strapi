@@ -16,6 +16,9 @@ function assertUrlProtocol(url) {
 
 module.exports = {
   init(config) {
+    const cloudFrontConfig = config.cloudFrontConfig;
+    delete config.cloudFrontConfig;
+
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...config,
@@ -39,8 +42,8 @@ module.exports = {
             }
 
             // set the bucket file url
-            if (config.cdn) {
-              file.url='https://' + config.cdn + '/' + data.Key;
+            if (cloudFrontConfig.protocol && cloudFrontConfig.domain) {
+              file.url = cloudFrontConfig.protocol + '://' + cloudFrontConfig.domain + '/' + data.Key;
             } else {
               if (assertUrlProtocol(data.Location)) {
                 file.url = data.Location;
