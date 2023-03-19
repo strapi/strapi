@@ -386,8 +386,8 @@ const createEntityManager = (db) => {
       const dataToInsert = flow(
         // Omit unwanted properties
         omit(['id', 'created_at', 'updated_at']),
-        // Merge with provided data, override to null if data attribute is null
-        mergeWith(params.data || {}, (a, b) => (b === null ? b : a)),
+        // Merge with provided data, set attribute to null if data attribute is null
+        mergeWith(data || {}, (original, override) => (override === null ? override : original)),
         // Process data with metadata
         (entity) => processData(metadata, entity, { withDefaults: true })
       )(entity);
