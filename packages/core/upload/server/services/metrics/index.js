@@ -1,7 +1,7 @@
 'use strict';
 
 const getProviderName = () => strapi.config.get('plugin.upload.provider', 'local');
-const isProviderPrivate = () => strapi.plugin('upload').provider.isPrivate();
+const isProviderPrivate = async () => strapi.plugin('upload').provider.isPrivate();
 
 module.exports = ({ strapi }) => ({
   async sendUploadPluginMetrics() {
