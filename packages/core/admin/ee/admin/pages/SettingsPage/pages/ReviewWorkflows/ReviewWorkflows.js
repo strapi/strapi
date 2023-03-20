@@ -3,7 +3,12 @@ import { FormikProvider, useFormik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { CheckPagePermissions, ConfirmDialog, SettingsPageTitle } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  ConfirmDialog,
+  SettingsPageTitle,
+  useTracking,
+} from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
@@ -17,6 +22,7 @@ import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema
 import adminPermissions from '../../../../../../admin/src/permissions';
 
 export function ReviewWorkflowsPage() {
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { workflows: workflowsData, updateWorkflowStages, refetchWorkflow } = useReviewWorkflows();
@@ -66,6 +72,10 @@ export function ReviewWorkflowsPage() {
   useEffect(() => {
     dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
   }, [workflowsData.status, workflowsData.data, dispatch]);
+
+  useEffect(() => {
+    trackUsage('didViewWorkflow');
+  }, [trackUsage]);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>

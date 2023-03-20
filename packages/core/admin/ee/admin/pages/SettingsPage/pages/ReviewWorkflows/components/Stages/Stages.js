@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { Box, Flex } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
 
 import { addStage } from '../../actions';
 import { AddStage } from '../AddStage';
@@ -23,6 +24,7 @@ const Background = styled(Box)`
 function Stages({ stages }) {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
+  const { trackUsage } = useTracking();
 
   return (
     <Flex direction="column" gap={6} width="100%">
@@ -56,7 +58,13 @@ function Stages({ stages }) {
       </StagesContainer>
 
       <Flex direction="column" gap={6}>
-        <AddStage type="button" onClick={() => dispatch(addStage({ name: '' }))}>
+        <AddStage
+          type="button"
+          onClick={() => {
+            dispatch(addStage({ name: '' }));
+            trackUsage('willCreateStage');
+          }}
+        >
           {formatMessage({
             id: 'Settings.review-workflows.stage.add',
             defaultMessage: 'Add new stage',
