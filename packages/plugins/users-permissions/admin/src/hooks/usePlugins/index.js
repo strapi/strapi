@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import init from './init';
 import pluginId from '../../pluginId';
 import { cleanPermissions } from '../../utils';

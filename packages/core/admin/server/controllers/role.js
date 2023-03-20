@@ -1,12 +1,32 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
-const { validateRoleUpdateInput } = require('../validation/role');
+const {
+  validateRoleUpdateInput,
+  validateRoleCreateInput,
+  validateRoleDeleteInput,
+  validateRolesDeleteInput,
+} = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
-const { EDITOR_CODE, AUTHOR_CODE, SUPER_ADMIN_CODE } = require('../services/constants');
+const { SUPER_ADMIN_CODE } = require('../services/constants');
 const { getService } = require('../utils');
 
 module.exports = {
+  /**
+   * Create a new role
+   * @param {KoaContext} ctx - koa context
+   */
+  async create(ctx) {
+    await validateRoleCreateInput(ctx.request.body);
+
+    const roleService = getService('role');
+
+    const role = await roleService.create(ctx.request.body);
+    const sanitizedRole = roleService.sanitizeRole(role);
+
+    ctx.created({ data: sanitizedRole });
+  },
+
   /**
    * Returns on role by id
    * @param {KoaContext} ctx - koa context
@@ -99,10 +119,10 @@ module.exports = {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
-    const { findOne, assignPermissions } = getService('role');
-    const { sanitizePermission, actionProvider } = getService('permission');
+    const roleService = getService('role');
+    const permissionService = getService('permission');
 
-    const role = await findOne({ id });
+    const role = await roleService.findOne({ id });
 
     if (!role) {
       return ctx.notFound('role.notFound');
@@ -112,30 +132,57 @@ module.exports = {
       throw new ApplicationError("Super admin permissions can't be edited.");
     }
 
-    await validatedUpdatePermissionsInput(input, role);
+    await validatedUpdatePermissionsInput(input);
 
-    let permissionsToAssign;
-
-    if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
-      permissionsToAssign = input.permissions.map((permission) => {
-        const action = actionProvider.get(permission.action);
-
-        if (action.section !== 'contentTypes') {
-          return permission;
-        }
-
-        const conditions = role.code === AUTHOR_CODE ? ['admin::is-creator'] : [];
-
-        return { ...permission, conditions };
-      });
-    } else {
-      permissionsToAssign = input.permissions;
+    if (!role) {
+      return ctx.notFound('role.notFound');
     }
 
-    const permissions = await assignPermissions(role.id, permissionsToAssign);
+    const permissions = await roleService.assignPermissions(role.id, input.permissions);
+
+    const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
     ctx.body = {
-      data: permissions.map(sanitizePermission),
+      data: sanitizedPermissions,
     };
+  },
+
+  /**
+   * Delete a role
+   * @param {KoaContext} ctx - koa context
+   */
+  async deleteOne(ctx) {
+    const { id } = ctx.params;
+
+    await validateRoleDeleteInput(id);
+
+    const roleService = getService('role');
+
+    const roles = await roleService.deleteByIds([id]);
+
+    const sanitizedRole = roles.map((role) => roleService.sanitizeRole(role))[0] || null;
+
+    return ctx.deleted({
+      data: sanitizedRole,
+    });
+  },
+
+  /**
+   * delete several roles
+   * @param {KoaContext} ctx - koa context
+   */
+  async deleteMany(ctx) {
+    const { body } = ctx.request;
+
+    await validateRolesDeleteInput(body);
+
+    const roleService = getService('role');
+
+    const roles = await roleService.deleteByIds(body.ids);
+    const sanitizedRoles = roles.map(roleService.sanitizeRole);
+
+    return ctx.deleted({
+      data: sanitizedRoles,
+    });
   },
 };

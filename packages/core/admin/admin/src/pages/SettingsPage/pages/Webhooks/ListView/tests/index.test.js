@@ -103,6 +103,7 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c42 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-width: 0;

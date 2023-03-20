@@ -40,7 +40,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c27 {
+.c28 {
   background: #f6f6f9;
   padding: 4px;
   border-radius: 4px;
@@ -53,18 +53,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   display: flex;
 }
 
-.c29 {
+.c30 {
   padding-right: 12px;
   padding-left: 12px;
   border-radius: 4px;
 }
 
-.c40 {
+.c41 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c42 {
+.c43 {
   padding-left: 12px;
 }
 
@@ -145,7 +145,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   gap: 4px;
 }
 
-.c30 {
+.c31 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -197,7 +197,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #32324d;
 }
 
-.c32 {
+.c33 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -205,7 +205,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   text-transform: uppercase;
 }
 
-.c34 {
+.c35 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -213,13 +213,13 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   text-transform: uppercase;
 }
 
-.c36 {
+.c37 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c41 {
+.c42 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -278,7 +278,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c27 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -335,7 +335,18 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   fill: #ffffff;
 }
 
-.c37 {
+.c25 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c38 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -351,28 +362,28 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   transition-duration: 0.2s;
 }
 
-.c37:focus-within {
+.c38:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c43 {
+.c44 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c43 svg {
+.c44 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c43 svg path {
+.c44 svg path {
   fill: #666687;
 }
 
-.c44 {
+.c45 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -381,11 +392,11 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: none;
 }
 
-.c44 svg {
+.c45 svg {
   width: 0.375rem;
 }
 
-.c38 {
+.c39 {
   position: absolute;
   left: 0;
   right: 0;
@@ -396,15 +407,15 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border: none;
 }
 
-.c38:focus {
+.c39:focus {
   outline: none;
 }
 
-.c38[aria-disabled='true'] {
+.c39[data-disabled] {
   cursor: not-allowed;
 }
 
-.c39 {
+.c40 {
   width: 100%;
 }
 
@@ -432,14 +443,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   outline: none;
 }
 
-.c25 {
+.c26 {
   position: relative;
   display: inline-block;
   z-index: 0;
   width: 100%;
 }
 
-.c28 {
+.c29 {
   overflow: hidden;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
@@ -452,12 +463,12 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c31 {
+.c32 {
   background-color: transparent;
   border: 1px solid #f6f6f9;
   position: relative;
@@ -473,7 +484,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   padding-bottom: 6px;
 }
 
-.c33 {
+.c34 {
   background-color: #ffffff;
   border: 1px solid #dcdce4;
   position: relative;
@@ -489,7 +500,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   padding-bottom: 6px;
 }
 
-.c35 {
+.c36 {
   height: 100%;
   left: 0;
   opacity: 0;
@@ -615,44 +626,40 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         class="c7"
                       >
                         <label
-                          class="c8 c24"
+                          class="c8 c24 c25"
                           for="1"
                         >
-                          <div
-                            class="c7"
-                          >
-                            Auto-registration
-                          </div>
+                          Auto-registration
                         </label>
                       </div>
                       <label
-                        class="c25"
+                        class="c26"
                       >
                         <div
-                          class="c26"
+                          class="c27"
                         >
                           Auto-registration
                         </div>
                         <div
-                          class="c27 c28"
+                          class="c28 c29"
                           display="flex"
                         >
                           <div
                             aria-hidden="true"
-                            class="c29 c30 c31"
+                            class="c30 c31 c32"
                           >
                             <span
-                              class="c8 c32"
+                              class="c8 c33"
                             >
                               Off
                             </span>
                           </div>
                           <div
                             aria-hidden="true"
-                            class="c29 c30 c33"
+                            class="c30 c31 c34"
                           >
                             <span
-                              class="c8 c34"
+                              class="c8 c35"
                             >
                               On
                             </span>
@@ -663,7 +670,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                             aria-label="autoRegister"
                             aria-required="false"
                             checked=""
-                            class="c35"
+                            class="c36"
                             data-testid="autoRegister"
                             id="1"
                             name="autoRegister"
@@ -672,7 +679,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         </div>
                       </label>
                       <p
-                        class="c8 c36"
+                        class="c8 c37"
                         id="1-hint"
                       >
                         Create new user on SSO login if no account exists
@@ -694,40 +701,38 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       class="c23"
                     >
                       <label
-                        class="c8 c24"
+                        class="c8 c24 c25"
                         for="3"
                       >
-                        <div
-                          class="c7"
-                        >
-                          Default role
-                        </div>
+                        Default role
                       </label>
                       <div
-                        class="c7 c37"
+                        class="c7 c38"
                       >
                         <button
                           aria-describedby="3-hint"
-                          aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="3 3-label 3-content"
-                          class="c38"
+                          aria-required="false"
+                          class="c39"
                           id="3"
                           name="defaultRole"
+                          role="combobox"
                           type="button"
+                          value="2"
                         />
                         <div
-                          class="c5 c39"
+                          class="c5 c40"
                         >
                           <div
                             class="c7"
                           >
                             <div
-                              class="c40"
+                              class="c41"
                             >
                               <span
-                                class="c8 c41"
+                                class="c8 c42"
                                 id="3-content"
                               >
                                 Editor
@@ -739,7 +744,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           >
                             <button
                               aria-hidden="true"
-                              class="c42 c43 c44"
+                              class="c43 c44 c45"
                               tabindex="-1"
                               title="Carret Down Button"
                               type="button"
@@ -763,7 +768,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         </div>
                       </div>
                       <p
-                        class="c8 c36"
+                        class="c8 c37"
                         id="3-hint"
                       >
                         It will attach the new authenticated user to the selected role
