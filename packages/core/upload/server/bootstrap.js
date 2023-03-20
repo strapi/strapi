@@ -38,7 +38,7 @@ module.exports = async ({ strapi }) => {
   await registerPermissionActions();
 
   await getService('weeklyMetrics').registerCron();
-  await getService('metrics').sendUploadPluginMetrics();
+  getService('metrics').sendUploadPluginMetrics();
 };
 
 const registerPermissionActions = async () => {
