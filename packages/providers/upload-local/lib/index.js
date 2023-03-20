@@ -17,7 +17,7 @@ const {
 const UPLOADS_FOLDER_NAME = 'uploads';
 
 module.exports = {
-  init({ sizeLimit: providerOptionsSizeLimit, useRelativeUrl = true } = {}) {
+  init({ sizeLimit: providerOptionsSizeLimit } = {}) {
     // TODO V5: remove providerOptions sizeLimit
     if (providerOptionsSizeLimit) {
       process.emitWarning(
@@ -60,7 +60,7 @@ module.exports = {
                 return reject(err);
               }
 
-              file.url = getFileUrl(file, useRelativeUrl);
+              file.url = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
 
               resolve();
             }
@@ -75,7 +75,7 @@ module.exports = {
               return reject(err);
             }
 
-            file.url = getFileUrl(file, useRelativeUrl);
+            file.url = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
 
             resolve();
           });
@@ -103,13 +103,3 @@ module.exports = {
     };
   },
 };
-
-/**
- * @param {*} file
- * @param {boolean} relative
- * @returns {string}
- */
-function getFileUrl(file, relative) {
-  const pathname = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
-  return relative ? pathname : `${strapi.config.server.url}${pathname}`;
-}
