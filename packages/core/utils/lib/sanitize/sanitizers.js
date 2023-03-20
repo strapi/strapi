@@ -69,9 +69,7 @@ const defaultSanitizeSort = curry((schema, sort) => {
           remove(key);
         }
       },
-      {
-        schema,
-      }
+      { schema }
     ),
     // Remove dynamic zones from sort
     traverseQuerySort(removeDynamicZones, { schema }),
