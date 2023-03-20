@@ -27,7 +27,7 @@ const getPersistedTables = async () =>
  */
 
 const persistTablesWithPrefix = async (tableNamePrefix) => {
-  const persistedTables = (await getPersistedTables()) || [];
+  const persistedTables = await getPersistedTables();
   const tableNames = await findTablesThatStartWithPrefix(tableNamePrefix);
   const notReservedTableNames = tableNames.filter((name) => !persistedTables.includes(name));
 
