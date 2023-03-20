@@ -54,7 +54,7 @@ module.exports = [
     path: '/telemetry-properties',
     handler: 'admin.telemetryProperties',
     config: {
-      auth: false,
+      policies: ['admin::isAuthenticatedAdmin'],
     },
   },
   {
@@ -65,34 +65,6 @@ module.exports = [
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::marketplace.read'] } },
-      ],
-    },
-  },
-  {
-    method: 'POST',
-    path: '/plugins/install',
-    handler: 'admin.installPlugin',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: { actions: ['admin::marketplace.plugins.install'] },
-        },
-      ],
-    },
-  },
-  {
-    method: 'DELETE',
-    path: '/plugins/uninstall/:plugin',
-    handler: 'admin.uninstallPlugin',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: { actions: ['admin::marketplace.plugins.uninstall'] },
-        },
       ],
     },
   },

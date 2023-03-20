@@ -78,13 +78,13 @@ module.exports = async () => {
   const userService = getService('user');
   const roleService = getService('role');
   const apiTokenService = getService('api-token');
+  const transferService = getService('transfer');
   const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.ensureBoundPermissionsInDatabase();
   await permissionService.cleanPermissionsInDatabase();
 
   await userService.displayWarningIfUsersDontHaveRole();
@@ -93,5 +93,6 @@ module.exports = async () => {
   await syncAPITokensPermissions();
 
   apiTokenService.checkSaltIsDefined();
+  transferService.token.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
 };

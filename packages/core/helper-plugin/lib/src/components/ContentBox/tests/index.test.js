@@ -60,25 +60,17 @@ describe('ContentBox', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
-      .c5 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c5 > * + * {
-        margin-top: 4px;
-      }
-
-      .c6 {
+      .c5 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 500;
         color: #32324d;
       }
 
-      .c8 {
+      .c7 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
@@ -93,7 +85,7 @@ describe('ContentBox', () => {
         height: 2rem;
       }
 
-      .c7 {
+      .c6 {
         word-break: break-all;
       }
 
@@ -104,20 +96,19 @@ describe('ContentBox', () => {
           class="c2 c1 c3"
         />
         <div
-          class="c4 c5"
-          spacing="1"
+          class="c4"
         >
           <div
             class="c1"
           >
             <span
-              class="c6 c7"
+              class="c5 c6"
             >
               Code example
             </span>
           </div>
           <span
-            class="c8"
+            class="c7"
           >
             Learn by testing real project developed by the community
           </span>

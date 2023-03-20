@@ -6,7 +6,11 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
+
 const {
+  isNil,
+  toNumber,
+  isInteger,
   has,
   isEmpty,
   isObject,
@@ -14,14 +18,16 @@ const {
   cloneDeep,
   get,
   mergeAll,
-  isNil,
-  toNumber,
-  isInteger,
 } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
 const { PaginationError } = require('./errors');
+const {
+  isMediaAttribute,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
+} = require('./content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -133,6 +139,41 @@ const convertLimitQueryParams = (limitQuery) => {
   return limitAsANumber;
 };
 
+const convertPageQueryParams = (page) => {
+  const pageVal = toNumber(page);
+
+  if (!isInteger(pageVal) || pageVal <= 0) {
+    throw new PaginationError(
+      `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
+    );
+  }
+
+  return pageVal;
+};
+
+const convertPageSizeQueryParams = (pageSize, page) => {
+  const pageSizeVal = toNumber(pageSize);
+
+  if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
+    throw new PaginationError(
+      `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+    );
+  }
+
+  return pageSizeVal;
+};
+
+const validatePaginationParams = (page, pageSize, start, limit) => {
+  const isPagePagination = !isNil(page) || !isNil(pageSize);
+  const isOffsetPagination = !isNil(start) || !isNil(limit);
+
+  if (isPagePagination && isOffsetPagination) {
+    throw new PaginationError(
+      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+    );
+  }
+};
+
 class InvalidPopulateError extends Error {
   constructor() {
     super();
@@ -185,8 +226,32 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    // FIXME: This is a temporary solution for dynamic zones that should be
-    // fixed when we'll implement a more accurate way to query them
+    // Allow adding an 'on' strategy to populate queries for polymorphic relations, media and dynamic zones
+    const isAllowedAttributeForFragmentPopulate =
+      isDynamicZoneAttribute(attribute) ||
+      isMediaAttribute(attribute) ||
+      isMorphToRelationalAttribute(attribute);
+
+    const hasFragmentPopulateDefined =
+      typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
+
+    if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined) {
+      return {
+        ...acc,
+        [key]: {
+          on: Object.entries(subPopulate.on).reduce(
+            (acc, [type, typeSubPopulate]) => ({
+              ...acc,
+              [type]: convertNestedPopulate(typeSubPopulate, strapi.getModel(type)),
+            }),
+            {}
+          ),
+        },
+      };
+    }
+
+    // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
+    //       Removing it could break existing user queries but it should be removed in V5.
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))
@@ -251,8 +316,8 @@ const convertNestedPopulate = (subPopulate, schema) => {
     throw new Error(`Invalid nested populate. Expected '*' or an object`);
   }
 
-  // TODO: We will need to consider a way to add limitation / pagination
-  const { sort, filters, fields, populate, count, ordering } = subPopulate;
+  const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
+    subPopulate;
 
   const query = {};
 
@@ -279,6 +344,26 @@ const convertNestedPopulate = (subPopulate, schema) => {
   if (ordering) {
     query.ordering = convertOrderingQueryParams(ordering);
   }
+
+  validatePaginationParams(page, pageSize, start, limit);
+
+  if (!isNil(page)) {
+    query.page = convertPageQueryParams(page);
+  }
+
+  if (!isNil(pageSize)) {
+    query.pageSize = convertPageSizeQueryParams(pageSize, page);
+  }
+
+  if (!isNil(start)) {
+    query.offset = convertStartQueryParams(start);
+  }
+
+  if (!isNil(limit)) {
+    query.limit = convertLimitQueryParams(limit);
+  }
+
+  convertPublicationStateParams(schema, subPopulate, query);
 
   return query;
 };
@@ -334,7 +419,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get(key, schema.attributes);
+    const attribute = get(key, schema?.attributes);
 
     // Handle attributes
     if (attribute) {
@@ -437,37 +522,14 @@ const transformParamsToQuery = (uid, params) => {
     query.populate = convertPopulateQueryParams(populate, schema);
   }
 
-  const isPagePagination = !isNil(page) || !isNil(pageSize);
-  const isOffsetPagination = !isNil(start) || !isNil(limit);
-
-  if (isPagePagination && isOffsetPagination) {
-    throw new PaginationError(
-      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
-    );
-  }
+  validatePaginationParams(page, pageSize, start, limit);
 
   if (!isNil(page)) {
-    const pageVal = toNumber(page);
-
-    if (!isInteger(pageVal) || pageVal <= 0) {
-      throw new PaginationError(
-        `Invalid 'page' parameter. Expected an integer > 0, received: ${page}`
-      );
-    }
-
-    query.page = pageVal;
+    query.page = convertPageQueryParams(page);
   }
 
   if (!isNil(pageSize)) {
-    const pageSizeVal = toNumber(pageSize);
-
-    if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
-      throw new PaginationError(
-        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
-      );
-    }
-
-    query.pageSize = pageSizeVal;
+    query.pageSize = convertPageSizeQueryParams(pageSize, page);
   }
 
   if (!isNil(start)) {

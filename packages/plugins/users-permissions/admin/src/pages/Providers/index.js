@@ -14,15 +14,23 @@ import {
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/design-system/Table';
-import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Pencil from '@strapi/icons/Pencil';
+import {
+  HeaderLayout,
+  Layout,
+  ContentLayout,
+  Main,
+  useNotifyAT,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  Typography,
+  IconButton,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil } from '@strapi/icons';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
 import { fetchData, putProvider } from './utils/api';
@@ -163,16 +171,9 @@ export const ProvidersPage = () => {
           <LoadingIndicatorPage />
         ) : (
           <ContentLayout>
-            <Table colCount={4} rowCount={rowCount + 1}>
+            <Table colCount={3} rowCount={rowCount + 1}>
               <Thead>
                 <Tr>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      <VisuallyHidden>
-                        {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
-                      </VisuallyHidden>
-                    </Typography>
-                  </Th>
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
@@ -204,9 +205,6 @@ export const ProvidersPage = () => {
                       condition: canUpdate,
                     })}
                   >
-                    <Td width="">
-                      <FontAwesomeIcon icon={provider.icon} />
-                    </Td>
                     <Td width="45%">
                       <Typography fontWeight="semiBold" textColor="neutral800">
                         {provider.name}

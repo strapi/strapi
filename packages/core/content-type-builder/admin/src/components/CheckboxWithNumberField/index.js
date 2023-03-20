@@ -7,11 +7,7 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Stack } from '@strapi/design-system/Stack';
-import { NumberInput } from '@strapi/design-system/NumberInput';
-import { TextInput } from '@strapi/design-system/TextInput';
+import { Box, Checkbox, Flex, NumberInput, TextInput } from '@strapi/design-system';
 
 const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChange, value }) => {
   const { formatMessage } = useIntl();
@@ -29,7 +25,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <Stack spacing={2}>
+    <Flex direction="column" alignItems="stretch" gap={2}>
       <Checkbox
         id={name}
         name={name}
@@ -71,7 +67,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
           )}
         </Box>
       )}
-    </Stack>
+    </Flex>
   );
 };
 

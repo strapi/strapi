@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 40px;
   padding-right: 56px;
@@ -9,20 +9,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   padding-left: 56px;
 }
 
+.c3 {
+  min-width: 0;
+}
+
 .c13 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c9 {
-  padding-right: 8px;
+.c7 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
 .c12 {
   padding-bottom: 56px;
 }
 
-.c16 {
+.c15 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -37,16 +48,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   padding-left: 8px;
 }
 
-.c37 {
+.c30 {
+  background: transparent;
+  border-style: none;
+}
+
+.c40 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c40 {
+.c43 {
   padding-left: 12px;
 }
 
-.c3 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -78,6 +94,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c14 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -90,6 +121,55 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 24px;
+}
+
+.c16 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: unset;
+  -webkit-justify-content: unset;
+  -ms-flex-pack: unset;
+  justify-content: unset;
 }
 
 .c6 {
@@ -103,18 +183,17 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
+  color: #ffffff;
 }
 
-.c18 {
+.c17 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c22 {
+.c21 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -127,13 +206,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #d02b20;
 }
 
-.c32 {
+.c35 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #32324d;
 }
 
-.c38 {
+.c41 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -143,68 +222,32 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c42 {
+.c45 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c15 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c15 > * + * {
-  margin-top: 24px;
-}
-
-.c17 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c17 > * + * {
-  margin-top: 16px;
-}
-
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 4px;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c9 {
   position: relative;
   outline: none;
 }
 
-.c7 svg {
+.c9 svg {
   height: 12px;
   width: 12px;
 }
 
-.c7 svg > g,
-.c7 svg path {
+.c9 svg > g,
+.c9 svg path {
   fill: #ffffff;
 }
 
-.c7[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c7:after {
+.c9:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -219,11 +262,11 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c7:focus-visible {
+.c9:focus-visible {
   outline: none;
 }
 
-.c7:focus-visible:after {
+.c9:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -234,23 +277,64 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
+.c34 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c10 {
-  height: 100%;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c8 .c1 {
+.c10[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c10[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c10[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c10[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c10:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c10:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #ffffff;
+}
+
+.c22 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -259,53 +343,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c8 .c5 {
-  color: #ffffff;
-}
-
-.c8[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c8[aria-disabled='true'] .c5 {
-  color: #666687;
-}
-
-.c8[aria-disabled='true'] svg > g,
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c8[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c8[aria-disabled='true']:active .c5 {
-  color: #666687;
-}
-
-.c8[aria-disabled='true']:active svg > g,
-.c8[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c8:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c8:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #ffffff;
 }
 
 .c24 {
@@ -417,42 +454,12 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c30 {
-  border: none;
-  background: transparent;
+.c32 {
   font-size: 1.6rem;
-  width: auto;
   padding: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c35 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c35:focus {
-  outline: none;
-}
-
-.c35[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c34 {
+.c37 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -468,28 +475,28 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c34:focus-within {
+.c37:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c39 {
+.c42 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c39 svg {
+.c42 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c39 svg path {
+.c42 svg path {
   fill: #666687;
 }
 
-.c41 {
+.c44 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -498,30 +505,49 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c41 svg {
+.c44 svg {
   width: 0.375rem;
 }
 
-.c36 {
+.c38 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
   width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c38:focus {
+  outline: none;
+}
+
+.c38[data-disabled] {
+  cursor: not-allowed;
+}
+
+.c39 {
+  width: 100%;
+}
+
+.c18 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c19 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
 .c0:focus-visible {
   outline: none;
 }
 
-.c19 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 20px;
-}
-
-.c20 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c33 {
+.c36 {
   color: #4945ff;
 }
 
@@ -529,23 +555,23 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   display: none;
 }
 
-.c31 svg {
+.c33 svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c31 svg path {
+.c33 svg path {
   fill: #666687;
 }
 
 @media (max-width:68.75rem) {
-  .c20 {
+  .c19 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c20 {
+  .c19 {
     grid-column: span;
   }
 }
@@ -565,14 +591,14 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
       style="height: 0px;"
     >
       <div
-        class="c1 c2"
+        class="c1"
         data-strapi-header="true"
       >
         <div
-          class="c1 c3"
+          class="c2"
         >
           <div
-            class="c1 c4"
+            class="c3 c4"
           >
             <h1
               class="c5 c6"
@@ -582,22 +608,22 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
           </div>
           <button
             aria-disabled="false"
-            class="c7 c8"
+            class="c7 c8 c9 c10"
             type="submit"
           >
             <div
               aria-hidden="true"
-              class="c1 c9 c10"
+              class=""
             >
               <svg
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 24 24"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                  d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                   fill="#212134"
                 />
               </svg>
@@ -612,64 +638,59 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c1 c12"
+      class="c12"
     >
       <div
-        class="c1 c13"
+        class="c13"
       >
         <div
-          class="c1 c14 c15"
-          spacing="6"
+          class="c14"
         >
           <div
-            class="c1 c16"
+            class="c15"
           >
             <div
-              class="c1 c14 c17"
-              spacing="4"
+              class="c16"
             >
               <h2
-                class="c5 c18"
+                class="c5 c17"
               >
                 Profile
               </h2>
               <div
-                class="c1 c19"
+                class="c18"
               >
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c21 c22"
                             for="firstname"
-                            required=""
                           >
-                            <div
-                              class="c1 c4"
+                            First name
+                            <span
+                              class="c5 c23 c24"
                             >
-                              First name
-                              <span
-                                class="c5 c23 c24"
-                              >
-                                *
-                              </span>
-                            </div>
+                              *
+                            </span>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c26"
                               id="firstname"
                               name="firstname"
@@ -684,33 +705,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c21 c22"
                             for="lastname"
                           >
-                            <div
-                              class="c1 c4"
-                            >
-                              Last name
-                            </div>
+                            Last name
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c26"
                               id="lastname"
                               name="lastname"
@@ -725,39 +744,36 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c21 c22"
                             for="email"
-                            required=""
                           >
-                            <div
-                              class="c1 c4"
+                            Email
+                            <span
+                              class="c5 c23 c24"
                             >
-                              Email
-                              <span
-                                class="c5 c23 c24"
-                              >
-                                *
-                              </span>
-                            </div>
+                              *
+                            </span>
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="true"
                               class="c26"
                               id="email"
                               name="email"
@@ -772,33 +788,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
+                            class="c5 c21 c22"
                             for="username"
                           >
-                            <div
-                              class="c1 c4"
-                            >
-                              Username
-                            </div>
+                            Username
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c26"
                               id="username"
                               name="username"
@@ -816,71 +830,74 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c1 c16"
+            class="c15"
           >
             <div
-              class="c1 c14 c17"
-              spacing="4"
+              class="c16"
             >
               <h2
-                class="c5 c18"
+                class="c5 c17"
               >
                 Change password
               </h2>
               <div
-                class="c1 c19"
+                class="c18"
               >
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
-                            for="textinput-1"
+                            class="c5 c21 c22"
+                            for="1"
                           >
-                            <div
-                              class="c1 c4"
-                            >
-                              Current Password
-                            </div>
+                            Current Password
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               class="c27 c28"
-                              id="textinput-1"
+                              id="1"
                               name="currentPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c29"
                             >
                               <button
-                                aria-label="Hide password"
-                                class="c30 c31"
+                                class="c30 c31 c32 c33"
                                 type="button"
                               >
+                                <span
+                                  class="c34"
+                                >
+                                  Hide password
+                                </span>
                                 <svg
+                                  aria-hidden="true"
                                   fill="none"
-                                  height="1em"
+                                  focusable="false"
+                                  height="1rem"
                                   viewBox="0 0 24 24"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                    d="M4.048 6.875 2.103 4.93a1 1 0 1 1 1.414-1.415l16.966 16.966a1 1 0 1 1-1.414 1.415l-2.686-2.686a12.247 12.247 0 0 1-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 0 1-2.116-2.568 11.096 11.096 0 0 1-.711-1.211 1.145 1.145 0 0 1 0-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906Zm10.539 10.539-1.551-1.551a4.005 4.005 0 0 1-4.9-4.9L6.584 9.411a6 6 0 0 0 8.002 8.002ZM7.617 4.787A12.248 12.248 0 0 1 12 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 0 1 2.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 0 0-8.002-8.002L7.617 4.787Zm3.347 3.347A4.005 4.005 0 0 1 16 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901Z"
                                     fill="#212134"
                                   />
                                 </svg>
@@ -894,60 +911,64 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c1 c19"
+                class="c18"
               >
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
-                            for="textinput-2"
+                            class="c5 c21 c22"
+                            for="3"
                           >
-                            <div
-                              class="c1 c4"
-                            >
-                              Password
-                            </div>
+                            Password
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id="textinput-2"
+                              id="3"
                               name="password"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c29"
                             >
                               <button
-                                aria-label="Hide password"
-                                class="c30 c31"
+                                class="c30 c31 c32 c33"
                                 type="button"
                               >
+                                <span
+                                  class="c34"
+                                >
+                                  Hide password
+                                </span>
                                 <svg
+                                  aria-hidden="true"
                                   fill="none"
-                                  height="1em"
+                                  focusable="false"
+                                  height="1rem"
                                   viewBox="0 0 24 24"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                    d="M4.048 6.875 2.103 4.93a1 1 0 1 1 1.414-1.415l16.966 16.966a1 1 0 1 1-1.414 1.415l-2.686-2.686a12.247 12.247 0 0 1-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 0 1-2.116-2.568 11.096 11.096 0 0 1-.711-1.211 1.145 1.145 0 0 1 0-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906Zm10.539 10.539-1.551-1.551a4.005 4.005 0 0 1-4.9-4.9L6.584 9.411a6 6 0 0 0 8.002 8.002ZM7.617 4.787A12.248 12.248 0 0 1 12 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 0 1 2.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 0 0-8.002-8.002L7.617 4.787Zm3.347 3.347A4.005 4.005 0 0 1 16 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901Z"
                                     fill="#212134"
                                   />
                                 </svg>
@@ -960,57 +981,61 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div>
-                      <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class="c1 c14 c21"
-                          spacing="1"
+                          class="c20"
                         >
                           <label
-                            class="c5 c22"
-                            for="textinput-3"
+                            class="c5 c21 c22"
+                            for="5"
                           >
-                            <div
-                              class="c1 c4"
-                            >
-                              Password confirmation
-                            </div>
+                            Password confirmation
                           </label>
                           <div
-                            class="c1 c3 c25"
+                            class="c2 c25"
                           >
                             <input
                               aria-disabled="false"
                               aria-invalid="false"
+                              aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id="textinput-3"
+                              id="5"
                               name="confirmPassword"
                               type="password"
                               value=""
                             />
                             <div
-                              class="c1 c29"
+                              class="c29"
                             >
                               <button
-                                aria-label="Hide password"
-                                class="c30 c31"
+                                class="c30 c31 c32 c33"
                                 type="button"
                               >
+                                <span
+                                  class="c34"
+                                >
+                                  Hide password
+                                </span>
                                 <svg
+                                  aria-hidden="true"
                                   fill="none"
-                                  height="1em"
+                                  focusable="false"
+                                  height="1rem"
                                   viewBox="0 0 24 24"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                    d="M4.048 6.875 2.103 4.93a1 1 0 1 1 1.414-1.415l16.966 16.966a1 1 0 1 1-1.414 1.415l-2.686-2.686a12.247 12.247 0 0 1-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 0 1-2.116-2.568 11.096 11.096 0 0 1-.711-1.211 1.145 1.145 0 0 1 0-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906Zm10.539 10.539-1.551-1.551a4.005 4.005 0 0 1-4.9-4.9L6.584 9.411a6 6 0 0 0 8.002 8.002ZM7.617 4.787A12.248 12.248 0 0 1 12 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 0 1 2.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 0 0-8.002-8.002L7.617 4.787Zm3.347 3.347A4.005 4.005 0 0 1 16 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901Z"
                                     fill="#212134"
                                   />
                                 </svg>
@@ -1026,27 +1051,25 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c1 c16"
+            class="c15"
           >
             <div
-              class="c1 c14 c17"
-              spacing="4"
+              class="c16"
             >
               <div
-                class="c1 c14 c21"
-                spacing="1"
+                class="c20"
               >
                 <h2
-                  class="c5 c18"
+                  class="c5 c17"
                 >
                   Experience
                 </h2>
                 <span
-                  class="c5 c32"
+                  class="c5 c35"
                 >
                   Preference changes will apply only to you. More information is available 
                   <a
-                    class="c33"
+                    class="c36"
                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                     rel="noopener noreferrer"
                     target="_blank"
@@ -1057,98 +1080,98 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                 </span>
               </div>
               <div
-                class="c1 c19"
+                class="c18"
               >
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c1 c14 c21"
-                        spacing="1"
+                        class="c20"
                       >
-                        <span
-                          class="c5 c22"
-                          for="select-4"
-                          id="select-4-label"
+                        <label
+                          class="c5 c21 c22"
+                          for="7"
                         >
-                          <div
-                            class="c1 c4"
-                          >
-                            Interface language
-                          </div>
-                        </span>
+                          Interface language
+                        </label>
                         <div
-                          class="c1 c4 c34"
+                          class="c4 c37"
                         >
                           <button
-                            aria-describedby="select-4-hint"
-                            aria-disabled="false"
+                            aria-describedby="7-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4-label select-4-content"
-                            class="c35"
-                            id="select-4"
+                            aria-labelledby="7 7-label 7-content"
+                            aria-required="false"
+                            class="c38"
+                            id="7"
+                            role="combobox"
                             type="button"
+                            value="en"
                           />
                           <div
-                            class="c1 c3 c36"
+                            class="c2 c39"
                           >
                             <div
-                              class="c1 c4"
+                              class="c4"
                             >
                               <div
-                                class="c1 c37"
+                                class="c40"
                               >
                                 <span
-                                  class="c5 c38"
-                                  id="select-4-content"
+                                  class="c5 c41"
+                                  id="7-content"
                                 >
                                   Select
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c1 c4"
+                              class="c4"
                             >
                               <button
                                 aria-disabled="false"
                                 aria-label="Clear the interface language selected"
-                                class="c1 c39"
+                                class="c42"
+                                title="Clear the interface language selected"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 24 24"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                    d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
                                     fill="#212134"
                                   />
                                 </svg>
                               </button>
                               <button
                                 aria-hidden="true"
-                                class="c1 c40 c39 c41"
+                                class="c43 c42 c44"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -1158,8 +1181,8 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c5 c42"
-                          id="select-4-hint"
+                          class="c5 c45"
+                          id="7-hint"
                         >
                           This will only display your own interface in the chosen language.
                         </p>
@@ -1168,76 +1191,75 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c1 c14 c21"
-                        spacing="1"
+                        class="c20"
                       >
-                        <span
-                          class="c5 c22"
-                          for="select-5"
-                          id="select-5-label"
+                        <label
+                          class="c5 c21 c22"
+                          for="9"
                         >
-                          <div
-                            class="c1 c4"
-                          >
-                            Interface mode
-                          </div>
-                        </span>
+                          Interface mode
+                        </label>
                         <div
-                          class="c1 c4 c34"
+                          class="c4 c37"
                         >
                           <button
-                            aria-describedby="select-5-hint"
-                            aria-disabled="false"
+                            aria-describedby="9-hint"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-5-label select-5-content"
-                            class="c35"
-                            id="select-5"
+                            aria-labelledby="9 9-label 9-content"
+                            aria-required="false"
+                            class="c38"
+                            id="9"
+                            role="combobox"
                             type="button"
+                            value="light"
                           />
                           <div
-                            class="c1 c3 c36"
+                            class="c2 c39"
                           >
                             <div
-                              class="c1 c4"
+                              class="c4"
                             >
                               <div
-                                class="c1 c37"
+                                class="c40"
                               >
                                 <span
-                                  class="c5 c38"
-                                  id="select-5-content"
+                                  class="c5 c41"
+                                  id="9-content"
                                 >
                                   Light mode
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c1 c4"
+                              class="c4"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c1 c40 c39 c41"
+                                class="c43 c42 c44"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -1247,8 +1269,8 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <p
-                          class="c5 c42"
-                          id="select-5-hint"
+                          class="c5 c45"
+                          id="9-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>

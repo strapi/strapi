@@ -1,43 +1,31 @@
 import React from 'react';
-import get from 'lodash/get';
-import PropTypes from 'prop-types';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { Box, Flex, Typography } from '@strapi/design-system';
+
+import { ComponentIcon } from '../../../components/ComponentIcon';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';
 
-const CustomFlex = styled(Flex)`
-  border-radius: 50%;
-  svg {
-    & > * {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-    width: 12px;
-    height: 12px;
-  }
-`;
 const CustomLink = styled(Flex)`
   text-decoration: none;
+
+  &:focus,
   &:hover {
     ${({ theme }) => `
-      background: ${theme.colors.primary100};
-      svg {
-        & > * {
-          fill: ${theme.colors.primary600};
-        }
-      }
+      background-color: ${theme.colors.primary100};
+      border-color: ${theme.colors.primary200};
+
       ${Typography} {
           color: ${theme.colors.primary600};
       }
-      ${CustomFlex} {
-        background: ${theme.colors.primary200};
-      }
-      border-color: ${theme.colors.primary200};
     `}
+
+    /* > ComponentIcon */
+    > div:first-child {
+      background: ${({ theme }) => theme.colors.primary200};
+      color: ${({ theme }) => theme.colors.primary600};
+    }
   }
 `;
 
@@ -45,7 +33,7 @@ const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
 
   return (
-    <Stack spacing={2} horizontal overflow="scroll hidden" padding={3}>
+    <Flex gap={2} overflow="scroll hidden" padding={3}>
       {components.map((componentUid) => (
         <CustomLink
           hasRadius
@@ -61,24 +49,16 @@ const DynamicZoneList = ({ components }) => {
           as={Link}
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
-          <CustomFlex
-            width={`${32 / 16}rem`}
-            height={`${32 / 16}rem`}
-            background="neutral150"
-            justifyContent="center"
-            alignItems="center"
-            padding={2}
-          >
-            <FontAwesomeIcon icon={get(componentLayouts, [componentUid, 'info', 'icon'], '')} />
-          </CustomFlex>
+          <ComponentIcon />
+
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">
-              {get(componentLayouts, [componentUid, 'info', 'displayName'], '')}
+              {componentLayouts?.[componentUid]?.info?.displayName ?? ''}
             </Typography>
           </Box>
         </CustomLink>
       ))}
-    </Stack>
+    </Flex>
   );
 };
 

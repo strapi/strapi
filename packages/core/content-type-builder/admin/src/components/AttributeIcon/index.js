@@ -1,49 +1,51 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import Component from '@strapi/icons/Component';
-import CollectionType from '@strapi/icons/CollectionType';
-import Date from '@strapi/icons/Date';
-import Boolean from '@strapi/icons/Boolean';
-import DynamicZone from '@strapi/icons/DynamicZone';
-import Email from '@strapi/icons/Email';
-import Enumeration from '@strapi/icons/Enumeration';
-import Json from '@strapi/icons/Json';
-import LongDescription from '@strapi/icons/RichText';
-import Media from '@strapi/icons/Media';
-import Password from '@strapi/icons/Password';
-import Relation from '@strapi/icons/Relation';
-import SingleType from '@strapi/icons/SingleType';
-import Text from '@strapi/icons/Text';
-import Uid from '@strapi/icons/Uid';
-import Numbers from '@strapi/icons/Number';
+import { Box } from '@strapi/design-system';
+import {
+  Component,
+  CollectionType,
+  Date,
+  Boolean,
+  DynamicZone,
+  Email,
+  Enumeration,
+  Json,
+  RichText,
+  Media,
+  Password,
+  Relation,
+  SingleType,
+  Text,
+  Uid,
+  Number,
+} from '@strapi/icons';
 import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
 
 const iconByTypes = {
-  biginteger: Numbers,
+  biginteger: Number,
   boolean: Boolean,
   collectionType: CollectionType,
   component: Component,
   contentType: CollectionType,
   date: Date,
   datetime: Date,
-  decimal: Numbers,
+  decimal: Number,
   dynamiczone: DynamicZone,
   email: Email,
   enum: Enumeration,
   enumeration: Enumeration,
   file: Media,
   files: Media,
-  float: Numbers,
-  integer: Numbers,
+  float: Number,
+  integer: Number,
   json: Json,
   JSON: Json,
   media: Media,
-  number: Numbers,
+  number: Number,
   password: Password,
   relation: Relation,
-  richtext: LongDescription,
+  richtext: RichText,
   singleType: SingleType,
   string: Text,
   text: Text,
@@ -53,9 +55,10 @@ const iconByTypes = {
 };
 
 const IconBox = styled(Box)`
-  width: ${pxToRem(32)};
-  height: ${pxToRem(24)};
-  box-sizing: content-box;
+  svg {
+    height: 100%;
+    width: 100%;
+  }
 `;
 
 const AttributeIcon = ({ type, customField, ...rest }) => {
@@ -75,7 +78,11 @@ const AttributeIcon = ({ type, customField, ...rest }) => {
     return null;
   }
 
-  return <IconBox as={Compo} {...rest} aria-hidden />;
+  return (
+    <IconBox height={pxToRem(24)} width={pxToRem(32)} shrink={0} {...rest} aria-hidden>
+      <Box as={Compo} />
+    </IconBox>
+  );
 };
 
 AttributeIcon.defaultProps = {

@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Button, Box, Main, Flex, Stack } from '@strapi/design-system';
+import { Button, Box, Main, Flex } from '@strapi/design-system';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import FilterListURLQuery from '../FilterListURLQuery';
 import FilterPopoverURLQuery from './index';
 
@@ -28,7 +29,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
       const [isVisible, setIsVisible] = useState(false);
       const buttonRef = useRef();
       const handleToggle = () => {
-        setIsVisible(prev => !prev);
+        setIsVisible((prev) => !prev);
       };
       const [{ query }, setQuery] = useQueryParams();
       const filters = {
@@ -51,9 +52,10 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
           metadatas: { label: 'city' },
         },
       ];
+      const { trackUsage } = useTracking();
       return (
         <Main>
-          <Stack spacing={6}>
+          <Flex direction="column" alignItems="stretch" gap={6}>
             <Flex paddingTop={6}>
               <Button variant="tertiary" onClick={handleToggle} size="S" ref={buttonRef}>
                 Filters
@@ -66,7 +68,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
               />
               <FilterListURLQuery filtersSchema={filtersSchema} />
             </Flex>
-          </Stack>
+          </Flex>
         </Main>
       );
     }}

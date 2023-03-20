@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import CodeMirror from 'codemirror';
-import 'codemirror/addon/display/placeholder';
+import CodeMirror from 'codemirror5';
+import 'codemirror5/addon/display/placeholder';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import { EditorStylesContainer } from './EditorStylesContainer';
 import { EditorAndPreviewWrapper } from './WysiwygStyles';
@@ -43,7 +43,7 @@ const Editor = ({
   }, [editorRef, textareaRef, name, placeholder]);
 
   useEffect(() => {
-    if (value && !editorRef.current.state.focused) {
+    if (value && !editorRef.current.hasFocus()) {
       editorRef.current.setValue(value);
     }
   }, [editorRef, value]);

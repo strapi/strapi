@@ -53,7 +53,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c0 {
         background: #f6f6f9;
         padding-top: 24px;
         padding-right: 56px;
@@ -61,15 +61,26 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         padding-left: 56px;
       }
 
-      .c2 {
+      .c1 {
         padding-bottom: 8px;
       }
 
-      .c4 {
-        padding-right: 8px;
+      .c7 {
+        min-width: 0;
       }
 
-      .c8 {
+      .c12 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -87,7 +98,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         justify-content: space-between;
       }
 
-      .c9 {
+      .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -101,10 +112,19 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: row;
       }
 
-      .c7 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
       }
 
       .c10 {
@@ -114,58 +134,39 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #32324d;
       }
 
-      .c14 {
+      .c15 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
+        color: #ffffff;
       }
 
-      .c15 {
+      .c16 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
       }
 
-      .c11 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c11 > * + * {
-        margin-left: 8px;
-      }
-
-      .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+      .c13 {
         position: relative;
         outline: none;
       }
 
-      .c12 svg {
+      .c13 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c12 svg > g,
-      .c12 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #ffffff;
       }
 
-      .c12[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c12:after {
+      .c13:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -180,11 +181,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid transparent;
       }
 
-      .c12:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c12:focus-visible:after {
+      .c13:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -195,77 +196,62 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid #4945ff;
       }
 
-      .c13 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c14 {
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
       }
 
-      .c13 .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c13 .c6 {
-        color: #ffffff;
-      }
-
-      .c13[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c13[aria-disabled='true'] .c6 {
+      .c14[aria-disabled='true'] .c9 {
         color: #666687;
       }
 
-      .c13[aria-disabled='true'] svg > g,
-      .c13[aria-disabled='true'] svg path {
+      .c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c13[aria-disabled='true']:active {
+      .c14[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c13[aria-disabled='true']:active .c6 {
+      .c14[aria-disabled='true']:active .c9 {
         color: #666687;
       }
 
-      .c13[aria-disabled='true']:active svg > g,
-      .c13[aria-disabled='true']:active svg path {
+      .c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c13:hover {
+      .c14:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c13:active {
+      .c14:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #ffffff;
       }
 
       .c3 {
+        padding-right: 8px;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c2 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -280,15 +266,15 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         outline: none;
       }
 
-      .c3 svg path {
+      .c2 svg path {
         fill: #4945ff;
       }
 
-      .c3 svg {
+      .c2 svg {
         font-size: 0.625rem;
       }
 
-      .c3:after {
+      .c2:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -303,11 +289,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid transparent;
       }
 
-      .c3:focus-visible {
+      .c2:focus-visible {
         outline: none;
       }
 
-      .c3:focus-visible:after {
+      .c2:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -318,7 +304,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 2px solid #4945ff;
       }
 
-      .c5 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -329,65 +315,64 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         style="height: 0px;"
       >
         <div
-          class="c0 c1"
+          class="c0"
           data-strapi-header="true"
         >
           <div
-            class="c0 c2"
+            class="c1"
           >
             <a
               aria-current="page"
-              class="c3 active"
+              class="c2 active"
               href="/"
             >
               <span
                 aria-hidden="true"
-                class="c0 c4 c5"
+                class="c3 c4"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                     fill="#212134"
                   />
                 </svg>
               </span>
               <span
-                class="c6 c7"
+                class="c5"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c0 c8"
+            class="c6"
           >
             <div
-              class="c0 c9"
+              class="c7 c8"
             >
               <h1
-                class="c6 c10"
+                class="c9 c10"
               >
                 Create an entry
               </h1>
             </div>
             <div
-              class="c0 c9 c11"
-              spacing="2"
+              class="c11"
             >
               <button
                 aria-disabled="true"
-                class="c12 c13"
+                class="c12 c11 c13 c14"
                 disabled=""
                 type="submit"
               >
                 <span
-                  class="c6 c14"
+                  class="c9 c15"
                 >
                   Save
                 </span>
@@ -395,7 +380,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             </div>
           </div>
           <p
-            class="c6 c15"
+            class="c9 c16"
           >
             API ID  : restaurant
           </p>

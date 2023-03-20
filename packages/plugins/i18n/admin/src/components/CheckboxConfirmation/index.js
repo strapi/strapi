@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Button } from '@strapi/design-system/Button';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
+import {
+  Checkbox,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Typography,
+  Flex,
+  Button,
+} from '@strapi/design-system';
+import { ExclamationMarkCircle } from '@strapi/icons';
 import { getTrad } from '../../utils';
 
 const TextAlignTypography = styled(Typography)`
@@ -67,7 +70,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack spacing={2}>
+            <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
                 <TextAlignTypography id="confirm-description">
                   {formatMessage({
@@ -85,7 +88,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
                   })}
                 </Typography>
               </Flex>
-            </Stack>
+            </Flex>
           </DialogBody>
           <DialogFooter
             startAction={

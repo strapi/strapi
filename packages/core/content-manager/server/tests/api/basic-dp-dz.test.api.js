@@ -280,7 +280,8 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
                   name: 'ValidationError',
                 },
                 {
-                  message: 'Cannot build relations store: "uid" is undefined',
+                  message:
+                    'Cannot build relations store from dynamiczone, component identifier is undefined',
                   name: 'ValidationError',
                   path: [],
                 },

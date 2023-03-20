@@ -109,6 +109,11 @@ const fixtures = {
           field: 'short string',
         },
         {
+          __component: 'default.foo',
+          number: 3,
+          field: 'long string',
+        },
+        {
           __component: 'default.bar',
           title: 'this is a title',
           field: 'password',
@@ -313,6 +318,102 @@ describe('Populate filters', () => {
       expect(body.data).toHaveLength(2);
 
       expect(body.data[0].attributes.third).toBeUndefined();
+    });
+  });
+
+  describe('Populate a dynamic zone', () => {
+    test('Populate every component in the dynamic zone', async () => {
+      const qs = {
+        populate: {
+          dz: '*',
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+
+      fixtures.b.forEach((fixture, i) => {
+        const res = body.data[i];
+        const { dz } = res.attributes;
+
+        expect(dz).toHaveLength(fixture.dz.length);
+        expect(dz).toMatchObject(
+          fixture.dz.map((component) => ({
+            ...omit('field', component),
+            id: expect.any(Number),
+          }))
+        );
+      });
+    });
+
+    test('Populate only one component type using fragment', async () => {
+      const qs = {
+        populate: {
+          dz: {
+            on: {
+              'default.foo': true,
+            },
+          },
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+
+      expect(body.data[0].attributes.dz).toHaveLength(3);
+      expect(body.data[1].attributes.dz).toHaveLength(0);
+
+      const expected = fixtures.b[0].dz
+        .filter(({ __component }) => __component === 'default.foo')
+        .map((component) => ({
+          ...component,
+          id: expect.any(Number),
+        }));
+
+      expect(body.data[0].attributes.dz).toMatchObject(expected);
+    });
+
+    test('Populate the dynamic zone with filters in fragments', async () => {
+      const qs = {
+        populate: {
+          dz: {
+            on: {
+              'default.foo': {
+                filters: { number: { $lt: 3 } },
+              },
+              'default.bar': {
+                filters: { title: { $contains: 'another' } },
+              },
+            },
+          },
+        },
+      };
+
+      const { status, body } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+      expect(body.data[0].attributes.dz).toHaveLength(2);
+      expect(body.data[1].attributes.dz).toHaveLength(1);
+
+      const filter = (data = []) =>
+        data
+          .filter(({ __component, number, title }) => {
+            if (__component === 'default.foo') return number < 3;
+            if (__component === 'default.bar') return title.includes('another');
+            return false;
+          })
+          .map((component) => ({
+            ...(component.__component === 'default.foo' ? component : omit('field', component)),
+            id: expect.any(Number),
+          }));
+
+      expect(body.data[0].attributes.dz).toMatchObject(filter(fixtures.b[0].dz));
+      expect(body.data[1].attributes.dz).toMatchObject(filter(fixtures.b[1].dz));
     });
   });
 });

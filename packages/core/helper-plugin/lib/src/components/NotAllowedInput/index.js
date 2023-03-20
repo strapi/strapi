@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { TextInput } from '@strapi/design-system/TextInput';
+import { TextInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import EyeStriked from '@strapi/icons/EyeStriked';
+import { EyeStriked } from '@strapi/icons';
 
 const StyledIcon = styled(EyeStriked)`
   > path {

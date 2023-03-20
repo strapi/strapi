@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
 import { request, useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
