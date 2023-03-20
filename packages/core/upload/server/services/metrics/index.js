@@ -5,10 +5,10 @@ const getProviderIsPrivate = () => strapi.plugin('upload').provider.isPrivate();
 
 module.exports = ({ strapi }) => ({
   async sendUploadPluginMetrics() {
-    const provider = await getProviderName();
+    const provider = getProviderName();
     const isPrivate = await getProviderIsPrivate();
 
-    await strapi.telemetry.send('didInitializePluginUpload', {
+    strapi.telemetry.send('didInitializePluginUpload', {
       groupProperties: {
         uploadProvider: provider,
         isUploadPrivateProvider: isPrivate,
