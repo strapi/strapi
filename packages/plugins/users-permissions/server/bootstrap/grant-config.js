@@ -120,4 +120,12 @@ module.exports = (baseURL) => ({
     scope: ['openid email'], // scopes should be space delimited
     subdomain: 'my.subdomain.com/cas',
   },
+  patreon: {
+    enabled: false,
+    icon: '',
+    key: '',
+    secret: '',
+    callback: `${baseURL}/patreon/callback`,
+    scope: ['identity', 'identity[email]'],
+  },
 });

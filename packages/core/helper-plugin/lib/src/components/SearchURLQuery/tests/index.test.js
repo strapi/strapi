@@ -33,63 +33,63 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(history));
 
     expect(container).toMatchInlineSnapshot(`
-      .c5 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c0 {
+        background: #ffffff;
+        padding: 8px;
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+        width: 2rem;
+        height: 2rem;
+        cursor: pointer;
       }
 
-      .c3 {
+      .c5 {
         color: #32324d;
       }
 
-      .c2 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c0 {
+      .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c6 path {
+        fill: #32324d;
+      }
+
+      .c2 {
         position: relative;
         outline: none;
       }
 
-      .c0 svg {
+      .c2 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c0 svg > g,
-      .c0 svg path {
+      .c2 svg > g,
+      .c2 svg path {
         fill: #ffffff;
       }
 
-      .c0[aria-disabled='true'] {
+      .c2[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c0:after {
+      .c2:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -104,11 +104,11 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid transparent;
       }
 
-      .c0:focus-visible {
+      .c2:focus-visible {
         outline: none;
       }
 
-      .c0:focus-visible:after {
+      .c2:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -119,77 +119,64 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
+      .c4 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
-      .c1 svg > g,
-      .c1 svg path {
+      .c3 svg > g,
+      .c3 svg path {
         fill: #8e8ea9;
       }
 
-      .c1:hover svg > g,
-      .c1:hover svg path {
+      .c3:hover svg > g,
+      .c3:hover svg path {
         fill: #666687;
       }
 
-      .c1:active svg > g,
-      .c1:active svg path {
+      .c3:active svg > g,
+      .c3:active svg path {
         fill: #a5a5ba;
       }
 
-      .c1[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c1[aria-disabled='true'] svg path {
+      .c3[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c4 path {
-        fill: #32324d;
       }
 
       <div>
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="tooltip-1"
-            class="c0 c1"
+            aria-labelledby="0"
+            class="c0 c1 c2 c3"
             tabindex="0"
             type="button"
           >
             <span
-              class="c2"
+              class="c4"
             >
               Search
             </span>
             <svg
               aria-hidden="true"
-              class="c3 c4"
+              class="c5 c6"
               fill="none"
               focusable="false"
-              height="1em"
+              height="1rem"
               viewBox="0 0 24 24"
-              width="1em"
+              width="1rem"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 clip-rule="evenodd"
-                d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                 fill="#32324D"
                 fill-rule="evenodd"
               />
@@ -197,7 +184,7 @@ describe('<SearchURLQuery />', () => {
           </button>
         </span>
         <div
-          class="c5"
+          class="c4"
         >
           <p
             aria-live="polite"
@@ -229,35 +216,9 @@ describe('<SearchURLQuery />', () => {
     fireEvent.click(container.querySelector('button[type="button"]'));
 
     expect(container).toMatchInlineSnapshot(`
-      .c11 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c7 {
         padding-right: 8px;
         padding-left: 12px;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
       }
 
       .c5 {
@@ -278,6 +239,20 @@ describe('<SearchURLQuery />', () => {
         justify-content: space-between;
       }
 
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
       .c2 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -285,7 +260,30 @@ describe('<SearchURLQuery />', () => {
         color: #32324d;
       }
 
-      .c10 {
+      .c1 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c11 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.40625rem;
@@ -300,31 +298,31 @@ describe('<SearchURLQuery />', () => {
         background: inherit;
       }
 
-      .c10::-webkit-input-placeholder {
+      .c11::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10::-moz-placeholder {
+      .c11::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10:-ms-input-placeholder {
+      .c11:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10::placeholder {
+      .c11::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10[aria-disabled='true'] {
+      .c11[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c10:focus {
+      .c11:focus {
         outline: none;
         box-shadow: none;
       }
@@ -346,23 +344,11 @@ describe('<SearchURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c1 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c9 {
+      .c10 {
         font-size: 0.8rem;
       }
 
-      .c9 svg path {
+      .c10 svg path {
         fill: #32324d;
       }
 
@@ -398,19 +384,17 @@ describe('<SearchURLQuery />', () => {
             <div
               class="c0"
             >
-              <div>
+              <div
+                class=""
+              >
                 <div
                   class="c1"
                 >
                   <label
-                    class="c2"
-                    for="field-5"
+                    class="c2 c3"
+                    for="4"
                   >
-                    <div
-                      class="c3"
-                    >
-                      Search label
-                    </div>
+                    Search label
                   </label>
                 </div>
                 <div
@@ -420,19 +404,19 @@ describe('<SearchURLQuery />', () => {
                     class="c7"
                   >
                     <div
-                      class="c8 c3 c9"
+                      class="c8 c9 c10"
                     >
                       <svg
                         aria-hidden="true"
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                          d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                           fill="#32324D"
                           fill-rule="evenodd"
                         />
@@ -442,8 +426,9 @@ describe('<SearchURLQuery />', () => {
                   <input
                     aria-disabled="false"
                     aria-invalid="false"
-                    class="c10"
-                    id="field-5"
+                    aria-required="false"
+                    class="c11"
+                    id="4"
                     name="search"
                     value=""
                   />
@@ -453,7 +438,7 @@ describe('<SearchURLQuery />', () => {
           </form>
         </div>
         <div
-          class="c11"
+          class="c1"
         >
           <p
             aria-live="polite"
@@ -494,7 +479,7 @@ describe('<SearchURLQuery />', () => {
 
   it('should clear value and update query params', async () => {
     const history = createMemoryHistory();
-    const { container } = render(makeApp(history));
+    const { container, getByText } = render(makeApp(history));
 
     fireEvent.click(container.querySelector('button[type="button"]'));
 
@@ -505,7 +490,7 @@ describe('<SearchURLQuery />', () => {
     const urlSearchQuery = history.location.search;
     expect(urlSearchQuery).toEqual('?_q=michka&page=1');
 
-    fireEvent.click(container.querySelector('button[aria-label="Clear"]'));
+    fireEvent.click(getByText('Clear'));
 
     expect(input.value).toEqual('');
 

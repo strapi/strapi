@@ -103,7 +103,8 @@ const redirectWithAuth = (ctx) => {
 
   const cookiesOptions = { httpOnly: false, secure: isProduction, overwrite: true };
 
-  strapi.eventHub.emit('admin.auth.success', { user, provider });
+  const sanitizedUser = getService('user').sanitizeUser(user);
+  strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider });
 
   ctx.cookies.set('jwtToken', jwt, cookiesOptions);
   ctx.redirect(redirectUrls.success);

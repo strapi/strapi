@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Flex } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const Overlay = styled(Box)`
@@ -22,7 +21,7 @@ const Overlay = styled(Box)`
   }
 `;
 
-const Content = styled(Stack)`
+const Content = styled(Flex)`
   position: fixed;
   top: 0;
   right: 0;

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Grid, GridItem } from '@strapi/design-system';
 import NpmPackageCard from '../NpmPackageCard';
 
 const NpmPackagesGrid = ({

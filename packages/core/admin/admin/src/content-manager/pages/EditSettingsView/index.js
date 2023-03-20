@@ -11,17 +11,21 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
-import { Main } from '@strapi/design-system/Main';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Stack } from '@strapi/design-system/Stack';
-import { Divider } from '@strapi/design-system/Divider';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
+import {
+  Main,
+  HeaderLayout,
+  ContentLayout,
+  Button,
+  Box,
+  Typography,
+  Grid,
+  GridItem,
+  Select,
+  Option,
+  Flex,
+  Divider,
+} from '@strapi/design-system';
+import { ArrowLeft, Check } from '@strapi/icons';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -260,7 +264,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack spacing={4}>
+              <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -324,7 +328,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                     });
                   }}
                 />
-              </Stack>
+              </Flex>
             </Box>
           </ContentLayout>
           <ConfirmDialog

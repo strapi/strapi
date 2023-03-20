@@ -54,10 +54,8 @@
   "plugin.description.short": "이 플러그인을 사용하면 어드민 패널과 API에서 서로 다른 언어로 된 컨텐츠를 만들고, 읽고, 업데이트할 수 있습니다.",
   "plugin.name": "국제화",
   "plugin.schema.i18n.ensure-unique-localization": "유니크 필드는 지역화(localized)되어야 합니다.",
-  "plugin.schema.i18n.localized.description": "로케일별로 콘텐츠를 저장할 수 있습니다.",
   "plugin.schema.i18n.localized.description-content-type": "로케일별로 콘텐츠를 저장할 수 있습니다.",
   "plugin.schema.i18n.localized.description-field": "필드는 각 로케일에서 서로 다른 값을 가질 수 있습니다.",
-  "plugin.schema.i18n.localized.label": "이 콘텐츠 타입의 지역화(localization) 켜기",
   "plugin.schema.i18n.localized.label-content-type": "이 콘텐츠 타입의 지역화(localization) 켜기",
   "plugin.schema.i18n.localized.label-field": "이 필드의 지역화(localization) 켜기"
 }

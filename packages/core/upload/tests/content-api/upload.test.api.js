@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const get = require('lodash/get');
 
 // Helpers.
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
@@ -25,11 +26,47 @@ const dogModel = {
   },
 };
 
+const todoListModel = {
+  displayName: 'TodoList',
+  singularName: 'todolist',
+  pluralName: 'todolists',
+  kind: 'collectionType',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+    todo: {
+      displayName: 'todo',
+      type: 'component',
+      repeatable: true,
+      component: 'default.todo',
+    },
+  },
+};
+
+const todoComponent = {
+  displayName: 'Todo',
+  attributes: {
+    docs: {
+      allowedTypes: ['images', 'files', 'videos', 'audios'],
+      type: 'media',
+      multiple: true,
+    },
+    task: {
+      type: 'string',
+    },
+  },
+};
+
 describe('Upload plugin', () => {
   beforeAll(async () => {
-    await builder.addContentType(dogModel).build();
+    await builder
+      .addContentType(dogModel)
+      .addComponent(todoComponent)
+      .addContentType(todoListModel)
+      .build();
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({ strapi });
+    rq = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -127,6 +164,34 @@ describe('Upload plugin', () => {
         ])
       );
     });
+    test('Get one file', async () => {
+      const dogEntity = await strapi.entityService.create('api::dog.dog', {
+        data: {},
+        files: {
+          profilePicture: {
+            path: path.join(__dirname, '../utils/rec.jpg'),
+            name: 'rec',
+            type: 'jpg',
+            size: 0,
+          },
+        },
+        populate: 'profilePicture',
+      });
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${dogEntity.profilePicture.id}`,
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({
+          id: expect.anything(),
+          url: expect.any(String),
+        })
+      );
+      await strapi.entityService.delete('api::dog.dog', dogEntity.id);
+      await strapi.entityService.delete('plugin::upload.file', dogEntity.profilePicture.id);
+    });
   });
 
   describe('Create an entity with a file', () => {
@@ -187,6 +252,82 @@ describe('Upload plugin', () => {
         },
       });
       data.dogs.push(res.body);
+    });
+    test('File should have related field', async () => {
+      const fileId = get(data, 'dogs[0].data.attributes.profilePicture.data.id');
+
+      expect(fileId).toBeDefined();
+
+      const getRes = await rq({
+        method: 'GET',
+        url: `/upload/files/${fileId}`,
+        qs: { populate: '*' },
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.objectContaining({
+          id: fileId,
+          related: [expect.any(Object)],
+        })
+      );
+    });
+  });
+
+  describe('Create an entity with a component with a file', () => {
+    test('With an image', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/todolists',
+        formData: {
+          data: '{"title":"Test todolist title","todo":[{"task":"First todo"},{"task":"Second todo"}]}',
+          'files.todo.0.docs': fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          attributes: {
+            title: 'Test todolist title',
+          },
+          id: expect.anything(),
+        },
+      });
+      const newlyCreatedTodolist = await rq({
+        method: 'GET',
+        url: `/todolists/${res.body.data.id}`,
+        qs: {
+          populate: ['todo', 'todo.docs'],
+        },
+      });
+
+      expect(newlyCreatedTodolist.body).toBeDefined();
+      expect(newlyCreatedTodolist.body).toMatchObject({
+        data: {
+          attributes: {
+            title: 'Test todolist title',
+            todo: [
+              {
+                id: expect.anything(),
+                task: 'First todo',
+                docs: {
+                  data: [
+                    {
+                      id: expect.anything(),
+                      attributes: {
+                        mime: 'image/jpeg',
+                        name: 'rec.jpg',
+                      },
+                    },
+                  ],
+                },
+              },
+              expect.any(Object),
+            ],
+          },
+        },
+      });
     });
   });
 

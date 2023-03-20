@@ -3,13 +3,8 @@
 import { useState } from 'react';
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
 import ContentBox from './index';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
-import InformationSquare from '@strapi/icons/InformationSquare';
-import CodeSquare from '@strapi/icons/CodeSquare';
-import PlaySquare from '@strapi/icons/PlaySquare';
-import FeatherSquare from '@strapi/icons/FeatherSquare';
-import Duplicate from '@strapi/icons/Duplicate';
+import { IconButton, Flex } from '@strapi/design-system';
+import { InformationSquare, CodeSquare, PlaySquare, FeatherSquare, Duplicate } from '@strapi/icons';
 
 <Meta title="components/ContentBox" />
 
@@ -21,7 +16,7 @@ TODO
 
 <Canvas>
   <Story name="base">
-    <Stack spacing={4}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
       <ContentBox
         title="Read the documentation"
         subtitle="Discover the concepts, reference, guides and PlaySquares"
@@ -69,7 +64,7 @@ TODO
         }
         iconBackground="neutral100"
       />
-    </Stack>
+    </Flex>
   </Story>
 </Canvas>
 

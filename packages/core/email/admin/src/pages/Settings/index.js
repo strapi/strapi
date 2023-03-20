@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
 import {
   getYupInnerErrors,
   CheckPagePermissions,
@@ -9,16 +8,19 @@ import {
   useOverlayBlocker,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { ContentLayout } from '@strapi/design-system/Layout';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Button } from '@strapi/design-system/Button';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Envelop from '@strapi/icons/Envelop';
+import {
+  Main,
+  ContentLayout,
+  Box,
+  Grid,
+  GridItem,
+  Typography,
+  TextInput,
+  Button,
+  Flex,
+  useNotifyAT,
+} from '@strapi/design-system';
+import { Envelop } from '@strapi/icons';
 import Configuration from './components/Configuration';
 import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
@@ -63,7 +65,7 @@ const SettingsPage = () => {
 
         setConfig(config);
 
-        const testAddressFound = get(config, 'settings.testAddress');
+        const testAddressFound = config?.settings?.testAddress;
 
         if (testAddressFound) {
           setTestAddress(testAddressFound);
@@ -158,7 +160,7 @@ const SettingsPage = () => {
       <EmailHeader />
       <ContentLayout>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={7}>
+          <Flex direction="column" alignItems="stretch" gap={7}>
             <Box
               background="neutral0"
               hasRadius
@@ -179,7 +181,7 @@ const SettingsPage = () => {
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack spacing={4}>
+              <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('Settings.email.plugin.title.test'),
@@ -224,9 +226,9 @@ const SettingsPage = () => {
                     </Button>
                   </GridItem>
                 </Grid>
-              </Stack>
+              </Flex>
             </Box>
-          </Stack>
+          </Flex>
         </form>
       </ContentLayout>
     </Main>

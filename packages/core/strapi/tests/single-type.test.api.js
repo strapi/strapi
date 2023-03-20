@@ -16,6 +16,7 @@ const model = {
   displayName: 'single-type',
   singularName: 'single-type',
   pluralName: 'single-types',
+  draftAndPublish: true,
   attributes: {
     title: {
       type: 'string',
@@ -64,6 +65,8 @@ describe('Content Manager single types', () => {
         title: 'Title',
       },
     });
+
+    expect(res.body.data.attributes.publishedAt).toBeISODate();
 
     data.id = res.body.data.id;
   });

@@ -33,7 +33,7 @@ If you're using the bucket as a CDN and deliver the content on a custom domain, 
 
 ### Provider Configuration
 
-`./config/plugins.js`
+`./config/plugins.js` or `./config/plugins.ts` for TypeScript projects:
 
 ```js
 module.exports = ({ env }) => ({

@@ -1,18 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 
-export const Hint = ({ id, error, name, description }) => {
-  const { formatMessage } = useIntl();
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
-
-  if (!hint || error) {
+export const Hint = ({ id, error, name, hint }) => {
+  if (hint.length === 0 || error) {
     return null;
   }
 
@@ -25,16 +16,12 @@ export const Hint = ({ id, error, name, description }) => {
 
 Hint.defaultProps = {
   id: undefined,
-  description: undefined,
   error: undefined,
+  hint: '',
 };
 
 Hint.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   error: PropTypes.string,
   id: PropTypes.string,
   name: PropTypes.string.isRequired,

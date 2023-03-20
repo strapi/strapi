@@ -46,7 +46,7 @@ describe('Email | Pages | Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c2 {
+      .c1 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -54,12 +54,16 @@ describe('Email | Pages | Settings', () => {
         padding-left: 56px;
       }
 
+      .c3 {
+        min-width: 0;
+      }
+
       .c8 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c11 {
+      .c10 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -78,11 +82,18 @@ describe('Email | Pages | Settings', () => {
         padding-left: 12px;
       }
 
-      .c35 {
-        padding-right: 8px;
+      .c33 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
       }
 
-      .c3 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -126,6 +137,52 @@ describe('Email | Pages | Settings', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 32px;
+      }
+
+      .c11 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .c12 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .c34 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
       }
 
       .c6 {
@@ -141,20 +198,20 @@ describe('Email | Pages | Settings', () => {
         color: #666687;
       }
 
-      .c14 {
+      .c13 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c15 {
+      .c14 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c19 {
+      .c18 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -175,66 +232,29 @@ describe('Email | Pages | Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
+        color: #ffffff;
       }
 
-      .c10 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c10 > * + * {
-        margin-top: 32px;
-      }
-
-      .c12 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c12 > * + * {
-        margin-top: 16px;
-      }
-
-      .c13 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c13 > * + * {
-        margin-top: 4px;
-      }
-
-      .c33 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+      .c35 {
         position: relative;
         outline: none;
       }
 
-      .c33 svg {
+      .c35 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c33 svg > g,
-      .c33 svg path {
+      .c35 svg > g,
+      .c35 svg path {
         fill: #ffffff;
       }
 
-      .c33[aria-disabled='true'] {
+      .c35[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c33:after {
+      .c35:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -249,11 +269,11 @@ describe('Email | Pages | Settings', () => {
         border: 2px solid transparent;
       }
 
-      .c33:focus-visible {
+      .c35:focus-visible {
         outline: none;
       }
 
-      .c33:focus-visible:after {
+      .c35:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -265,22 +285,51 @@ describe('Email | Pages | Settings', () => {
       }
 
       .c36 {
-        height: 100%;
-      }
-
-      .c34 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
       }
 
-      .c34 .c1 {
+      .c36[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c36[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c36[aria-disabled='true'] svg > g,.c36[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c36[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c36[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c36[aria-disabled='true']:active svg > g,.c36[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c36:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c36:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c36 svg > g,
+      .c36 svg path {
+        fill: #ffffff;
+      }
+
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -289,53 +338,6 @@ describe('Email | Pages | Settings', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c34 .c5 {
-        color: #ffffff;
-      }
-
-      .c34[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c34[aria-disabled='true'] .c5 {
-        color: #666687;
-      }
-
-      .c34[aria-disabled='true'] svg > g,
-      .c34[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c34[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c34[aria-disabled='true']:active .c5 {
-        color: #666687;
-      }
-
-      .c34[aria-disabled='true']:active svg > g,
-      .c34[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c34:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c34:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c34 svg > g,
-      .c34 svg path {
-        fill: #ffffff;
       }
 
       .c21 {
@@ -463,25 +465,6 @@ describe('Email | Pages | Settings', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c23 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c23:focus {
-        outline: none;
-      }
-
-      .c23[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
       .c22 {
         position: relative;
         border: 1px solid #dcdce4;
@@ -535,21 +518,36 @@ describe('Email | Pages | Settings', () => {
         width: 0.375rem;
       }
 
+      .c23 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c23:focus {
+        outline: none;
+      }
+
+      .c23[data-disabled] {
+        cursor: not-allowed;
+      }
+
       .c24 {
         width: 100%;
       }
 
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c17 {
+      .c16 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 20px;
       }
 
-      .c18 {
+      .c17 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -559,18 +557,22 @@ describe('Email | Pages | Settings', () => {
         max-width: 100%;
       }
 
-      .c16 {
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c15 {
         color: #4945ff;
       }
 
       @media (max-width:68.75rem) {
-        .c18 {
+        .c17 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c18 {
+        .c17 {
           grid-column: span;
         }
       }
@@ -598,14 +600,14 @@ describe('Email | Pages | Settings', () => {
           style="height: 0px;"
         >
           <div
-            class="c1 c2"
+            class="c1"
             data-strapi-header="true"
           >
             <div
-              class="c1 c3"
+              class="c2"
             >
               <div
-                class="c1 c4"
+                class="c3 c4"
               >
                 <h1
                   class="c5 c6"
@@ -623,35 +625,32 @@ describe('Email | Pages | Settings', () => {
           </div>
         </div>
         <div
-          class="c1 c8"
+          class="c8"
         >
           <form>
             <div
-              class="c1 c9 c10"
-              spacing="7"
+              class="c9"
             >
               <div
-                class="c1 c11"
+                class="c10"
               >
                 <div
-                  class="c1 c9 c12"
-                  spacing="4"
+                  class="c11"
                 >
                   <div
-                    class="c1 c9 c13"
-                    spacing="1"
+                    class="c12"
                   >
                     <h2
-                      class="c5 c14"
+                      class="c5 c13"
                     >
                       Configuration
                     </h2>
                     <span
-                      class="c5 c15"
+                      class="c5 c14"
                     >
                       The plugin is configured through the ./config/plugins.js file, checkout this 
                       <a
-                        class="c16"
+                        class="c15"
                         href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                         rel="noopener noreferrer"
                         target="_blank"
@@ -662,39 +661,39 @@ describe('Email | Pages | Settings', () => {
                     </span>
                   </div>
                   <div
-                    class="c1 c17"
+                    class="c16"
                   >
                     <div
-                      class="c18"
+                      class="c17"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c1 c9 c13"
-                              spacing="1"
+                              class="c12"
                             >
                               <label
-                                class="c5 c19"
-                                for="textinput-4"
+                                class="c5 c18 c19"
+                                for="7"
                               >
-                                <div
-                                  class="c1 c4"
-                                >
-                                  Default sender email
-                                </div>
+                                Default sender email
                               </label>
                               <div
-                                class="c1 c3 c20"
+                                class="c2 c20"
                                 disabled=""
                               >
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
-                                  id="textinput-4"
+                                  data-disabled=""
+                                  disabled=""
+                                  id="7"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
                                   value=""
@@ -706,36 +705,36 @@ describe('Email | Pages | Settings', () => {
                       </div>
                     </div>
                     <div
-                      class="c18"
+                      class="c17"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c1 c9 c13"
-                              spacing="1"
+                              class="c12"
                             >
                               <label
-                                class="c5 c19"
-                                for="textinput-5"
+                                class="c5 c18 c19"
+                                for="9"
                               >
-                                <div
-                                  class="c1 c4"
-                                >
-                                  Default response email
-                                </div>
+                                Default response email
                               </label>
                               <div
-                                class="c1 c3 c20"
+                                class="c2 c20"
                                 disabled=""
                               >
                                 <input
                                   aria-disabled="true"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c21"
-                                  id="textinput-5"
+                                  data-disabled=""
+                                  disabled=""
+                                  id="9"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
                                   value=""
@@ -747,79 +746,80 @@ describe('Email | Pages | Settings', () => {
                       </div>
                     </div>
                     <div
-                      class="c18"
+                      class="c17"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
-                        <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class="c1 c9 c13"
-                            spacing="1"
+                            class="c12"
                           >
-                            <span
-                              class="c5 c19"
-                              for="select-6"
-                              id="select-6-label"
+                            <label
+                              class="c5 c18 c19"
+                              for="11"
                             >
-                              <div
-                                class="c1 c4"
-                              >
-                                Email provider
-                              </div>
-                            </span>
+                              Email provider
+                            </label>
                             <div
-                              class="c1 c4 c22"
+                              class="c4 c22"
                               disabled=""
                             >
                               <button
-                                aria-disabled="true"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
-                                aria-labelledby="select-6-label select-6-content"
+                                aria-labelledby="11 11-label 11-content"
+                                aria-required="false"
                                 class="c23"
-                                id="select-6"
+                                data-disabled=""
+                                disabled=""
+                                id="11"
                                 name="email-provider"
+                                role="combobox"
                                 type="button"
+                                value=""
                               />
                               <div
-                                class="c1 c3 c24"
+                                class="c2 c24"
                               >
                                 <div
-                                  class="c1 c4"
+                                  class="c4"
                                 >
                                   <div
-                                    class="c1 c25"
+                                    class="c25"
                                   >
                                     <span
                                       class="c5 c26"
-                                      id="select-6-content"
+                                      id="11-content"
                                     >
                                       Select...
                                     </span>
                                   </div>
                                 </div>
                                 <div
-                                  class="c1 c4"
+                                  class="c4"
                                 >
                                   
                                   <button
                                     aria-hidden="true"
-                                    class="c1 c27 c28 c29"
+                                    class="c27 c28 c29"
                                     disabled=""
                                     tabindex="-1"
+                                    title="Carret Down Button"
                                     type="button"
                                   >
                                     <svg
                                       fill="none"
-                                      height="1em"
+                                      height="1rem"
                                       viewBox="0 0 14 8"
-                                      width="1em"
+                                      width="1rem"
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
                                         clip-rule="evenodd"
-                                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                         fill="#32324D"
                                         fill-rule="evenodd"
                                       />
@@ -836,48 +836,45 @@ describe('Email | Pages | Settings', () => {
                 </div>
               </div>
               <div
-                class="c1 c11"
+                class="c10"
               >
                 <div
-                  class="c1 c9 c12"
-                  spacing="4"
+                  class="c11"
                 >
                   <h2
-                    class="c5 c14"
+                    class="c5 c13"
                   >
                     Test email delivery
                   </h2>
                   <div
-                    class="c1 c17"
+                    class="c16"
                   >
                     <div
-                      class="c18"
+                      class="c17"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c1 c9 c13"
-                              spacing="1"
+                              class="c12"
                             >
                               <label
-                                class="c5 c19"
+                                class="c5 c18 c19"
                                 for="test-address-input"
                               >
-                                <div
-                                  class="c1 c4"
-                                >
-                                  Recipient email
-                                </div>
+                                Recipient email
                               </label>
                               <div
-                                class="c1 c3 c30"
+                                class="c2 c30"
                               >
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
+                                  aria-required="false"
                                   class="c31"
                                   id="test-address-input"
                                   name="test-address"
@@ -894,35 +891,35 @@ describe('Email | Pages | Settings', () => {
                       class="c32"
                     >
                       <div
-                        class="c1 "
+                        class=""
                       >
                         <button
                           aria-disabled="true"
-                          class="c33 c34"
+                          class="c33 c34 c35 c36"
                           disabled=""
                           type="submit"
                         >
                           <div
                             aria-hidden="true"
-                            class="c1 c35 c36"
+                            class=""
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M0 2.8A.8.8 0 01.8 2h22.4a.8.8 0 01.8.8v2.71a1 1 0 01-1 1H1a1 1 0 01-1-1V2.8z"
+                                d="M0 2.8A.8.8 0 0 1 .8 2h22.4a.8.8 0 0 1 .8.8v2.71a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V2.8Z"
                                 fill="#32324D"
                               />
                               <path
-                                d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873zM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053z"
+                                d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873ZM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053Z"
                                 fill="#32324D"
                               />
                               <path
-                                d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555z"
+                                d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555Z"
                                 fill="#32324D"
                               />
                             </svg>

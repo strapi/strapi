@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd packages/core/helper-plugin && yarn build-storybook",
+  "github": {
+    "silent": true,
+    "autoJobCancelation": true
+  },
+  "installCommand": "yarn setup",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet './packages/core/helper-plugin'",
+  "outputDirectory": "packages/core/helper-plugin/storybook-static"
+}

@@ -3,12 +3,11 @@
 
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Grid, GridItem, Flex } from '@strapi/design-system';
 import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
+import useLazyComponents from '../../hooks/useLazyComponents';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
@@ -17,6 +16,8 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
     [componentUid, getComponentLayout]
   );
   const fields = componentLayoutData.layouts.edit;
+
+  const { lazyComponentStore } = useLazyComponents();
 
   return (
     <Box
@@ -28,7 +29,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
       hasRadius={isNested}
       borderColor={isNested ? 'neutral200' : ''}
     >
-      <Stack spacing={6}>
+      <Flex direction="column" alignItems="stretch" gap={6}>
         {fields.map((fieldRow, key) => {
           return (
             <Grid gap={4} key={key}>
@@ -67,6 +68,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                       metadatas={metadatas}
                       queryInfos={queryInfos}
                       size={size}
+                      customFieldInputs={lazyComponentStore}
                     />
                   </GridItem>
                 );
@@ -74,7 +76,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
             </Grid>
           );
         })}
-      </Stack>
+      </Flex>
     </Box>
   );
 };

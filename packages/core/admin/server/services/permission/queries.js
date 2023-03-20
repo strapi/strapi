@@ -1,22 +1,7 @@
 'use strict';
 
-const {
-  flatMap,
-  reject,
-  isNil,
-  isArray,
-  prop,
-  xor,
-  eq,
-  uniq,
-  map,
-  difference,
-  differenceWith,
-  pipe,
-} = require('lodash/fp');
+const { isNil, isArray, prop, xor, eq, map, differenceWith } = require('lodash/fp');
 const pmap = require('p-map');
-const { EDITOR_CODE } = require('../constants');
-const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../../domain/role');
 const { getService } = require('../../utils');
 const permissionDomain = require('../../domain/permission/index');
 
@@ -44,9 +29,12 @@ const deleteByRolesIds = async (rolesIds) => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async (ids) => {
+  const result = [];
   for (const id of ids) {
-    await strapi.query('admin::permission').delete({ where: { id } });
+    const queryResult = await strapi.query('admin::permission').delete({ where: { id } });
+    result.push(queryResult);
   }
+  strapi.eventHub.emit('permission.delete', { permissions: result });
 };
 
 /**
@@ -61,7 +49,10 @@ const createMany = async (permissions) => {
     createdPermissions.push(newPerm);
   }
 
-  return permissionDomain.toPermission(createdPermissions);
+  const permissionsToReturn = permissionDomain.toPermission(createdPermissions);
+  strapi.eventHub.emit('permission.create', { permissions: permissionsToReturn });
+
+  return permissionsToReturn;
 };
 
 /**
@@ -75,7 +66,10 @@ const update = async (params, attributes) => {
     .query('admin::permission')
     .update({ where: params, data: attributes });
 
-  return permissionDomain.toPermission(updatedPermission);
+  const permissionToReturn = permissionDomain.toPermission(updatedPermission);
+  strapi.eventHub.emit('permission.update', { permissions: permissionToReturn });
+
+  return permissionToReturn;
 };
 
 /**
@@ -186,63 +180,6 @@ const cleanPermissionsInDatabase = async () => {
   }
 };
 
-const ensureBoundPermissionsInDatabase = async () => {
-  if (strapi.EE) {
-    return;
-  }
-
-  const contentTypes = Object.values(strapi.contentTypes);
-  const editorRole = await strapi.query('admin::role').findOne({
-    where: { code: EDITOR_CODE },
-  });
-
-  if (isNil(editorRole)) {
-    return;
-  }
-
-  for (const contentType of contentTypes) {
-    const boundActions = getBoundActionsBySubject(editorRole, contentType.uid);
-
-    const permissions = await findMany({
-      where: {
-        subject: contentType.uid,
-        action: boundActions,
-        role: { id: editorRole.id },
-      },
-    });
-
-    if (permissions.length === 0) {
-      return;
-    }
-
-    const fields = pipe(
-      flatMap(permissionDomain.getProperty('fields')),
-      reject(isNil),
-      uniq
-    )(permissions);
-
-    // Handle the scenario where permissions are missing
-    const missingActions = difference(map('action', permissions), boundActions);
-
-    if (missingActions.length > 0) {
-      const permissions = pipe(
-        // Create a permission skeleton from the action id
-        map((action) => ({ action, subject: contentType.uid, role: editorRole.id })),
-        // Use the permission domain to create a clean permission from the given object
-        map(permissionDomain.create),
-        // Adds the fields property if the permission action is eligible
-        map((permission) =>
-          BOUND_ACTIONS_FOR_FIELDS.includes(permission.action)
-            ? permissionDomain.setProperty('fields', fields, permission)
-            : permission
-        )
-      )(missingActions);
-
-      await createMany(permissions);
-    }
-  }
-};
-
 module.exports = {
   createMany,
   findMany,
@@ -250,5 +187,4 @@ module.exports = {
   deleteByIds,
   findUserPermissions,
   cleanPermissionsInDatabase,
-  ensureBoundPermissionsInDatabase,
 };

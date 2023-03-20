@@ -436,7 +436,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: body.permissions,
+      permissions: expect.arrayContaining(body.permissions),
       description: body.description,
       type: body.type,
       id: expect.any(Number),

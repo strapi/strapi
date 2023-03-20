@@ -21,17 +21,8 @@ const permissions = {
     ],
   },
   marketplace: {
-    main: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.install', subject: null },
-      { action: 'admin::marketplace.plugins.uninstall', subject: null },
-    ],
-    install: [{ action: 'admin::marketplace.plugins.install', subject: null }],
-    read: [
-      { action: 'admin::marketplace.read', subject: null },
-      { action: 'admin::marketplace.plugins.uninstall', subject: null },
-    ],
-    uninstall: [{ action: 'admin::marketplace.plugins.uninstall', subject: null }],
+    main: [{ action: 'admin::marketplace.read', subject: null }],
+    read: [{ action: 'admin::marketplace.read', subject: null }],
   },
   settings: {
     roles: {
@@ -82,6 +73,18 @@ const permissions = {
       read: [{ action: 'admin::api-tokens.read', subject: null }],
       update: [{ action: 'admin::api-tokens.update', subject: null }],
       regenerate: [{ action: 'admin::api-tokens.regenerate', subject: null }],
+    },
+    'transfer-tokens': {
+      main: [{ action: 'admin::transfer.tokens.access', subject: null }],
+      create: [{ action: 'admin::transfer.tokens.create', subject: null }],
+      delete: [{ action: 'admin::transfer.tokens.delete', subject: null }],
+      read: [{ action: 'admin::transfer.tokens.read', subject: null }],
+      update: [{ action: 'admin::transfer.tokens.update', subject: null }],
+      regenerate: [{ action: 'admin::transfer.tokens.regenerate', subject: null }],
+    },
+    'project-settings': {
+      read: [{ action: 'admin::project-settings.read', subject: null }],
+      update: [{ action: 'admin::project-settings.update', subject: null }],
     },
   },
 };

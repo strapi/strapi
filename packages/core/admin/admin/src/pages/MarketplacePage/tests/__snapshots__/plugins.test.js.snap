@@ -1,23 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marketplace page - plugins tab renders and matches the plugin tab snapshot 1`] = `
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c2 {
+.c1 {
   padding-bottom: 56px;
 }
 
-.c5 {
+.c4 {
   background: #f6f6f9;
   padding-top: 40px;
   padding-right: 56px;
@@ -25,48 +13,59 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   padding-left: 56px;
 }
 
-.c13 {
-  padding-right: 8px;
+.c6 {
+  min-width: 0;
 }
 
-.c16 {
+.c19 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c17 {
+.c20 {
   padding-bottom: 16px;
   width: 25%;
 }
 
-.c22 {
+.c27 {
   padding-right: 8px;
   padding-left: 12px;
 }
 
-.c26 {
+.c31 {
   padding-bottom: 16px;
 }
 
-.c28 {
+.c33 {
   padding: 16px;
 }
 
-.c40 {
+.c44 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c42 {
+.c46 {
   padding-left: 12px;
 }
 
-.c45 {
+.c49 {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-.c52 {
+.c50 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c57 {
   background: #ffffff;
   padding-top: 16px;
   padding-right: 16px;
@@ -77,87 +76,83 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   height: 100%;
 }
 
-.c55 {
+.c60 {
   border-radius: 4px;
   width: 64px;
   height: 64px;
 }
 
-.c57 {
+.c62 {
   color: #666687;
 }
 
-.c59 {
+.c64 {
   color: #f29d41;
 }
 
-.c62 {
+.c67 {
   background: #dcdce4;
 }
 
-.c65 {
+.c70 {
   padding-top: 16px;
 }
 
-.c67 {
+.c72 {
   padding-top: 8px;
 }
 
-.c70 {
+.c75 {
   padding-top: 24px;
 }
 
-.c72 {
-  padding-left: 8px;
-}
-
-.c74 {
+.c77 {
   color: #328048;
   margin-left: 8px;
 }
 
-.c76 {
+.c79 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c77 {
+.c80 {
   padding-left: 16px;
 }
 
-.c78 {
+.c81 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c80 {
+.c83 {
   padding-top: 32px;
 }
 
-.c81 {
+.c84 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c82 {
+.c85 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
 }
 
-.c86 {
+.c89 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
   height: 12px;
 }
 
-.c6 {
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -189,7 +184,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   flex-direction: row;
 }
 
-.c33 {
+.c38 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -204,7 +199,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   gap: 8px;
 }
 
-.c35 {
+.c40 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -218,7 +213,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   flex-direction: column;
 }
 
-.c53 {
+.c58 {
   -webkit-align-items: normal;
   -webkit-box-align: normal;
   -ms-flex-align: normal;
@@ -236,7 +231,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   justify-content: space-between;
 }
 
-.c54 {
+.c59 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -254,6 +249,21 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   justify-content: space-between;
 }
 
+.c61 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+}
+
 .c9 {
   font-weight: 600;
   font-size: 2rem;
@@ -261,20 +271,20 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #32324d;
 }
 
-.c14 {
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c23 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c30 {
+.c35 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -282,7 +292,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #4945ff;
 }
 
-.c32 {
+.c37 {
   font-weight: 600;
   font-size: 0.6875rem;
   line-height: 1.45;
@@ -290,7 +300,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #666687;
 }
 
-.c41 {
+.c45 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -300,99 +310,78 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   color: #32324d;
 }
 
-.c49 {
+.c54 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
+  color: #ffffff;
 }
 
-.c61 {
+.c66 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c66 {
+.c71 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c68 {
+.c73 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #666687;
 }
 
-.c79 {
+.c82 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #328048;
 }
 
-.c84 {
+.c87 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 500;
   color: #32324d;
 }
 
-.c36 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c63 path {
+  fill: #666687;
 }
 
-.c56 > * {
-  margin-left: 0;
-  margin-right: 0;
+.c65 path {
+  fill: #f29d41;
 }
 
-.c56 > * + * {
-  margin-left: 4px;
+.c78 path {
+  fill: #328048;
 }
 
-.c71 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c71 > * + * {
-  margin-left: 8px;
-}
-
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c51 {
   position: relative;
   outline: none;
 }
 
-.c11 svg {
+.c51 svg {
   height: 12px;
   width: 12px;
 }
 
-.c11 svg > g,
-.c11 svg path {
+.c51 svg > g,
+.c51 svg path {
   fill: #ffffff;
 }
 
-.c11[aria-disabled='true'] {
+.c51[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c11:after {
+.c51:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -407,11 +396,11 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   border: 2px solid transparent;
 }
 
-.c11:focus-visible {
+.c51:focus-visible {
   outline: none;
 }
 
-.c11:focus-visible:after {
+.c51:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -422,99 +411,127 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   border: 2px solid #4945ff;
 }
 
-.c48 {
-  height: 100%;
+.c22 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
-.c46 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c52 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c46 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c46 .c8 {
-  color: #ffffff;
-}
-
-.c46[aria-disabled='true'] {
+.c52[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true'] .c8 {
+.c52[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c52[aria-disabled='true'] svg > g,.c52[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c46[aria-disabled='true']:active {
+.c52[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true']:active .c8 {
+.c52[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c52[aria-disabled='true']:active svg > g,.c52[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c46:hover {
+.c52:hover {
   background-color: #f6f6f9;
 }
 
-.c46:active {
+.c52:active {
   background-color: #eaeaef;
 }
 
-.c46 .c8 {
+.c52 .c8 {
   color: #32324d;
 }
 
-.c46 svg > g,
-.c46 svg path {
+.c52 svg > g,
+.c52 svg path {
   fill: #32324d;
 }
 
-.c73 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c76 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c73 .c0 {
+.c76[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c76[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c76[aria-disabled='true'] svg > g,.c76[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c76[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c76[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c76[aria-disabled='true']:active svg > g,.c76[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c76:hover {
+  background-color: #ffffff;
+}
+
+.c76:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c76:active .c8 {
+  color: #4945ff;
+}
+
+.c76:active svg > g,
+.c76:active svg path {
+  fill: #4945ff;
+}
+
+.c76 .c8 {
+  color: #271fe0;
+}
+
+.c76 svg > g,
+.c76 svg path {
+  fill: #271fe0;
+}
+
+.c24 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -525,71 +542,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   align-items: center;
 }
 
-.c73 .c8 {
-  color: #ffffff;
-}
-
-.c73[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c73[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c73[aria-disabled='true'] svg > g,
-.c73[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c73[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c73[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c73[aria-disabled='true']:active svg > g,
-.c73[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c73:hover {
-  background-color: #ffffff;
-}
-
-.c73:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c73:active .c8 {
-  color: #4945ff;
-}
-
-.c73:active svg > g,
-.c73:active svg path {
-  fill: #4945ff;
-}
-
-.c73 .c8 {
-  color: #271fe0;
-}
-
-.c73 svg > g,
-.c73 svg path {
-  fill: #271fe0;
-}
-
-.c63 {
-  height: 1px;
-  border: none;
-}
-
-.c25 {
+.c30 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -604,36 +557,36 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   background: inherit;
 }
 
-.c25::-webkit-input-placeholder {
+.c30::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::-moz-placeholder {
+.c30::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:-ms-input-placeholder {
+.c30:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::placeholder {
+.c30::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   color: inherit;
 }
 
-.c25:focus {
+.c30:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c21 {
+.c26 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -645,43 +598,12 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   transition-duration: 0.2s;
 }
 
-.c21:focus-within {
+.c26:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c58 path {
-  fill: #666687;
-}
-
-.c60 path {
-  fill: #f29d41;
-}
-
-.c75 path {
-  fill: #328048;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c37 {
+.c41 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -697,28 +619,28 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   transition-duration: 0.2s;
 }
 
-.c37:focus-within {
+.c41:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c43 {
+.c47 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c43 svg {
+.c47 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c43 svg path {
+.c47 svg path {
   fill: #666687;
 }
 
-.c44 {
+.c48 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -727,23 +649,74 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   border: none;
 }
 
-.c44 svg {
+.c48 svg {
   width: 0.375rem;
 }
 
-.c39 {
+.c42 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c42:focus {
+  outline: none;
+}
+
+.c42[data-disabled] {
+  cursor: not-allowed;
+}
+
+.c43 {
   width: 100%;
 }
 
-.c24 {
+.c68 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c55 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c56 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c2 {
+  overflow-x: hidden;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c29 {
   font-size: 0.8rem;
 }
 
-.c24 svg path {
+.c29 svg path {
   fill: #32324d;
 }
 
-.c18 {
+.c21 {
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   outline: none;
@@ -754,193 +727,240 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
   transition-duration: 0.2s;
 }
 
-.c18:focus-within .c23 svg path {
+.c21:focus-within .c28 svg path {
   fill: #4945ff;
 }
 
-.c18 .c20 {
+.c21 .c25 {
   border: 1px solid transparent;
 }
 
-.c18 .c20:focus-within {
+.c21 .c25:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c34 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c36 {
+  border-bottom: 2px solid transparent;
+}
+
+.c32[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c86 {
+  margin-right: 24px;
+}
+
+.c86 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c88 {
+  word-break: break-all;
+}
+
+.c11 {
+  background: #4945ff;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
 .c10 {
   cursor: pointer;
 }
 
-.c12 {
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border-radius: 4px;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c12 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c12 .c8 {
-  color: #ffffff;
-}
-
-.c12[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c12[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c12[aria-disabled='true'] svg > g,
-.c12[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c12[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c12[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c12[aria-disabled='true']:active svg > g,
-.c12[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c12:hover {
-  background-color: #f6f6f9;
-}
-
-.c12:active {
-  background-color: #eaeaef;
-}
-
-.c12 .c8 {
-  color: #32324d;
-}
-
-.c12 svg > g,
-.c12 svg path {
-  fill: #32324d;
-}
-
-.c83 {
-  margin-right: 24px;
-}
-
-.c83 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c85 {
-  word-break: break-all;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c3 {
-  overflow-x: hidden;
-}
-
-.c50 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c51 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c4:focus-visible {
+.c13 {
+  position: relative;
   outline: none;
 }
 
-.c29 {
-  border-bottom: 2px solid #4945ff;
+.c13 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c31 {
-  border-bottom: 2px solid transparent;
+.c13 svg > g,
+.c13 svg path {
+  fill: #ffffff;
 }
 
-.c27[aria-disabled='true'] {
-  cursor: not-allowed;
+.c13[aria-disabled='true'] {
+  pointer-events: none;
 }
 
-.c64 {
+.c13:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c13:focus-visible {
+  outline: none;
+}
+
+.c13:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c14 {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true'] .c16 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c14[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c14[aria-disabled='true']:active .c16 {
+  color: #666687;
+}
+
+.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c14:hover {
+  background-color: #f6f6f9;
+}
+
+.c14:active {
+  background-color: #eaeaef;
+}
+
+.c14 .c16 {
+  color: #32324d;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #32324d;
+}
+
+.c69 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 
-.c69 {
+.c74 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
 
-.c34 {
+.c39 {
   font-weight: 500;
 }
 
-.c34 span {
+.c39 span {
   font-size: 0.75rem;
 }
 
-.c47 {
+.c53 {
   height: 2rem;
 }
 
 @media (max-width:68.75rem) {
-  .c51 {
+  .c56 {
     grid-column: span 6;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c51 {
+  .c56 {
     grid-column: span 12;
   }
 }
 
 <div
-  class="c0 c1"
+  class="c0"
 >
   <div
-    class="c0 c2 c3"
+    class="c1 c2"
   >
     <main
       aria-labelledby="main-content-title"
-      class="c4"
+      class="c3"
       id="main-content"
       tabindex="-1"
     >
@@ -948,14 +968,14 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
         style="height: 0px;"
       >
         <div
-          class="c0 c5"
+          class="c4"
           data-strapi-header="true"
         >
           <div
-            class="c0 c6"
+            class="c5"
           >
             <div
-              class="c0 c7"
+              class="c6 c7"
             >
               <h1
                 class="c8 c9"
@@ -965,89 +985,85 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
             </div>
             <a
               aria-disabled="false"
-              class="c10 c11 c12"
+              class="c10 c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
-              rel="noreferrer noopener"
-              target="_blank"
+              target="_self"
             >
               <div
                 aria-hidden="true"
-                class="c0 c13"
+                class="c15"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 25"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     clip-rule="evenodd"
-                    d="M13.571 18.272H10.43v-8.47H2.487a.2.2 0 01-.14-.343L11.858.058a.2.2 0 01.282 0l9.513 9.4a.2.2 0 01-.14.343H13.57v8.47zM2.2 21.095a.2.2 0 00-.2.2v2.424c0 .11.09.2.2.2h19.6a.2.2 0 00.2-.2v-2.424a.2.2 0 00-.2-.2H2.2z"
+                    d="M13.571 18.272H10.43v-8.47H2.487a.2.2 0 0 1-.14-.343L11.858.058a.2.2 0 0 1 .282 0l9.513 9.4a.2.2 0 0 1-.14.343H13.57v8.47ZM2.2 21.095a.2.2 0 0 0-.2.2v2.424c0 .11.09.2.2.2h19.6a.2.2 0 0 0 .2-.2v-2.424a.2.2 0 0 0-.2-.2H2.2Z"
                     fill="#212134"
                     fill-rule="evenodd"
                   />
                 </svg>
               </div>
               <span
-                class="c8 c14"
+                class="c16 c17"
               >
                 Submit plugin
               </span>
             </a>
           </div>
           <p
-            class="c8 c15"
+            class="c8 c18"
           >
             Get more out of Strapi
           </p>
         </div>
       </div>
       <div
-        class="c0 c16"
+        class="c19"
       >
         <div
-          class="c0 c17"
-          width="25%"
+          class="c20"
         >
           <div
-            class="c18"
+            class="c21"
           >
-            <div>
+            <div
+              class=""
+            >
               <div
-                class="c19"
+                class="c22"
               >
                 <label
-                  class="c8 c14"
-                  for="field-1"
+                  class="c8 c23 c24"
+                  for="0"
                 >
-                  <div
-                    class="c0 c7"
-                  >
-                    Search
-                  </div>
+                  Search
                 </label>
               </div>
               <div
-                class="c0 c20 c6 c21"
+                class="c25 c5 c26"
               >
                 <div
-                  class="c0 c22"
+                  class="c27"
                 >
                   <div
-                    class="c0 c23 c7 c24"
+                    class="c28 c7 c29"
                   >
                     <svg
                       aria-hidden="true"
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                        d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />
@@ -1057,8 +1073,9 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                 <input
                   aria-disabled="false"
                   aria-invalid="false"
-                  class="c25"
-                  id="field-1"
+                  aria-required="false"
+                  class="c30"
+                  id="0"
                   name="searchbar"
                   placeholder="Search"
                   value=""
@@ -1069,7 +1086,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
         </div>
         <div>
           <div
-            class="c0 c26"
+            class="c31"
           >
             <div
               aria-label="Plugins and Providers for Strapi"
@@ -1079,17 +1096,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                 aria-controls="tabs-0-tabpanel"
                 aria-disabled="false"
                 aria-selected="true"
-                class="c27"
+                class="c32"
                 id="tabs-0-tab"
                 role="tab"
                 tabindex="0"
                 type="button"
               >
                 <div
-                  class="c0 c28 c29"
+                  class="c33 c34"
                 >
                   <span
-                    class="c8 c30"
+                    class="c8 c35"
                   >
                     Plugins
                      
@@ -1102,17 +1119,17 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               <button
                 aria-disabled="false"
                 aria-selected="false"
-                class="c27"
+                class="c32"
                 id="tabs-1-tab"
                 role="tab"
                 tabindex="-1"
                 type="button"
               >
                 <div
-                  class="c0 c28 c31"
+                  class="c33 c36"
                 >
                   <span
-                    class="c8 c32"
+                    class="c8 c37"
                   >
                     Providers
                      
@@ -1125,38 +1142,42 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
             </div>
           </div>
           <div
-            class="c0 c26 c33"
+            class="c31 c38"
           >
             <div
-              class="c0 c34"
+              class="c39"
             >
-              <div>
+              <div
+                class=""
+              >
                 <div
-                  class="c0 c35 c36"
+                  class="c40"
                 >
                   <div
-                    class="c0 c7 c37"
+                    class="c7 c41"
                   >
                     <button
-                      aria-disabled="false"
                       aria-expanded="false"
                       aria-haspopup="listbox"
-                      aria-labelledby="sort-by-select-label sort-by-select-content"
-                      class="c38"
+                      aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
+                      aria-required="false"
+                      class="c42"
                       id="sort-by-select"
+                      role="combobox"
                       type="button"
+                      value="name:asc"
                     />
                     <div
-                      class="c0 c6 c39"
+                      class="c5 c43"
                     >
                       <div
-                        class="c0 c7"
+                        class="c7"
                       >
                         <div
-                          class="c0 c40"
+                          class="c44"
                         >
                           <span
-                            class="c8 c41"
+                            class="c8 c45"
                             id="sort-by-select-content"
                           >
                             Sort by alphabetical order
@@ -1164,24 +1185,25 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </div>
                       </div>
                       <div
-                        class="c0 c7"
+                        class="c7"
                       >
                         <button
                           aria-hidden="true"
-                          class="c0 c42 c43 c44"
+                          class="c46 c47 c48"
                           tabindex="-1"
+                          title="Carret Down Button"
                           type="button"
                         >
                           <svg
                             fill="none"
-                            height="1em"
+                            height="1rem"
                             viewBox="0 0 14 8"
-                            width="1em"
+                            width="1rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
                               clip-rule="evenodd"
-                              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                               fill="#32324D"
                               fill-rule="evenodd"
                             />
@@ -1194,35 +1216,35 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               </div>
             </div>
             <div
-              class="c0 c45"
+              class="c49"
             >
               <button
                 aria-disabled="false"
-                class="c11 c46 c47"
+                class="c50 c38 c51 c52 c53"
                 data-testid="filters-button"
                 type="button"
               >
                 <div
                   aria-hidden="true"
-                  class="c0 c13 c48"
+                  class=""
                 >
                   <svg
                     fill="none"
-                    height="1em"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="1em"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
                       clip-rule="evenodd"
-                      d="M0 4a2 2 0 012-2h20a2 2 0 110 4H2a2 2 0 01-2-2zm4 8a2 2 0 012-2h12a2 2 0 110 4H6a2 2 0 01-2-2zm6 6a2 2 0 100 4h4a2 2 0 100-4h-4z"
+                      d="M0 4a2 2 0 0 1 2-2h20a2 2 0 1 1 0 4H2a2 2 0 0 1-2-2Zm4 8a2 2 0 0 1 2-2h12a2 2 0 1 1 0 4H6a2 2 0 0 1-2-2Zm6 6a2 2 0 1 0 0 4h4a2 2 0 1 0 0-4h-4Z"
                       fill="#32324D"
                       fill-rule="evenodd"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c8 c49"
+                  class="c8 c54"
                 >
                   Filters
                 </span>
@@ -1237,58 +1259,58 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               tabindex="0"
             >
               <div
-                class="c0 c50"
+                class="c55"
               >
                 <div
-                  class="c51"
+                  class="c56"
                 >
                   <div
-                    class="c0 "
+                    class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c57 c58"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
-                        class="c0 "
+                        class=""
                       >
                         <div
-                          class="c0 c54"
+                          class="c59"
                         >
                           <img
                             alt="Comments logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c60"
                             src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c61"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 24"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0112 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0z"
+                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
                                 fill="#161614"
                               />
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c59 c60"
+                              class="c64 c65"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 24"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M12 18.26l-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26z"
+                                d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1296,24 +1318,26 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin was starred 323 on GitHub"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 323
                               </span>
                             </p>
                             <hr
-                              class="c0 c62 c63 c64"
+                              class="c67 c68 c69"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 25"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1322,7 +1346,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 1123 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 1123
                               </span>
@@ -1330,59 +1354,57 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c70"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c71"
                           >
                             <div
-                              class="c0 c7"
+                              class="c7"
                             >
                               Comments
                             </div>
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c72"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c73 c74"
                           >
                             Powerful Strapi based comments moderation tool for you and your users
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c75 c38"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Comments"
-                          class="c10 c11 c12"
+                          class="c10 c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-comments"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                          target="_self"
                         >
                           <span
-                            class="c8 c14"
+                            class="c16 c17"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c15"
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                                 fill="#32324D"
                               />
                             </svg>
@@ -1390,32 +1412,32 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c50 c38 c51 c76"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c0 c13 c48"
+                            class=""
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
                                 fill="#212134"
                               />
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c54"
                           >
                             Copy install command
                           </span>
@@ -1425,44 +1447,42 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c56"
                 >
                   <div
-                    class="c0 "
+                    class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c57 c58"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
-                        class="c0 "
+                        class=""
                       >
                         <div
-                          class="c0 c54"
+                          class="c59"
                         >
                           <img
                             alt="Config Sync logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c60"
                             src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c61"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 25"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1471,7 +1491,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 0
                               </span>
@@ -1479,32 +1499,32 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c70"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c71"
                           >
                             <div
-                              class="c0 c7"
+                              class="c7"
                             >
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="tooltip-2"
-                                  class="c0 c7"
+                                  aria-describedby="1"
+                                  class="c7"
                                   tabindex="0"
                                 >
                                   <svg
-                                    class="c0 c74 c75"
+                                    class="c77 c78"
                                     fill="none"
-                                    height="1em"
+                                    height="1rem"
                                     viewBox="0 0 24 24"
-                                    width="1em"
+                                    width="1rem"
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
+                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12Zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354Z"
                                       fill="#212134"
                                       fill-rule="evenodd"
                                     />
@@ -1515,46 +1535,44 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c72"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c73 c74"
                           >
                             Migrate your config data across environments using the CLI or Strapi admin panel.
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c75 c38"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Config Sync"
-                          class="c10 c11 c12"
+                          class="c10 c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                          target="_self"
                         >
                           <span
-                            class="c8 c14"
+                            class="c16 c17"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c15"
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                                 fill="#32324D"
                               />
                             </svg>
@@ -1562,32 +1580,32 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c50 c38 c51 c76"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c0 c13 c48"
+                            class=""
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
                                 fill="#212134"
                               />
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c54"
                           >
                             Copy install command
                           </span>
@@ -1597,44 +1615,42 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c56"
                 >
                   <div
-                    class="c0 "
+                    class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c57 c58"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
-                        class="c0 "
+                        class=""
                       >
                         <div
-                          class="c0 c54"
+                          class="c59"
                         >
                           <img
                             alt="Content Versioning logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c60"
                             src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c61"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 25"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1643,7 +1659,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 0
                               </span>
@@ -1651,59 +1667,57 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c70"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c71"
                           >
                             <div
-                              class="c0 c7"
+                              class="c7"
                             >
                               Content Versioning
                             </div>
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c72"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c73 c74"
                           >
                             This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c75 c38"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Content Versioning"
-                          class="c10 c11 c12"
+                          class="c10 c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                          target="_self"
                         >
                           <span
-                            class="c8 c14"
+                            class="c16 c17"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c15"
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                                 fill="#32324D"
                               />
                             </svg>
@@ -1711,32 +1725,32 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c50 c38 c51 c76"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c0 c13 c48"
+                            class=""
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
                                 fill="#212134"
                               />
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c54"
                           >
                             Copy install command
                           </span>
@@ -1746,55 +1760,55 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c56"
                 >
                   <div
-                    class="c0 "
+                    class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c57 c58"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
-                        class="c0 "
+                        class=""
                       >
                         <div
-                          class="c0 c54"
+                          class="c59"
                         >
                           <img
                             alt="Documentation logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c60"
                             src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c61"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 24"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0112 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0z"
+                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
                                 fill="#161614"
                               />
                             </svg>
                             <svg
                               aria-hidden="true"
-                              class="c0 c59 c60"
+                              class="c64 c65"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 24"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M12 18.26l-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26z"
+                                d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
                                 fill="#212134"
                               />
                             </svg>
@@ -1802,24 +1816,26 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin was starred 49130 on GitHub"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 49130
                               </span>
                             </p>
                             <hr
-                              class="c0 c62 c63 c64"
+                              class="c67 c68 c69"
                             />
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 25"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1828,7 +1844,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 7492 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 7492
                               </span>
@@ -1836,27 +1852,25 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c70"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c71"
                           >
                             <div
-                              class="c0 c7"
+                              class="c7"
                             >
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-4"
-                                  class="c0 c7"
+                                  aria-describedby="2"
+                                  class="c7"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c0 c76"
-                                    height="auto"
+                                    class="c79"
                                     src="IMAGE_MOCK"
-                                    width="6"
                                   />
                                 </div>
                               </span>
@@ -1864,69 +1878,67 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c72"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c73 c74"
                           >
                             Create an OpenAPI Document and visualize your API with SWAGGER UI
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c75 c38"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Documentation"
-                          class="c10 c11 c12"
+                          class="c10 c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                          target="_self"
                         >
                           <span
-                            class="c8 c14"
+                            class="c16 c17"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c15"
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                                 fill="#32324D"
                               />
                             </svg>
                           </div>
                         </a>
                         <div
-                          class="c0 c77"
+                          class="c80"
                         >
                           <svg
-                            class="c0 c78 c75"
+                            class="c81 c78"
                             fill="none"
-                            height="12"
+                            height="1rem"
                             viewBox="0 0 24 24"
-                            width="12"
+                            width="1rem"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                              d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                               fill="#212134"
                             />
                           </svg>
                           <span
-                            class="c8 c79"
+                            class="c8 c82"
                           >
                             Installed
                           </span>
@@ -1936,44 +1948,42 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                   </div>
                 </div>
                 <div
-                  class="c51"
+                  class="c56"
                 >
                   <div
-                    class="c0 "
+                    class=""
                     style="height: 100%;"
                   >
                     <div
-                      class="c0 c52 c53"
+                      class="c57 c58"
                       data-testid="npm-package-card"
-                      height="100%"
                     >
                       <div
-                        class="c0 "
+                        class=""
                       >
                         <div
-                          class="c0 c54"
+                          class="c59"
                         >
                           <img
                             alt="Transformer logo"
-                            class="c0 c55"
-                            height="11"
+                            class="c60"
                             src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
-                            width="11"
                           />
                           <div
-                            class="c0 c7 c56"
-                            spacing="1"
+                            class="c61"
                           >
                             <svg
                               aria-hidden="true"
-                              class="c0 c57 c58"
+                              class="c62 c63"
                               fill="none"
+                              height="1rem"
                               viewBox="0 0 24 25"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
                                 fill="#212134"
                                 fill-rule="evenodd"
                               />
@@ -1982,7 +1992,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                               aria-label="This plugin has 0 weekly downloads"
                             >
                               <span
-                                class="c8 c61"
+                                class="c8 c66"
                               >
                                 0
                               </span>
@@ -1990,59 +2000,57 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                           </div>
                         </div>
                         <div
-                          class="c0 c65"
+                          class="c70"
                         >
                           <h3
-                            class="c8 c66"
+                            class="c8 c71"
                           >
                             <div
-                              class="c0 c7"
+                              class="c7"
                             >
                               Transformer
                             </div>
                           </h3>
                         </div>
                         <div
-                          class="c0 c67"
+                          class="c72"
                         >
                           <p
-                            class="c8 c68 c69"
+                            class="c8 c73 c74"
                           >
                             A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c0 c70 c7 c71"
-                        spacing="2"
+                        class="c75 c38"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Transformer"
-                          class="c10 c11 c12"
+                          class="c10 c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-transformer"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                          target="_self"
                         >
                           <span
-                            class="c8 c14"
+                            class="c16 c17"
                           >
                             More
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c0 c72"
+                            class="c15"
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                                 fill="#32324D"
                               />
                             </svg>
@@ -2050,32 +2058,32 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c11 c73"
+                          class="c50 c38 c51 c76"
                           type="button"
                         >
                           <div
                             aria-hidden="true"
-                            class="c0 c13 c48"
+                            class=""
                           >
                             <svg
                               fill="none"
-                              height="1em"
+                              height="1rem"
                               viewBox="0 0 24 24"
-                              width="1em"
+                              width="1rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
                                 fill="#212134"
                               />
                               <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
                                 fill="#212134"
                               />
                             </svg>
                           </div>
                           <span
-                            class="c8 c49"
+                            class="c8 c54"
                           >
                             Copy install command
                           </span>
@@ -2089,7 +2097,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
           </div>
         </div>
         <div
-          class="c0 c80"
+          class="c83"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2098,57 +2106,57 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
             target="_blank"
           >
             <div
-              class="c0 c81 c7"
+              class="c84 c7"
             >
               <div
-                class="c0 c82 c7 c83"
+                class="c85 c7 c86"
               >
                 <svg
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 32 32"
-                  width="1em"
+                  width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M0 4a4 4 0 014-4h24a4 4 0 014 4v24a4 4 0 01-4 4H4a4 4 0 01-4-4V4z"
+                    d="M0 4a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4Z"
                     fill="#AC73E6"
                   />
                   <path
                     clip-rule="evenodd"
-                    d="M15.027 13.839c-3.19-.836-6.305-1.064-10.18-.608-1.215.152-1.063 1.975.076 2.203.304.836.456 2.355.912 3.267.987 2.279 5.622 1.975 7.369.835 1.14-.683 1.443-2.279 1.9-3.494.227-.684 1.595-.684 1.822 0 .38 1.215.76 2.81 1.9 3.494 1.747 1.14 6.381 1.444 7.369-.835.456-.912.607-2.431.911-3.267 1.14-.228 1.216-2.051.076-2.203-3.874-.456-6.989-.228-10.18.608-.455.075-1.519.075-1.975 0z"
+                    d="M15.027 13.839c-3.19-.836-6.305-1.064-10.18-.608-1.215.152-1.063 1.975.076 2.203.304.836.456 2.355.912 3.267.987 2.279 5.622 1.975 7.369.835 1.14-.683 1.443-2.279 1.9-3.494.227-.684 1.595-.684 1.822 0 .38 1.215.76 2.81 1.9 3.494 1.747 1.14 6.381 1.444 7.369-.835.456-.912.607-2.431.911-3.267 1.14-.228 1.216-2.051.076-2.203-3.874-.456-6.989-.228-10.18.608-.455.075-1.519.075-1.975 0Z"
                     fill="#fff"
                     fill-rule="evenodd"
                   />
                 </svg>
               </div>
               <div
-                class="c0 c35 c36"
+                class="c40"
               >
                 <div
-                  class="c0 c7"
+                  class="c7"
                 >
                   <span
-                    class="c8 c84 c85"
+                    class="c8 c87 c88"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c0 c86 c58"
+                    class="c89 c63"
                     fill="none"
-                    height="3"
+                    height="1rem"
                     viewBox="0 0 24 24"
-                    width="3"
+                    width="1rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                      d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
                       fill="#32324D"
                     />
                   </svg>
                 </div>
                 <span
-                  class="c8 c68"
+                  class="c8 c73"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>

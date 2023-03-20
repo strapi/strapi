@@ -2,8 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Typography } from '@strapi/design-system';
 
 import { getTrad } from '../../utils';
 
@@ -26,7 +25,7 @@ const FormModalSubHeader = ({
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
-    <Stack direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
+    <Flex direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
       <Typography as="h2" variant="beta">
         {formatMessage(
           {
@@ -52,7 +51,7 @@ const FormModalSubHeader = ({
           defaultMessage: 'A type for modeling data',
         })}
       </Typography>
-    </Stack>
+    </Flex>
   );
 };
 

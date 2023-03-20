@@ -23,6 +23,9 @@ describe('Single Types', () => {
         create: jest.fn(() => false),
       },
       buildReadQuery: jest.fn((query) => query),
+      sanitizedQuery: {
+        read: (q) => q,
+      },
     };
 
     global.strapi = {
@@ -85,6 +88,7 @@ describe('Single Types', () => {
       },
       user: {
         id: 1,
+        email: 'someTestEmailString',
       },
     };
 
@@ -100,6 +104,9 @@ describe('Single Types', () => {
       sanitizeCreateInput: (obj) => obj,
       sanitizeOutput: (obj) => obj,
       buildReadQuery: jest.fn((query) => query),
+      sanitizedQuery: {
+        update: (q) => q,
+      },
     };
 
     const createFn = jest.fn(() => ({}));
@@ -180,7 +187,9 @@ describe('Single Types', () => {
     );
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
-      model: modelUid,
+      eventProperties: {
+        model: modelUid,
+      },
     });
   });
 
@@ -212,6 +221,9 @@ describe('Single Types', () => {
       },
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
+      sanitizedQuery: {
+        delete: (q) => q,
+      },
     };
 
     const deleteFn = jest.fn(() => ({}));
@@ -306,6 +318,9 @@ describe('Single Types', () => {
       },
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
+      sanitizedQuery: {
+        publish: (q) => q,
+      },
     };
 
     const publishFn = jest.fn(() => ({}));
@@ -400,6 +415,9 @@ describe('Single Types', () => {
       },
       sanitizeOutput: jest.fn((obj) => obj),
       buildReadQuery: jest.fn((query) => query),
+      sanitizedQuery: {
+        unpublish: (q) => q,
+      },
     };
 
     const unpublishFn = jest.fn(() => ({}));
@@ -431,8 +449,8 @@ describe('Single Types', () => {
               find() {
                 return Promise.resolve(entity);
               },
-              assocCreatorRoles(enitty) {
-                return enitty;
+              assocCreatorRoles(entity) {
+                return entity;
               },
               unpublish: unpublishFn,
             },

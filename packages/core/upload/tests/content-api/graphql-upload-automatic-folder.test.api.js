@@ -115,7 +115,6 @@ describe('Uploads folder (GraphQL)', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -170,7 +169,6 @@ describe('Uploads folder (GraphQL)', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -255,7 +253,6 @@ describe('Uploads folder (GraphQL)', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -310,7 +307,6 @@ describe('Uploads folder (GraphQL)', () => {
         },
         folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });

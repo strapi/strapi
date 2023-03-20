@@ -51,8 +51,11 @@ describe('<PaginationURLQuery />', () => {
         flex-direction: row;
       }
 
-      .c1 > * + * {
-        margin-left: 4px;
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
       .c4 {
@@ -67,11 +70,8 @@ describe('<PaginationURLQuery />', () => {
         width: 1px;
       }
 
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+      .c1 > * + * {
+        margin-left: 4px;
       }
 
       .c8 {
@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-ezHhwS"
+        class=""
       >
         <ul
           class="c0 c1"
@@ -211,13 +211,13 @@ describe('<PaginationURLQuery />', () => {
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                  d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
                   fill="#32324D"
                 />
               </svg>
@@ -258,13 +258,13 @@ describe('<PaginationURLQuery />', () => {
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
                   fill="#32324D"
                 />
               </svg>

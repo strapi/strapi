@@ -228,7 +228,9 @@ describe('Marketplace page - providers tab', () => {
     await waitForReload();
 
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    await user.click(
+      screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
+    );
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
 
     await waitForReload();
@@ -292,7 +294,7 @@ describe('Marketplace page - providers tab', () => {
 
   it('shows the correct options on sort select', async () => {
     const user = userEvent.setup();
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
@@ -304,7 +306,7 @@ describe('Marketplace page - providers tab', () => {
 
   it('changes the url on sort option select', async () => {
     const user = userEvent.setup();
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });

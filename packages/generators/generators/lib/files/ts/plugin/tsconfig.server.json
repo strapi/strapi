@@ -1,0 +1,25 @@
+{
+  "extends": "@strapi/typescript-utils/tsconfigs/server",
+
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "."
+  },
+
+  "include": [
+    // Include the root directory
+    "server",
+    // Force the JSON files in the src folder to be included
+    "server/**/*.json"
+  ],
+
+  "exclude": [
+    "node_modules/",
+    "dist/",
+
+    // Do not include admin files in the server compilation
+    "admin/",
+    // Do not include test files
+    "**/*.test.ts"
+  ]
+}
