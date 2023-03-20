@@ -270,7 +270,10 @@ const createEntityManager = (db) => {
 
       const createdEntries = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
 
-      const result = { count: data.length, ids: createdEntries.map(({ id }) => id) };
+      const result = {
+        count: data.length,
+        ids: createdEntries.map((entry) => (typeof entry === 'object' ? entry?.id : entry)),
+      };
 
       await db.lifecycles.run('afterCreateMany', uid, { params, result }, states);
 
