@@ -1,4 +1,5 @@
-import { omit, get } from 'lodash';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
 
 const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
   const list = layouts.list.map((obj) => {

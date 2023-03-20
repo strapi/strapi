@@ -23,6 +23,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 }
 
 .c11 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -707,6 +708,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 }
 
 .c11 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -737,7 +739,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   padding-left: 40px;
 }
 
-.c33 {
+.c34 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -798,7 +800,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c34 {
+.c35 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -851,7 +853,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #666687;
 }
 
-.c36 {
+.c37 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -865,7 +867,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #32324d;
 }
 
-.c30 {
+.c31 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -932,98 +934,109 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   width: 1px;
 }
 
-.c37 {
+.c38 {
   height: 2rem;
 }
 
-.c37[aria-disabled='true'] {
+.c38[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true'] .c9 {
+.c38[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c37[aria-disabled='true'] svg > g,.c37[aria-disabled='true'] svg path {
+.c38[aria-disabled='true'] svg > g,.c38[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c37[aria-disabled='true']:active {
+.c38[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c37[aria-disabled='true']:active .c9 {
+.c38[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c37[aria-disabled='true']:active svg > g,.c37[aria-disabled='true']:active svg path {
+.c38[aria-disabled='true']:active svg > g,.c38[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c37:hover {
+.c38:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c37:active {
+.c38:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c37 svg > g,
-.c37 svg path {
+.c38 svg > g,
+.c38 svg path {
   fill: #ffffff;
 }
 
-.c35 {
+.c36 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c35[aria-disabled='true'] {
+.c36[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true'] .c9 {
+.c36[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+.c36[aria-disabled='true'] svg > g,.c36[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c35[aria-disabled='true']:active {
+.c36[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true']:active .c9 {
+.c36[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+.c36[aria-disabled='true']:active svg > g,.c36[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c35:hover {
+.c36:hover {
   background-color: #f6f6f9;
 }
 
-.c35:active {
+.c36:active {
   background-color: #eaeaef;
 }
 
-.c35 .c9 {
+.c36 .c9 {
   color: #32324d;
 }
 
-.c35 svg > g,
-.c35 svg path {
+.c36 svg > g,
+.c36 svg path {
   fill: #32324d;
+}
+
+.c28 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c22 {
@@ -1068,12 +1081,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c31 {
+.c32 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c32 > * + * {
+.c33 > * + * {
   margin-left: 8px;
 }
 
@@ -1089,7 +1102,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   cursor: not-allowed;
 }
 
-.c28 {
+.c29 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -1105,12 +1118,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c29 {
+.c30 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -1121,27 +1134,27 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: inherit;
 }
 
-.c29::-webkit-input-placeholder {
+.c30::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29::-moz-placeholder {
+.c30::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29:-ms-input-placeholder {
+.c30:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29::placeholder {
+.c30::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c29:focus-within {
+.c30:focus-within {
   outline: none;
 }
 
@@ -1341,30 +1354,26 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                               class="c26"
                             >
                               <label
-                                class="c9 c27"
+                                class="c9 c27 c28"
                                 for="34"
                               >
-                                <div
-                                  class="c26"
-                                >
-                                  URL
-                                </div>
+                                URL
                               </label>
                             </div>
                             <div
-                              class="c28"
+                              class="c29"
                             >
                               <textarea
                                 aria-describedby="34-hint"
                                 aria-invalid="false"
                                 aria-required="false"
-                                class="c29"
+                                class="c30"
                                 id="34"
                                 name="urls"
                               />
                             </div>
                             <p
-                              class="c9 c30"
+                              class="c9 c31"
                               id="34-hint"
                             >
                               Separate your URL links by a carriage return.
@@ -1374,36 +1383,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c6 c31"
+                      class="c6 c32"
                     >
                       <div
                         class="c8"
                       >
                         <div
-                          class="c26 c32"
+                          class="c26 c33"
                         >
                           <button
                             aria-disabled="false"
-                            class="c33 c34 c12 c35"
+                            class="c34 c35 c12 c36"
                             type="button"
                           >
                             <span
-                              class="c9 c36"
+                              class="c9 c37"
                             >
                               app.components.Button.cancel
                             </span>
                           </button>
                         </div>
                         <div
-                          class="c26 c32"
+                          class="c26 c33"
                         >
                           <button
                             aria-disabled="false"
-                            class="c33 c34 c12 c37"
+                            class="c34 c35 c12 c38"
                             type="submit"
                           >
                             <span
-                              class="c9 c36"
+                              class="c9 c37"
                             >
                               Next
                             </span>

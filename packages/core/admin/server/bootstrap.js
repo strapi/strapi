@@ -85,7 +85,6 @@ module.exports = async () => {
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.ensureBoundPermissionsInDatabase();
   await permissionService.cleanPermissionsInDatabase();
 
   await userService.displayWarningIfUsersDontHaveRole();

@@ -149,6 +149,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c28 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-width: 0;

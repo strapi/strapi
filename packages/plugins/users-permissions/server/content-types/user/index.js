@@ -38,16 +38,19 @@ module.exports = {
       minLength: 6,
       configurable: false,
       private: true,
+      searchable: false,
     },
     resetPasswordToken: {
       type: 'string',
       configurable: false,
       private: true,
+      searchable: false,
     },
     confirmationToken: {
       type: 'string',
       configurable: false,
       private: true,
+      searchable: false,
     },
     confirmed: {
       type: 'boolean',
