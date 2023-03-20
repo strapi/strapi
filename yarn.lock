@@ -7466,6 +7466,7 @@ __metadata:
     formik: 2.2.9
     fs-extra: 10.0.0
     history: ^4.9.0
+    immer: ^9.0.19
     koa-static: ^5.0.0
     lodash: 4.17.21
     msw: 1.0.1
@@ -18790,6 +18791,13 @@ __metadata:
   version: 9.0.19
   resolution: "immer@npm:9.0.19"
   checksum: f02ee53989989c287cd548a3d817fccf0bfe56db919755ee94a72ea3ae78a00363fba93ee6c010fe54a664380c29c53d44ed4091c6a86cae60957ad2cfabc010
+  languageName: node
+  linkType: hard
+
+"immer@npm:^9.0.19":
+  version: 9.0.21
+  resolution: "immer@npm:9.0.21"
+  checksum: 70e3c274165995352f6936695f0ef4723c52c92c92dd0e9afdfe008175af39fa28e76aafb3a2ca9d57d1fb8f796efc4dd1e1cc36f18d33fa5b74f3dfb0375432
   languageName: node
   linkType: hard
 
