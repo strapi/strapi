@@ -23,20 +23,6 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c4 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -68,6 +54,17 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c5 {
@@ -113,14 +110,10 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
       class="c0"
     >
       <label
-        class="c1"
+        class="c1 c2"
         for="0"
       >
-        <div
-          class="c2"
-        >
-          Default label
-        </div>
+        Default label
       </label>
       <div
         class="c3 c4 c5"
@@ -261,20 +254,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -320,6 +299,17 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c4 {
@@ -438,19 +428,15 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
       class="c0"
     >
       <label
-        class="c1"
+        class="c1 c2"
         for="number"
       >
-        <div
-          class="c2"
+        Default label
+        <span
+          class="c3 c4"
         >
-          Default label
-          <span
-            class="c3 c4"
-          >
-            *
-          </span>
-        </div>
+          *
+        </span>
       </label>
       <div
         class="c5 c6"

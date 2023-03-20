@@ -45,7 +45,7 @@ jobs:
           actions: 'add-assignees'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          assignees: 'derrickmehaffy, kasonde, bolg55'
+          assignees: 'derrickmehaffy, kasonde, bolg55, Eventyret'
           random-to: 1
 
       # v3 Legacy Issues

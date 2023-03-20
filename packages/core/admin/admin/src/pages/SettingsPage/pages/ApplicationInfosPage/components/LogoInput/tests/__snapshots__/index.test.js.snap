@@ -36,6 +36,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 }
 
 .c15 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -151,20 +152,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   gap: 4px;
 }
 
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -266,6 +253,20 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
+}
+
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
 .c2 {
@@ -438,52 +439,52 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   fill: #ffffff;
 }
 
-.c57 {
+.c58 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c57[aria-disabled='true'] {
+.c58[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true'] .c1 {
+.c58[aria-disabled='true'] .c1 {
   color: #666687;
 }
 
-.c57[aria-disabled='true'] svg > g,.c57[aria-disabled='true'] svg path {
+.c58[aria-disabled='true'] svg > g,.c58[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c57[aria-disabled='true']:active {
+.c58[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true']:active .c1 {
+.c58[aria-disabled='true']:active .c1 {
   color: #666687;
 }
 
-.c57[aria-disabled='true']:active svg > g,.c57[aria-disabled='true']:active svg path {
+.c58[aria-disabled='true']:active svg > g,.c58[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c57:hover {
+.c58:hover {
   background-color: #f6f6f9;
 }
 
-.c57:active {
+.c58:active {
   background-color: #eaeaef;
 }
 
-.c57 .c1 {
+.c58 .c1 {
   color: #32324d;
 }
 
-.c57 svg > g,
-.c57 svg path {
+.c58 svg > g,
+.c58 svg path {
   fill: #32324d;
 }
 
@@ -500,6 +501,17 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 
 .c8 {
   grid-area: slides;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c11 {
@@ -556,7 +568,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border-top: 1px solid #eaeaef;
 }
 
-.c56 > * + * {
+.c57 > * + * {
   margin-left: 8px;
 }
 
@@ -593,14 +605,10 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
         class="c0"
       >
         <label
-          class="c1 c2"
+          class="c1 c2 c3"
           for="39"
         >
-          <div
-            class="c3"
-          >
-            logo input label
-          </div>
+          logo input label
         </label>
         <div
           class=""
@@ -937,11 +945,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                       class="c30"
                     >
                       <div
-                        class="c3 c56"
+                        class="c56 c57"
                       >
                         <button
                           aria-disabled="false"
-                          class="c50 c51 c16 c57"
+                          class="c50 c51 c16 c58"
                           type="button"
                         >
                           <span
@@ -952,7 +960,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                         </button>
                       </div>
                       <div
-                        class="c3 c56"
+                        class="c56 c57"
                       />
                     </div>
                   </div>
@@ -1003,6 +1011,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 }
 
 .c15 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -1066,7 +1075,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   padding-left: 40px;
 }
 
-.c46 {
+.c47 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -1090,20 +1099,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   -ms-flex-direction: column;
   flex-direction: column;
   gap: 4px;
-}
-
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
 }
 
 .c10 {
@@ -1161,7 +1156,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: space-between;
 }
 
-.c47 {
+.c48 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1174,6 +1169,20 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
+}
+
+.c45 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
 .c2 {
@@ -1284,8 +1293,55 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 1px;
 }
 
+.c50 {
+  height: 2rem;
+}
+
+.c50[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c50[aria-disabled='true'] .c1 {
+  color: #666687;
+}
+
+.c50[aria-disabled='true'] svg > g,.c50[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c50[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c50[aria-disabled='true']:active .c1 {
+  color: #666687;
+}
+
+.c50[aria-disabled='true']:active svg > g,.c50[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c50:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c50:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c50 svg > g,
+.c50 svg path {
+  fill: #ffffff;
+}
+
 .c49 {
   height: 2rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
 }
 
 .c49[aria-disabled='true'] {
@@ -1315,66 +1371,19 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 }
 
 .c49:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
+  background-color: #f6f6f9;
 }
 
 .c49:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
+  background-color: #eaeaef;
+}
+
+.c49 .c1 {
+  color: #32324d;
 }
 
 .c49 svg > g,
 .c49 svg path {
-  fill: #ffffff;
-}
-
-.c48 {
-  height: 2rem;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c48[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c48[aria-disabled='true'] .c1 {
-  color: #666687;
-}
-
-.c48[aria-disabled='true'] svg > g,.c48[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c48[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c48[aria-disabled='true']:active .c1 {
-  color: #666687;
-}
-
-.c48[aria-disabled='true']:active svg > g,.c48[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c48:hover {
-  background-color: #f6f6f9;
-}
-
-.c48:active {
-  background-color: #eaeaef;
-}
-
-.c48 .c1 {
-  color: #32324d;
-}
-
-.c48 svg > g,
-.c48 svg path {
   fill: #32324d;
 }
 
@@ -1391,6 +1400,17 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 
 .c8 {
   grid-area: slides;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c43 {
@@ -1508,7 +1528,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border-top: 1px solid #eaeaef;
 }
 
-.c45 > * + * {
+.c46 > * + * {
   margin-left: 8px;
 }
 
@@ -1535,14 +1555,10 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
         class="c0"
       >
         <label
-          class="c1 c2"
+          class="c1 c2 c3"
           for="91"
         >
-          <div
-            class="c3"
-          >
-            logo input label
-          </div>
+          logo input label
         </label>
         <div
           class=""
@@ -1806,14 +1822,10 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                             class="c0"
                           >
                             <label
-                              class="c1 c2"
+                              class="c1 c2 c3"
                               for="97"
                             >
-                              <div
-                                class="c3"
-                              >
-                                URL
-                              </div>
+                              URL
                             </label>
                             <div
                               class="c30 c42"
@@ -1839,11 +1851,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                         class="c30"
                       >
                         <div
-                          class="c3 c45"
+                          class="c45 c46"
                         >
                           <button
                             aria-disabled="false"
-                            class="c46 c47 c16 c48"
+                            class="c47 c48 c16 c49"
                             type="button"
                           >
                             <span
@@ -1854,11 +1866,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                           </button>
                         </div>
                         <div
-                          class="c3 c45"
+                          class="c45 c46"
                         >
                           <button
                             aria-disabled="false"
-                            class="c46 c47 c16 c49"
+                            class="c47 c48 c16 c50"
                             type="submit"
                           >
                             <span
@@ -1918,6 +1930,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
 }
 
 .c14 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -1946,20 +1959,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   -ms-flex-direction: column;
   flex-direction: column;
   gap: 4px;
-}
-
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
 }
 
 .c9 {
@@ -2087,6 +2086,17 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   grid-area: slides;
 }
 
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
 .c10 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2121,14 +2131,10 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
       class="c0"
     >
       <label
-        class="c1"
+        class="c1 c2"
         for="3"
       >
-        <div
-          class="c2"
-        >
-          logo input label
-        </div>
+        logo input label
       </label>
       <div
         class=""

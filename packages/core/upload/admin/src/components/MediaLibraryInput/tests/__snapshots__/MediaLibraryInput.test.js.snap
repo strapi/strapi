@@ -51,20 +51,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -141,6 +127,17 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   grid-area: slides;
 }
 
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
 .c10 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -164,14 +161,10 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
         class="c0"
       >
         <label
-          class="c1"
+          class="c1 c2"
           for="1"
         >
-          <div
-            class="c2"
-          >
-            default
-          </div>
+          default
         </label>
         <div
           class=""

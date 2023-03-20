@@ -7,5 +7,6 @@ module.exports = {
   },
   components: {
     'default.component-a': require('./component-a'),
+    'default.component-b': require('./component-b'),
   },
 };

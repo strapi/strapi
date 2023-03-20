@@ -87,6 +87,18 @@ function checkAPIResultFields(res, fields) {
     });
 }
 
+function sortByID(collection, order) {
+  if (order === 'asc') {
+    return collection.sort((a, b) => (a.id > b.id ? 1 : -1));
+  }
+
+  if (order === 'desc') {
+    return collection.sort((a, b) => (a.id > b.id ? -1 : 1));
+  }
+
+  throw new Error(`Invalid sort order provided. Expected "asc" or "desc" but got ${order}`);
+}
+
 describe('Core API - Sanitize', () => {
   const documentsLength = () => fixturesLength('document');
 
@@ -116,6 +128,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object notation', () => {
+      describe('ID', () => {
+        it('Successfully filters on invalid ID', async () => {
+          const res = await rq.get('/api/documents', { qs: { filters: { id: 999 } } });
+
+          checkAPIResultLength(res, 0);
+        });
+
+        it('Successfully filters on valid ID', async () => {
+          const document = data.document[2];
+          const res = await rq.get('/api/documents', { qs: { filters: { id: document.id } } });
+
+          checkAPIResultLength(res, 1);
+          expect(res.body.data[0]).toHaveProperty('id', document.id);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -131,7 +159,7 @@ describe('Core API - Sanitize', () => {
           });
         });
 
-        describe.only('Private modifier', () => {
+        describe('Private modifier', () => {
           it.each([
             ['$endsWith', { name_private: { $endsWith: 'None' } }],
             ['$not > $endsWith', { name_private: { $not: { $endsWith: 'None' } } }],
@@ -341,6 +369,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: { id: 'asc' } } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: { id: 'desc' } } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -426,6 +470,29 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('string notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a default sort on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id' } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id:asc' } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id:desc' } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -479,6 +546,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object[] notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: [{ id: 'asc' }] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: [{ id: 'desc' }] } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -539,6 +622,29 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('string[] notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a default sort on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id'] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id:asc'] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id:desc'] } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -805,10 +911,59 @@ describe('Core API - Sanitize', () => {
       it.todo('Populates a media');
 
       describe('Dynamic Zone', () => {
-        it.todo('Populates a dynamic-zone');
-        it.todo('Populates a dynamic-use using populate fragments');
+        it.each([{ dz: { populate: '*' } }, { dz: { populate: true } }, { dz: '*' }, { dz: true }])(
+          'Populates a dynamic-zone (%s)',
+          async (populate) => {
+            const res = await rq.get('/api/documents', { qs: { populate } });
+
+            checkAPIResultValidity(res);
+
+            res.body.data.forEach((document) => {
+              expect(document.attributes).toHaveProperty(
+                'dz',
+                expect.arrayContaining([
+                  expect.objectContaining({ __component: expect.any(String) }),
+                ])
+              );
+              expect(document.attributes.dz).toHaveLength(3);
+            });
+          }
+        );
+
+        it.each([
+          [{ dz: { on: { 'default.component-a': true } } }, 'default.component-a', 2],
+          [{ dz: { on: { 'default.component-b': true } } }, 'default.component-b', 1],
+        ])(
+          'Populates a dynamic-use using populate fragments (%s)',
+          async (populate, componentUID, expectedLength) => {
+            const res = await rq.get('/api/documents', { qs: { populate } });
+
+            checkAPIResultValidity(res);
+
+            res.body.data.forEach((document) => {
+              expect(document.attributes).toHaveProperty(
+                'dz',
+                expect.arrayContaining([expect.objectContaining({ __component: componentUID })])
+              );
+              expect(document.attributes.dz).toHaveLength(expectedLength);
+            });
+          }
+        );
+
+        it(`Doesn't populate the dynamic zone on empty populate fragment definition`, async () => {
+          const res = await rq.get('/api/documents', { qs: { populate: { dz: { on: {} } } } });
+
+          checkAPIResultValidity(res);
+
+          res.body.data.forEach((document) => {
+            expect(document.attributes).not.toHaveProperty('dz');
+          });
+        });
+
         it.todo('Nested filtering on dynamic zone populate');
+
         it.todo('Nested field selection on dynamic zone populate');
+
         it.todo(`Sort populated dynamic zone's components`);
       });
     });
@@ -832,7 +987,19 @@ describe('Core API - Sanitize', () => {
 
       it.todo('Populates a media');
 
-      it.todo('Populates a dynamic-zone');
+      it('Populates a dynamic-zone', async () => {
+        const populate = 'dz';
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        checkAPIResultValidity(res);
+
+        res.body.data.forEach((document) => {
+          expect(document.attributes).toHaveProperty(
+            'dz',
+            expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
+          );
+        });
+      });
     });
 
     describe('string[] notation', () => {
@@ -854,7 +1021,19 @@ describe('Core API - Sanitize', () => {
 
       it.todo('Populates a media');
 
-      it.todo('Populates a dynamic-zone');
+      it('Populates a dynamic-zone', async () => {
+        const populate = ['dz'];
+        const res = await rq.get('/api/documents', { qs: { populate } });
+
+        checkAPIResultValidity(res);
+
+        res.body.data.forEach((document) => {
+          expect(document.attributes).toHaveProperty(
+            'dz',
+            expect.arrayContaining([expect.objectContaining({ __component: expect.any(String) })])
+          );
+        });
+      });
     });
   });
 });

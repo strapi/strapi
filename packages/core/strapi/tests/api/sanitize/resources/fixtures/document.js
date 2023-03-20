@@ -16,6 +16,26 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name A',
         password: 'compPass9101',
       },
+      dz: [
+        {
+          __component: 'default.component-a',
+          name: 'Name A',
+          name_private: 'Private Name A',
+          password: 'Password A',
+        },
+        {
+          __component: 'default.component-b',
+          name: 'Name B',
+          name_private: 'Private Name B',
+          password: 'Password B',
+        },
+        {
+          __component: 'default.component-a',
+          name: 'Name C',
+          name_private: 'Private Name C',
+          password: 'Password C',
+        },
+      ],
     },
     {
       name: '1 Document B OO',
@@ -29,6 +49,26 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name B',
         password: 'compPass5678',
       },
+      dz: [
+        {
+          __component: 'default.component-a',
+          name: 'Name A',
+          name_private: 'Private Name A',
+          password: 'Password A',
+        },
+        {
+          __component: 'default.component-b',
+          name: 'Name B',
+          name_private: 'Private Name B',
+          password: 'Password B',
+        },
+        {
+          __component: 'default.component-a',
+          name: 'Name C',
+          name_private: 'Private Name C',
+          password: 'Password C',
+        },
+      ],
     },
     {
       name: '2 Document C OO',
@@ -42,6 +82,26 @@ module.exports = (fixtures) => {
         name_private: 'Private Component A Name C',
         password: 'compPass1234',
       },
+      dz: [
+        {
+          __component: 'default.component-a',
+          name: 'Name A',
+          name_private: 'Private Name A',
+          password: 'Password A',
+        },
+        {
+          __component: 'default.component-b',
+          name: 'Name B',
+          name_private: 'Private Name B',
+          password: 'Password B',
+        },
+        {
+          __component: 'default.component-a',
+          name: 'Name C',
+          name_private: 'Private Name C',
+          password: 'Password C',
+        },
+      ],
     },
   ];
 };
