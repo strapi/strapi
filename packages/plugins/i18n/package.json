@@ -37,7 +37,7 @@
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
-    "yup": "^0.32.9"
+    "yup": "^0.32.11"
   },
   "peerDependencies": {
     "react": "^17.0.2",

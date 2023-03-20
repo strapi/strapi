@@ -47,7 +47,7 @@
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "url-join": "4.0.1",
-    "yup": "^0.32.9"
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@testing-library/dom": "8.19.0",
