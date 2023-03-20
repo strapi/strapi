@@ -1,4 +1,5 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
+
 import { getType, getOtherInfos } from './getAttributeInfos';
 
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];

@@ -1,4 +1,4 @@
-import { isObject } from 'lodash';
+import isObject from 'lodash/isObject';
 
 /**
  * Sets all the none object values of an object to the given one
