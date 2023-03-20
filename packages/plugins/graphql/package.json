@@ -44,8 +44,7 @@
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
     "nexus": "1.3.0",
-    "pluralize": "^8.0.0",
-    "subscriptions-transport-ws": "0.9.19"
+    "pluralize": "^8.0.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
