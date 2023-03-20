@@ -21,6 +21,8 @@ module.exports = async () => {
   }
 
   if (features.isEnabled('review-workflows')) {
+    await persistTablesWithPrefix('strapi_workflows');
+
     const { bootstrap: rwBootstrap } = getService('review-workflows');
 
     await rwBootstrap();
