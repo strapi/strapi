@@ -52,6 +52,7 @@ describe('DocAssetCard', () => {
       }
 
       .c14 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;
@@ -175,15 +176,6 @@ describe('DocAssetCard', () => {
         line-height: 1.45;
         text-transform: uppercase;
         color: #666687;
-      }
-
-      .c7 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c7 > * + * {
-        margin-left: 8px;
       }
 
       .c32 {
@@ -318,6 +310,15 @@ describe('DocAssetCard', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c7 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c7 > * + * {
+        margin-left: 8px;
       }
 
       .c8 {

@@ -2,7 +2,7 @@ import produce from 'immer';
 import pluralize from 'pluralize';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
-import _ from 'lodash';
+
 import getRelationType from '../../utils/getRelationType';
 import nameToSlug from '../../utils/nameToSlug';
 import { createComponentUid } from './utils/createUid';
@@ -312,7 +312,7 @@ const reducer = (state = initialState, action) =>
 
         if (optionDefaults.length) {
           optionDefaults.forEach(({ name, defaultValue }) =>
-            _.set(draftState.modifiedData, name, defaultValue)
+            set(draftState.modifiedData, name, defaultValue)
           );
         }
 

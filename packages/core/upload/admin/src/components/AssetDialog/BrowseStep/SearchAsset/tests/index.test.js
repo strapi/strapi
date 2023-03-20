@@ -31,6 +31,7 @@ describe('<SearchURLQuery />', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;

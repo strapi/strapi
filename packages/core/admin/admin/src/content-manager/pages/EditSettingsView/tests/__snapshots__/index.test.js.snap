@@ -13,7 +13,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
 }
 
-.c12 {
+.c9 {
+  min-width: 0;
+}
+
+.c13 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -24,12 +28,12 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c18 {
+.c19 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c19 {
+.c20 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -39,25 +43,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c30 {
+.c31 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c32 {
+.c33 {
   padding-left: 12px;
 }
 
-.c36 {
+.c37 {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c37 {
+.c38 {
   background: #eaeaef;
 }
 
-.c46 {
+.c47 {
   padding: 16px;
   border-radius: 4px;
   border-style: dashed;
@@ -65,7 +69,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border-color: #c0c0cf;
 }
 
-.c50 {
+.c51 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
@@ -74,17 +78,18 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   min-height: 2rem;
 }
 
-.c53 {
+.c54 {
   padding-right: 12px;
   padding-left: 12px;
 }
 
-.c56 {
+.c57 {
   overflow: hidden;
   width: 100%;
 }
 
-.c58 {
+.c59 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-width: 0;
@@ -94,7 +99,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c64 {
+.c65 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -124,7 +129,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -138,7 +143,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c13 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -153,7 +158,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c20 {
+.c21 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -168,7 +173,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 16px;
 }
 
-.c24 {
+.c25 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -180,9 +185,10 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c47 {
+.c48 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -197,7 +203,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c51 {
+.c52 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -211,7 +217,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c59 {
+.c60 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -229,7 +235,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c65 {
+.c66 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -248,27 +254,27 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c11 {
+.c12 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c16 {
+.c17 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c17 {
+.c18 {
   font-size: 1rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c21 {
+.c22 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -282,7 +288,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c31 {
+.c32 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -292,20 +298,20 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c35 {
+.c36 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c39 {
+.c40 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #32324d;
 }
 
-.c57 {
+.c58 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -316,35 +322,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c25 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c25 > * + * {
-  margin-top: 4px;
-}
-
-.c14 {
+.c15 {
   position: relative;
   outline: none;
 }
 
-.c14 svg {
+.c15 svg {
   height: 12px;
   width: 12px;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #ffffff;
 }
 
-.c14[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c14:after {
+.c15:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -359,11 +356,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c14:focus-visible {
+.c15:focus-visible {
   outline: none;
 }
 
-.c14:focus-visible:after {
+.c15:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -374,7 +371,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c62 {
+.c63 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -386,111 +383,122 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c15 {
+.c16 {
   height: 2rem;
 }
 
-.c15[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c10 {
+.c16[aria-disabled='true'] .c11 {
   color: #666687;
 }
 
-.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c15[aria-disabled='true']:active {
+.c16[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c10 {
+.c16[aria-disabled='true']:active .c11 {
   color: #666687;
 }
 
-.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c15:hover {
+.c16:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c15:active {
+.c16:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c16 svg > g,
+.c16 svg path {
   fill: #ffffff;
 }
 
-.c66 {
+.c67 {
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c66[aria-disabled='true'] {
+.c67[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c66[aria-disabled='true'] .c10 {
+.c67[aria-disabled='true'] .c11 {
   color: #666687;
 }
 
-.c66[aria-disabled='true'] svg > g,.c66[aria-disabled='true'] svg path {
+.c67[aria-disabled='true'] svg > g,.c67[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c66[aria-disabled='true']:active {
+.c67[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c66[aria-disabled='true']:active .c10 {
+.c67[aria-disabled='true']:active .c11 {
   color: #666687;
 }
 
-.c66[aria-disabled='true']:active svg > g,.c66[aria-disabled='true']:active svg path {
+.c67[aria-disabled='true']:active svg > g,.c67[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c66:hover {
+.c67:hover {
   background-color: #ffffff;
 }
 
-.c66:active {
+.c67:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c66:active .c10 {
+.c67:active .c11 {
   color: #4945ff;
 }
 
-.c66:active svg > g,
-.c66:active svg path {
+.c67:active svg > g,
+.c67:active svg path {
   fill: #4945ff;
 }
 
-.c66 .c10 {
+.c67 .c11 {
   color: #271fe0;
 }
 
-.c66 svg > g,
-.c66 svg path {
+.c67 svg > g,
+.c67 svg path {
   fill: #271fe0;
 }
 
 .c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c28 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -506,28 +514,28 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c27:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c33 {
+.c34 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c33 svg {
+.c34 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c33 svg path {
+.c34 svg path {
   fill: #666687;
 }
 
-.c34 {
+.c35 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -536,11 +544,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c34 svg {
+.c35 svg {
   width: 0.375rem;
 }
 
-.c28 {
+.c29 {
   position: absolute;
   left: 0;
   right: 0;
@@ -551,19 +559,19 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c28:focus {
+.c29:focus {
   outline: none;
 }
 
-.c28[aria-disabled='true'] {
+.c29[data-disabled] {
   cursor: not-allowed;
 }
 
-.c29 {
+.c30 {
   width: 100%;
 }
 
-.c38 {
+.c39 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -572,37 +580,37 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   margin: 0;
 }
 
-.c22 {
+.c23 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c23 {
+.c24 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c48 {
+.c49 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c60 svg > g,
-.c60 svg path {
+.c61 svg > g,
+.c61 svg path {
   fill: #8e8ea9;
 }
 
-.c60:hover svg > g,
-.c60:hover svg path {
+.c61:hover svg > g,
+.c61:hover svg path {
   fill: #666687;
 }
 
-.c60:active svg > g,
-.c60:active svg path {
+.c61:active svg > g,
+.c61:active svg path {
   fill: #a5a5ba;
 }
 
-.c60[aria-disabled='true'] svg path {
+.c61[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -614,7 +622,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   padding-right: 8px;
 }
 
-.c40 {
+.c41 {
   background: #4945ff;
   padding-top: 8px;
   padding-right: 16px;
@@ -631,14 +639,14 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   color: #4945ff;
 }
 
-.c45 {
+.c46 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c41 {
+.c42 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -653,7 +661,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c44 {
+.c45 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -667,26 +675,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c42 {
+.c43 {
   position: relative;
   outline: none;
 }
 
-.c42 svg {
+.c43 svg {
   height: 12px;
   width: 12px;
 }
 
-.c42 svg > g,
-.c42 svg path {
+.c43 svg > g,
+.c43 svg path {
   fill: #ffffff;
 }
 
-.c42[aria-disabled='true'] {
+.c43[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c42:after {
+.c43:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -701,11 +709,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c42:focus-visible {
+.c43:focus-visible {
   outline: none;
 }
 
-.c42:focus-visible:after {
+.c43:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -776,94 +784,94 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c43 {
+.c44 {
   -webkit-text-decoration: none;
   text-decoration: none;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c43[aria-disabled='true'] {
+.c44[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c43[aria-disabled='true'] .c6 {
+.c44[aria-disabled='true'] .c6 {
   color: #666687;
 }
 
-.c43[aria-disabled='true'] svg > g,.c43[aria-disabled='true'] svg path {
+.c44[aria-disabled='true'] svg > g,.c44[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c43[aria-disabled='true']:active {
+.c44[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c43[aria-disabled='true']:active .c6 {
+.c44[aria-disabled='true']:active .c6 {
   color: #666687;
 }
 
-.c43[aria-disabled='true']:active svg > g,.c43[aria-disabled='true']:active svg path {
+.c44[aria-disabled='true']:active svg > g,.c44[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c43:hover {
+.c44:hover {
   background-color: #ffffff;
 }
 
-.c43:active {
+.c44:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c43:active .c6 {
+.c44:active .c6 {
   color: #4945ff;
 }
 
-.c43:active svg > g,
-.c43:active svg path {
+.c44:active svg > g,
+.c44:active svg path {
   fill: #4945ff;
 }
 
-.c43 .c6 {
+.c44 .c6 {
   color: #271fe0;
 }
 
-.c43 svg > g,
-.c43 svg path {
+.c44 svg > g,
+.c44 svg path {
   fill: #271fe0;
 }
 
-.c61 {
+.c62 {
   background-color: transparent;
 }
 
-.c61 path {
+.c62 path {
   fill: #666687;
 }
 
-.c49 {
+.c50 {
   position: relative;
   padding-right: 4px;
 }
 
-.c63 {
+.c64 {
   position: relative;
   padding-left: 4px;
 }
 
-.c55 {
+.c56 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c55 path {
+.c56 path {
   fill: #666687;
 }
 
-.c52 {
+.c53 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -871,31 +879,31 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
-.c54 {
+.c55 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c48 {
+  .c49 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c48 {
+  .c49 {
     grid-column: span;
   }
 }
@@ -951,17 +959,17 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
             class="c8"
           >
             <div
-              class="c9"
+              class="c9 c10"
             >
               <h1
-                class="c10 c11"
+                class="c11 c12"
               >
                 Configure the view - Address
               </h1>
             </div>
             <button
               aria-disabled="true"
-              class="c12 c13 c14 c15"
+              class="c13 c14 c15 c16"
               disabled=""
               type="submit"
             >
@@ -983,80 +991,80 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 </svg>
               </div>
               <span
-                class="c10 c16"
+                class="c11 c17"
               >
                 Save
               </span>
             </button>
           </div>
           <p
-            class="c10 c17"
+            class="c11 c18"
           >
             Customize how the edit view will look like.
           </p>
         </div>
       </div>
       <div
-        class="c18"
+        class="c19"
       >
         <div
-          class="c19"
+          class="c20"
         >
           <div
-            class="c20"
+            class="c21"
           >
             <h2
-              class="c10 c21"
+              class="c11 c22"
             >
               Settings
             </h2>
             <div
-              class="c22"
+              class="c23"
             >
               <div
-                class="c23"
+                class="c24"
               >
                 <div
                   class=""
                 >
-                  <div>
+                  <div
+                    class=""
+                  >
                     <div
-                      class="c24 c25"
+                      class="c25"
                     >
                       <label
-                        class="c10 c26"
+                        class="c11 c26 c27"
                         for="1"
                       >
-                        <div
-                          class="c9"
-                        >
-                          Entry title
-                        </div>
+                        Entry title
                       </label>
                       <div
-                        class="c9 c27"
+                        class="c10 c28"
                       >
                         <button
                           aria-describedby="1-hint"
-                          aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="1 1-label 1-content"
-                          class="c28"
+                          aria-required="false"
+                          class="c29"
                           id="1"
+                          role="combobox"
                           type="button"
+                          value="postal_code"
                         />
                         <div
-                          class="c8 c29"
+                          class="c8 c30"
                         >
                           <div
-                            class="c9"
+                            class="c10"
                           >
                             <div
-                              class="c30"
+                              class="c31"
                             >
                               <span
-                                class="c10 c31"
+                                class="c11 c32"
                                 id="1-content"
                               >
                                 postal_code
@@ -1064,11 +1072,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c9"
+                            class="c10"
                           >
                             <button
                               aria-hidden="true"
-                              class="c32 c33 c34"
+                              class="c33 c34 c35"
                               tabindex="-1"
                               title="Carret Down Button"
                               type="button"
@@ -1092,7 +1100,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c10 c35"
+                        class="c11 c36"
                         id="1-hint"
                       >
                         Set the display field of your entry
@@ -1103,19 +1111,19 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               </div>
             </div>
             <div
-              class="c36"
+              class="c37"
             >
               <hr
-                class="c37 c38"
+                class="c38 c39"
               />
             </div>
             <h3
-              class="c10 c21"
+              class="c11 c22"
             >
               View
             </h3>
             <div
-              class="c20"
+              class="c21"
             >
               <div
                 class="c8"
@@ -1125,7 +1133,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                     class=""
                   >
                     <span
-                      class="c10 c39"
+                      class="c11 c40"
                     >
                       Displayed fields
                     </span>
@@ -1134,7 +1142,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                     class=""
                   >
                     <span
-                      class="c10 c35"
+                      class="c11 c36"
                     >
                       Drag & drop the fields to build the layout
                     </span>
@@ -1143,12 +1151,12 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 <div>
                   <a
                     aria-disabled="false"
-                    class="c40 c41 c42 c43"
+                    class="c41 c42 c43 c44"
                     href="/plugins/content-type-builder/content-types/api::address.address"
                   >
                     <div
                       aria-hidden="true"
-                      class="c44"
+                      class="c45"
                     >
                       <svg
                         fill="none"
@@ -1166,7 +1174,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       </svg>
                     </div>
                     <span
-                      class="c6 c45"
+                      class="c6 c46"
                     >
                       Edit the content type
                     </span>
@@ -1174,34 +1182,34 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c46"
+                class="c47"
               >
                 <div
-                  class="c47"
+                  class="c48"
                 >
                   <div
-                    class="c22"
+                    class="c23"
                   >
                     <div
-                      class="c48"
+                      class="c49"
                     >
                       <div
                         class=""
                       >
                         <div
-                          class="c9 c49"
+                          class="c10 c50"
                         >
                           <div
-                            class="c50 c51 c52"
+                            class="c51 c52 c53"
                           >
                             <span
-                              class="c53 c9 c54"
+                              class="c54 c10 c55"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c55"
+                                class="c56"
                                 fill="none"
                                 height="1rem"
                                 viewBox="0 0 24 24"
@@ -1239,30 +1247,30 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                               </svg>
                             </span>
                             <div
-                              class="c56"
+                              class="c57"
                               overflow="hidden"
                             >
                               <div
-                                class="c32 c8"
+                                class="c33 c8"
                               >
                                 <span
-                                  class="c10 c57"
+                                  class="c11 c58"
                                 >
                                   postal_code
                                 </span>
                                 <div
-                                  class="c9"
+                                  class="c10"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="2"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Edit postal_code
                                       </span>
@@ -1288,13 +1296,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="3"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Delete postal_code
                                       </span>
@@ -1322,25 +1330,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c48"
+                      class="c49"
                     >
                       <div
                         class=""
                       >
                         <div
-                          class="c9 c63"
+                          class="c10 c64"
                         >
                           <div
-                            class="c50 c51 c52"
+                            class="c51 c52 c53"
                           >
                             <span
-                              class="c53 c9 c54"
+                              class="c54 c10 c55"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c55"
+                                class="c56"
                                 fill="none"
                                 height="1rem"
                                 viewBox="0 0 24 24"
@@ -1378,30 +1386,30 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                               </svg>
                             </span>
                             <div
-                              class="c56"
+                              class="c57"
                               overflow="hidden"
                             >
                               <div
-                                class="c32 c8"
+                                class="c33 c8"
                               >
                                 <span
-                                  class="c10 c57"
+                                  class="c11 c58"
                                 >
                                   city
                                 </span>
                                 <div
-                                  class="c9"
+                                  class="c10"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="4"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Edit city
                                       </span>
@@ -1427,13 +1435,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="5"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Delete city
                                       </span>
@@ -1467,7 +1475,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       aria-disabled="true"
                       aria-expanded="false"
                       aria-haspopup="true"
-                      class="c64 c65 c14 c66"
+                      class="c65 c66 c15 c67"
                       data-testid="add-field"
                       disabled=""
                       label="Insert another field"
@@ -1491,7 +1499,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         </svg>
                       </div>
                       <span
-                        class="c10 c16"
+                        class="c11 c17"
                       >
                         Insert another field
                       </span>
@@ -1506,7 +1514,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
     </form>
   </main>
   <div
-    class="c62"
+    class="c63"
   >
     <p
       aria-live="polite"
@@ -1543,7 +1551,11 @@ exports[`EditSettingsView should add field 1`] = `
   padding-bottom: 8px;
 }
 
-.c12 {
+.c9 {
+  min-width: 0;
+}
+
+.c13 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -1554,12 +1566,12 @@ exports[`EditSettingsView should add field 1`] = `
   cursor: pointer;
 }
 
-.c18 {
+.c19 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c19 {
+.c20 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -1569,25 +1581,25 @@ exports[`EditSettingsView should add field 1`] = `
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c30 {
+.c31 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c32 {
+.c33 {
   padding-left: 12px;
 }
 
-.c36 {
+.c37 {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c37 {
+.c38 {
   background: #eaeaef;
 }
 
-.c46 {
+.c47 {
   padding: 16px;
   border-radius: 4px;
   border-style: dashed;
@@ -1595,7 +1607,7 @@ exports[`EditSettingsView should add field 1`] = `
   border-color: #c0c0cf;
 }
 
-.c50 {
+.c51 {
   background: #f6f6f9;
   border-radius: 4px;
   border-color: #eaeaef;
@@ -1604,17 +1616,18 @@ exports[`EditSettingsView should add field 1`] = `
   min-height: 2rem;
 }
 
-.c53 {
+.c54 {
   padding-right: 12px;
   padding-left: 12px;
 }
 
-.c56 {
+.c57 {
   overflow: hidden;
   width: 100%;
 }
 
-.c58 {
+.c59 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-width: 0;
@@ -1624,7 +1637,7 @@ exports[`EditSettingsView should add field 1`] = `
   cursor: pointer;
 }
 
-.c64 {
+.c65 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -1654,7 +1667,7 @@ exports[`EditSettingsView should add field 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1668,7 +1681,7 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c13 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1683,7 +1696,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 8px;
 }
 
-.c20 {
+.c21 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1698,7 +1711,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 16px;
 }
 
-.c24 {
+.c25 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1710,9 +1723,10 @@ exports[`EditSettingsView should add field 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c47 {
+.c48 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1727,7 +1741,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 8px;
 }
 
-.c51 {
+.c52 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -1741,7 +1755,7 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c59 {
+.c60 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1759,7 +1773,7 @@ exports[`EditSettingsView should add field 1`] = `
   justify-content: center;
 }
 
-.c65 {
+.c66 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1778,27 +1792,27 @@ exports[`EditSettingsView should add field 1`] = `
   justify-content: center;
 }
 
-.c11 {
+.c12 {
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
   color: #32324d;
 }
 
-.c16 {
+.c17 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c17 {
+.c18 {
   font-size: 1rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c21 {
+.c22 {
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
@@ -1812,7 +1826,7 @@ exports[`EditSettingsView should add field 1`] = `
   color: #32324d;
 }
 
-.c31 {
+.c32 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -1822,20 +1836,20 @@ exports[`EditSettingsView should add field 1`] = `
   color: #32324d;
 }
 
-.c35 {
+.c36 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c39 {
+.c40 {
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
   color: #32324d;
 }
 
-.c57 {
+.c58 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -1846,35 +1860,26 @@ exports[`EditSettingsView should add field 1`] = `
   color: #32324d;
 }
 
-.c25 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c25 > * + * {
-  margin-top: 4px;
-}
-
-.c14 {
+.c15 {
   position: relative;
   outline: none;
 }
 
-.c14 svg {
+.c15 svg {
   height: 12px;
   width: 12px;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c15 svg > g,
+.c15 svg path {
   fill: #ffffff;
 }
 
-.c14[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c14:after {
+.c15:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1889,11 +1894,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c14:focus-visible {
+.c15:focus-visible {
   outline: none;
 }
 
-.c14:focus-visible:after {
+.c15:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1904,7 +1909,7 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c62 {
+.c63 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1916,111 +1921,122 @@ exports[`EditSettingsView should add field 1`] = `
   width: 1px;
 }
 
-.c15 {
+.c16 {
   height: 2rem;
 }
 
-.c15[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c10 {
+.c16[aria-disabled='true'] .c11 {
   color: #666687;
 }
 
-.c15[aria-disabled='true'] svg > g,.c15[aria-disabled='true'] svg path {
+.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c15[aria-disabled='true']:active {
+.c16[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c10 {
+.c16[aria-disabled='true']:active .c11 {
   color: #666687;
 }
 
-.c15[aria-disabled='true']:active svg > g,.c15[aria-disabled='true']:active svg path {
+.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c15:hover {
+.c16:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c15:active {
+.c16:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c16 svg > g,
+.c16 svg path {
   fill: #ffffff;
 }
 
-.c66 {
+.c67 {
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c66[aria-disabled='true'] {
+.c67[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c66[aria-disabled='true'] .c10 {
+.c67[aria-disabled='true'] .c11 {
   color: #666687;
 }
 
-.c66[aria-disabled='true'] svg > g,.c66[aria-disabled='true'] svg path {
+.c67[aria-disabled='true'] svg > g,.c67[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c66[aria-disabled='true']:active {
+.c67[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c66[aria-disabled='true']:active .c10 {
+.c67[aria-disabled='true']:active .c11 {
   color: #666687;
 }
 
-.c66[aria-disabled='true']:active svg > g,.c66[aria-disabled='true']:active svg path {
+.c67[aria-disabled='true']:active svg > g,.c67[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c66:hover {
+.c67:hover {
   background-color: #ffffff;
 }
 
-.c66:active {
+.c67:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c66:active .c10 {
+.c67:active .c11 {
   color: #4945ff;
 }
 
-.c66:active svg > g,
-.c66:active svg path {
+.c67:active svg > g,
+.c67:active svg path {
   fill: #4945ff;
 }
 
-.c66 .c10 {
+.c67 .c11 {
   color: #271fe0;
 }
 
-.c66 svg > g,
-.c66 svg path {
+.c67 svg > g,
+.c67 svg path {
   fill: #271fe0;
 }
 
 .c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c28 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -2036,28 +2052,28 @@ exports[`EditSettingsView should add field 1`] = `
   transition-duration: 0.2s;
 }
 
-.c27:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c33 {
+.c34 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c33 svg {
+.c34 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c33 svg path {
+.c34 svg path {
   fill: #666687;
 }
 
-.c34 {
+.c35 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2066,11 +2082,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: none;
 }
 
-.c34 svg {
+.c35 svg {
   width: 0.375rem;
 }
 
-.c28 {
+.c29 {
   position: absolute;
   left: 0;
   right: 0;
@@ -2081,19 +2097,19 @@ exports[`EditSettingsView should add field 1`] = `
   border: none;
 }
 
-.c28:focus {
+.c29:focus {
   outline: none;
 }
 
-.c28[aria-disabled='true'] {
+.c29[data-disabled] {
   cursor: not-allowed;
 }
 
-.c29 {
+.c30 {
   width: 100%;
 }
 
-.c38 {
+.c39 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -2102,37 +2118,37 @@ exports[`EditSettingsView should add field 1`] = `
   margin: 0;
 }
 
-.c22 {
+.c23 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
 }
 
-.c23 {
+.c24 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c48 {
+.c49 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c60 svg > g,
-.c60 svg path {
+.c61 svg > g,
+.c61 svg path {
   fill: #8e8ea9;
 }
 
-.c60:hover svg > g,
-.c60:hover svg path {
+.c61:hover svg > g,
+.c61:hover svg path {
   fill: #666687;
 }
 
-.c60:active svg > g,
-.c60:active svg path {
+.c61:active svg > g,
+.c61:active svg path {
   fill: #a5a5ba;
 }
 
-.c60[aria-disabled='true'] svg path {
+.c61[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -2144,7 +2160,7 @@ exports[`EditSettingsView should add field 1`] = `
   padding-right: 8px;
 }
 
-.c40 {
+.c41 {
   background: #4945ff;
   padding-top: 8px;
   padding-right: 16px;
@@ -2161,14 +2177,14 @@ exports[`EditSettingsView should add field 1`] = `
   color: #4945ff;
 }
 
-.c45 {
+.c46 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #ffffff;
 }
 
-.c41 {
+.c42 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2183,7 +2199,7 @@ exports[`EditSettingsView should add field 1`] = `
   gap: 8px;
 }
 
-.c44 {
+.c45 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2197,26 +2213,26 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c42 {
+.c43 {
   position: relative;
   outline: none;
 }
 
-.c42 svg {
+.c43 svg {
   height: 12px;
   width: 12px;
 }
 
-.c42 svg > g,
-.c42 svg path {
+.c43 svg > g,
+.c43 svg path {
   fill: #ffffff;
 }
 
-.c42[aria-disabled='true'] {
+.c43[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c42:after {
+.c43:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2231,11 +2247,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c42:focus-visible {
+.c43:focus-visible {
   outline: none;
 }
 
-.c42:focus-visible:after {
+.c43:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2306,94 +2322,94 @@ exports[`EditSettingsView should add field 1`] = `
   display: flex;
 }
 
-.c43 {
+.c44 {
   -webkit-text-decoration: none;
   text-decoration: none;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c43[aria-disabled='true'] {
+.c44[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c43[aria-disabled='true'] .c6 {
+.c44[aria-disabled='true'] .c6 {
   color: #666687;
 }
 
-.c43[aria-disabled='true'] svg > g,.c43[aria-disabled='true'] svg path {
+.c44[aria-disabled='true'] svg > g,.c44[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c43[aria-disabled='true']:active {
+.c44[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c43[aria-disabled='true']:active .c6 {
+.c44[aria-disabled='true']:active .c6 {
   color: #666687;
 }
 
-.c43[aria-disabled='true']:active svg > g,.c43[aria-disabled='true']:active svg path {
+.c44[aria-disabled='true']:active svg > g,.c44[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c43:hover {
+.c44:hover {
   background-color: #ffffff;
 }
 
-.c43:active {
+.c44:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c43:active .c6 {
+.c44:active .c6 {
   color: #4945ff;
 }
 
-.c43:active svg > g,
-.c43:active svg path {
+.c44:active svg > g,
+.c44:active svg path {
   fill: #4945ff;
 }
 
-.c43 .c6 {
+.c44 .c6 {
   color: #271fe0;
 }
 
-.c43 svg > g,
-.c43 svg path {
+.c44 svg > g,
+.c44 svg path {
   fill: #271fe0;
 }
 
-.c61 {
+.c62 {
   background-color: transparent;
 }
 
-.c61 path {
+.c62 path {
   fill: #666687;
 }
 
-.c49 {
+.c50 {
   position: relative;
   padding-right: 4px;
 }
 
-.c63 {
+.c64 {
   position: relative;
   padding-left: 4px;
 }
 
-.c55 {
+.c56 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c55 path {
+.c56 path {
   fill: #666687;
 }
 
-.c52 {
+.c53 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2401,31 +2417,31 @@ exports[`EditSettingsView should add field 1`] = `
   opacity: 1;
 }
 
-.c54 {
+.c55 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c48 {
+  .c49 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c48 {
+  .c49 {
     grid-column: span;
   }
 }
@@ -2481,17 +2497,17 @@ exports[`EditSettingsView should add field 1`] = `
             class="c8"
           >
             <div
-              class="c9"
+              class="c9 c10"
             >
               <h1
-                class="c10 c11"
+                class="c11 c12"
               >
                 Configure the view - Address
               </h1>
             </div>
             <button
               aria-disabled="true"
-              class="c12 c13 c14 c15"
+              class="c13 c14 c15 c16"
               disabled=""
               type="submit"
             >
@@ -2513,80 +2529,80 @@ exports[`EditSettingsView should add field 1`] = `
                 </svg>
               </div>
               <span
-                class="c10 c16"
+                class="c11 c17"
               >
                 Save
               </span>
             </button>
           </div>
           <p
-            class="c10 c17"
+            class="c11 c18"
           >
             Customize how the edit view will look like.
           </p>
         </div>
       </div>
       <div
-        class="c18"
+        class="c19"
       >
         <div
-          class="c19"
+          class="c20"
         >
           <div
-            class="c20"
+            class="c21"
           >
             <h2
-              class="c10 c21"
+              class="c11 c22"
             >
               Settings
             </h2>
             <div
-              class="c22"
+              class="c23"
             >
               <div
-                class="c23"
+                class="c24"
               >
                 <div
                   class=""
                 >
-                  <div>
+                  <div
+                    class=""
+                  >
                     <div
-                      class="c24 c25"
+                      class="c25"
                     >
                       <label
-                        class="c10 c26"
+                        class="c11 c26 c27"
                         for="12"
                       >
-                        <div
-                          class="c9"
-                        >
-                          Entry title
-                        </div>
+                        Entry title
                       </label>
                       <div
-                        class="c9 c27"
+                        class="c10 c28"
                       >
                         <button
                           aria-describedby="12-hint"
-                          aria-disabled="false"
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="12 12-label 12-content"
-                          class="c28"
+                          aria-required="false"
+                          class="c29"
                           id="12"
+                          role="combobox"
                           type="button"
+                          value="postal_code"
                         />
                         <div
-                          class="c8 c29"
+                          class="c8 c30"
                         >
                           <div
-                            class="c9"
+                            class="c10"
                           >
                             <div
-                              class="c30"
+                              class="c31"
                             >
                               <span
-                                class="c10 c31"
+                                class="c11 c32"
                                 id="12-content"
                               >
                                 postal_code
@@ -2594,11 +2610,11 @@ exports[`EditSettingsView should add field 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c9"
+                            class="c10"
                           >
                             <button
                               aria-hidden="true"
-                              class="c32 c33 c34"
+                              class="c33 c34 c35"
                               tabindex="-1"
                               title="Carret Down Button"
                               type="button"
@@ -2622,7 +2638,7 @@ exports[`EditSettingsView should add field 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c10 c35"
+                        class="c11 c36"
                         id="12-hint"
                       >
                         Set the display field of your entry
@@ -2633,19 +2649,19 @@ exports[`EditSettingsView should add field 1`] = `
               </div>
             </div>
             <div
-              class="c36"
+              class="c37"
             >
               <hr
-                class="c37 c38"
+                class="c38 c39"
               />
             </div>
             <h3
-              class="c10 c21"
+              class="c11 c22"
             >
               View
             </h3>
             <div
-              class="c20"
+              class="c21"
             >
               <div
                 class="c8"
@@ -2655,7 +2671,7 @@ exports[`EditSettingsView should add field 1`] = `
                     class=""
                   >
                     <span
-                      class="c10 c39"
+                      class="c11 c40"
                     >
                       Displayed fields
                     </span>
@@ -2664,7 +2680,7 @@ exports[`EditSettingsView should add field 1`] = `
                     class=""
                   >
                     <span
-                      class="c10 c35"
+                      class="c11 c36"
                     >
                       Drag & drop the fields to build the layout
                     </span>
@@ -2673,12 +2689,12 @@ exports[`EditSettingsView should add field 1`] = `
                 <div>
                   <a
                     aria-disabled="false"
-                    class="c40 c41 c42 c43"
+                    class="c41 c42 c43 c44"
                     href="/plugins/content-type-builder/content-types/api::address.address"
                   >
                     <div
                       aria-hidden="true"
-                      class="c44"
+                      class="c45"
                     >
                       <svg
                         fill="none"
@@ -2696,7 +2712,7 @@ exports[`EditSettingsView should add field 1`] = `
                       </svg>
                     </div>
                     <span
-                      class="c6 c45"
+                      class="c6 c46"
                     >
                       Edit the content type
                     </span>
@@ -2704,34 +2720,34 @@ exports[`EditSettingsView should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c46"
+                class="c47"
               >
                 <div
-                  class="c47"
+                  class="c48"
                 >
                   <div
-                    class="c22"
+                    class="c23"
                   >
                     <div
-                      class="c48"
+                      class="c49"
                     >
                       <div
                         class=""
                       >
                         <div
-                          class="c9 c49"
+                          class="c10 c50"
                         >
                           <div
-                            class="c50 c51 c52"
+                            class="c51 c52 c53"
                           >
                             <span
-                              class="c53 c9 c54"
+                              class="c54 c10 c55"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c55"
+                                class="c56"
                                 fill="none"
                                 height="1rem"
                                 viewBox="0 0 24 24"
@@ -2769,30 +2785,30 @@ exports[`EditSettingsView should add field 1`] = `
                               </svg>
                             </span>
                             <div
-                              class="c56"
+                              class="c57"
                               overflow="hidden"
                             >
                               <div
-                                class="c32 c8"
+                                class="c33 c8"
                               >
                                 <span
-                                  class="c10 c57"
+                                  class="c11 c58"
                                 >
                                   postal_code
                                 </span>
                                 <div
-                                  class="c9"
+                                  class="c10"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="13"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Edit postal_code
                                       </span>
@@ -2818,13 +2834,13 @@ exports[`EditSettingsView should add field 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="14"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Delete postal_code
                                       </span>
@@ -2852,25 +2868,25 @@ exports[`EditSettingsView should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c48"
+                      class="c49"
                     >
                       <div
                         class=""
                       >
                         <div
-                          class="c9 c63"
+                          class="c10 c64"
                         >
                           <div
-                            class="c50 c51 c52"
+                            class="c51 c52 c53"
                           >
                             <span
-                              class="c53 c9 c54"
+                              class="c54 c10 c55"
                               draggable="true"
                               tabindex="-1"
                               type="button"
                             >
                               <svg
-                                class="c55"
+                                class="c56"
                                 fill="none"
                                 height="1rem"
                                 viewBox="0 0 24 24"
@@ -2908,30 +2924,30 @@ exports[`EditSettingsView should add field 1`] = `
                               </svg>
                             </span>
                             <div
-                              class="c56"
+                              class="c57"
                               overflow="hidden"
                             >
                               <div
-                                class="c32 c8"
+                                class="c33 c8"
                               >
                                 <span
-                                  class="c10 c57"
+                                  class="c11 c58"
                                 >
                                   city
                                 </span>
                                 <div
-                                  class="c9"
+                                  class="c10"
                                 >
                                   <span>
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="15"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Edit city
                                       </span>
@@ -2957,13 +2973,13 @@ exports[`EditSettingsView should add field 1`] = `
                                     <button
                                       aria-disabled="false"
                                       aria-labelledby="16"
-                                      class="c58 c59 c14 c60 c61"
+                                      class="c59 c60 c15 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
                                       type="button"
                                     >
                                       <span
-                                        class="c62"
+                                        class="c63"
                                       >
                                         Delete city
                                       </span>
@@ -2997,7 +3013,7 @@ exports[`EditSettingsView should add field 1`] = `
                       aria-disabled="true"
                       aria-expanded="false"
                       aria-haspopup="true"
-                      class="c64 c65 c14 c66"
+                      class="c65 c66 c15 c67"
                       data-testid="add-field"
                       disabled=""
                       label="Insert another field"
@@ -3021,7 +3037,7 @@ exports[`EditSettingsView should add field 1`] = `
                         </svg>
                       </div>
                       <span
-                        class="c10 c16"
+                        class="c11 c17"
                       >
                         Insert another field
                       </span>
@@ -3036,7 +3052,7 @@ exports[`EditSettingsView should add field 1`] = `
     </form>
   </main>
   <div
-    class="c62"
+    class="c63"
   >
     <p
       aria-live="polite"

@@ -445,7 +445,9 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
           <div
             class="c10"
           >
-            <div>
+            <div
+              class=""
+            >
               <label
                 for="logo-upload"
               >
@@ -603,7 +605,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   cursor: pointer;
 }
 
-.c18 {
+.c17 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -626,7 +628,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   gap: 8px;
 }
 
-.c15 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -644,7 +646,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   justify-content: space-between;
 }
 
-.c14 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -670,6 +672,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
 .c7 {
@@ -695,20 +698,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   color: #ffffff;
 }
 
-.c13 {
+.c12 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
-}
-
-.c12 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c12 > * + * {
-  margin-top: 4px;
 }
 
 .c23 {
@@ -866,7 +860,18 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   fill: #32324d;
 }
 
-.c17 {
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c16 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -881,36 +886,36 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   background: inherit;
 }
 
-.c17::-webkit-input-placeholder {
+.c16::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c17::-moz-placeholder {
+.c16::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c17:-ms-input-placeholder {
+.c16:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c17::placeholder {
+.c16::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c17[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   color: inherit;
 }
 
-.c17:focus {
+.c16:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c16 {
+.c15 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -922,7 +927,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   transition-duration: 0.2s;
 }
 
-.c16:focus-within {
+.c15:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -936,7 +941,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   margin: 0;
 }
 
-.c19 {
+.c18 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
@@ -1022,28 +1027,26 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
             class="c10"
           >
             <div>
-              <div>
+              <div
+                class=""
+              >
                 <div
-                  class="c11 c12"
+                  class="c11"
                 >
                   <label
-                    class="c4 c13"
+                    class="c4 c12 c13"
                     for="5"
                   >
-                    <div
-                      class="c14"
-                    >
-                      URL
-                    </div>
+                    URL
                   </label>
                   <div
-                    class="c15 c16"
+                    class="c14 c15"
                   >
                     <input
                       aria-disabled="false"
                       aria-invalid="false"
                       aria-required="false"
-                      class="c17"
+                      class="c16"
                       id="5"
                       name="logo-url"
                       value=""
@@ -1054,13 +1057,13 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
             </div>
           </div>
           <div
-            class="c18 c19"
+            class="c17 c18"
           >
             <div
-              class="c15"
+              class="c14"
             >
               <div
-                class="c14 c20"
+                class="c19 c20"
               >
                 <button
                   aria-disabled="false"
@@ -1075,7 +1078,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                 </button>
               </div>
               <div
-                class="c14 c20"
+                class="c19 c20"
               >
                 <button
                   aria-disabled="false"

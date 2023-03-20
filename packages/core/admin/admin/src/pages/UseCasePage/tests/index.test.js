@@ -111,6 +111,10 @@ describe('Admin | UseCasePage', () => {
         padding-top: 16px;
       }
 
+      .c39 {
+        background: transparent;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -199,6 +203,7 @@ describe('Admin | UseCasePage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
       .c26 {
@@ -270,7 +275,7 @@ describe('Admin | UseCasePage', () => {
         color: #32324d;
       }
 
-      .c23 {
+      .c22 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -294,49 +299,31 @@ describe('Admin | UseCasePage', () => {
         color: #ffffff;
       }
 
-      .c40 {
+      .c41 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #4945ff;
       }
 
-      .c22 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c22 > * + * {
-        margin-top: 4px;
-      }
-
-      .c39 {
-        background: transparent;
+      .c40 {
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c39[aria-disabled='true'] {
+      .c40[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c39[aria-disabled='true'] svg path {
+      .c40[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c39 svg {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        font-size: 0.625rem;
-      }
-
-      .c39 svg path {
+      .c40 svg path {
         fill: #4945ff;
       }
 
-      .c39:after {
+      .c40:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -351,11 +338,11 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid transparent;
       }
 
-      .c39:focus-visible {
+      .c40:focus-visible {
         outline: none;
       }
 
-      .c39:focus-visible:after {
+      .c40:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -415,7 +402,7 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c41 {
+      .c42 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -522,6 +509,17 @@ describe('Admin | UseCasePage', () => {
         fill: #ffffff;
       }
 
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c24 {
         position: relative;
         border: 1px solid #dcdce4;
@@ -603,7 +601,7 @@ describe('Admin | UseCasePage', () => {
         outline: none;
       }
 
-      .c25[aria-disabled='true'] {
+      .c25[data-disabled] {
         cursor: not-allowed;
       }
 
@@ -715,31 +713,30 @@ describe('Admin | UseCasePage', () => {
                   <div
                     class="c20"
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c21 c22"
+                        class="c21"
                       >
                         <label
-                          class="c6 c23"
+                          class="c6 c22 c23"
                           for="usecase"
                         >
-                          <div
-                            class="c8"
-                          >
-                            What type of work do you do?
-                          </div>
+                          What type of work do you do?
                         </label>
                         <div
                           class="c8 c24"
                         >
                           <button
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="usecase usecase-label usecase-content"
+                            aria-required="false"
                             class="c25"
                             data-testid="usecase"
                             id="usecase"
+                            role="combobox"
                             type="button"
                           />
                           <div
@@ -812,11 +809,11 @@ describe('Admin | UseCasePage', () => {
                 >
                   <button
                     aria-disabled="false"
-                    class="c8 c39"
+                    class="c39 c3 c40"
                     type="button"
                   >
                     <span
-                      class="c6 c40"
+                      class="c6 c41"
                     >
                       Skip this question
                     </span>
@@ -827,7 +824,7 @@ describe('Admin | UseCasePage', () => {
           </div>
         </div>
         <div
-          class="c41"
+          class="c42"
         >
           <p
             aria-live="polite"

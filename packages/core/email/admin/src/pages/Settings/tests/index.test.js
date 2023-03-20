@@ -54,12 +54,16 @@ describe('Email | Pages | Settings', () => {
         padding-left: 56px;
       }
 
-      .c7 {
+      .c3 {
+        min-width: 0;
+      }
+
+      .c8 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c9 {
+      .c10 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -107,7 +111,7 @@ describe('Email | Pages | Settings', () => {
         justify-content: space-between;
       }
 
-      .c3 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -121,7 +125,7 @@ describe('Email | Pages | Settings', () => {
         flex-direction: row;
       }
 
-      .c8 {
+      .c9 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -136,7 +140,7 @@ describe('Email | Pages | Settings', () => {
         gap: 32px;
       }
 
-      .c10 {
+      .c11 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -151,7 +155,7 @@ describe('Email | Pages | Settings', () => {
         gap: 16px;
       }
 
-      .c11 {
+      .c12 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -164,20 +168,6 @@ describe('Email | Pages | Settings', () => {
         -ms-flex-direction: column;
         flex-direction: column;
         gap: 4px;
-      }
-
-      .c17 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
       }
 
       .c34 {
@@ -195,33 +185,33 @@ describe('Email | Pages | Settings', () => {
         gap: 8px;
       }
 
-      .c5 {
+      .c6 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c6 {
+      .c7 {
         font-size: 1rem;
         line-height: 1.5;
         color: #666687;
       }
 
-      .c12 {
+      .c13 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c13 {
+      .c14 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c19 {
+      .c18 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -243,15 +233,6 @@ describe('Email | Pages | Settings', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 4px;
       }
 
       .c35 {
@@ -312,7 +293,7 @@ describe('Email | Pages | Settings', () => {
         background: #eaeaef;
       }
 
-      .c36[aria-disabled='true'] .c4 {
+      .c36[aria-disabled='true'] .c5 {
         color: #666687;
       }
 
@@ -325,7 +306,7 @@ describe('Email | Pages | Settings', () => {
         background: #eaeaef;
       }
 
-      .c36[aria-disabled='true']:active .c4 {
+      .c36[aria-disabled='true']:active .c5 {
         color: #666687;
       }
 
@@ -346,6 +327,17 @@ describe('Email | Pages | Settings', () => {
       .c36 svg > g,
       .c36 svg path {
         fill: #ffffff;
+      }
+
+      .c19 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c21 {
@@ -541,7 +533,7 @@ describe('Email | Pages | Settings', () => {
         outline: none;
       }
 
-      .c23[aria-disabled='true'] {
+      .c23[data-disabled] {
         cursor: not-allowed;
       }
 
@@ -549,13 +541,13 @@ describe('Email | Pages | Settings', () => {
         width: 100%;
       }
 
-      .c15 {
+      .c16 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 20px;
       }
 
-      .c16 {
+      .c17 {
         grid-column: span 6;
         max-width: 100%;
       }
@@ -569,18 +561,18 @@ describe('Email | Pages | Settings', () => {
         outline: none;
       }
 
-      .c14 {
+      .c15 {
         color: #4945ff;
       }
 
       @media (max-width:68.75rem) {
-        .c16 {
+        .c17 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c16 {
+        .c17 {
           grid-column: span;
         }
       }
@@ -615,10 +607,10 @@ describe('Email | Pages | Settings', () => {
               class="c2"
             >
               <div
-                class="c3"
+                class="c3 c4"
               >
                 <h1
-                  class="c4 c5"
+                  class="c5 c6"
                   id="title"
                 >
                   Configuration
@@ -626,39 +618,39 @@ describe('Email | Pages | Settings', () => {
               </div>
             </div>
             <p
-              class="c4 c6"
+              class="c5 c7"
             >
               Test the settings for the Email plugin
             </p>
           </div>
         </div>
         <div
-          class="c7"
+          class="c8"
         >
           <form>
             <div
-              class="c8"
+              class="c9"
             >
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10"
+                  class="c11"
                 >
                   <div
-                    class="c11"
+                    class="c12"
                   >
                     <h2
-                      class="c4 c12"
+                      class="c5 c13"
                     >
                       Configuration
                     </h2>
                     <span
-                      class="c4 c13"
+                      class="c5 c14"
                     >
                       The plugin is configured through the ./config/plugins.js file, checkout this 
                       <a
-                        class="c14"
+                        class="c15"
                         href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                         rel="noopener noreferrer"
                         target="_blank"
@@ -669,28 +661,26 @@ describe('Email | Pages | Settings', () => {
                     </span>
                   </div>
                   <div
-                    class="c15"
+                    class="c16"
                   >
                     <div
-                      class="c16"
+                      class="c17"
                     >
                       <div
                         class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c17 c18"
+                              class="c12"
                             >
                               <label
-                                class="c4 c19"
+                                class="c5 c18 c19"
                                 for="7"
                               >
-                                <div
-                                  class="c3"
-                                >
-                                  Default sender email
-                                </div>
+                                Default sender email
                               </label>
                               <div
                                 class="c2 c20"
@@ -701,6 +691,8 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c21"
+                                  data-disabled=""
+                                  disabled=""
                                   id="7"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
@@ -713,25 +705,23 @@ describe('Email | Pages | Settings', () => {
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c17"
                     >
                       <div
                         class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c17 c18"
+                              class="c12"
                             >
                               <label
-                                class="c4 c19"
+                                class="c5 c18 c19"
                                 for="9"
                               >
-                                <div
-                                  class="c3"
-                                >
-                                  Default response email
-                                </div>
+                                Default response email
                               </label>
                               <div
                                 class="c2 c20"
@@ -742,6 +732,8 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c21"
+                                  data-disabled=""
+                                  disabled=""
                                   id="9"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
@@ -754,50 +746,52 @@ describe('Email | Pages | Settings', () => {
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c17"
                     >
                       <div
                         class=""
                       >
-                        <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class="c17 c18"
+                            class="c12"
                           >
                             <label
-                              class="c4 c19"
+                              class="c5 c18 c19"
                               for="11"
                             >
-                              <div
-                                class="c3"
-                              >
-                                Email provider
-                              </div>
+                              Email provider
                             </label>
                             <div
-                              class="c3 c22"
+                              class="c4 c22"
                               disabled=""
                             >
                               <button
-                                aria-disabled="true"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
                                 aria-labelledby="11 11-label 11-content"
+                                aria-required="false"
                                 class="c23"
+                                data-disabled=""
+                                disabled=""
                                 id="11"
                                 name="email-provider"
+                                role="combobox"
                                 type="button"
+                                value=""
                               />
                               <div
                                 class="c2 c24"
                               >
                                 <div
-                                  class="c3"
+                                  class="c4"
                                 >
                                   <div
                                     class="c25"
                                   >
                                     <span
-                                      class="c4 c26"
+                                      class="c5 c26"
                                       id="11-content"
                                     >
                                       Select...
@@ -805,7 +799,7 @@ describe('Email | Pages | Settings', () => {
                                   </div>
                                 </div>
                                 <div
-                                  class="c3"
+                                  class="c4"
                                 >
                                   
                                   <button
@@ -842,39 +836,37 @@ describe('Email | Pages | Settings', () => {
                 </div>
               </div>
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10"
+                  class="c11"
                 >
                   <h2
-                    class="c4 c12"
+                    class="c5 c13"
                   >
                     Test email delivery
                   </h2>
                   <div
-                    class="c15"
+                    class="c16"
                   >
                     <div
-                      class="c16"
+                      class="c17"
                     >
                       <div
                         class=""
                       >
                         <div>
-                          <div>
+                          <div
+                            class=""
+                          >
                             <div
-                              class="c17 c18"
+                              class="c12"
                             >
                               <label
-                                class="c4 c19"
+                                class="c5 c18 c19"
                                 for="test-address-input"
                               >
-                                <div
-                                  class="c3"
-                                >
-                                  Recipient email
-                                </div>
+                                Recipient email
                               </label>
                               <div
                                 class="c2 c30"
@@ -933,7 +925,7 @@ describe('Email | Pages | Settings', () => {
                             </svg>
                           </div>
                           <span
-                            class="c4 c37"
+                            class="c5 c37"
                           >
                             Send test email
                           </span>

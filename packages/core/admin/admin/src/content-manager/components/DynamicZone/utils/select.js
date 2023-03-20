@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect(name) {
