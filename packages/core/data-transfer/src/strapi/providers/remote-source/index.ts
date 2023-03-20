@@ -176,7 +176,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (res.statusCode === 401) {
             return reject(
               new ProviderInitializationError(
-                'Failed to initialize the connexion: Authentication Error'
+                'Failed to initialize the connection: Authentication Error'
               )
             );
           }
@@ -184,7 +184,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (res.statusCode === 403) {
             return reject(
               new ProviderInitializationError(
-                'Failed to initialize the connexion: Authorization Error'
+                'Failed to initialize the connection: Authorization Error'
               )
             );
           }
@@ -192,14 +192,14 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (res.statusCode === 404) {
             return reject(
               new ProviderInitializationError(
-                'Failed to initialize the connexion: Data transfer is not enabled on the remote host'
+                'Failed to initialize the connection: Data transfer is not enabled on the remote host'
               )
             );
           }
 
           return reject(
             new ProviderInitializationError(
-              `Failed to initialize the connexion: Unexpected server response ${res.statusCode}`
+              `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
             )
           );
         })
