@@ -136,11 +136,9 @@ describe('Documentation service', () => {
         },
         'x-strapi-config': {
           path: 'custom-documentation',
-          showGeneratedFiles: false,
-          generateDefaultResponse: false,
           plugins: [],
         },
-        servers: [], // Servers is generated based on the config.servers so it shouldn't be overridden
+        servers: [{ server: 'custom-server' }],
         externalDocs: {
           description: 'custom Find out more',
           url: 'custom-doc-url',
@@ -165,6 +163,7 @@ describe('Documentation service', () => {
       expect(mockFinalDoc.externalDocs).toEqual(userConfig.externalDocs);
       expect(mockFinalDoc.security).toEqual(userConfig.security);
       expect(mockFinalDoc.webhooks).toEqual(userConfig.webhooks);
+      expect(mockFinalDoc.servers).toEqual(userConfig.servers);
     });
 
     it("does not apply an override if the plugin providing the override isn't specified in the x-strapi-config.plugins", async () => {
@@ -173,8 +172,9 @@ describe('Documentation service', () => {
         'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
       });
       const docService = documentation({ strapi: global.strapi });
+      const overrideService = override({ strapi: global.strapi });
 
-      docService.registerDoc(
+      overrideService.registerOverride(
         {
           paths: {
             '/test': {
@@ -186,11 +186,7 @@ describe('Documentation service', () => {
             },
           },
         },
-        'users-permissions'
-      );
-
-      expect(global.strapi.log.info).toHaveBeenCalledWith(
-        `@strapi/documentation will not use the override provided by users-permissions since the plugin was not specified in the x-strapi-config.plugins array`
+        { pluginOrigin: 'users-permissions' }
       );
 
       await docService.generateFullDoc();
@@ -200,23 +196,32 @@ describe('Documentation service', () => {
     });
 
     it('overrides (extends) Tags', async () => {
-      const docService = documentation({ strapi: global.strapi });
-
+      const overrideService = override({ strapi: global.strapi });
       // Simulate override from users-permissions plugin
-      docService.registerDoc(
+      overrideService.registerOverride(
         {
           tags: ['users-permissions-tag'],
         },
-        'users-permissions'
+        { pluginOrigin: 'users-permissions' }
       );
       // Simulate override from upload plugin
-      docService.registerDoc(
+      overrideService.registerOverride(
         {
           tags: ['upload-tag'],
         },
-        'upload'
+        { pluginOrigin: 'upload' }
       );
+      // Use the override service in the documentation service
+      global.strapi.plugins.documentation = {
+        service: jest.fn((name) => {
+          const mockServices = {
+            override: overrideService,
+          };
 
+          return mockServices[name];
+        }),
+      };
+      const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
       const mockFinalDoc = lastMockCall[1];
@@ -225,10 +230,9 @@ describe('Documentation service', () => {
     });
 
     it('overrides (replaces existing or adds new) Paths', async () => {
-      const docService = documentation({ strapi: global.strapi });
-
+      const overrideService = override({ strapi: global.strapi });
       // Simulate override from upload plugin
-      docService.registerDoc(
+      overrideService.registerOverride(
         {
           paths: {
             // This path exists after generating with mock data, replace it
@@ -245,13 +249,21 @@ describe('Documentation service', () => {
             },
           },
         },
-        'upload'
+        { pluginOrigin: 'upload' }
       );
+      global.strapi.plugins.documentation = {
+        service: jest.fn((name) => {
+          const mockServices = {
+            override: overrideService,
+          };
 
+          return mockServices[name];
+        }),
+      };
+      const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
       const mockFinalDoc = lastMockCall[1];
-      console.log(mockFinalDoc);
 
       expect(mockFinalDoc.paths['/upload/files'].get.responses).toEqual(['existing-path-test']);
       expect(Object.keys(mockFinalDoc.paths['/upload/files'].get)).toEqual(['responses']);
@@ -259,10 +271,9 @@ describe('Documentation service', () => {
     });
 
     it('overrides (replaces existing or adds new) Components', async () => {
-      const docService = documentation({ strapi: global.strapi });
-
+      const overrideService = override({ strapi: global.strapi });
       // Simulate override from upload plugin
-      docService.registerDoc(
+      overrideService.registerOverride(
         {
           components: {
             schemas: {
@@ -283,9 +294,18 @@ describe('Documentation service', () => {
             },
           },
         },
-        'upload'
+        { pluginOrigin: 'upload' }
       );
+      global.strapi.plugins.documentation = {
+        service: jest.fn((name) => {
+          const mockServices = {
+            override: overrideService,
+          };
 
+          return mockServices[name];
+        }),
+      };
+      const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
       const mockFinalDoc = lastMockCall[1];
