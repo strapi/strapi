@@ -87,6 +87,18 @@ function checkAPIResultFields(res, fields) {
     });
 }
 
+function sortByID(collection, order) {
+  if (order === 'asc') {
+    return collection.sort((a, b) => (a.id > b.id ? 1 : -1));
+  }
+
+  if (order === 'desc') {
+    return collection.sort((a, b) => (a.id > b.id ? -1 : 1));
+  }
+
+  throw new Error(`Invalid sort order provided. Expected "asc" or "desc" but got ${order}`);
+}
+
 describe('Core API - Sanitize', () => {
   const documentsLength = () => fixturesLength('document');
 
@@ -116,6 +128,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object notation', () => {
+      describe('ID', () => {
+        it('Successfully filters on invalid ID', async () => {
+          const res = await rq.get('/api/documents', { qs: { filters: { id: 999 } } });
+
+          checkAPIResultLength(res, 0);
+        });
+
+        it('Successfully filters on valid ID', async () => {
+          const document = data.document[2];
+          const res = await rq.get('/api/documents', { qs: { filters: { id: document.id } } });
+
+          checkAPIResultLength(res, 1);
+          expect(res.body.data[0]).toHaveProperty('id', document.id);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -341,6 +369,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: { id: 'asc' } } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: { id: 'desc' } } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -426,6 +470,29 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('string notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a default sort on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id' } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id:asc' } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: 'id:desc' } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -479,6 +546,22 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('object[] notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: [{ id: 'asc' }] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: [{ id: 'desc' }] } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
@@ -539,6 +622,29 @@ describe('Core API - Sanitize', () => {
     });
 
     describe('string[] notation', () => {
+      describe('ID', () => {
+        it('Successfully applies a default sort on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id'] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:asc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id:asc'] } });
+
+          const order = sortByID(data.document, 'asc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+
+        it('Successfully applies a sort:desc on the id', async () => {
+          const res = await rq.get('/api/documents', { qs: { sort: ['id:desc'] } });
+
+          const order = sortByID(data.document, 'desc').map((d) => d.id);
+          checkAPIResultOrder(res, order);
+        });
+      });
+
       describe('Scalar', () => {
         describe('Basic (no modifiers)', () => {
           it.each([
