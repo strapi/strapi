@@ -46,9 +46,9 @@ module.exports = ({ env }) => ({
         params: {
           Bucket: env('AWS_BUCKET'),
         },
-        cloudFrontConfig: {
+        cloudFrontUrl: {
           protocol: env('AWS_CLOUDFRONT_PROTOCOL', 'https'),
-          domain: env('AWS_CLOUDFRONT_DOMAIN'), //e.g.: ddehgnixh0ene.cloudfront.net
+          domain: env('AWS_CLOUDFRONT_DOMAIN'), //e.g.: xyz.cloudfront.net
         }
       },
       actionOptions: {
