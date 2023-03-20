@@ -1,5 +1,6 @@
 ---
 title: Example
+description: Short description
 tags:
   - content-manager
 ---
@@ -8,7 +9,7 @@ tags:
 
 ## Summary
 
-_Description of the sofware system / component._
+_Description of the software system / component._
 
 ## Detailed design
 
@@ -34,4 +35,4 @@ _What other approaches did we consider?_
 
 - _Link to product documents._
 - _Link to user documentation._
-- _Any usefull research used for it_
+- _Any useful research used for it_

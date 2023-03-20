@@ -51,7 +51,6 @@ module.exports = function createComponentBuilder() {
         .setUID(uid)
         .set('collectionName', collectionName)
         .set(['info', 'displayName'], infos.displayName)
-        .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
@@ -101,7 +100,6 @@ module.exports = function createComponentBuilder() {
         .setUID(newUID)
         .setDir(newDir)
         .set(['info', 'displayName'], infos.displayName)
-        .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));

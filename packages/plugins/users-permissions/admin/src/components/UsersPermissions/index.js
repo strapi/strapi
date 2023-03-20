@@ -1,8 +1,6 @@
 import React, { memo, useReducer, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Typography, Flex, Grid, GridItem } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import Policies from '../Policies';
@@ -62,8 +60,8 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     <UsersPermissionsProvider value={providerValue}>
       <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
         <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
-          <Stack spacing={6}>
-            <Stack spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={6}>
+            <Flex direction="column" alignItems="stretch" gap={2}>
               <Typography variant="delta" as="h2">
                 {formatMessage({
                   id: getTrad('Plugins.header.title'),
@@ -76,9 +74,9 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
                   defaultMessage: 'Only actions bound by a route are listed below.',
                 })}
               </Typography>
-            </Stack>
+            </Flex>
             <Permissions />
-          </Stack>
+          </Flex>
         </GridItem>
         <Policies />
       </Grid>

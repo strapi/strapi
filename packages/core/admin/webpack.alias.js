@@ -1,13 +1,12 @@
 'use strict';
 
 const path = require('path');
+const findRoot = require('find-root');
 
 const aliasExactMatch = [
   '@strapi/design-system',
   '@strapi/helper-plugin',
   '@strapi/icons',
-  '@fortawesome/fontawesome-svg-core',
-  '@fortawesome/free-solid-svg-icons',
   'date-fns',
   'formik',
   'history',
@@ -33,27 +32,13 @@ const aliasExactMatch = [
   'redux',
   'reselect',
   'styled-components',
-  'whatwg-fetch',
   'yup',
-];
-
-const alias = [
-  'react-select/animated',
-  'react-select/async',
-  'react-select/async-creatable',
-  'react-select/base',
-  'react-select/creatable',
 ];
 
 // See https://webpack.js.org/configuration/resolve/
 module.exports = {
-  ...alias.reduce((acc, name) => {
-    acc[name] = require.resolve(name);
-    return acc;
-  }, {}),
-
-  ...aliasExactMatch.reduce((acc, name) => {
-    acc[`${name}$`] = require.resolve(name);
+  ...aliasExactMatch.reduce((acc, moduleName) => {
+    acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
     return acc;
   }, {}),
 

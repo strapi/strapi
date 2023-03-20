@@ -16,10 +16,6 @@ jest.mock('../../../hooks', () => ({
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => null,
-}));
-
 jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
@@ -74,7 +70,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c11 {
         padding-bottom: 56px;
       }
 
@@ -83,7 +79,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         grid-template-columns: auto 1fr;
       }
 
-      .c13 {
+      .c12 {
         overflow-x: hidden;
       }
 
@@ -107,16 +103,11 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
+      .c4 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c3 {
@@ -149,33 +140,33 @@ describe('ADMIN | pages | SettingsPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
+        gap: 8px;
       }
 
       .c7 {
         height: 1px;
         border: none;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         margin: 0;
+      }
+
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
       }
 
       .c8 {
         width: 1.5rem;
         background-color: #dcdce4;
-      }
-
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c11 > * + * {
-        margin-top: 8px;
       }
 
       <div
@@ -209,13 +200,12 @@ describe('ADMIN | pages | SettingsPage', () => {
             class="c9"
           >
             <ol
-              class="c10 c11"
-              spacing="2"
+              class="c10"
             />
           </div>
         </nav>
         <div
-          class="c12 c13"
+          class="c11 c12"
         >
           <h1>
             App infos
@@ -320,19 +310,20 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
+    const user = userEvent.setup();
     history.push(route);
 
     render(App);
 
     expect(screen.getByText(/App infos/)).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('i18n.plugin.name'));
+    await user.click(screen.getByText('i18n.plugin.name'));
 
     await waitFor(() => {
       expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByText('email'));
+    await user.click(screen.getByText('email'));
 
     await waitFor(() => {
       expect(screen.getByText(/email settings/)).toBeInTheDocument();

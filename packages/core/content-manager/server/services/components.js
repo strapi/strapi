@@ -41,7 +41,7 @@ module.exports = ({ strapi }) => ({
 
     return {
       uid: component.uid,
-      category: component.categoru,
+      category: component.category,
       ...configuration,
     };
   },
@@ -69,7 +69,7 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    for (const key in model.attributes) {
+    for (const key of Object.keys(model.attributes)) {
       const attribute = model.attributes[key];
 
       if (attribute.type === 'component') {

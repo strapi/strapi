@@ -6,6 +6,7 @@ const types = require('../../types');
 const { createField } = require('../../fields');
 const { createJoin } = require('./join');
 const { toColumnName } = require('./transform');
+const { isKnexQuery } = require('../../utils/knex');
 
 const GROUP_OPERATORS = ['$and', '$or'];
 const OPERATORS = [
@@ -24,6 +25,8 @@ const OPERATORS = [
   '$between',
   '$startsWith',
   '$endsWith',
+  '$startsWithi',
+  '$endsWithi',
   '$contains',
   '$notContains',
   '$containsi',
@@ -52,7 +55,7 @@ const castValue = (value, attribute) => {
     return value;
   }
 
-  if (types.isScalar(attribute.type)) {
+  if (types.isScalar(attribute.type) && !isKnexQuery(value)) {
     const field = createField(attribute);
 
     return value === null ? null : field.toDB(value);
@@ -76,7 +79,7 @@ const processAttributeWhere = (attribute, where, operator = '$eq') => {
 
   const filters = {};
 
-  for (const key in where) {
+  for (const key of Object.keys(where)) {
     const value = where[key];
 
     if (!isOperator(key)) {
@@ -119,7 +122,7 @@ const processWhere = (where, ctx) => {
   const filters = {};
 
   // for each key in where
-  for (const key in where) {
+  for (const key of Object.keys(where)) {
     const value = where[key];
 
     // if operator $and $or then loop over them
@@ -206,12 +209,12 @@ const applyOperator = (qb, column, operator, value) => {
     }
 
     case '$in': {
-      qb.whereIn(column, _.castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : _.castArray(value));
       break;
     }
 
     case '$notIn': {
-      qb.whereNotIn(column, _.castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : _.castArray(value));
       break;
     }
 
@@ -282,8 +285,16 @@ const applyOperator = (qb, column, operator, value) => {
       qb.where(column, 'like', `${value}%`);
       break;
     }
+    case '$startsWithi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}%`]);
+      break;
+    }
     case '$endsWith': {
       qb.where(column, 'like', `%${value}`);
+      break;
+    }
+    case '$endsWithi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
       break;
     }
     case '$contains': {

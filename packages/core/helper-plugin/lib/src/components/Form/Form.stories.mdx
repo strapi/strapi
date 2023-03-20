@@ -2,10 +2,10 @@
 
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { Main, Row } from '@strapi/design-system';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
+import { TextInput } from '@strapi/design-system';
+import { Button } from '@strapi/design-system';
+import { Box } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Form from './';
@@ -24,9 +24,7 @@ This component is used to display a Formik form with additionnal error handling 
       <Formik
         initialValues={{ email: '' }}
         validationSchema={Yup.object().shape({
-          email: Yup.string()
-            .email('Invalid email')
-            .required('Required'),
+          email: Yup.string().email('Invalid email').required('Required'),
         })}
       >
         {({ handleSubmit, values, errors, handleChange }) => (
@@ -58,9 +56,7 @@ Make sure to run this story in detached mode. The embeded iframe breaks the focu
       <Formik
         initialValues={{ email: '' }}
         validationSchema={Yup.object().shape({
-          email: Yup.string()
-            .email('Invalid email')
-            .required('Required'),
+          email: Yup.string().email('Invalid email').required('Required'),
         })}
         validateOnChange={false}
       >

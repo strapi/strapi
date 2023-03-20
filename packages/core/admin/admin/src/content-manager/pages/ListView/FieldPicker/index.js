@@ -2,8 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Box } from '@strapi/design-system/Box';
+import { Select, Option, Box } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
 import { onChangeListHeaders } from '../actions';
 import { selectDisplayedHeaders } from '../selectors';
@@ -85,7 +84,6 @@ FieldPicker.propTypes = {
       metadatas: PropTypes.object.isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,

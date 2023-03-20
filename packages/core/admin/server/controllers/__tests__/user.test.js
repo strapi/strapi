@@ -65,6 +65,38 @@ describe('User Controller', () => {
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
     });
+
+    test('Create User Successfully with camelCase email', async () => {
+      const camelCaseBody = { ...body, email: 'kAiDoE@CamelCaSE.com' };
+      const create = jest.fn(() => Promise.resolve(camelCaseBody));
+      const exists = jest.fn(() => Promise.resolve(false));
+      const sanitizeUser = jest.fn((user) => Promise.resolve(user));
+      const created = jest.fn();
+      const ctx = createContext({ body: camelCaseBody }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            user: {
+              exists,
+              create,
+              sanitizeUser,
+            },
+          },
+        },
+      };
+
+      await userController.create(ctx);
+
+      const lowerEmail = camelCaseBody.email.toLowerCase();
+      expect(exists).toHaveBeenCalledWith({ email: lowerEmail });
+      expect(create).toHaveBeenCalledWith({
+        ...camelCaseBody,
+        email: lowerEmail,
+      });
+      expect(sanitizeUser).toHaveBeenCalled();
+      expect(created).toHaveBeenCalled();
+    });
   });
 
   describe('Find a user by its ID', () => {
@@ -142,13 +174,29 @@ describe('User Controller', () => {
         pagination,
       }));
 
+      const state = {
+        userAbility: {
+          can: jest.fn(),
+          cannot: jest.fn(() => false),
+        },
+      };
+
       const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({});
+      ctx.state = state;
+
+      const createPermissionsManager = jest.fn(() => ({
+        ability: state.userAbility,
+        sanitizeQuery: (query) => query,
+      }));
 
       global.strapi = {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            permission: {
+              createPermissionsManager,
+            },
           },
         },
       };
@@ -167,13 +215,30 @@ describe('User Controller', () => {
         pagination,
       }));
 
+      const state = {
+        userAbility: {
+          can: jest.fn(),
+          cannot: jest.fn(() => false),
+        },
+      };
+
       const sanitizeUser = jest.fn((user) => user);
       const ctx = createContext({ query: { _q: 'foo' } });
+
+      ctx.state = state;
+
+      const createPermissionsManager = jest.fn(() => ({
+        ability: state.userAbility,
+        sanitizeQuery: (query) => query,
+      }));
 
       global.strapi = {
         admin: {
           services: {
             user: { findPage, sanitizeUser },
+            permission: {
+              createPermissionsManager,
+            },
           },
         },
       };

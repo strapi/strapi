@@ -5,16 +5,20 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Check from '@strapi/icons/Check';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
+import {
+  Box,
+  Divider,
+  Layout,
+  HeaderLayout,
+  ContentLayout,
+  Main,
+  Button,
+} from '@strapi/design-system';
+import { Check, ArrowLeft } from '@strapi/icons';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
@@ -35,12 +39,12 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
   const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
+  const isModalFormOpen = !isEmpty(fieldForm);
+
   const { attributes } = layout;
   const displayedFields = modifiedData.layouts.list;
 
@@ -110,19 +114,16 @@ const ListSettingsView = ({ layout, slug }) => {
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
     });
-    toggleModalForm();
   };
 
   const handleCloseModal = () => {
     dispatch({
       type: 'UNSET_FIELD_TO_EDIT',
     });
-    toggleModalForm();
   };
 
   const handleSubmitFieldEdit = (e) => {
     e.preventDefault();
-    toggleModalForm();
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });

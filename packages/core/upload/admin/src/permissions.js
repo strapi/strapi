@@ -33,6 +33,7 @@ const pluginPermissions = {
     },
   ],
   read: [{ action: 'plugin::upload.read', subject: null }],
+  configureView: [{ action: 'plugin::upload.configure-view', subject: null }],
   settings: [{ action: 'plugin::upload.settings.read', subject: null }],
   update: [{ action: 'plugin::upload.assets.update', subject: null, fields: null }],
 };

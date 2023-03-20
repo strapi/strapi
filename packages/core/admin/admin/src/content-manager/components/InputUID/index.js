@@ -1,15 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useFetchClient } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
-import Refresh from '@strapi/icons/Refresh';
-import CheckCircle from '@strapi/icons/CheckCircle';
-import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
-import Loader from '@strapi/icons/Loader';
-import { axiosInstance } from '../../../core/utils';
+import { TextInput, Typography } from '@strapi/design-system';
+import { Refresh, CheckCircle, ExclamationMarkCircle, Loader } from '@strapi/icons';
 import { getRequestUrl } from '../../utils';
 import useDebounce from './useDebounce';
 import UID_REGEX from './regex';
@@ -23,7 +18,7 @@ import {
 const InputUID = ({
   attribute,
   contentTypeUID,
-  description,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -46,6 +41,7 @@ const InputUID = ({
   const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
   const [isCustomized, setIsCustomized] = useState(false);
   const [regenerateLabel, setRegenerateLabel] = useState(null);
+  const { post } = useFetchClient();
 
   const label = intlLabel.id
     ? formatMessage(
@@ -53,13 +49,6 @@ const InputUID = ({
         { ...intlLabel.values }
       )
     : name;
-
-  const hint = description
-    ? formatMessage(
-        { id: description.id, defaultMessage: description.defaultMessage },
-        { ...description.values }
-      )
-    : '';
 
   const formattedPlaceholder = placeholder
     ? formatMessage(
@@ -74,7 +63,7 @@ const InputUID = ({
     try {
       const {
         data: { data },
-      } = await axiosInstance.post(requestURL, {
+      } = await post(requestURL, {
         contentTypeUID,
         field: name,
         data: modifiedData,
@@ -96,7 +85,7 @@ const InputUID = ({
     }
 
     try {
-      const { data } = await axiosInstance.post(requestURL, {
+      const { data } = await post(requestURL, {
         contentTypeUID,
         field: name,
         value: value ? value.trim() : '',
@@ -251,11 +240,6 @@ InputUID.propTypes = {
     required: PropTypes.bool,
   }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -273,16 +257,17 @@ InputUID.propTypes = {
     values: PropTypes.object,
   }),
   required: PropTypes.bool,
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 InputUID.defaultProps = {
-  description: undefined,
   disabled: false,
   error: undefined,
   labelAction: undefined,
   placeholder: undefined,
   value: '',
   required: false,
+  hint: '',
 };
 
 export default InputUID;

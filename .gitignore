@@ -68,6 +68,7 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
+!.github/workflows/db/**/*.sql
 *.sqlite
 
 
@@ -79,6 +80,7 @@ $RECYCLE.BIN/
 .idea
 nbproject
 .vscode/
+.eslintcache
 
 
 ############################

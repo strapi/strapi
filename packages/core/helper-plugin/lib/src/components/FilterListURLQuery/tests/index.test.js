@@ -5,13 +5,45 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import qs from 'qs';
 import FilterListURLQuery from '../index';
+
+// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
+// before AM/PM in the dates, after the introduction of node 18.13
+jest.mock('react-intl', () => {
+  const reactIntl = jest.requireActual('react-intl');
+  const intl = reactIntl.createIntl({
+    locale: 'en',
+    messages: {
+      'components.FilterOptions.FILTER_TYPES.$eq': 'is',
+      'components.FilterOptions.FILTER_TYPES.$ne': 'is not',
+      'components.FilterOptions.FILTER_TYPES.$contains': 'contains (case sensitive)',
+      'components.FilterOptions.FILTER_TYPES.$notContains': 'does not contain (case sensitive)',
+      'components.FilterOptions.FILTER_TYPES.$gt': 'is greater than',
+      'components.FilterOptions.FILTER_TYPES.$gte': 'is greater than or equal to',
+      'components.FilterOptions.FILTER_TYPES.$lt': 'is lower than',
+      'components.FilterOptions.FILTER_TYPES.$lte': 'is lower than or equal to',
+      'components.FilterOptions.FILTER_TYPES.$startsWith': 'starts with',
+      'components.FilterOptions.FILTER_TYPES.$endsWith': 'ends with',
+      'components.FilterOptions.FILTER_TYPES.$null': 'is null',
+      'components.FilterOptions.FILTER_TYPES.$notNull': 'is not null',
+    },
+    textComponent: 'span',
+  });
+
+  intl.formatDate = jest.fn(() => 'Wednesday, September 1, 2021');
+  intl.formatTime = jest.fn(() => '12:45 AM');
+
+  return {
+    ...reactIntl,
+    useIntl: () => intl,
+  };
+});
 
 const makeApp = (history, filtersSchema) => (
   <Router history={history}>
@@ -131,5 +163,42 @@ describe('<FilterListURLQuery />', () => {
     const { container } = render(makeApp(history, filtersSchema));
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('displays the label for a custom input providing options with custom values', () => {
+    const history = createMemoryHistory();
+    const displayedFilters = [
+      {
+        name: 'action',
+        metadatas: {
+          label: 'Action',
+          options: [
+            { label: 'Create entry', customValue: 'entry.create' },
+            { label: 'Update entry', customValue: 'entry.update' },
+            { label: 'Delete entry', customValue: 'entry.delete' },
+          ],
+          customInput: jest.fn(),
+        },
+        fieldSchema: { type: 'enumeration' },
+      },
+    ];
+    const search = {
+      filters: {
+        $and: [
+          {
+            action: {
+              $eq: 'entry.create',
+            },
+          },
+        ],
+      },
+    };
+    history.push({
+      pathname: '/',
+      search: qs.stringify(search),
+    });
+
+    render(makeApp(history, displayedFilters));
+    expect(screen.getByRole('button', { name: /action is create entry/i })).toBeVisible();
   });
 });

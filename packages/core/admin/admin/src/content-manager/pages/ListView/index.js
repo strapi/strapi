@@ -5,45 +5,55 @@ import { connect } from 'react-redux';
 import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import get from 'lodash/get';
 import { stringify } from 'qs';
+import axios from 'axios';
+
 import {
   NoPermissions,
   CheckPermissions,
   SearchURLQuery,
+  useFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBACProvider,
   useTracking,
   Link,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Button } from '@strapi/design-system/Button';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Plus from '@strapi/icons/Plus';
-import Cog from '@strapi/icons/Cog';
-import axios from 'axios';
-import { axiosInstance } from '../../../core/utils';
-import { InjectionZone } from '../../../shared/components';
+
+import {
+  IconButton,
+  Main,
+  Box,
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  useNotifyAT,
+  Button,
+} from '@strapi/design-system';
+
+import { ArrowLeft, Plus, Cog } from '@strapi/icons';
+
 import DynamicTable from '../../components/DynamicTable';
+import AttributeFilter from '../../components/AttributeFilter';
+import { InjectionZone } from '../../../shared/components';
+
 import permissions from '../../../permissions';
+
 import { getRequestUrl, getTrad } from '../../utils';
+
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
-import AttributeFilter from '../../components/AttributeFilter';
 
 const cmPermissions = permissions.contentManager;
 
-const IconButtonCustom = styled(IconButton)`
+const ConfigureLayoutBox = styled(Box)`
   svg {
     path {
       fill: ${({ theme }) => theme.colors.neutral900};
@@ -51,7 +61,6 @@ const IconButtonCustom = styled(IconButton)`
   }
 `;
 
-/* eslint-disable react/no-array-index-key */
 function ListView({
   canCreate,
   canDelete,
@@ -78,6 +87,7 @@ function ListView({
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   useFocusWhenNavigate();
 
@@ -90,6 +100,8 @@ function ListView({
   const { formatMessage } = useIntl();
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  const fetchClient = useFetchClient();
+  const { post, del } = fetchClient;
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -105,7 +117,7 @@ function ListView({
 
         const {
           data: { results, pagination: paginationResult },
-        } = await axiosInstance.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, opts);
 
         notifyStatus(
           formatMessage(
@@ -140,20 +152,19 @@ function ListView({
           return;
         }
 
-        console.error(err);
         toggleNotification({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification]
+    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
   );
 
   const handleConfirmDeleteAllData = useCallback(
     async (ids) => {
       try {
-        await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
         });
 
@@ -163,17 +174,17 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: formatAPIError(err),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification]
+    [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
-        await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
         fetchData(requestUrl);
@@ -183,19 +194,13 @@ function ListView({
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message: formatAPIError(err),
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
   useEffect(() => {
@@ -214,7 +219,6 @@ function ListView({
 
       source.cancel('Operation canceled by the user.');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const defaultHeaderLayoutTitle = formatMessage({
@@ -240,16 +244,18 @@ function ListView({
     canCreate ? (
       <Button
         {...props}
+        forwardedAs={ReactRouterLink}
         onClick={() => {
           const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
           trackUsageRef.current('willCreateEntry', trackerProperty);
-          push({
-            pathname: `${pathname}/create`,
-            search: query.plugins ? pluginsQueryParams : '',
-          });
+        }}
+        to={{
+          pathname: `${pathname}/create`,
+          search: query.plugins ? pluginsQueryParams : '',
         }}
         startIcon={<Plus />}
+        style={{ textDecoration: 'none' }}
       >
         {formatMessage({
           id: getTrad('HeaderLayout.button.label-add-entry'),
@@ -283,20 +289,20 @@ function ListView({
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
               <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
-                <Box paddingTop={1} paddingBottom={1}>
-                  <IconButtonCustom
+                <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
+                  <IconButton
                     onClick={() => {
                       trackUsage('willEditListLayout');
-
-                      push({ pathname: `${slug}/configurations/list`, search: pluginsQueryParams });
                     }}
+                    forwardedAs={ReactRouterLink}
+                    to={{ pathname: `${slug}/configurations/list`, search: pluginsQueryParams }}
                     icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
                   />
-                </Box>
+                </ConfigureLayoutBox>
               </CheckPermissions>
             </>
           }
@@ -361,7 +367,6 @@ ListView.propTypes = {
       info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,

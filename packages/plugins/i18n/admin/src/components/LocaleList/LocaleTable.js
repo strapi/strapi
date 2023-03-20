@@ -1,12 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Stack } from '@strapi/design-system/Stack';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Table, Thead, Tr, Th, Td, Tbody } from '@strapi/design-system/Table';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
+import {
+  Typography,
+  IconButton,
+  Flex,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Td,
+  Tbody,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
@@ -62,12 +68,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               </Typography>
             </Td>
             <Td>
-              <Stack
-                horizontal
-                spacing={1}
-                style={{ justifyContent: 'flex-end' }}
-                {...stopPropagation}
-              >
+              <Flex gap={1} justifyContent="flex-end" {...stopPropagation}>
                 {onEditLocale && (
                   <IconButton
                     onClick={() => onEditLocale(locale)}
@@ -84,7 +85,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
                     noBorder
                   />
                 )}
-              </Stack>
+              </Flex>
             </Td>
           </Tr>
         ))}

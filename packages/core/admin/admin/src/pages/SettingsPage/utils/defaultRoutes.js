@@ -1,25 +1,33 @@
-import RolesCreatePage from 'ee_else_ce/pages/SettingsPage/pages/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/pages/SettingsPage/pages/Roles/ProtectedListPage';
-
 const defaultRoutes = [
   {
-    Component() {
-      return { default: ProtectedRolesListPage };
-    },
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-roles-list" */ '../pages/Roles/ProtectedListPage'
+      );
 
+      return component;
+    },
     to: '/settings/roles',
     exact: true,
   },
   {
-    Component() {
-      return { default: RolesCreatePage };
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+      );
+
+      return component;
     },
     to: '/settings/roles/duplicate/:id',
     exact: true,
   },
   {
-    Component() {
-      return { default: RolesCreatePage };
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+      );
+
+      return component;
     },
     to: '/settings/roles/new',
     exact: true,
@@ -121,6 +129,39 @@ const defaultRoutes = [
       return component;
     },
     to: '/settings/api-tokens/:id',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-create-page" */ '../pages/TransferTokens/ProtectedCreateView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens/create',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-list-page" */ '../pages/TransferTokens/ProtectedListView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens',
+    exact: true,
+  },
+  {
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "transfer-tokens-edit-page" */ '../pages/TransferTokens/ProtectedEditView'
+      );
+
+      return component;
+    },
+    to: '/settings/transfer-tokens/:id',
     exact: true,
   },
 ];

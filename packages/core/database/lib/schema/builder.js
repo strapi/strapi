@@ -316,7 +316,7 @@ const createHelpers = (db) => {
         debug(`Creating column ${addedColumn.name}`);
 
         if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
-          tableBuilder.integer(addedColumn.name).unsigned().notNullable();
+          tableBuilder.integer(addedColumn.name).unsigned();
           tableBuilder.primary(addedColumn.name);
         } else {
           createColumn(tableBuilder, addedColumn);

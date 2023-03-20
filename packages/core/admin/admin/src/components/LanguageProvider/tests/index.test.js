@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useIntl } from 'react-intl';
 import useLocalesProvider from '../../LocalesProvider/useLocalesProvider';
 import LanguageProvider from '../index';
@@ -54,9 +53,7 @@ describe('LanguageProvider', () => {
 
     expect(screen.getByText('English')).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(screen.getByText('CHANGE'));
-    });
+    fireEvent.click(screen.getByText('CHANGE'));
 
     expect(screen.getByText('Français')).toBeInTheDocument();
     expect(localStorage.getItem('strapi-admin-language')).toEqual('fr');

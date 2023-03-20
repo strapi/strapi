@@ -27,8 +27,6 @@ module.exports = ({ strapi }) => ({
       queryParams.push(String(i), '');
     }
 
-    const knex = strapi.db.connection;
-
     /*
       The following query goal is to count the number of folders with depth 1, depth 2 etc.
       The query returns :
@@ -49,9 +47,10 @@ module.exports = ({ strapi }) => ({
     */
 
     const folderLevelsArray = (
-      await knex(folderTable)
+      await strapi.db
+        .getConnection(folderTable)
         .select(
-          knex.raw(
+          strapi.db.connection.raw(
             `LENGTH(${keepOnlySlashesSQLString}) AS depth, COUNT(*) AS occurence`,
             queryParams
           )
@@ -92,7 +91,9 @@ module.exports = ({ strapi }) => ({
 
   async sendMetrics() {
     const metrics = await this.computeMetrics();
-    strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
+    strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', {
+      groupProperties: { metrics },
+    });
 
     const metricsInfoStored = await getMetricsStoreValue();
     await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });

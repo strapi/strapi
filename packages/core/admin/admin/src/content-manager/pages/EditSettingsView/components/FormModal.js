@@ -7,11 +7,11 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Grid } from '@strapi/design-system/Grid';
+  Typography,
+  Button,
+  Flex,
+  Grid,
+} from '@strapi/design-system';
 import styled from 'styled-components';
 import { getTrad } from '../../../utils';
 import { useLayoutDnd } from '../../../hooks';
@@ -26,7 +26,7 @@ const HeaderContainer = styled(Flex)`
   }
 `;
 
-const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => {
+const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, customFieldUid }) => {
   const { selectedField } = useLayoutDnd();
   const { formatMessage } = useIntl();
 
@@ -47,7 +47,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => 
       <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
-            <FieldTypeIcon type={getAttrType(type)} />
+            <FieldTypeIcon type={getAttrType()} customFieldUid={customFieldUid} />
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
               {formatMessage(
                 {
@@ -81,7 +81,12 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => 
   );
 };
 
+FormModal.defaultProps = {
+  customFieldUid: null,
+};
+
 FormModal.propTypes = {
+  customFieldUid: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   onMetaChange: PropTypes.func.isRequired,

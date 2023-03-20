@@ -78,7 +78,7 @@ module.exports = ({ strapi }) => {
       return user;
     }
 
-    if (users.length > 1 && advancedSettings.unique_email) {
+    if (users.length && advancedSettings.unique_email) {
       throw new Error('Email is already taken.');
     }
 

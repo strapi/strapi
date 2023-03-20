@@ -1,42 +1,49 @@
-import React, { useState } from 'react';
+import {
+  Badge,
+  Box,
+  Flex,
+  Loader,
+  MenuItem,
+  SimpleMenu,
+  Typography,
+  useNotifyAT,
+} from '@strapi/design-system';
+import { stopPropagation, useFetchClient } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { useQuery } from 'react-query';
+import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Badge } from '@strapi/design-system/Badge';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
+import { useQuery } from 'react-query';
 import styled from 'styled-components';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { stopPropagation } from '@strapi/helper-plugin';
-import CellValue from '../CellValue';
-import { axiosInstance } from '../../../../../core/utils';
 import { getRequestUrl, getTrad } from '../../../../utils';
+import CellValue from '../CellValue';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 500px;
 `;
 
-const fetchRelation = async (endPoint, notifyStatus) => {
+const fetchRelation = async (endPoint, notifyStatus, get) => {
   const {
     data: { results, pagination },
-  } = await axiosInstance.get(endPoint);
+  } = await get(endPoint);
 
   notifyStatus();
 
   return { results, pagination };
 };
 
-const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
+const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
+  const relationFetchEndpoint = useMemo(
+    () => getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`),
+    [entityId, name, contentType]
+  );
   const [isOpen, setIsOpen] = useState(false);
+  const { get } = useFetchClient();
 
   const Label = (
-    <>
-      <Badge>{value.count}</Badge>{' '}
+    <Flex gap={1} wrap="nowrap">
+      <Badge>{value.count}</Badge>
       {formatMessage(
         {
           id: 'content-manager.containers.ListPage.items',
@@ -44,7 +51,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
         },
         { number: value.count }
       )}
-    </>
+    </Flex>
   );
 
   const notify = () => {
@@ -56,11 +63,15 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
   };
 
   const { data, status } = useQuery(
-    [fieldSchema.targetModel, rowId],
-    () => fetchRelation(requestURL, notify),
+    [fieldSchema.targetModel, entityId],
+    () => fetchRelation(relationFetchEndpoint, notify, get),
     {
       enabled: isOpen,
       staleTime: 0,
+      select: (data) => ({
+        ...data,
+        results: [...data.results].reverse(),
+      }),
     }
   );
 
@@ -104,7 +115,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >
-                <Typography>...</Typography>
+                <Typography>…</Typography>
               </MenuItem>
             )}
           </>
@@ -115,6 +126,9 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
 };
 
 RelationMultiple.propTypes = {
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   fieldSchema: PropTypes.shape({
     relation: PropTypes.string,
     targetModel: PropTypes.string,
@@ -127,8 +141,7 @@ RelationMultiple.propTypes = {
     }),
   }).isRequired,
   name: PropTypes.string.isRequired,
-  rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }).isRequired,
+  entityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   value: PropTypes.object.isRequired,
 };
 

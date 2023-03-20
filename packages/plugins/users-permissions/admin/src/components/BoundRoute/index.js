@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Box, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
@@ -23,7 +21,7 @@ function BoundRoute({ route }) {
   const colors = getMethodColor(route.method);
 
   return (
-    <Stack spacing={2}>
+    <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="delta" as="h3">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
@@ -35,7 +33,7 @@ function BoundRoute({ route }) {
           .{action}
         </Typography>
       </Typography>
-      <Stack horizontal hasRadius background="neutral0" borderColor="neutral200" spacing={0}>
+      <Flex hasRadius background="neutral0" borderColor="neutral200" gap={0}>
         <MethodBox background={colors.background} borderColor={colors.border} padding={2}>
           <Typography fontWeight="bold" textColor={colors.text}>
             {method}
@@ -48,8 +46,8 @@ function BoundRoute({ route }) {
             </Typography>
           ))}
         </Box>
-      </Stack>
-    </Stack>
+      </Flex>
+    </Flex>
   );
 }
 
