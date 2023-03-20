@@ -144,7 +144,7 @@
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
-    "glob": "7.2.3",
+    "glob": "8.0.3",
     "msw": "1.0.1",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
