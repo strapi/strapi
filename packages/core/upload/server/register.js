@@ -25,7 +25,13 @@ module.exports = async ({ strapi }) => {
   }
 
   if (strapi.plugin('documentation')) {
-    strapi.plugin('documentation').service('documentation').registerDoc(spec, 'upload');
+    strapi
+      .plugin('documentation')
+      .service('override')
+      .registerOverride(spec, {
+        pluginOrigin: 'upload',
+        excludeFromGeneration: ['upload'],
+      });
   }
 };
 

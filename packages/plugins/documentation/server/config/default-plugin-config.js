@@ -19,9 +19,8 @@ module.exports = {
   },
   'x-strapi-config': {
     path: '/documentation',
-    showGeneratedFiles: true,
-    generateDefaultResponse: true,
     plugins: null,
+    customizer: null,
   },
   servers: [],
   externalDocs: {

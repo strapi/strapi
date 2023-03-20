@@ -11,7 +11,6 @@ const defaultOpenApiComponents = require('./utils/default-openapi-components');
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
 module.exports = ({ strapi }) => {
-  console.log('documentation arg', strapi.config.get());
   const config = strapi.config.get('plugin.documentation');
   const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
 
@@ -19,12 +18,17 @@ module.exports = ({ strapi }) => {
 
   return {
     /**
-     * @TODO: Make both parameters required in next major release
-     * @param {*} doc - The openapi specifcation to override
-     * @param {*} pluginOrigin - The name of the plugin that is overriding the documentation
+     *
+     * @deprecated
+     * registerDoc is deprecated it will be removed in the next major release,
+     * use strapi.plugin('documentation').service('override').registerOverride instead
+     * @param {object} doc - The openapi specifcation to override
+     * @param {object} options - The options to override the documentation
+     * @param {string} options.pluginOrigin - The name of the plugin that is overriding the documentation
+     * @param {string[]} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
      */
-    registerDoc(doc, pluginOrigin) {
-      overrideService.registerDoc(doc, pluginOrigin);
+    registerDoc(doc, options) {
+      overrideService.registerOverride(doc, options);
     },
 
     getDocumentationVersion() {
@@ -133,7 +137,10 @@ module.exports = ({ strapi }) => {
       let paths = {};
       let schemas = {};
       const apis = this.getPluginAndApiInfo();
-      for (const api of apis) {
+      const apisThatNeedGeneratedDocumentation = apis.filter(
+        ({ name }) => !overrideService.excludedApisAndPlugins.includes(name)
+      );
+      for (const api of apisThatNeedGeneratedDocumentation) {
         const apiName = api.name;
         // TODO: check if this is necessary
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
@@ -169,40 +176,51 @@ module.exports = ({ strapi }) => {
       // Set config defaults
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
-      _.set(config, 'servers', [
-        {
-          url: `${serverUrl}${apiPath}`,
-          description: 'Development server',
-        },
-      ]);
+      // When no servers found set the default
+      if (config.servers.length === 0) {
+        _.set(config, 'servers', [
+          {
+            url: `${serverUrl}${apiPath}`,
+            description: 'Development server',
+          },
+        ]);
+      }
       _.set(config, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(config, ['info', 'version'], version);
       _.set(config, ['x-strapi-config', 'plugins'], pluginsThatNeedDocumentation);
-      // Prepare final doc with default config and generated paths
-      const finalDoc = { ...config, paths };
-      // Add the default components to the final doc
-      _.set(finalDoc, 'components', defaultOpenApiComponents);
+      // Get the documentation customizer
+      const documentationCustomizer = _.get(config, ['x-strapi-config', 'customizer']);
+      // Delete it from the config so it doesn't end up in the spec
+      _.unset(config, ['x-strapi-config', 'customizer']);
+      // Prepare the document to be written with default config and generated paths
+      const generatedDocumentation = { ...config, paths };
+      // Add the default components to the document to be written
+      _.set(generatedDocumentation, 'components', defaultOpenApiComponents);
       // Merge the generated component schemas with the defaults
-      _.merge(finalDoc.components, { schemas });
+      _.merge(generatedDocumentation.components, { schemas });
       // Apply the the registered overrides
-      overrideService.registeredDocs.forEach((doc) => {
-        // Merge ovveride tags with the generated tags
-        finalDoc.tags = finalDoc.tags || [];
-        finalDoc.tags.push(...(doc.tags || []));
+      overrideService.registeredOverrides.forEach((doc) => {
+        // Merge override tags with the generated tags
+        generatedDocumentation.tags = generatedDocumentation.tags || [];
+        generatedDocumentation.tags.push(...(doc.tags || []));
         // Merge override paths with the generated paths
         // The override will add a new path or replace the value of an existing path
-        _.assign(finalDoc.paths, doc.paths);
+        _.assign(generatedDocumentation.paths, doc.paths);
         // Add components
         _.forEach(doc.components || {}, (val, key) => {
-          finalDoc.components[key] = finalDoc.components[key] || {};
+          generatedDocumentation.components[key] = generatedDocumentation.components[key] || {};
           // Merge override components with the generated components,
           // The override will add a new component or replace the value of an existing component
-          _.assign(finalDoc.components[key], val);
+          _.assign(generatedDocumentation.components[key], val);
         });
       });
+      // Escape hatch, allow the user to provide a customizer function that can manipulate
+      // the generated documentation before it is written to the file system
+      const finalDocumentation = documentationCustomizer
+        ? documentationCustomizer(_.cloneDeep(generatedDocumentation))
+        : generatedDocumentation;
 
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, finalDocumentation, { spaces: 2 });
     },
   };
 };

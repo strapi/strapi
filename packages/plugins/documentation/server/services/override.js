@@ -3,36 +3,49 @@
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
 module.exports = ({ strapi }) => {
-  const registeredDocs = [];
+  const registeredOverrides = [];
+  const excludedApisAndPlugins = [];
+  /**
+   *
+   * @param {string | string[]} api - The name of the api or and array of apis to exclude from generation
+   */
+  const excludeFromGeneration = (api) => {
+    excludedApisAndPlugins.concat(api);
+  };
+  /**
+   * @TODO pluginOrigin should be required in next major release
+   * @param {object} doc - The openapi specifcation to override
+   * @param {object} options - The options to override the documentation
+   * @param {string} options.pluginOrigin - The name of the plugin that is overriding the documentation
+   * @param {string[]} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
+   */
+  const registerOverride = (override, { pluginOrigin, excludeFromGeneration = [] }) => {
+    const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
+      strapi.config.get('plugin.documentation')
+    );
+    // Don't apply the override if the plugin is not in the list of plugins that need documentation
+    if (pluginOrigin && !pluginsThatNeedDocumentation.includes(pluginOrigin)) return;
+
+    if (excludeFromGeneration.length) {
+      strapi
+        .plugin('documentation')
+        .service('override')
+        .excludeFromGeneration(excludeFromGeneration);
+    }
+
+    let overrideToRegister = override;
+    // Parse yaml if we receive a string
+    if (typeof override === 'string') {
+      overrideToRegister = require('yaml').parse(overrideToRegister);
+    }
+    // receive an object we can register it directly
+    registeredOverrides.push(overrideToRegister);
+  };
 
   return {
-    registeredDocs,
-    registerDoc(doc, pluginOrigin) {
-      const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
-        strapi.config.get('plugin.documentation')
-      );
-      console.log('adding override from', pluginOrigin, doc);
-      let registeredDoc = doc;
-
-      if (pluginOrigin) {
-        if (!pluginsThatNeedDocumentation.includes(pluginOrigin)) {
-          return strapi.log.info(
-            `@strapi/documentation will not use the override provided by ${pluginOrigin} since the plugin was not specified in the x-strapi-config.plugins array`
-          );
-        }
-      } else {
-        strapi.log.warn(
-          '@strapi/documentation received an override that did not specify its origin, this could cause unexpected schema generation'
-        );
-      }
-
-      // parseYaml
-      if (typeof doc === 'string') {
-        registeredDoc = require('yaml').parse(registeredDoc);
-      }
-      // receive an object we can register it directly
-      registeredDocs.push(registeredDoc);
-      console.log('adding override', registeredDocs);
-    },
+    registeredOverrides,
+    registerOverride,
+    excludeFromGeneration,
+    excludedApisAndPlugins,
   };
 };
