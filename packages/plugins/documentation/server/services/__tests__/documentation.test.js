@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash/fp');
 const fse = require('fs-extra');
 const SwaggerParser = require('@apidevtools/swagger-parser');
 const { api, plugins, components, contentTypes } = require('../__mocks__/mock-strapi-data');
@@ -71,7 +72,8 @@ describe('Documentation service', () => {
     const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
     const mockFinalDoc = lastMockCall[1];
 
-    const validatePromise = SwaggerParser.validate(mockFinalDoc);
+    // The final documenation is read only, clone deep for this test
+    const validatePromise = SwaggerParser.validate(_.cloneDeep(mockFinalDoc));
 
     await expect(validatePromise).resolves.not.toThrow();
   });

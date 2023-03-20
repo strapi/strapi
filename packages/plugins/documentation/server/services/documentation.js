@@ -2,9 +2,9 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const _ = require('lodash');
+const _ = require('lodash/fp');
+const { produce } = require('immer');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
-
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
@@ -32,7 +32,7 @@ module.exports = ({ strapi }) => {
     },
 
     getDocumentationVersion() {
-      return _.get(config, 'info.version');
+      return _.get('info.version', config);
     },
 
     getFullDocumentationPath() {
@@ -58,7 +58,8 @@ module.exports = ({ strapi }) => {
                 path.resolve(this.getFullDocumentationPath(), version, 'full_documentation.json')
               )
             );
-            const generatedDate = _.get(doc, ['info', 'x-generation-date'], null);
+
+            const generatedDate = _.get(['info', 'x-generation-date'], doc);
 
             return { version, generatedDate, url: '' };
           } catch (err) {
@@ -142,6 +143,7 @@ module.exports = ({ strapi }) => {
       );
       for (const api of apisThatNeedGeneratedDocumentation) {
         const apiName = api.name;
+
         // TODO: check if this is necessary
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
         // TODO: check if this is necessary
@@ -176,47 +178,55 @@ module.exports = ({ strapi }) => {
       // Set config defaults
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
-      // When no servers found set the default
-      if (config.servers.length === 0) {
-        _.set(config, 'servers', [
-          {
-            url: `${serverUrl}${apiPath}`,
-            description: 'Development server',
-          },
-        ]);
-      }
-      _.set(config, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(config, ['x-strapi-config', 'plugins'], pluginsThatNeedDocumentation);
-      // Get the documentation customizer
-      const documentationCustomizer = _.get(config, ['x-strapi-config', 'customizer']);
-      // Delete it from the config so it doesn't end up in the spec
-      _.unset(config, ['x-strapi-config', 'customizer']);
-      // Prepare the document to be written with default config and generated paths
-      const generatedDocumentation = { ...config, paths };
-      // Add the default components to the document to be written
-      _.set(generatedDocumentation, 'components', defaultOpenApiComponents);
-      // Merge the generated component schemas with the defaults
-      _.merge(generatedDocumentation.components, { schemas });
-      // Apply the the registered overrides
-      overrideService.registeredOverrides.forEach((doc) => {
-        // Merge override tags with the generated tags
-        generatedDocumentation.tags = generatedDocumentation.tags || [];
-        generatedDocumentation.tags.push(...(doc.tags || []));
-        // Merge override paths with the generated paths
-        // The override will add a new path or replace the value of an existing path
-        _.assign(generatedDocumentation.paths, doc.paths);
-        // Add components
-        _.forEach(doc.components || {}, (val, key) => {
-          generatedDocumentation.components[key] = generatedDocumentation.components[key] || {};
-          // Merge override components with the generated components,
-          // The override will add a new component or replace the value of an existing component
-          _.assign(generatedDocumentation.components[key], val);
+      const generatedDocumentation = produce(config, (draft) => {
+        // When no servers found set the default
+        if (draft.servers.length === 0) {
+          draft.servers = [
+            {
+              url: `${serverUrl}${apiPath}`,
+              description: 'Development server',
+            },
+          ];
+        }
+
+        draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
+        // Delete it from the config so it doesn't end up in the spec
+        delete draft['x-strapi-config'].customizer;
+
+        // Set the generated paths
+        draft.paths = paths;
+        // Merge the generated component schemas with the defaults
+        draft.components = _.merge(defaultOpenApiComponents, { schemas });
+
+        overrideService.registeredOverrides.forEach((doc) => {
+          if (doc.tags) {
+            // Merge override tags with the generated tags
+            draft.tags = draft.tags || [];
+            draft.tags.push(...doc.tags);
+          }
+
+          if (doc.paths) {
+            // Merge override paths with the generated paths
+            // The override will add a new path or replace the value of an existing path
+            draft.paths = { ...draft.paths, ...doc.paths };
+          }
+
+          if (doc.components) {
+            Object.entries(doc.components).forEach(([key, val]) => {
+              draft.components[key] = draft.components[key] || {};
+              // Merge override components with the generated components,
+              // The override will add a new component or replace the value of an existing component
+              draft.components[key] = { ...draft.components[key], ...val };
+            });
+          }
         });
       });
+      // Get the documentation customizer
+      const documentationCustomizer = config['x-strapi-config'].customizer;
       // Escape hatch, allow the user to provide a customizer function that can manipulate
       // the generated documentation before it is written to the file system
       const finalDocumentation = documentationCustomizer
-        ? documentationCustomizer(_.cloneDeep(generatedDocumentation))
+        ? produce(generatedDocumentation, documentationCustomizer)
         : generatedDocumentation;
 
       await fs.ensureFile(fullDocJsonPath);
