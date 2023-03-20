@@ -16,10 +16,11 @@ function assertUrlProtocol(url) {
 
 module.exports = {
   init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
-    if (legacyS3Options)
+    if (legacyS3Options) {
       process.emitWarning(
         "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
       );
+    }
 
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
@@ -29,11 +30,11 @@ module.exports = {
 
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
-    function getFileKey(file) {
+    const getFileKey = (file) => {
       const path = file.path ? `${file.path}/` : '';
 
       return `${filePrefix}${path}${file.hash}${file.ext}`;
-    }
+    };
 
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
