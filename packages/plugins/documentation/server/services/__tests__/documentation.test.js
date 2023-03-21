@@ -319,5 +319,50 @@ describe('Documentation service', () => {
         'test-new-component'
       );
     });
+    it('excludes apis and plugins from generation', async () => {
+      const overrideService = override({ strapi: global.strapi });
+
+      overrideService.excludeFromGeneration('kitchensink');
+
+      global.strapi.plugins.documentation = {
+        service: jest.fn((name) => {
+          const mockServices = {
+            override: overrideService,
+          };
+
+          return mockServices[name];
+        }),
+      };
+
+      const docService = documentation({ strapi: global.strapi });
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+
+      expect(
+        Object.keys(mockFinalDoc.paths).find((path) => path.includes('kitchensink'))
+      ).toBeUndefined();
+      expect(
+        Object.keys(mockFinalDoc.components.schemas).find((compo) => compo.includes('Kitchensink'))
+      ).toBeUndefined();
+    });
+    it("applies a user's customizer function", async () => {
+      global.strapi.config.get = () => ({
+        ...defaultConfig,
+        'x-strapi-config': {
+          ...defaultConfig['x-strapi-config'],
+          customizer(draft) {
+            draft.paths['/kitchensinks'] = { get: { responses: { 200: { description: 'test' } } } };
+          },
+        },
+      });
+      const docService = documentation({ strapi: global.strapi });
+      await docService.generateFullDoc();
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+      expect(mockFinalDoc.paths['/kitchensinks']).toEqual({
+        get: { responses: { 200: { description: 'test' } } },
+      });
+    });
   });
 });
