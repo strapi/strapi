@@ -102,7 +102,6 @@ const traverseEntity = async (visitor, options, entity) => {
         }
         copy[key] = res;
       } else {
-        // need to update copy
         copy[key] = await method(visitor, newPath, value);
       }
 
