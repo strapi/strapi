@@ -15,10 +15,18 @@ const sanitizeOutput = (data, ctx) => {
 
   return sanitize.contentAPI.output(data, schema, { auth });
 };
+const sanitizeQuery = (data, ctx) => {
+  const schema = strapi.getModel(FILE_MODEL_UID);
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.query(data, schema, { auth });
+};
 
 module.exports = {
   async find(ctx) {
-    const files = await getService('upload').findMany(ctx.query);
+    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
+
+    const files = await getService('upload').findMany(sanitizedParams);
 
     ctx.body = await sanitizeOutput(files, ctx);
   },
@@ -26,10 +34,10 @@ module.exports = {
   async findOne(ctx) {
     const {
       params: { id },
-      query: { populate },
     } = ctx;
 
-    const file = await getService('upload').findOne(id, populate);
+    const sanitizedParams = await sanitizeQuery(ctx.query, ctx);
+    const file = await getService('upload').findOne(id, sanitizedParams.populate);
 
     if (!file) {
       return ctx.notFound('file.notFound');

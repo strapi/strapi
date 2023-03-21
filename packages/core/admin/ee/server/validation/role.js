@@ -20,38 +20,46 @@ const rolesDeleteSchema = yup
       .of(yup.strapiID())
       .min(1)
       .required()
-      .test('roles-deletion-checks', 'Roles deletion checks have failed', async function (ids) {
-        try {
-          await strapi.admin.services.role.checkRolesIdForDeletion(ids);
+      .test(
+        'roles-deletion-checks',
+        'Roles deletion checks have failed',
+        async function rolesDeletionChecks(ids) {
+          try {
+            await strapi.admin.services.role.checkRolesIdForDeletion(ids);
 
-          if (features.isEnabled('sso')) {
-            await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
+            if (features.isEnabled('sso')) {
+              await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
+            }
+          } catch (e) {
+            return this.createError({ path: 'ids', message: e.message });
           }
-        } catch (e) {
-          return this.createError({ path: 'ids', message: e.message });
-        }
 
-        return true;
-      }),
+          return true;
+        }
+      ),
   })
   .noUnknown();
 
 const roleDeleteSchema = yup
   .strapiID()
   .required()
-  .test('no-admin-single-delete', 'Role deletion checks have failed', async function (id) {
-    try {
-      await strapi.admin.services.role.checkRolesIdForDeletion([id]);
+  .test(
+    'no-admin-single-delete',
+    'Role deletion checks have failed',
+    async function noAdminSingleDelete(id) {
+      try {
+        await strapi.admin.services.role.checkRolesIdForDeletion([id]);
 
-      if (features.isEnabled('sso')) {
-        await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
+        if (features.isEnabled('sso')) {
+          await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
+        }
+      } catch (e) {
+        return this.createError({ path: 'id', message: e.message });
       }
-    } catch (e) {
-      return this.createError({ path: 'id', message: e.message });
-    }
 
-    return true;
-  });
+      return true;
+    }
+  );
 
 module.exports = {
   validateRoleCreateInput: validateYupSchema(roleCreateSchema),

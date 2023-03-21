@@ -60,7 +60,7 @@ module.exports = {
                 return reject(err);
               }
 
-              file.url = `/uploads/${file.hash}${file.ext}`;
+              file.url = `/${UPLOADS_FOLDER_NAME}/${file.hash}${file.ext}`;
 
               resolve();
             }
