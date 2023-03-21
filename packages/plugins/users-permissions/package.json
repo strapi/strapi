@@ -43,7 +43,7 @@
     "match-sorter": "^4.0.2",
     "prop-types": "^15.7.2",
     "purest": "4.0.2",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "url-join": "4.0.1",
