@@ -89,8 +89,7 @@ module.exports = {
         }
 
         return new Promise((resolve, reject) => {
-          const path = file.path ? `${file.path}/` : '';
-          const fileKey = `${path}${file.hash}${file.ext}`;
+          const fileKey = getFileKey(file);
 
           S3.getSignedUrl(
             'getObject',
