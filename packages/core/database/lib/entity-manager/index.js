@@ -396,11 +396,8 @@ const createEntityManager = (db) => {
 
       const id = res[0].id || res[0];
 
-      // TODO: try strapi.db.transaction(method) instead of trx.get()
       const trx = await strapi.db.transaction();
       try {
-        // TODO: Should we do this here? Or should we do it in the service layer.
-        // TODO: Do this for components too?
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
           if (attr.type === 'relation' && attr.joinTable && !attr.component) {
             acc[attrName] = true;
