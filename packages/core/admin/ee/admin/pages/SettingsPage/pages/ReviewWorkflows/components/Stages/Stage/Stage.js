@@ -12,12 +12,14 @@ import {
   IconButton,
   TextInput,
 } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
 
 import { deleteStage, updateStage } from '../../../actions';
 
 function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = useState(isOpenDefault);
   const fieldIdentifier = `stages.${index}.name`;
   const [field, meta] = useField(fieldIdentifier);
@@ -27,7 +29,13 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
     <Accordion
       size="S"
       variant="primary"
-      onToggle={() => setIsOpen(!isOpen)}
+      onToggle={() => {
+        setIsOpen(!isOpen);
+
+        if (!isOpen) {
+          trackUsage('willEditStage');
+        }
+      }}
       expanded={isOpen}
       shadow="tableShadow"
     >
