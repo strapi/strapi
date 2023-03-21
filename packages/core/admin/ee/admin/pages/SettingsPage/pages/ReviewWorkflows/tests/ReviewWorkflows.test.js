@@ -1,28 +1,57 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import userEvent from '@testing-library/user-event';
-
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import { useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsPage from '..';
 import { reducer } from '../reducer';
-import { useReviewWorkflows } from '../hooks/useReviewWorkflows';
-
-jest.mock('../hooks/useReviewWorkflows', () => ({
-  ...jest.requireActual('../hooks/useReviewWorkflows'),
-  useReviewWorkflows: jest.fn().mockReturnValue(),
-}));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn().mockReturnValue(jest.fn()),
   useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
   // eslint-disable-next-line react/prop-types
-  CheckPagePermissions: ({ children }) => <>{children}</>,
+  CheckPagePermissions({ children }) {
+    return children;
+  },
 }));
+
+let SHOULD_ERROR = false;
+
+const FIXTURE_WORKFLOW = {
+  id: 1,
+  stages: [
+    {
+      id: 1,
+      name: 'stage-1',
+    },
+  ],
+};
+
+const server = setupServer(
+  rest.get('*/review-workflows/workflows', (req, res, ctx) => {
+    return res(
+      ctx.json({
+        data: [FIXTURE_WORKFLOW],
+      })
+    );
+  }),
+
+  rest.put(`*/review-workflows/workflows/${FIXTURE_WORKFLOW.id}/stages`, (req, res, ctx) => {
+    if (SHOULD_ERROR) {
+      return res(ctx.status(500), ctx.json({}));
+    }
+
+    return res(ctx.json({}));
+  })
+);
 
 const client = new QueryClient({
   defaultOptions: {
@@ -53,35 +82,20 @@ const setup = (props) => render(<ComponentFixture {...props} />);
 const user = userEvent.setup();
 
 describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
-  beforeEach(() => {
-    jest.restoreAllMocks();
+  beforeAll(() => {
+    server.listen();
+  });
 
-    useReviewWorkflows.mockReturnValue({
-      workflows: {
-        status: 'success',
-        data: [
-          {
-            id: 1,
-            stages: [
-              {
-                id: 1,
-                name: 'stage-1',
-              },
-            ],
-          },
-        ],
-      },
-    });
+  afterAll(() => {
+    server.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('handle initial loading state', () => {
-    useReviewWorkflows.mockReturnValue({
-      workflows: {
-        status: 'loading',
-        data: [],
-      },
-    });
-
     const { getByText } = setup();
 
     expect(getByText('0 stages')).toBeInTheDocument();
@@ -101,7 +115,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(getByText('stage-1')).toBeInTheDocument();
   });
 
-  test('Save button is disabled by default', async () => {
+  test('Save button is disabled by default', () => {
     const { getByRole } = setup();
 
     const saveButton = getByRole('button', { name: /save/i });
@@ -123,5 +137,84 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     expect(getByText('2 stages')).toBeInTheDocument();
     expect(saveButton.hasAttribute('disabled')).toBeFalsy();
+  });
+
+  test('Successful Stage update', async () => {
+    const toggleNotification = useNotification();
+    const { getByRole } = setup();
+
+    await user.click(
+      getByRole('button', {
+        name: /add new stage/i,
+      })
+    );
+
+    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
+      target: { value: 'stage-2' },
+    });
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /save/i }));
+    });
+
+    expect(toggleNotification).toBeCalledWith({
+      type: 'success',
+      message: expect.any(Object),
+    });
+  });
+
+  test('Stage update with error', async () => {
+    SHOULD_ERROR = true;
+    const toggleNotification = useNotification();
+    const { getByRole } = setup();
+
+    await user.click(
+      getByRole('button', {
+        name: /add new stage/i,
+      })
+    );
+
+    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
+      target: { value: 'stage-2' },
+    });
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /save/i }));
+    });
+
+    expect(toggleNotification).toBeCalledWith({
+      type: 'warning',
+      message: expect.any(String),
+    });
+  });
+
+  test('Does not show a delete button if only stage is left', () => {
+    const { queryByRole } = setup();
+
+    expect(queryByRole('button', { name: /delete stage/i })).not.toBeInTheDocument();
+  });
+
+  test('Show confirmation dialog when a stage was deleted', async () => {
+    const { getByRole, getAllByRole } = setup();
+
+    await user.click(
+      getByRole('button', {
+        name: /add new stage/i,
+      })
+    );
+
+    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
+      target: { value: 'stage-2' },
+    });
+
+    const deleteButtons = getAllByRole('button', { name: /delete stage/i });
+
+    await user.click(deleteButtons[0]);
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /save/i }));
+    });
+
+    expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument();
   });
 });
