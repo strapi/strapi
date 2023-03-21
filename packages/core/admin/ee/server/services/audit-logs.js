@@ -132,7 +132,7 @@ const createAuditLogsService = (strapi) => {
     async register() {
       // Handle license being enabled
       if (!state.eeEnableUnsubscribe) {
-        state.eeEnableUnsubscribe = strapi.eventHub.once('ee.enable', () => {
+        state.eeEnableUnsubscribe = strapi.eventHub.on('ee.enable', () => {
           // Recreate the service to use the new license info
           this.destroy();
           this.register();
@@ -141,7 +141,7 @@ const createAuditLogsService = (strapi) => {
 
       // Handle license being updated
       if (!state.eeUpdateUnsubscribe) {
-        state.eeUpdateUnsubscribe = strapi.eventHub.once('ee.update', () => {
+        state.eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
           // Recreate the service to use the new license info
           this.destroy();
           this.register();
@@ -149,11 +149,16 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Handle license being disabled
-      state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
-        // Turn off service when the license gets disabled
-        // Only ee.enable and ee.update listeners remain active to recreate the service
-        this.destroy();
-      });
+      if (!state.eeDisableUnsubscribe) {
+        state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
+          // Turn off service when the license gets disabled
+          // ee.enable and ee.update listeners remain active to recreate the service
+          this.destroy();
+        });
+      }
+
+      // Register the provider now because collections can't be added later at runtime
+      state.provider = await localProvider.register({ strapi });
 
       // Check current state of license
       if (!features.isEnabled('audit-logs')) {
@@ -161,7 +166,6 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Start saving events
-      state.provider = await localProvider.register({ strapi });
       state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
 
       // Manage audit logs auto deletion

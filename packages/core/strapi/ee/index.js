@@ -112,18 +112,18 @@ const onlineUpdate = async ({ strapi }) => {
       try {
         // Verify license and check if its info changed
         const newLicenseInfo = verifyLicense(license);
-        const fieldsToCompare = ['licenseKey', 'features', 'plan'];
-        const licenseInfoChanged = !isEqual(
-          pick(fieldsToCompare, newLicenseInfo),
-          pick(fieldsToCompare, ee.licenseInfo)
-        );
+        const licenseInfoChanged =
+          !isEqual(newLicenseInfo.features, ee.licenseInfo.features) ||
+          newLicenseInfo.seats !== ee.licenseInfo.seats ||
+          newLicenseInfo.type !== ee.licenseInfo.type;
 
         // Store the new license info
         ee.licenseInfo = newLicenseInfo;
+        const wasEnabled = ee.enabled;
         validateInfo();
 
         // Notify EE features
-        if (licenseInfoChanged) {
+        if (licenseInfoChanged && wasEnabled) {
           strapi.eventHub.emit('ee.update');
         }
       } catch (error) {
