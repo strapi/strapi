@@ -30,7 +30,7 @@
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
     "react": "^17.0.2",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "sqlite3": "5.1.2"
   },
   "strapi": {

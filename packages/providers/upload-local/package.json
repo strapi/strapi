@@ -32,6 +32,8 @@
     "lib": "./lib"
   },
   "scripts": {
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "lint": "eslint ."
   },
   "dependencies": {
