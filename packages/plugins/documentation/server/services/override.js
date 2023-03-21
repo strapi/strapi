@@ -4,13 +4,19 @@ const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-ne
 
 module.exports = ({ strapi }) => {
   const registeredOverrides = [];
-  const excludedApisAndPlugins = [];
+  const excludedFromGeneration = [];
   /**
    *
    * @param {string | string[]} api - The name of the api or and array of apis to exclude from generation
    */
   const excludeFromGeneration = (api) => {
-    excludedApisAndPlugins.concat(api);
+    if (Array.isArray(api)) {
+      excludedFromGeneration.push(...api);
+
+      return;
+    }
+
+    excludedFromGeneration.push(api);
   };
   /**
    * @TODO pluginOrigin should be required in next major release
@@ -46,6 +52,6 @@ module.exports = ({ strapi }) => {
     registeredOverrides,
     registerOverride,
     excludeFromGeneration,
-    excludedApisAndPlugins,
+    excludedFromGeneration,
   };
 };

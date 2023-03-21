@@ -138,8 +138,9 @@ module.exports = ({ strapi }) => {
       let paths = {};
       let schemas = {};
       const apis = this.getPluginAndApiInfo();
+
       const apisThatNeedGeneratedDocumentation = apis.filter(
-        ({ name }) => !overrideService.excludedApisAndPlugins.includes(name)
+        ({ name }) => !overrideService.excludedFromGeneration.includes(name)
       );
       for (const api of apisThatNeedGeneratedDocumentation) {
         const apiName = api.name;
