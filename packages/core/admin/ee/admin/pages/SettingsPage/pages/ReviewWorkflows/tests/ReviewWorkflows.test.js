@@ -77,9 +77,12 @@ const ComponentFixture = () => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
-
-const user = userEvent.setup();
+const setup = (props) => {
+  return {
+    ...render(<ComponentFixture {...props} />),
+    user: userEvent.setup(),
+  };
+};
 
 describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   beforeAll(() => {
@@ -125,7 +128,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Save button is enabled after a stage has been added', async () => {
-    const { getByText, getByRole } = setup();
+    const { user, getByText, getByRole } = setup();
 
     await user.click(
       getByRole('button', {
@@ -141,7 +144,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
   test('Successful Stage update', async () => {
     const toggleNotification = useNotification();
-    const { getByRole } = setup();
+    const { user, getByRole } = setup();
 
     await user.click(
       getByRole('button', {
@@ -166,7 +169,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   test('Stage update with error', async () => {
     SHOULD_ERROR = true;
     const toggleNotification = useNotification();
-    const { getByRole } = setup();
+    const { user, getByRole } = setup();
 
     await user.click(
       getByRole('button', {
@@ -195,7 +198,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Show confirmation dialog when a stage was deleted', async () => {
-    const { getByRole, getAllByRole } = setup();
+    const { user, getByRole, getAllByRole } = setup();
 
     await user.click(
       getByRole('button', {
@@ -203,9 +206,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
       })
     );
 
-    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
-      target: { value: 'stage-2' },
-    });
+    await user.type(getByRole('textbox', { name: /stage name/i }), 'stage-2');
 
     const deleteButtons = getAllByRole('button', { name: /delete stage/i });
 
