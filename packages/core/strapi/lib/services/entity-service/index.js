@@ -16,6 +16,7 @@ const {
   createComponents,
   updateComponents,
   deleteComponents,
+  cloneComponents,
 } = require('./components');
 const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
@@ -291,9 +292,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
-    // TODO: Implement cloneComponents
-    // const componentData = await cloneComponents(uid, validData);
-    const componentData = await createComponents(uid, validData);
+    const componentData = await cloneComponents(uid, entityToClone, validData);
 
     const entityData = creationPipeline(
       Object.assign(omitComponentData(model, validData), componentData),
