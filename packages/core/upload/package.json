@@ -44,7 +44,7 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-select": "5.7.0",

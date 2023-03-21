@@ -1,7 +1,7 @@
 /**
  * This file is for all helpers related to `paths` in the CM.
  */
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 /**
  * This is typically used in circumstances where there are re-orderable pieces e.g. Dynamic Zones

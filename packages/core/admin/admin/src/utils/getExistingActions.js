@@ -1,5 +1,3 @@
-import { get } from 'lodash';
-
 const getExistingActions = (permissions) => {
   return Array.from(
     new Set(
@@ -23,7 +21,7 @@ const getExistingActions = (permissions) => {
           ...acc,
           ...getActionsPermission([
             ...Object.values(current[1].attributes || {}),
-            get(current[1], 'contentTypeActions', {}),
+            current[1]?.contentTypeActions ?? {},
           ]),
         ];
       }, [])

@@ -59,6 +59,12 @@ const defaultSanitizeSort = curry((schema, sort) => {
     // Remove non attribute keys
     traverseQuerySort(
       ({ key, attribute }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         if (!attribute) {
           remove(key);
         }
