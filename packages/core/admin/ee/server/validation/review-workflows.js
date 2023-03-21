@@ -8,10 +8,17 @@ const stageObject = yup.object().shape({
 });
 
 const validateUpdateStagesSchema = yup.array().of(stageObject).required();
+const validateUpdateStageOnEntity = yup
+  .object()
+  .shape({
+    id: yup.number().integer().min(1).required(),
+  })
+  .required();
 
 module.exports = {
   validateUpdateStages: validateYupSchema(validateUpdateStagesSchema, {
     strict: false,
     stripUnknown: true,
   }),
+  validateUpdateStageOnEntity: validateYupSchema(validateUpdateStageOnEntity),
 };

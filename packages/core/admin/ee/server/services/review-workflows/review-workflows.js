@@ -11,7 +11,7 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const {
   disableOnContentTypes: disableReviewWorkflows,
 } = require('../../migrations/review-workflows');
-const { getDefaultWorkflow } = require('../../utils/review-workflows');
+const { getDefaultWorkflow, hasRWEnabled } = require('../../utils/review-workflows');
 
 const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
   // Pick only content-types with reviewWorkflows options set to true
@@ -169,6 +169,10 @@ module.exports = ({ strapi }) => {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
       strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkflows);
+    },
+    isReviewWorkflowEnabled({ strapi }, modelUID) {
+      const contentType = strapi.container.get('content-types').get(modelUID);
+      return hasRWEnabled(contentType);
     },
   };
 };

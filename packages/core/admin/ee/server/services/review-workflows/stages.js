@@ -5,7 +5,7 @@ const {
   errors: { ApplicationError },
 } = require('@strapi/utils');
 
-const { STAGE_MODEL_UID } = require('../../constants/workflows');
+const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
 module.exports = ({ strapi }) => {
@@ -67,6 +67,21 @@ module.exports = ({ strapi }) => {
         return workflowsService.update(workflowId, {
           stages: stagesIds,
         });
+      });
+    },
+
+    /**
+     * Update the stage of an entity
+     *
+     * @param {object} entityInfo
+     * @param {string} entityInfo.id - Entity id
+     * @param {string} entityInfo.modelUID - the content-type of the entity
+     * @param {string} stageId - The id of the stage to assign to the entity
+     */
+    updateEntity(entityInfo, stageId) {
+      return strapi.entityService.update(entityInfo.modelUID, entityInfo.id, {
+        data: { [ENTITY_STAGE_ATTRIBUTE]: Number(stageId) },
+        populate: [ENTITY_STAGE_ATTRIBUTE],
       });
     },
   };
