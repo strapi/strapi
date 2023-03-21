@@ -26,7 +26,11 @@ const findAllAndReplaceSetup = (components, predicate = () => false, replacement
   /**
    * @type {<TData extends object = object>(data: TData, attributes: Attributes, options?: { ignoreFalseyValues?: boolean}) => TData}
    */
-  const findAllAndReplace = (data, attributes, { ignoreFalseyValues = false, path = [] } = {}) => {
+  const findAllAndReplace = (
+    data,
+    attributes,
+    { ignoreFalseyValues = false, path = [], parent = attributes } = {}
+  ) => {
     return Object.entries(attributes).reduce(
       (acc, [key, value]) => {
         if (
@@ -36,7 +40,7 @@ const findAllAndReplaceSetup = (components, predicate = () => false, replacement
           return acc;
         }
 
-        if (predicate(value, { path: [...path, key], parent: acc })) {
+        if (predicate(value, { path: [...path, key], parent })) {
           acc[key] =
             typeof replacement === 'function'
               ? replacement(acc[key], { path: [...path, key], parent: acc })
@@ -46,16 +50,18 @@ const findAllAndReplaceSetup = (components, predicate = () => false, replacement
         if (value.type === 'component') {
           const componentAttributes = components[value.component].attributes;
 
-          if (!value.repeatable) {
+          if (!value.repeatable && typeof acc[key] === 'object') {
             acc[key] = findAllAndReplace(acc[key], componentAttributes, {
               ignoreFalseyValues,
               path: [...path, key],
+              parent: attributes[key],
             });
           } else if (value.repeatable && Array.isArray(acc[key])) {
             acc[key] = acc[key].map((datum, index) => {
               const data = findAllAndReplace(datum, componentAttributes, {
                 ignoreFalseyValues,
                 path: [...path, key, index],
+                parent: attributes[key],
               });
 
               return data;
@@ -67,6 +73,7 @@ const findAllAndReplaceSetup = (components, predicate = () => false, replacement
             const data = findAllAndReplace(datum, componentAttributes, {
               ignoreFalseyValues,
               path: [...path, key, index],
+              parent: attributes[key],
             });
 
             return data;

@@ -69,14 +69,11 @@ describe('findAllAndReplace', () => {
       expect(data).toMatchInlineSnapshot(`
         {
           "categories": "replaced",
-          "comp_relation": {
-            "categories": "replaced",
-          },
         }
       `);
     });
 
-    it('should replace relations in single components', () => {
+    it('should not replace relations in single components', () => {
       const data = findAllAndReplace(
         components,
         (value) => value.type === 'relation',
@@ -86,9 +83,6 @@ describe('findAllAndReplace', () => {
       expect(data).toMatchInlineSnapshot(`
         {
           "categories": "replaced",
-          "comp_relation": {
-            "categories": "replaced",
-          },
         }
       `);
     });
@@ -103,9 +97,6 @@ describe('findAllAndReplace', () => {
       expect(data).toMatchInlineSnapshot(`
         {
           "categories": "replaced",
-          "comp_relation": {
-            "categories": "replaced",
-          },
         }
       `);
     });
@@ -120,9 +111,6 @@ describe('findAllAndReplace', () => {
       expect(data).toMatchInlineSnapshot(`
         {
           "categories": "replaced",
-          "comp_relation": {
-            "categories": "replaced",
-          },
         }
       `);
     });
@@ -137,9 +125,6 @@ describe('findAllAndReplace', () => {
       expect(data).toMatchInlineSnapshot(`
         {
           "categories": "replaced",
-          "comp_relation": {
-            "categories": "replaced",
-          },
         }
       `);
     });
