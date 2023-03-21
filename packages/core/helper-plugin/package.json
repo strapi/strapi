@@ -51,7 +51,7 @@
     "prop-types": "^15.7.2",
     "qs": "6.11.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-select": "5.7.0"
   },
   "devDependencies": {
