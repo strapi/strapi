@@ -243,6 +243,51 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return entityToDelete;
   },
 
+  async clone(uid, cloneId, opts) {
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'clone' });
+    const { data } = wrappedParams;
+
+    const model = strapi.getModel(uid);
+
+    const entityToClone = await db.query(uid).findOne({ where: { id: cloneId } });
+
+    if (!entityToClone) {
+      return null;
+    }
+    const isDraft = contentTypesUtils.isDraft(entityToClone, model);
+
+    const validData = await entityValidator.validateEntityUpdate(
+      model,
+      data,
+      {
+        isDraft,
+      },
+      entityToClone
+    );
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+
+    // TODO: wrap into transaction
+    // TODO: Implement cloneComponents
+    // const componentData = await cloneComponents(uid, validData);
+    const componentData = await createComponents(uid, validData);
+
+    const entityData = creationPipeline(
+      Object.assign(omitComponentData(model, validData), componentData),
+      {
+        contentType: model,
+      }
+    );
+
+    const entity = await db.query(uid).clone(cloneId, {
+      ...query,
+      data: entityData,
+    });
+
+    // TODO Files
+    await this.emitEvent(uid, ENTRY_CREATE, entity);
+
+    return entity;
+  },
   // FIXME: used only for the CM to be removed
   async deleteMany(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
