@@ -130,6 +130,106 @@ describe('findAllAndReplace', () => {
     });
   });
 
+  describe('null values', () => {
+    const nullishData = {
+      categories: null,
+      repeatable_repeatable_relations: null,
+      repeatable_relations: null,
+      dynamic_relations: null,
+      comp_relation: null,
+    };
+
+    it('should replace the first level of relations', () => {
+      const data = findAllAndReplace(
+        components,
+        (value) => value.type === 'relation',
+        'replaced'
+      )(nullishData, schema);
+
+      expect(data).toMatchInlineSnapshot(`
+        {
+          "categories": "replaced",
+          "comp_relation": null,
+          "dynamic_relations": null,
+          "repeatable_relations": null,
+          "repeatable_repeatable_relations": null,
+        }
+      `);
+    });
+
+    it('should not replace relations in single components', () => {
+      const data = findAllAndReplace(
+        components,
+        (value) => value.type === 'relation',
+        'replaced'
+      )(nullishData, schema);
+
+      expect(data).toMatchInlineSnapshot(`
+        {
+          "categories": "replaced",
+          "comp_relation": null,
+          "dynamic_relations": null,
+          "repeatable_relations": null,
+          "repeatable_repeatable_relations": null,
+        }
+      `);
+    });
+
+    it('should not replace relation instances in a repeatable component', () => {
+      const data = findAllAndReplace(
+        components,
+        (value) => value.type === 'relation',
+        'replaced'
+      )(nullishData, schema);
+
+      expect(data).toMatchInlineSnapshot(`
+        {
+          "categories": "replaced",
+          "comp_relation": null,
+          "dynamic_relations": null,
+          "repeatable_relations": null,
+          "repeatable_repeatable_relations": null,
+        }
+      `);
+    });
+
+    it('should not replace all relation instances in nested repeatable components', () => {
+      const data = findAllAndReplace(
+        components,
+        (value) => value.type === 'relation',
+        'replaced'
+      )(nullishData, schema);
+
+      expect(data).toMatchInlineSnapshot(`
+        {
+          "categories": "replaced",
+          "comp_relation": null,
+          "dynamic_relations": null,
+          "repeatable_relations": null,
+          "repeatable_repeatable_relations": null,
+        }
+      `);
+    });
+
+    it('should not replace relation instances in dynamic zones correctly', () => {
+      const data = findAllAndReplace(
+        components,
+        (value) => value.type === 'relation',
+        'replaced'
+      )(nullishData, schema);
+
+      expect(data).toMatchInlineSnapshot(`
+        {
+          "categories": "replaced",
+          "comp_relation": null,
+          "dynamic_relations": null,
+          "repeatable_relations": null,
+          "repeatable_repeatable_relations": null,
+        }
+      `);
+    });
+  });
+
   describe('replacement as a function', () => {
     it('should pass the data object (not the schema) and use the returned value', () => {
       const data = findAllAndReplace(

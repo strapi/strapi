@@ -50,7 +50,7 @@ const findAllAndReplaceSetup = (components, predicate = () => false, replacement
         if (value.type === 'component') {
           const componentAttributes = components[value.component].attributes;
 
-          if (!value.repeatable && typeof acc[key] === 'object') {
+          if (!value.repeatable && acc[key] && typeof acc[key] === 'object') {
             acc[key] = findAllAndReplace(acc[key], componentAttributes, {
               ignoreFalseyValues,
               path: [...path, key],
