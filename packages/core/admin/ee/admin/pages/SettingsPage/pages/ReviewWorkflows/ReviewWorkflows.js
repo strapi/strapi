@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { FormikProvider, useFormik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
+import { useMutation } from 'react-query';
 
 import {
   CheckPagePermissions,
   ConfirmDialog,
   SettingsPageTitle,
+  useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
@@ -25,7 +29,10 @@ export function ReviewWorkflowsPage() {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { workflows: workflowsData, updateWorkflowStages, refetchWorkflow } = useReviewWorkflows();
+  const { put } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+  const toggleNotification = useNotification();
+  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -37,6 +44,46 @@ export function ReviewWorkflowsPage() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+
+  const { mutateAsync, isLoading } = useMutation(
+    async ({ workflowId, stages }) => {
+      try {
+        const {
+          data: { data },
+        } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
+          data: stages,
+        });
+
+        return data;
+      } catch (error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      }
+
+      return null;
+    },
+    {
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        });
+      },
+    }
+  );
+
+  const updateWorkflowStages = (workflowId, stages) => {
+    return mutateAsync({ workflowId, stages });
+  };
 
   const submitForm = async () => {
     setIsConfirmDeleteDialogOpen(false);
@@ -136,6 +183,7 @@ export function ReviewWorkflowsPage() {
               defaultMessage:
                 'All entries assigned to deleted stages will be moved to the first stage. Are you sure you want to save this?',
             }}
+            isConfirmButtonLoading={isLoading}
             isOpen={isConfirmDeleteDialogOpen}
             onToggleDialog={toggleConfirmDeleteDialog}
             onConfirm={handleConfirmDeleteDialog}
