@@ -233,14 +233,18 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const relationLoad = useCallback(({ target: { initialDataPath, modifiedDataPath, value } }) => {
-    dispatch({
-      type: 'LOAD_RELATION',
-      modifiedDataPath,
-      initialDataPath,
-      value,
-    });
-  }, []);
+  const relationLoad = useCallback(
+    ({ target: { initialDataPath, modifiedDataPath, value, modifiedDataOnly } }) => {
+      dispatch({
+        type: 'LOAD_RELATION',
+        modifiedDataPath,
+        initialDataPath,
+        value,
+        modifiedDataOnly,
+      });
+    },
+    []
+  );
 
   const addRepeatableComponentToField = dispatchAddComponent('ADD_REPEATABLE_COMPONENT_TO_FIELD');
 
