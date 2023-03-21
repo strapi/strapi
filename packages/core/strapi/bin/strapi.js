@@ -322,6 +322,11 @@ program
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
+
+        await confirmMessage(
+          'The transfer will delete all data in the local database and media files. Are you sure you want to proceed?',
+          { failMessage: 'Transfer process aborted' }
+        )(thisCommand);
       }
     )
   )
