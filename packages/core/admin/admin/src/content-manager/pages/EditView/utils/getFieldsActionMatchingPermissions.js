@@ -1,4 +1,5 @@
-import { uniq, flatMap } from 'lodash';
+import uniq from 'lodash/uniq';
+import flatMap from 'lodash/flatMap';
 import { findMatchingPermissions } from '@strapi/helper-plugin';
 
 const getFieldsActionMatchingPermissions = (userPermissions, slug) => {

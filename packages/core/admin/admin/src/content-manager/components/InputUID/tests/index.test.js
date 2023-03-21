@@ -47,16 +47,14 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c7 {
+      .c6 {
         padding-right: 12px;
         padding-left: 8px;
+      }
+
+      .c8 {
+        background: transparent;
+        border-style: none;
       }
 
       .c0 {
@@ -71,23 +69,10 @@ describe('<InputUID />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
       .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -105,16 +90,69 @@ describe('<InputUID />', () => {
         justify-content: space-between;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: unset;
+        -webkit-justify-content: unset;
+        -ms-flex-pack: unset;
+        justify-content: unset;
       }
 
-      .c1 > * + * {
-        margin-top: 4px;
+      .c13 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c6 {
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c5 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.65625rem;
@@ -129,36 +167,36 @@ describe('<InputUID />', () => {
         background: inherit;
       }
 
-      .c6::-webkit-input-placeholder {
+      .c5::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::-moz-placeholder {
+      .c5::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6:-ms-input-placeholder {
+      .c5:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::placeholder {
+      .c5::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c6:focus {
+      .c5:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -170,101 +208,94 @@ describe('<InputUID />', () => {
         transition-duration: 0.2s;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c9 {
-        border: none;
-        background: transparent;
+      .c10 {
         font-size: 1.6rem;
-        width: auto;
         padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c8 {
+      .c7 {
         position: relative;
       }
 
-      .c10 svg {
+      .c11 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c10 svg path {
+      .c11 svg path {
         fill: #a5a5ba;
       }
 
-      .c10 svg:hover path {
+      .c11 svg:hover path {
         fill: #4945ff;
       }
 
-      .c11 {
+      .c14 {
         -webkit-animation: gzYjWD 2s infinite linear;
         animation: gzYjWD 2s infinite linear;
       }
 
       <div>
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c0 c1"
+            class="c0"
           >
             <label
-              class="c2"
+              class="c1 c2"
               for="1"
             >
-              <div
-                class="c3"
-              >
-                test
-              </div>
+              test
             </label>
             <div
-              class="c4 c5"
+              class="c3 c4"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-required="false"
-                class="c6"
+                class="c5"
                 id="1"
                 name="test"
                 placeholder=""
                 value="michka"
               />
               <div
-                class="c7"
+                class="c6"
               >
                 <div
-                  class="c8"
+                  class="c7"
                 >
                   <button
-                    aria-label="regenerate"
-                    class="c9 c10"
+                    class="c8 c9 c10 c11"
                     type="button"
                   >
+                    <span
+                      class="c12"
+                    >
+                      regenerate
+                    </span>
                     <div
-                      class="c3 c11"
+                      aria-hidden="true"
+                      class="c13 c14"
+                      focusable="false"
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           clip-rule="evenodd"
-                          d="M12.057 18c.552 0 1 .451 1 .997v4.006a1 1 0 01-.941.995l-.059.002c-.552 0-1-.451-1-.997v-4.006a1 1 0 01.941-.995l.06-.002zm-3.06-.736l.055.03c.478.276.64.89.367 1.364l-2.002 3.468a1 1 0 01-1.31.394l-.055-.03a1.002 1.002 0 01-.368-1.363l2.003-3.469a1 1 0 011.31-.394zm7.42.394l2.002 3.468a1 1 0 01-.314 1.331l-.053.033a1.002 1.002 0 01-1.365-.363l-2.003-3.469a1 1 0 01.314-1.33l.054-.034a1.002 1.002 0 011.364.364zm-9.548-2.66l.033.054c.276.478.11 1.091-.364 1.364L3.07 18.42a1 1 0 01-1.331-.314l-.033-.053a1.001 1.001 0 01.364-1.365l3.468-2.003a1 1 0 011.33.314zm11.79-.313l3.468 2.002a1 1 0 01.393 1.31l-.03.055c-.276.478-.89.64-1.363.367l-3.469-2.003a1 1 0 01-.394-1.309l.03-.055c.276-.479.89-.64 1.364-.367zm4.344-3.628a1 1 0 01.995.941l.002.06c0 .551-.451 1-.997 1h-4.006a1 1 0 01-.995-.942L18 12.057c0-.552.451-1 .997-1h4.006zm-18 0a1 1 0 01.995.941l.002.06c0 .551-.451 1-.998 1H.998a1 1 0 01-.996-.942L0 12.057c0-.552.451-1 .998-1h4.004zm17.454-5.059l.033.054c.277.478.11 1.091-.363 1.365l-3.469 2.002a1 1 0 01-1.33-.314l-.034-.053a1.002 1.002 0 01.364-1.365l3.468-2.003a1 1 0 011.331.314zM3.07 5.684l3.468 2.003a1 1 0 01.394 1.31l-.03.055c-.276.478-.89.64-1.364.367L2.07 7.417a1 1 0 01-.394-1.31l.03-.055c.276-.479.89-.64 1.364-.368zm14.926-4.008l.056.03c.478.276.64.89.367 1.364l-2.003 3.468a1 1 0 01-1.309.394l-.055-.03a1.002 1.002 0 01-.367-1.364l2.002-3.468a1 1 0 011.31-.394zm-10.58.394L9.42 5.538a1 1 0 01-.314 1.33l-.053.034a1.002 1.002 0 01-1.365-.364L5.684 3.07a1 1 0 01.314-1.331l.054-.033a1.002 1.002 0 011.365.364zM12.058 0c.552 0 1 .451 1 .998v4.004a1 1 0 01-.941.996L12.057 6c-.552 0-1-.451-1-.998V.998a1 1 0 01.941-.996l.06-.002z"
+                          d="M12.057 18c.552 0 1 .451 1 .997v4.006a1 1 0 0 1-.941.995l-.059.002c-.552 0-1-.451-1-.997v-4.006a1 1 0 0 1 .941-.995l.06-.002Zm-3.06-.736.055.03c.478.276.64.89.367 1.364l-2.002 3.468a1 1 0 0 1-1.31.394l-.055-.03a1.002 1.002 0 0 1-.368-1.363l2.003-3.469a1 1 0 0 1 1.31-.394Zm7.42.394 2.002 3.468a1 1 0 0 1-.314 1.331l-.053.033a1.002 1.002 0 0 1-1.365-.363l-2.003-3.469a1 1 0 0 1 .314-1.33l.054-.034a1.002 1.002 0 0 1 1.364.364Zm-9.548-2.66.033.054c.276.478.11 1.091-.364 1.364L3.07 18.42a1 1 0 0 1-1.331-.314l-.033-.053a1.001 1.001 0 0 1 .364-1.365l3.468-2.003a1 1 0 0 1 1.33.314Zm11.79-.313 3.468 2.002a1 1 0 0 1 .393 1.31l-.03.055c-.276.478-.89.64-1.363.367l-3.469-2.003a1 1 0 0 1-.394-1.309l.03-.055c.276-.479.89-.64 1.364-.367Zm4.344-3.628a1 1 0 0 1 .995.941l.002.06c0 .551-.451 1-.997 1h-4.006a1 1 0 0 1-.995-.942L18 12.057c0-.552.451-1 .997-1h4.006Zm-18 0a1 1 0 0 1 .995.941l.002.06c0 .551-.451 1-.998 1H.998a1 1 0 0 1-.996-.942L0 12.057c0-.552.451-1 .998-1h4.004Zm17.454-5.059.033.054c.277.478.11 1.091-.363 1.365l-3.469 2.002a1 1 0 0 1-1.33-.314l-.034-.053a1.002 1.002 0 0 1 .364-1.365l3.468-2.003a1 1 0 0 1 1.331.314ZM3.07 5.684l3.468 2.003a1 1 0 0 1 .394 1.31l-.03.055c-.276.478-.89.64-1.364.367L2.07 7.417a1 1 0 0 1-.394-1.31l.03-.055c.276-.479.89-.64 1.364-.368Zm14.926-4.008.056.03c.478.276.64.89.367 1.364l-2.003 3.468a1 1 0 0 1-1.309.394l-.055-.03a1.002 1.002 0 0 1-.367-1.364l2.002-3.468a1 1 0 0 1 1.31-.394Zm-10.58.394L9.42 5.538a1 1 0 0 1-.314 1.33l-.053.034a1.002 1.002 0 0 1-1.365-.364L5.684 3.07a1 1 0 0 1 .314-1.331l.054-.033a1.002 1.002 0 0 1 1.365.364ZM12.058 0c.552 0 1 .451 1 .998v4.004a1 1 0 0 1-.941.996L12.057 6c-.552 0-1-.451-1-.998V.998a1 1 0 0 1 .941-.996l.06-.002Z"
                           fill="#212134"
                           fill-rule="evenodd"
                         />

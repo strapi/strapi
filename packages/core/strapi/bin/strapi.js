@@ -18,8 +18,9 @@ const {
   promptEncryptionKey,
   confirmMessage,
   forceOption,
+  parseURL,
 } = require('../lib/commands/utils/commander');
-const { exitWith } = require('../lib/commands/utils/helpers');
+const { exitWith, ifOptions, assertUrlHasProtocol } = require('../lib/commands/utils/helpers');
 const {
   excludeOption,
   onlyOption,
@@ -272,59 +273,89 @@ program
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
 
-// if (process.env.STRAPI_EXPERIMENTAL === 'true') {
-//   // `$ strapi transfer`
-//   program
-//     .command('transfer')
-//     .description('Transfer data from one source to another')
-//     .allowExcessArguments(false)
-//     .addOption(
-//       new Option(
-//         '--from <sourceURL>',
-//         `URL of the remote Strapi instance to get data from`
-//       ).argParser(parseURL)
-//     )
-//     .addOption(
-//       new Option(
-//         '--to <destinationURL>',
-//         `URL of the remote Strapi instance to send data to`
-//       ).argParser(parseURL)
-//     )
-//     .addOption(forceOption)
-//     // Validate URLs
-//     .hook(
-//       'preAction',
-//       ifOptions(
-//         (opts) => opts.from,
-//         (thisCommand) => assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:'])
-//       )
-//     )
-//     .hook(
-//       'preAction',
-//       ifOptions(
-//         (opts) => opts.to,
-//         (thisCommand) => assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:'])
-//       )
-//     )
-//     .hook(
-//       'preAction',
-//       ifOptions(
-//         (opts) => !opts.from && !opts.to,
-//         () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-//       )
-//     )
-//     .addOption(forceOption)
-//     .addOption(excludeOption)
-//     .addOption(onlyOption)
-//     .hook('preAction', validateExcludeOnly)
-//     .hook(
-//       'preAction',
-//       confirmMessage(
-//         'The import will delete all data in the remote database. Are you sure you want to proceed?'
-//       )
-//     )
-//     .action(getLocalScript('transfer/transfer'));
-// }
+// `$ strapi transfer`
+program
+  .command('transfer')
+  .description('Transfer data from one source to another')
+  .allowExcessArguments(false)
+  .addOption(
+    new Option('--from <sourceURL>', `URL of the remote Strapi instance to get data from`)
+      .argParser(parseURL)
+      .hideHelp() // Hidden until pull feature is released
+  )
+  .addOption(
+    new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
+  )
+  .addOption(
+    new Option(
+      '--to <destinationURL>',
+      `URL of the remote Strapi instance to send data to`
+    ).argParser(parseURL)
+  )
+  .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
+  .addOption(forceOption)
+  .addOption(excludeOption)
+  .addOption(onlyOption)
+  .hook('preAction', validateExcludeOnly)
+  // If --from is used, validate the URL and token
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.from,
+      async (thisCommand) => {
+        assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:']);
+        if (!thisCommand.opts().fromToken) {
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              message: 'Please enter your transfer token for the remote Strapi source',
+              name: 'fromToken',
+            },
+          ]);
+          if (!answers.fromToken?.length) {
+            exitWith(1, 'No token entered, aborting transfer.');
+          }
+          thisCommand.opts().fromToken = answers.fromToken;
+        }
+      }
+    )
+  )
+  // If --to is used, validate the URL, token, and confirm restore
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => opts.to,
+      async (thisCommand) => {
+        assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
+        if (!thisCommand.opts().toToken) {
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              message: 'Please enter your transfer token for the remote Strapi destination',
+              name: 'toToken',
+            },
+          ]);
+          if (!answers.toToken?.length) {
+            exitWith(1, 'No token entered, aborting transfer.');
+          }
+          thisCommand.opts().toToken = answers.toToken;
+        }
+
+        await confirmMessage(
+          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?',
+          { failMessage: 'Transfer process aborted' }
+        )(thisCommand);
+      }
+    )
+  )
+  // .hook(
+  //   'preAction',
+  //   ifOptions(
+  //     (opts) => !opts.from && !opts.to,
+  //     () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
+  //   )
+  // )
+  .action(getLocalScript('transfer/transfer'));
 
 // `$ strapi export`
 program
@@ -382,7 +413,7 @@ program
           },
         ]);
         if (!answers.key?.length) {
-          exitWith(0, 'No key entered, aborting import.');
+          exitWith(1, 'No key entered, aborting import.');
         }
         opts.key = answers.key;
       }
@@ -420,7 +451,8 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database. Are you sure you want to proceed?'
+      'The import will delete all data in your database and media files. Are you sure you want to proceed?',
+      { failMessage: 'Import process aborted' }
     )
   )
   .action(getLocalScript('transfer/import'));

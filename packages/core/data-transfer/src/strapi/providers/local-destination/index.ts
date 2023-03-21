@@ -77,8 +77,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
-  rollback(): void {
-    this.transaction?.rollback();
+  async rollback() {
+    await this.transaction?.rollback();
   }
 
   async beforeTransfer() {
@@ -173,14 +173,21 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
         chunk.stream
           .pipe(writableStream)
-          .on('close', callback)
-          .on('error', async (error: Error) => {
+          .on('close', () => {
+            callback(null);
+          })
+          .on('error', async (error: NodeJS.ErrnoException) => {
+            const errorMessage =
+              error.code === 'ENOSPC'
+                ? " Your server doesn't have space to proceed with the import. "
+                : ' ';
+
             try {
               await fse.rm(assetsDirectory, { recursive: true, force: true });
               await fse.move(backupDirectory, assetsDirectory);
               this.destroy(
                 new ProviderTransferError(
-                  `There was an error during the transfer process. The original files have been restored to ${assetsDirectory}`
+                  `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
                 )
               );
             } catch (err) {

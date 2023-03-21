@@ -41,6 +41,18 @@ module.exports = {
     'no-restricted-imports': [
       'error',
       {
+        paths: [
+          {
+            name: '@strapi/design-system',
+            importNames: ['Stack'],
+            message:
+              "'Stack' has been deprecated. Please import 'Flex' from '@strapi/design-system' instead.",
+          },
+          {
+            name: 'lodash',
+            message: 'Please use import [method] from lodash/[method]',
+          },
+        ],
         patterns: [
           {
             group: [

@@ -17,7 +17,6 @@ import {
   DialogFooter,
   Flex,
   Typography,
-  Stack,
 } from '@strapi/design-system';
 import styled from 'styled-components';
 import { getTrad } from '../../../utils';
@@ -70,7 +69,7 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Stack horizontal spacing={2}>
+      <Flex gap={2}>
         {hasDraftAndPublish && (
           <Button disabled startIcon={<Check />} variant="secondary">
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -82,7 +81,7 @@ const Header = ({
             defaultMessage: 'Save',
           })}
         </Button>
-      </Stack>
+      </Flex>
     );
   }
 
@@ -168,7 +167,7 @@ const Header = ({
         isOpen={showWarningUnpublish}
       >
         <DialogBody icon={<ExclamationMarkCircle />}>
-          <Stack spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <Flex justifyContent="center" style={{ textAlign: 'center' }}>
               <Typography id="confirm-description">
                 {formatMessage(
@@ -191,7 +190,7 @@ const Header = ({
                 })}
               </Typography>
             </Flex>
-          </Stack>
+          </Flex>
         </DialogBody>
         <DialogFooter
           startAction={
@@ -223,7 +222,7 @@ const Header = ({
         isOpen={showPublishConfirmation}
       >
         <DialogBody icon={<ExclamationMarkCircle />}>
-          <Stack spacing={2}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
             <FlexTextAlign justifyContent="center">
               <Typography id="confirm-description">
                 {draftCount}
@@ -248,7 +247,7 @@ const Header = ({
                 })}
               </Typography>
             </FlexTextAlign>
-          </Stack>
+          </Flex>
         </DialogBody>
         <DialogFooter
           startAction={

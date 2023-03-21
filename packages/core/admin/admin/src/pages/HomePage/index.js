@@ -10,6 +10,7 @@ import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Layout, Main, Box, Grid, GridItem } from '@strapi/design-system';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
 import cornerOrnamentPath from './assets/corner-ornament.svg';
 import { useModels } from '../../hooks';
 import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
@@ -32,6 +33,7 @@ const HomePage = () => {
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  useLicenseLimitNotification();
 
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;

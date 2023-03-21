@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
-const useRegenerate = (id, onRegenerate) => {
+const useRegenerate = (url, id, onRegenerate) => {
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const toggleNotification = useNotification();
   const { post } = useFetchClient();
@@ -13,7 +13,7 @@ const useRegenerate = (id, onRegenerate) => {
         data: {
           data: { accessKey },
         },
-      } = await post(`/admin/api-tokens/${id}/regenerate`);
+      } = await post(`${url}${id}/regenerate`);
       setIsLoadingConfirmation(false);
       onRegenerate(accessKey);
     } catch (error) {

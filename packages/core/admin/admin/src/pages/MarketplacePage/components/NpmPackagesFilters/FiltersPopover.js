@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Popover, Stack, FocusTrap } from '@strapi/design-system';
+import { Box, Popover, Flex, FocusTrap } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import FilterSelect from './FilterSelect';
 
@@ -19,7 +19,7 @@ const FiltersPopover = ({
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={() => {}}>
       <FocusTrap onEscape={onToggle}>
-        <Stack spacing={1}>
+        <Flex direction="column" alignItems="stretch" gap={1}>
           <Box>
             <FilterSelect
               message={formatMessage({
@@ -73,7 +73,7 @@ const FiltersPopover = ({
               />
             </Box>
           )}
-        </Stack>
+        </Flex>
       </FocusTrap>
     </Popover>
   );

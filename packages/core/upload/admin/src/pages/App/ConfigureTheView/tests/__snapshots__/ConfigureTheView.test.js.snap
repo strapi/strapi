@@ -1,47 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure initial render renders and matches the snapshot 1`] = `
-.c14 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c2 {
+.c1 {
   padding-bottom: 56px;
 }
 
-.c5 {
+.c4 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -49,12 +13,23 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   padding-left: 56px;
 }
 
-.c6 {
+.c5 {
   padding-bottom: 8px;
 }
 
-.c17 {
-  padding-right: 8px;
+.c11 {
+  min-width: 0;
+}
+
+.c15 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
 .c21 {
@@ -72,16 +47,16 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c30 {
+.c31 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c32 {
+.c33 {
   padding-left: 12px;
 }
 
-.c11 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -113,6 +88,21 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-direction: row;
 }
 
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c25 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -125,46 +115,72 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c26 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c14 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
 }
 
-.c26 > * + * {
-  margin-top: 4px;
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.c15 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c20 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c36 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c17 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c17 svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c17 svg > g,
+.c17 svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c17:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -179,11 +195,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -194,7 +210,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c36 {
+.c37 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -207,22 +223,51 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c18 {
-  height: 100%;
-}
-
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c16 .c0 {
+.c18[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c18[aria-disabled='true'] .c13 {
+  color: #666687;
+}
+
+.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c18[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c18[aria-disabled='true']:active .c13 {
+  color: #666687;
+}
+
+.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c18:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c18:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c18 svg > g,
+.c18 svg path {
+  fill: #ffffff;
+}
+
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -233,52 +278,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   align-items: center;
 }
 
-.c16 .c13 {
-  color: #ffffff;
-}
-
-.c16[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true'] .c13 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c16[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true']:active .c13 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c16:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c16:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c16 svg > g,
-.c16 svg path {
-  fill: #ffffff;
-}
-
-.c27 {
+.c28 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -294,28 +294,28 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   transition-duration: 0.2s;
 }
 
-.c27:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c33 {
+.c34 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c33 svg {
+.c34 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c33 svg path {
+.c34 svg path {
   fill: #666687;
 }
 
-.c34 {
+.c35 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -324,11 +324,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c34 svg {
+.c35 svg {
   width: 0.375rem;
 }
 
-.c28 {
+.c29 {
   position: absolute;
   left: 0;
   right: 0;
@@ -339,15 +339,15 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c28:focus {
+.c29:focus {
   outline: none;
 }
 
-.c28[aria-disabled='true'] {
+.c29[data-disabled] {
   cursor: not-allowed;
 }
 
-.c29 {
+.c30 {
   width: 100%;
 }
 
@@ -362,30 +362,30 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   max-width: 100%;
 }
 
-.c1 {
+.c0 {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-.c3 {
+.c2 {
   overflow-x: hidden;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c8 {
+.c7 {
   padding-right: 8px;
 }
 
-.c10 {
+.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c7 {
+.c6 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -400,15 +400,15 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   outline: none;
 }
 
-.c7 svg path {
+.c6 svg path {
   fill: #4945ff;
 }
 
-.c7 svg {
+.c6 svg {
   font-size: 0.625rem;
 }
 
-.c7:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -423,11 +423,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid transparent;
 }
 
-.c7:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c7:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -438,7 +438,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c9 {
+.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -459,14 +459,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 <div>
   <div
-    class="c0 c1"
+    class="c0"
   >
     <div
-      class="c0 c2 c3"
+      class="c1 c2"
     >
       <main
         aria-labelledby="main-content-title"
-        class="c4"
+        class="c3"
         id="main-content"
         tabindex="-1"
       >
@@ -475,46 +475,46 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
             style="height: 0px;"
           >
             <div
-              class="c0 c5"
+              class="c4"
               data-strapi-header="true"
             >
               <div
-                class="c0 c6"
+                class="c5"
               >
                 <a
-                  class="c7"
+                  class="c6"
                   href="/plugins/upload"
                   id="go-back"
                 >
                   <span
                     aria-hidden="true"
-                    class="c8 c9"
+                    class="c7 c8"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                        d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
                         fill="#212134"
                       />
                     </svg>
                   </span>
                   <span
-                    class="c10"
+                    class="c9"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c0 c11"
+                class="c10"
               >
                 <div
-                  class="c0 c12"
+                  class="c11 c12"
                 >
                   <h1
                     class="c13 c14"
@@ -524,23 +524,23 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c15 c16"
+                  class="c15 c16 c17 c18"
                   disabled=""
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c0 c17 c18"
+                    class=""
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                         fill="#212134"
                       />
                     </svg>
@@ -560,60 +560,60 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
             </div>
           </div>
           <div
-            class="c0 c21"
+            class="c21"
           >
             <div
-              class="c0 c22"
+              class="c22"
             >
               <div
-                class="c0 c23"
+                class="c23"
               >
                 <div
                   class="c24"
                 >
                   <div
-                    class="c0 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c0 c25 c26"
+                        class="c25"
                       >
                         <label
-                          class="c13 c19"
+                          class="c13 c26 c27"
                           for="1"
                         >
-                          <div
-                            class="c0 c12"
-                          >
-                            Entries per page
-                          </div>
+                          Entries per page
                         </label>
                         <div
-                          class="c0 c12 c27"
+                          class="c12 c28"
                         >
                           <button
                             aria-describedby="1-hint"
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="1 1-label 1-content"
-                            class="c28"
+                            aria-required="false"
+                            class="c29"
                             data-testid="pageSize-select"
                             id="1"
                             name="pageSize"
+                            role="combobox"
                             type="button"
+                            value="10"
                           />
                           <div
-                            class="c0 c11 c29"
+                            class="c10 c30"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               <div
-                                class="c0 c30"
+                                class="c31"
                               >
                                 <span
-                                  class="c13 c31"
+                                  class="c13 c32"
                                   id="1-content"
                                 >
                                   10
@@ -621,25 +621,25 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               </div>
                             </div>
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c0 c32 c33 c34"
+                                class="c33 c34 c35"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -649,7 +649,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           </div>
                         </div>
                         <p
-                          class="c13 c35"
+                          class="c13 c36"
                           id="1-hint"
                         >
                           Number of assets displayed by default in the Media Library
@@ -662,48 +662,48 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                   class="c24"
                 >
                   <div
-                    class="c0 "
+                    class=""
                   >
-                    <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class="c0 c25 c26"
+                        class="c25"
                       >
                         <label
-                          class="c13 c19"
+                          class="c13 c26 c27"
                           for="3"
                         >
-                          <div
-                            class="c0 c12"
-                          >
-                            Default sort order
-                          </div>
+                          Default sort order
                         </label>
                         <div
-                          class="c0 c12 c27"
+                          class="c12 c28"
                         >
                           <button
                             aria-describedby="3-hint"
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="3 3-label 3-content"
-                            class="c28"
+                            aria-required="false"
+                            class="c29"
                             data-testid="sort-select"
                             id="3"
                             name="sort"
+                            role="combobox"
                             type="button"
+                            value="createdAt:DESC"
                           />
                           <div
-                            class="c0 c11 c29"
+                            class="c10 c30"
                           >
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               <div
-                                class="c0 c30"
+                                class="c31"
                               >
                                 <span
-                                  class="c13 c31"
+                                  class="c13 c32"
                                   id="3-content"
                                 >
                                   createdAt:DESC
@@ -711,25 +711,25 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                               </div>
                             </div>
                             <div
-                              class="c0 c12"
+                              class="c12"
                             >
                               <button
                                 aria-hidden="true"
-                                class="c0 c32 c33 c34"
+                                class="c33 c34 c35"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
                                   fill="none"
-                                  height="1em"
+                                  height="1rem"
                                   viewBox="0 0 14 8"
-                                  width="1em"
+                                  width="1rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
                                     clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                                     fill="#32324D"
                                     fill-rule="evenodd"
                                   />
@@ -739,7 +739,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           </div>
                         </div>
                         <p
-                          class="c13 c35"
+                          class="c13 c36"
                           id="3-hint"
                         >
                           Note: You can override this value in the media library.
@@ -756,7 +756,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
     </div>
   </div>
   <div
-    class="c36"
+    class="c37"
   >
     <p
       aria-live="polite"
