@@ -17,12 +17,14 @@ import { connect, diffRelations, normalizeRelation, normalizeSearchResults, sele
 
 export const RelationInputDataManager = ({
   error,
+  entityId,
   componentId,
   isComponentRelation,
   editable,
   description,
   intlLabel,
   isCreatingEntry,
+  isCloningEntry,
   isFieldAllowed,
   isFieldReadable,
   labelAction,
@@ -72,6 +74,7 @@ export const RelationInputDataManager = ({
               initialDataPath: ['initialData', ...initialDataPath],
               modifiedDataPath: ['modifiedData', ...nameSplit],
               value,
+              modifiedDataOnly: isCloningEntry,
             },
           });
         },
@@ -86,11 +89,12 @@ export const RelationInputDataManager = ({
         pageParams: {
           ...defaultParams,
           // eslint-disable-next-line no-nested-ternary
-          entityId: isCreatingEntry
-            ? undefined
-            : isComponentRelation
-            ? componentId
-            : initialData.id,
+          entityId:
+            isCreatingEntry && !isCloningEntry
+              ? undefined
+              : isComponentRelation
+              ? componentId
+              : entityId,
           pageSize: SEARCH_RESULTS_TO_DISPLAY,
         },
       },
@@ -372,6 +376,7 @@ export const RelationInputDataManager = ({
 
 RelationInputDataManager.defaultProps = {
   componentId: undefined,
+  entityId: undefined,
   editable: true,
   error: undefined,
   description: '',
@@ -384,6 +389,7 @@ RelationInputDataManager.defaultProps = {
 
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
+  entityId: PropTypes.number,
   editable: PropTypes.bool,
   error: PropTypes.string,
   description: PropTypes.string,
@@ -393,6 +399,7 @@ RelationInputDataManager.propTypes = {
     values: PropTypes.object,
   }).isRequired,
   labelAction: PropTypes.element,
+  isCloningEntry: PropTypes.bool.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isComponentRelation: PropTypes.bool,
   isFieldAllowed: PropTypes.bool,
