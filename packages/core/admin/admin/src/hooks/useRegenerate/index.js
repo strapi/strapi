@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 
 const useRegenerate = (url, id, onRegenerate) => {

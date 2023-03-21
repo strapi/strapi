@@ -27,7 +27,7 @@ import {
   TabPanel,
   Flex,
 } from '@strapi/design-system';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';

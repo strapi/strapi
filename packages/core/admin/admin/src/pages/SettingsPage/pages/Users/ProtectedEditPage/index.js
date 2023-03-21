@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useRBAC, LoadingIndicatorPage, useNotification } from '@strapi/helper-plugin';
 import { Redirect, useLocation } from 'react-router-dom';
-import { get } from 'lodash';
+
 import adminPermissions from '../../../../../permissions';
 import EditPage from '../EditPage';
 
@@ -19,7 +19,7 @@ const ProtectedEditPage = () => {
     allowedActions: { canRead, canUpdate },
   } = useRBAC(permissions);
   const { state } = useLocation();
-  const from = get(state, 'from', '/');
+  const from = state?.from ?? '/';
 
   useEffect(() => {
     if (!isLoading) {

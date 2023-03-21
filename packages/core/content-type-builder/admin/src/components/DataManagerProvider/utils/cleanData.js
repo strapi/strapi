@@ -1,4 +1,8 @@
-import { get, isEqual, omit, sortBy, camelCase } from 'lodash';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
+import sortBy from 'lodash/sortBy';
+import camelCase from 'lodash/camelCase';
 
 import pluginId from '../../../pluginId';
 import makeUnique from '../../../utils/makeUnique';

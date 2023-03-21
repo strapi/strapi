@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const createDefaultForm = (attributes, allComponentsSchema) => {
   return Object.keys(attributes).reduce((acc, current) => {
@@ -10,7 +10,7 @@ const createDefaultForm = (attributes, allComponentsSchema) => {
     }
 
     if (type === 'component') {
-      const currentComponentSchema = get(allComponentsSchema, [component, 'attributes'], {});
+      const currentComponentSchema = allComponentsSchema?.[component]?.attributes ?? {};
       const currentComponentDefaultForm = createDefaultForm(
         currentComponentSchema,
         allComponentsSchema

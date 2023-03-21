@@ -1,11 +1,5 @@
-import { set } from 'lodash';
-
 const cleanData = (data) => {
-  const webhooks = { ...data };
-
-  set(webhooks, 'headers', unformatHeaders(data.headers));
-
-  return webhooks;
+  return { ...data, headers: unformatHeaders(data.headers) };
 };
 
 const unformatHeaders = (headers) => {

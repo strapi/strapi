@@ -39,7 +39,8 @@ module.exports = () => {
     for (const key of keys) {
       const attribute =
         schema?.attributes?.[key] ??
-        // look for the attribute when key is in snake_case
+        // FIX: Needed to not break existing behavior on the API.
+        //      It looks for the attribute in the DB metadata when the key is in snake_case
         schema?.attributes?.[strapi.db.metadata.get(schema?.uid).columnToAttribute[key]];
 
       const newPath = { ...path };

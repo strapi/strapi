@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "4.8.1",
+  "version": "4.8.2",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -28,12 +28,12 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.6.5",
-    "@strapi/generators": "4.8.1",
-    "@strapi/helper-plugin": "4.8.1",
-    "@strapi/icons": "1.6.5",
-    "@strapi/strapi": "4.8.1",
-    "@strapi/utils": "4.8.1",
+    "@strapi/design-system": "1.6.6",
+    "@strapi/generators": "4.8.2",
+    "@strapi/helper-plugin": "4.8.2",
+    "@strapi/icons": "1.6.6",
+    "@strapi/strapi": "4.8.2",
+    "@strapi/utils": "4.8.2",
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
@@ -42,14 +42,14 @@
     "prop-types": "^15.7.2",
     "qs": "6.11.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.8.1",
+    "@strapi/admin": "4.8.2",
     "@testing-library/react": "12.1.4",
     "@testing-library/react-hooks": "8.0.1",
     "history": "^4.9.0",
