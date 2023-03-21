@@ -16,19 +16,34 @@ function assertUrlProtocol(url) {
 }
 
 module.exports = {
-  init(config) {
+  init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
+    if (legacyS3Options) {
+      process.emitWarning(
+        "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
+      );
+    }
+
+    const config = { ...s3Options, ...legacyS3Options };
+
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...config,
     });
+
+    const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
+
+    const getFileKey = (file) => {
+      const path = file.path ? `${file.path}/` : '';
+
+      return `${filePrefix}${path}${file.hash}${file.ext}`;
+    };
 
     const ACL = getOr('public-read', ['params', 'ACL'], config);
 
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
-        const path = file.path ? `${file.path}/` : '';
-        const fileKey = `${path}${file.hash}${file.ext}`;
+        const fileKey = getFileKey(file);
         S3.upload(
           {
             Key: fileKey,
@@ -44,7 +59,7 @@ module.exports = {
 
             // set the bucket file url
             if (assertUrlProtocol(data.Location)) {
-              file.url = data.Location;
+              file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
             } else {
               // Default protocol to https protocol
               file.url = `https://${data.Location}`;
@@ -74,8 +89,7 @@ module.exports = {
         }
 
         return new Promise((resolve, reject) => {
-          const path = file.path ? `${file.path}/` : '';
-          const fileKey = `${path}${file.hash}${file.ext}`;
+          const fileKey = getFileKey(file);
 
           S3.getSignedUrl(
             'getObject',
@@ -102,13 +116,13 @@ module.exports = {
       delete(file, customParams = {}) {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
-          const path = file.path ? `${file.path}/` : '';
+          const fileKey = getFileKey(file);
           S3.deleteObject(
             {
-              Key: `${path}${file.hash}${file.ext}`,
+              Key: fileKey,
               ...customParams,
             },
-            (err, data) => {
+            (err) => {
               if (err) {
                 return reject(err);
               }

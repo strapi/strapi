@@ -1,4 +1,5 @@
-import { flattenDeep, isObject } from 'lodash';
+import flattenDeep from 'lodash/flattenDeep';
+import isObject from 'lodash/isObject';
 
 const createArrayOfValues = (obj) => {
   if (!isObject(obj)) {

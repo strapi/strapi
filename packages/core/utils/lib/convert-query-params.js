@@ -232,7 +232,8 @@ const convertPopulateObject = (populate, schema) => {
       isMediaAttribute(attribute) ||
       isMorphToRelationalAttribute(attribute);
 
-    const hasFragmentPopulateDefined = typeof subPopulate === 'object' && 'on' in subPopulate;
+    const hasFragmentPopulateDefined =
+      typeof subPopulate === 'object' && 'on' in subPopulate && !isNil(subPopulate.on);
 
     if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined) {
       return {
@@ -418,7 +419,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get(key, schema.attributes);
+    const attribute = get(key, schema?.attributes);
 
     // Handle attributes
     if (attribute) {

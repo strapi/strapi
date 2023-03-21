@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/admin/upload');
@@ -49,12 +50,12 @@ module.exports = {
     }
 
     const data = await validateUploadBody(body);
-    const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
+    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
 
     // Sign file urls for private providers
-    const signedFiles = await getService('file').signFileUrls(replacedFiles);
+    const signedFile = await getService('file').signFileUrls(replacedFile);
 
-    ctx.body = await pm.sanitizeOutput(signedFiles, { action: ACTIONS.read });
+    ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
   },
 
   async uploadFiles(ctx) {
@@ -77,7 +78,10 @@ module.exports = {
     const data = await validateUploadBody(body);
     const uploadedFiles = await uploadService.upload({ data, files }, { user });
 
-    ctx.body = await pm.sanitizeOutput(uploadedFiles, { action: ACTIONS.read });
+    // Sign file urls for private providers
+    const signedFiles = await mapAsync(uploadedFiles, getService('file').signFileUrls);
+
+    ctx.body = await pm.sanitizeOutput(signedFiles, { action: ACTIONS.read });
   },
 
   async upload(ctx) {

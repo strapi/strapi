@@ -24,7 +24,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const query = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    const pmQuery = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    const query = await pm.sanitizeQuery(pmQuery);
 
     const { results: files, pagination } = await getService('upload').findPage(query);
 

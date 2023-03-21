@@ -1,6 +1,6 @@
 import * as yup from 'yup';
-import { toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+
 import getTrad from '../../../utils/getTrad';
 import { createUid } from '../utils/createUid';
 
@@ -34,7 +34,7 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),
@@ -70,7 +70,7 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),
@@ -106,7 +106,7 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),

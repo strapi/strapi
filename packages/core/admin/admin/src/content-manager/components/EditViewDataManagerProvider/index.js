@@ -26,7 +26,7 @@ import { getTrad } from '../../utils';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema, recursivelyFindPathsBasedOnCondition } from './utils';
+import { cleanData, createYupSchema } from './utils';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import { usePrev } from '../../hooks';
 
@@ -166,39 +166,11 @@ const EditViewDataManagerProvider = ({
       currentContentTypeLayout?.attributes &&
       !isEqual(previousInitialValues, initialValues)
     ) {
-      /**
-       * This will return an array of paths:
-       * ['many_to_one', 'one_to_many', 'one_to_one']
-       * it can also return a path to a relation:
-       * ['relation_component.categories']
-       */
-      const relationalFieldPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'relation'
-      )(currentContentTypeLayout.attributes);
-
-      const componentPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'component' && !value.repeatable
-      )(currentContentTypeLayout.attributes);
-
-      const repeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'component' && value.repeatable
-      )(currentContentTypeLayout.attributes);
-
-      const dynamicZonePaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'dynamiczone'
-      )(currentContentTypeLayout.attributes);
-
       dispatch({
         type: 'INIT_FORM',
         initialValues,
-        relationalFieldPaths,
-        componentPaths,
-        repeatableComponentPaths,
-        dynamicZonePaths,
+        components,
+        attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
       });
 
