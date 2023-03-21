@@ -11,6 +11,11 @@ import configureStore from '../../../../../../../../../../admin/src/core/store/c
 import { Stage } from '../Stage';
 import { reducer } from '../../../../reducer';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
+}));
+
 const STAGES_FIXTURE = {
   id: 1,
   name: 'stage-1',

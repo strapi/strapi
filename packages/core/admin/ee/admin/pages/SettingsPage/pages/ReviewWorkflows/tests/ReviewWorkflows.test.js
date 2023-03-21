@@ -19,6 +19,7 @@ jest.mock('../hooks/useReviewWorkflows', () => ({
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
   // eslint-disable-next-line react/prop-types
   CheckPagePermissions: ({ children }) => <>{children}</>,
 }));
