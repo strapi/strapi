@@ -399,6 +399,8 @@ const createEntityManager = (db) => {
       // TODO: try strapi.db.transaction(method) instead of trx.get()
       const trx = await strapi.db.transaction();
       try {
+        // TODO: Should we do this here? Or should we do it in the service layer.
+        // TODO: Do this for components too?
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
           if (attr.type === 'relation' && attr.joinTable && !attr.component) {
             acc[attrName] = true;
@@ -406,9 +408,7 @@ const createEntityManager = (db) => {
           return acc;
         }, {});
 
-        // How to get the relations of the clone entity ?
-        await this.cloneRelations(uid, id, cloneId, { cloneAttrs, transaction: trx.get() });
-        await this.updateRelations(uid, id, data, { transaction: trx.get() });
+        await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
         await trx.commit();
       } catch (e) {
         await trx.rollback();
@@ -1248,7 +1248,7 @@ const createEntityManager = (db) => {
      * @example cloneRelations('user', 3, 1, { cloneAttrs: { friends: true }})
      * @example cloneRelations('post', 5, 2, { cloneAttrs: { comments: true, likes: true } })
      */
-    async cloneRelations(uid, targetId, sourceId, { cloneAttrs = {}, transaction }) {
+    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = {}, transaction }) {
       const { attributes } = db.metadata.get(uid);
 
       if (!attributes) {
@@ -1285,6 +1285,8 @@ const createEntityManager = (db) => {
           await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
         }
       });
+
+      await this.updateRelations(uid, targetId, data, { transaction });
     },
 
     // TODO: add lifecycle events
