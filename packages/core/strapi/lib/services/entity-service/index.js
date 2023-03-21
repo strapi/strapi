@@ -245,7 +245,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   async clone(uid, cloneId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'clone' });
-    const { data } = wrappedParams;
+    const { data, files } = wrappedParams;
 
     const model = strapi.getModel(uid);
 
@@ -278,12 +278,17 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       }
     );
 
-    const entity = await db.query(uid).clone(cloneId, {
+    let entity = await db.query(uid).clone(cloneId, {
       ...query,
       data: entityData,
     });
 
-    // TODO Files
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, Object.assign(entityData, entity), files);
+      entity = await this.findOne(uid, entity.id, wrappedParams);
+    }
+
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
