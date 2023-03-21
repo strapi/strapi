@@ -108,7 +108,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const { initialDataPath, modifiedDataPath, value } = action;
+        const { initialDataPath, modifiedDataPath, value, modifiedDataOnly = false } = action;
 
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
@@ -137,11 +137,13 @@ const reducer = (state, action) =>
           __temp_key__: keys[index],
         }));
 
-        set(
-          draftState,
-          initialDataPath,
-          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
-        );
+        if (!modifiedDataOnly) {
+          set(
+            draftState,
+            initialDataPath,
+            uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+          );
+        }
 
         /**
          * We need to set the value also on modifiedData, because initialData
