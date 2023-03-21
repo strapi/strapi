@@ -343,6 +343,10 @@ const cloneComponents = async (uid, entityToClone, data) => {
         ? data[attributeName]
         : componentData[attributeName];
 
+      if (componentValue === null) {
+        continue;
+      }
+
       if (repeatable === true) {
         if (!Array.isArray(componentValue)) {
           throw new Error('Expected an array to create repeatable component');
