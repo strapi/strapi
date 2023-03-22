@@ -2,16 +2,26 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const _ = require('lodash/fp');
+const { cloneDeep } = require('lodash/fp');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
+/**
+ * @description
+ * Mutates the current state of the OpenAPI object and returns a new immutable object
+ *
+ * @param {object} currentState The immutable state of the OpenAPI object
+ * @param {function} mutateStateCallback A callback function that can mutate a copy of the immutable state
+ *
+ * @returns {object}
+ * The mutated copy as the new immutable state
+ */
 const mutateDocumentation = (currentState, mutateStateCallback) => {
   // Create a copy of the current state that is mutable
-  const draftState = _.cloneDeep(currentState);
+  const draftState = cloneDeep(currentState);
   // Pass the draft to the callback for mutation
   mutateStateCallback(draftState);
   // Return the mutated state as a new immutable state
@@ -39,7 +49,7 @@ module.exports = ({ strapi }) => {
     },
 
     getDocumentationVersion() {
-      return _.get('info.version', config);
+      return config.info.version;
     },
 
     getFullDocumentationPath() {
@@ -66,7 +76,7 @@ module.exports = ({ strapi }) => {
               )
             );
 
-            const generatedDate = _.get(['info', 'x-generation-date'], doc);
+            const generatedDate = doc.info['x-generation-date'];
 
             return { version, generatedDate, url: '' };
           } catch (err) {
@@ -183,11 +193,19 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const serverUrl = getAbsoluteServerUrl(strapi.config);
-      const apiPath = strapi.config.get('api.rest.prefix');
-      const generatedDocumentation = mutateDocumentation(config, (draft) => {
-        // When no servers found set the default
+      const initialDocumentation = {
+        ...config,
+        paths,
+        components: {
+          ...defaultOpenApiComponents,
+          schemas: { ...defaultOpenApiComponents.schemas, ...schemas },
+        },
+      };
+      const generatedDocumentation = mutateDocumentation(initialDocumentation, (draft) => {
+        // When no servers found set the defaults
         if (draft.servers.length === 0) {
+          const serverUrl = getAbsoluteServerUrl(strapi.config);
+          const apiPath = strapi.config.get('api.rest.prefix');
           draft.servers = [
             {
               url: `${serverUrl}${apiPath}`,
@@ -199,36 +217,35 @@ module.exports = ({ strapi }) => {
         draft.info['x-generation-date'] = new Date().toISOString();
         // Set the plugins that need documentation
         draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
-        // Delete it from the config so it doesn't end up in the spec
+        // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
         delete draft['x-strapi-config'].mutateDocumentation;
-        // Set the generated paths
-        draft.paths = paths;
-        // Merge the generated component schemas with the defaults
-        draft.components = _.merge(defaultOpenApiComponents, { schemas });
         // Check for overrides and then add them
         if (overrideService.registeredOverrides.length > 0) {
-          overrideService.registeredOverrides.forEach((doc) => {
+          overrideService.registeredOverrides.forEach((override) => {
             // Only run the overrrides when no override version is provided,
             // or when the generated documentation version matches the override version
-            if (!doc?.info?.version || doc.info.version === version) {
-              if (doc.tags) {
+            if (!override?.info?.version || override.info.version === version) {
+              if (override.tags) {
                 // Merge override tags with the generated tags
                 draft.tags = draft.tags || [];
-                draft.tags.push(...doc.tags);
+                draft.tags.push(...override.tags);
               }
 
-              if (doc.paths) {
+              if (override.paths) {
                 // Merge override paths with the generated paths
                 // The override will add a new path or replace the value of an existing path
-                draft.paths = { ...draft.paths, ...doc.paths };
+                draft.paths = { ...draft.paths, ...override.paths };
               }
 
-              if (doc.components) {
-                Object.entries(doc.components).forEach(([key, val]) => {
-                  draft.components[key] = draft.components[key] || {};
+              if (override.components) {
+                Object.entries(override.components).forEach(([overrideKey, overrideValue]) => {
+                  draft.components[overrideKey] = draft.components[overrideKey] || {};
                   // Merge override components with the generated components,
                   // The override will add a new component or replace the value of an existing component
-                  draft.components[key] = { ...draft.components[key], ...val };
+                  draft.components[overrideKey] = {
+                    ...draft.components[overrideKey],
+                    ...overrideValue,
+                  };
                 });
               }
             }
@@ -236,11 +253,11 @@ module.exports = ({ strapi }) => {
         }
       });
       // Get the documentation mutateDocumentation
-      const userMutateCallback = config['x-strapi-config'].mutateDocumentation;
+      const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
       // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
       // the generated documentation before it is written to the file system
-      const finalDocumentation = userMutateCallback
-        ? mutateDocumentation(generatedDocumentation, userMutateCallback)
+      const finalDocumentation = userMutatesDocumentation
+        ? mutateDocumentation(generatedDocumentation, userMutatesDocumentation)
         : generatedDocumentation;
 
       await fs.ensureFile(fullDocJsonPath);
