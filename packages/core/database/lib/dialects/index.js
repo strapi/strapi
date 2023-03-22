@@ -13,12 +13,27 @@ const getDialectClass = (client) => {
   }
 };
 
+const getDialectName = (client) => {
+  switch (client) {
+    case 'postgres':
+      return 'postgres';
+    case 'mysql':
+    case 'mysql2':
+      return 'mysql';
+    case 'sqlite':
+      return 'sqlite';
+    default:
+      throw new Error(`Unknown dialect ${client}`);
+  }
+};
+
 const getDialect = (db) => {
   const { client } = db.config.connection;
+  const dialectName = getDialectName(client);
 
-  const constructor = getDialectClass(client);
+  const constructor = getDialectClass(dialectName);
   const dialect = new constructor(db);
-  dialect.client = client;
+  dialect.client = dialectName;
 
   return dialect;
 };
