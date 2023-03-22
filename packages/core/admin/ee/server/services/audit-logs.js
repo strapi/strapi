@@ -149,13 +149,11 @@ const createAuditLogsService = (strapi) => {
       }
 
       // Handle license being disabled
-      if (!state.eeDisableUnsubscribe) {
-        state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
-          // Turn off service when the license gets disabled
-          // ee.enable and ee.update listeners remain active to recreate the service
-          this.destroy();
-        });
-      }
+      state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
+        // Turn off service when the license gets disabled
+        // Only ee.enable and ee.update listeners remain active to recreate the service
+        this.destroy();
+      });
 
       // Register the provider now because collections can't be added later at runtime
       state.provider = await localProvider.register({ strapi });
