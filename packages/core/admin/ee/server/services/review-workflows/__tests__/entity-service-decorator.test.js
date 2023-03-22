@@ -2,8 +2,6 @@
 
 const { decorator } = require('../entity-service-decorator')();
 
-const { getService } = require('../../../utils');
-
 jest.mock('../../../utils');
 
 const rwModel = {
@@ -29,6 +27,12 @@ describe('Entity service decorator', () => {
       getModel(uid) {
         return models[uid || 'test-model'];
       },
+      query: () => ({
+        findOne: () => ({
+          id: 1,
+          stages: [{ id: 1 }],
+        }),
+      }),
     };
   });
 
@@ -51,9 +55,6 @@ describe('Entity service decorator', () => {
     });
 
     test('Assigns default stage to new review workflow entity', async () => {
-      const assignSpy = jest.fn();
-      getService.mockImplementation(() => ({ assignEntityDefaultStage: assignSpy }));
-
       const entry = {
         id: 1,
       };
@@ -67,8 +68,13 @@ describe('Entity service decorator', () => {
       const input = { data: { title: 'title ' } };
       await service.create('test-model', input);
 
-      expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
-      expect(assignSpy).toHaveBeenCalledWith('test-model', expect.anything());
+      expect(defaultService.create).toHaveBeenCalledWith('test-model', {
+        ...input,
+        data: {
+          ...input.data,
+          strapi_reviewWorkflows_stage: 1,
+        },
+      });
     });
   });
 });

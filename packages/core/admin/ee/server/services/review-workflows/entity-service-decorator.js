@@ -1,7 +1,6 @@
 'use strict';
 
-const { hasRWEnabled } = require('../../utils/review-workflows');
-const { getService } = require('../../utils');
+const { hasRWEnabled, getDefaultWorkflow } = require('../../utils/review-workflows');
 
 /**
  * Decorates the entity service with RW business logic
@@ -12,16 +11,17 @@ const decorator = (service) => ({
     const model = strapi.getModel(uid);
     const hasRW = hasRWEnabled(model);
 
-    const entity = await service.create.call(this, uid, opts);
     if (!hasRW) {
-      return entity;
+      return service.create.call(this, uid, opts);
     }
 
-    // Assign this entity to the default workflow stage
-    const { assignEntityDefaultStage } = getService('review-workflows');
-    await assignEntityDefaultStage(uid, entity.id);
+    const defaultWorkFlow = await getDefaultWorkflow({ strapi });
 
-    return entity;
+    return service.create.call(this, uid, {
+      ...opts,
+      // Assign this entity to the default workflow stage
+      data: { ...opts.data, strapi_reviewWorkflows_stage: defaultWorkFlow.stages[0].id },
+    });
   },
 });
 
