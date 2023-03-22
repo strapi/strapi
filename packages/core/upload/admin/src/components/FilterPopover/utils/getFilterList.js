@@ -11,17 +11,31 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
       return [
         {
           intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$eq',
-            defaultMessage: 'is',
+            id: 'components.FilterOptions.FILTER_TYPES.$contains',
+            defaultMessage: 'contains',
           },
           value: '$contains',
         },
         {
           intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$ne',
-            defaultMessage: 'is not',
+            id: 'components.FilterOptions.FILTER_TYPES.$containsi',
+            defaultMessage: 'contains (case insensitive)',
+          },
+          value: '$containsi',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notContains',
+            defaultMessage: 'not contains',
           },
           value: '$notContains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notContainsi',
+            defaultMessage: 'not contains (case insensitive)',
+          },
+          value: '$notContainsi',
         },
       ];
     }
@@ -72,6 +86,13 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
           value: '$eq',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$eqi',
+            defaultMessage: 'is (case insensitive)',
+          },
+          value: '$eqi',
         },
         {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },
