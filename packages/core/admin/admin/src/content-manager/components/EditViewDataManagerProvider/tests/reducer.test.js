@@ -571,7 +571,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             level_one_repeatable: [
               {
                 __temp_key__: 0,
-                level_two_single_component: {},
               },
             ],
           },
