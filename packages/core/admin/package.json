@@ -108,7 +108,7 @@
     "passport-local": "1.0.0",
     "pluralize": "8.0.0",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",

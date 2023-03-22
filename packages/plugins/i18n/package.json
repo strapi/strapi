@@ -34,7 +34,7 @@
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",

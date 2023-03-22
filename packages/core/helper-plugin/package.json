@@ -50,7 +50,7 @@
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-helmet": "^6.1.0",
     "react-intl": "6.3.2",
     "react-select": "5.7.0"
