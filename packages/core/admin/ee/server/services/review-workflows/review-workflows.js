@@ -63,30 +63,6 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
   }
 }
 
-async function assignEntityDefaultStage(uid, entityID) {
-  const defaultWorkflow = await getDefaultWorkflow({ strapi });
-  if (!defaultWorkflow) {
-    return;
-  }
-  const firstStage = defaultWorkflow.stages[0];
-
-  const contentTypeMetadata = strapi.db.metadata.get(uid);
-  const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
-  const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
-  const { idColumn, typeColumn } = joinTable.morphColumn;
-
-  const connection = strapi.db.getConnection();
-
-  // TODO test all db types
-  await connection(joinTable.name).insert({
-    [idColumn.name]: entityID,
-    field: connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
-    order: 1,
-    [joinTable.joinColumn.name]: firstStage.id,
-    [typeColumn.name]: connection.raw('?', [uid]),
-  });
-}
-
 const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
   writable: true,
   private: false,
@@ -179,6 +155,35 @@ function enableReviewWorkflow({ strapi }) {
       (contentTypesUIDs) => mapAsync(contentTypesUIDs, up),
     ])(contentTypes);
   };
+}
+
+/**
+ * Assigns an entity to the first stage of the default workflow.
+ * @param {string} uid of the model
+ * @param {number} entityID
+ * @returns
+ */
+async function assignEntityDefaultStage(uid, entityID) {
+  const defaultWorkflow = await getDefaultWorkflow({ strapi });
+  if (!defaultWorkflow) {
+    return;
+  }
+  const firstStage = defaultWorkflow.stages[0];
+
+  const contentTypeMetadata = strapi.db.metadata.get(uid);
+  const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
+  const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
+  const { idColumn, typeColumn } = joinTable.morphColumn;
+
+  const connection = strapi.db.getConnection();
+
+  await connection(joinTable.name).insert({
+    [idColumn.name]: entityID,
+    field: connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
+    order: 1,
+    [joinTable.joinColumn.name]: firstStage.id,
+    [typeColumn.name]: connection.raw('?', [uid]),
+  });
 }
 
 module.exports = ({ strapi }) => {
