@@ -19,9 +19,6 @@ module.exports = () => ({
       info: {
         version: '2.0.0',
       },
-      'x-strapi-config': {
-        plugins: ['upload'],
-      },
     },
   },
   myplugin: {
