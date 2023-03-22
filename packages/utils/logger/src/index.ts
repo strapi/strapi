@@ -1,7 +1,7 @@
 import * as winston from 'winston';
-
-import * as formats from './formats';
 import * as configs from './configs';
+
+export * as formats from './formats';
 
 const createLogger = (userConfiguration: winston.LoggerOptions = {}): winston.Logger => {
   const configuration = configs.createDefaultConfiguration();
@@ -11,4 +11,4 @@ const createLogger = (userConfiguration: winston.LoggerOptions = {}): winston.Lo
   return winston.createLogger(configuration);
 };
 
-export { createLogger, winston, formats, configs };
+export { createLogger, winston, configs };

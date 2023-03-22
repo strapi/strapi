@@ -31,6 +31,10 @@
     "styled-components": "5.3.3"
   },
   "scripts": {
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "lint": "eslint ."
   },
   "repository": {

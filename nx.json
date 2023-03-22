@@ -12,7 +12,7 @@
     "build": {
       "inputs": ["production", "^production"],
       "dependsOn": ["^build"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/build"]
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
     },
     "build:ts": {
       "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
