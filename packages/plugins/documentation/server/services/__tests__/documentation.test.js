@@ -154,13 +154,15 @@ describe('Documentation service', () => {
           },
         ],
       };
+
       global.strapi.config.get = () => ({ ...userConfig });
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
       const mockFinalDoc = lastMockCall[1];
-
-      expect(mockFinalDoc.info).toEqual(userConfig.info);
+      // The generation data is dynamically added, it cannot be modified by the user
+      const { 'x-generation-date': generationConfig, ...mockFinalDocInfo } = mockFinalDoc.info;
+      expect(mockFinalDocInfo).toEqual(userConfig.info);
       expect(mockFinalDoc['x-strapi-config']).toEqual(userConfig['x-strapi-config']);
       expect(mockFinalDoc.externalDocs).toEqual(userConfig.externalDocs);
       expect(mockFinalDoc.security).toEqual(userConfig.security);
@@ -319,6 +321,66 @@ describe('Documentation service', () => {
         'test-new-component'
       );
     });
+    it('overrides only the specified version', async () => {
+      const overrideService = override({ strapi: global.strapi });
+      // Simulate override from upload plugin
+      overrideService.registerOverride(
+        {
+          // Only override for version 1.0.0
+          info: { version: '1.0.0' },
+          components: {
+            schemas: {
+              // This component schema exists after generating with mock data, replace it
+              ShouldNotBeAdded: {},
+            },
+          },
+        },
+        { pluginOrigin: 'upload' }
+      );
+      // Simulate override from upload plugin
+      overrideService.registerOverride(
+        {
+          // Only override for version 2.0.0
+          info: { version: '2.0.0' },
+          components: {
+            schemas: {
+              // This component schema exists after generating with mock data, replace it
+              ShouldBeAdded: {},
+            },
+          },
+        },
+        { pluginOrigin: 'upload' }
+      );
+      // Simulate override from upload plugin
+      overrideService.registerOverride(
+        {
+          components: {
+            schemas: {
+              // This component schema exists after generating with mock data, replace it
+              ShouldAlsoBeAdded: {},
+            },
+          },
+        },
+        { pluginOrigin: 'upload' }
+      );
+      global.strapi.plugins.documentation = {
+        service: jest.fn((name) => {
+          const mockServices = {
+            override: overrideService,
+          };
+
+          return mockServices[name];
+        }),
+      };
+      const docService = documentation({ strapi: global.strapi });
+      await docService.generateFullDoc('2.0.0');
+      const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+      const mockFinalDoc = lastMockCall[1];
+
+      expect(mockFinalDoc.components.schemas.ShouldNotBeAdded).toBeUndefined();
+      expect(mockFinalDoc.components.schemas.ShouldBeAdded).toBeDefined();
+      expect(mockFinalDoc.components.schemas.ShouldAlsoBeAdded).toBeDefined();
+    });
     it('excludes apis and plugins from generation', async () => {
       const overrideService = override({ strapi: global.strapi });
 
@@ -346,12 +408,12 @@ describe('Documentation service', () => {
         Object.keys(mockFinalDoc.components.schemas).find((compo) => compo.includes('Kitchensink'))
       ).toBeUndefined();
     });
-    it("applies a user's customizer function", async () => {
+    it("applies a user's mutateDocumentation function", async () => {
       global.strapi.config.get = () => ({
         ...defaultConfig,
         'x-strapi-config': {
           ...defaultConfig['x-strapi-config'],
-          customizer(draft) {
+          mutateDocumentation(draft) {
             draft.paths['/kitchensinks'] = { get: { responses: { 200: { description: 'test' } } } };
           },
         },
