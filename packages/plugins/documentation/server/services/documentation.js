@@ -3,17 +3,24 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash/fp');
-const { produce } = require('immer');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
+const mutateDocumentation = (currentState, mutateStateCallback) => {
+  // Create a copy of the current state that is mutable
+  const draftState = _.cloneDeep(currentState);
+  // Pass the draft to the callback for mutation
+  mutateStateCallback(draftState);
+  // Return the mutated state as a new immutable state
+  return Object.freeze(draftState);
+};
+
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
   const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
-
   const overrideService = strapi.plugin('documentation').service('override');
 
   return {
@@ -145,9 +152,9 @@ module.exports = ({ strapi }) => {
       for (const api of apisThatNeedGeneratedDocumentation) {
         const apiName = api.name;
 
-        // TODO: check if this is necessary
+        // TODO: confirm this can be removed
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
-        // TODO: check if this is necessary
+        // TODO: confirm this can be removed
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
 
         const apiPath = builApiEndpointPath(api);
@@ -156,7 +163,7 @@ module.exports = ({ strapi }) => {
           continue;
         }
 
-        // TODO: check if this is necessary
+        // TODO: confirm this can be removed
         await fs.ensureFile(apiDocPath);
         await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
 
@@ -178,7 +185,7 @@ module.exports = ({ strapi }) => {
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
-      const generatedDocumentation = produce(config, (draft) => {
+      const generatedDocumentation = mutateDocumentation(config, (draft) => {
         // When no servers found set the default
         if (draft.servers.length === 0) {
           draft.servers = [
@@ -229,11 +236,11 @@ module.exports = ({ strapi }) => {
         }
       });
       // Get the documentation mutateDocumentation
-      const documentationCustomizer = config['x-strapi-config'].mutateDocumentation;
+      const userMutateCallback = config['x-strapi-config'].mutateDocumentation;
       // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
       // the generated documentation before it is written to the file system
-      const finalDocumentation = documentationCustomizer
-        ? produce(generatedDocumentation, documentationCustomizer)
+      const finalDocumentation = userMutateCallback
+        ? mutateDocumentation(generatedDocumentation, userMutateCallback)
         : generatedDocumentation;
 
       await fs.ensureFile(fullDocJsonPath);
