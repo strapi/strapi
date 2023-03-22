@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -14,6 +13,7 @@ import {
   useTracking,
   getYupInnerErrors,
   Link,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import {
   Box,
@@ -27,16 +27,9 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { EyeStriked, Eye } from '@strapi/icons';
-import UnauthenticatedLayout, {
-  Column,
-  LayoutContent,
-} from '../../../../layouts/UnauthenticatedLayout';
+import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../../../../components/UnauthenticatedLogo';
 import FieldActionWrapper from '../FieldActionWrapper';
-
-const CenteredBox = styled(Box)`
-  text-align: center;
-`;
 
 const A = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
@@ -58,6 +51,8 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const query = useQuery();
+  const { formatAPIError } = useAPIErrorHandler();
+
   const registrationToken = query.get('registrationToken');
 
   useEffect(() => {
@@ -73,17 +68,17 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
           if (data) {
             setUserInfo(data);
           }
-        } catch (err) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
+        } catch (error) {
+          const message = formatAPIError(error);
 
           toggleNotification({
             type: 'warning',
-            message: errorMessage,
+            message,
           });
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
-          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
+          push(`/auth/oops?info=${encodeURIComponent(message)}`);
         }
       };
 
@@ -91,6 +86,20 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [registrationToken]);
+
+  function normalizeData(data) {
+    return Object.entries(data).reduce((acc, [key, value]) => {
+      let normalizedvalue = value;
+
+      if (!['password', 'confirmPassword'].includes(key) && typeof value === 'string') {
+        normalizedvalue = normalizedvalue.trim();
+      }
+
+      acc[key] = normalizedvalue;
+
+      return acc;
+    }, {});
+  }
 
   return (
     <UnauthenticatedLayout>
@@ -107,8 +116,10 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
             news: false,
           }}
           onSubmit={async (data, formik) => {
+            const normalizedData = normalizeData(data);
+
             try {
-              await schema.validate(data, { abortEarly: false });
+              await schema.validate(normalizedData, { abortEarly: false });
 
               if (submitCount > 0 && authType === 'register-admin') {
                 trackUsage('didSubmitWithErrorsFirstAdmin', { count: submitCount.toString() });
@@ -117,11 +128,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
               if (registrationToken) {
                 // We need to pass the registration token in the url param to the api in order to submit another admin user
                 onSubmit(
-                  { userInfo: omit(data, ['registrationToken']), registrationToken },
+                  { userInfo: omit(normalizedData, ['registrationToken']), registrationToken },
                   formik
                 );
               } else {
-                onSubmit(data, formik);
+                onSubmit(normalizedData, formik);
               }
             } catch (err) {
               const errors = getYupInnerErrors(err);
@@ -138,27 +149,26 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
             return (
               <Form noValidate>
                 <Main>
-                  <Column>
+                  <Flex direction="column" alignItems="stretch" gap={3}>
                     <Logo />
-                    <Box paddingTop={6} paddingBottom={1}>
-                      <Typography as="h1" variant="alpha">
-                        {formatMessage({
-                          id: 'Auth.form.welcome.title',
-                          defaultMessage: 'Welcome to Strapi!',
-                        })}
-                      </Typography>
-                    </Box>
-                    <CenteredBox paddingBottom={7}>
-                      <Typography variant="epsilon" textColor="neutral600">
-                        {formatMessage({
-                          id: 'Auth.form.register.subtitle',
-                          defaultMessage:
-                            'Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.',
-                        })}
-                      </Typography>
-                    </CenteredBox>
-                  </Column>
-                  <Flex direction="column" alignItems="stretch" gap={6}>
+
+                    <Typography as="h1" variant="alpha" textAlign="center">
+                      {formatMessage({
+                        id: 'Auth.form.welcome.title',
+                        defaultMessage: 'Welcome to Strapi!',
+                      })}
+                    </Typography>
+
+                    <Typography variant="epsilon" textColor="neutral600" textAlign="center">
+                      {formatMessage({
+                        id: 'Auth.form.register.subtitle',
+                        defaultMessage:
+                          'Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.',
+                      })}
+                    </Typography>
+                  </Flex>
+
+                  <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
@@ -204,7 +214,6 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       value={values.password}
                       error={errors.password ? formatMessage(errors.password) : undefined}
                       endAction={
-                        // eslint-disable-next-line react/jsx-wrap-multilines
                         <FieldActionWrapper
                           onClick={(e) => {
                             e.preventDefault();
@@ -245,7 +254,6 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         errors.confirmPassword ? formatMessage(errors.confirmPassword) : undefined
                       }
                       endAction={
-                        // eslint-disable-next-line react/jsx-wrap-multilines
                         <FieldActionWrapper
                           onClick={(e) => {
                             e.preventDefault();
