@@ -12,7 +12,7 @@ const {
 } = require('@strapi/utils');
 const { getService } = require('../utils');
 
-const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif', 'avif'];
+const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 

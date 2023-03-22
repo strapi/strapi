@@ -187,12 +187,8 @@ module.exports = ({ strapi }) => ({
    * @param {*} fileData
    */
   async uploadImage(fileData) {
-    const {
-      getDimensions,
-      generateThumbnail,
-      generateResponsiveFormats,
-      isResizableImage,
-    } = getService('image-manipulation');
+    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
+      getService('image-manipulation');
 
     // Store width and height of the original image
     const { width, height } = await getDimensions(fileData);
