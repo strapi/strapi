@@ -176,7 +176,6 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      // Set config defaults
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
       const generatedDocumentation = produce(config, (draft) => {
@@ -189,42 +188,49 @@ module.exports = ({ strapi }) => {
             },
           ];
         }
-
+        // Set the generated date
+        draft.info['x-generation-date'] = new Date().toISOString();
+        // Set the plugins that need documentation
         draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
         // Delete it from the config so it doesn't end up in the spec
-        delete draft['x-strapi-config'].customizer;
-
+        delete draft['x-strapi-config'].mutateDocumentation;
         // Set the generated paths
         draft.paths = paths;
         // Merge the generated component schemas with the defaults
         draft.components = _.merge(defaultOpenApiComponents, { schemas });
+        // Check for overrides and then add them
+        if (overrideService.registeredOverrides.length > 0) {
+          overrideService.registeredOverrides.forEach((doc) => {
+            // Only run the overrrides when no override version is provided,
+            // or when the generated documentation version matches the override version
+            if (!doc?.info?.version || doc.info.version === version) {
+              if (doc.tags) {
+                // Merge override tags with the generated tags
+                draft.tags = draft.tags || [];
+                draft.tags.push(...doc.tags);
+              }
 
-        overrideService.registeredOverrides.forEach((doc) => {
-          if (doc.tags) {
-            // Merge override tags with the generated tags
-            draft.tags = draft.tags || [];
-            draft.tags.push(...doc.tags);
-          }
+              if (doc.paths) {
+                // Merge override paths with the generated paths
+                // The override will add a new path or replace the value of an existing path
+                draft.paths = { ...draft.paths, ...doc.paths };
+              }
 
-          if (doc.paths) {
-            // Merge override paths with the generated paths
-            // The override will add a new path or replace the value of an existing path
-            draft.paths = { ...draft.paths, ...doc.paths };
-          }
-
-          if (doc.components) {
-            Object.entries(doc.components).forEach(([key, val]) => {
-              draft.components[key] = draft.components[key] || {};
-              // Merge override components with the generated components,
-              // The override will add a new component or replace the value of an existing component
-              draft.components[key] = { ...draft.components[key], ...val };
-            });
-          }
-        });
+              if (doc.components) {
+                Object.entries(doc.components).forEach(([key, val]) => {
+                  draft.components[key] = draft.components[key] || {};
+                  // Merge override components with the generated components,
+                  // The override will add a new component or replace the value of an existing component
+                  draft.components[key] = { ...draft.components[key], ...val };
+                });
+              }
+            }
+          });
+        }
       });
-      // Get the documentation customizer
-      const documentationCustomizer = config['x-strapi-config'].customizer;
-      // Escape hatch, allow the user to provide a customizer function that can manipulate
+      // Get the documentation mutateDocumentation
+      const documentationCustomizer = config['x-strapi-config'].mutateDocumentation;
+      // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
       // the generated documentation before it is written to the file system
       const finalDocumentation = documentationCustomizer
         ? produce(generatedDocumentation, documentationCustomizer)
