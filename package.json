@@ -91,7 +91,7 @@
     "nx": "15.8.3",
     "plop": "2.7.6",
     "prettier": "2.8.4",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "rimraf": "3.0.2",
     "stylelint": "13.13.1",
     "stylelint-config-recommended": "3.0.0",

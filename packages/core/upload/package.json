@@ -42,7 +42,7 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
     "react-helmet": "^6.1.0",
