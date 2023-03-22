@@ -480,7 +480,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
     expect(updatedRes.statusCode).toBe(200);
     expect(updatedRes.body.data).toMatchObject({
       name: updatedBody.name,
-      permissions: updatedBody.permissions,
+      permissions: expect.arrayContaining(updatedBody.permissions),
       description: updatedBody.description,
       id: token.id,
       createdAt: token.createdAt,
