@@ -62,6 +62,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     requests.admin = await createAuthRequest({ strapi });
   };
 
+  const getRWMorphTableResults = async (connection) =>
+    connection
+      .select('*')
+      .from('strapi_workflows_stages_related_morphs')
+      .where('related_type', productUID);
+
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
     // eslint-disable-next-line node/no-extraneous-require
@@ -319,12 +325,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Enabling/Disabling review workflows on a content type', () => {
     let response;
 
-    const getRWMorphTableResults = async (connection) =>
-      connection
-        .select('*')
-        .from('strapi_workflows_stages_related_morphs')
-        .where('related_type', productUID);
-
     beforeAll(async () => {
       await createEntry(productUID, { name: 'Product' });
       await createEntry(productUID, { name: 'Product 1' });
@@ -371,6 +371,40 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       response = await getRWMorphTableResults(strapi.db.getConnection());
       expect(response.length).toEqual(0);
+    });
+  });
+
+  describe('Creating an entity in a review workflow content type', () => {
+    let response;
+
+    beforeAll(async () => {
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: true },
+      });
+      await restart();
+
+      await createEntry(productUID, { name: 'Product' });
+      await createEntry(productUID, { name: 'Product 1' });
+      await createEntry(productUID, { name: 'Product 2' });
+    });
+
+    test('when review workflows is enabled on a content type, new entries should be added to the first stage of the default workflow', async () => {
+      response = await requests.admin({
+        method: 'GET',
+        url: `/content-type-builder/content-types/api::product.product`,
+      });
+
+      expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
+
+      response = await getRWMorphTableResults(strapi.db.getConnection());
+
+      expect(response.length).toEqual(6);
+      for (let i = 0; i < response.length; i += 1) {
+        const entry = response[i];
+        expect(entry.related_id).toEqual(i + 1);
+        expect(entry.order).toEqual(1);
+      }
     });
   });
 });
