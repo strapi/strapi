@@ -27,13 +27,14 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "yarn build:ts",
-    "build:ts": "tsc -p tsconfig.json",
-    "build:clean": "yarn clean && yarn build",
+    "build": "tsc",
+    "build:ts": "tsc",
     "clean": "rimraf ./lib",
-    "prepublishOnly": "yarn build:clean",
-    "test:unit": "jest --verbose",
-    "watch": "yarn build:ts -w --preserveWatchOutput"
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
+    "watch": "tsc -w --preserveWatchOutput",
+    "lint": "eslint ."
   },
   "directories": {
     "lib": "./lib"
