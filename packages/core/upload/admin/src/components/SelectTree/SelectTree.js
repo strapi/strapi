@@ -8,7 +8,7 @@ import flattenTree from './utils/flattenTree';
 import getOpenValues from './utils/getOpenValues';
 import getValuesToClose from './utils/getValuesToClose';
 
-const hasParent = option => !option.parent;
+const hasParent = (option) => !option.parent;
 
 const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ...props }) => {
   const flatDefaultOptions = useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
@@ -18,14 +18,14 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
 
   useEffect(() => {
     if (openValues.length === 0) {
-      setOptions(flatDefaultOptions.filter(option => option.parent === undefined));
+      setOptions(flatDefaultOptions.filter((option) => option.parent === undefined));
     } else {
       const allOpenValues = openValues.reduce((acc, value) => {
         const options = flatDefaultOptions.filter(
-          option => option.value === value || option.parent === value
+          (option) => option.value === value || option.parent === value
         );
 
-        options.forEach(option => {
+        options.forEach((option) => {
           const values = getOpenValues(flatDefaultOptions, option);
           acc = [...acc, ...values];
         });
@@ -33,18 +33,20 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
         return acc;
       }, []);
 
-      const nextOptions = flatDefaultOptions.filter(option => allOpenValues.includes(option.value));
+      const nextOptions = flatDefaultOptions.filter((option) =>
+        allOpenValues.includes(option.value)
+      );
 
       setOptions(nextOptions);
     }
   }, [openValues, flatDefaultOptions, optionsFiltered]);
 
-  const handleToggle = value => {
+  const handleToggle = (value) => {
     if (openValues.includes(value)) {
       const valuesToClose = getValuesToClose(flatDefaultOptions, value);
-      setOpenValues(prev => prev.filter(prevData => !valuesToClose.includes(prevData)));
+      setOpenValues((prev) => prev.filter((prevData) => !valuesToClose.includes(prevData)));
     } else {
-      setOpenValues(prev => [...prev, value]);
+      setOpenValues((prev) => [...prev, value]);
     }
   };
 

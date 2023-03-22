@@ -9,7 +9,7 @@ const persistStateToLocaleStorage = {
     localStorage.removeItem(CURRENT_STEP);
     localStorage.removeItem(COMPLETED_STEPS);
   },
-  addCompletedStep: completedStep => {
+  addCompletedStep(completedStep) {
     const currentSteps = parse(localStorage.getItem(COMPLETED_STEPS))?.slice() || [];
     const isAlreadyStored = currentSteps.includes(completedStep);
 
@@ -20,13 +20,13 @@ const persistStateToLocaleStorage = {
     currentSteps.push(completedStep);
     localStorage.setItem(COMPLETED_STEPS, stringify(currentSteps));
   },
-  addCurrentStep: currentStep => {
+  addCurrentStep(currentStep) {
     localStorage.setItem(CURRENT_STEP, stringify(currentStep));
   },
-  setSkipped: value => {
+  setSkipped(value) {
     localStorage.setItem(SKIPPED, stringify(value));
   },
-  get: item => {
+  get(item) {
     return parse(localStorage.getItem(item));
   },
 };

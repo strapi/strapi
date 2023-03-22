@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Flex } from '@strapi/design-system/Flex';
+import { Flex } from '@strapi/design-system';
 import { PaginationContext } from './PaginationContext';
 
 const PaginationWrapper = styled.nav``;
@@ -12,8 +12,10 @@ const PaginationList = styled(Flex)`
 `;
 
 export const Pagination = ({ children, label, activePage, pageCount }) => {
+  const paginationValue = useMemo(() => ({ activePage, pageCount }), [activePage, pageCount]);
+
   return (
-    <PaginationContext.Provider value={{ activePage, pageCount }}>
+    <PaginationContext.Provider value={paginationValue}>
       <PaginationWrapper aria-label={label}>
         <PaginationList as="ul">{children}</PaginationList>
       </PaginationWrapper>

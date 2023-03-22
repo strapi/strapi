@@ -29,9 +29,11 @@ npm install @strapi/provider-upload-aws-s3 --save
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
+If you're using the bucket as a CDN and deliver the content on a custom domain, you can get use of the `baseUrl` and `rootPath` properties to configure how your assets' urls will be saved inside Strapi.
+
 ### Provider Configuration
 
-`./config/plugins.js`
+`./config/plugins.js` or `./config/plugins.ts` for TypeScript projects:
 
 ```js
 module.exports = ({ env }) => ({
@@ -40,12 +42,16 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: env('AWS_ACCESS_SECRET'),
-        region: env('AWS_REGION'),
-        params: {
-          Bucket: env('AWS_BUCKET'),
-        },
+        baseUrl: env('CDN_URL'),
+        rootPath: env('CDN_ROOT_PATH'),
+        s3Options: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+          region: env('AWS_REGION'),
+          params: {
+            Bucket: env('AWS_BUCKET'),
+          },
+        }
       },
       actionOptions: {
         upload: {},
@@ -123,6 +129,22 @@ module.exports = [
 ```
 
 If you use dots in your bucket name, the url of the ressource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg`. Then only add `s3.yourRegion.amazonaws.com` to img-src and media-src directives.
+
+## Bucket CORS Configuration
+
+If you are planning on uploading content like GIFs and videos to your S3 bucket, you will want to edit its CORS configuration so that thumbnails are properly shown in Strapi. To do so, open your Bucket on the AWS console and locate the _Cross-origin resource sharing (CORS)_ field under the _Permissions_ tab, then amend the policies by writing your own JSON configuration, or copying and pasting the following one:
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["YOUR STRAPI URL"],
+    "ExposeHeaders": [],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
 
 ## Required AWS Policy Actions
 

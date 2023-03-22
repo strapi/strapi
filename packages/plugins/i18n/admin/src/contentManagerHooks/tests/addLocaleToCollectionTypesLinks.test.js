@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../../admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import addLocaleToCollectionTypesLinksHook from '../addLocaleToCollectionTypesLinks';
 
 describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () => {
@@ -17,7 +17,7 @@ describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () 
         'plugin::content-manager.explorer.create': [],
       },
     };
-    store.getState = function() {
+    store.getState = function () {
       return this;
     };
   });

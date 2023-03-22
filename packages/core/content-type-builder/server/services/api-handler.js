@@ -73,13 +73,13 @@ async function rollback(uid) {
  * Creates a delete function to clear an api folder
  * @param {string} baseName
  */
-const createDeleteApiFunction = baseName => {
+const createDeleteApiFunction = (baseName) => {
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
    * @param {string} filePath file path to delete
    */
-  return async filePath => {
+  return async (filePath) => {
     const fileName = path.basename(filePath, path.extname(filePath));
 
     const isSchemaFile = filePath.endsWith(`${baseName}/schema.json`);

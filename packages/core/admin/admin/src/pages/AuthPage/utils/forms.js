@@ -14,10 +14,7 @@ const forms = {
     fieldsToDisable: [],
     fieldsToOmit: [],
     schema: yup.object().shape({
-      email: yup
-        .string()
-        .email(translatedErrors.email)
-        .required(translatedErrors.required),
+      email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
     }),
     inputsPrefix: '',
   },
@@ -35,10 +32,7 @@ const forms = {
     fieldsToDisable: [],
     fieldsToOmit: ['rememberMe'],
     schema: yup.object().shape({
-      email: yup
-        .string()
-        .email(translatedErrors.email)
-        .required(translatedErrors.required),
+      email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
       password: yup.string().required(translatedErrors.required),
       rememberMe: yup.bool().nullable(),
     }),
@@ -58,7 +52,7 @@ const forms = {
     fieldsToDisable: ['email'],
     fieldsToOmit: ['userInfo.confirmPassword', 'userInfo.news', 'userInfo.email'],
     schema: yup.object().shape({
-      firstname: yup.string().required(translatedErrors.required),
+      firstname: yup.string().trim().required(translatedErrors.required),
       lastname: yup.string(),
       password: yup
         .string()
@@ -82,7 +76,7 @@ const forms = {
     fieldsToDisable: [],
     fieldsToOmit: ['confirmPassword', 'news'],
     schema: yup.object().shape({
-      firstname: yup.string().required(translatedErrors.required),
+      firstname: yup.string().trim().required(translatedErrors.required),
       lastname: yup.string(),
       password: yup
         .string()

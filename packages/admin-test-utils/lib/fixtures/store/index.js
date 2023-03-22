@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
@@ -30,6 +29,7 @@ const reducers = {
     contentTypeDataStructure: {},
     isLoading: true,
     data: null,
+    setModifiedDataOnly: false,
     status: 'resolved',
   })),
   rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),

@@ -1,9 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
@@ -37,13 +34,14 @@ const RowLabelWithCheckbox = ({
           )}
           disabled={isFormDisabled}
           // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-          onValueChange={value =>
+          onValueChange={(value) =>
             onChange({
               target: {
                 name: checkboxName,
                 value,
               },
-            })}
+            })
+          }
           indeterminate={someChecked}
           value={value}
         />
@@ -76,7 +74,7 @@ const RowLabelWithCheckbox = ({
 RowLabelWithCheckbox.defaultProps = {
   children: null,
   checkboxName: '',
-  onChange: () => {},
+  onChange() {},
   value: false,
   someChecked: false,
   isCollapsable: false,

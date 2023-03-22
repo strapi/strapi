@@ -1,19 +1,19 @@
 import { createSelector } from 'reselect';
 import { initialState } from './reducer';
 
-const selectAppDomain = () => state => {
+const selectAppDomain = () => (state) => {
   return state['content-manager_app'] || initialState;
 };
 
 const makeSelectApp = () =>
-  createSelector(selectAppDomain(), substate => {
+  createSelector(selectAppDomain(), (substate) => {
     return substate;
   });
 
-const makeSelectModels = () => createSelector(selectAppDomain(), state => state.models);
+const makeSelectModels = () => createSelector(selectAppDomain(), (state) => state.models);
 
 const makeSelectModelLinks = () =>
-  createSelector(selectAppDomain(), state => ({
+  createSelector(selectAppDomain(), (state) => ({
     collectionTypeLinks: state.collectionTypeLinks,
     singleTypeLinks: state.singleTypeLinks,
   }));

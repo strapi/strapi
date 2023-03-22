@@ -1,9 +1,7 @@
-import { get } from 'lodash';
-
-const createPossibleMainFieldsForModelsAndComponents = array => {
+const createPossibleMainFieldsForModelsAndComponents = (array) => {
   return array.reduce((acc, current) => {
-    const attributes = get(current, ['attributes'], {});
-    const possibleMainFields = Object.keys(attributes).filter(attr => {
+    const attributes = current?.attributes ?? {};
+    const possibleMainFields = Object.keys(attributes).filter((attr) => {
       return ![
         'boolean',
         'component',
@@ -14,7 +12,7 @@ const createPossibleMainFieldsForModelsAndComponents = array => {
         'relation',
         'text',
         'richtext',
-      ].includes(get(attributes, [attr, 'type'], ''));
+      ].includes(attributes?.[attr]?.type ?? '');
     });
 
     acc[current.uid] = possibleMainFields;

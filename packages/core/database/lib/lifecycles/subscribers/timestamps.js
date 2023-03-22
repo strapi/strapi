@@ -33,7 +33,7 @@ const timestampsLifecyclesSubscriber = {
 
     const now = new Date();
     if (_.isArray(data)) {
-      data.forEach(data => _.defaults(data, { createdAt: now, updatedAt: now }));
+      data.forEach((data) => _.defaults(data, { createdAt: now, updatedAt: now }));
     }
   },
 
@@ -57,7 +57,7 @@ const timestampsLifecyclesSubscriber = {
 
     const now = new Date();
     if (_.isArray(data)) {
-      data.forEach(data => _.assign(data, { updatedAt: now }));
+      data.forEach((data) => _.assign(data, { updatedAt: now }));
     }
   },
 };

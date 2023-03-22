@@ -36,4 +36,4 @@ const operators = {
 };
 
 // Instantiate every operator with the Strapi instance
-module.exports = context => mapValues(opCtor => opCtor(context), operators);
+module.exports = (context) => mapValues((opCtor) => opCtor(context), operators);

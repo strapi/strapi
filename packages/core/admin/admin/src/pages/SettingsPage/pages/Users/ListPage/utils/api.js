@@ -1,17 +1,20 @@
-import { axiosInstance } from '../../../../../../core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const fetchData = async (search, notify) => {
+  const { get } = getFetchClient();
   const {
     data: { data },
-  } = await axiosInstance.get(`/admin/users${search}`);
+  } = await get(`/admin/users${search}`);
 
   notify();
 
   return data;
 };
 
-const deleteData = async ids => {
-  await axiosInstance.post('/admin/users/batch-delete', { ids });
+const deleteData = async (ids) => {
+  const { post } = getFetchClient();
+
+  await post('/admin/users/batch-delete', { ids });
 };
 
 export { deleteData, fetchData };

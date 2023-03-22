@@ -1,4 +1,5 @@
 'use strict';
+
 const restrictAccess = require('../middlewares/restrict-access');
 
 module.exports = [

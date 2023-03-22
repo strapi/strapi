@@ -1,6 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-
+const path = require('path');
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
@@ -8,13 +8,14 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://contributor.strapi.io',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
   organizationName: 'strapi',
   projectName: 'strapi',
+  trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -23,7 +24,20 @@ const config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-  plugins: [],
+  plugins: [
+    () => ({
+      name: 'resolve-react',
+      configureWebpack() {
+        return {
+          resolve: {
+            alias: {
+              react: path.resolve(__dirname, './node_modules/react'),
+            },
+          },
+        };
+      },
+    }),
+  ],
   presets: [
     [
       'classic',
@@ -32,7 +46,7 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          // editUrl: 'https://github.com/strapi/strapi/tree/master/docs//docs',
+          editUrl: 'https://github.com/strapi/strapi/tree/main/docs/',
         },
         blog: false,
       },
@@ -43,7 +57,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     {
       navbar: {
-        // title: 'Doc',
+        title: 'Contributor documentation',
         hideOnScroll: true,
         logo: {
           alt: 'Doc',
@@ -63,6 +77,12 @@ const config = {
             position: 'left',
             sidebarId: 'api',
             label: 'API',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'community',
+            label: 'Community',
           },
         ],
       },

@@ -4,7 +4,7 @@ const fs = require('fs');
 const { join } = require('path');
 const packagesFolder = require('./packagesFolder');
 
-const fileExistsInPackages = path =>
+const fileExistsInPackages = (path) =>
   fs.promises
     .access(join(packagesFolder, path))
     .then(() => true)

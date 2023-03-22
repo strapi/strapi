@@ -1,9 +1,9 @@
 import * as yup from 'yup';
-import { toLower } from 'lodash';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+
 import CATEGORY_NAME_REGEX from './regex';
 
-const createCategorySchema = usedCategoryNames => {
+const createCategorySchema = (usedCategoryNames) => {
   const shape = {
     name: yup
       .string()
@@ -11,12 +11,12 @@ const createCategorySchema = usedCategoryNames => {
       .test({
         name: 'nameNotAllowed',
         message: errorsTrads.unique,
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
 
-          return !usedCategoryNames.includes(toLower(value));
+          return !usedCategoryNames.includes(value?.toLowerCase());
         },
       })
       .required(errorsTrads.required),

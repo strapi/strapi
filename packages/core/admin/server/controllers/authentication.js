@@ -32,12 +32,13 @@ module.exports = {
 
         ctx.state.user = user;
 
-        strapi.eventHub.emit('admin.auth.success', { user, provider: 'local' });
+        const sanitizedUser = getService('user').sanitizeUser(user);
+        strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider: 'local' });
 
         return next();
       })(ctx, next);
     },
-    ctx => {
+    (ctx) => {
       const { user } = ctx.state;
 
       ctx.body = {
@@ -155,5 +156,11 @@ module.exports = {
         user: getService('user').sanitizeUser(user),
       },
     };
+  },
+
+  logout(ctx) {
+    const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
+    strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
+    ctx.body = { data: {} };
   },
 };

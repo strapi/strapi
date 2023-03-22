@@ -1,9 +1,8 @@
 import React, { memo, useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
@@ -12,6 +11,7 @@ import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
 import ListViewLayout from '../ListViewLayoutManager';
 import ListSettingsView from '../ListSettingsView';
+import ErrorFallback from './components/ErrorFallback';
 
 const cmPermissions = permissions.contentManager;
 
@@ -42,7 +42,7 @@ const CollectionTypeRecursivePath = ({
     return { rawContentTypeLayout, rawComponentsLayouts };
   }, [layout]);
 
-  const uid = get(layout, ['contentType', 'uid'], null);
+  const uid = layout?.contentType?.uid ?? null;
 
   // This statement is needed in order to prevent the CollectionTypeFormWrapper effects clean up phase to be run twice.
   // What can happen is that when navigating from one entry to another the cleanup phase of the fetch data effect is run twice : once when
@@ -81,7 +81,7 @@ const CollectionTypeRecursivePath = ({
     { path: ':id', comp: EditViewLayoutManager },
     { path: '', comp: ListViewLayout },
   ].map(({ path, comp }) => (
-    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
+    <Route key={path} path={`${url}/${path}`} render={(props) => renderRoute(props, comp)} />
   ));
 
   return (

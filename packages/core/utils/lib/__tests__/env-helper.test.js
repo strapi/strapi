@@ -54,10 +54,13 @@ describe('Env helper', () => {
       expect(envHelper.bool('NO_VAR')).toBeUndefined();
     });
 
-    test.each(['', '1', '-1', 'false'])('Returns false if var is not equal to true (%s)', value => {
-      process.env.NOT_TRUE = value;
-      expect(envHelper.bool('NOT_TRUE')).toEqual(false);
-    });
+    test.each(['', '1', '-1', 'false'])(
+      'Returns false if var is not equal to true (%s)',
+      (value) => {
+        process.env.NOT_TRUE = value;
+        expect(envHelper.bool('NOT_TRUE')).toEqual(false);
+      }
+    );
 
     test('Returns true when using "true"', () => {
       process.env.TRUE_VAR = 'true';
@@ -139,6 +142,29 @@ describe('Env helper', () => {
     test('Returns a valid date when possible', () => {
       process.env.DATE_VAR = '2010-02-21T12:34:12';
       expect(envHelper.date('DATE_VAR')).toEqual(new Date(2010, 1, 21, 12, 34, 12));
+    });
+  });
+
+  describe('env with union cast', () => {
+    test('Throws if expectedValues is not provided', () => {
+      expect(() => envHelper.oneOf('NO_VAR')).toThrow();
+    });
+
+    test('Throws if defaultValue not included in expectedValues', () => {
+      expect(() => envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'test')).toThrow();
+    });
+
+    test('Return undefined if value is missing in expectedValues and no defaultValue', () => {
+      expect(envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'])).toBeUndefined();
+    });
+
+    test('Return defaultValue if value does not exist in expectedValues', () => {
+      expect(envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
+    });
+
+    test('Return defaultValue if value exists and is missing in expectedValues', () => {
+      process.env.WITH_VAR = 'test';
+      expect(envHelper.oneOf('WITH_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
     });
   });
 });

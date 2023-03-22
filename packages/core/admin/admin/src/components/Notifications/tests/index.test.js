@@ -54,21 +54,11 @@ describe('<Notifications />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c2 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c2 > * + * {
-        margin-top: 8px;
+        gap: 8px;
       }
 
       <div
-        class="c0 c1 c2"
-        spacing="2"
-        width="31.25rem"
+        class="c0 c1"
       />
     `);
   });
@@ -108,7 +98,9 @@ describe('<Notifications />', () => {
     expect(items).toHaveLength(1);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2500);
+      });
     });
 
     const foundItems = screen.queryAllByText(/simple notif/);
@@ -151,7 +143,9 @@ describe('<Notifications />', () => {
     expect(items).toHaveLength(1);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2500);
+      });
     });
 
     const foundItems = screen.queryAllByText(/simple notif/);

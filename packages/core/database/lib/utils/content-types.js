@@ -1,6 +1,6 @@
 'use strict';
 
-const transformAttribute = attribute => {
+const transformAttribute = (attribute) => {
   switch (attribute.type) {
     case 'media': {
       return {
@@ -17,8 +17,8 @@ const transformAttribute = attribute => {
 };
 
 // TODO: model logic outside DB
-const transformContentTypes = contentTypes => {
-  return contentTypes.map(contentType => {
+const transformContentTypes = (contentTypes) => {
+  return contentTypes.map((contentType) => {
     const model = {
       ...contentType,
       // reuse new model def

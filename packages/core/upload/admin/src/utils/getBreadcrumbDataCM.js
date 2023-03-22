@@ -1,6 +1,6 @@
 import getTrad from './getTrad';
 
-const getBreadcrumbDataML = folder => {
+const getBreadcrumbDataML = (folder) => {
   let data = [
     {
       id: null,

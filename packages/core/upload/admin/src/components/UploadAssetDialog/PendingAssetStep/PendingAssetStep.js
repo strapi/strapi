@@ -1,14 +1,18 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTracking } from '@strapi/helper-plugin';
-import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
+import {
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Typography,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  KeyboardNavigable,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
@@ -38,7 +42,7 @@ export const PendingAssetStep = ({
   const { trackUsage } = useTracking();
   const [uploadStatus, setUploadStatus] = useState(Status.Idle);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -93,9 +97,9 @@ export const PendingAssetStep = ({
       </ModalHeader>
 
       <ModalBody>
-        <Stack spacing={7}>
+        <Flex direction="column" alignItems="stretch" gap={7}>
           <Flex justifyContent="space-between">
-            <Stack spacing={0}>
+            <Flex direction="column" alignItems="stretch" gap={0}>
               <Typography variant="pi" fontWeight="bold" textColor="neutral800">
                 {formatMessage(
                   {
@@ -112,7 +116,7 @@ export const PendingAssetStep = ({
                   defaultMessage: 'Manage the assets before adding them to the Media Library',
                 })}
               </Typography>
-            </Stack>
+            </Flex>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
@@ -122,7 +126,7 @@ export const PendingAssetStep = ({
           </Flex>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
-              {assets.map(asset => {
+              {assets.map((asset) => {
                 const assetKey = asset.url;
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
@@ -134,7 +138,7 @@ export const PendingAssetStep = ({
                         asset={asset}
                         id={assetKey}
                         onCancel={onCancelUpload}
-                        onStatusChange={status => handleStatusChange(status, asset.rawFile)}
+                        onStatusChange={(status) => handleStatusChange(status, asset.rawFile)}
                         size="S"
                         folderId={folderId}
                       />
@@ -158,7 +162,7 @@ export const PendingAssetStep = ({
               })}
             </Grid>
           </KeyboardNavigable>
-        </Stack>
+        </Flex>
       </ModalBody>
 
       <ModalFooter

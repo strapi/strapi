@@ -1,10 +1,10 @@
 import { useQuery } from 'react-query';
 import { request, useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
-const fetchDefaultLocalesList = async toggleNotification => {
+const fetchDefaultLocalesList = async (toggleNotification) => {
   try {
     const data = await request('/i18n/iso-locales', {
       method: 'GET',
@@ -26,7 +26,7 @@ const useDefaultLocales = () => {
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
   const { isLoading, data } = useQuery('default-locales', () =>
-    fetchDefaultLocalesList(toggleNotification).then(data => {
+    fetchDefaultLocalesList(toggleNotification).then((data) => {
       notifyStatus(
         formatMessage({
           id: getTrad('Settings.locales.modal.locales.loaded'),

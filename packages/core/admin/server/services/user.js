@@ -9,13 +9,13 @@ const { password: passwordValidator } = require('../validation/common-validators
 const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 
-const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'code']);
+const sanitizeUserRoles = (role) => _.pick(role, ['id', 'name', 'description', 'code']);
 
 /**
  * Remove private user fields
  * @param {Object} user - user to sanitize
  */
-const sanitizeUser = user => {
+const sanitizeUser = (user) => {
   return {
     ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
@@ -27,7 +27,7 @@ const sanitizeUser = user => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -42,6 +42,8 @@ const create = async attributes => {
   const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
   getService('metrics').sendDidInviteUser();
+
+  strapi.eventHub.emit('user.create', { user: sanitizeUser(createdUser) });
 
   return createdUser;
 };
@@ -76,7 +78,7 @@ const updateById = async (id, attributes) => {
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
-    return strapi.query('admin::user').update({
+    const updatedUser = await strapi.query('admin::user').update({
       where: { id },
       data: {
         ...attributes,
@@ -84,13 +86,23 @@ const updateById = async (id, attributes) => {
       },
       populate: ['roles'],
     });
+
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+
+    return updatedUser;
   }
 
-  return strapi.query('admin::user').update({
+  const updatedUser = await strapi.query('admin::user').update({
     where: { id },
     data: attributes,
     populate: ['roles'],
   });
+
+  if (updatedUser) {
+    strapi.eventHub.emit('user.update', { user: sanitizeUser(updatedUser) });
+  }
+
+  return updatedUser;
 };
 
 /**
@@ -120,7 +132,7 @@ const resetPasswordByEmail = async (email, password) => {
  * Check if a user is the last super admin
  * @param {int|string} userId user's id to look for
  */
-const isLastSuperAdminUser = async userId => {
+const isLastSuperAdminUser = async (userId) => {
   const user = await findOne(userId);
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
 
@@ -141,7 +153,7 @@ const exists = async (attributes = {}) => {
  * @param {string} registrationToken - a user registration token
  * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
-const findRegistrationInfo = async registrationToken => {
+const findRegistrationInfo = async (registrationToken) => {
   const user = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!user) {
@@ -206,7 +218,7 @@ const findPage = async (query = {}) => {
  * @param id id of the user to delete
  * @returns {Promise<user>}
  */
-const deleteById = async id => {
+const deleteById = async (id) => {
   // Check at least one super admin remains
   const userToDelete = await strapi.query('admin::user').findOne({
     where: { id },
@@ -218,7 +230,7 @@ const deleteById = async id => {
   }
 
   if (userToDelete) {
-    if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
+    if (userToDelete.roles.some((r) => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
       if (superAdminRole.usersCount === 1) {
         throw new ValidationError('You must have at least one user with super admin role.');
@@ -226,14 +238,20 @@ const deleteById = async id => {
     }
   }
 
-  return strapi.query('admin::user').delete({ where: { id }, populate: ['roles'] });
+  const deletedUser = await strapi
+    .query('admin::user')
+    .delete({ where: { id }, populate: ['roles'] });
+
+  strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
+
+  return deletedUser;
 };
 
 /** Delete a user
  * @param ids ids of the users to delete
  * @returns {Promise<user>}
  */
-const deleteByIds = async ids => {
+const deleteByIds = async (ids) => {
   // Check at least one super admin remains
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
   const nbOfSuperAdminToDelete = await strapi.query('admin::user').count({
@@ -256,6 +274,10 @@ const deleteByIds = async ids => {
 
     deletedUsers.push(deletedUser);
   }
+
+  strapi.eventHub.emit('user.delete', {
+    users: deletedUsers.map((deletedUser) => sanitizeUser(deletedUser)),
+  });
 
   return deletedUsers;
 };
@@ -285,7 +307,7 @@ const count = async (where = {}) => {
 /** Assign some roles to several users
  * @returns {undefined}
  */
-const assignARoleToAll = async roleId => {
+const assignARoleToAll = async (roleId) => {
   const users = await strapi.query('admin::user').findMany({
     select: ['id'],
     where: {
@@ -294,7 +316,7 @@ const assignARoleToAll = async roleId => {
   });
 
   await Promise.all(
-    users.map(user => {
+    users.map((user) => {
       return strapi.query('admin::user').update({
         where: { id: user.id },
         data: { roles: [roleId] },
@@ -320,7 +342,7 @@ const displayWarningIfUsersDontHaveRole = async () => {
 const getLanguagesInUse = async () => {
   const users = await strapi.query('admin::user').findMany({ select: ['preferedLanguage'] });
 
-  return users.map(user => user.preferedLanguage || 'en');
+  return users.map((user) => user.preferedLanguage || 'en');
 };
 
 module.exports = {

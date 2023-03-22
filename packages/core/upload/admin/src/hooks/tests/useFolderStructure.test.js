@@ -3,12 +3,13 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
 
-import { axiosInstance } from '../../utils';
+import { useFetchClient } from '@strapi/helper-plugin';
+
 import { useFolderStructure } from '../useFolderStructure';
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
         data: [
@@ -32,7 +33,7 @@ jest.mock('../../utils', () => ({
         ],
       },
     }),
-  },
+  }),
 }));
 
 const client = new QueryClient({
@@ -55,7 +56,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useFolderStructure(...args), { wrapper: ComponentFixture }));
     });
@@ -64,11 +65,12 @@ function setup(...args) {
 
 describe('useFolderStructure', () => {
   test('fetches data from the right URL', async () => {
+    const { get } = useFetchClient();
     const { waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
-    expect(axiosInstance.get).toBeCalledWith('/upload/folder-structure');
+    expect(get).toBeCalledWith('/upload/folder-structure');
   });
 
   test('transforms the required object keys', async () => {

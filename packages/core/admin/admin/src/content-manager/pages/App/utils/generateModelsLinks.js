@@ -1,10 +1,11 @@
-import { chain, get } from 'lodash';
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
 import { stringify } from 'qs';
 
 const generateLinks = (links, type, configurations = []) => {
   return links
-    .filter(link => link.isDisplayed)
-    .map(link => {
+    .filter((link) => link.isDisplayed)
+    .map((link) => {
       const collectionTypesPermissions = [
         { action: 'plugin::content-manager.explorer.create', subject: link.uid },
         { action: 'plugin::content-manager.explorer.read', subject: link.uid },
@@ -44,19 +45,19 @@ const generateLinks = (links, type, configurations = []) => {
 };
 
 const generateModelsLinks = (models, modelsConfigurations) => {
-  const [collectionTypes, singleTypes] = chain(models)
-    .groupBy('kind')
-    .map((value, key) => ({ name: key, links: value }))
-    .sortBy('name')
-    .value();
+  const groupedModels = Object.entries(groupBy(models, 'kind')).map(([key, value]) => ({
+    name: key,
+    links: value,
+  }));
+  const [collectionTypes, singleTypes] = sortBy(groupedModels, 'name');
 
   return {
     collectionTypesSectionLinks: generateLinks(
-      get(collectionTypes, 'links', []),
+      collectionTypes?.links || [],
       'collectionTypes',
       modelsConfigurations
     ),
-    singleTypesSectionLinks: generateLinks(get(singleTypes, 'links', []), 'singleTypes'),
+    singleTypesSectionLinks: generateLinks(singleTypes?.links ?? [], 'singleTypes'),
   };
 };
 

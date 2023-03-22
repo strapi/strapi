@@ -2,13 +2,9 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Typography, ModalFooter, Button } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Button } from '@strapi/design-system/Button';
-import PicturePlus from '@strapi/icons/PicturePlus';
+import { PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
@@ -41,18 +37,18 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
   const inputRef = useRef(null);
   const { trackUsage } = useTracking();
 
-  const handleDragOver = event => {
+  const handleDragOver = (event) => {
     event.preventDefault();
   };
 
-  const handleDragEnter = event => {
+  const handleDragEnter = (event) => {
     event.preventDefault();
     setDragOver(true);
   };
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
     inputRef.current.click();
   };
@@ -75,7 +71,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
     onAddAssets(assets);
   };
 
-  const handleDrop = e => {
+  const handleDrop = (e) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {

@@ -14,13 +14,10 @@ const registerProviderActionSchema = yup
           .string()
           .matches(
             /^[a-z]([a-z|.|-]+)[a-z]$/,
-            v => `${v.path}: The id can only contain lowercase letters, dots and hyphens.`
+            (v) => `${v.path}: The id can only contain lowercase letters, dots and hyphens.`
           )
           .required(),
-        section: yup
-          .string()
-          .oneOf(['contentTypes', 'plugins', 'settings'])
-          .required(),
+        section: yup.string().oneOf(['contentTypes', 'plugins', 'settings']).required(),
         pluginName: yup.mixed().when('section', {
           is: 'plugins',
           then: validators.isAPluginName.required(),
@@ -28,10 +25,7 @@ const registerProviderActionSchema = yup
         }),
         subjects: yup.mixed().when('section', {
           is: 'contentTypes',
-          then: yup
-            .array()
-            .of(yup.string())
-            .required(),
+          then: yup.array().of(yup.string()).required(),
           otherwise: yup
             .mixed()
             .oneOf([undefined], 'subjects should only be defined for the "contentTypes" section'),
@@ -45,18 +39,18 @@ const registerProviderActionSchema = yup
             .test(
               'settingsCategory',
               'category should only be defined for the "settings" section',
-              cat => cat === undefined
+              (cat) => cat === undefined
             ),
         }),
         subCategory: yup.mixed().when('section', {
-          is: section => ['settings', 'plugins'].includes(section),
+          is: (section) => ['settings', 'plugins'].includes(section),
           then: yup.string(),
           otherwise: yup
             .mixed()
             .test(
               'settingsSubCategory',
               'subCategory should only be defined for "plugins" and "settings" sections',
-              subCat => {
+              (subCat) => {
                 return subCat === undefined;
               }
             ),

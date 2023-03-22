@@ -2,13 +2,13 @@
 
 const { isEmpty, toPath } = require('lodash/fp');
 
-const formatYupInnerError = yupError => ({
+const formatYupInnerError = (yupError) => ({
   path: toPath(yupError.path),
   message: yupError.message,
   name: yupError.name,
 });
 
-const formatYupErrors = yupError => ({
+const formatYupErrors = (yupError) => ({
   errors: isEmpty(yupError.inner)
     ? [formatYupInnerError(yupError)]
     : yupError.inner.map(formatYupInnerError),

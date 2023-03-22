@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Checkbox } from '@strapi/design-system/Checkbox';
+import { BaseCheckbox, Checkbox } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
-  const enabledCheckboxes = events.filter(event => {
+  const enabledCheckboxes = events.filter((event) => {
     return !disabledEvents.includes(event);
   });
 
@@ -34,7 +33,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
         </Checkbox>
       </td>
 
-      {events.map(event => {
+      {events.map((event) => {
         return (
           <td key={event}>
             <BaseCheckbox
@@ -42,7 +41,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
               aria-label={event}
               name={event}
               value={inputValue.includes(event)}
-              onValueChange={value => handleChange({ target: { name: event, value } })}
+              onValueChange={(value) => handleChange({ target: { name: event, value } })}
             />
           </td>
         );
@@ -55,8 +54,8 @@ EventRow.defaultProps = {
   disabledEvents: [],
   events: [],
   inputValue: [],
-  handleChange: () => {},
-  handleChangeAll: () => {},
+  handleChange() {},
+  handleChangeAll() {},
 };
 
 EventRow.propTypes = {

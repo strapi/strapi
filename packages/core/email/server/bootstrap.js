@@ -1,9 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-
-const createProvider = emailConfig => {
-  const providerName = _.toLower(emailConfig.provider);
+const createProvider = (emailConfig) => {
+  const providerName = emailConfig.provider?.toLowerCase();
   let provider;
 
   let modulePath;

@@ -36,14 +36,9 @@ const LIFECYCLES = [
  * TODO V5: check if we can avoid this coupling by moving this logic
  * into the GraphQL plugin.
  */
-const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
+const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
 
-const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
-  yup
-    .mixed()
-    .nullable()
-    .isFunction()
-);
+const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () => yup.mixed().nullable().isFunction());
 
 const contentTypeSchemaValidator = yup.object().shape({
   schema: yup.object().shape({
@@ -51,34 +46,28 @@ const contentTypeSchemaValidator = yup.object().shape({
       .object()
       .shape({
         displayName: yup.string().required(),
-        singularName: yup
-          .string()
-          .isKebabCase()
-          .required(),
-        pluralName: yup
-          .string()
-          .isKebabCase()
-          .required(),
+        singularName: yup.string().isKebabCase().required(),
+        pluralName: yup.string().isKebabCase().required(),
       })
       .required(),
     attributes: yup.object().test({
       name: 'valuesCollide',
       message: 'Some values collide when normalized',
       test(attributes) {
-        for (const attrName in attributes) {
+        for (const attrName of Object.keys(attributes)) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
             const regressedValues = attr.enum.map(toRegressedEnumValue);
 
             // should match the GraphQL regex
-            if (!regressedValues.every(value => GRAPHQL_ENUM_REGEX.test(value))) {
+            if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
               const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
 
             // should not contain empty values
-            if (regressedValues.some(value => value === '')) {
+            if (regressedValues.some((value) => value === '')) {
               return this.createError({
                 message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
               });
@@ -104,13 +93,10 @@ const contentTypeSchemaValidator = yup.object().shape({
     }),
   }),
   actions: yup.object().onlyContainsFunctions(),
-  lifecycles: yup
-    .object()
-    .shape(lifecyclesShape)
-    .noUnknown(),
+  lifecycles: yup.object().shape(lifecyclesShape).noUnknown(),
 });
 
-const validateContentTypeDefinition = data => {
+const validateContentTypeDefinition = (data) => {
   return contentTypeSchemaValidator.validateSync(data, { strict: true, abortEarly: false });
 };
 

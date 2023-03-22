@@ -18,7 +18,7 @@ module.exports = {
   async getComponents(ctx) {
     const componentService = getService('components');
 
-    const data = Object.keys(strapi.components).map(uid => {
+    const data = Object.keys(strapi.components).map((uid) => {
       return componentService.formatComponent(strapi.components[uid]);
     });
 

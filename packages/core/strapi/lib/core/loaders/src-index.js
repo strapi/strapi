@@ -2,9 +2,7 @@
 
 const { resolve } = require('path');
 const { statSync, existsSync } = require('fs');
-const { yup } = require('@strapi/utils');
-
-const { importDefault } = require('../../utils');
+const { yup, importDefault } = require('@strapi/utils');
 
 const srcSchema = yup
   .object()
@@ -15,11 +13,11 @@ const srcSchema = yup
   })
   .noUnknown();
 
-const validateSrcIndex = srcIndex => {
+const validateSrcIndex = (srcIndex) => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   if (!existsSync(strapi.dirs.dist.src)) {
     return;
   }

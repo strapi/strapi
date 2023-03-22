@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { set } from 'lodash';
+import set from 'lodash/set';
 /* eslint-disable consistent-return */
 
 const initialState = {
@@ -9,7 +9,7 @@ const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE': {
         set(draftState.modifiedData, action.keys.split('.'), action.value);

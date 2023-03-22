@@ -8,8 +8,8 @@ const chalk = require('chalk');
 const { getTemplatePackageInfo, downloadNpmTemplate } = require('./fetch-npm-template');
 
 // Specify all the files and directories a template can have
-const allowFile = Symbol();
-const allowChildren = Symbol();
+const allowFile = Symbol('alloFile');
+const allowChildren = Symbol('allowChildren');
 const allowedTemplateContents = {
   'README.md': allowFile,
   '.env.example': allowFile,
@@ -30,7 +30,7 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   let templatePath;
   let templateParentPath;
   let templatePackageInfo = {};
-  const isLocalTemplate = ['./', '../', '/'].some(filePrefix =>
+  const isLocalTemplate = ['./', '../', '/'].some((filePrefix) =>
     scope.template.startsWith(filePrefix)
   );
 

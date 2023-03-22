@@ -21,7 +21,7 @@ async function captureException(error) {
     sentry.captureException(error);
     await sentry.flush();
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -31,7 +31,7 @@ async function captureError(message) {
     sentry.captureMessage(message, 'error');
     await sentry.flush();
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -41,7 +41,7 @@ function captureStderr(name, error) {
     error.stderr
       .trim()
       .split('\n')
-      .forEach(line => {
+      .forEach((line) => {
         sentry.addBreadcrumb({
           category: 'stderr',
           message: line,
@@ -53,80 +53,80 @@ function captureStderr(name, error) {
   return captureError(name);
 }
 
-function trackEvent(event, body) {
+const getProperties = (scope, error) => {
+  const eventProperties = {
+    error: typeof error === 'string' ? error : error && error.message,
+  };
+  const userProperties = {
+    os: os.type(),
+    osPlatform: os.platform(),
+    osArch: os.arch(),
+    osRelease: os.release(),
+    nodeVersion: process.versions.node,
+  };
+  const groupProperties = {
+    version: scope.strapiVersion,
+    docker: scope.docker,
+    useYarn: scope.useYarn,
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
+    isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
+    noRun: (scope.runQuickstartApp !== true).toString(),
+    projectId: scope.uuid,
+  };
+
+  return {
+    eventProperties,
+    userProperties,
+    groupProperties: addPackageJsonStrapiMetadata(groupProperties, scope),
+  };
+};
+
+function trackEvent(event, payload) {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
 
   try {
-    return fetch('https://analytics.strapi.io/track', {
+    return fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event,
-        ...body,
+        ...payload,
       }),
       timeout: 1000,
       headers: { 'Content-Type': 'application/json' },
     }).catch(() => {});
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
 
 function trackError({ scope, error }) {
-  const { uuid } = scope;
-
-  const properties = {
-    error: typeof error == 'string' ? error : error && error.message,
-    os: os.type(),
-    platform: os.platform(),
-    release: os.release(),
-    version: scope.strapiVersion,
-    nodeVersion: process.version,
-    docker: scope.docker,
-    useYarn: scope.useYarn,
-    useTypescriptOnServer: scope.useTypescript,
-    useTypescriptOnAdmin: scope.useTypescript,
-  };
+  const properties = getProperties(scope, error);
 
   try {
     return trackEvent('didNotCreateProject', {
-      uuid,
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      ...properties,
     });
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
 
 function trackUsage({ event, scope, error }) {
-  const { uuid } = scope;
-
-  const properties = {
-    error: typeof error == 'string' ? error : error && error.message,
-    os: os.type(),
-    os_platform: os.platform(),
-    os_release: os.release(),
-    node_version: process.version,
-    version: scope.strapiVersion,
-    docker: scope.docker,
-    useYarn: scope.useYarn.toString(),
-    useTypescriptOnServer: scope.useTypescript,
-    useTypescriptOnAdmin: scope.useTypescript,
-    noRun: (scope.runQuickstartApp !== true).toString(),
-  };
+  const properties = getProperties(scope, error);
 
   try {
     return trackEvent(event, {
-      uuid,
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      ...properties,
     });
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }

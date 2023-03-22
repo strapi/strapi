@@ -16,17 +16,24 @@ import {
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
-import { Button } from '@strapi/design-system/Button';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Table, Tr, Thead, Th, Tbody, Td } from '@strapi/design-system/Table';
+import {
+  Button,
+  Layout,
+  HeaderLayout,
+  ContentLayout,
+  Main,
+  IconButton,
+  Typography,
+  Flex,
+  Table,
+  Tr,
+  Thead,
+  Th,
+  Tbody,
+  Td,
+} from '@strapi/design-system';
 
-import Trash from '@strapi/icons/Trash';
-import Show from '@strapi/icons/Eye';
-import Reload from '@strapi/icons/Refresh';
+import { Trash, Eye as Show, Refresh as Reload } from '@strapi/icons';
 
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
@@ -49,7 +56,7 @@ const PluginPage = () => {
     openWithNewTab(`${slash}${data?.prefix}/v${data?.currentVersion}`);
   };
 
-  const handleRegenerateDoc = version => {
+  const handleRegenerateDoc = (version) => {
     regenerateDocMutation.mutate({ version, prefix: data?.prefix });
   };
 
@@ -64,7 +71,7 @@ const PluginPage = () => {
     setIsConfirmButtonLoading(false);
   };
 
-  const handleClickDelete = version => {
+  const handleClickDelete = (version) => {
     setVersionToDelete(version);
     setShowConfirmDelete(!showConfirmDelete);
   };
@@ -123,7 +130,7 @@ const PluginPage = () => {
               <Tbody>
                 {data.docVersions
                   .sort((a, b) => (a.generatedDate < b.generatedDate ? 1 : -1))
-                  .map(doc => (
+                  .map((doc) => (
                     <Tr key={doc.version}>
                       <Td width="50%">
                         <Typography>{doc.version}</Typography>

@@ -1,11 +1,20 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Typography } from '@strapi/design-system/Typography';
-import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
+import {
+  useNotifyAT,
+  Layout,
+  HeaderLayout,
+  ContentLayout,
+  Main,
+  Typography,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Td,
+  Th,
+} from '@strapi/design-system';
 import useFetchEnabledPlugins from '../../hooks/useFetchEnabledPlugins';
 
 const Plugins = () => {
@@ -55,7 +64,7 @@ const Plugins = () => {
           })}
         />
         <ContentLayout>
-          <Table colCount={2} rowCount={data?.plugins.length + 1}>
+          <Table colCount={2} rowCount={data?.plugins?.length ?? 0 + 1}>
             <Thead>
               <Tr>
                 <Th>

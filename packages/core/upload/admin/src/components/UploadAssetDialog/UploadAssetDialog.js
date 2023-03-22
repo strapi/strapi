@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ModalLayout } from '@strapi/design-system/ModalLayout';
+import { ModalLayout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
@@ -19,23 +19,26 @@ export const UploadAssetDialog = ({
   onClose,
   addUploadedFiles,
   trackedLocation,
+  validateAssetsTypes = (_, cb) => cb(),
 }) => {
   const { formatMessage } = useIntl();
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
   const [assets, setAssets] = useState(initialAssetsToAdd || []);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
 
-  const handleAddToPendingAssets = nextAssets => {
-    setAssets(prevAssets => prevAssets.concat(nextAssets));
-    setStep(Steps.PendingAsset);
+  const handleAddToPendingAssets = (nextAssets) => {
+    validateAssetsTypes(nextAssets, () => {
+      setAssets((prevAssets) => prevAssets.concat(nextAssets));
+      setStep(Steps.PendingAsset);
+    });
   };
 
   const moveToAddAsset = () => {
     setStep(Steps.AddAsset);
   };
 
-  const handleCancelUpload = file => {
-    const nextAssets = assets.filter(asset => asset.rawFile !== file);
+  const handleCancelUpload = (file) => {
+    const nextAssets = assets.filter((asset) => asset.rawFile !== file);
     setAssets(nextAssets);
 
     // When there's no asset, transition to the AddAsset step
@@ -44,8 +47,8 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleUploadSuccess = file => {
-    const nextAssets = assets.filter(asset => asset.rawFile !== file);
+  const handleUploadSuccess = (file) => {
+    const nextAssets = assets.filter((asset) => asset.rawFile !== file);
     setAssets(nextAssets);
 
     if (nextAssets.length === 0) {
@@ -53,9 +56,9 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleAssetEditValidation = nextAsset => {
+  const handleAssetEditValidation = (nextAsset) => {
     if (nextAsset) {
-      const nextAssets = assets.map(asset => (asset === assetToEdit ? nextAsset : asset));
+      const nextAssets = assets.map((asset) => (asset === assetToEdit ? nextAsset : asset));
       setAssets(nextAssets);
     }
 
@@ -80,8 +83,8 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleRemoveAsset = assetToRemove => {
-    const nextAssets = assets.filter(asset => asset !== assetToRemove);
+  const handleRemoveAsset = (assetToRemove) => {
+    const nextAssets = assets.filter((asset) => asset !== assetToRemove);
     setAssets(nextAssets);
   };
 
@@ -130,6 +133,7 @@ UploadAssetDialog.defaultProps = {
   folderId: null,
   initialAssetsToAdd: undefined,
   trackedLocation: undefined,
+  validateAssetsTypes: undefined,
 };
 
 UploadAssetDialog.propTypes = {
@@ -138,4 +142,5 @@ UploadAssetDialog.propTypes = {
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
   onClose: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
+  validateAssetsTypes: PropTypes.func,
 };

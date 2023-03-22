@@ -17,7 +17,7 @@ describe('Global', () => {
     jest.resetAllMocks();
   });
 
-  const assertGlobalNodeStructure = node => {
+  const assertGlobalNodeStructure = (node) => {
     // "declare global"
     expect(node.kind).toBe(ts.SyntaxKind.ModuleDeclaration);
     expect(node.modifiers).toHaveLength(1);

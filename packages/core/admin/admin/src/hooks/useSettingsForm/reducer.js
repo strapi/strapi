@@ -1,6 +1,8 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { pick, set, unset } from 'lodash';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
+import unset from 'lodash/unset';
 
 const initialState = {
   fieldsToPick: [],
@@ -13,7 +15,7 @@ const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.isLoading = false;

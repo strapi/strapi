@@ -15,7 +15,7 @@ module.exports = function transformImport(nodePath, state) {
 
   if (source.includes('ee_else_ce')) {
     const modulePaths = resolvePath(source, currentFile, state.opts);
-    const specifiers = nodePath.node.specifiers.map(s => ` ${s.local.name}`);
+    const specifiers = nodePath.node.specifiers.map((s) => ` ${s.local.name}`);
 
     const tmpNode = `const ${specifiers[0]} = (() => {
         if (window && window.strapi && window.strapi.isEE) {

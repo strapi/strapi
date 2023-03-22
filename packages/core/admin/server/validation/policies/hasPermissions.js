@@ -5,13 +5,9 @@ const { yup, validateYupSchema } = require('@strapi/utils');
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(
-    yup.lazy(val => {
+    yup.lazy((val) => {
       if (_.isArray(val)) {
-        return yup
-          .array()
-          .of(yup.string())
-          .min(1)
-          .max(2);
+        return yup.array().of(yup.string()).min(1).max(2);
       }
 
       if (_.isString(val)) {

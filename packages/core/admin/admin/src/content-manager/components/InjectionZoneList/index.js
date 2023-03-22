@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
+import { Box } from '@strapi/design-system';
 import { useInjectionZone } from '../../../shared/hooks';
 
 const InjectionZoneList = ({ area, ...props }) => {
@@ -13,7 +13,7 @@ const InjectionZoneList = ({ area, ...props }) => {
   // TODO
   return (
     <ul>
-      {compos.map(compo => {
+      {compos.map((compo) => {
         const component = compo.Component(props);
 
         if (component) {

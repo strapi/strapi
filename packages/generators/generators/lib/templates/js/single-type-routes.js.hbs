@@ -4,8 +4,8 @@ module.exports = {
   routes: [
     {
       method: 'GET',
-      path: '/{{id}}',
-      handler: '{{id}}.find',
+      path: '/{{ id }}',
+      handler: '{{ id }}.find',
       config: {
         policies: [],
         middlewares: [],
@@ -13,8 +13,8 @@ module.exports = {
     },
     {
       method: 'PUT',
-      path: '/{{id}}',
-      handler: '{{id}}.update',
+      path: '/{{ id }}',
+      handler: '{{ id }}.update',
       config: {
         policies: [],
         middlewares: [],
@@ -22,8 +22,8 @@ module.exports = {
     },
     {
       method: 'DELETE',
-      path: '/{{id}}',
-      handler: '{{id}}.delete',
+      path: '/{{ id }}',
+      handler: '{{ id }}.delete',
       config: {
         policies: [],
         middlewares: [],

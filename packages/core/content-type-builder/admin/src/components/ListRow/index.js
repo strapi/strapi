@@ -2,14 +2,8 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import Lock from '@strapi/icons/Lock';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
+import { IconButton, Flex, Typography, Box } from '@strapi/design-system';
+import { Lock, Pencil, Trash } from '@strapi/icons';
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
@@ -17,9 +11,11 @@ import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import BoxWrapper from './BoxWrapper';
 import AttributeIcon from '../AttributeIcon';
+import DisplayedType from './DisplayedType';
 
 function ListRow({
   configurable,
+  customField,
   editTarget,
   firstLoopComponentUid,
   isFromDynamicZone,
@@ -37,14 +33,6 @@ function ListRow({
 
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
-
-  let readableType = type;
-
-  if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-    readableType = 'number';
-  } else if (['string'].includes(type)) {
-    readableType = 'text';
-  }
 
   const contentType = get(contentTypes, [target], {});
   const contentTypeFriendlyName = get(contentType, ['schema', 'displayName'], '');
@@ -68,7 +56,8 @@ function ListRow({
         // Name of the attribute
         name,
         // Type of the attribute
-        attrType
+        attrType,
+        customField
       );
     }
   };
@@ -92,10 +81,10 @@ function ListRow({
     >
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
-        <Stack paddingLeft={2} spacing={4} horizontal>
-          <AttributeIcon key={src} type={src} />
+        <Flex paddingLeft={2} gap={4}>
+          <AttributeIcon type={src} customField={customField} />
           <Typography fontWeight="bold">{name}</Typography>
-        </Stack>
+        </Flex>
       </td>
       <td>
         {target ? (
@@ -118,25 +107,14 @@ function ListRow({
             </span>
           </Typography>
         ) : (
-          <Typography>
-            {formatMessage({
-              id: getTrad(`attribute.${readableType}`),
-              defaultMessage: type,
-            })}
-            &nbsp;
-            {repeatable &&
-              formatMessage({
-                id: getTrad('component.repeatable'),
-                defaultMessage: '(repeatable)',
-              })}
-          </Typography>
+          <DisplayedType type={type} customField={customField} repeatable={repeatable} />
         )}
       </td>
       <td>
         {isInDevelopmentMode ? (
           <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <Stack horizontal spacing={1}>
+              <Flex gap={1}>
                 {!isMorph && (
                   <IconButton
                     onClick={handleClick}
@@ -149,7 +127,7 @@ function ListRow({
                   />
                 )}
                 <IconButton
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     removeAttribute(
                       editTarget,
@@ -164,7 +142,7 @@ function ListRow({
                   noBorder
                   icon={<Trash />}
                 />
-              </Stack>
+              </Flex>
             ) : (
               <Lock />
             )}
@@ -184,9 +162,10 @@ function ListRow({
 
 ListRow.defaultProps = {
   configurable: true,
+  customField: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
-  onClick: () => {},
+  onClick() {},
   relation: '',
   repeatable: false,
   secondLoopComponentUid: null,
@@ -197,6 +176,7 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   configurable: PropTypes.bool,
+  customField: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,

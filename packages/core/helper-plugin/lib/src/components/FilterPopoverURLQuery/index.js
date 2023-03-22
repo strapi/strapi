@@ -6,17 +6,12 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Popover } from '@strapi/design-system/Popover';
-import { Stack } from '@strapi/design-system/Stack';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Select, Option } from '@strapi/design-system/Select';
-import Plus from '@strapi/icons/Plus';
+import { Button, Flex, Box, Popover, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
-import Inputs from './Inputs';
+import DefaultInputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
 const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
@@ -38,8 +33,8 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     return null;
   }
 
-  const handleChangeFilterField = value => {
-    const nextField = displayedFilters.find(f => f.name === value);
+  const handleChangeFilterField = (value) => {
+    const nextField = displayedFilters.find((f) => f.name === value);
     const {
       fieldSchema: { type, options },
     } = nextField;
@@ -50,7 +45,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     }
 
     if (type === 'enumeration') {
-      filterValue = options[0];
+      filterValue = options?.[0];
     }
 
     const filter = getFilterList(nextField)[0].value;
@@ -58,11 +53,11 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     setModifiedData({ name: value, filter, value: filterValue });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const hasFilter =
-      query?.filters?.$and.find(filter => {
+      query?.filters?.$and.find((filter) => {
         return (
           filter[modifiedData.name] &&
           filter[modifiedData.name]?.[modifiedData.filter] === modifiedData.value
@@ -97,9 +92,9 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     onToggle();
   };
 
-  const handleChangeOperator = operator => {
+  const handleChangeOperator = (operator) => {
     if (operator === '$null' || operator === '$notNull') {
-      setModifiedData(prev => ({
+      setModifiedData((prev) => ({
         ...prev,
         value: 'true',
         filter: operator,
@@ -108,17 +103,19 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
       return;
     }
 
-    setModifiedData(prev => ({ ...prev, filter: operator, value: '' }));
+    setModifiedData((prev) => ({ ...prev, filter: operator, value: '' }));
   };
 
-  const appliedFilter = displayedFilters.find(filter => filter.name === modifiedData.name);
+  const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
   const operator = modifiedData.filter;
+  const filterList = appliedFilter.metadatas.customOperators || getFilterList(appliedFilter);
+  const Inputs = appliedFilter.metadatas.customInput || DefaultInputs;
 
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={1} style={{ minWidth: 184 }}>
+          <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
                 aria-label={formatMessage({
@@ -130,7 +127,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 onChange={handleChangeFilterField}
                 value={modifiedData.name}
               >
-                {displayedFilters.map(filter => {
+                {displayedFilters.map((filter) => {
                   return (
                     <Option key={filter.name} value={filter.name}>
                       {filter.metadatas.label}
@@ -150,7 +147,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 value={modifiedData.filter}
                 onChange={handleChangeOperator}
               >
-                {getFilterList(appliedFilter).map(option => {
+                {filterList.map((option) => {
                   return (
                     <Option key={option.value} value={option.value}>
                       {formatMessage(option.intlLabel)}
@@ -165,7 +162,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                   {...appliedFilter.metadatas}
                   {...appliedFilter.fieldSchema}
                   value={modifiedData.value}
-                  onChange={value => setModifiedData(prev => ({ ...prev, value }))}
+                  onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
                 />
               </Box>
             )}
@@ -174,7 +171,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
               </Button>
             </Box>
-          </Stack>
+          </Flex>
         </form>
       </FocusTrap>
     </Popover>
@@ -182,7 +179,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
 };
 
 FilterPopoverURLQuery.defaultProps = {
-  onBlur: () => {},
+  onBlur() {},
 };
 
 FilterPopoverURLQuery.propTypes = {

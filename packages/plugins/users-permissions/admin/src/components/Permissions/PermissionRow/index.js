@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import sortBy from 'lodash/sortBy';
-import { Box } from '@strapi/design-system/Box';
+import { Box } from '@strapi/design-system';
 import SubCategory from './SubCategory';
 
 const PermissionRow = ({ name, permissions }) => {
@@ -38,7 +38,7 @@ const PermissionRow = ({ name, permissions }) => {
 
   return (
     <Box padding={6}>
-      {subCategories.map(subCategory => (
+      {subCategories.map((subCategory) => (
         <SubCategory key={subCategory.name} subCategory={subCategory} />
       ))}
     </Box>

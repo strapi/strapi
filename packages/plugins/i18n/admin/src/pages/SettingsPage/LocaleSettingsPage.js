@@ -11,7 +11,7 @@ const LocaleSettingsPage = ({
   const [isOpenedCreateModal, setIsOpenedCreateModal] = useState(false);
 
   const handleToggleModalCreate = canCreateLocale
-    ? () => setIsOpenedCreateModal(s => !s)
+    ? () => setIsOpenedCreateModal((s) => !s)
     : undefined;
 
   return canReadLocale ? (

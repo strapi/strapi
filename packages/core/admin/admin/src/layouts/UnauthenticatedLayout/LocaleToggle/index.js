@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import { SimpleMenu, MenuItem } from '@strapi/design-system';
 import useLocalesProvider from '../../../components/LocalesProvider/useLocalesProvider';
 
 const LocaleToggle = () => {
@@ -15,7 +15,7 @@ const LocaleToggle = () => {
 
   return (
     <SimpleMenu label={localeNames[locale]}>
-      {Object.keys(localeNames).map(lang => (
+      {Object.keys(localeNames).map((lang) => (
         <MenuItem onClick={() => changeLocale(lang)} key={lang}>
           {localeNames[lang]}
         </MenuItem>

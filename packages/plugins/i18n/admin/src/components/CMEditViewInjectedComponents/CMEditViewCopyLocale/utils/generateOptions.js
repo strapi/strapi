@@ -11,10 +11,10 @@ const generateOptions = (appLocales, currentLocale, localizations, permissions) 
     .filter(({ code }) => {
       return permissions.some(({ properties }) => get(properties, 'locales', []).includes(code));
     })
-    .map(locale => {
+    .map((locale) => {
       return {
         label: locale.name,
-        value: localizations.find(loc => locale.code === loc.locale).id,
+        value: localizations.find((loc) => locale.code === loc.locale).id,
       };
     });
 };

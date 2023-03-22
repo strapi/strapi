@@ -1,8 +1,6 @@
 'use strict';
 
 const { isEmpty, mergeWith, isArray } = require('lodash/fp');
-const { execute, subscribe } = require('graphql');
-const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { ApolloServer } = require('apollo-server-koa');
 const {
   ApolloServerPluginLandingPageDisabled,
@@ -18,12 +16,26 @@ const merge = mergeWith((a, b) => {
   }
 });
 
+/**
+ * Register the upload middleware powered by graphql-upload in Strapi
+ * @param {object} strapi
+ * @param {string} path
+ */
+const useUploadMiddleware = (strapi, path) => {
+  const uploadMiddleware = graphqlUploadKoa();
+
+  strapi.server.app.use((ctx, next) => {
+    if (ctx.path === path) {
+      return uploadMiddleware(ctx, next);
+    }
+
+    return next();
+  });
+};
+
 module.exports = async ({ strapi }) => {
   // Generate the GraphQL schema for the content API
-  const schema = strapi
-    .plugin('graphql')
-    .service('content-api')
-    .buildSchema();
+  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');
@@ -66,24 +78,6 @@ module.exports = async ({ strapi }) => {
   };
 
   const serverConfig = merge(defaultServerConfig, config('apolloServer'));
-
-  // Handle subscriptions
-  if (config('subscriptions')) {
-    const subscriptionServer = SubscriptionServer.create(
-      { schema, execute, subscribe },
-      { server: strapi.server.httpServer, path }
-    );
-
-    serverConfig.plugins.push({
-      async serverWillStart() {
-        return {
-          async drainServer() {
-            subscriptionServer.close();
-          },
-        };
-      },
-    });
-  }
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
@@ -137,21 +131,4 @@ module.exports = async ({ strapi }) => {
   strapi.plugin('graphql').destroy = async () => {
     await server.stop();
   };
-};
-
-/**
- * Register the upload middleware powered by graphql-upload in Strapi
- * @param {object} strapi
- * @param {string} path
- */
-const useUploadMiddleware = (strapi, path) => {
-  const uploadMiddleware = graphqlUploadKoa();
-
-  strapi.server.app.use((ctx, next) => {
-    if (ctx.path === path) {
-      return uploadMiddleware(ctx, next);
-    }
-
-    return next();
-  });
 };

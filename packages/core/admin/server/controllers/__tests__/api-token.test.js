@@ -1,7 +1,9 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
+const { omit } = require('lodash/fp');
 const createContext = require('../../../../../../test/helpers/create-context');
+const constants = require('../../services/constants');
 const apiTokenController = require('../api-token');
 
 describe('API Token Controller', () => {
@@ -17,6 +19,17 @@ describe('API Token Controller', () => {
       const ctx = createContext({ body });
 
       global.strapi = {
+        contentAPI: {
+          permissions: {
+            providers: {
+              action: {
+                keys() {
+                  return ['foo', 'bar'];
+                },
+              },
+            },
+          },
+        },
         admin: {
           services: {
             'api-token': {
@@ -62,6 +75,138 @@ describe('API Token Controller', () => {
       expect(badRequest).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledWith(body);
       expect(created).toHaveBeenCalled();
+    });
+
+    test('Create API Token with valid lifespan', async () => {
+      const lifespan = constants.API_TOKEN_LIFESPANS.DAYS_7;
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+      const tokenBody = {
+        ...createBody,
+        expiresAt: Date.now() + lifespan,
+        permissions: undefined,
+      };
+
+      const create = jest.fn().mockResolvedValue(tokenBody);
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { badRequest, created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              exists,
+              create,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.create(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(createBody);
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
+    });
+
+    test('Throws with invalid lifespan', async () => {
+      const lifespan = 1235; // not in constants.API_TOKEN_LIFESPANS
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+
+      const create = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              create,
+            },
+          },
+        },
+      };
+
+      expect(async () => {
+        await apiTokenController.create(ctx);
+      }).rejects.toThrow(/lifespan must be one of the following values/);
+      expect(create).not.toHaveBeenCalled();
+      expect(created).not.toHaveBeenCalled();
+    });
+
+    test('Throws with negative lifespan', async () => {
+      const lifespan = -1;
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+
+      const create = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              create,
+            },
+          },
+        },
+      };
+
+      expect(async () => {
+        await apiTokenController.create(ctx);
+      }).rejects.toThrow(/lifespan must be one of the following values/);
+      expect(create).not.toHaveBeenCalled();
+      expect(created).not.toHaveBeenCalled();
+    });
+
+    test('Ignores a received expiresAt', async () => {
+      const lifespan = constants.API_TOKEN_LIFESPANS.DAYS_7;
+
+      const createBody = {
+        ...body,
+        expiresAt: 1234,
+        lifespan,
+      };
+      const tokenBody = {
+        ...createBody,
+        expiresAt: Date.now() + lifespan,
+        permissions: undefined,
+      };
+
+      const create = jest.fn().mockResolvedValue(tokenBody);
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { badRequest, created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              exists,
+              create,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.create(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(omit(['expiresAt'], createBody));
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
     });
   });
 
@@ -151,6 +296,62 @@ describe('API Token Controller', () => {
 
       expect(revoke).toHaveBeenCalledWith(token.id);
       expect(deleted).toHaveBeenCalledWith({ data: null });
+    });
+  });
+
+  describe('Regenerate an API token', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-regenerate',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('Regenerates an API token successfully', async () => {
+      const regenerate = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(token);
+      const created = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              regenerate,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.regenerate(ctx);
+
+      expect(regenerate).toHaveBeenCalledWith(token.id);
+    });
+
+    test('Fails if token not found', async () => {
+      const regenerate = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(null);
+      const created = jest.fn();
+      const notFound = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created, notFound });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              regenerate,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.regenerate(ctx);
+
+      expect(regenerate).not.toHaveBeenCalled();
+      expect(getById).toHaveBeenCalledWith(token.id);
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
     });
   });
 

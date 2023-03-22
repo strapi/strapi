@@ -4,15 +4,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Formik } from 'formik';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
+import { Box, Main, Flex, Button, TextInput, Typography } from '@strapi/design-system';
+import { EyeStriked, Eye } from '@strapi/icons';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -72,7 +65,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <PasswordInput
                     name="password"
                     onChange={handleChange}
@@ -87,9 +80,9 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     }
                     endAction={
                       <FieldActionWrapper
-                        onClick={e => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          setPasswordShown(prev => !prev);
+                          setPasswordShown((prev) => !prev);
                         }}
                         label={formatMessage(
                           passwordShown
@@ -132,9 +125,9 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     }
                     endAction={
                       <FieldActionWrapper
-                        onClick={e => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          setConfirmPasswordShown(prev => !prev);
+                          setConfirmPasswordShown((prev) => !prev);
                         }}
                         label={formatMessage(
                           passwordShown
@@ -154,7 +147,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     required
                     label={formatMessage({
                       id: 'Auth.form.confirmPassword.label',
-                      defaultMessage: 'Confirmation Password',
+                      defaultMessage: 'Confirm Password',
                     })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />
@@ -164,7 +157,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                       defaultMessage: 'Change password',
                     })}
                   </Button>
-                </Stack>
+                </Flex>
               </Form>
             )}
           </Formik>
@@ -182,7 +175,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
 };
 
 ForgotPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
 };
 
 ForgotPassword.propTypes = {

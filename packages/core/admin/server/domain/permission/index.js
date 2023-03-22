@@ -98,7 +98,7 @@ const deleteProperty = (property, permission) => omit(`properties.${property}`, 
  * @param {Permission} attributes
  * @return {Permission}
  */
-const create = attributes => {
+const create = (attributes) => {
   return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes);
 };
 
@@ -114,7 +114,7 @@ const sanitizeConditions = curry((provider, permission) => {
   }
 
   return permission.conditions
-    .filter(condition => !provider.has(condition))
+    .filter((condition) => !provider.has(condition))
     .reduce((perm, condition) => removeCondition(condition, perm), permission);
 });
 
@@ -123,7 +123,7 @@ const sanitizeConditions = curry((provider, permission) => {
  * @param {object | object[]} payload - Can either be a single object of attributes or an array of those objects.
  * @return {Permission | Permission[]}
  */
-const toPermission = payload => (isArray(payload) ? map(create, payload) : create(payload));
+const toPermission = (payload) => (isArray(payload) ? map(create, payload) : create(payload));
 
 module.exports = {
   addCondition,

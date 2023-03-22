@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import CellValue from '../CellValue';
 
@@ -13,7 +13,7 @@ const RelationSingle = ({ metadatas, value }) => {
     <TypographyMaxWidth textColor="neutral800" ellipsis>
       <CellValue
         type={metadatas.mainField.schema.type}
-        value={value[metadatas.mainField.name] || value.id}
+        value={value[metadatas.mainField.name] ?? value.id}
       />
     </TypographyMaxWidth>
   );

@@ -18,15 +18,12 @@ const getPassportStrategies = () => {
   }
 
   const providers = sso.providerRegistry.getAll();
-  const strategies = providers.map(provider => provider.createStrategy(strapi));
+  const strategies = providers.map((provider) => provider.createStrategy(strapi));
 
   return [localStrategy, ...strategies];
 };
 
 module.exports = {
   getPassportStrategies,
+  ...sso,
 };
-
-if (features.isEnabled('sso')) {
-  Object.assign(module.exports, sso);
-}

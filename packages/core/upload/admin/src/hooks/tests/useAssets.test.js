@@ -5,30 +5,18 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system';
 
-import { axiosInstance } from '../../utils';
 import { useAssets } from '../useAssets';
 
 const notifyStatusMock = jest.fn();
 
-jest.mock('@strapi/design-system/LiveRegions', () => ({
-  ...jest.requireActual('@strapi/design-system/LiveRegions'),
+jest.mock('@strapi/design-system', () => ({
+  ...jest.requireActual('@strapi/design-system'),
   useNotifyAT: () => ({
     notifyStatus: notifyStatusMock,
   }),
-}));
-
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
-    get: jest.fn().mockResolvedValue({
-      data: {
-        id: 1,
-      },
-    }),
-  },
 }));
 
 const notificationStatusMock = jest.fn();
@@ -36,6 +24,13 @@ const notificationStatusMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        id: 1,
+      },
+    }),
+  }),
 }));
 
 const client = new QueryClient({
@@ -64,7 +59,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useAssets(...args), { wrapper: ComponentFixture }));
     });
@@ -82,6 +77,8 @@ describe('useAssets', () => {
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
 
+    const { get } = useFetchClient();
+
     const expected = {
       filters: {
         $and: [
@@ -96,8 +93,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -106,6 +103,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -119,8 +117,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -131,6 +129,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -147,8 +146,8 @@ describe('useAssets', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -159,6 +158,7 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
+    const { get } = useFetchClient();
 
     const expected = {
       filters: {
@@ -171,8 +171,34 @@ describe('useAssets', () => {
       _q: 'something',
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?${stringify(expected, { encode: false })}`
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    );
+  });
+
+  test('correctly encodes the search query _q', async () => {
+    const _q = 'something&else';
+    const { result, waitFor, waitForNextUpdate } = await setup({
+      query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+    const { get } = useFetchClient();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+        ],
+      },
+      _q: encodeURIComponent(_q),
+    };
+
+    expect(get).toBeCalledWith(
+      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
     );
   });
 
@@ -181,7 +207,9 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(axiosInstance.get).toBeCalledTimes(0);
+    const { get } = useFetchClient();
+
+    expect(get).toBeCalledTimes(0);
   });
 
   test('calls notifyStatus in case of success', async () => {
@@ -199,8 +227,9 @@ describe('useAssets', () => {
   test('calls toggleNotification in case of error', async () => {
     const originalConsoleError = console.error;
     console.error = jest.fn();
+    const { get } = useFetchClient();
 
-    axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
+    get.mockRejectedValueOnce(new Error('Jest mock error'));
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
@@ -213,5 +242,98 @@ describe('useAssets', () => {
     expect(notifyStatus).not.toBeCalled();
 
     console.error = originalConsoleError;
+  });
+
+  it('should filter out any assets without a name', async () => {
+    const { get } = useFetchClient();
+
+    get.mockReturnValue({
+      data: {
+        results: [
+          {
+            name: null,
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+          {
+            name: 'test',
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+        ],
+      },
+    });
+
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.data !== undefined);
+
+    expect(result.current.data.results).toEqual([
+      {
+        name: 'test',
+        mime: 'image/jpeg',
+        ext: 'jpg',
+      },
+    ]);
+  });
+
+  it('should set mime and ext to strings as defaults if they are nullish', async () => {
+    const { get } = useFetchClient();
+
+    get.mockReturnValue({
+      data: {
+        results: [
+          {
+            name: 'test 1',
+            mime: null,
+            ext: 'jpg',
+          },
+          {
+            name: 'test 2',
+            mime: 'image/jpeg',
+            ext: null,
+          },
+          {
+            name: 'test 3',
+            mime: null,
+            ext: null,
+          },
+          {
+            name: 'test 4',
+            mime: 'image/jpeg',
+            ext: 'jpg',
+          },
+        ],
+      },
+    });
+
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.data !== undefined);
+
+    expect(result.current.data.results).toMatchInlineSnapshot(`
+      [
+        {
+          "ext": "jpg",
+          "mime": "",
+          "name": "test 1",
+        },
+        {
+          "ext": "",
+          "mime": "image/jpeg",
+          "name": "test 2",
+        },
+        {
+          "ext": "",
+          "mime": "",
+          "name": "test 3",
+        },
+        {
+          "ext": "jpg",
+          "mime": "image/jpeg",
+          "name": "test 4",
+        },
+      ]
+    `);
   });
 });

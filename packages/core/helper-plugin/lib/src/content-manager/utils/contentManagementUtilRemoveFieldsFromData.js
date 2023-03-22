@@ -1,4 +1,5 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
+
 import { getType, getOtherInfos } from './getAttributeInfos';
 
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
@@ -32,7 +33,7 @@ const contentManagementUtilRemoveFieldsFromData = (
       }
 
       if (attrType === 'dynamiczone') {
-        acc[current] = value.map(componentValue => {
+        acc[current] = value.map((componentValue) => {
           const subCleanedData = recursiveCleanData(
             componentValue,
             componentSchema[componentValue.__component]
@@ -46,7 +47,7 @@ const contentManagementUtilRemoveFieldsFromData = (
 
       if (attrType === 'component') {
         if (isRepeatable) {
-          acc[current] = value.map(compoData => {
+          acc[current] = value.map((compoData) => {
             const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
 
             return subCleanedData;

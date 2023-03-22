@@ -12,7 +12,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          let msg = {
+          const msg = {
             from: from || settings.defaultFrom,
             to,
             cc,
@@ -24,7 +24,7 @@ module.exports = {
             ...rest,
           };
 
-          sendgrid.send(removeUndefined(msg), function(err) {
+          sendgrid.send(removeUndefined(msg), (err) => {
             if (err) {
               reject(err);
             } else {

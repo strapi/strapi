@@ -18,19 +18,19 @@ const DEFAULT_PLUGINS = [
  * @param {Object} plugins
  * @returns {boolean}
  */
-const hasNonDefaultPlugins = plugins => {
+const hasNonDefaultPlugins = (plugins) => {
   // List of plugins that are not the ones installed in a generated app
-  const installedPlugins = Object.keys(plugins).filter(x => !DEFAULT_PLUGINS.includes(x));
+  const installedPlugins = Object.keys(plugins).filter((x) => !DEFAULT_PLUGINS.includes(x));
 
   // List of default plugins uninstalled from a generated app
-  const missingPlugins = DEFAULT_PLUGINS.filter(x => !Object.keys(plugins).includes(x));
+  const missingPlugins = DEFAULT_PLUGINS.filter((x) => !Object.keys(plugins).includes(x));
 
   const diff = [...installedPlugins, ...missingPlugins];
 
   return diff.length > 0;
 };
 
-const hasCustomAdminCode = async dir => {
+const hasCustomAdminCode = async (dir) => {
   const customAdminPath = path.join(dir, 'src', 'admin');
 
   const customAdminAppConfigFile = await getCustomAppConfigFile(dir);

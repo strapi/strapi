@@ -1,6 +1,6 @@
 'use strict';
 
-const isoLocales = require('./iso-locales');
+const isoLocales = require('./iso-locales.json');
 
 /**
  * Returns the default locale based either on env var or english

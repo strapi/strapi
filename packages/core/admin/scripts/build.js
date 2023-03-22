@@ -3,7 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const { isObject } = require('lodash');
-// eslint-disable-next-line node/no-extraneous-require
+// eslint-disable-next-line import/no-extraneous-dependencies
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 
 const webpackConfig = require('../webpack.config');
@@ -41,6 +41,17 @@ const buildAdmin = async () => {
     options: {
       backend: 'http://localhost:1337',
       adminPath: '/admin/',
+
+      /**
+       * Ideally this would take more scenarios into account, such
+       * as the `telemetryDisabled` property in the package.json
+       * of the users project. For builds based on an app we are
+       * passing this information throgh, but here we do not have access
+       * to the app's package.json. By using at least an environment variable
+       * we can make sure developers can actually test this functionality.
+       */
+
+      telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ?? false,
     },
     tsConfigFilePath,
   };
@@ -80,12 +91,10 @@ const buildAdmin = async () => {
           new Error(
             messages.errors.reduce((acc, error) => {
               if (isObject(error)) {
-                acc += error.message;
-              } else {
-                acc += error.join('\n\n');
+                return acc + error.message;
               }
 
-              return acc;
+              return acc + error.join('\n\n');
             }, '')
           )
         );
@@ -103,7 +112,7 @@ buildAdmin()
   .then(() => {
     process.exit();
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
     process.exit(1);
   });

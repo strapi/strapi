@@ -33,7 +33,7 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
           value: '$eq',
         },
         {
-          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },
           value: '$ne',
         },
         {
@@ -74,7 +74,7 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
           value: '$eq',
         },
         {
-          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },
           value: '$ne',
         },
         {

@@ -12,7 +12,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { DraftAndPublishBadge } from '../index';
 
-const makeApp = props => (
+const makeApp = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en">
       <DraftAndPublishBadge {...props} />
@@ -59,16 +59,16 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c4 {
-        color: #2f6846;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #2f6846;
       }
 
       .c5 {
-        font-weight: 600;
-        color: #2f6846;
         font-size: 0.875rem;
         line-height: 1.43;
+        font-weight: 600;
+        color: #2f6846;
       }
 
       .c2 {
@@ -84,14 +84,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect
@@ -159,16 +159,16 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c4 {
-        color: #006096;
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #006096;
       }
 
       .c5 {
-        font-weight: 600;
-        color: #006096;
         font-size: 0.875rem;
         line-height: 1.43;
+        font-weight: 600;
+        color: #006096;
       }
 
       .c2 {
@@ -184,14 +184,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect

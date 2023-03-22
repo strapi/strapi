@@ -23,7 +23,7 @@ describe('CONTENT MANAGER | hooks | useFetchContentTypeLayout | reducer', () => 
 
     const action = { type: 'GET_DATA' };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = true;
       draft.error = null;
     });
@@ -37,7 +37,7 @@ describe('CONTENT MANAGER | hooks | useFetchContentTypeLayout | reducer', () => 
       data: { contentType: { uid: 'test' } },
     };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.layout = { contentType: { uid: 'test' } };
       draft.layouts = { test: { contentType: { uid: 'test' } } };
@@ -52,7 +52,7 @@ describe('CONTENT MANAGER | hooks | useFetchContentTypeLayout | reducer', () => 
       error: true,
     };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.error = true;
     });

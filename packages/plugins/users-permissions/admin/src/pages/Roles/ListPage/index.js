@@ -1,12 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { Button } from '@strapi/design-system/Button';
-import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Table, Tr, Thead, Th } from '@strapi/design-system/Table';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Typography } from '@strapi/design-system/Typography';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Plus from '@strapi/icons/Plus';
+import {
+  Button,
+  HeaderLayout,
+  Layout,
+  ContentLayout,
+  ActionLayout,
+  Main,
+  Table,
+  Tr,
+  Thead,
+  Th,
+  Typography,
+  useNotifyAT,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import {
   useTracking,
   SettingsPageTitle,
@@ -97,8 +105,8 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation(id => deleteData(id, toggleNotification), {
-    onSuccess: async () => {
+  const deleteMutation = useMutation((id) => deleteData(id, toggleNotification), {
+    async onSuccess() {
       await queryClient.invalidateQueries('get-roles');
     },
   });
@@ -131,7 +139,7 @@ const RoleListPage = () => {
           })}
           primaryAction={
             <CheckPermissions permissions={permissions.createRole}>
-              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
+              <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
                   defaultMessage: 'Add new role',

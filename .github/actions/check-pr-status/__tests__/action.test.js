@@ -6,7 +6,7 @@ jest.mock('@actions/core');
 const github = require('@actions/github');
 const core = require('@actions/core');
 
-test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async label => {
+test.each(action.BLOCKING_LABELS)('Test blocking labels %s', async (label) => {
   github.context = {
     payload: {
       pull_request: {

@@ -1,6 +1,6 @@
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 
-const createProvidersArray = data => {
+const createProvidersArray = (data) => {
   return sortBy(
     Object.keys(data).reduce((acc, current) => {
       const { icon: iconName, enabled, subdomain } = data[current];

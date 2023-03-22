@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '@strapi/design-system/ThemeProvider';
-import { lightTheme } from '@strapi/design-system/themes';
+import { render } from '@testing-library/react';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import DateTimePicker from '../index';
 
 describe('DateTimePicker', () => {
@@ -22,7 +21,7 @@ describe('DateTimePicker', () => {
   });
 
   it('should initialize the two inputs', () => {
-    render(
+    const { getByRole, getByText } = render(
       <ThemeProvider theme={lightTheme}>
         <DateTimePicker
           value={new Date('2021-10-13T13:43:00.000Z')}
@@ -35,14 +34,13 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    expect(screen.getByText('13:45')).toBeInTheDocument();
-    const datepicker = screen.getByTestId('datetimepicker-date');
+    expect(getByText('13:45')).toBeInTheDocument();
 
-    expect(datepicker.value).toBe('10/13/2021');
+    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('10/13/2021');
   });
 
   it('should rerender a new value passed as props', () => {
-    const { rerender } = render(
+    const { rerender, getByRole } = render(
       <ThemeProvider theme={lightTheme}>
         <DateTimePicker
           value={new Date('2021-10-13T13:43:00.000Z')}
@@ -68,13 +66,11 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    const datepicker = screen.getByTestId('datetimepicker-date');
-
-    expect(datepicker.value).toBe('10/4/2021');
+    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('10/4/2021');
   });
 
   it('should rerender an empty value if it is passed as props', () => {
-    const { rerender } = render(
+    const { rerender, getByRole } = render(
       <ThemeProvider theme={lightTheme}>
         <DateTimePicker
           value={new Date('2021-10-13T13:43:00.000Z')}
@@ -99,8 +95,6 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    const datepicker = screen.getByTestId('datetimepicker-date');
-
-    expect(datepicker.value).toBe('');
+    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('');
   });
 });

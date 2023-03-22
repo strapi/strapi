@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system/Layout';
+import { Button, Main, EmptyStateLayout, ContentLayout, HeaderLayout } from '@strapi/design-system';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import EmptyDocuments from '@strapi/icons/EmptyDocuments';
+import { Plus, EmptyDocuments } from '@strapi/icons';
 import useLocales from '../../hooks/useLocales';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
@@ -34,7 +31,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
     <Main tabIndex={-1}>
       <HeaderLayout
         primaryAction={
-          <Button startIcon={<Plus />} onClick={onToggleCreateModal} size="L">
+          <Button startIcon={<Plus />} onClick={onToggleCreateModal} size="S">
             {formatMessage({ id: getTrad('Settings.list.actions.add') })}
           </Button>
         }

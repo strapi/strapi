@@ -47,11 +47,7 @@ const userUpdateSchema = yup
 const usersDeleteSchema = yup
   .object()
   .shape({
-    ids: yup
-      .array()
-      .of(yup.strapiID())
-      .min(1)
-      .required(),
+    ids: yup.array().of(yup.strapiID()).min(1).required(),
   })
   .noUnknown();
 

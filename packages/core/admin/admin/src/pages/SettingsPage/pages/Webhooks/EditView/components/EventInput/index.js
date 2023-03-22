@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { FieldLabel, Flex, Typography } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -29,16 +27,16 @@ const StyledTable = styled.table`
 const displayedData = {
   headers: {
     default: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
     ],
     draftAndPublish: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
-      'app.utils.publish',
-      'app.utils.unpublish',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
+      { id: 'app.utils.publish', defaultMessage: 'Publish' },
+      { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' },
     ],
   },
   events: {
@@ -87,19 +85,19 @@ const EventInput = ({ isDraftAndPublish }) => {
     let set = new Set(inputValue);
 
     if (value) {
-      events[name].forEach(event => {
+      events[name].forEach((event) => {
         if (!disabledEvents.includes(event)) {
           set.add(event);
         }
       });
     } else {
-      events[name].forEach(event => set.delete(event));
+      events[name].forEach((event) => set.delete(event));
     }
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.events',
@@ -110,28 +108,28 @@ const EventInput = ({ isDraftAndPublish }) => {
         <thead>
           <tr>
             <td />
-            {headersName.map(header => {
+            {headersName.map((header) => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <td
-                    key={header}
+                    key={header.id}
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
-                        'This event only exists for contents with Draft/Publish system enabled',
+                        'This event only exists for content with draft & publish enabled',
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: header, defaultMessage: header })}
+                      {formatMessage(header)}
                     </Typography>
                   </td>
                 );
               }
 
               return (
-                <td key={header}>
+                <td key={header.id}>
                   <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: header, defaultMessage: header })}
+                    {formatMessage(header)}
                   </Typography>
                 </td>
               );
@@ -139,7 +137,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           </tr>
         </thead>
         <tbody>
-          {Object.keys(events).map(event => {
+          {Object.keys(events).map((event) => {
             return (
               <EventRow
                 disabledEvents={disabledEvents}
@@ -154,7 +152,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           })}
         </tbody>
       </StyledTable>
-    </Stack>
+    </Flex>
   );
 };
 

@@ -8,7 +8,7 @@
  * For each model try to run it's lifecycles function if any is defined
  * @type {Subscriber}
  */
-const modelsLifecyclesSubscriber = async event => {
+const modelsLifecyclesSubscriber = async (event) => {
   const { model } = event;
 
   if (event.action in model.lifecycles) {

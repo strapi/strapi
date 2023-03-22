@@ -55,7 +55,7 @@ const SQL_QUERIES = {
   `,
 };
 
-const toStrapiType = column => {
+const toStrapiType = (column) => {
   const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
 
   switch (rootType) {
@@ -119,7 +119,7 @@ class MysqlSchemaInspector {
     const tables = await this.getTables();
 
     schema.tables = await Promise.all(
-      tables.map(async tableName => {
+      tables.map(async (tableName) => {
         const columns = await this.getColumns(tableName);
         const indexes = await this.getIndexes(tableName);
         const foreignKeys = await this.getForeignKeys(tableName);
@@ -139,13 +139,13 @@ class MysqlSchemaInspector {
   async getTables() {
     const [rows] = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
 
-    return rows.map(row => row.table_name);
+    return rows.map((row) => row.table_name);
   }
 
   async getColumns(tableName) {
     const [rows] = await this.db.connection.raw(SQL_QUERIES.LIST_COLUMNS, [tableName]);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const { type, args = [], ...rest } = toStrapiType(row);
 
       return {
@@ -214,20 +214,16 @@ class MysqlSchemaInspector {
         ret[fkReference.constraint_name].referencedColumns.push(fkReference.referenced_column_name);
       }
 
-      const [
-        fkReferentialConstraints,
-      ] = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS, [
-        contraintNames,
-        tableName,
-      ]);
+      const [fkReferentialConstraints] = await this.db.connection.raw(
+        SQL_QUERIES.FOREIGN_KEY_REFERENTIALS_CONSTRAINTS,
+        [contraintNames, tableName]
+      );
 
       for (const fkReferentialConstraint of fkReferentialConstraints) {
-        ret[
-          fkReferentialConstraint.constraint_name
-        ].onUpdate = fkReferentialConstraint.on_update.toUpperCase();
-        ret[
-          fkReferentialConstraint.constraint_name
-        ].onDelete = fkReferentialConstraint.on_delete.toUpperCase();
+        ret[fkReferentialConstraint.constraint_name].onUpdate =
+          fkReferentialConstraint.on_update.toUpperCase();
+        ret[fkReferentialConstraint.constraint_name].onDelete =
+          fkReferentialConstraint.on_delete.toUpperCase();
       }
     }
 

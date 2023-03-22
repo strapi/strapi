@@ -19,7 +19,7 @@ const registerCollectionType = (contentType, { registry, strapi, builders }) => 
     mutations: naming.getEntityMutationsTypeName(contentType),
   };
 
-  const getConfig = kind => ({ kind, contentType });
+  const getConfig = (kind) => ({ kind, contentType });
 
   // Type definition
   registry.register(types.base, builders.buildTypeDefinition(contentType), getConfig(KINDS.type));

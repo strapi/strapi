@@ -7,8 +7,7 @@ import {
   NotFound,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
+import { Layout, HeaderLayout, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';
@@ -28,7 +27,7 @@ const cmPermissions = permissions.contentManager;
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } = useModels();
-  const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], model =>
+  const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
     model.title.toLowerCase()
   );
   const { pathname } = useLocation();
@@ -114,7 +113,7 @@ const App = () => {
 
 export { App };
 
-export default () => {
+export default function () {
   const { formatMessage } = useIntl();
 
   return (
@@ -125,4 +124,4 @@ export default () => {
       <App />
     </>
   );
-};
+}

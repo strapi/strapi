@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
-import { Button } from '@strapi/design-system/Button';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Button, VisuallyHidden } from '@strapi/design-system';
 import { getTrad } from '../../utils';
 
 export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocation, ...props }) => {
@@ -11,7 +10,7 @@ export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocatio
   const inputRef = useRef(null);
   const { trackUsage } = useTracking();
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
 
     if (trackedLocation) {

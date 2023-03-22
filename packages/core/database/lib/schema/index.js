@@ -10,7 +10,7 @@ const { metadataToSchema } = require('./schema');
 /**
  * @type {import('.').default}
  */
-const createSchemaProvider = db => {
+const createSchemaProvider = (db) => {
   const schema = metadataToSchema(db.metadata);
 
   return {
@@ -50,7 +50,7 @@ const createSchemaProvider = db => {
 
       const DBSchema = await db.dialect.schemaInspector.getSchema();
 
-      const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
@@ -87,7 +87,6 @@ const createSchemaProvider = db => {
       }
 
       debug('Schema unchanged');
-      return;
     },
   };
 };

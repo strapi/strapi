@@ -17,7 +17,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }) => {
         fieldSchema: { type: 'string' },
         metadatas: { label: 'Content available in', searchable: false, sortable: false },
         name: 'locales',
-        cellFormatter: props => <LocaleListCell {...props} />,
+        cellFormatter: (props) => <LocaleListCell {...props} />,
       },
     ],
     layout,

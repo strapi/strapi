@@ -12,7 +12,7 @@ async function validateCustomConfig(schema) {
     }).validate(schema.config);
   } catch (error) {
     throw new Error(
-      `Invalid Model configuration for model ${schema.uid}. Verify your {{modelName}}.config.js(on) file:\n  - ${error.message}\n`
+      `Invalid Model configuration for model ${schema.uid}. Verify your {{ modelName }}.config.js(on) file:\n  - ${error.message}\n`
     );
   }
 }

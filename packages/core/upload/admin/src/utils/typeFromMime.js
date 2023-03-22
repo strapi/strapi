@@ -1,6 +1,6 @@
 import { AssetType } from '../constants';
 
-export const typeFromMime = mime => {
+export const typeFromMime = (mime) => {
   if (mime.includes(AssetType.Image)) {
     return AssetType.Image;
   }

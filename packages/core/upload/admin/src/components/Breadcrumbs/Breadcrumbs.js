@@ -3,11 +3,7 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
-import {
-  Crumb,
-  CrumbLink,
-  Breadcrumbs as BaseBreadcrumbs,
-} from '@strapi/design-system/v2/Breadcrumbs';
+import { Crumb, CrumbLink, Breadcrumbs as BaseBreadcrumbs } from '@strapi/design-system/v2';
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 import { BreadcrumbsDefinition } from '../../constants';
 
@@ -22,7 +18,7 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
             <CrumbSimpleMenuAsync
               parentsToOmit={[...breadcrumbs]
                 .splice(index + 1, breadcrumbs.length - 1)
-                .map(parent => parent.id)}
+                .map((parent) => parent.id)}
               key={`breadcrumb-${crumb?.id ?? 'menu'}`}
               currentFolderId={currentFolderId}
               onChangeFolder={onChangeFolder}

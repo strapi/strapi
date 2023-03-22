@@ -1,5 +1,10 @@
 import produce from 'immer';
-import { cloneDeep, has, isObject, get, set } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import has from 'lodash/has';
+import isObject from 'lodash/isObject';
+import get from 'lodash/get';
+import set from 'lodash/set';
+
 import updateConditionsToFalse from './utils/updateConditionsToFalse';
 import updateValues from './utils/updateValues';
 
@@ -11,7 +16,7 @@ const initialState = {
 
 /* eslint-disable consistent-return */
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       // This action is called when a checkbox in the <GlobalActions />
       // changes
@@ -19,7 +24,7 @@ const reducer = (state, action) =>
         const { collectionTypeKind, actionId, value } = action;
         const pathToData = ['modifiedData', collectionTypeKind];
 
-        Object.keys(get(state, pathToData)).forEach(collectionType => {
+        Object.keys(get(state, pathToData)).forEach((collectionType) => {
           const collectionTypeActionData = get(
             state,
             [...pathToData, collectionType, actionId],
@@ -49,7 +54,7 @@ const reducer = (state, action) =>
 
         const objToUpdate = get(nextModifiedDataState, pathToModifiedDataCollectionType, {});
 
-        Object.keys(objToUpdate).forEach(actionId => {
+        Object.keys(objToUpdate).forEach((actionId) => {
           // When a ct has multiple properties (ex: locales, field)
           // We need to make sure that we add any new property to the modifiedData
           // object.
@@ -83,7 +88,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_CHANGE_CONDITIONS': {
-        Object.entries(action.conditions).forEach(array => {
+        Object.entries(action.conditions).forEach((array) => {
           const [stringPathToData, conditionsToUpdate] = array;
 
           set(

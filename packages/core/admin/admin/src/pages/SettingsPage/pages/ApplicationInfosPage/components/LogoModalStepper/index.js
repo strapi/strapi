@@ -1,8 +1,7 @@
 import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalHeader } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
+import { ModalLayout, ModalHeader, Typography } from '@strapi/design-system';
 import reducer, { initialState } from './reducer';
 
 const LogoModalStepper = ({
@@ -18,7 +17,7 @@ const LogoModalStepper = ({
   const [{ localImage }, dispatch] = useReducer(reducer, initialState);
   const { formatMessage } = useIntl();
 
-  const setLocalImage = asset => {
+  const setLocalImage = (asset) => {
     dispatch({
       type: 'SET_LOCAL_IMAGE',
       value: asset,

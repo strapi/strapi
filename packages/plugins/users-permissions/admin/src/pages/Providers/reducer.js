@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { set } from 'lodash';
+import set from 'lodash/set';
 
 const initialState = {
   formErrors: {},
@@ -10,7 +10,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'GET_DATA': {
         draftState.isLoading = true;

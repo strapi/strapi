@@ -17,20 +17,23 @@ import upperFirst from 'lodash/upperFirst';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
-import { Main } from '@strapi/design-system/Main';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Stack } from '@strapi/design-system/Stack';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Select, Option } from '@strapi/design-system/Select';
-import { FieldAction } from '@strapi/design-system/Field';
-import { TextInput } from '@strapi/design-system/TextInput';
-import Eye from '@strapi/icons/Eye';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Check from '@strapi/icons/Check';
+import {
+  Main,
+  Typography,
+  Box,
+  ContentLayout,
+  HeaderLayout,
+  Button,
+  Grid,
+  GridItem,
+  Flex,
+  useNotifyAT,
+  Select,
+  Option,
+  FieldAction,
+  TextInput,
+} from '@strapi/design-system';
+import { Eye, EyeStriked, Check } from '@strapi/icons';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
 import { fetchUser, putUser } from './utils/api';
@@ -73,7 +76,7 @@ const ProfilePage = () => {
   useFocusWhenNavigate();
 
   const { status, data } = useQuery('user', () => fetchUser(), {
-    onSuccess: () => {
+    onSuccess() {
       notifyStatus(
         formatMessage({
           id: 'Settings.profile.form.notify.data.loaded',
@@ -81,7 +84,7 @@ const ProfilePage = () => {
         })
       );
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -91,8 +94,8 @@ const ProfilePage = () => {
 
   const isLoading = status !== 'success';
 
-  const submitMutation = useMutation(body => putUser(body), {
-    onSuccess: async data => {
+  const submitMutation = useMutation((body) => putUser(body), {
+    async onSuccess(data) {
       await queryClient.invalidateQueries('user');
 
       auth.setUserInfo(
@@ -109,7 +112,7 @@ const ProfilePage = () => {
         message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
       });
     },
-    onSettled: () => {
+    onSettled() {
       unlockApp();
     },
     refetchActive: true,
@@ -124,7 +127,7 @@ const ProfilePage = () => {
     submitMutation.mutate(
       { ...body, username },
       {
-        onError: error => {
+        onError(error) {
           const res = error?.response?.data;
 
           if (res?.data) {
@@ -174,7 +177,7 @@ const ProfilePage = () => {
   }
 
   const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    themeName => allApplicationThemes[themeName]
+    (themeName) => allApplicationThemes[themeName]
   );
 
   return (
@@ -205,7 +208,7 @@ const ProfilePage = () => {
               />
               <Box paddingBottom={10}>
                 <ContentLayout>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Box
                       background="neutral0"
                       hasRadius
@@ -215,7 +218,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.profile',
@@ -275,7 +278,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -286,7 +289,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.change-password',
@@ -315,9 +318,9 @@ const ProfilePage = () => {
                               type={currentPasswordShown ? 'text' : 'password'}
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setCurrentPasswordShown(prev => !prev);
+                                    setCurrentPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     currentPasswordShown
@@ -360,9 +363,9 @@ const ProfilePage = () => {
                               autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordShown(prev => !prev);
+                                    setPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordShown
@@ -402,9 +405,9 @@ const ProfilePage = () => {
                               autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordConfirmShown(prev => !prev);
+                                    setPasswordConfirmShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordConfirmShown
@@ -424,7 +427,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -435,8 +438,8 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
-                        <Stack spacing={1}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
+                        <Flex direction="column" alignItems="stretch" gap={1}>
                           <Typography variant="delta" as="h2">
                             {formatMessage({
                               id: 'Settings.profile.form.section.experience.title',
@@ -446,8 +449,7 @@ const ProfilePage = () => {
                           <Typography>
                             {formatMessage(
                               {
-                                id:
-                                  'Settings.profile.form.section.experience.interfaceLanguageHelp',
+                                id: 'Settings.profile.form.section.experience.interfaceLanguageHelp',
                                 defaultMessage:
                                   'Preference changes will apply only to you. More information is available {here}.',
                               },
@@ -459,7 +461,7 @@ const ProfilePage = () => {
                                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                                   >
                                     {formatMessage({
-                                      id: 'Settings.profile.form.section.experience.documentation',
+                                      id: 'Settings.profile.form.section.experience.here',
                                       defaultMessage: 'here',
                                     })}
                                   </DocumentationLink>
@@ -467,7 +469,7 @@ const ProfilePage = () => {
                               }
                             )}
                           </Typography>
-                        </Stack>
+                        </Flex>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <Select
@@ -480,8 +482,7 @@ const ProfilePage = () => {
                                 defaultMessage: 'Select',
                               })}
                               hint={formatMessage({
-                                id:
-                                  'Settings.profile.form.section.experience.interfaceLanguage.hint',
+                                id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
                                 defaultMessage:
                                   'This will only display your own interface in the chosen language.',
                               })}
@@ -495,13 +496,13 @@ const ProfilePage = () => {
                                 defaultMessage: 'Clear the interface language selected',
                               })}
                               value={values.preferedLanguage}
-                              onChange={e => {
+                              onChange={(e) => {
                                 handleChange({
                                   target: { name: 'preferedLanguage', value: e },
                                 });
                               }}
                             >
-                              {Object.keys(localeNames).map(language => {
+                              {Object.keys(localeNames).map((language) => {
                                 const langName = localeNames[language];
 
                                 return (
@@ -527,18 +528,17 @@ const ProfilePage = () => {
                                 defaultMessage: 'Displays your interface in the chosen mode.',
                               })}
                               value={values.currentTheme}
-                              onChange={e => {
+                              onChange={(e) => {
                                 handleChange({
                                   target: { name: 'currentTheme', value: e },
                                 });
                               }}
                             >
-                              {themesToDisplay.map(theme => (
+                              {themesToDisplay.map((theme) => (
                                 <Option value={theme} key={theme}>
                                   {formatMessage(
                                     {
-                                      id:
-                                        'Settings.profile.form.section.experience.mode.option-label',
+                                      id: 'Settings.profile.form.section.experience.mode.option-label',
                                       defaultMessage: '{name} mode',
                                     },
                                     {
@@ -553,9 +553,9 @@ const ProfilePage = () => {
                             </Select>
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
-                  </Stack>
+                  </Flex>
                 </ContentLayout>
               </Box>
             </Form>

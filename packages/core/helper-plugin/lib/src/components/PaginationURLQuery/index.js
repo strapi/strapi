@@ -15,13 +15,7 @@
  */
 
 import React from 'react';
-import {
-  NextLink,
-  Pagination,
-  PreviousLink,
-  Dots,
-  PageLink,
-} from '@strapi/design-system/Pagination';
+import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useLocation, NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -33,7 +27,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
-  const makeSearch = page => stringify({ ...query, page }, { encode: false });
+  const makeSearch = (page) => stringify({ ...query, page }, { encode: false });
   const nextSearch = makeSearch(activePage + (pageCount > 1 ? 1 : 0));
 
   const previousSearch = makeSearch(activePage - 1);
@@ -50,7 +44,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   if (pageCount <= 4) {
     const links = Array.from({ length: pageCount })
       .map((_, i) => i + 1)
-      .map(number => {
+      .map((number) => {
         return (
           <PageLink
             as={NavLink}
@@ -140,7 +134,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
     lastLinksToCreate = [activePage, activePage - 1];
   }
 
-  lastLinksToCreate.forEach(number => {
+  lastLinksToCreate.forEach((number) => {
     lastLinks.unshift(
       <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
         Go to page {number}
@@ -148,7 +142,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
     );
   });
 
-  firstLinksToCreate.forEach(number => {
+  firstLinksToCreate.forEach((number) => {
     firstLinks.push(
       <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
         {formatMessage(
@@ -166,7 +160,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   ) {
     const middleLinksToCreate = [activePage - 1, activePage, activePage + 1];
 
-    middleLinksToCreate.forEach(number => {
+    middleLinksToCreate.forEach((number) => {
       middleLinks.push(
         <PageLink
           as={NavLink}

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = baseURL => ({
+module.exports = (baseURL) => ({
   email: {
     enabled: true,
     icon: 'envelope',
@@ -119,5 +119,13 @@ module.exports = baseURL => ({
     callback: `${baseURL}/cas/callback`,
     scope: ['openid email'], // scopes should be space delimited
     subdomain: 'my.subdomain.com/cas',
+  },
+  patreon: {
+    enabled: false,
+    icon: '',
+    key: '',
+    secret: '',
+    callback: `${baseURL}/patreon/callback`,
+    scope: ['identity', 'identity[email]'],
   },
 });

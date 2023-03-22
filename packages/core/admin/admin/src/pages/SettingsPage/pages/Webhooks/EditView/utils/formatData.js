@@ -1,14 +1,8 @@
-import { set } from 'lodash';
-
-const cleanData = data => {
-  const webhooks = { ...data };
-
-  set(webhooks, 'headers', unformatHeaders(data.headers));
-
-  return webhooks;
+const cleanData = (data) => {
+  return { ...data, headers: unformatHeaders(data.headers) };
 };
 
-const unformatHeaders = headers => {
+const unformatHeaders = (headers) => {
   return headers.reduce((acc, current) => {
     const { key, value } = current;
 

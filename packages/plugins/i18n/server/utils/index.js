@@ -5,7 +5,7 @@ const getCoreStore = () => {
 };
 
 // retrieve a local service
-const getService = name => {
+const getService = (name) => {
   return strapi.plugin('i18n').service(name);
 };
 

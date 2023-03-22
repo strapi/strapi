@@ -11,12 +11,12 @@ import {
   to,
   useNotification,
   useOverlayBlocker,
+  useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useModels } from '../../../../../hooks';
-import { axiosInstance } from '../../../../../core/utils';
 import WebhookForm from './components/WebhookForm';
 import cleanData from './utils/formatData';
 
@@ -30,11 +30,12 @@ const EditView = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
   const { isLoading: isLoadingForModels, collectionTypes } = useModels();
+  const { post } = useFetchClient();
 
   const isCreating = id === 'create';
 
   const fetchWebhook = useCallback(
-    async id => {
+    async (id) => {
       const [err, { data }] = await to(
         request(`/admin/webhooks/${id}`, {
           method: 'GET',
@@ -64,11 +65,11 @@ const EditView = () => {
     data: triggerResponse,
     isIdle: isTriggerIdle,
     mutate,
-  } = useMutation(() => axiosInstance.post(`/admin/webhooks/${id}/trigger`));
+  } = useMutation(() => post(`/admin/webhooks/${id}/trigger`));
 
   const triggerWebhook = () =>
     mutate(null, {
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
@@ -76,7 +77,7 @@ const EditView = () => {
       },
     });
 
-  const createWebhookMutation = useMutation(body =>
+  const createWebhookMutation = useMutation((body) =>
     request('/admin/webhooks', {
       method: 'POST',
       body,
@@ -90,11 +91,11 @@ const EditView = () => {
     })
   );
 
-  const handleSubmit = async data => {
+  const handleSubmit = async (data) => {
     if (isCreating) {
       lockApp();
       createWebhookMutation.mutate(cleanData(data), {
-        onSuccess: result => {
+        onSuccess(result) {
           toggleNotification({
             type: 'success',
             message: { id: 'Settings.webhooks.created' },
@@ -102,7 +103,7 @@ const EditView = () => {
           replace(`/settings/webhooks/${result.data.id}`);
           unlockApp();
         },
-        onError: e => {
+        onError(e) {
           toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
@@ -116,7 +117,7 @@ const EditView = () => {
       updateWebhookMutation.mutate(
         { id, body: cleanData(data) },
         {
-          onSuccess: () => {
+          onSuccess() {
             queryClient.invalidateQueries(['get-webhook', id]);
             toggleNotification({
               type: 'success',
@@ -124,7 +125,7 @@ const EditView = () => {
             });
             unlockApp();
           },
-          onError: e => {
+          onError(e) {
             toggleNotification({
               type: 'warning',
               message: { id: 'notification.error' },
@@ -138,7 +139,7 @@ const EditView = () => {
   };
 
   const isDraftAndPublishEvents = useMemo(
-    () => collectionTypes.some(ct => ct.options.draftAndPublish === true),
+    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
     [collectionTypes]
   );
 

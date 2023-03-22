@@ -1,10 +1,14 @@
 import React from 'react';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Typography } from '@strapi/design-system/Typography';
-import { Th, Thead, Tr } from '@strapi/design-system/Table';
+import {
+  BaseCheckbox,
+  IconButton,
+  Tooltip,
+  Typography,
+  Th,
+  Thead,
+  Tr,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SortIcon from '../../../icons/SortIcon';
@@ -45,14 +49,9 @@ const TableHead = ({
           const isSorted = sortBy === name;
           const isUp = sortOrder === 'ASC';
 
-          const intlLabel = formatMessage({
-            id: `global.table.header.${name}`,
-            defaultMessage: label,
-          });
-
           const sortLabel = formatMessage(
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-            { label: intlLabel }
+            { label }
           );
 
           const handleClickSort = (shouldAllowClick = true) => {
@@ -80,15 +79,15 @@ const TableHead = ({
                 )
               }
             >
-              <Tooltip label={isSortable ? sortLabel : intlLabel}>
+              <Tooltip label={isSortable ? sortLabel : label}>
                 <Typography
                   textColor="neutral600"
                   as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={intlLabel}
+                  label={label}
                   onClick={() => handleClickSort(!isSorted)}
                   variant="sigma"
                 >
-                  {intlLabel}
+                  {label}
                 </Typography>
               </Tooltip>
             </Th>

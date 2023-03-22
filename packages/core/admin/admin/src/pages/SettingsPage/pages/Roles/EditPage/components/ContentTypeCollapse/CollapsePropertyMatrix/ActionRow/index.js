@@ -2,10 +2,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Flex } from '@strapi/design-system/Flex';
+import { BaseCheckbox, Flex } from '@strapi/design-system';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
@@ -74,7 +72,7 @@ const ActionRow = ({
 
   const handleClick = useCallback(() => {
     if (isCollapsable) {
-      setRowToOpen(prev => {
+      setRowToOpen((prev) => {
         if (prev === name) {
           return null;
         }
@@ -134,7 +132,7 @@ const ActionRow = ({
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     <BaseCheckbox
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
                         {
@@ -144,7 +142,7 @@ const ActionRow = ({
                         { label: `${name} ${label}` }
                       )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value => {
+                      onValueChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName.join('..'),
@@ -165,10 +163,10 @@ const ActionRow = ({
               return (
                 <Cell key={label} justifyContent="center" alignItems="center">
                   <BaseCheckbox
-                    disabled={isFormDisabled || IS_DISABLED}
+                    disabled={isFormDisabled}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={value => {
+                    onValueChange={(value) => {
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),

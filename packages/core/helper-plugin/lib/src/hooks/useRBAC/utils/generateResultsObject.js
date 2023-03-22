@@ -1,6 +1,6 @@
 import upperFirst from 'lodash/upperFirst';
 
-const generateResultsObject = array =>
+const generateResultsObject = (array) =>
   array.reduce((acc, current) => {
     acc[`can${upperFirst(current.permissionName)}`] = current.hasPermission;
 

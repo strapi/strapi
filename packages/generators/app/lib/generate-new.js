@@ -10,7 +10,7 @@ const createCLIDatabaseProject = require('./create-cli-db-project');
 const createCustomizedProject = require('./create-customized-project');
 const createQuickStartProject = require('./create-quickstart-project');
 
-module.exports = async scope => {
+module.exports = async (scope) => {
   const hasDatabaseConfig = Boolean(scope.database);
 
   // check rootPath is empty

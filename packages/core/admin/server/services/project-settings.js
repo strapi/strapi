@@ -3,16 +3,13 @@
 const fs = require('fs');
 const { pick } = require('lodash');
 
-const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo'];
-const DEFAULT_PROJECT_SETTINGS = {
-  menuLogo: null,
-};
+const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo', 'authLogo'];
 
-const parseFilesData = async files => {
+const parseFilesData = async (files) => {
   const formatedFilesData = {};
 
   await Promise.all(
-    PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+    PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
       const file = files[inputName];
 
       // Skip empty file inputs
@@ -23,7 +20,7 @@ const parseFilesData = async files => {
       const getStream = () => fs.createReadStream(file.path);
 
       // Add formated data for the upload provider
-      formatedFilesData[inputName] = strapi
+      formatedFilesData[inputName] = await strapi
         .plugin('upload')
         .service('upload')
         .formatFileInfo({
@@ -35,10 +32,7 @@ const parseFilesData = async files => {
       // Add image dimensions
       Object.assign(
         formatedFilesData[inputName],
-        await strapi
-          .plugin('upload')
-          .service('image-manipulation')
-          .getDimensions({ getStream })
+        await strapi.plugin('upload').service('image-manipulation').getDimensions({ getStream })
       );
 
       // Add file path, and stream
@@ -55,13 +49,20 @@ const parseFilesData = async files => {
 
 const getProjectSettings = async () => {
   const store = strapi.store({ type: 'core', name: 'admin' });
+
+  // Returns an object with file inputs names as key and null as value
+  const defaultProjectSettings = PROJECT_SETTINGS_FILE_INPUTS.reduce((prev, cur) => {
+    prev[cur] = null;
+    return prev;
+  }, {});
+
   const projectSettings = {
-    ...DEFAULT_PROJECT_SETTINGS,
+    ...defaultProjectSettings,
     ...(await store.get({ key: 'project-settings' })),
   };
 
   // Filter file input fields
-  PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
+  PROJECT_SETTINGS_FILE_INPUTS.forEach((inputName) => {
     if (!projectSettings[inputName]) {
       return;
     }
@@ -83,14 +84,14 @@ const uploadFiles = async (files = {}) => {
   // Call the provider upload function for each file
   return Promise.all(
     Object.values(files)
-      .filter(file => file.stream instanceof fs.ReadStream)
-      .map(file => strapi.plugin('upload').provider.uploadStream(file))
+      .filter((file) => file.stream instanceof fs.ReadStream)
+      .map((file) => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
 
 const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   return Promise.all(
-    PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+    PROJECT_SETTINGS_FILE_INPUTS.map(async (inputName) => {
       // Skip if the store doesn't contain project settings
       if (!previousSettings) {
         return;
@@ -121,14 +122,14 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   );
 };
 
-const updateProjectSettings = async newSettings => {
+const updateProjectSettings = async (newSettings) => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
   const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);
 
   await uploadFiles(files);
 
-  PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
+  PROJECT_SETTINGS_FILE_INPUTS.forEach((inputName) => {
     // If the user input exists but is not a formdata "file" remove it
     if (newSettings[inputName] !== undefined && !(typeof newSettings[inputName] === 'object')) {
       newSettings[inputName] = null;
@@ -136,7 +137,7 @@ const updateProjectSettings = async newSettings => {
     }
 
     // If the user input is undefined reuse previous setting (do not update field)
-    if (!newSettings[inputName]) {
+    if (!newSettings[inputName] && previousSettings) {
       newSettings[inputName] = previousSettings[inputName];
       return;
     }

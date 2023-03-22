@@ -6,16 +6,18 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 import {
+  Button,
+  Flex,
+  Breadcrumbs,
+  Crumb,
+  Grid,
+  GridItem,
   ModalLayout,
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';
@@ -41,13 +43,13 @@ const FormModal = ({
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
-          {headerBreadcrumbs.map(crumb => (
+          {headerBreadcrumbs.map((crumb) => (
             <Crumb key={crumb}>{crumb}</Crumb>
           ))}
         </Breadcrumbs>
       </ModalHeader>
       <Formik
-        onSubmit={values => onSubmit(values)}
+        onSubmit={(values) => onSubmit(values)}
         initialValues={initialData}
         validationSchema={layout.schema}
         validateOnChange={false}
@@ -56,10 +58,10 @@ const FormModal = ({
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={1}>
+                <Flex direction="column" alignItems="stretch" gap={1}>
                   <Grid gap={5}>
-                    {layout.form.map(row => {
-                      return row.map(input => {
+                    {layout.form.map((row) => {
+                      return row.map((input) => {
                         return (
                           <GridItem key={input.name} col={input.size} xs={12}>
                             <Input
@@ -74,7 +76,7 @@ const FormModal = ({
                       });
                     })}
                   </Grid>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={
@@ -86,11 +88,9 @@ const FormModal = ({
                   </Button>
                 }
                 endActions={
-                  <>
-                    <Button type="submit" loading={isSubmiting}>
-                      {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                    </Button>
-                  </>
+                  <Button type="submit" loading={isSubmiting}>
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                  </Button>
                 }
               />
             </Form>

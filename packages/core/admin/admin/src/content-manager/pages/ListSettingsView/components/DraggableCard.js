@@ -4,13 +4,8 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import Pencil from '@strapi/icons/Pencil';
-import Cross from '@strapi/icons/Cross';
-import Drag from '@strapi/icons/Drag';
+import { Flex, Box, Typography } from '@strapi/design-system';
+import { Pencil, Cross, Drag } from '@strapi/icons';
 import CardPreview from './CardPreview';
 import ellipsisCardTitle from '../utils/ellipsisCardTitle';
 import { getTrad, ItemTypes } from '../../../utils';
@@ -141,13 +136,13 @@ const DraggableCard = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.FIELD,
-    item: () => {
+    item() {
       return { index, labelField, name };
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: () => {
+    end() {
       setIsDraggingSibling(false);
     },
   });
@@ -167,7 +162,7 @@ const DraggableCard = ({
   // anymore, this hack forces a rerender in order to apply the dragRef
   useEffect(() => {
     if (!isDraggingSibling) {
-      forceRerenderAfterDnd(prev => !prev);
+      forceRerenderAfterDnd((prev) => !prev);
     }
   }, [isDraggingSibling]);
 
@@ -193,7 +188,7 @@ const DraggableCard = ({
           onClick={handleClickEditRow}
           isDragging={isDragging}
         >
-          <Stack horizontal spacing={3}>
+          <Flex gap={3}>
             <DragButton
               as="span"
               aria-label={formatMessage(
@@ -201,20 +196,20 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.move.field'),
                   defaultMessage: 'Move {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               ref={refs.dragRef}
               type="button"
             >
               <Drag />
             </DragButton>
             <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-          </Stack>
+          </Flex>
           <Flex paddingLeft={3}>
             <ActionButton
               ref={editButtonRef}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onClickEditField(name);
               }}
@@ -223,7 +218,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.edit.field'),
                   defaultMessage: 'Edit {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >
@@ -237,7 +232,7 @@ const DraggableCard = ({
                   id: getTrad('components.DraggableCard.delete.field'),
                   defaultMessage: 'Delete {item}',
                 },
-                { item: name }
+                { item: labelField }
               )}
               type="button"
             >

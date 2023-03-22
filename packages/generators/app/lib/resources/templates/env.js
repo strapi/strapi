@@ -13,11 +13,9 @@ module.exports = () => {
   const compile = _.template(tmpl);
 
   return compile({
-    appKeys: new Array(4)
-      .fill()
-      .map(generateASecret)
-      .join(','),
+    appKeys: new Array(4).fill().map(generateASecret).join(','),
     apiTokenSalt: generateASecret(),
+    transferTokenSalt: generateASecret(),
     adminJwtToken: generateASecret(),
   });
 };

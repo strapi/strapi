@@ -4,9 +4,8 @@ import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
 
-import { axiosInstance } from '../../utils';
 import { useBulkMove } from '../useBulkMove';
 
 const FIXTURE_ASSETS = [
@@ -35,9 +34,12 @@ const FIXTURE_FOLDERS = [
 
 const FIXTURE_DESTINATION_FOLDER_ID = 1;
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
+const notificationStatusMock = jest.fn();
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
       const res = { data: { data: {} } };
 
@@ -51,14 +53,7 @@ jest.mock('../../utils', () => ({
 
       return Promise.resolve(res);
     }),
-  },
-}));
-
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+  }),
 }));
 
 const refetchQueriesMock = jest.fn();
@@ -96,7 +91,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useBulkMove(...args), { wrapper: ComponentFixture }));
     });
@@ -117,11 +112,9 @@ describe('useBulkMove', () => {
     await act(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
+    const { post } = useFetchClient();
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(
-      '/upload/actions/bulk-move',
-      expect.any(Object)
-    );
+    expect(post).toHaveBeenCalledWith('/upload/actions/bulk-move', expect.any(Object));
   });
 
   test('does properly collect all asset ids', async () => {
@@ -129,12 +122,13 @@ describe('useBulkMove', () => {
       result: { current },
     } = await setup();
     const { move } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       destinationFolderId: FIXTURE_DESTINATION_FOLDER_ID,
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
     });
@@ -145,12 +139,13 @@ describe('useBulkMove', () => {
       result: { current },
     } = await setup();
     const { move } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_FOLDERS);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       destinationFolderId: FIXTURE_DESTINATION_FOLDER_ID,
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
@@ -161,12 +156,13 @@ describe('useBulkMove', () => {
       result: { current },
     } = await setup();
     const { move } = current;
+    const { post } = useFetchClient();
 
     await act(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, [...FIXTURE_FOLDERS, ...FIXTURE_ASSETS]);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith(expect.any(String), {
+    expect(post).toHaveBeenCalledWith(expect.any(String), {
       destinationFolderId: FIXTURE_DESTINATION_FOLDER_ID,
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),

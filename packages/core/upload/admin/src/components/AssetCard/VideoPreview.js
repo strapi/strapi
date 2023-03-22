@@ -1,15 +1,14 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { Box, VisuallyHidden } from '@strapi/design-system';
 
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value
 const HAVE_FUTURE_DATA = 3;
 
 export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
-  const handleTimeUpdate = e => {
+  const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 0) {
       const video = e.target;
       const canvas = document.createElement('canvas');
@@ -23,7 +22,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
     }
   };
 
-  const handleThumbnailVisibility = e => {
+  const handleThumbnailVisibility = (e) => {
     const video = e.target;
 
     if (video.readyState < HAVE_FUTURE_DATA) return;
@@ -48,7 +47,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
 };
 
 VideoPreview.defaultProps = {
-  onLoadDuration: () => {},
+  onLoadDuration() {},
   size: 'M',
 };
 

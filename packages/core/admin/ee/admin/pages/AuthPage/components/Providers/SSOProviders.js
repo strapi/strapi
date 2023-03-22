@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tooltip } from '@strapi/design-system/Tooltip';
+import { Grid, GridItem, Flex, Typography, Tooltip } from '@strapi/design-system';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -63,7 +60,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
   if (displayAllProviders) {
     return (
       <Grid gap={4}>
-        {providers.map(provider => (
+        {providers.map((provider) => (
           <GridItem key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
           </GridItem>
@@ -75,7 +72,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
   if (providers.length > 2 && !displayAllProviders) {
     return (
       <Grid gap={4}>
-        {providers.slice(0, 2).map(provider => (
+        {providers.slice(0, 2).map((provider) => (
           <GridItem key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
           </GridItem>
@@ -97,7 +94,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
 
   return (
     <SSOProvidersWrapper justifyContent="center">
-      {providers.map(provider => (
+      {providers.map((provider) => (
         <SSOProviderButton key={provider.uid} provider={provider} />
       ))}
     </SSOProvidersWrapper>

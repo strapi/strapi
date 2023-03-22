@@ -1,6 +1,8 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set, get, take } from 'lodash';
+import get from 'lodash/get';
+import set from 'lodash/set';
+import take from 'lodash/take';
 
 export const initialState = {
   initialData: {},
@@ -11,7 +13,7 @@ export const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE': {
         const keysLength = action.keys.length;

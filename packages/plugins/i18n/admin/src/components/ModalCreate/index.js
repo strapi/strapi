@@ -6,14 +6,18 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Button } from '@strapi/design-system/Button';
-import { Typography } from '@strapi/design-system/Typography';
-import { Divider } from '@strapi/design-system/Divider';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import Check from '@strapi/icons/Check';
+  TabGroup,
+  Tabs,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Button,
+  Typography,
+  Divider,
+  Box,
+  Flex,
+} from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import localeFormSchema from '../../schemas';
@@ -38,7 +42,7 @@ const ModalCreate = ({ onClose }) => {
    * since the all tree (from the root of the page) is destroyed and re-mounted
    * because of the RBAC refreshing and the potential move of the default locale
    */
-  const handleLocaleAdd = async values => {
+  const handleLocaleAdd = async (values) => {
     await addLocale({
       code: values.code,
       name: values.displayName,

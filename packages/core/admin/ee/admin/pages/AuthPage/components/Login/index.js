@@ -1,11 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Divider } from '@strapi/design-system/Divider';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Divider, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';
@@ -16,7 +12,7 @@ const DividerFull = styled(Divider)`
   flex: 1;
 `;
 
-const Login = loginProps => {
+const Login = (loginProps) => {
   const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
@@ -33,7 +29,7 @@ const Login = loginProps => {
     <UnauthenticatedLayout>
       <BaseLogin {...loginProps}>
         <Box paddingTop={7}>
-          <Stack spacing={7}>
+          <Flex direction="column" alignItems="stretch" gap={7}>
             <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>
@@ -44,7 +40,7 @@ const Login = loginProps => {
               <DividerFull />
             </Flex>
             <SSOProviders providers={providers} displayAllProviders={false} />
-          </Stack>
+          </Flex>
         </Box>
       </BaseLogin>
     </UnauthenticatedLayout>
@@ -52,7 +48,7 @@ const Login = loginProps => {
 };
 
 Login.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 

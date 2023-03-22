@@ -9,7 +9,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider, TrackingContext } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -99,7 +99,7 @@ const queryClient = new QueryClient({
 const renderCompo = (toggleNotification = jest.fn()) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+      <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={toggleNotification}>
             <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
@@ -113,7 +113,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
             </IntlProvider>
           </NotificationsProvider>
         </ThemeProvider>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );

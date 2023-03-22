@@ -9,8 +9,8 @@ const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres'];
 
 module.exports = function parseDatabaseArguments({ scope, args }) {
   const argKeys = Object.keys(args);
-  const matchingArgs = DB_ARGS.filter(key => argKeys.includes(key));
-  const missingArgs = DB_ARGS.filter(key => !argKeys.includes(key));
+  const matchingArgs = DB_ARGS.filter((key) => argKeys.includes(key));
+  const missingArgs = DB_ARGS.filter((key) => !argKeys.includes(key));
 
   if (matchingArgs.length === 0) return;
 

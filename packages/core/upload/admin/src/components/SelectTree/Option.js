@@ -4,12 +4,9 @@ import { useIntl } from 'react-intl';
 import { components } from 'react-select';
 import styled from 'styled-components';
 
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
+import { Flex, Icon, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
-import ChevronUp from '@strapi/icons/ChevronUp';
-import ChevronDown from '@strapi/icons/ChevronDown';
+import { ChevronUp, ChevronDown } from '@strapi/icons';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;
@@ -29,39 +26,37 @@ const Option = ({ children, data, selectProps, ...props }) => {
   const isOpen = openValues.includes(value);
 
   return (
-    <>
-      <components.Option {...props}>
-        <Flex alignItems="start">
-          <Typography textColor="neutral800" ellipsis>
-            <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
-              {children}
-            </span>
-          </Typography>
+    <components.Option {...props}>
+      <Flex alignItems="start">
+        <Typography textColor="neutral800" ellipsis>
+          <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
+            {children}
+          </span>
+        </Typography>
 
-          {options?.length > 0 && (
-            <ToggleButton
-              aria-label={formatMessage({
-                id: 'app.utils.toggle',
-                defaultMessage: 'Toggle',
-              })}
-              as="button"
-              alignItems="center"
-              hasRadius
-              justifyContent="center"
-              marginLeft="auto"
-              onClick={event => {
-                event.preventDefault();
-                event.stopPropagation();
+        {options?.length > 0 && (
+          <ToggleButton
+            aria-label={formatMessage({
+              id: 'app.utils.toggle',
+              defaultMessage: 'Toggle',
+            })}
+            as="button"
+            alignItems="center"
+            hasRadius
+            justifyContent="center"
+            marginLeft="auto"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
 
-                onOptionToggle(value);
-              }}
-            >
-              <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
-            </ToggleButton>
-          )}
-        </Flex>
-      </components.Option>
-    </>
+              onOptionToggle(value);
+            }}
+          >
+            <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
+          </ToggleButton>
+        )}
+      </Flex>
+    </components.Option>
   );
 };
 

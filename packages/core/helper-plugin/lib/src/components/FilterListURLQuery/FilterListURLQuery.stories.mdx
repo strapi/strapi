@@ -2,11 +2,7 @@
 
 import { useEffect } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
+import { Button, Box, Main, Flex } from '@strapi/design-system';
 import useQueryParams from '../../hooks/useQueryParams';
 import FilterListURLQuery from './index';
 
@@ -37,7 +33,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
       const handleResetFilters = () => setQuery({ filters });
       return (
         <Main>
-          <Stack spacing={6}>
+          <Flex direction="column" alignItems="stretch" gap={6}>
             <Flex paddingTop={6}>
               <FilterListURLQuery
                 filtersSchema={[
@@ -62,7 +58,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
             <Box>
               <Button onClick={handleResetFilters}>Reset filters</Button>
             </Box>
-          </Stack>
+          </Flex>
         </Main>
       );
     }}

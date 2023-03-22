@@ -22,6 +22,13 @@ const defaultGlobalLinks = [
     isDisplayed: false,
     permissions: adminPermissions.settings['api-tokens'].main,
   },
+  {
+    intlLabel: { id: 'Settings.transferTokens.title', defaultMessage: 'Transfer Tokens' },
+    to: '/settings/transfer-tokens?sort=name:ASC',
+    id: 'transfer-tokens',
+    isDisplayed: false,
+    permissions: adminPermissions.settings['transfer-tokens'].main,
+  },
 ];
 
 export default defaultGlobalLinks;

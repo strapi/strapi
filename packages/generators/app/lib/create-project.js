@@ -15,7 +15,10 @@ const { trackUsage, captureStderr } = require('./utils/usage');
 const mergeTemplate = require('./utils/merge-template.js');
 
 const packageJSON = require('./resources/json/common/package.json');
-const createDatabaseConfig = require('./resources/templates/database.js');
+const {
+  createDatabaseConfig,
+  generateDbEnvariables,
+} = require('./resources/templates/database.js');
 const createEnvFile = require('./resources/templates/env.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
@@ -34,11 +37,11 @@ module.exports = async function createProject(scope, { client, connection, depen
     // copy dot files
     await fse.writeFile(join(rootPath, '.env'), createEnvFile());
 
-    const copyDotFilesFromSubDirectory = subDirectory => {
+    const copyDotFilesFromSubDirectory = (subDirectory) => {
       const files = fse.readdirSync(join(resources, 'dot-files', subDirectory));
 
       return Promise.all(
-        files.map(file => {
+        files.map((file) => {
           const src = join(resources, 'dot-files', subDirectory, file);
           const dest = join(rootPath, `.${file}`);
           return fse.copy(src, dest);
@@ -98,6 +101,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
     // create config/database
+    await fse.appendFile(join(rootPath, '.env'), generateDbEnvariables({ client, connection }));
     await fse.writeFile(
       join(rootPath, `config/database.${language}`),
       createDatabaseConfig({
@@ -129,10 +133,7 @@ module.exports = async function createProject(scope, { client, connection, depen
   const loader = ora(installPrefix).start();
 
   const logInstall = (chunk = '') => {
-    loader.text = `${installPrefix} ${chunk
-      .toString()
-      .split('\n')
-      .join(' ')}`;
+    loader.text = `${installPrefix} ${chunk.toString().split('\n').join(' ')}`;
   };
 
   try {

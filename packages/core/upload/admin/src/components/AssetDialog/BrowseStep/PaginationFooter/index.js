@@ -41,7 +41,7 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
   if (pageCount <= 4) {
     const links = Array.from({ length: pageCount })
       .map((_, i) => i + 1)
-      .map(number => {
+      .map((number) => {
         return (
           <PageLink key={number} number={number} onClick={() => onChangePage(number)}>
             {formatMessage(
@@ -121,7 +121,7 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
     lastLinksToCreate = [activePage, activePage - 1];
   }
 
-  lastLinksToCreate.forEach(number => {
+  lastLinksToCreate.forEach((number) => {
     lastLinks.unshift(
       <PageLink key={number} number={number} onClick={() => onChangePage(number)}>
         Go to page {number}
@@ -129,7 +129,7 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
     );
   });
 
-  firstLinksToCreate.forEach(number => {
+  firstLinksToCreate.forEach((number) => {
     firstLinks.push(
       <PageLink key={number} number={number} onClick={() => onChangePage(number)}>
         {formatMessage(
@@ -147,7 +147,7 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
   ) {
     const middleLinksToCreate = [activePage - 1, activePage, activePage + 1];
 
-    middleLinksToCreate.forEach(number => {
+    middleLinksToCreate.forEach((number) => {
       middleLinks.push(
         <PageLink key={number} number={number} onClick={() => onChangePage(number)}>
           {formatMessage(

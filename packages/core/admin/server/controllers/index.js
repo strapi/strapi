@@ -7,6 +7,8 @@ module.exports = {
   authentication: require('./authentication'),
   permission: require('./permission'),
   role: require('./role'),
+  transfer: require('./transfer'),
   user: require('./user'),
   webhooks: require('./webhooks'),
+  'content-api': require('./content-api'),
 };

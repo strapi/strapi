@@ -1,10 +1,8 @@
 import React, { useLayoutEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import SearchIcon from '@strapi/icons/Search';
-import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Icon } from '@strapi/design-system/Icon';
+import { Search as SearchIcon } from '@strapi/icons';
+import { Searchbar, SearchForm, IconButton, Icon } from '@strapi/design-system';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
@@ -18,7 +16,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const handleToggle = () => setIsOpen(prev => !prev);
+  const handleToggle = () => setIsOpen((prev) => !prev);
 
   useLayoutEffect(() => {
     if (isOpen) {
@@ -33,14 +31,14 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (value) {
       if (trackedEvent) {
         trackUsage(trackedEvent, trackedEventDetails);
       }
-      setQuery({ _q: value, page: 1 });
+      setQuery({ _q: encodeURIComponent(value), page: 1 });
     } else {
       handleToggle();
       setQuery({ _q: '' }, 'remove');

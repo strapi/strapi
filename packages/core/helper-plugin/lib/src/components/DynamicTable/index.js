@@ -1,12 +1,8 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { Typography } from '@strapi/design-system/Typography';
-import { Table as TableCompo } from '@strapi/design-system/Table';
+import { Box, Flex, Button, Typography, Table as TableCompo } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import Trash from '@strapi/icons/Trash';
+import { Trash } from '@strapi/icons';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
@@ -86,7 +82,7 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setEntriesToDelete(rows.map(row => row.id));
+      setEntriesToDelete(rows.map((row) => row.id));
     } else {
       setEntriesToDelete([]);
     }
@@ -97,29 +93,29 @@ const Table = ({
       trackUsage(onOpenDeleteAllModalTrackedEvent);
     }
 
-    setShowConfirmDeleteAll(prev => !prev);
+    setShowConfirmDeleteAll((prev) => !prev);
   };
 
   const handleToggleConfirmDelete = () => {
     if (showConfirmDelete) {
       setEntriesToDelete([]);
     }
-    setShowConfirmDelete(prev => !prev);
+    setShowConfirmDelete((prev) => !prev);
   };
 
-  const handleClickDelete = id => {
+  const handleClickDelete = (id) => {
     setEntriesToDelete([id]);
 
     handleToggleConfirmDelete();
   };
 
   const handleSelectRow = ({ name, value }) => {
-    setEntriesToDelete(prev => {
+    setEntriesToDelete((prev) => {
       if (value) {
         return prev.concat(name);
       }
 
-      return prev.filter(id => id !== name);
+      return prev.filter((id) => id !== name);
     });
   };
 
@@ -177,7 +173,7 @@ const Table = ({
             action={action}
           />
         ) : (
-          Children.toArray(children).map(child =>
+          Children.toArray(children).map((child) =>
             cloneElement(child, {
               entriesToDelete,
               onClickDelete: handleClickDelete,
@@ -217,8 +213,8 @@ Table.defaultProps = {
   footer: undefined,
   headers: [],
   isLoading: false,
-  onConfirmDeleteAll: () => {},
-  onConfirmDelete: () => {},
+  onConfirmDeleteAll() {},
+  onConfirmDelete() {},
   onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,

@@ -35,7 +35,7 @@ const FIXTURE_OPTIONS = [
   },
 ];
 
-const ComponentFixture = props => (
+const ComponentFixture = (props) => (
   <IntlProvider locale="en" messages={{}}>
     <ThemeProvider theme={lightTheme}>
       <SelectTree defaultValue={{ value: 'f1' }} {...props} />
@@ -43,9 +43,9 @@ const ComponentFixture = props => (
   </IntlProvider>
 );
 
-const setup = props => {
-  return new Promise(resolve => {
-    return act(() => {
+const setup = (props) => {
+  return new Promise((resolve) => {
+    act(() => {
       resolve(render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />));
     });
   });

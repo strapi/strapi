@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 import { getTrad } from '../../../utils';
 import useHasI18n from '../../../hooks/useHasI18n';
 
@@ -21,7 +21,7 @@ const DeleteModalAdditionalInfos = () => {
             'This will delete the active locale versions <em>(from Internationalization)</em>',
         },
         {
-          em: chunks => (
+          em: (chunks) => (
             <Typography fontWeight="semiBold" textColor="danger500">
               {chunks}
             </Typography>

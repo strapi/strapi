@@ -9,7 +9,7 @@ const SERVER_HAS_BEEN_KILLED_MESSAGE = 'server is down';
  * @returns {object} the response data
  */
 export default function serverRestartWatcher(response, didShutDownServer) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
@@ -18,7 +18,7 @@ export default function serverRestartWatcher(response, didShutDownServer) {
         'Keep-Alive': false,
       },
     })
-      .then(res => {
+      .then((res) => {
         if (res.status >= 400) {
           throw new Error(SERVER_HAS_BEEN_KILLED_MESSAGE);
         }
@@ -29,7 +29,7 @@ export default function serverRestartWatcher(response, didShutDownServer) {
 
         resolve(response);
       })
-      .catch(err => {
+      .catch((err) => {
         setTimeout(() => {
           return serverRestartWatcher(
             response,

@@ -39,10 +39,14 @@ jest.mock('../../../hooks', () => ({
   useConfigurations: jest.fn(() => ({ showTutorials: false })),
 }));
 
-jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);
-jest.mock('../../HomePage', () => () => <div>HomePage</div>);
+jest.mock('../../../components/LeftMenu', () => () => {
+  return <div>menu</div>;
+});
+jest.mock('../../HomePage', () => () => {
+  return <div>HomePage</div>;
+});
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
       <Router history={history}>

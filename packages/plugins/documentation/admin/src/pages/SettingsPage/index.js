@@ -9,20 +9,22 @@ import {
 } from '@strapi/helper-plugin';
 
 // Strapi Parts
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import {
+  ContentLayout,
+  HeaderLayout,
+  Main,
+  Button,
+  Box,
+  Flex,
+  Typography,
+  ToggleInput,
+  TextInput,
+  Grid,
+  GridItem,
+} from '@strapi/design-system';
 
 // Strapi Icons
-import Show from '@strapi/icons/Eye';
-import Hide from '@strapi/icons/EyeStriked';
-import Check from '@strapi/icons/Check';
+import { Eye as Show, EyeStriked as Hide, Check } from '@strapi/icons';
 
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';
@@ -36,7 +38,7 @@ const SettingsPage = () => {
   const { submitMutation, data, isLoading } = useReactQuery();
   const [passwordShown, setPasswordShown] = useState(false);
 
-  const handleUpdateSettingsSubmit = body => {
+  const handleUpdateSettingsSubmit = (body) => {
     submitMutation.mutate({
       prefix: data?.prefix,
       body,
@@ -89,7 +91,7 @@ const SettingsPage = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'global.settings',
@@ -143,9 +145,9 @@ const SettingsPage = () => {
                               }
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordShown(prev => !prev);
+                                    setPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordShown
@@ -166,7 +168,7 @@ const SettingsPage = () => {
                           </GridItem>
                         )}
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
                 </ContentLayout>
               </Form>

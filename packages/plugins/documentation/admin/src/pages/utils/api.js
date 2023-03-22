@@ -5,7 +5,7 @@ const deleteDoc = ({ prefix, version }) => {
   return request(`${prefix}/deleteDoc/${version}`, { method: 'DELETE' });
 };
 
-const fetchDocumentationVersions = async toggleNotification => {
+const fetchDocumentationVersions = async (toggleNotification) => {
   try {
     const data = await request(`/${pluginId}/getInfos`, { method: 'GET' });
 

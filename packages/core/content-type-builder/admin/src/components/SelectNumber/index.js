@@ -7,14 +7,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Select, Option } from '@strapi/design-system';
 
 const SelectNumber = ({ intlLabel, error, modifiedData, name, onChange, options, value }) => {
   const { formatMessage } = useIntl();
   const label = formatMessage(intlLabel);
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
-  const handleChange = nextValue => {
+  const handleChange = (nextValue) => {
     onChange({ target: { name, value: nextValue, type: 'select' } });
 
     if (!value) {

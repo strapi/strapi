@@ -1,12 +1,13 @@
-import { flattenDeep, isObject } from 'lodash';
+import flattenDeep from 'lodash/flattenDeep';
+import isObject from 'lodash/isObject';
 
-const createArrayOfValues = obj => {
+const createArrayOfValues = (obj) => {
   if (!isObject(obj)) {
     return [];
   }
 
   return flattenDeep(
-    Object.values(obj).map(value => {
+    Object.values(obj).map((value) => {
       if (isObject(value)) {
         return createArrayOfValues(value);
       }

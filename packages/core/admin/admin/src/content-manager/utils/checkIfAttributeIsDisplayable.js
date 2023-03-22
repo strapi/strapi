@@ -1,6 +1,6 @@
-import { toLower } from 'lodash';
+import toLower from 'lodash/toLower';
 
-const checkIfAttributeIsDisplayable = attribute => {
+const checkIfAttributeIsDisplayable = (attribute) => {
   const type = attribute.type;
 
   if (type === 'relation') {

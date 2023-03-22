@@ -8,12 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { ModalHeader } from '@strapi/design-system/ModalLayout';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Breadcrumbs, Crumb, ModalHeader, Box, Flex, Typography } from '@strapi/design-system';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
@@ -28,6 +23,7 @@ const FormModalHeader = ({
   forTarget,
   modalType,
   targetUid,
+  customFieldUid,
 }) => {
   const { formatMessage } = useIntl();
   const { modifiedData } = useDataManager();
@@ -91,7 +87,7 @@ const FormModalHeader = ({
     headers.push({ label: dynamicZoneTarget });
   }
 
-  if (modalType === 'attribute') {
+  if (modalType === 'attribute' || modalType === 'customField') {
     icon = attributeType;
     headers.push({ label: attributeName });
   }
@@ -109,8 +105,8 @@ const FormModalHeader = ({
 
   return (
     <ModalHeader>
-      <Stack horizontal spacing={3}>
-        <AttributeIcon type={icon} />
+      <Flex gap={3}>
+        <AttributeIcon type={icon} customField={customFieldUid} />
 
         <Breadcrumbs label={breadcrumbsLabel}>
           {headers.map((header, index) => {
@@ -133,7 +129,7 @@ const FormModalHeader = ({
             return <Crumb key={key}>{label}</Crumb>;
           })}
         </Breadcrumbs>
-      </Stack>
+      </Flex>
     </ModalHeader>
   );
 };
@@ -147,6 +143,7 @@ FormModalHeader.defaultProps = {
   forTarget: null,
   contentTypeKind: null,
   targetUid: null,
+  customFieldUid: null,
 };
 
 FormModalHeader.propTypes = {
@@ -159,6 +156,7 @@ FormModalHeader.propTypes = {
   forTarget: PropTypes.oneOf(['contentType', 'component', 'components']),
   modalType: PropTypes.string.isRequired,
   targetUid: PropTypes.string,
+  customFieldUid: PropTypes.string,
 };
 
 export default FormModalHeader;

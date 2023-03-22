@@ -18,6 +18,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
       contentTypeDataStructure: {},
       isLoading: true,
       data: {},
+      setModifiedDataOnly: false,
       status: 'resolved',
     };
   });
@@ -33,7 +34,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
 
     const action = { type: GET_DATA };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = true;
       draft.data = null;
     });
@@ -47,7 +48,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
       data: 'test',
     };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.data = 'test';
     });
@@ -61,7 +62,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
     };
     state.contentTypeDataStructure = { foo: 'bar' };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.isLoading = false;
       draft.data = { foo: 'bar' };
     });
@@ -76,7 +77,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
       contentTypeDataStructure: { foo: 'bar' },
     };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.componentsDataStructure = { test: 'test' };
       draft.contentTypeDataStructure = { foo: 'bar' };
     });
@@ -87,7 +88,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   it('should handle the SET_STATUS action correctly', () => {
     const action = { type: SET_STATUS, status: 'pending' };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.status = 'pending';
     });
 
@@ -97,7 +98,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   it('should handle the SUBMIt_SUCCEEDED action correctly', () => {
     const action = { type: SUBMIT_SUCCEEDED, data: 'test' };
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.data = 'test';
     });
 

@@ -2,8 +2,8 @@ module.exports = {
   routes: [
     {
       method: 'GET',
-      path: '/{{pluralize id}}',
-      handler: '{{id}}.find',
+      path: '/{{ pluralize id }}',
+      handler: '{{ id }}.find',
       config: {
         policies: [],
         middlewares: [],
@@ -11,8 +11,8 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/{{pluralize id}}/:id',
-      handler: '{{id}}.findOne',
+      path: '/{{ pluralize id }}/:id',
+      handler: '{{ id }}.findOne',
       config: {
         policies: [],
         middlewares: [],
@@ -20,8 +20,8 @@ module.exports = {
     },
     {
       method: 'POST',
-      path: '/{{pluralize id}}',
-      handler: '{{id}}.create',
+      path: '/{{ pluralize id }}',
+      handler: '{{ id }}.create',
       config: {
         policies: [],
         middlewares: [],
@@ -29,8 +29,8 @@ module.exports = {
     },
     {
       method: 'PUT',
-      path: '/{{pluralize id}}/:id',
-      handler: '{{id}}.update',
+      path: '/{{ pluralize id }}/:id',
+      handler: '{{ id }}.update',
       config: {
         policies: [],
         middlewares: [],
@@ -38,8 +38,8 @@ module.exports = {
     },
     {
       method: 'DELETE',
-      path: '/{{pluralize id}}/:id',
-      handler: '{{id}}.delete',
+      path: '/{{ pluralize id }}/:id',
+      handler: '{{ id }}.delete',
       config: {
         policies: [],
         middlewares: [],

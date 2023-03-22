@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   strapi.container.get('sanitizers').set('content-api', { input: [], output: [] });
 };

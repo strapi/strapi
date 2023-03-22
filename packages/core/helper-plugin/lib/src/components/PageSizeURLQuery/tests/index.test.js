@@ -20,7 +20,7 @@ const messages = {
   'components.PageFooter.select': 'Entries per page',
 };
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={messages} textComponent="span">
@@ -39,7 +39,16 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c13 {
+      .c6 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c8 {
+        padding-left: 12px;
+      }
+
+      .c11 {
         padding-left: 8px;
       }
 
@@ -57,34 +66,6 @@ describe('<PageSizeURLQuery />', () => {
         flex-direction: row;
       }
 
-      .c5 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c5:focus {
-        outline: none;
-      }
-
-      .c5[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
-      .c8 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c10 {
-        padding-left: 12px;
-      }
-
       .c1 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -99,21 +80,7 @@ describe('<PageSizeURLQuery />', () => {
         flex-direction: column;
       }
 
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c6 {
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -131,22 +98,23 @@ describe('<PageSizeURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c9 {
-        color: #32324d;
+      .c7 {
+        font-size: 0.875rem;
+        line-height: 1.43;
         display: block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c12 {
         font-size: 0.875rem;
         line-height: 1.43;
+        color: #666687;
       }
 
-      .c2 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c4 {
+      .c2 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -162,28 +130,28 @@ describe('<PageSizeURLQuery />', () => {
         transition-duration: 0.2s;
       }
 
-      .c4:focus-within {
+      .c2:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c11 {
+      .c9 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c11 svg {
+      .c9 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c11 svg path {
+      .c9 svg path {
         fill: #666687;
       }
 
-      .c12 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -192,76 +160,94 @@ describe('<PageSizeURLQuery />', () => {
         border: none;
       }
 
-      .c12 svg {
+      .c10 svg {
         width: 0.375rem;
       }
 
-      .c7 {
+      .c3 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
         width: 100%;
+        background: transparent;
+        border: none;
       }
 
-      .c14 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c3:focus {
+        outline: none;
+      }
+
+      .c3[data-disabled] {
+        cursor: not-allowed;
+      }
+
+      .c5 {
+        width: 100%;
       }
 
       <div
         class="c0"
       >
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c1 c2"
+            class="c1"
           >
             <div
-              class="c3 c4"
+              class="c0 c2"
             >
               <button
-                aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
-                aria-labelledby="select-1-label select-1-content"
-                class="c5"
-                id="select-1"
+                aria-labelledby="1 1-label 1-content"
+                aria-required="false"
+                class="c3"
+                id="1"
+                role="combobox"
                 type="button"
+                value="10"
               />
               <div
-                class="c6 c7"
+                class="c4 c5"
               >
                 <div
-                  class="c3"
+                  class="c0"
                 >
                   <div
-                    class="c8"
+                    class="c6"
                   >
                     <span
-                      class="c9"
-                      id="select-1-content"
+                      class="c7"
+                      id="1-content"
                     >
                       10
                     </span>
                   </div>
                 </div>
                 <div
-                  class="c3"
+                  class="c0"
                 >
                   <button
                     aria-hidden="true"
-                    class="c10 c11 c12"
+                    class="c8 c9 c10"
                     tabindex="-1"
+                    title="Carret Down Button"
                     type="button"
                   >
                     <svg
                       fill="none"
-                      height="1em"
+                      height="1rem"
                       viewBox="0 0 14 8"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
                         fill="#32324D"
                         fill-rule="evenodd"
                       />
@@ -273,10 +259,10 @@ describe('<PageSizeURLQuery />', () => {
           </div>
         </div>
         <div
-          class="c13"
+          class="c11"
         >
           <label
-            class="c14"
+            class="c12"
             for="page-size"
           >
             Entries per page

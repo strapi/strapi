@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Button, ModalFooter } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 export const DialogFooter = ({ onClose, onValidate }) => {
@@ -16,11 +15,9 @@ export const DialogFooter = ({ onClose, onValidate }) => {
       }
       endActions={
         onValidate && (
-          <>
-            <Button onClick={onValidate}>
-              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-            </Button>
-          </>
+          <Button onClick={onValidate}>
+            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+          </Button>
         )
       }
     />

@@ -10,7 +10,7 @@ module.exports = ({ strapi }) => {
     const { ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
     const isEmpty = components.length === 0;
 
-    const componentsTypeNames = components.map(componentUID => {
+    const componentsTypeNames = components.map((componentUID) => {
       const component = strapi.components[componentUID];
 
       if (!component) {
@@ -40,15 +40,15 @@ module.exports = ({ strapi }) => {
   };
 
   const buildInputDefinition = (name, components) => {
-    const parseData = value => {
+    const parseData = (value) => {
       const component = Object.values(strapi.components).find(
-        component => component.globalId === value.__typename
+        (component) => component.globalId === value.__typename
       );
 
       if (!component) {
         throw new ApplicationError(
           `Component not found. expected one of: ${components
-            .map(uid => strapi.components[uid].globalId)
+            .map((uid) => strapi.components[uid].globalId)
             .join(', ')}`
         );
       }
@@ -62,9 +62,9 @@ module.exports = ({ strapi }) => {
     return scalarType({
       name,
 
-      serialize: value => value,
+      serialize: (value) => value,
 
-      parseValue: value => parseData(value),
+      parseValue: (value) => parseData(value),
 
       parseLiteral(ast, variables) {
         if (ast.kind !== Kind.OBJECT) {

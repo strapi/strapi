@@ -55,10 +55,8 @@
   "plugin.description.short": "Ten plugin umożliwia tworzenie, czytanie i aktualizowanie treści w różnych językach, zarówno z poziomu panelu admina jak i z API.",
   "plugin.name": "Internationalization",
   "plugin.schema.i18n.ensure-unique-localization": "Unikalne pola muszą zostać zlokalizowane",
-  "plugin.schema.i18n.localized.description": "Pozwala mieć treść w różnych ustawieniach regionalnych",
   "plugin.schema.i18n.localized.description-content-type": "Pozwala mieć treść w różnych ustawieniach regionalnych",
   "plugin.schema.i18n.localized.description-field": "To pole może mieć różne wartości w zależności od różnych ustawień regionalnych",
-  "plugin.schema.i18n.localized.label": "Włącz lokalizację dla tego typu treści",
   "plugin.schema.i18n.localized.label-content-type": "Włącz lokalizację dla tego typu treści",
   "plugin.schema.i18n.localized.label-field": "Włącz lokalizację dla tego pola"
 }

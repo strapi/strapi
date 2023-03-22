@@ -15,7 +15,7 @@ const GuidedTour = ({ children }) => {
     init
   );
 
-  const setCurrentStep = step => {
+  const setCurrentStep = (step) => {
     // if step is null it is intentional, we need to dispatch it
     if (step !== null) {
       const isStepAlreadyDone = get(guidedTourState, step);
@@ -34,7 +34,7 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const setGuidedTourVisibility = value => {
+  const setGuidedTourVisibility = (value) => {
     dispatch({
       type: 'SET_GUIDED_TOUR_VISIBILITY',
       value,
@@ -51,7 +51,7 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const startSection = sectionName => {
+  const startSection = (sectionName) => {
     const sectionSteps = guidedTourState[sectionName];
 
     if (sectionSteps) {
@@ -67,7 +67,7 @@ const GuidedTour = ({ children }) => {
     return null;
   };
 
-  const setSkipped = value => {
+  const setSkipped = (value) => {
     persistStateToLocaleStorage.setSkipped(value);
 
     dispatch({

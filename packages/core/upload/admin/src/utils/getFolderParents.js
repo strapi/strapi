@@ -3,7 +3,7 @@ import flattenTree from '../components/SelectTree/utils/flattenTree';
 const getFolderParents = (folders, currentFolderId) => {
   const parents = [];
   const flatFolders = flattenTree(folders);
-  const currentFolder = flatFolders.find(folder => folder.value === currentFolderId);
+  const currentFolder = flatFolders.find((folder) => folder.value === currentFolderId);
 
   if (!currentFolder) {
     return [];

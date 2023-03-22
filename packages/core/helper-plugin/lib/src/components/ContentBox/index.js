@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Flex, Typography } from '@strapi/design-system';
 
 const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
+
   svg {
     width: ${32 / 16}rem;
     height: ${32 / 16}rem;
@@ -27,7 +26,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>
-      <Stack spacing={endAction ? 0 : 1}>
+      <Flex direction="column" alignItems="stretch" gap={endAction ? 0 : 1}>
         <Flex>
           <TypographyWordBreak fontWeight="semiBold" variant="pi">
             {title}
@@ -35,7 +34,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
           {endAction}
         </Flex>
         <Typography textColor="neutral600">{subtitle}</Typography>
-      </Stack>
+      </Flex>
     </Flex>
   );
 };

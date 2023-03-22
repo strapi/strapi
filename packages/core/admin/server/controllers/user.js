@@ -13,10 +13,11 @@ const { getService } = require('../utils');
 module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
+    const cleanData = { ...body, email: _.get(body, `email`, ``).toLowerCase() };
 
-    await validateUserCreationInput(body);
+    await validateUserCreationInput(cleanData);
 
-    const attributes = _.pick(body, [
+    const attributes = _.pick(cleanData, [
       'firstname',
       'lastname',
       'email',
@@ -47,11 +48,17 @@ module.exports = {
   async find(ctx) {
     const userService = getService('user');
 
-    const { results, pagination } = await userService.findPage(ctx.query);
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: 'admin::user',
+    });
+    const sanitizedQuery = await permissionsManager.sanitizeQuery(ctx.query);
+
+    const { results, pagination } = await userService.findPage(sanitizedQuery);
 
     ctx.body = {
       data: {
-        results: results.map(user => userService.sanitizeUser(user)),
+        results: results.map((user) => userService.sanitizeUser(user)),
         pagination,
       },
     };

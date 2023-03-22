@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "reviews",
   "info": {
     "displayName": "Review",

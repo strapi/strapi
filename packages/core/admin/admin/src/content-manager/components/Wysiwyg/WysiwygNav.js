@@ -1,24 +1,30 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { IconButtonGroup } from '@strapi/design-system/IconButton';
-import { Option, Select } from '@strapi/design-system/Select';
-import { Popover } from '@strapi/design-system/Popover';
-import { Flex } from '@strapi/design-system/Flex';
-import Bold from '@strapi/icons/Bold';
-import Italic from '@strapi/icons/Italic';
-import Underline from '@strapi/icons/Underline';
-import StrikeThrough from '@strapi/icons/StrikeThrough';
-import BulletList from '@strapi/icons/BulletList';
-import NumberList from '@strapi/icons/NumberList';
-import Code from '@strapi/icons/Code';
-import Image from '@strapi/icons/Picture';
-import Link from '@strapi/icons/Link';
-import Quote from '@strapi/icons/Quote';
-import More from '@strapi/icons/More';
+import {
+  FocusTrap,
+  Box,
+  Button,
+  IconButtonGroup,
+  Option,
+  Select,
+  Popover,
+  Flex,
+} from '@strapi/design-system';
+import {
+  Bold,
+  Italic,
+  Underline,
+  StrikeThrough,
+  BulletList,
+  NumberList,
+  Code,
+  Picture as Image,
+  Link,
+  Quote,
+  More,
+} from '@strapi/icons';
+
 import {
   MainButtons,
   CustomIconButton,
@@ -45,7 +51,7 @@ const WysiwygNav = ({
   const buttonMoreRef = useRef();
 
   const handleTogglePopover = () => {
-    setVisiblePopover(prev => !prev);
+    setVisiblePopover((prev) => !prev);
   };
 
   if (disabled || isPreviewMode) {
@@ -110,7 +116,7 @@ const WysiwygNav = ({
             id="selectTitle"
             placeholder={selectPlaceholder}
             size="S"
-            onChange={value => onActionClick(value, editorRef)}
+            onChange={(value) => onActionClick(value, editorRef)}
           >
             <Option value="h1">h1</Option>
             <Option value="h2">h2</Option>
@@ -233,8 +239,8 @@ const WysiwygNav = ({
 
 WysiwygNav.defaultProps = {
   isPreviewMode: false,
-  onActionClick: () => {},
-  onToggleMediaLib: () => {},
+  onActionClick() {},
+  onToggleMediaLib() {},
   onTogglePreviewMode: undefined,
 };
 
