@@ -152,39 +152,60 @@ module.exports = ({ strapi }) => {
      * @description - Creates the Swagger json files
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
-      let paths = {};
-      let schemas = {};
       const apis = this.getPluginAndApiInfo();
-
       const apisThatNeedGeneratedDocumentation = apis.filter(
         ({ name }) => !overrideService.excludedFromGeneration.includes(name)
       );
+      // Initialize the generated documentation with defaults
+      let generatedDocumentation = mutateDocumentation(
+        {
+          ...config,
+          components: defaultOpenApiComponents,
+        },
+        (draft) => {
+          if (draft.servers.length === 0) {
+            // When no servers found set the defaults
+            const serverUrl = getAbsoluteServerUrl(strapi.config);
+            const apiPath = strapi.config.get('api.rest.prefix');
+            draft.servers = [
+              {
+                url: `${serverUrl}${apiPath}`,
+                description: 'Development server',
+              },
+            ];
+          }
+          // Set the generated date
+          draft.info['x-generation-date'] = new Date().toISOString();
+          // Set the plugins that need documentation
+          draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
+          // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
+          delete draft['x-strapi-config'].mutateDocumentation;
+        }
+      );
+      // Generate the documentation for each api and update the generatedDocumentation
       for (const api of apisThatNeedGeneratedDocumentation) {
         const apiName = api.name;
 
-        // TODO: confirm this can be removed
+        const newApiPath = builApiEndpointPath(api);
+        const generatedSchemas = buildComponentSchema(api);
+
+        // TODO: To be confirmed, do we still need to write these files...?
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
-        // TODO: confirm this can be removed
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
-
-        const apiPath = builApiEndpointPath(api);
-
-        if (!apiPath) {
-          continue;
-        }
-
-        // TODO: confirm this can be removed
         await fs.ensureFile(apiDocPath);
-        await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
+        await fs.writeJson(apiDocPath, newApiPath, { spaces: 2 });
 
-        const componentSchema = buildComponentSchema(api);
+        generatedDocumentation = mutateDocumentation(generatedDocumentation, (draft) => {
+          if (generatedSchemas) {
+            draft.components = {
+              schemas: { ...draft.components.schemas, ...generatedSchemas },
+            };
+          }
 
-        schemas = {
-          ...schemas,
-          ...componentSchema,
-        };
-
-        paths = { ...paths, ...apiPath };
+          if (newApiPath) {
+            draft.paths = { ...draft.paths, ...newApiPath };
+          }
+        });
       }
 
       const fullDocJsonPath = path.join(
@@ -192,35 +213,9 @@ module.exports = ({ strapi }) => {
         version,
         'full_documentation.json'
       );
-
-      const initialDocumentation = {
-        ...config,
-        paths,
-        components: {
-          ...defaultOpenApiComponents,
-          schemas: { ...defaultOpenApiComponents.schemas, ...schemas },
-        },
-      };
-      const generatedDocumentation = mutateDocumentation(initialDocumentation, (draft) => {
-        // When no servers found set the defaults
-        if (draft.servers.length === 0) {
-          const serverUrl = getAbsoluteServerUrl(strapi.config);
-          const apiPath = strapi.config.get('api.rest.prefix');
-          draft.servers = [
-            {
-              url: `${serverUrl}${apiPath}`,
-              description: 'Development server',
-            },
-          ];
-        }
-        // Set the generated date
-        draft.info['x-generation-date'] = new Date().toISOString();
-        // Set the plugins that need documentation
-        draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
-        // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
-        delete draft['x-strapi-config'].mutateDocumentation;
-        // Check for overrides and then add them
-        if (overrideService.registeredOverrides.length > 0) {
+      // When overrides are present update the generatedDocumentation
+      if (overrideService.registeredOverrides.length > 0) {
+        generatedDocumentation = mutateDocumentation(generatedDocumentation, (draft) => {
           overrideService.registeredOverrides.forEach((override) => {
             // Only run the overrrides when no override version is provided,
             // or when the generated documentation version matches the override version
@@ -250,8 +245,9 @@ module.exports = ({ strapi }) => {
               }
             }
           });
-        }
-      });
+        });
+      }
+
       // Get the documentation mutateDocumentation
       const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
       // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
