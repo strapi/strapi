@@ -156,6 +156,7 @@ module.exports = ({ strapi }) => {
       const apisThatNeedGeneratedDocumentation = apis.filter(
         ({ name }) => !overrideService.excludedFromGeneration.includes(name)
       );
+
       // Initialize the generated documentation with defaults
       let generatedDocumentation = mutateDocumentation(
         {
@@ -208,11 +209,6 @@ module.exports = ({ strapi }) => {
         });
       }
 
-      const fullDocJsonPath = path.join(
-        this.getFullDocumentationPath(),
-        version,
-        'full_documentation.json'
-      );
       // When overrides are present update the generatedDocumentation
       if (overrideService.registeredOverrides.length > 0) {
         generatedDocumentation = mutateDocumentation(generatedDocumentation, (draft) => {
@@ -248,14 +244,20 @@ module.exports = ({ strapi }) => {
         });
       }
 
-      // Get the documentation mutateDocumentation
-      const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
       // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
       // the generated documentation before it is written to the file system
+      const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
       const finalDocumentation = userMutatesDocumentation
         ? mutateDocumentation(generatedDocumentation, userMutatesDocumentation)
         : generatedDocumentation;
 
+      // Get the file path for the final documentation
+      const fullDocJsonPath = path.join(
+        this.getFullDocumentationPath(),
+        version,
+        'full_documentation.json'
+      );
+      // Write the documentation to the file system
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, finalDocumentation, { spaces: 2 });
     },
