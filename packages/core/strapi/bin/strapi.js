@@ -324,7 +324,7 @@ program
         }
 
         await confirmMessage(
-          'The transfer will delete all of the local Strapi assets and its database. Are you sure you want to proceed?',
+          'The transfer will delete all the local Strapi assets and its database. Are you sure you want to proceed?',
           { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
@@ -352,7 +352,7 @@ program
         }
 
         await confirmMessage(
-          'The transfer will delete all of the remote Strapi assets and its database. Are you sure you want to proceed?',
+          'The transfer will delete all the remote Strapi assets and its database. Are you sure you want to proceed?',
           { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
@@ -456,7 +456,7 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database and media files. Are you sure you want to proceed?',
+      'The import will delete all assets and data in your database. Are you sure you want to proceed?',
       { failMessage: 'Import process aborted' }
     )
   )
