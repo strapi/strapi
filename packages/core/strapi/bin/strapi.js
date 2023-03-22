@@ -324,7 +324,7 @@ program
         }
 
         await confirmMessage(
-          'The transfer will delete all data in the local database and media files. Are you sure you want to proceed?',
+          'The transfer will delete all of the local Strapi assets and its database. Are you sure you want to proceed?',
           { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
@@ -352,7 +352,7 @@ program
         }
 
         await confirmMessage(
-          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?',
+          'The transfer will delete all of the remote Strapi assets and its database. Are you sure you want to proceed?',
           { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
