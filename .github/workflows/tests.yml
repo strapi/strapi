@@ -160,7 +160,7 @@ jobs:
   api_ce_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -199,7 +199,7 @@ jobs:
   api_ce_mysql_5:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5, client:${{ matrix.db_client }} , node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -234,12 +234,10 @@ jobs:
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
-  # TODO THE REST OF THESE
-
   api_ce_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -308,7 +306,7 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -351,7 +349,7 @@ jobs:
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
