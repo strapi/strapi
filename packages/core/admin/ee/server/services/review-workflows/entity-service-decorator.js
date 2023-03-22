@@ -10,16 +10,15 @@ const { getService } = require('../../utils');
 const decorator = (service) => ({
   async create(uid, opts = {}) {
     const model = strapi.getModel(uid);
-
     const hasRW = hasRWEnabled(model);
 
     const entity = await service.create.call(this, uid, opts);
     if (!hasRW) {
-      return;
+      return entity;
     }
 
-    const { assignEntityDefaultStage } = getService('review-workflows');
     // Assign this entity to the default workflow stage
+    const { assignEntityDefaultStage } = getService('review-workflows');
     await assignEntityDefaultStage(uid, entity.id);
 
     return entity;
