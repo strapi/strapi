@@ -21,7 +21,7 @@
     },
     "test:unit": {
       "inputs": ["default", "{projectRoot}/jest.config.js", "{workspaceRoot}/jest-preset.unit.js"],
-      "dependsOn": ["build:ts"]
+      "dependsOn": ["build:ts", "^build:ts"]
     },
     "test:front": {
       "inputs": [
@@ -29,7 +29,10 @@
         "{projectRoot}/jest.config.front.js",
         "{workspaceRoot}/jest-preset.front.js"
       ],
-      "dependsOn": ["^build"]
+      "dependsOn": ["build", "^build"]
+    },
+    "test:api": {
+      "dependsOn": ["build:ts", "^build:ts"]
     },
     "lint": {
       "inputs": [
@@ -46,7 +49,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:api", "test:front"]
       }
     }
   }

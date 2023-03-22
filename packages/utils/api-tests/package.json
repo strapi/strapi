@@ -1,0 +1,8 @@
+{
+  "name": "api-tests",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "run-api-tests": "cli.js"
+  }
+}

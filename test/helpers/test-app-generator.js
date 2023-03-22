@@ -26,7 +26,7 @@ const cleanTestApp = (appName) => {
  * @param {string} options.appName - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = async ({ appName, database }) => {
+const generateTestApp = async ({ appName, database, plugins = [] }) => {
   const scope = {
     database,
     rootPath: path.resolve(appName),
@@ -44,10 +44,11 @@ const generateTestApp = async ({ appName, database }) => {
     installDependencies: false,
     strapiDependencies: [
       '@strapi/strapi',
-      '@strapi/plugin-users-permissions',
-      '@strapi/plugin-graphql',
-      '@strapi/plugin-documentation',
-      '@strapi/plugin-i18n',
+      ...plugins,
+      // '@strapi/plugin-users-permissions',
+      // '@strapi/plugin-graphql',
+      // '@strapi/plugin-documentation',
+      // '@strapi/plugin-i18n',
     ],
     additionalsDependencies: {},
   };

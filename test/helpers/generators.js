@@ -15,12 +15,12 @@ module.exports = {
       content: {
         type: 'richtext',
       },
-      author: {
-        type: 'relation',
-        relation: 'manyToOne',
-        target: 'plugin::users-permissions.user',
-        targetAttribute: 'articles',
-      },
+      // author: {
+      //   type: 'relation',
+      //   relation: 'manyToOne',
+      //   target: 'plugin::users-permissions.user',
+      //   targetAttribute: 'articles',
+      // },
     },
     uid: 'api::article.article',
     displayName: 'Article',

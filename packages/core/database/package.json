@@ -30,6 +30,7 @@
   "scripts": {
     "test:unit": "jest",
     "test:unit:watch": "jest --watch",
+    "test:api": "run-api-tests",
     "lint": "eslint ."
   },
   "dependencies": {

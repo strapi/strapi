@@ -76,6 +76,7 @@
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js",
+    "test:api": "run-api-tests",
     "test:unit": "jest",
     "test:unit:watch": "jest --watch",
     "lint": "eslint ."

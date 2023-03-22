@@ -15,7 +15,7 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
-const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
+const TEST_APP_DIR = process.env.TEST_APP_DIR;
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,
@@ -25,8 +25,8 @@ const createStrapiInstance = async ({
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
   const options = {
-    appDir: TEST_APP_URL,
-    distDir: TEST_APP_URL,
+    appDir: TEST_APP_DIR,
+    distDir: TEST_APP_DIR,
   };
   const instance = strapi(options);
 
