@@ -1,9 +1,45 @@
 'use strict';
 
-const { cloneDeep, isObject, isArray, isNil, curry } = require('lodash/fp');
+const { clone, isObject, isArray, isNil, curry } = require('lodash/fp');
+
+const traverseMorphRelationTarget = async (visitor, path, entry) => {
+  const targetSchema = strapi.getModel(entry.__type);
+
+  const traverseOptions = { schema: targetSchema, path };
+
+  return traverseEntity(visitor, traverseOptions, entry);
+};
+
+const traverseRelationTarget = (schema) => async (visitor, path, entry) => {
+  const traverseOptions = { schema, path };
+
+  return traverseEntity(visitor, traverseOptions, entry);
+};
+
+const traverseMediaTarget = async (visitor, path, entry) => {
+  const targetSchemaUID = 'plugin::upload.file';
+  const targetSchema = strapi.getModel(targetSchemaUID);
+
+  const traverseOptions = { schema: targetSchema, path };
+
+  return traverseEntity(visitor, traverseOptions, entry);
+};
+
+const traverseComponent = async (visitor, path, schema, entry) => {
+  const traverseOptions = { schema, path };
+
+  return traverseEntity(visitor, traverseOptions, entry);
+};
+
+const visitDynamicZoneEntry = async (visitor, path, entry) => {
+  const targetSchema = strapi.getModel(entry.__component);
+  const traverseOptions = { schema: targetSchema, path };
+
+  return traverseEntity(visitor, traverseOptions, entry);
+};
 
 const traverseEntity = async (visitor, options, entity) => {
-  const { path = null, schema } = options;
+  const { path = { raw: null, attribute: null }, schema } = options;
 
   // End recursion
   if (!isObject(entity) || isNil(schema)) {
@@ -11,9 +47,13 @@ const traverseEntity = async (visitor, options, entity) => {
   }
 
   // Don't mutate the original entity object
-  const copy = cloneDeep(entity);
+  // only clone at 1st level as the next level will get clone when traversed
+  const copy = clone(entity);
+  const visitorUtils = createVisitorUtils({ data: copy });
 
-  for (const key of Object.keys(copy)) {
+  const keys = Object.keys(copy);
+  for (let i = 0; i < keys.length; i += 1) {
+    const key = keys[i];
     // Retrieve the attribute definition associated to the key from the schema
     const attribute = schema.attributes[key];
 
@@ -22,11 +62,16 @@ const traverseEntity = async (visitor, options, entity) => {
       continue;
     }
 
-    const newPath = path ? `${path}.${key}` : key;
+    const newPath = { ...path };
+
+    newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+
+    if (!isNil(attribute)) {
+      newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
+    }
 
     // Visit the current attribute
     const visitorOptions = { data: copy, schema, key, value: copy[key], attribute, path: newPath };
-    const visitorUtils = createVisitorUtils({ data: copy });
 
     await visitor(visitorOptions, visitorUtils);
 
@@ -46,58 +91,62 @@ const traverseEntity = async (visitor, options, entity) => {
     if (isRelation) {
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
-      const traverseTarget = (entry) => {
-        // Handle polymorphic relationships
-        const targetSchemaUID = isMorphRelation ? entry.__type : attribute.target;
-        const targetSchema = strapi.getModel(targetSchemaUID);
+      const method = isMorphRelation
+        ? traverseMorphRelationTarget
+        : traverseRelationTarget(strapi.getModel(attribute.target));
 
-        const traverseOptions = { schema: targetSchema, path: newPath };
+      if (isArray(value)) {
+        const res = new Array(value.length);
+        for (let i = 0; i < value.length; i += 1) {
+          res[i] = await method(visitor, newPath, value[i]);
+        }
+        copy[key] = res;
+      } else {
+        copy[key] = await method(visitor, newPath, value);
+      }
 
-        return traverseEntity(visitor, traverseOptions, entry);
-      };
-
-      // need to update copy
-      copy[key] = isArray(value)
-        ? await Promise.all(value.map(traverseTarget))
-        : await traverseTarget(value);
+      continue;
     }
 
     if (isMedia) {
-      const traverseTarget = (entry) => {
-        const targetSchemaUID = 'plugin::upload.file';
-        const targetSchema = strapi.getModel(targetSchemaUID);
-
-        const traverseOptions = { schema: targetSchema, path: newPath };
-
-        return traverseEntity(visitor, traverseOptions, entry);
-      };
-
       // need to update copy
-      copy[key] = isArray(value)
-        ? await Promise.all(value.map(traverseTarget))
-        : await traverseTarget(value);
+      if (isArray(value)) {
+        const res = new Array(value.length);
+        for (let i = 0; i < value.length; i += 1) {
+          res[i] = await traverseMediaTarget(visitor, newPath, value[i]);
+        }
+        copy[key] = res;
+      } else {
+        copy[key] = await traverseMediaTarget(visitor, newPath, value);
+      }
+
+      continue;
     }
 
     if (isComponent) {
       const targetSchema = strapi.getModel(attribute.component);
-      const traverseOptions = { schema: targetSchema, path: newPath };
 
-      const traverseComponent = (entry) => traverseEntity(visitor, traverseOptions, entry);
+      if (isArray(value)) {
+        const res = new Array(value.length);
+        for (let i = 0; i < value.length; i += 1) {
+          res[i] = await traverseComponent(visitor, newPath, targetSchema, value[i]);
+        }
+        copy[key] = res;
+      } else {
+        copy[key] = await traverseComponent(visitor, newPath, targetSchema, value);
+      }
 
-      copy[key] = isArray(value)
-        ? await Promise.all(value.map(traverseComponent))
-        : await traverseComponent(value);
+      continue;
     }
 
     if (isDynamicZone && isArray(value)) {
-      const visitDynamicZoneEntry = (entry) => {
-        const targetSchema = strapi.getModel(entry.__component);
-        const traverseOptions = { schema: targetSchema, path: newPath };
+      const res = new Array(value.length);
+      for (let i = 0; i < value.length; i += 1) {
+        res[i] = await visitDynamicZoneEntry(visitor, newPath, value[i]);
+      }
+      copy[key] = res;
 
-        return traverseEntity(visitor, traverseOptions, entry);
-      };
-
-      copy[key] = await Promise.all(value.map(visitDynamicZoneEntry));
+      continue;
     }
   }
 

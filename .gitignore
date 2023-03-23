@@ -79,7 +79,6 @@ $RECYCLE.BIN/
 *#
 .idea
 nbproject
-.vscode/
 .eslintcache
 
 
@@ -135,6 +134,8 @@ schema.graphql
 # Visual Studio Code
 ############################
 
+.vscode/
+!.vscode/settings.json
 front-workspace.code-workspace
 .yarn
 .yarnrc

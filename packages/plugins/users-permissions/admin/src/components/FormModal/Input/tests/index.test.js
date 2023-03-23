@@ -49,20 +49,6 @@ describe('<Input />', () => {
         gap: 4px;
       }
 
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -86,6 +72,17 @@ describe('<Input />', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c5 {
@@ -157,14 +154,10 @@ describe('<Input />', () => {
             class="c0"
           >
             <label
-              class="c1"
+              class="c1 c2"
               for="1"
             >
-              <div
-                class="c2"
-              >
-                Enabled
-              </div>
+              Enabled
             </label>
             <div
               class="c3 c4"

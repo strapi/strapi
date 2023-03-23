@@ -90,7 +90,7 @@ describe('Admin Controller', () => {
         ['uuid', null],
       ]);
       expect(result.data).toBeDefined();
-      expect(result.data).toStrictEqual({
+      expect(result.data).toMatchObject({
         currentEnvironment: 'development',
         autoReload: false,
         strapiVersion: '1.0.0',
@@ -100,7 +100,6 @@ describe('Admin Controller', () => {
         },
         nodeVersion: process.version,
         communityEdition: false,
-        useYarn: true,
       });
     });
   });

@@ -51,6 +51,27 @@
         "basic.relation",
         "basic.simple"
       ]
+    },
+    "single_relation": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "basic.relation"
+    },
+    "require_single_relation": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "basic.relation",
+      "required": true
     }
   }
 }

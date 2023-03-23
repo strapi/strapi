@@ -1,0 +1,4 @@
+node_modules/
+.eslintrc.js
+build/
+lib/src/utils/**

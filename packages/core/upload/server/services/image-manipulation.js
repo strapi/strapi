@@ -12,6 +12,7 @@ const {
 } = require('@strapi/utils');
 const { getService } = require('../utils');
 
+const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
@@ -208,6 +209,18 @@ const isOptimizableImage = async (file) => {
   return format && FORMATS_TO_OPTIMIZE.includes(format);
 };
 
+const isResizableImage = async (file) => {
+  let format;
+  try {
+    const metadata = await getMetadata(file);
+    format = metadata.format;
+  } catch (e) {
+    // throw when the file is not a supported image
+    return false;
+  }
+  return format && FORMATS_TO_RESIZE.includes(format);
+};
+
 const isImage = async (file) => {
   let format;
   try {
@@ -224,6 +237,7 @@ module.exports = () => ({
   isSupportedImage,
   isFaultyImage,
   isOptimizableImage,
+  isResizableImage,
   isImage,
   getDimensions,
   generateResponsiveFormats,

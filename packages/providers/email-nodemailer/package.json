@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -46,7 +46,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",
