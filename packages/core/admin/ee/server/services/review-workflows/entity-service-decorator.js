@@ -1,6 +1,21 @@
 'use strict';
 
+const { isNil } = require('lodash/fp');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { hasRWEnabled, getDefaultWorkflow } = require('../../utils/review-workflows');
+
+/**
+ * Assigns the entity data to the default workflow stage if no stage is present in the data
+ * @param {Object} data
+ * @returns
+ */
+const getDataWithStage = async (data) => {
+  if (!isNil(ENTITY_STAGE_ATTRIBUTE, data)) {
+    const defaultWorkflow = await getDefaultWorkflow({ strapi });
+    return { ...data, [ENTITY_STAGE_ATTRIBUTE]: defaultWorkflow.stages[0].id };
+  }
+  return data;
+};
 
 /**
  * Decorates the entity service with RW business logic
@@ -15,12 +30,10 @@ const decorator = (service) => ({
       return service.create.call(this, uid, opts);
     }
 
-    const defaultWorkFlow = await getDefaultWorkflow({ strapi });
-
+    const data = await getDataWithStage(opts.data);
     return service.create.call(this, uid, {
       ...opts,
-      // Assign this entity to the default workflow stage
-      data: { ...opts.data, strapi_reviewWorkflows_stage: defaultWorkFlow.stages[0].id },
+      data,
     });
   },
 });
