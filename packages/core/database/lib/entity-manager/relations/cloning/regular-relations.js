@@ -60,7 +60,7 @@ const cloneRegularRelations = async ({ targetId, sourceId, attribute, transactio
   // Clean the inverse order column
   if (inverseOrderColumnName) {
     await cleanInverseOrderColumn({
-      targetId,
+      id: targetId,
       attribute,
       trx,
     });
