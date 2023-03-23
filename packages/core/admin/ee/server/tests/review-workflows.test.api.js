@@ -5,7 +5,12 @@ const { createAuthRequest, createRequest } = require('../../../../../../test/hel
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
 const { describeOnCondition } = require('../utils/test');
-const { STAGE_MODEL_UID, WORKFLOW_MODEL_UID } = require('../constants/workflows');
+const {
+  STAGE_MODEL_UID,
+  WORKFLOW_MODEL_UID,
+  ENTITY_STAGE_ATTRIBUTE,
+} = require('../constants/workflows');
+const defaultStages = require('../constants/default-stages.json');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -375,36 +380,17 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Creating an entity in a review workflow content type', () => {
-    let response;
-
     beforeAll(async () => {
       await updateContentType(productUID, {
         components: [],
         contentType: { ...model, reviewWorkflows: true },
       });
       await restart();
-
-      await createEntry(productUID, { name: 'Product' });
-      await createEntry(productUID, { name: 'Product 1' });
-      await createEntry(productUID, { name: 'Product 2' });
     });
 
     test('when review workflows is enabled on a content type, new entries should be added to the first stage of the default workflow', async () => {
-      response = await requests.admin({
-        method: 'GET',
-        url: `/content-type-builder/content-types/api::product.product`,
-      });
-
-      expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
-
-      response = await getRWMorphTableResults(strapi.db.getConnection());
-
-      expect(response.length).toEqual(6);
-      for (let i = 0; i < response.length; i += 1) {
-        const entry = response[i];
-        expect(entry.related_id).toEqual(i + 1);
-        expect(entry.order).toEqual(1);
-      }
+      const adminResponse = await createEntry(productUID, { name: 'Product' });
+      expect(await adminResponse[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
     });
   });
 });
