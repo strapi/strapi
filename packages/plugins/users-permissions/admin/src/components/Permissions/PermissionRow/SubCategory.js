@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box, Checkbox, Flex, Typography, Grid, GridItem } from '@strapi/design-system';

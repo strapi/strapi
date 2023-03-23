@@ -49,6 +49,14 @@ describe('Event Hub', () => {
     unsubscribe2();
     await emit('my-event');
     expect(fn).toHaveBeenCalledTimes(4);
+
+    // Avoid removing the wrong subscriber when unsubscribe is given a non-existing subscriber
+    const unsubscribe3 = subscribe(fn);
+    const unrelatedFunction = jest.fn();
+    unsubscribe(unrelatedFunction);
+    await emit('my-event');
+    expect(fn).toHaveBeenCalledTimes(5);
+    unsubscribe3();
   });
 
   it('adds and removes simple listeners', async () => {

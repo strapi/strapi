@@ -31,7 +31,7 @@
     "redux": "^4.2.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x"

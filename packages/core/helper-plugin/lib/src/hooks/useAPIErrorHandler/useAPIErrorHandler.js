@@ -17,11 +17,17 @@ export function useAPIErrorHandler(intlMessagePrefixCallback) {
 
   return {
     formatAPIError(error) {
-      if (error instanceof AxiosError) {
-        return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
-      }
+      // Try to normalize the passed error first. This will fail for e.g. network
+      // errors which are thrown by Axios directly.
+      try {
+        return formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
+      } catch (_) {
+        if (error instanceof AxiosError) {
+          return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
+        }
 
-      return formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
+        throw new Error('formatAPIError: Unknown error:', error);
+      }
     },
   };
 }

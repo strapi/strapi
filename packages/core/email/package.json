@@ -23,7 +23,8 @@
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
@@ -32,7 +33,7 @@
     "@strapi/utils": "4.8.2",
     "lodash": "4.17.21",
     "prop-types": "^15.7.2",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "yup": "^0.32.9"
   },
   "devDependencies": {

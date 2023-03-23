@@ -20,17 +20,20 @@ const {
   removeMorphToRelations,
 } = require('./visitors');
 
-const sanitizePasswords = curry((schema, entity) => {
+const sanitizePasswords = (schema) => async (entity) => {
   return traverseEntity(removePassword, { schema }, entity);
-});
+};
 
-const sanitizePrivates = curry((schema, entity) => {
-  return traverseEntity(removePrivate, { schema }, entity);
-});
-
-const defaultSanitizeOutput = curry((schema, entity) => {
-  return pipeAsync(sanitizePrivates(schema), sanitizePasswords(schema))(entity);
-});
+const defaultSanitizeOutput = async (schema, entity) => {
+  return traverseEntity(
+    (...args) => {
+      removePassword(...args);
+      removePrivate(...args);
+    },
+    { schema },
+    entity
+  );
+};
 
 const defaultSanitizeFilters = curry((schema, filters) => {
   return pipeAsync(
@@ -59,6 +62,12 @@ const defaultSanitizeSort = curry((schema, sort) => {
     // Remove non attribute keys
     traverseQuerySort(
       ({ key, attribute }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         if (!attribute) {
           remove(key);
         }
@@ -134,7 +143,6 @@ const defaultSanitizePopulate = curry((schema, populate) => {
 
 module.exports = {
   sanitizePasswords,
-  sanitizePrivates,
   defaultSanitizeOutput,
   defaultSanitizeFilters,
   defaultSanitizeSort,

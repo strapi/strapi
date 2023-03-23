@@ -23,16 +23,25 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "build": "tsc",
+    "build:ts": "tsc",
+    "watch": "tsc -w --preserveWatchOutput",
+    "clean": "rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",
     "winston": "3.3.3"
+  },
+  "devDependencies": {
+    "rimraf": "3.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

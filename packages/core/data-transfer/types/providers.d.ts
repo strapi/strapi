@@ -1,3 +1,4 @@
+import type { PipelineSource, PipelineDestination, Readable, Writable } from 'stream';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
@@ -6,7 +7,6 @@ import type {
   MaybePromise,
 } from './utils';
 import type { IMetadata } from './common-entities';
-import type { PipelineSource, PipelineDestination, Readable, Writable } from 'stream';
 
 type ProviderType = 'source' | 'destination';
 

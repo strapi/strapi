@@ -40,7 +40,7 @@
     "create-strapi-app": "./index.js"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
