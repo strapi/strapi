@@ -21,6 +21,7 @@ const getDialectName = (client) => {
     case 'mysql2':
       return 'mysql';
     case 'sqlite':
+    case 'sqlite-legacy':
       return 'sqlite';
     default:
       throw new Error(`Unknown dialect ${client}`);
