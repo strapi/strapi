@@ -37,6 +37,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --frozen-lockfile
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
