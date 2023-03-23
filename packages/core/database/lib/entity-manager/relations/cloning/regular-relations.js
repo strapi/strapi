@@ -2,15 +2,15 @@
 
 const { cleanInverseOrderColumn } = require('../../regular-relations');
 
-const replaceRegularRelations = async ({ id, cloneId, attribute, transaction: trx }) => {
+const replaceRegularRelations = async ({ targetId, sourceId, attribute, transaction: trx }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
   // We are effectively stealing the relation from the cloned entity
   await strapi.db.entityManager
     .createQueryBuilder(joinTable.name)
-    .update({ [joinColumn.name]: id })
-    .where({ [joinColumn.name]: cloneId })
+    .update({ [joinColumn.name]: targetId })
+    .where({ [joinColumn.name]: sourceId })
     // TODO: Exclude some relations from being replaced
     // .where({ $not: { [inverseJoinColumn.name]: relationsToDeleteIds } })
     .onConflict([joinColumn.name, inverseJoinColumn.name])
@@ -19,7 +19,7 @@ const replaceRegularRelations = async ({ id, cloneId, attribute, transaction: tr
     .execute();
 };
 
-const cloneRegularRelations = async ({ id, cloneId, attribute, transaction: trx }) => {
+const cloneRegularRelations = async ({ targetId, sourceId, attribute, transaction: trx }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
   const connection = strapi.db.getConnection();
@@ -33,11 +33,11 @@ const cloneRegularRelations = async ({ id, cloneId, attribute, transaction: trx 
   const selectStatement = connection
     .select(
       // Override joinColumn with the new id
-      { [joinColumn.name]: id },
+      { [joinColumn.name]: targetId },
       // The rest of columns will be the same
       ...columns.slice(1)
     )
-    .where(joinColumn.name, cloneId)
+    .where(joinColumn.name, sourceId)
     // TODO: Exclude some relations from being replaced
     // .where({ $not: { [inverseJoinColumn.name]: relationsToDeleteIds } })
     .from(joinTable.name)
@@ -60,7 +60,7 @@ const cloneRegularRelations = async ({ id, cloneId, attribute, transaction: trx 
   // Clean the inverse order column
   if (inverseOrderColumnName) {
     await cleanInverseOrderColumn({
-      id,
+      targetId,
       attribute,
       trx,
     });
