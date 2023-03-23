@@ -1,25 +1,33 @@
-import RolesCreatePage from 'ee_else_ce/pages/SettingsPage/pages/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/pages/SettingsPage/pages/Roles/ProtectedListPage';
-
 const defaultRoutes = [
   {
-    Component() {
-      return { default: ProtectedRolesListPage };
-    },
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-roles-list" */ '../pages/Roles/ProtectedListPage'
+      );
 
+      return component;
+    },
     to: '/settings/roles',
     exact: true,
   },
   {
-    Component() {
-      return { default: RolesCreatePage };
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+      );
+
+      return component;
     },
     to: '/settings/roles/duplicate/:id',
     exact: true,
   },
   {
-    Component() {
-      return { default: RolesCreatePage };
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+      );
+
+      return component;
     },
     to: '/settings/roles/new',
     exact: true,

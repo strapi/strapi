@@ -34,6 +34,7 @@ describe('<SearchURLQuery />', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;
@@ -220,20 +221,6 @@ describe('<SearchURLQuery />', () => {
         padding-left: 12px;
       }
 
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -250,6 +237,20 @@ describe('<SearchURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c2 {
@@ -271,7 +272,18 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
-      .c10 {
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c11 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.40625rem;
@@ -286,31 +298,31 @@ describe('<SearchURLQuery />', () => {
         background: inherit;
       }
 
-      .c10::-webkit-input-placeholder {
+      .c11::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10::-moz-placeholder {
+      .c11::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10:-ms-input-placeholder {
+      .c11:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10::placeholder {
+      .c11::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c10[aria-disabled='true'] {
+      .c11[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c10:focus {
+      .c11:focus {
         outline: none;
         box-shadow: none;
       }
@@ -332,11 +344,11 @@ describe('<SearchURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c9 {
+      .c10 {
         font-size: 0.8rem;
       }
 
-      .c9 svg path {
+      .c10 svg path {
         fill: #32324d;
       }
 
@@ -379,14 +391,10 @@ describe('<SearchURLQuery />', () => {
                   class="c1"
                 >
                   <label
-                    class="c2"
+                    class="c2 c3"
                     for="4"
                   >
-                    <div
-                      class="c3"
-                    >
-                      Search label
-                    </div>
+                    Search label
                   </label>
                 </div>
                 <div
@@ -396,7 +404,7 @@ describe('<SearchURLQuery />', () => {
                     class="c7"
                   >
                     <div
-                      class="c8 c3 c9"
+                      class="c8 c9 c10"
                     >
                       <svg
                         aria-hidden="true"
@@ -419,7 +427,7 @@ describe('<SearchURLQuery />', () => {
                     aria-disabled="false"
                     aria-invalid="false"
                     aria-required="false"
-                    class="c10"
+                    class="c11"
                     id="4"
                     name="search"
                     value=""

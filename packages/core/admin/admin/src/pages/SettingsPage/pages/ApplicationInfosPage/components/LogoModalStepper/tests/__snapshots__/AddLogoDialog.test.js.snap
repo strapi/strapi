@@ -594,7 +594,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-left: 40px;
 }
 
-.c20 {
+.c21 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -613,7 +613,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-left: 20px;
 }
 
-.c21 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -646,7 +646,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   justify-content: space-between;
 }
 
-.c13 {
+.c19 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -691,7 +691,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   color: #666687;
 }
 
-.c24 {
+.c25 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -705,26 +705,26 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   color: #32324d;
 }
 
-.c22 {
+.c23 {
   position: relative;
   outline: none;
 }
 
-.c22 svg {
+.c23 svg {
   height: 12px;
   width: 12px;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c23 svg > g,
+.c23 svg path {
   fill: #ffffff;
 }
 
-.c22[aria-disabled='true'] {
+.c23[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c22:after {
+.c23:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -739,11 +739,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   border: 2px solid transparent;
 }
 
-.c22:focus-visible {
+.c23:focus-visible {
   outline: none;
 }
 
-.c22:focus-visible:after {
+.c23:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -754,7 +754,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c27 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -766,98 +766,109 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   width: 1px;
 }
 
-.c25 {
+.c26 {
   height: 2rem;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c25[aria-disabled='true'] .c4 {
+.c26[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c25[aria-disabled='true'] svg > g,.c25[aria-disabled='true'] svg path {
+.c26[aria-disabled='true'] svg > g,.c26[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c25[aria-disabled='true']:active {
+.c26[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c25[aria-disabled='true']:active .c4 {
+.c26[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c25[aria-disabled='true']:active svg > g,.c25[aria-disabled='true']:active svg path {
+.c26[aria-disabled='true']:active svg > g,.c26[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c25:hover {
+.c26:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c25:active {
+.c26:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c26 svg > g,
+.c26 svg path {
   fill: #ffffff;
 }
 
-.c23 {
+.c24 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c23[aria-disabled='true'] {
+.c24[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true'] .c4 {
+.c24[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c23[aria-disabled='true'] svg > g,.c23[aria-disabled='true'] svg path {
+.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c23[aria-disabled='true']:active {
+.c24[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c23[aria-disabled='true']:active .c4 {
+.c24[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c23[aria-disabled='true']:active svg > g,.c23[aria-disabled='true']:active svg path {
+.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c23:hover {
+.c24:hover {
   background-color: #f6f6f9;
 }
 
-.c23:active {
+.c24:active {
   background-color: #eaeaef;
 }
 
-.c23 .c4 {
+.c24 .c4 {
   color: #32324d;
 }
 
-.c23 svg > g,
-.c23 svg path {
+.c24 svg > g,
+.c24 svg path {
   fill: #32324d;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c16 {
@@ -935,7 +946,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   border-top: 1px solid #eaeaef;
 }
 
-.c19 > * + * {
+.c20 > * + * {
   margin-left: 8px;
 }
 
@@ -1023,14 +1034,10 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                   class="c11"
                 >
                   <label
-                    class="c4 c12"
+                    class="c4 c12 c13"
                     for="5"
                   >
-                    <div
-                      class="c13"
-                    >
-                      URL
-                    </div>
+                    URL
                   </label>
                   <div
                     class="c14 c15"
@@ -1056,30 +1063,30 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
               class="c14"
             >
               <div
-                class="c13 c19"
+                class="c19 c20"
               >
                 <button
                   aria-disabled="false"
-                  class="c20 c21 c22 c23"
+                  class="c21 c22 c23 c24"
                   type="button"
                 >
                   <span
-                    class="c4 c24"
+                    class="c4 c25"
                   >
                     Cancel
                   </span>
                 </button>
               </div>
               <div
-                class="c13 c19"
+                class="c19 c20"
               >
                 <button
                   aria-disabled="false"
-                  class="c20 c21 c22 c25"
+                  class="c21 c22 c23 c26"
                   type="submit"
                 >
                   <span
-                    class="c4 c24"
+                    class="c4 c25"
                   >
                     Next
                   </span>
@@ -1092,7 +1099,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
     </div>
   </div>
   <div
-    class="c26"
+    class="c27"
   >
     <p
       aria-live="polite"
