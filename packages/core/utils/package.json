@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -32,7 +32,9 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test:unit": "jest --verbose"
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",

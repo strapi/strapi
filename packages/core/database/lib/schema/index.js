@@ -50,7 +50,7 @@ const createSchemaProvider = (db) => {
 
       const DBSchema = await db.dialect.schemaInspector.getSchema();
 
-      const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);

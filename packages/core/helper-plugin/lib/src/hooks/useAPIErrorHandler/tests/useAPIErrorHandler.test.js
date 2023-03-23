@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useIntl } from 'react-intl';
+import { AxiosError } from 'axios';
 
 import { useAPIErrorHandler } from '../useAPIErrorHandler';
 
@@ -19,6 +20,10 @@ function setup(...args) {
 }
 
 describe('useAPIErrorHandler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('exports formatAPIError()', async () => {
     const handler = await setup();
 
@@ -80,6 +85,29 @@ describe('useAPIErrorHandler', () => {
     });
 
     expect(message).toBe('Field contains errors\nField must be unique');
-    expect(formatMessage).toBeCalledTimes(3);
+    expect(formatMessage).toBeCalledTimes(2);
+  });
+
+  test('formats AxiosErrors', async () => {
+    let message;
+    const handler = await setup();
+    const { formatAPIError } = handler.result.current;
+
+    const axiosError = new AxiosError(
+      'Error message',
+      '409',
+      undefined,
+      {},
+      {
+        status: 405,
+        data: { message: 'Error message' },
+      }
+    );
+
+    act(() => {
+      message = formatAPIError(axiosError);
+    });
+
+    expect(message).toBe('Error message');
   });
 });

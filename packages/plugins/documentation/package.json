@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -21,13 +21,13 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.6.5",
-    "@strapi/helper-plugin": "4.7.1",
-    "@strapi/icons": "1.6.5",
-    "@strapi/utils": "4.7.1",
+    "@strapi/design-system": "1.6.6",
+    "@strapi/helper-plugin": "4.8.2",
+    "@strapi/icons": "1.6.6",
+    "@strapi/utils": "4.8.2",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.2.9",
@@ -38,12 +38,12 @@
     "pluralize": "8.0.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
-    "swagger-ui-dist": "4.15.5",
+    "swagger-ui-dist": "4.18.1",
     "yaml": "1.10.2",
     "yup": "^0.32.9"
   },

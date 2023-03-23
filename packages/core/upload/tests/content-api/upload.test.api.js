@@ -66,7 +66,7 @@ describe('Upload plugin', () => {
       .addContentType(todoListModel)
       .build();
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({ strapi });
+    rq = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {

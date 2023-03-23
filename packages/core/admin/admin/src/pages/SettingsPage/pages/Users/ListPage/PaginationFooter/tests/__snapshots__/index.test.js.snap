@@ -188,7 +188,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c5[aria-disabled='true'] {
+.c5[data-disabled] {
   cursor: not-allowed;
 }
 
@@ -355,14 +355,16 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               class="c2 c4"
             >
               <button
-                aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="1 1-label 1-content"
+                aria-required="false"
                 class="c5"
                 id="1"
+                role="combobox"
                 type="button"
+                value="10"
               />
               <div
                 class="c6 c7"
