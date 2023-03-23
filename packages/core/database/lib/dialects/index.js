@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Require our dialect-specific code
+ */
 const getDialectClass = (client) => {
   switch (client) {
     case 'postgres':
@@ -13,6 +16,12 @@ const getDialectClass = (client) => {
   }
 };
 
+/**
+ * Get the dialect of a database client
+ *
+ * @param {string} The client value from a project database configuration
+ * @returns {string} The dialect of that client
+ */
 const getDialectName = (client) => {
   switch (client) {
     case 'postgres':
