@@ -38,6 +38,10 @@ describe('Admin Transfer Token CRUD (api)', () => {
     await strapi.destroy();
   });
 
+  afterEach(async () => {
+    await deleteAllTokens();
+  });
+
   // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
@@ -415,7 +419,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
 
   test('Returns a 404 if the ressource to retrieve does not exist', async () => {
     const res = await rq({
-      url: '/admin/transfer/tokens/999',
+      url: '/admin/transfer/tokens/42',
       method: 'GET',
     });
 
@@ -465,6 +469,8 @@ describe('Admin Transfer Token CRUD (api)', () => {
   });
 
   test('Returns a 404 if the resource to update does not exist', async () => {
+    await deleteAllTokens();
+
     const body = {
       name: 'transfer-token_tests-updated-name',
       description: 'transfer-token_tests-updated-description',

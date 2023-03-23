@@ -38,6 +38,10 @@ describe('Admin API Token v2 CRUD (api)', () => {
     await strapi.destroy();
   });
 
+  afterEach(async () => {
+    await deleteAllTokens();
+  });
+
   // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
