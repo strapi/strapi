@@ -111,8 +111,8 @@ const createRepository = (uid, db) => {
       return db.entityManager.deleteRelations(uid, id);
     },
 
-    cloneRelations(id, cloneId, params) {
-      return db.entityManager.cloneRelations(uid, id, cloneId, params);
+    cloneRelations(targetId, sourceId, params) {
+      return db.entityManager.cloneRelations(uid, targetId, sourceId, params);
     },
 
     populate(entity, populate) {
