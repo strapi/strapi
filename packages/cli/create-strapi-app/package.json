@@ -1,9 +1,9 @@
 {
   "name": "create-strapi-app",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Generate a new Strapi application.",
   "dependencies": {
-    "@strapi/generate-new": "4.7.1",
+    "@strapi/generate-new": "4.8.2",
     "commander": "8.3.0",
     "inquirer": "8.2.5"
   },
@@ -40,7 +40,7 @@
     "create-strapi-app": "./index.js"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { Button, Box, Main, Flex } from '@strapi/design-system';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import FilterListURLQuery from '../FilterListURLQuery';
 import FilterPopoverURLQuery from './index';
 
@@ -51,6 +52,7 @@ import { FilterListURLQuery } from '@strapi/helper-plugin';
           metadatas: { label: 'city' },
         },
       ];
+      const { trackUsage } = useTracking();
       return (
         <Main>
           <Flex direction="column" alignItems="stretch" gap={6}>

@@ -1,16 +1,19 @@
 {
   "name": "check-pr-status",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "main": "dist/index.js",
   "license": "MIT",
   "private": true,
   "scripts": {
     "build": "NODE_ENV=production ncc build index.js -o dist --minify",
-    "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify"
+    "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@actions/core": "1.10.0",
+    "@actions/github": "5.1.1"
   },
   "devDependencies": {
-    "@actions/core": "1.10.0",
-    "@actions/github": "5.1.1",
     "@vercel/ncc": "0.36.1"
   }
 }

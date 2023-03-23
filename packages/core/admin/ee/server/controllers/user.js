@@ -6,10 +6,7 @@ const _ = require('lodash');
 const { pick, isNil } = require('lodash/fp');
 const { ApplicationError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateUserCreationInput } = require('../validation/user');
-const {
-  validateUserUpdateInput,
-  validateUsersDeleteInput,
-} = require('../../../server/validation/user');
+const { validateUserUpdateInput } = require('../../../server/validation/user');
 const { getService } = require('../../../server/utils');
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
@@ -97,36 +94,5 @@ module.exports = {
     ctx.body = {
       data: getService('user').sanitizeUser(updatedUser),
     };
-  },
-
-  async deleteOne(ctx) {
-    const { id } = ctx.params;
-
-    const deletedUser = await getService('user').deleteById(id);
-
-    if (!deletedUser) {
-      return ctx.notFound('User not found');
-    }
-
-    return ctx.deleted({
-      data: getService('user').sanitizeUser(deletedUser),
-    });
-  },
-
-  /**
-   * Delete several users
-   * @param {KoaContext} ctx - koa context
-   */
-  async deleteMany(ctx) {
-    const { body } = ctx.request;
-    await validateUsersDeleteInput(body);
-
-    const users = await getService('user').deleteByIds(body.ids);
-
-    const sanitizedUsers = users.map(getService('user').sanitizeUser);
-
-    return ctx.deleted({
-      data: sanitizedUsers,
-    });
   },
 };

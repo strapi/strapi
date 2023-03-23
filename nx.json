@@ -1,0 +1,53 @@
+{
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.test.js",
+      "!{projectRoot}/**/*.md"
+    ]
+  },
+  "targetDefaults": {
+    "build": {
+      "inputs": ["production", "^production"],
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
+    },
+    "build:ts": {
+      "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
+      "dependsOn": ["^build:ts"],
+      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
+    },
+    "test:unit": {
+      "inputs": ["default", "{projectRoot}/jest.config.js", "{workspaceRoot}/jest-preset.unit.js"],
+      "dependsOn": ["build:ts"]
+    },
+    "test:front": {
+      "inputs": [
+        "default",
+        "{projectRoot}/jest.config.front.js",
+        "{workspaceRoot}/jest-preset.front.js"
+      ],
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "inputs": [
+        "default",
+        "{projectRoot}/.eslintrc.js",
+        "{projectRoot}/.eslintignore",
+        "{projectRoot}/tsconfig.eslint.json",
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+      ],
+      "dependsOn": ["build:ts"]
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+      }
+    }
+  }
+}

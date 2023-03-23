@@ -1,4 +1,5 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
+
 import { getCheckboxState } from '../../../../utils';
 
 /**

@@ -5,8 +5,6 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-
 const omitTimestamps = omit(['updatedAt', 'createdAt']);
 const omitRegistrationToken = omit(['registrationToken']);
 
@@ -59,11 +57,7 @@ describe('Admin User CRUD (api)', () => {
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 
-    if (edition === 'EE') {
-      testData.role = await createUserRole();
-    } else {
-      testData.role = await utils.getSuperAdminRole();
-    }
+    testData.role = await createUserRole();
 
     testData.firstSuperAdminUser = rq.getLoggedUser();
     testData.superAdminRole = await utils.getSuperAdminRole();
@@ -71,9 +65,8 @@ describe('Admin User CRUD (api)', () => {
 
   // Cleanup actions
   afterAll(async () => {
-    if (edition === 'EE') {
-      await utils.deleteRolesById([testData.role.id]);
-    }
+    await utils.deleteRolesById([testData.role.id]);
+
     await strapi.destroy();
   });
 
@@ -386,7 +379,7 @@ describe('Admin User CRUD (api)', () => {
       method: 'GET',
       qs: {
         filters: {
-          email: testData.user.email,
+          username: testData.user.username,
         },
       },
     });

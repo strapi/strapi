@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -27,20 +27,21 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "yarn build:ts",
-    "build:ts": "tsc -p tsconfig.json",
-    "build:clean": "yarn clean && yarn build",
+    "build": "tsc",
+    "build:ts": "tsc",
     "clean": "rimraf ./lib",
-    "prepublishOnly": "yarn build:clean",
-    "test:unit": "jest --verbose",
-    "watch": "yarn build:ts -w --preserveWatchOutput"
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
+    "watch": "tsc -w --preserveWatchOutput",
+    "lint": "eslint ."
   },
   "directories": {
     "lib": "./lib"
   },
   "dependencies": {
-    "@strapi/logger": "4.7.1",
-    "@strapi/strapi": "4.7.1",
+    "@strapi/logger": "4.8.2",
+    "@strapi/strapi": "4.8.2",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",

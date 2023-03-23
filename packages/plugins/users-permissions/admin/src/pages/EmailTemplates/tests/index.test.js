@@ -106,6 +106,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c25 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-width: 0;

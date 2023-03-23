@@ -175,6 +175,7 @@ describe('Content manager | App | main', () => {
       }
 
       .c6 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;

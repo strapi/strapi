@@ -47,12 +47,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c30 {
+.c31 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c32 {
+.c33 {
   padding-left: 12px;
 }
 
@@ -145,7 +145,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #32324d;
 }
 
-.c31 {
+.c32 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -155,7 +155,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #32324d;
 }
 
-.c35 {
+.c36 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -210,7 +210,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c36 {
+.c37 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -268,6 +268,17 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c28 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -283,28 +294,28 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   transition-duration: 0.2s;
 }
 
-.c27:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c33 {
+.c34 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c33 svg {
+.c34 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c33 svg path {
+.c34 svg path {
   fill: #666687;
 }
 
-.c34 {
+.c35 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -313,11 +324,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c34 svg {
+.c35 svg {
   width: 0.375rem;
 }
 
-.c28 {
+.c29 {
   position: absolute;
   left: 0;
   right: 0;
@@ -328,15 +339,15 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c28:focus {
+.c29:focus {
   outline: none;
 }
 
-.c28[aria-disabled='true'] {
+.c29[data-disabled] {
   cursor: not-allowed;
 }
 
-.c29 {
+.c30 {
   width: 100%;
 }
 
@@ -570,41 +581,39 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         class="c25"
                       >
                         <label
-                          class="c13 c26"
+                          class="c13 c26 c27"
                           for="1"
                         >
-                          <div
-                            class="c12"
-                          >
-                            Entries per page
-                          </div>
+                          Entries per page
                         </label>
                         <div
-                          class="c12 c27"
+                          class="c12 c28"
                         >
                           <button
                             aria-describedby="1-hint"
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="1 1-label 1-content"
-                            class="c28"
+                            aria-required="false"
+                            class="c29"
                             data-testid="pageSize-select"
                             id="1"
                             name="pageSize"
+                            role="combobox"
                             type="button"
+                            value="10"
                           />
                           <div
-                            class="c10 c29"
+                            class="c10 c30"
                           >
                             <div
                               class="c12"
                             >
                               <div
-                                class="c30"
+                                class="c31"
                               >
                                 <span
-                                  class="c13 c31"
+                                  class="c13 c32"
                                   id="1-content"
                                 >
                                   10
@@ -616,7 +625,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                             >
                               <button
                                 aria-hidden="true"
-                                class="c32 c33 c34"
+                                class="c33 c34 c35"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
@@ -640,7 +649,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           </div>
                         </div>
                         <p
-                          class="c13 c35"
+                          class="c13 c36"
                           id="1-hint"
                         >
                           Number of assets displayed by default in the Media Library
@@ -662,41 +671,39 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         class="c25"
                       >
                         <label
-                          class="c13 c26"
+                          class="c13 c26 c27"
                           for="3"
                         >
-                          <div
-                            class="c12"
-                          >
-                            Default sort order
-                          </div>
+                          Default sort order
                         </label>
                         <div
-                          class="c12 c27"
+                          class="c12 c28"
                         >
                           <button
                             aria-describedby="3-hint"
-                            aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
                             aria-labelledby="3 3-label 3-content"
-                            class="c28"
+                            aria-required="false"
+                            class="c29"
                             data-testid="sort-select"
                             id="3"
                             name="sort"
+                            role="combobox"
                             type="button"
+                            value="createdAt:DESC"
                           />
                           <div
-                            class="c10 c29"
+                            class="c10 c30"
                           >
                             <div
                               class="c12"
                             >
                               <div
-                                class="c30"
+                                class="c31"
                               >
                                 <span
-                                  class="c13 c31"
+                                  class="c13 c32"
                                   id="3-content"
                                 >
                                   createdAt:DESC
@@ -708,7 +715,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                             >
                               <button
                                 aria-hidden="true"
-                                class="c32 c33 c34"
+                                class="c33 c34 c35"
                                 tabindex="-1"
                                 title="Carret Down Button"
                                 type="button"
@@ -732,7 +739,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                           </div>
                         </div>
                         <p
-                          class="c13 c35"
+                          class="c13 c36"
                           id="3-hint"
                         >
                           Note: You can override this value in the media library.
@@ -749,7 +756,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
     </div>
   </div>
   <div
-    class="c36"
+    class="c37"
   >
     <p
       aria-live="polite"
