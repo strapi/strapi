@@ -21,7 +21,7 @@
     }
   ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
@@ -38,12 +38,12 @@
     "pluralize": "8.0.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
-    "swagger-ui-dist": "4.15.5",
+    "swagger-ui-dist": "4.18.1",
     "yaml": "1.10.2",
     "yup": "^0.32.9"
   },

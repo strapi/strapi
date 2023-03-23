@@ -21,10 +21,7 @@
     }
   ],
   "scripts": {
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
@@ -44,8 +41,7 @@
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
     "nexus": "1.3.0",
-    "pluralize": "^8.0.0",
-    "subscriptions-transport-ws": "0.9.19"
+    "pluralize": "^8.0.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

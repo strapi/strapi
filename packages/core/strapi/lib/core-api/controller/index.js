@@ -18,7 +18,7 @@ const createController = ({ contentType }) => {
       return transformResponse(data, meta, { contentType });
     },
 
-    sanitizeOutput(data, ctx) {
+    async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.output(data, contentType, { auth });
