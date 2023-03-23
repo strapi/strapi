@@ -1,8 +1,14 @@
 'use strict';
 
 const createError = require('http-errors');
-const { NotFoundError, UnauthorizedError, ForbiddenError, PayloadTooLargeError, RateLimitError } =
-  require('@strapi/utils').errors;
+const {
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  PayloadTooLargeError,
+  RateLimitError,
+  NotImplementedError,
+} = require('@strapi/utils').errors;
 
 const mapErrorsAndStatus = [
   {
@@ -24,6 +30,10 @@ const mapErrorsAndStatus = [
   {
     classError: RateLimitError,
     status: 429,
+  },
+  {
+    classError: NotImplementedError,
+    status: 501,
   },
 ];
 

@@ -21,10 +21,7 @@
     }
   ],
   "scripts": {
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",

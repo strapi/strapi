@@ -20,11 +20,13 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest --verbose",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
@@ -40,7 +42,7 @@
     "match-sorter": "^4.0.2",
     "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-helmet": "^6.1.0",
     "react-intl": "6.3.2",
     "react-redux": "8.0.5",

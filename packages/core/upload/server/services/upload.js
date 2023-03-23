@@ -187,7 +187,7 @@ module.exports = ({ strapi }) => ({
    * @param {*} fileData
    */
   async uploadImage(fileData) {
-    const { getDimensions, generateThumbnail, generateResponsiveFormats, isOptimizableImage } =
+    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
       getService('image-manipulation');
 
     // Store width and height of the original image
@@ -206,6 +206,7 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     };
 
+    // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format) => {
       const { key, file } = format;
       await getService('provider').upload(file);
@@ -218,7 +219,7 @@ module.exports = ({ strapi }) => ({
     uploadPromises.push(getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
-    if (await isOptimizableImage(fileData)) {
+    if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         uploadPromises.push(uploadThumbnail(thumbnailFile));
