@@ -183,18 +183,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
 
       server.once('error', (err) => {
-        if (err.message === 'Unexpected server response: 401') {
-          reject(
-            new ProviderValidationError('Invalid Transfer Token', {
-              check: 'auth.token',
-              details: {
-                error: err.message,
-              },
-            })
-          );
-        }
         reject(
-          new ProviderTransferError('Error connecting to server', {
+          new ProviderTransferError(err.message, {
             details: {
               error: err.message,
             },
