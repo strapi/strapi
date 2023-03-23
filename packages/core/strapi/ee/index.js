@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const { pick, isEqual } = require('lodash/fp');
 
 const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./license');
 const { shiftCronExpression } = require('../lib/utils/cron');
@@ -13,10 +13,31 @@ const ee = {
 };
 
 const disable = (message) => {
+  // Prevent emitting ee.disable if it was already disabled
+  const shouldEmitEvent = ee.enabled !== false;
+
   ee.logger?.warn(`${message} Switching to CE.`);
   // Only keep the license key for potential re-enabling during a later check
   ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
+
   ee.enabled = false;
+
+  if (shouldEmitEvent) {
+    // Notify EE features that they should be disabled
+    strapi.eventHub.emit('ee.disable');
+  }
+};
+
+const enable = () => {
+  // Prevent emitting ee.enable if it was already enabled
+  const shouldEmitEvent = ee.enabled !== true;
+
+  ee.enabled = true;
+
+  if (shouldEmitEvent) {
+    // Notify EE features that they should be disabled
+    strapi.eventHub.emit('ee.enable');
+  }
 };
 
 let initialized = false;
@@ -41,7 +62,7 @@ const init = (licenseDir, logger) => {
 
     if (license) {
       ee.licenseInfo = verifyLicense(license);
-      ee.enabled = true;
+      enable();
     }
   } catch (error) {
     disable(error.message);
@@ -89,8 +110,22 @@ const onlineUpdate = async ({ strapi }) => {
 
     if (license) {
       try {
-        ee.licenseInfo = verifyLicense(license);
+        // Verify license and check if its info changed
+        const newLicenseInfo = verifyLicense(license);
+        const licenseInfoChanged =
+          !isEqual(newLicenseInfo.features, ee.licenseInfo.features) ||
+          newLicenseInfo.seats !== ee.licenseInfo.seats ||
+          newLicenseInfo.type !== ee.licenseInfo.type;
+
+        // Store the new license info
+        ee.licenseInfo = newLicenseInfo;
+        const wasEnabled = ee.enabled;
         validateInfo();
+
+        // Notify EE features
+        if (licenseInfoChanged && wasEnabled) {
+          strapi.eventHub.emit('ee.update');
+        }
       } catch (error) {
         disable(error.message);
       }
@@ -125,7 +160,7 @@ const validateInfo = () => {
     return disable('License expired.');
   }
 
-  ee.enabled = true;
+  enable();
 };
 
 const checkLicense = async ({ strapi }) => {
