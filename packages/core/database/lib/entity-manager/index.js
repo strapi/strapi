@@ -1234,14 +1234,15 @@ const createEntityManager = (db) => {
     /**
      *
      * @param {string} uid - uid of the entity to clone
-     * @param {number} id - id of the entity to clone
-     * @param {number} cloneId - id of the cloned entity
+     * @param {number} targetId - id of the entity to clone into
+     * @param {number} sourceId - id of the entity to clone from
      * @param {object} opt
      * @param {object} opt.cloneAttrs - key value pair of attributes to clone
      * @param {object} opt.transaction - transaction to use
-     * @example cloneRelations('article', 1, 2, { cloneAttrs: { categories: true } })
+     * @example cloneRelations('user', 3, 1, { cloneAttrs: { friends: true }})
+     * @example cloneRelations('post', 5, 2, { cloneAttrs: { comments: true, likes: true } })
      */
-    async cloneRelations(uid, id, cloneId, data, { cloneAttrs = {}, transaction }) {
+    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = {}, transaction }) {
       const { attributes } = db.metadata.get(uid);
 
       if (!attributes) {
@@ -1273,13 +1274,13 @@ const createEntityManager = (db) => {
         }
 
         if (isOneToAny(attribute) && isBidirectional(attribute)) {
-          await replaceRegularRelations({ id, cloneId, attribute, transaction });
+          await replaceRegularRelations({ targetId, sourceId, attribute, transaction });
         } else {
-          await cloneRegularRelations({ id, cloneId, attribute, transaction });
+          await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
         }
       });
 
-      await this.updateRelations(uid, id, data, { transaction });
+      await this.updateRelations(uid, targetId, data, { transaction });
     },
 
     // TODO: add lifecycle events
