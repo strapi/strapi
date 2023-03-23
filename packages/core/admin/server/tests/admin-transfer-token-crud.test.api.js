@@ -8,6 +8,8 @@ const constants = require('../services/constants');
 describe('Admin Transfer Token CRUD (api)', () => {
   let rq;
   let strapi;
+  let now;
+  let nowSpy;
 
   const deleteAllTokens = async () => {
     const tokens = await strapi.admin.services.transfer.token.list();
@@ -22,6 +24,9 @@ describe('Admin Transfer Token CRUD (api)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    // To eliminate latency in the request and predict the expiry timestamp, we freeze Date.now()
+    now = Date.now();
+    nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     // delete tokens
     await deleteAllTokens();
@@ -29,6 +34,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
 
   // Cleanup actions
   afterAll(async () => {
+    nowSpy.mockRestore();
     await strapi.destroy();
   });
 
@@ -116,9 +122,6 @@ describe('Admin Transfer Token CRUD (api)', () => {
   });
 
   test('Creates a transfer token with a 7-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'transfer-token_tests-lifespan7',
       description: 'transfer-token_tests-description',
@@ -148,14 +151,9 @@ describe('Admin Transfer Token CRUD (api)', () => {
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a transfer token with a 30-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'transfer-token_tests-lifespan30',
       description: 'transfer-token_tests-description',
@@ -185,14 +183,9 @@ describe('Admin Transfer Token CRUD (api)', () => {
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a transfer token with a 90-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'transfer-token_tests-lifespan90',
       description: 'transfer-token_tests-description',
@@ -222,8 +215,6 @@ describe('Admin Transfer Token CRUD (api)', () => {
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
-
-    jest.useRealTimers();
   });
 
   test('Creates a transfer token with a null lifespan', async () => {
@@ -424,7 +415,7 @@ describe('Admin Transfer Token CRUD (api)', () => {
 
   test('Returns a 404 if the ressource to retrieve does not exist', async () => {
     const res = await rq({
-      url: '/admin/transfer/tokens/42',
+      url: '/admin/transfer/tokens/999',
       method: 'GET',
     });
 

@@ -8,6 +8,8 @@ const constants = require('../services/constants');
 describe('Admin API Token v2 CRUD (api)', () => {
   let rq;
   let strapi;
+  let now;
+  let nowSpy;
 
   const deleteAllTokens = async () => {
     const tokens = await strapi.admin.services['api-token'].list();
@@ -22,6 +24,9 @@ describe('Admin API Token v2 CRUD (api)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    // To eliminate latency in the request and predict the expiry timestamp, we freeze Date.now()
+    now = Date.now();
+    nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
 
     // delete tokens
     await deleteAllTokens();
@@ -29,6 +34,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
 
   // Cleanup actions
   afterAll(async () => {
+    nowSpy.mockRestore();
     await strapi.destroy();
   });
 
@@ -178,9 +184,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
   });
 
   test('Creates a token with a 7-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'api-token_tests-lifespan7',
       description: 'api-token_tests-description',
@@ -217,9 +220,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
   });
 
   test('Creates a token with a 30-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'api-token_tests-lifespan30',
       description: 'api-token_tests-description',
@@ -256,9 +256,6 @@ describe('Admin API Token v2 CRUD (api)', () => {
   });
 
   test('Creates a token with a 90-day lifespan', async () => {
-    const now = Date.now();
-    jest.useFakeTimers('modern').setSystemTime(now);
-
     const body = {
       name: 'api-token_tests-lifespan90',
       description: 'api-token_tests-description',
