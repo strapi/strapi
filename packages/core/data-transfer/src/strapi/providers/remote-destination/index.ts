@@ -16,6 +16,10 @@ interface ITransferTokenAuth {
   token: string;
 }
 
+type WebsocketParams = ConstructorParameters<typeof WebSocket>;
+type Address = WebsocketParams[0];
+type Options = WebsocketParams[2];
+
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
@@ -171,13 +175,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  async #connectToWebsocket(
-    wsUrl: string,
-    headers?: { Authorization: string },
-    auth?: ITransferTokenAuth
-  ): Promise<WebSocket> {
+  async #connectToWebsocket(address: Address, options?: Options): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const server = headers ? new WebSocket(wsUrl, { headers }) : new WebSocket(wsUrl);
+      const server = new WebSocket(address, options);
       server.once('open', () => {
         resolve(server);
       });
@@ -188,7 +188,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
             new ProviderValidationError('Invalid Transfer Token', {
               check: 'auth.token',
               details: {
-                token: auth?.token,
                 error: err.message,
               },
             })
@@ -230,7 +229,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await this.#connectToWebsocket(wsUrl, headers, auth);
+      ws = await this.#connectToWebsocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided
