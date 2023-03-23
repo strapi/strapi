@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 const fse = require('fs-extra');
-const { defaultsDeep, getOr, get } = require('lodash/fp');
+const { defaultsDeep, defaults, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
@@ -101,7 +101,12 @@ const loadPlugins = async (strapi) => {
     }
 
     const pluginServer = loadConfigFile(serverEntrypointPath);
-    plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+    plugins[pluginName] = {
+      ...defaultPlugin,
+      ...pluginServer,
+      config: defaults(defaultPlugin.config, pluginServer.config),
+      routes: pluginServer.routes ?? defaultPlugin.routes,
+    };
   }
 
   // TODO: validate plugin format
