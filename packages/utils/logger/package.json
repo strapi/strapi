@@ -23,16 +23,16 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
-  "types": "./lib/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.ts",
   "files": [
-    "./lib"
+    "./dist"
   ],
   "scripts": {
     "build": "tsc",
     "build:ts": "tsc",
     "watch": "tsc -w --preserveWatchOutput",
-    "clean": "rimraf ./lib",
+    "clean": "rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
     "lint": "eslint ."
   },

@@ -8,6 +8,9 @@
       "!{projectRoot}/**/*.md"
     ]
   },
+  "cli": {
+    "packageManager": "yarn"
+  },
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
@@ -16,8 +19,7 @@
     },
     "build:ts": {
       "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
-      "dependsOn": ["^build:ts"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
+      "dependsOn": ["^build:ts"]
     },
     "test:unit": {
       "inputs": ["default", "{projectRoot}/jest.config.js", "{workspaceRoot}/jest-preset.unit.js"],
@@ -33,7 +35,8 @@
     },
     "lint": {
       "inputs": [
-        "default",
+        "{projectRoot}/**/*.js",
+        "{projectRoot}/**/*.ts",
         "{projectRoot}/.eslintrc.js",
         "{projectRoot}/.eslintignore",
         "{projectRoot}/tsconfig.eslint.json",
