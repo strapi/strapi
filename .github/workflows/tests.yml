@@ -239,6 +239,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - run: yarn install --frozen-lockfile
+      - run: yarn nx run-many --target=build:ts --nx-ignore-cycles
       - run: yarn nx run-many --target=test:api --nx-ignore-cycles
       # - uses: ./.github/actions/run-api-tests
       #   env:
