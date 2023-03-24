@@ -38,13 +38,16 @@ module.exports = ({ strapi }) => {
      *
      * @deprecated
      * registerDoc is deprecated it will be removed in the next major release,
-     * use strapi.plugin('documentation').service('override').registerOverride instead
+     * use strapi.plugin('documentation').service('override').registerOverride() instead
      * @param {object} doc - The openapi specifcation to override
      * @param {object} options - The options to override the documentation
      * @param {string} options.pluginOrigin - The name of the plugin that is overriding the documentation
      * @param {string[]} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
      */
     registerDoc(doc, options) {
+      strapi.log.warn(
+        "@strapi/plugin-documentation has deprecated registerDoc, use strapi.plugin('documentation').service('override').registerOverride() instead"
+      );
       overrideService.registerOverride(doc, options);
     },
 
