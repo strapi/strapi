@@ -20,17 +20,20 @@ const {
   removeMorphToRelations,
 } = require('./visitors');
 
-const sanitizePasswords = curry((schema, entity) => {
+const sanitizePasswords = (schema) => async (entity) => {
   return traverseEntity(removePassword, { schema }, entity);
-});
+};
 
-const sanitizePrivates = curry((schema, entity) => {
-  return traverseEntity(removePrivate, { schema }, entity);
-});
-
-const defaultSanitizeOutput = curry((schema, entity) => {
-  return pipeAsync(sanitizePrivates(schema), sanitizePasswords(schema))(entity);
-});
+const defaultSanitizeOutput = async (schema, entity) => {
+  return traverseEntity(
+    (...args) => {
+      removePassword(...args);
+      removePrivate(...args);
+    },
+    { schema },
+    entity
+  );
+};
 
 const defaultSanitizeFilters = curry((schema, filters) => {
   return pipeAsync(
@@ -140,7 +143,6 @@ const defaultSanitizePopulate = curry((schema, populate) => {
 
 module.exports = {
   sanitizePasswords,
-  sanitizePrivates,
   defaultSanitizeOutput,
   defaultSanitizeFilters,
   defaultSanitizeSort,

@@ -6,9 +6,8 @@ const { curry, curryN } = require('lodash/fp');
 function pipeAsync(...methods) {
   return async (data) => {
     let res = data;
-
-    for (const method of methods) {
-      res = await method(res);
+    for (let i = 0; i < methods.length; i += 1) {
+      res = await methods[i](res);
     }
 
     return res;

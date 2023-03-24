@@ -45,13 +45,12 @@ const createCoreService = (uid, cfg = {}) => {
 };
 
 const createCoreRouter = (uid, cfg = {}) => {
-  const { prefix, config = {}, only, except } = cfg;
+  const { prefix, config = {}, only, except, type } = cfg;
   let routes;
 
   return {
-    get prefix() {
-      return prefix;
-    },
+    type,
+    prefix,
     get routes() {
       if (!routes) {
         const contentType = strapi.contentType(uid);

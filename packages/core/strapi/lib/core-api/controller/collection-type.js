@@ -22,7 +22,6 @@ const createCollectionTypeController = ({ contentType }) => {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
       const { results, pagination } = await strapi.service(uid).find(sanitizedQuery);
       const sanitizedResults = await this.sanitizeOutput(results, ctx);
-
       return this.transformResponse(sanitizedResults, { pagination });
     },
 

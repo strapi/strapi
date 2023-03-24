@@ -37,12 +37,16 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(data);
   };
 
-  const sanitizeOuput = (data, schema, { auth } = {}) => {
+  const sanitizeOutput = async (data, schema, { auth } = {}) => {
     if (isArray(data)) {
-      return Promise.all(data.map((entry) => sanitizeOuput(entry, schema, { auth })));
+      const res = new Array(data.length);
+      for (let i = 0; i < data.length; i += 1) {
+        res[i] = await sanitizeOutput(data[i], schema, { auth });
+      }
+      return res;
     }
 
-    const transforms = [sanitizers.defaultSanitizeOutput(schema)];
+    const transforms = [(data) => sanitizers.defaultSanitizeOutput(schema, data)];
 
     if (auth) {
       transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
@@ -122,7 +126,7 @@ const createContentAPISanitizers = () => {
 
   return {
     input: sanitizeInput,
-    output: sanitizeOuput,
+    output: sanitizeOutput,
     query: sanitizeQuery,
     filters: sanitizeFilters,
     sort: sanitizeSort,

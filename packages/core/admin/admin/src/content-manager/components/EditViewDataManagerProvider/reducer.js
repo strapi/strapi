@@ -220,7 +220,9 @@ const reducer = (state, action) =>
 
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
-          (value) => value.type === 'relation',
+          (value) => {
+            return value.type === 'relation';
+          },
           (_, { path }) => {
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {
               return get(state.modifiedData, path);
