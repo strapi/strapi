@@ -1,6 +1,7 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
@@ -23,13 +24,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const query = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    const pmQuery = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    const query = await pm.sanitizeQuery(pmQuery);
 
-    const { results, pagination } = await getService('upload').findPage(query);
+    const { results: files, pagination } = await getService('upload').findPage(query);
 
-    const sanitizedResults = await pm.sanitizeOutput(results);
+    // Sign file urls for private providers
+    const signedFiles = await mapAsync(files, getService('file').signFileUrls);
 
-    return { results: sanitizedResults, pagination };
+    const sanitizedFiles = await pm.sanitizeOutput(signedFiles);
+
+    return { results: sanitizedFiles, pagination };
   },
 
   async findOne(ctx) {
@@ -45,7 +50,8 @@ module.exports = {
       id
     );
 
-    ctx.body = await pm.sanitizeOutput(file);
+    const signedFile = await getService('file').signFileUrls(file);
+    ctx.body = await pm.sanitizeOutput(signedFile);
   },
 
   async destroy(ctx) {

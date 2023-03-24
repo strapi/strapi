@@ -149,6 +149,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       }
 
       .c28 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-width: 0;
@@ -158,7 +159,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         cursor: pointer;
       }
 
-      .c36 {
+      .c35 {
         max-width: 15.625rem;
       }
 
@@ -255,9 +256,13 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         color: #666687;
       }
 
-      .c35 {
+      .c36 {
         font-size: 0.875rem;
         line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: 600;
         color: #32324d;
       }
@@ -919,19 +924,19 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                     >
                       <td
                         aria-colindex="1"
-                        class="c25"
+                        class="c35 c25"
                         role="gridcell"
                         tabindex="-1"
                       >
                         <span
-                          class="c5 c35"
+                          class="c5 c36"
                         >
                           My super token
                         </span>
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c36 c25"
+                        class="c35 c25"
                         role="gridcell"
                         tabindex="-1"
                       >

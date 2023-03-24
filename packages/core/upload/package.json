@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -16,19 +16,21 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest --verbose",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.6.5",
-    "@strapi/helper-plugin": "4.7.1",
-    "@strapi/icons": "1.6.5",
-    "@strapi/provider-upload-local": "4.7.1",
-    "@strapi/utils": "4.7.1",
-    "axios": "1.2.2",
+    "@strapi/design-system": "1.6.6",
+    "@strapi/helper-plugin": "4.8.2",
+    "@strapi/icons": "1.6.6",
+    "@strapi/provider-upload-local": "4.8.2",
+    "@strapi/utils": "4.8.2",
+    "axios": "1.3.4",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
     "date-fns": "2.29.3",
@@ -40,11 +42,11 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.2.8",
+    "react-intl": "6.3.2",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-select": "5.7.0",

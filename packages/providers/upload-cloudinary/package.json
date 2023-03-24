@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
@@ -33,10 +33,10 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@strapi/utils": "4.7.1",
+    "@strapi/utils": "4.8.2",
     "cloudinary": "^1.33.0",
     "into-stream": "^5.1.0"
   },

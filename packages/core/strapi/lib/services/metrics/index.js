@@ -17,6 +17,7 @@ const LIMITED_EVENTS = [
   'didSaveMediaWithCaption',
   'didDisableResponsiveDimensions',
   'didEnableResponsiveDimensions',
+  'didInitializePluginUpload',
 ];
 
 const createTelemetryInstance = (strapi) => {

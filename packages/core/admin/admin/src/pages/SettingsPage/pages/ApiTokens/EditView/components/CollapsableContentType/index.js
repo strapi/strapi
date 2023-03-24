@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { useIntl } from 'react-intl';
 import {
   Accordion,

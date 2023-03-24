@@ -322,7 +322,7 @@ module.exports = (db) => {
     };
   };
 
-  const diffSchemas = (srcSchema, destSchema) => {
+  const diffSchemas = async (srcSchema, destSchema) => {
     const addedTables = [];
     const updatedTables = [];
     const unchangedTables = [];
@@ -344,10 +344,17 @@ module.exports = (db) => {
       }
     }
 
+    const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
+      ? (await strapi.store.get({
+          type: 'core',
+          key: 'persisted_tables',
+        })) ?? []
+      : [];
+
     for (const srcTable of srcSchema.tables) {
       if (
         !helpers.hasTable(destSchema, srcTable.name) &&
-        !RESERVED_TABLE_NAMES.includes(srcTable.name)
+        ![...RESERVED_TABLE_NAMES, ...persistedTables].includes(srcTable.name)
       ) {
         removedTables.push(srcTable);
       }

@@ -278,7 +278,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
     await user.click(
-      screen.getByRole('button', { name: 'Collections 1 collection selected Made by Strapi' })
+      screen.getByRole('combobox', { name: 'Collections 1 collection selected Made by Strapi' })
     );
     // They should the categories button with no options selected
     const categoriesButton = screen.getByTestId('Categories-button');
@@ -316,7 +316,7 @@ describe('Marketplace page - plugins tab', () => {
 
     await user.click(screen.getByTestId('filters-button'));
     await user.click(
-      screen.getByRole('button', { name: `Collections 1 collection selected Made by Strapi` })
+      screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
     );
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
 
@@ -341,7 +341,7 @@ describe('Marketplace page - plugins tab', () => {
 
     await user.click(screen.getByTestId('filters-button'));
     await user.click(
-      screen.getByRole('button', { name: `Categories 1 category selected Custom fields` })
+      screen.getByRole('combobox', { name: `Categories 1 category selected Custom fields` })
     );
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
 
@@ -404,7 +404,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('shows the correct options on sort select', async () => {
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
 
     await user.click(sortButton);
 
@@ -416,7 +416,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('changes the url on sort option select', async () => {
-    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });

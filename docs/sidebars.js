@@ -88,6 +88,27 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Database',
+          link: {
+            type: 'doc',
+            id: 'core/database/intro',
+          },
+          items: [
+            {
+              type: 'category',
+              label: 'Relations',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Reordering',
+                  id: 'core/database/relations/reordering',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Helper Plugin',
           items: [
             {

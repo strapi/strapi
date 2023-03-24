@@ -10,6 +10,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 .c5 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;

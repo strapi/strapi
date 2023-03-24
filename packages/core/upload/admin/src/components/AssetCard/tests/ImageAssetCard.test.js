@@ -55,6 +55,7 @@ describe('ImageAssetCard', () => {
       }
 
       .c14 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;
@@ -479,7 +480,7 @@ describe('ImageAssetCard', () => {
                 alt=""
                 aria-hidden="true"
                 class="c19"
-                src="http://somewhere.com/hello.png?width=40&height=40"
+                src="http://somewhere.com/hello.png"
               />
             </div>
           </div>

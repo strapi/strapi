@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "4.7.1",
+  "version": "4.8.2",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-starter",
@@ -35,10 +35,10 @@
     "create-strapi-starter": "./index.js"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@strapi/generate-new": "4.7.1",
+    "@strapi/generate-new": "4.8.2",
     "chalk": "4.1.2",
     "ci-info": "3.8.0",
     "commander": "8.3.0",

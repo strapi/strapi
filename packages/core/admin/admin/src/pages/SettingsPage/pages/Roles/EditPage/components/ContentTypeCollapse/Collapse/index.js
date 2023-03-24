@@ -6,7 +6,6 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
@@ -179,7 +178,7 @@ const Collapse = ({
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     {hasConditions && <TinyDot />}
                     <BaseCheckbox
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       name={checkboxName}
                       aria-label={formatMessage(
                         {
@@ -208,7 +207,7 @@ const Collapse = ({
                 <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && <TinyDot />}
                   <BaseCheckbox
-                    disabled={isFormDisabled || IS_DISABLED}
+                    disabled={isFormDisabled}
                     indeterminate={hasConditions}
                     name={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
