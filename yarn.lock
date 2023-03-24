@@ -25040,6 +25040,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playwright@workspace:test-apps/playwright":
+  version: 0.0.0-use.local
+  resolution: "playwright@workspace:test-apps/playwright"
+  dependencies:
+    "@strapi/plugin-documentation": 4.8.2
+    "@strapi/plugin-graphql": 4.8.2
+    "@strapi/plugin-i18n": 4.8.2
+    "@strapi/plugin-users-permissions": 4.8.2
+    "@strapi/strapi": 4.8.2
+    better-sqlite3: 8.0.1
+  languageName: unknown
+  linkType: soft
+
 "plop@npm:2.7.6":
   version: 2.7.6
   resolution: "plop@npm:2.7.6"

@@ -25,6 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
+    "test-apps/*",
     ".github/actions/*",
     "scripts/*"
   ],
