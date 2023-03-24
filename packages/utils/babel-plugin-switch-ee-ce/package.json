@@ -1,7 +1,6 @@
 {
   "name": "@strapi/babel-plugin-switch-ee-ce",
   "version": "4.8.2",
-  "private": false,
   "description": "Babel plugin to switch from CE to EE at runtime",
   "repository": "git://github.com/strapi/strapi.git",
   "license": "SEE LICENSE IN LICENSE",
@@ -18,6 +17,9 @@
     }
   ],
   "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint"
+  },
   "dependencies": {
     "@babel/template": "^7.20.7",
     "reselect": "4.1.7",

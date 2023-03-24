@@ -1,9 +1,5 @@
 import styled, { keyframes } from 'styled-components';
-import { Box, Flex, FieldAction } from '@strapi/design-system';
-
-export const EndActionWrapper = styled(Box)`
-  position: relative;
-`;
+import { Flex, FieldAction } from '@strapi/design-system';
 
 export const FieldActionWrapper = styled(FieldAction)`
   svg {
@@ -22,18 +18,13 @@ export const FieldActionWrapper = styled(FieldAction)`
 `;
 
 export const TextValidation = styled(Flex)`
-  position: absolute;
-  right: ${({ theme }) => theme.spaces[6]};
-  width: 100px;
-  pointer-events: none;
-
   svg {
-    margin-right: ${({ theme }) => theme.spaces[1]};
     height: ${12 / 16}rem;
     width: ${12 / 16}rem;
+
     path {
-      fill: ${({ theme, notAvailable }) =>
-        !notAvailable ? theme.colors.success600 : theme.colors.danger600};
+      fill: ${({ theme, available }) =>
+        available ? theme.colors.success600 : theme.colors.danger600};
     }
   }
 `;

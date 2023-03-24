@@ -66,9 +66,7 @@
   ],
   "main": "./lib",
   "types": "./lib/index.d.ts",
-  "bin": {
-    "strapi": "./bin/strapi.js"
-  },
+  "bin": "./bin/strapi.js",
   "directories": {
     "lib": "./lib",
     "bin": "./bin",
@@ -76,7 +74,9 @@
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js",
-    "test:unit": "jest --verbose"
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@koa/cors": "3.4.3",
@@ -128,7 +128,7 @@
     "open": "8.4.0",
     "ora": "5.4.1",
     "package-json": "7.0.0",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.3.8",
     "statuses": "2.0.1",

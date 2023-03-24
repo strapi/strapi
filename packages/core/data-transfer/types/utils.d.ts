@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import type { Readable, Writable, Duplex, Transform } from 'stream';
+import type { Schema } from '@strapi/strapi';
+import type { KnexTransaction } from 'knex';
 import type { IDestinationProvider, ISourceProvider } from './providers';
 import type { IAsset, IEntity, ILink } from './common-entities';
-import type { Schema } from '@strapi/strapi';
-import type { ITransferEngineOptions } from './transfer-engine';
-import type { KnexTransaction } from 'knex';
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -30,7 +30,7 @@ export type TransferMap<T> = {
   map: (data: T) => T;
 };
 
-type Stream = Readable | Writable | Duplex | Transform;
+export type Stream = Readable | Writable | Duplex | Transform;
 export type TransformFunction = (chunk: any, encoding?: string) => any;
 export type StreamItem = Stream | TransformFunction;
 
@@ -48,18 +48,18 @@ export type TransferTransforms = {
   [key in TransferTransformOption]?: TransferTransformArray<key>;
 };
 
-/**
+/*
  * Filters
- **/
+ */
 export type TransferFilterArray<T> = TransferFilter<TransferStageTypeMap[T]>[];
 
 export type TransferFilters = {
   [key in TransferTransformOption]?: boolean | TransferFilterArray<key>;
 };
 
-/**
+/*
  * Progress
- **/
+ */
 export type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
@@ -86,7 +86,7 @@ export type IProviderTransferResults = {};
 export type ISourceProviderTransferResults = {};
 export type IDestinationProviderTransferResults = {};
 
-export type KnexTransaction = KnexTransaction;
+export type { KnexTransaction };
 export type TransactionCallback = (trx?: KnexTransaction) => Promise<void>;
 export type Transaction = {
   attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
