@@ -108,23 +108,22 @@ function enableReviewWorkflow({ strapi }) {
       const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
       const { idColumn, typeColumn } = joinTable.morphColumn;
 
-      const connection = strapi.db.getConnection();
-
       // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
       // Only entities that do not have a record in the join table yet are selected.
-      const selectStatement = connection
+      const selectStatement = strapi.db
+        .getConnection()
         .select({
           [idColumn.name]: 'entity.id',
-          field: connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
+          field: strapi.db.connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
           order: 1,
           [joinTable.joinColumn.name]: firstStage.id,
-          [typeColumn.name]: connection.raw('?', [contentTypeUID]),
+          [typeColumn.name]: strapi.db.connection.raw('?', [contentTypeUID]),
         })
         .leftJoin(`${joinTable.name} AS jointable`, function () {
           this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
             `jointable.${typeColumn.name}`,
             '=',
-            connection.raw('?', [contentTypeUID])
+            strapi.db.connection.raw('?', [contentTypeUID])
           );
         })
         .where(`jointable.${idColumn.name}`, null)
@@ -134,19 +133,21 @@ function enableReviewWorkflow({ strapi }) {
       const columnsToInsert = [
         idColumn.name,
         'field',
-        connection.raw('??', ['order']),
+        strapi.db.connection.raw('??', ['order']),
         joinTable.joinColumn.name,
         typeColumn.name,
       ];
 
       // Insert rows for all entries of the content type that do not have a
       // default stage
-      await connection(joinTable.name).insert(
-        connection.raw(
-          `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
-          selectStatement.bindings
-        )
-      );
+      await strapi.db
+        .getConnection(joinTable.name)
+        .insert(
+          strapi.db.connection.raw(
+            `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
+            selectStatement.bindings
+          )
+        );
     };
 
     return pipe([
