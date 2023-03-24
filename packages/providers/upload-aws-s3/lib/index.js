@@ -96,7 +96,7 @@ module.exports = {
             {
               Bucket: config.params.Bucket,
               Key: fileKey,
-              Expires: getOr(60 * 60 * 24 * 7, ['params', 'signedUrlExpires'], config), // 7 days
+              Expires: getOr(15 * 60, ['params', 'signedUrlExpires'], config), // 15 minutes
             },
             (err, url) => {
               if (err) {
