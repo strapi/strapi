@@ -7698,7 +7698,7 @@ __metadata:
     koa-compress: 5.1.0
     koa-favicon: 2.1.0
     koa-helmet: 6.1.0
-    koa-ip: ^2.1.2
+    koa-ip: ^2.1.3
     koa-session: 6.4.0
     koa-static: 5.0.0
     lodash: 4.17.21
@@ -19631,13 +19631,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is_js@npm:^0.9.0":
-  version: 0.9.0
-  resolution: "is_js@npm:0.9.0"
-  checksum: bf7f0fc52187eda1ca597da0a20b85c4828b9bca5f08c5f2f6dd64d437384bdc9628674c78cee510f9600050871f7d783738d35dc6f5fe80e2a8848be5fbdce9
-  languageName: node
-  linkType: hard
-
 "isarray@npm:0.0.1":
   version: 0.0.1
   resolution: "isarray@npm:0.0.1"
@@ -21041,14 +21034,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa-ip@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "koa-ip@npm:2.1.2"
+"koa-ip@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "koa-ip@npm:2.1.3"
   dependencies:
     debug: 4.3.4
     lodash.isplainobject: 4.0.6
-    request-ip: 2.1.3
-  checksum: 4c590a10b29e382c69206397a2ecbf91f8fbdbf2d7a3e4c5c1e8b11d648ba2dac348d59dfa8b3310ba10ffe5c2ad39fdc650feb8cd7683ca2a1cb583e1738a88
+    request-ip: 3.3.0
+  checksum: f7bb7407cadd0fae3b48024174e0c970ddc69b81e4b1a838248dd477beced5debae920880904399eb89b47556452494ac90d41744c9f63806ea2f7d00c0e7de2
   languageName: node
   linkType: hard
 
@@ -27095,12 +27088,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"request-ip@npm:2.1.3":
-  version: 2.1.3
-  resolution: "request-ip@npm:2.1.3"
-  dependencies:
-    is_js: ^0.9.0
-  checksum: 72048c15140a3e6ef3d3198fb4eaecf2bb52bb0677dcf20202345428d866085fb0596d2450a42382c59df5e79e1973b402952b3362b2ad9f7f7ab5ce6f90487f
+"request-ip@npm:3.3.0":
+  version: 3.3.0
+  resolution: "request-ip@npm:3.3.0"
+  checksum: 9ca26f814201da19cb6f1a18da4f036803b770665ec0e7c556ea975ba553321922a5f04909f6dfc2371f695ca8aaa3c66f02c00a5e902c76435029804cdc4964
   languageName: node
   linkType: hard
 
