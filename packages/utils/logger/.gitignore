@@ -95,5 +95,5 @@ package-lock.json
 testApp
 coverage
 
-lib/
+dist/
 docs/

@@ -480,7 +480,7 @@ describe('ImageAssetCard', () => {
                 alt=""
                 aria-hidden="true"
                 class="c19"
-                src="http://somewhere.com/hello.png?width=40&height=40"
+                src="http://somewhere.com/hello.png"
               />
             </div>
           </div>
