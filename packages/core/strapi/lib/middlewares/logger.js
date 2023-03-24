@@ -1,7 +1,5 @@
 'use strict';
 
-/* eslint-disable no-nested-ternary */
-
 /**
  * @type {import('./').MiddlewareFactory}
  */
