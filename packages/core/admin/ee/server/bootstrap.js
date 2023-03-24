@@ -27,6 +27,10 @@ module.exports = async () => {
 
     await rwBootstrap();
     await actionProvider.registerMany(actions.reviewWorkflows);
+
+    // Decorate the entity service with review workflow logic
+    const { decorator } = getService('review-workflows-decorator');
+    strapi.entityService.decorate(decorator);
   }
 
   await getService('seat-enforcement').seatEnforcementWorkflow();

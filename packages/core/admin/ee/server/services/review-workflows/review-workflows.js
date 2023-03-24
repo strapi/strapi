@@ -6,9 +6,12 @@ const { getService } = require('../../utils');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
-const { WORKFLOW_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
-const disableReviewWorkFlows = require('../../migrations/review-workflows');
+const {
+  disableOnContentTypes: disableReviewWorkflows,
+} = require('../../migrations/review-workflows');
+const { getDefaultWorkflow } = require('../../utils/review-workflows');
 
 const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
   // Pick only content-types with reviewWorkflows options set to true
@@ -92,16 +95,13 @@ function enableReviewWorkflow({ strapi }) {
    * @returns {Promise<void>} - Promise that resolves when the review workflow is enabled.
    */
   return async ({ contentTypes }) => {
-    // TODO To be refactored when multiple workflows are added
-    const defaultWorkflow = await strapi
-      .query(WORKFLOW_MODEL_UID)
-      .findOne({ populate: ['stages'] });
-
+    const defaultWorkflow = await getDefaultWorkflow({ strapi });
     // This is possible if this is the first start of EE, there won't be any workflow in DB before bootstrap
     if (!defaultWorkflow) {
       return;
     }
     const firstStage = defaultWorkflow.stages[0];
+
     const up = async (contentTypeUID) => {
       const contentTypeMetadata = strapi.db.metadata.get(contentTypeUID);
       const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
@@ -168,7 +168,7 @@ module.exports = ({ strapi }) => {
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
-      strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkFlows);
+      strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkflows);
     },
   };
 };

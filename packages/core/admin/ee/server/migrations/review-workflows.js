@@ -1,17 +1,12 @@
 'use strict';
 
-/**
- * Determine if a content type has the review workflows feature enabled
- * @param {Object} contentType
- * @returns
- */
-const hasRWEnabled = (contentType) => contentType?.options?.reviewWorkflows || false;
+const { hasRWEnabled } = require('../utils/review-workflows');
 
 /**
  * Remove all stage information for all content types that have had review workflows disabled
  */
 /* eslint-disable no-continue */
-const disableReviewWorkFlows = async ({ oldContentTypes, contentTypes }) => {
+const disableOnContentTypes = async ({ oldContentTypes, contentTypes }) => {
   const uidsToRemove = [];
   for (const uid in contentTypes) {
     if (!oldContentTypes || !oldContentTypes[uid]) {
@@ -38,4 +33,4 @@ const disableReviewWorkFlows = async ({ oldContentTypes, contentTypes }) => {
     .del();
 };
 
-module.exports = disableReviewWorkFlows;
+module.exports = { disableOnContentTypes };

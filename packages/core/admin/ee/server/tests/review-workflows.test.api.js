@@ -5,7 +5,12 @@ const { createAuthRequest, createRequest } = require('../../../../../../test/hel
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
 const { describeOnCondition } = require('../utils/test');
-const { STAGE_MODEL_UID, WORKFLOW_MODEL_UID } = require('../constants/workflows');
+const {
+  STAGE_MODEL_UID,
+  WORKFLOW_MODEL_UID,
+  ENTITY_STAGE_ATTRIBUTE,
+} = require('../constants/workflows');
+const defaultStages = require('../constants/default-stages.json');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -61,6 +66,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
   };
+
+  const getRWMorphTableResults = async (connection) =>
+    connection
+      .select('*')
+      .from('strapi_workflows_stages_related_morphs')
+      .where('related_type', productUID);
 
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
@@ -319,12 +330,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Enabling/Disabling review workflows on a content type', () => {
     let response;
 
-    const getRWMorphTableResults = async (connection) =>
-      connection
-        .select('*')
-        .from('strapi_workflows_stages_related_morphs')
-        .where('related_type', productUID);
-
     beforeAll(async () => {
       await createEntry(productUID, { name: 'Product' });
       await createEntry(productUID, { name: 'Product 1' });
@@ -371,6 +376,21 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       response = await getRWMorphTableResults(strapi.db.getConnection());
       expect(response.length).toEqual(0);
+    });
+  });
+
+  describe('Creating an entity in a review workflow content type', () => {
+    beforeAll(async () => {
+      await updateContentType(productUID, {
+        components: [],
+        contentType: { ...model, reviewWorkflows: true },
+      });
+      await restart();
+    });
+
+    test('when review workflows is enabled on a content type, new entries should be added to the first stage of the default workflow', async () => {
+      const adminResponse = await createEntry(productUID, { name: 'Product' });
+      expect(await adminResponse[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
     });
   });
 });
