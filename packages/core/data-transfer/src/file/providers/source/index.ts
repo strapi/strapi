@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import path from 'path';
+import os from 'os';
 import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
@@ -15,6 +16,8 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
+
+const OS_SPLITTER = os.platform() === 'win32' ? '\\' : '/';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -126,7 +129,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = filePath.split('/');
+            const parts = filePath.split(os_splitter);
             return parts[0] === 'assets' && parts[1] === 'uploads';
           },
           onentry(entry) {
@@ -184,7 +187,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = path.relative('.', filePath).split('/');
+            const parts = path.relative('.', filePath).split(os_splitter);
 
             // TODO: this method is limiting us from having additional subdirectories and is requiring us to remove any "./" prefixes (the path.relative line above)
             if (parts.length !== 2) {
