@@ -129,7 +129,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = filePath.split(os_splitter);
+            const parts = filePath.split('/');
             return parts[0] === 'assets' && parts[1] === 'uploads';
           },
           onentry(entry) {
@@ -187,7 +187,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = path.relative('.', filePath).split(os_splitter);
+            const parts = path.relative('.', filePath).split(OS_SPLITTER);
 
             // TODO: this method is limiting us from having additional subdirectories and is requiring us to remove any "./" prefixes (the path.relative line above)
             if (parts.length !== 2) {
