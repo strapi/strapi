@@ -184,7 +184,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = path.relative('.', filePath).split('/');
+            const parts = path.relative('.', filePath).split(path.sep);
 
             // TODO: this method is limiting us from having additional subdirectories and is requiring us to remove any "./" prefixes (the path.relative line above)
             if (parts.length !== 2) {
