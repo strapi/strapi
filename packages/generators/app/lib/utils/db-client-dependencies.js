@@ -12,7 +12,7 @@ const sqlClientModule = {
  * Client dependencies
  */
 module.exports = ({ client }) => {
-  if (Object.keys(sqlClientModule).includes(client)) {
+  if (client in sqlClientModule) {
     return {
       ...sqlClientModule[client],
     };
