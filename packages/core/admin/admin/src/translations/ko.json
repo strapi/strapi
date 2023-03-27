@@ -326,7 +326,7 @@
   "components.FilterOptions.FILTER_TYPES.$contains": "contains",
   "components.FilterOptions.FILTER_TYPES.$containsi": "contains (case insensitive)",
   "components.FilterOptions.FILTER_TYPES.$endsWith": "ends with",
-  "components.FilterOptions.FILTER_TYPES.$endsWithi": "ends with",
+  "components.FilterOptions.FILTER_TYPES.$endsWithi": "ends with (case insensitive)",
   "components.FilterOptions.FILTER_TYPES.$eq": "is",
   "components.FilterOptions.FILTER_TYPES.$eqi": "is (case insensitive)",
   "components.FilterOptions.FILTER_TYPES.$gt": "is greater than",
