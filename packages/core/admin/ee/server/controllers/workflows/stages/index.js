@@ -2,6 +2,7 @@
 
 const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { getService } = require('../../../utils');
+const { hasReviewWorkflow } = require('../../../utils/review-workflows');
 const {
   validateUpdateStages,
   validateUpdateStageOnEntity,
@@ -74,7 +75,6 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const stagesService = getService('stages');
-    const reviewWorkflowsService = getService('review-workflows');
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
     const entityId = Number(entityIdString);
 
@@ -83,7 +83,7 @@ module.exports = {
       'You shall pass an id to the body of the put request.'
     );
 
-    if (!reviewWorkflowsService.isReviewWorkflowEnabled({ strapi }, modelUID)) {
+    if (!hasReviewWorkflow({ strapi }, modelUID)) {
       throw new ApplicationError(`Review workflows is not activated on ${modelUID}.`);
     }
 

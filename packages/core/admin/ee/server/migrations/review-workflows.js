@@ -1,6 +1,6 @@
 'use strict';
 
-const { hasRWEnabled } = require('../utils/review-workflows');
+const { hasReviewWorkflow } = require('../utils/review-workflows');
 
 /**
  * Remove all stage information for all content types that have had review workflows disabled
@@ -16,7 +16,10 @@ const disableOnContentTypes = async ({ oldContentTypes, contentTypes }) => {
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes?.[uid];
 
-    if (hasRWEnabled(oldContentType) && !hasRWEnabled(contentType)) {
+    if (
+      hasReviewWorkflow({ strapi }, oldContentType) &&
+      !hasReviewWorkflow({ strapi }, contentType)
+    ) {
       // If review workflows has been turned off on a content type
       // remove stage information from all entities within this CT
       uidsToRemove.push(uid);

@@ -11,7 +11,7 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const {
   disableOnContentTypes: disableReviewWorkflows,
 } = require('../../migrations/review-workflows');
-const { getDefaultWorkflow, hasRWEnabled } = require('../../utils/review-workflows');
+const { getDefaultWorkflow } = require('../../utils/review-workflows');
 
 const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
   // Pick only content-types with reviewWorkflows options set to true
@@ -120,7 +120,7 @@ function enableReviewWorkflow({ strapi }) {
           [joinTable.joinColumn.name]: firstStage.id,
           [typeColumn.name]: connection.raw('?', [contentTypeUID]),
         })
-        .leftJoin(`${joinTable.name} AS jointable`, function () {
+        .leftJoin(`${joinTable.name} AS jointable`, () => {
           this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
             `jointable.${typeColumn.name}`,
             '=',
@@ -169,10 +169,6 @@ module.exports = ({ strapi }) => {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
       strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkflows);
-    },
-    isReviewWorkflowEnabled({ strapi }, modelUID) {
-      const contentType = strapi.container.get('content-types').get(modelUID);
-      return hasRWEnabled(contentType);
     },
   };
 };
