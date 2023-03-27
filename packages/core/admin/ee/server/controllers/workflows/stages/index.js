@@ -80,7 +80,7 @@ module.exports = {
 
     const { id: stageId } = await validateUpdateStageOnEntity(
       ctx.request?.body?.data,
-      'You shall pass an id to the body of the put request.'
+      'You should pass an id to the body of the put request.'
     );
 
     if (!hasReviewWorkflow({ strapi }, modelUID)) {
