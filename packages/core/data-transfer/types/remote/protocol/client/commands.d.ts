@@ -1,4 +1,5 @@
 import type { ILocalStrapiDestinationProviderOptions } from '../../../../src/strapi/providers';
+import type { TransferMethod } from '../../../../src/strapi/remote/constants';
 
 export type CommandMessage = { type: 'command' } & (InitCommand | EndCommand | StatusCommand);
 
@@ -12,7 +13,10 @@ export type GetCommandParams<T extends Command> = {
 
 export type InitCommand = CreateCommand<
   'init',
-  Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>
+  {
+    options: Pick<ILocalStrapiDestinationProviderOptions, 'strategy' | 'restore'>;
+    transfer: TransferMethod;
+  }
 >;
 export type TransferKind = InitCommand['params']['transfer'];
 

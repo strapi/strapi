@@ -439,7 +439,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
 
     this.provider = createLocalStrapiDestinationProvider({
-      ...params,
+      ...params.options,
       autoDestroy: false,
       getStrapi: () => strapi,
     });
