@@ -6,8 +6,9 @@
 
 /* eslint-disable no-unused-vars */
 // Public node modules.
-const _ = require('lodash');
+const { getOr } = require('lodash/fp');
 const AWS = require('aws-sdk');
+const { getBucketFromUrl } = require('./utils');
 
 function assertUrlProtocol(url) {
   // Regex to test protocol like "http://", "https://"
@@ -22,10 +23,11 @@ module.exports = {
       );
     }
 
+    const config = { ...s3Options, ...legacyS3Options };
+
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
-      ...s3Options,
-      ...legacyS3Options,
+      ...config,
     });
 
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
@@ -36,6 +38,8 @@ module.exports = {
       return `${filePrefix}${path}${file.hash}${file.ext}`;
     };
 
+    const ACL = getOr('public-read', ['params', 'ACL'], config);
+
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
@@ -44,7 +48,7 @@ module.exports = {
           {
             Key: fileKey,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL: 'public-read',
+            ACL,
             ContentType: file.mime,
             ...customParams,
           },
@@ -60,13 +64,49 @@ module.exports = {
               // Default protocol to https protocol
               file.url = `https://${data.Location}`;
             }
-
             resolve();
           }
         );
       });
 
     return {
+      isPrivate() {
+        return ACL === 'private';
+      },
+      /**
+       * @param {Object} file
+       * @param {string} file.path
+       * @param {string} file.hash
+       * @param {string} file.ext
+       * @param {Object} customParams
+       * @returns {Promise<{url: string}>}
+       */
+      getSignedUrl(file, customParams = {}) {
+        // Do not sign the url if it does not come from the same bucket.
+        const { bucket } = getBucketFromUrl(file.url);
+        if (bucket !== config.params.Bucket) {
+          return { url: file.url };
+        }
+
+        return new Promise((resolve, reject) => {
+          const fileKey = getFileKey(file);
+
+          S3.getSignedUrl(
+            'getObject',
+            {
+              Bucket: config.params.Bucket,
+              Key: fileKey,
+              Expires: getOr(15 * 60, ['params', 'signedUrlExpires'], config), // 15 minutes
+            },
+            (err, url) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve({ url });
+            }
+          );
+        });
+      },
       uploadStream(file, customParams = {}) {
         return upload(file, customParams);
       },

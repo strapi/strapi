@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx --no lint-staged
+yarn lint-staged
+yarn nx affected:lint --uncommitted --nx-ignore-cycles

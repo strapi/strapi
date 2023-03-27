@@ -1,11 +1,6 @@
 import type { PassThrough } from 'stream';
-import type { IAsset, IEntity, ILink } from './common-entities';
-import type { ITransferResults, TransferTransform, TransferTransforms } from './utils';
+import type { ITransferResults, TransferTransforms, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
-import type { Schema } from '@strapi/strapi';
-import type { ITransferResults, TransferTransform, TransferProgress } from './utils';
-import type { ISourceProvider, IDestinationProvider } from './providers';
-import type { Severity } from '../src/errors';
 import type { DiagnosticReporter } from '../src/engine/diagnostic';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';

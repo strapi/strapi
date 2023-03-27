@@ -36,11 +36,9 @@
     }
   ],
   "main": "./index.js",
-  "bin": {
-    "create-strapi-app": "./index.js"
-  },
+  "bin": "./index.js",
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

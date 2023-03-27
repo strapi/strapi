@@ -28,6 +28,9 @@
     }
   ],
   "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/typescript-utils": "4.8.2",

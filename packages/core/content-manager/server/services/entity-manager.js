@@ -2,6 +2,7 @@
 
 const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
+const { mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
@@ -72,40 +73,77 @@ module.exports = ({ strapi }) => ({
     return assoc(`${CREATED_BY_ATTRIBUTE}.roles`, roles, entity);
   },
 
-  find(opts, uid) {
+  /**
+   * Extend this function from other plugins to add custom mapping of entity
+   * responses
+   * @param {Object} entity
+   * @returns
+   */
+  mapEntity(entity) {
+    return entity;
+  },
+
+  /**
+   * Some entity manager functions may return multiple entities or one entity.
+   * This function maps the response in both cases
+   * @param {Array|Object|null} entities
+   * @param {string} uid
+   */
+  async mapEntitiesResponse(entities, uid) {
+    if (entities?.results) {
+      const mappedResults = await mapAsync(entities.results, (entity) =>
+        this.mapEntity(entity, uid)
+      );
+      return { ...entities, results: mappedResults };
+    }
+    // if entity is single type
+    return this.mapEntity(entities, uid);
+  },
+
+  async find(opts, uid) {
     const params = { ...opts, populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.findMany(uid, params);
+    const entities = await strapi.entityService.findMany(uid, params);
+
+    return this.mapEntitiesResponse(entities, uid);
   },
 
-  findPage(opts, uid) {
+  async findPage(opts, uid) {
     const params = { ...opts, populate: getDeepPopulate(uid, { maxLevel: 1 }) };
 
-    return strapi.entityService.findPage(uid, params);
+    const entities = await strapi.entityService.findPage(uid, params);
+
+    return this.mapEntitiesResponse(entities, uid);
   },
 
-  findWithRelationCountsPage(opts, uid) {
+  async findWithRelationCountsPage(opts, uid) {
     const counterPopulate = getDeepPopulate(uid, { countMany: true, maxLevel: 1 });
     const params = { ...opts, populate: addCreatedByRolesPopulate(counterPopulate) };
 
-    return strapi.entityService.findWithRelationCountsPage(uid, params);
+    const entities = await strapi.entityService.findWithRelationCountsPage(uid, params);
+
+    return this.mapEntitiesResponse(entities, uid);
   },
 
-  findOneWithCreatorRolesAndCount(id, uid) {
+  async findOneWithCreatorRolesAndCount(id, uid) {
     const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
     const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
 
-    return strapi.entityService.findOne(uid, id, params);
+    return strapi.entityService
+      .findOne(uid, id, params)
+      .then((entity) => this.mapEntity(entity, uid));
   },
 
   async findOne(id, uid) {
     const params = { populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.findOne(uid, id, params);
+    return strapi.entityService
+      .findOne(uid, id, params)
+      .then((entity) => this.mapEntity(entity, uid));
   },
 
   async findOneWithCreatorRoles(id, uid) {
-    const entity = await this.findOne(id, uid);
+    const entity = await this.findOne(id, uid).then((entity) => this.mapEntity(entity, uid));
 
     if (!entity) {
       return entity;
@@ -130,7 +168,9 @@ module.exports = ({ strapi }) => ({
         : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
-    const entity = await strapi.entityService.create(uid, params);
+    const entity = await strapi.entityService
+      .create(uid, params)
+      .then((entity) => this.mapEntity(entity, uid));
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (populateRelations) {
@@ -151,7 +191,9 @@ module.exports = ({ strapi }) => ({
         : getDeepPopulate(uid, { countMany: true, countOne: true }),
     };
 
-    const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
+    const updatedEntity = await strapi.entityService
+      .update(uid, entity.id, params)
+      .then((entity) => this.mapEntity(entity, uid));
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (populateRelations) {
@@ -214,12 +256,14 @@ module.exports = ({ strapi }) => ({
 
     await emitEvent(ENTRY_PUBLISH, updatedEntity, uid);
 
+    const mappedEntity = await this.mapEntity(updatedEntity, uid);
+
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isRelationsPopulateEnabled(uid)) {
-      return getDeepRelationsCount(updatedEntity, uid);
+      return getDeepRelationsCount(mappedEntity, uid);
     }
 
-    return updatedEntity;
+    return mappedEntity;
   },
 
   async unpublish(entity, body = {}, uid) {
@@ -241,12 +285,14 @@ module.exports = ({ strapi }) => ({
 
     await emitEvent(ENTRY_UNPUBLISH, updatedEntity, uid);
 
+    const mappedEntity = await this.mapEntity(updatedEntity, uid);
+
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isRelationsPopulateEnabled(uid)) {
-      return getDeepRelationsCount(updatedEntity, uid);
+      return getDeepRelationsCount(mappedEntity, uid);
     }
 
-    return updatedEntity;
+    return mappedEntity;
   },
 
   async getNumberOfDraftRelations(id, uid) {
