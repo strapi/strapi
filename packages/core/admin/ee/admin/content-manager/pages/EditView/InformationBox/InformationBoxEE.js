@@ -25,9 +25,7 @@ export function InformationBoxEE() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
 
-  const {
-    workflows: { data: workflow },
-  } = useReviewWorkflows(activeWorkflowStage?.id);
+  const { workflows: { data: [workflow] = [] } = {} } = useReviewWorkflows();
 
   const { error, isLoading, mutateAsync } = useMutation(async ({ entityId, stageId, uid }) => {
     const {

@@ -101,6 +101,20 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     await builder.cleanup();
   });
 
+  beforeEach(async () => {
+    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).update({
+      where: { id: testWorkflow.id },
+      data: {
+        uid: 'workflow',
+        stages: [defaultStage.id, secondStage.id],
+      },
+    });
+    await updateContentType(productUID, {
+      components: [],
+      contentType: model,
+    });
+  });
+
   describe('Get workflows', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get('/admin/review-workflows/workflows');
@@ -328,8 +342,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Enabling/Disabling review workflows on a content type', () => {
-    let response;
-
     beforeAll(async () => {
       await createEntry(productUID, { name: 'Product' });
       await createEntry(productUID, { name: 'Product 1' });
@@ -343,18 +355,18 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
       await restart();
 
-      response = await requests.admin({
+      const response = await requests.admin({
         method: 'GET',
         url: `/content-type-builder/content-types/api::product.product`,
       });
 
       expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
 
-      response = await getRWMorphTableResults(strapi.db.getConnection());
+      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
 
-      expect(response.length).toEqual(3);
-      for (let i = 0; i < response.length; i += 1) {
-        const entry = response[i];
+      expect(morphTableResults.length).toEqual(3);
+      for (let i = 0; i < morphTableResults.length; i += 1) {
+        const entry = morphTableResults[i];
         expect(entry.related_id).toEqual(i + 1);
         expect(entry.order).toEqual(1);
       }
@@ -368,14 +380,66 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       await restart();
 
-      response = await requests.admin({
+      const response = await requests.admin({
         method: 'GET',
         url: `/content-type-builder/content-types/api::product.product`,
       });
       expect(response.body.data.schema.reviewWorkflows).toBeFalsy();
 
-      response = await getRWMorphTableResults(strapi.db.getConnection());
-      expect(response.length).toEqual(0);
+      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
+      expect(morphTableResults.length).toEqual(0);
+    });
+  });
+
+  describe('update a stage on an entity', () => {
+    describe('Review Workflow is enabled', () => {
+      beforeAll(async () => {
+        await updateContentType(productUID, {
+          components: [],
+          contentType: { ...model, reviewWorkflows: true },
+        });
+        await restart();
+      });
+      test('Should update the accordingly on an entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          body: {
+            data: { id: secondStage.id },
+          },
+        });
+
+        expect(response.status).toEqual(200);
+        expect(response.body[ENTITY_STAGE_ATTRIBUTE]).toEqual(
+          expect.objectContaining({ id: secondStage.id })
+        );
+      });
+    });
+    describe('Review Workflow is disabled', () => {
+      beforeAll(async () => {
+        await updateContentType(productUID, {
+          components: [],
+          contentType: { ...model, reviewWorkflows: false },
+        });
+        await restart();
+      });
+      test('Should not update the entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          body: {
+            data: { id: secondStage.id },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toBe('ApplicationError');
+      });
     });
   });
 
