@@ -8,7 +8,6 @@ import {
 import { Field, FieldLabel, FieldError, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { get } from 'lodash/fp';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
@@ -26,7 +25,10 @@ export function InformationBoxEE() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
 
-  const workflow = get('workflows.data[0]', useReviewWorkflows());
+  const {
+    workflow: { data: workflows },
+  } = useReviewWorkflows(activeWorkflowStage?.workflow?.id);
+  const workflow = workflows?.at(0);
 
   const { error, isLoading, mutateAsync } = useMutation(async ({ entityId, stageId, uid }) => {
     const {
