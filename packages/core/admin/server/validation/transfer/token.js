@@ -8,7 +8,11 @@ const transferTokenCreationSchema = yup
   .shape({
     name: yup.string().min(1).required(),
     description: yup.string().optional(),
-    permissions: yup.array().of(yup.string()).nullable(),
+    permissions: yup
+      .array()
+      .min(1)
+      .of(yup.string().oneOf(Object.values(constants.TRANSFER_TOKEN_TYPE)))
+      .required(),
     lifespan: yup
       .number()
       .min(1)
@@ -23,7 +27,11 @@ const transferTokenUpdateSchema = yup
   .shape({
     name: yup.string().min(1).notNull(),
     description: yup.string().nullable(),
-    permissions: yup.array().of(yup.string()).nullable(),
+    permissions: yup
+      .array()
+      .min(1)
+      .of(yup.string().oneOf(Object.values(constants.TRANSFER_TOKEN_TYPE)))
+      .nullable(),
   })
   .noUnknown()
   .strict();

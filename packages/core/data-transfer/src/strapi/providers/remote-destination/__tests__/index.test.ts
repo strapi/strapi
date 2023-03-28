@@ -10,7 +10,7 @@ const defaultOptions: IRemoteStrapiDestinationProviderOptions = {
   auth: undefined,
 };
 
-jest.mock('../utils', () => ({
+jest.mock('../../utils', () => ({
   createDispatcher: jest.fn(),
 }));
 
@@ -62,7 +62,7 @@ describe('Remote Strapi Destination', () => {
       // ignore ws connection error
     }
 
-    expect(WebSocket).toHaveBeenCalledWith(`ws://strapi.com/admin${TRANSFER_PATH}`, undefined);
+    expect(WebSocket).toHaveBeenCalledWith(`ws://strapi.com/admin${TRANSFER_PATH}/push`, undefined);
   });
 
   test('Should use wss protocol for https urls', async () => {
@@ -76,7 +76,10 @@ describe('Remote Strapi Destination', () => {
       // ignore ws connection error
     }
 
-    expect(WebSocket).toHaveBeenCalledWith(`wss://strapi.com/admin${TRANSFER_PATH}`, undefined);
+    expect(WebSocket).toHaveBeenCalledWith(
+      `wss://strapi.com/admin${TRANSFER_PATH}/push`,
+      undefined
+    );
   });
 
   test('Should throw on invalid protocol', async () => {
