@@ -202,7 +202,31 @@ module.exports = ({ strapi }) => ({
 
     return updatedEntity;
   },
+  async clone(entity, body, uid) {
+    const modelDef = strapi.getModel(uid);
+    const publishData = { ...body };
+    const populateRelations = isRelationsPopulateEnabled(uid);
 
+    if (hasDraftAndPublish(modelDef)) {
+      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
+    }
+
+    const params = {
+      data: publishData,
+      populate: populateRelations
+        ? getDeepPopulate(uid, {})
+        : getDeepPopulate(uid, { countMany: true, countOne: true }),
+    };
+
+    const clonedEntity = await strapi.entityService.clone(uid, entity.id, params);
+
+    // If relations were populated, relations count will be returned instead of the array of relations.
+    if (populateRelations) {
+      return getDeepRelationsCount(clonedEntity, uid);
+    }
+
+    return clonedEntity;
+  },
   async delete(entity, uid) {
     const populateRelations = isRelationsPopulateEnabled(uid);
 
