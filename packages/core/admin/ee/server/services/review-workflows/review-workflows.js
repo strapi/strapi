@@ -120,7 +120,7 @@ function enableReviewWorkflow({ strapi }) {
           [joinTable.joinColumn.name]: firstStage.id,
           [typeColumn.name]: connection.raw('?', [contentTypeUID]),
         })
-        .leftJoin(`${joinTable.name} AS jointable`, () => {
+        .leftJoin(`${joinTable.name} AS jointable`, function joinFunc() {
           this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
             `jointable.${typeColumn.name}`,
             '=',
