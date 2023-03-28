@@ -1,9 +1,12 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
+const { isEmpty } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
+const { hasProhibitedCloningFields } = require('../services/utils/clone');
 
 module.exports = {
   async find(ctx) {
@@ -123,6 +126,43 @@ module.exports = {
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
+  },
+
+  async clone(ctx) {
+    const { userAbility, user } = ctx.state;
+    const { model, sourceId: id } = ctx.params;
+    const { body } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.create()) {
+      return ctx.forbidden();
+    }
+
+    // Trying to automatically clone the entity
+    // and model has unique or relational fields
+    if (isEmpty(body) && hasProhibitedCloningFields(model)) {
+      throw new ApplicationError('clone.prohibitedFields');
+    }
+
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    const pickWritables = pickWritableAttributes({ model });
+    const pickPermittedFields = permissionChecker.sanitizeCreateInput;
+    const setCreator = setCreatorFields({ user });
+
+    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+
+    const sanitizedBody = await sanitizeFn(body);
+
+    const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
+
+    ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
   },
 
   async delete(ctx) {
