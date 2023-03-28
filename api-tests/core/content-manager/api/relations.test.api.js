@@ -132,6 +132,16 @@ const updateEntry = async (singularName, id, data, populate) => {
   return body;
 };
 
+const cloneEntry = async (singularName, id, data, populate) => {
+  const { body } = await rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/api::${singularName}.${singularName}/clone/${id}`,
+    body: data,
+    qs: { populate },
+  });
+  return body;
+};
+
 const getRelations = async (uid, field, id) => {
   const res = await rq({
     method: 'GET',
@@ -907,6 +917,161 @@ describe('Relations', () => {
         res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
         expect(res.data).toMatchObject({ id: id1 });
       });
+    });
+  });
+
+  describe.only('Clone entity with relations', () => {
+    test('Clone entity with relations', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { connect: [id1] },
+          products_oo: { connect: [id1] },
+          products_mo: { connect: [id1] },
+          products_om: { connect: [id1] },
+          products_mm: { connect: [id1] },
+          products_mw: { connect: [id1] },
+          myCompo: {
+            compo_products_ow: { connect: [id1] },
+            compo_products_mw: { connect: [id1] },
+          },
+        },
+        ['myCompo']
+      );
+
+      // Clone with empty data
+      const res = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::shop.shop/clone/${createdShop.id}`,
+        body: {},
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Clone entity with relations and connect data', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { connect: [id1] },
+          products_oo: { connect: [id1] },
+          products_mo: { connect: [id1] },
+          products_om: { connect: [id1] },
+          products_mm: { connect: [id1] },
+          products_mw: { connect: [id1] },
+          myCompo: {
+            compo_products_ow: { connect: [id1] },
+            compo_products_mw: { connect: [id1] },
+          },
+        },
+        ['myCompo']
+      );
+
+      const clonedShop = await cloneEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop 2',
+        products_ow: { connect: [id2] },
+        products_oo: { connect: [id2] },
+        products_mo: { connect: [id2] },
+        products_om: { connect: [id2] },
+        products_mm: { connect: [id2] },
+        products_mw: { connect: [id2] },
+        myCompo: {
+          id: createdShop.myCompo.id,
+          compo_products_ow: { connect: [id2] },
+          compo_products_mw: { connect: [id2] },
+        },
+      });
+
+      expect(clonedShop.name).toBe('Cazotte Shop 2');
+
+      let res;
+      res = await getRelations('default.compo', 'compo_products_mw', clonedShop.myCompo.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('default.compo', 'compo_products_ow', clonedShop.myCompo.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_mm', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_mo', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_mw', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_om', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_oo', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
+    });
+
+    test('Clone entity with relations and disconnect data', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { connect: [id1] },
+          products_oo: { connect: [id1] },
+          products_mo: { connect: [id1] },
+          products_om: { connect: [id1] },
+          products_mm: { connect: [id1] },
+          products_mw: { connect: [id1] },
+          myCompo: {
+            compo_products_ow: { connect: [id1] },
+            compo_products_mw: { connect: [id1] },
+          },
+        },
+        ['myCompo']
+      );
+
+      const clonedShop = await cloneEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop 2',
+        products_ow: { connect: [id2] },
+        products_oo: { connect: [id2] },
+        products_mo: { connect: [id2] },
+        products_om: { connect: [id2] },
+        products_mm: { connect: [id2] },
+        products_mw: { connect: [id2] },
+        myCompo: {
+          id: createdShop.myCompo.id,
+          compo_products_ow: { connect: [id2] },
+          compo_products_mw: { connect: [id2] },
+        },
+      });
+
+      expect(clonedShop.name).toBe('Cazotte Shop 2');
+
+      let res;
+      res = await getRelations('default.compo', 'compo_products_mw', clonedShop.myCompo.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('default.compo', 'compo_products_ow', clonedShop.myCompo.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_mm', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_mo', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_mw', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_om', clonedShop.id);
+      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_oo', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
+
+      res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
+      expect(res.data).toMatchObject({ id: id2 });
     });
   });
 });
