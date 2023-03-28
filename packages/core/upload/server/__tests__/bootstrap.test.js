@@ -42,6 +42,9 @@ describe('Upload plugin bootstrap function', () => {
         upload: {
           services: {
             metrics: {
+              sendUploadPluginMetrics() {},
+            },
+            weeklyMetrics: {
               registerCron() {},
             },
           },

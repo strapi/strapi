@@ -7,12 +7,10 @@ import { AssetCardBase } from './AssetCardBase';
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {
   // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
   // instead of a full refresh
-  const optimizedCachingThumbnail =
-    width && height ? `${thumbnail}?width=${width}&height=${height}` : thumbnail;
 
   return (
     <AssetCardBase {...props} subtitle={height && width && ` - ${width}✕${height}`} variant="Image">
-      <CardAsset src={optimizedCachingThumbnail} size={size} alt={alt} />
+      <CardAsset src={thumbnail} size={size} alt={alt} />
     </AssetCardBase>
   );
 };
