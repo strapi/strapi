@@ -4,7 +4,7 @@
     "silent": true,
     "autoJobCancelation": true
   },
-  "installCommand": "yarn setup",
+  "installCommand": "yarn install --immutable",
   "ignoreCommand": "git diff HEAD^ HEAD --quiet './packages/core/helper-plugin'",
   "outputDirectory": "packages/core/helper-plugin/storybook-static"
 }
