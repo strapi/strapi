@@ -221,7 +221,7 @@ module.exports = ({
       alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
-      mainFields: ['browser', 'jsnext:main', 'main'],
+      mainFields: ['browser', 'module', 'jsnext:main', 'main'],
       modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
