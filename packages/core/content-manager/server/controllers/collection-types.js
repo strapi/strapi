@@ -6,7 +6,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
-const { hasProhibitedCloningFields } = require('../services/utils/clone');
+const { hasProhibitedCloningFields } = require('./utils/clone');
 
 module.exports = {
   async find(ctx) {
