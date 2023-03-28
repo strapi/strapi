@@ -13,9 +13,8 @@ const createAssetUrl = (asset, forThumbnail = true) => {
   }
 
   const assetUrl = forThumbnail ? asset?.formats?.thumbnail?.url || asset.url : asset.url;
-  const backendUrl = prefixFileUrlWithBackendUrl(assetUrl);
 
-  return `${backendUrl}?updated_at=${asset.updatedAt}`;
+  return prefixFileUrlWithBackendUrl(assetUrl);
 };
 
 export default createAssetUrl;

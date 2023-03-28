@@ -390,7 +390,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   alt="strapi-cover_1fabc982ce.png"
                   aria-hidden="true"
                   class="c14"
-                  src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?width=1066&height=551"
+                  src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
                 />
               </div>
             </div>
@@ -490,7 +490,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     >
                       <video
                         crossorigin="anonymous"
-                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4?updated_at=2021-09-14T07:48:30.882Z"
+                        src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
                       >
                         <source
                           type="video/mp4"

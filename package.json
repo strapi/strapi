@@ -40,9 +40,9 @@
     "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "nx run-many --target=lint --nx-ignore-cycles -- --fix",
     "lint:other": "npm run prettier:other -- --check",
-    "format": "npm-run-all -p format:*",
-    "format:code": "npm run prettier:code -- --write",
-    "format:other": "npm run prettier:other -- --write",
+    "format": "yarn format:code && yarn format:other",
+    "format:code": "yarn prettier:code --write",
+    "format:other": "yarn prettier:other --write",
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
     "test:front": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles",
@@ -87,7 +87,6 @@
     "lerna": "6.5.1",
     "lint-staged": "13.0.3",
     "lodash": "4.17.21",
-    "npm-run-all": "4.1.5",
     "nx": "15.8.3",
     "plop": "2.7.6",
     "prettier": "2.8.4",
@@ -106,5 +105,6 @@
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "packageManager": "yarn@3.5.0"
 }
