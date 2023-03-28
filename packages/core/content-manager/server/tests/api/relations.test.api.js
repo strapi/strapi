@@ -920,7 +920,7 @@ describe('Relations', () => {
     });
   });
 
-  describe.only('Clone entity with relations', () => {
+  describe('Clone entity with relations', () => {
     test('Clone entity with relations', async () => {
       const createdShop = await createEntry(
         'shop',
@@ -1020,12 +1020,12 @@ describe('Relations', () => {
           products_ow: { connect: [id1] },
           products_oo: { connect: [id1] },
           products_mo: { connect: [id1] },
-          products_om: { connect: [id1] },
-          products_mm: { connect: [id1] },
-          products_mw: { connect: [id1] },
+          products_om: { connect: [id1, id2] },
+          products_mm: { connect: [id1, id2] },
+          products_mw: { connect: [id1, id2] },
           myCompo: {
             compo_products_ow: { connect: [id1] },
-            compo_products_mw: { connect: [id1] },
+            compo_products_mw: { connect: [id1, id2] },
           },
         },
         ['myCompo']
@@ -1033,16 +1033,16 @@ describe('Relations', () => {
 
       const clonedShop = await cloneEntry('shop', createdShop.id, {
         name: 'Cazotte Shop 2',
-        products_ow: { connect: [id2] },
-        products_oo: { connect: [id2] },
-        products_mo: { connect: [id2] },
-        products_om: { connect: [id2] },
-        products_mm: { connect: [id2] },
-        products_mw: { connect: [id2] },
+        products_ow: { disconnect: [id1] },
+        products_oo: { disconnect: [id1] },
+        products_mo: { disconnect: [id1] },
+        products_om: { disconnect: [id1] },
+        products_mm: { disconnect: [id1] },
+        products_mw: { disconnect: [id1] },
         myCompo: {
           id: createdShop.myCompo.id,
-          compo_products_ow: { connect: [id2] },
-          compo_products_mw: { connect: [id2] },
+          compo_products_ow: { disconnect: [id1] },
+          compo_products_mw: { disconnect: [id1] },
         },
       });
 
@@ -1050,28 +1050,28 @@ describe('Relations', () => {
 
       let res;
       res = await getRelations('default.compo', 'compo_products_mw', clonedShop.myCompo.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+      expect(res.results).toMatchObject([{ id: id2 }]);
 
       res = await getRelations('default.compo', 'compo_products_ow', clonedShop.myCompo.id);
-      expect(res.data).toMatchObject({ id: id2 });
+      expect(res.data).toBe(null);
 
       res = await getRelations('api::shop.shop', 'products_mm', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+      expect(res.results).toMatchObject([{ id: id2 }]);
 
       res = await getRelations('api::shop.shop', 'products_mo', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
+      expect(res.data).toBe(null);
 
       res = await getRelations('api::shop.shop', 'products_mw', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+      expect(res.results).toMatchObject([{ id: id2 }]);
 
       res = await getRelations('api::shop.shop', 'products_om', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+      expect(res.results).toMatchObject([{ id: id2 }]);
 
       res = await getRelations('api::shop.shop', 'products_oo', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
+      expect(res.data).toBe(null);
 
       res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
+      expect(res.data).toBe(null);
     });
   });
 });
