@@ -36,9 +36,7 @@
     }
   ],
   "main": "./index.js",
-  "bin": {
-    "create-strapi-app": "./index.js"
-  },
+  "bin": "./index.js",
   "scripts": {
     "lint": "eslint ."
   },
