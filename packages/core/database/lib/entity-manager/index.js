@@ -1233,7 +1233,6 @@ const createEntityManager = (db) => {
     },
 
     // TODO: Clone polymorphic relations
-    // TODO: Excluded relation attributes
     /**
      *
      * @param {string} uid - uid of the entity to clone
@@ -1276,8 +1275,23 @@ const createEntityManager = (db) => {
           return;
         }
 
+        let omitIds = [];
+        if (has(attrName, data)) {
+          const cleanRelationData = toAssocs(data[attrName]);
+
+          // Don't clone if the relation attr is being set
+          if (cleanRelationData.set) {
+            return;
+          }
+
+          // Disconnected relations don't need to be cloned
+          if (cleanRelationData.disconnect) {
+            omitIds = toIds(cleanRelationData.disconnect);
+          }
+        }
+
         if (isOneToAny(attribute) && isBidirectional(attribute)) {
-          await replaceRegularRelations({ targetId, sourceId, attribute, transaction });
+          await replaceRegularRelations({ targetId, sourceId, attribute, omitIds, transaction });
         } else {
           await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
         }
