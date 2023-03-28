@@ -38,7 +38,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --immutable
       - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
@@ -63,7 +63,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --immutable
       - name: Run build:ts
-        run: yarn nx run-many --target=build:ts --nx-ignore-cycles
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
@@ -86,7 +86,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - uses: nrwl/nx-set-shas@v3
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
 
@@ -106,7 +106,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - name: Build
         run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
 
@@ -145,7 +145,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -184,7 +184,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -222,7 +222,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -244,7 +244,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
@@ -290,7 +290,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -333,7 +333,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -359,7 +359,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install  --immutable
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
