@@ -399,11 +399,12 @@ const createEntityManager = (db) => {
       const trx = await strapi.db.transaction();
       try {
         const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
+          // TODO: handle components in the db layer
           if (attr.type === 'relation' && attr.joinTable && !attr.component) {
-            acc[attrName] = true;
+            acc.push(attrName);
           }
           return acc;
-        }, {});
+        }, []);
 
         await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
         await trx.commit();
@@ -1241,18 +1242,17 @@ const createEntityManager = (db) => {
      * @param {object} opt
      * @param {object} opt.cloneAttrs - key value pair of attributes to clone
      * @param {object} opt.transaction - transaction to use
-     * @example cloneRelations('user', 3, 1, { cloneAttrs: { friends: true }})
-     * @example cloneRelations('post', 5, 2, { cloneAttrs: { comments: true, likes: true } })
+     * @example cloneRelations('user', 3, 1, { cloneAttrs: ["comments"]})
+     * @example cloneRelations('post', 5, 2, { cloneAttrs: ["comments", "likes"] })
      */
-    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = {}, transaction }) {
+    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = [], transaction }) {
       const { attributes } = db.metadata.get(uid);
 
       if (!attributes) {
         return;
       }
 
-      await mapAsync(Object.entries(cloneAttrs), async ([attrName, shouldClone]) => {
-        if (!shouldClone) return;
+      await mapAsync(cloneAttrs, async (attrName) => {
         const attribute = attributes[attrName];
 
         if (attribute.type !== 'relation') {
