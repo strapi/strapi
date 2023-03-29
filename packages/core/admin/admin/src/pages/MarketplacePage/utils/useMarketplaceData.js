@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
+import { useNotifyAT } from '@strapi/design-system';
 import useFetchMarketplacePlugins from '../../../hooks/useFetchMarketplacePlugins';
 import useFetchMarketplaceProviders from '../../../hooks/useFetchMarketplaceProviders';
 

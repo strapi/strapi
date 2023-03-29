@@ -1,11 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Layout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
+import { Box, Flex, Typography, Layout, Main } from '@strapi/design-system';
 import PageHeader from '../PageHeader';
 import offlineCloud from '../../../../assets/images/icon_offline-cloud.svg';
 
