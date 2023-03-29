@@ -14095,6 +14095,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"denque@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "denque@npm:2.1.0"
+  checksum: 1d4ae1d05e59ac3a3481e7b478293f4b4c813819342273f3d5b826c7ffa9753c520919ba264f377e09108d24ec6cf0ec0ac729a5686cbb8f32d797126c5dae74
+  languageName: node
+  linkType: hard
+
 "depd@npm:2.0.0, depd@npm:^2.0.0, depd@npm:~2.0.0":
   version: 2.0.0
   resolution: "depd@npm:2.0.0"
@@ -17008,6 +17015,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"generate-function@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "generate-function@npm:2.3.1"
+  dependencies:
+    is-property: ^1.0.2
+  checksum: 652f083de206ead2bae4caf9c7eeb465e8d98c0b8ed2a29c6afc538cef0785b5c6eea10548f1e13cc586d3afd796c13c830c2cb3dc612ec2457b2aadda5f57c9
+  languageName: node
+  linkType: hard
+
 "gensync@npm:^1.0.0-beta.1, gensync@npm:^1.0.0-beta.2":
   version: 1.0.0-beta.2
   resolution: "gensync@npm:1.0.0-beta.2"
@@ -17202,6 +17218,7 @@ __metadata:
     better-sqlite3: 8.0.1
     lodash: 4.17.21
     mysql: 2.18.1
+    mysql2: 3.2.0
     passport-google-oauth2: 0.2.0
     pg: 8.8.0
     react: ^17.0.2
@@ -18523,7 +18540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2":
+"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
@@ -19376,6 +19393,13 @@ __metadata:
   version: 1.0.1
   resolution: "is-potential-custom-element-name@npm:1.0.1"
   checksum: ced7bbbb6433a5b684af581872afe0e1767e2d1146b2207ca0068a648fb5cab9d898495d1ac0583524faaf24ca98176a7d9876363097c2d14fee6dd324f3a1ab
+  languageName: node
+  linkType: hard
+
+"is-property@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "is-property@npm:1.0.2"
+  checksum: 33b661a3690bcc88f7e47bb0a21b9e3187e76a317541ea7ec5e8096d954f441b77a46d8930c785f7fbf4ef8dfd624c25495221e026e50f74c9048fe501773be5
   languageName: node
   linkType: hard
 
@@ -21752,6 +21776,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"long@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "long@npm:5.2.1"
+  checksum: 9264da12d1b7df67e5aa6da4498144293caf1ad12e7f092efe4e9a2d32c53f0bbf7334f7cef997080a2a3af061142558ab366efa71698d98b1cdb883477445a7
+  languageName: node
+  linkType: hard
+
 "longest-streak@npm:^2.0.0":
   version: 2.0.4
   resolution: "longest-streak@npm:2.0.4"
@@ -21844,6 +21875,13 @@ __metadata:
   version: 7.13.1
   resolution: "lru-cache@npm:7.13.1"
   checksum: f53c7dd098a7afd6342b23f7182629edff206c7665de79445a7f5455440e768a4d1c6ec52e1a16175580c71535c9437dfb6f6bc22ca1a0e4a7454a97cde87329
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^7.14.1":
+  version: 7.18.3
+  resolution: "lru-cache@npm:7.18.3"
+  checksum: e550d772384709deea3f141af34b6d4fa392e2e418c1498c078de0ee63670f1f46f5eee746e8ef7e69e1c895af0d4224e62ee33e66a543a14763b0f2e74c1356
   languageName: node
   linkType: hard
 
@@ -22980,6 +23018,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mysql2@npm:3.2.0":
+  version: 3.2.0
+  resolution: "mysql2@npm:3.2.0"
+  dependencies:
+    denque: ^2.1.0
+    generate-function: ^2.3.1
+    iconv-lite: ^0.6.3
+    long: ^5.2.1
+    lru-cache: ^7.14.1
+    named-placeholders: ^1.1.3
+    seq-queue: ^0.0.5
+    sqlstring: ^2.3.2
+  checksum: 7885d3b4f575e7321754de14bb4fadb80d4705d5b00f8b645d760ae7a0f3170ac6d4fe6e7b9307e698fe84c3ee047d7c2652f01b95c9393f56eace993f2952ab
+  languageName: node
+  linkType: hard
+
 "mysql@npm:2.18.1":
   version: 2.18.1
   resolution: "mysql@npm:2.18.1"
@@ -23000,6 +23054,15 @@ __metadata:
     object-assign: ^4.0.1
     thenify-all: ^1.0.0
   checksum: 8427de0ece99a07e9faed3c0c6778820d7543e3776f9a84d22cf0ec0a8eb65f6e9aee9c9d353ff9a105ff62d33a9463c6ca638974cc652ee8140cd1e35951c87
+  languageName: node
+  linkType: hard
+
+"named-placeholders@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "named-placeholders@npm:1.1.3"
+  dependencies:
+    lru-cache: ^7.14.1
+  checksum: 7834adc91e92ae1b9c4413384e3ccd297de5168bb44017ff0536705ddc4db421723bd964607849265feb3f6ded390f84cf138e5925f22f7c13324f87a803dc73
   languageName: node
   linkType: hard
 
@@ -27778,6 +27841,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"seq-queue@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "seq-queue@npm:0.0.5"
+  checksum: f8695a6cb613e1b378b9686cde4ea626944091a412fc1c9d24c5039283d4351dd115f4505e4cf103d3a2e4a9a6a72fc7698fdce703839fb1fec9627aa4ce5563
+  languageName: node
+  linkType: hard
+
 "serialize-javascript@npm:^4.0.0":
   version: 4.0.0
   resolution: "serialize-javascript@npm:4.0.0"
@@ -28479,6 +28549,13 @@ __metadata:
   version: 2.3.1
   resolution: "sqlstring@npm:2.3.1"
   checksum: de4299cf9bd0f49abae5b4eddde42c7ae7c447e035498ec50b3264610d6f0efbe433eeed2d20d48b6362bf46fd96c85cf6db240e994dbe6d5c3f9dac6d7ffd31
+  languageName: node
+  linkType: hard
+
+"sqlstring@npm:^2.3.2":
+  version: 2.3.3
+  resolution: "sqlstring@npm:2.3.3"
+  checksum: 1e7e2d51c38a0cf7372e875408ca100b6e0c9a941ab7773975ea41fb36e5528e404dc787689be855780cf6d0a829ff71027964ae3a05a7446e91dce26672fda7
   languageName: node
   linkType: hard
 
