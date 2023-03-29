@@ -10,6 +10,7 @@ import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import { trimTrailingSlash } from '../../../utils/providers';
 
 interface ITransferTokenAuth {
   type: 'token';
@@ -210,9 +211,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname.replace(
-      /\/$/,
-      ''
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
     )}${TRANSFER_PATH}/push`;
 
     // No auth defined, trying public access for transfer

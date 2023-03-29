@@ -16,6 +16,7 @@ import {
   ProviderTransferError,
   ProviderValidationError,
 } from '../../../errors/providers';
+import { trimTrailingSlash } from '../../../utils/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher } from '../utils';
@@ -227,9 +228,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     let ws: WebSocket;
     this.assertValidProtocol(url);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname.replace(
-      /\/$/,
-      ''
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
     )}${TRANSFER_PATH}/pull`;
 
     // No auth defined, trying public access for transfer
