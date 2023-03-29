@@ -28,19 +28,21 @@ jest.mock(
     useReviewWorkflows: jest.fn(() => ({
       workflows: {
         isLoading: false,
-        data: {
-          stages: [
-            {
-              id: 1,
-              name: 'Stage 1',
-            },
+        data: [
+          {
+            stages: [
+              {
+                id: 1,
+                name: 'Stage 1',
+              },
 
-            {
-              id: 2,
-              name: 'Stage 2',
-            },
-          ],
-        },
+              {
+                id: 2,
+                name: 'Stage 2',
+              },
+            ],
+          },
+        ],
       },
     })),
   })

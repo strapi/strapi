@@ -255,7 +255,56 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
             data: expect.objectContaining({
               stages: expect.arrayContaining([
                 {
-                  __temp_key__: 1,
+                  __temp_key__: 0,
+                  name: 'something',
+                },
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_ADD_STAGE should correctly append the key when the ids are not sequential', () => {
+    const WORKFLOWS_FIXTURE = [
+      {
+        id: 1,
+        stages: [
+          {
+            id: 1,
+            name: 'stage-1',
+          },
+
+          {
+            id: 3,
+            name: 'stage-2',
+          },
+        ],
+      },
+    ];
+
+    const action = {
+      type: ACTION_ADD_STAGE,
+      payload: { name: 'something' },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: expect.any(Object),
+      clientState: {
+        currentWorkflow: { data: WORKFLOWS_FIXTURE[0], isDirty: false },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([
+                {
+                  __temp_key__: 4,
                   name: 'something',
                 },
               ]),

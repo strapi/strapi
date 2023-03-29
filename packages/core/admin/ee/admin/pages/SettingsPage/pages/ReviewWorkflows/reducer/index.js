@@ -64,9 +64,11 @@ export function reducer(state = initialState, action) {
           };
         }
 
+        const newTempKey = getMaxTempKey(draft.clientState.currentWorkflow.data.stages);
+
         draft.clientState.currentWorkflow.data.stages.push({
           ...payload,
-          __temp_key__: (currentWorkflow.data?.stages?.length ?? 0) + 1,
+          __temp_key__: newTempKey,
         });
 
         break;
@@ -100,3 +102,20 @@ export function reducer(state = initialState, action) {
     }
   });
 }
+
+/**
+ * @type {(stages: Array<{id?: number; __temp_key__: number}>) => number}
+ */
+const getMaxTempKey = (stages = []) => {
+  /**
+   * We check if there are ids or __temp_key__ because you may add a stage to a list of stages
+   * already in the DB, alternatively you might add multiple new stages at once.
+   */
+  const ids = stages.map((stage) => stage.id ?? stage.__temp_key__);
+
+  /**
+   * If there are no ids it will return 0 as the max value
+   * because the max value is -1.
+   */
+  return Math.max(...ids, -1) + 1;
+};
