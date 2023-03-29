@@ -43,8 +43,6 @@ const cloneRegularRelations = async ({ targetId, sourceId, attribute, transactio
       ...columns.slice(1)
     )
     .where(joinColumn.name, sourceId)
-    // TODO: Exclude some relations from being replaced
-    // .where({ $not: { [inverseJoinColumn.name]: omitIds } })
     .from(joinTable.name)
     .toSQL();
 
