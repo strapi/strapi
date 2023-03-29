@@ -1073,5 +1073,73 @@ describe('Relations', () => {
       res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
       expect(res.data).toBe(null);
     });
+
+    test('Clone entity with relations and disconnect data should not steal relations', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { connect: [id1] },
+          products_oo: { connect: [id1] },
+          products_mo: { connect: [id1] },
+          products_om: { connect: [id1, id2] },
+          products_mm: { connect: [id1, id2] },
+          products_mw: { connect: [id1, id2] },
+          myCompo: {
+            compo_products_ow: { connect: [id1] },
+            compo_products_mw: { connect: [id1, id2] },
+          },
+        },
+        ['myCompo']
+      );
+
+      await cloneEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop 2',
+        products_oo: { disconnect: [id1] },
+        products_om: { disconnect: [id1] },
+      });
+
+      let res;
+
+      res = await getRelations('api::shop.shop', 'products_om', createdShop.id);
+      expect(res.results).toMatchObject([{ id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_oo', createdShop.id);
+      expect(res.data).toMatchObject({ id: id1 });
+    });
+
+    test('Clone entity with relations and set data should not steal relations', async () => {
+      const createdShop = await createEntry(
+        'shop',
+        {
+          name: 'Cazotte Shop',
+          products_ow: { connect: [id1] },
+          products_oo: { connect: [id1] },
+          products_mo: { connect: [id1] },
+          products_om: { connect: [id1, id2] },
+          products_mm: { connect: [id1, id2] },
+          products_mw: { connect: [id1, id2] },
+          myCompo: {
+            compo_products_ow: { connect: [id1] },
+            compo_products_mw: { connect: [id1, id2] },
+          },
+        },
+        ['myCompo']
+      );
+
+      await cloneEntry('shop', createdShop.id, {
+        name: 'Cazotte Shop 2',
+        products_oo: { set: [id2] }, // id 1 should not be stolen from createdShop products_oo
+        products_om: { set: [id2] }, // id 1 should not be stolen from createdShop products_om
+      });
+
+      let res;
+
+      res = await getRelations('api::shop.shop', 'products_om', createdShop.id);
+      expect(res.results).toMatchObject([{ id: id1 }]);
+
+      res = await getRelations('api::shop.shop', 'products_oo', createdShop.id);
+      expect(res.data).toMatchObject({ id: id1 });
+    });
   });
 });
