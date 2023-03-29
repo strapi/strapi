@@ -74,7 +74,7 @@ module.exports = ({ strapi }) => {
             populate: ['related'],
           });
 
-          if ((stageInfo?.related?.length ?? 0) === 0) {
+          if (!stageInfo?.related?.length) {
             // If there are no related entities, just delete the stage
             return this.delete(stage.id);
           }
@@ -192,25 +192,26 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
 }
 
 /**
- * Find the nearest object in an array that matches a condition.
+ * Find the id of the nearest object in an array that matches a condition.
+ * Used for searching for the nearest stage that is not deleted.
  * Starts by searching the elements before the index, then the remaining elements in the array.
  *
- * @param {Array} array of stages
- * @param {Number} index the index to start searching from
+ * @param {Array} stages of stages
+ * @param {Number} startIndex the index to start searching from
  * @param {Function} condition must evaluate to true for the object to be considered a match
- * @returns {Object}
+ * @returns {Number}
  */
-function findNearestMatchingStageID(array, index, condition) {
-  // Start by searching the elements before the index
-  for (let i = index; i >= 0; i -= 1) {
-    if (condition(array[i])) {
-      return array[i].id;
+function findNearestMatchingStageID(stages, startIndex, condition) {
+  // Start by searching the elements before the startIndex
+  for (let i = startIndex; i >= 0; i -= 1) {
+    if (condition(stages[i])) {
+      return stages[i].id;
     }
   }
 
-  // If no matching element is found before the index,
+  // If no matching element is found before the startIndex,
   // search the remaining elements in the array
-  const remainingArray = array.slice(index + 1);
+  const remainingArray = stages.slice(startIndex + 1);
   const nearestObject = remainingArray.filter(condition)[0];
   return nearestObject.id;
 }
