@@ -28,6 +28,17 @@ const mysql = {
   },
 };
 
+const mysql2 = {
+  client: 'mysql2',
+  connection: {
+    database: 'strapi',
+    user: 'strapi',
+    password: 'strapi',
+    port: 3306,
+    host: 'localhost',
+  },
+};
+
 const mariadb = {
   client: 'mysql',
   connection: {
@@ -41,6 +52,7 @@ const mariadb = {
 
 const db = {
   mysql,
+  mysql2,
   sqlite,
   postgres,
   mariadb,

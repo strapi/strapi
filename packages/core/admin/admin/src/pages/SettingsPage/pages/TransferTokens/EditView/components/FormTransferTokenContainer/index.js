@@ -5,6 +5,7 @@ import { Box, Grid, GridItem, Flex, Typography } from '@strapi/design-system';
 import LifeSpanInput from '../../../../../components/Tokens/LifeSpanInput';
 import TokenName from '../../../../../components/Tokens/TokenName';
 import TokenDescription from '../../../../../components/Tokens/TokenDescription';
+import TokenTypeSelect from '../../../../../components/Tokens/TokenTypeSelect';
 
 const FormTransferTokenContainer = ({
   errors,
@@ -15,6 +16,30 @@ const FormTransferTokenContainer = ({
   transferToken,
 }) => {
   const { formatMessage } = useIntl();
+
+  const typeOptions = [
+    {
+      value: 'push',
+      label: {
+        id: 'Settings.transferTokens.types.push',
+        defaultMessage: 'Push',
+      },
+    },
+    {
+      value: 'pull',
+      label: {
+        id: 'Settings.transferTokens.types.pull',
+        defaultMessage: 'Pull',
+      },
+    },
+    {
+      value: 'push-pull',
+      label: {
+        id: 'Settings.transferTokens.types.push-pull',
+        defaultMessage: 'Full Access',
+      },
+    },
+  ];
 
   return (
     <Box
@@ -57,6 +82,22 @@ const FormTransferTokenContainer = ({
               values={values}
               onChange={onChange}
               token={transferToken}
+            />
+          </GridItem>
+          <GridItem key="permissions" col={6} xs={12}>
+            <TokenTypeSelect
+              name="permissions"
+              values={values}
+              errors={errors}
+              label={{
+                id: 'Settings.tokens.form.type',
+                defaultMessage: 'Token type',
+              }}
+              onChange={(value) => {
+                onChange({ target: { name: 'permissions', value } });
+              }}
+              options={typeOptions}
+              canEditInputs={canEditInputs}
             />
           </GridItem>
         </Grid>

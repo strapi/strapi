@@ -149,37 +149,39 @@ const update = async (id, attributes) => {
       },
     });
 
-    const currentPermissionsResult = await strapi.entityService.load(
-      TRANSFER_TOKEN_UID,
-      updatedToken,
-      'permissions'
-    );
+    if (attributes.permissions) {
+      const currentPermissionsResult = await strapi.entityService.load(
+        TRANSFER_TOKEN_UID,
+        updatedToken,
+        'permissions'
+      );
 
-    const currentPermissions = map('action', currentPermissionsResult || []);
-    const newPermissions = uniq(attributes.permissions);
+      const currentPermissions = map('action', currentPermissionsResult || []);
+      const newPermissions = uniq(attributes.permissions);
 
-    const actionsToDelete = difference(currentPermissions, newPermissions);
-    const actionsToAdd = difference(newPermissions, currentPermissions);
+      const actionsToDelete = difference(currentPermissions, newPermissions);
+      const actionsToAdd = difference(newPermissions, currentPermissions);
 
-    // TODO: improve efficiency here
-    // method using a loop -- works but very inefficient
-    await Promise.all(
-      actionsToDelete.map((action) =>
-        strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
-          where: { action, token: id },
-        })
-      )
-    );
+      // TODO: improve efficiency here
+      // method using a loop -- works but very inefficient
+      await Promise.all(
+        actionsToDelete.map((action) =>
+          strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
+            where: { action, token: id },
+          })
+        )
+      );
 
-    // TODO: improve efficiency here
-    // using a loop -- works but very inefficient
-    await Promise.all(
-      actionsToAdd.map((action) =>
-        strapi.query(TRANSFER_TOKEN_PERMISSION_UID).create({
-          data: { action, token: id },
-        })
-      )
-    );
+      // TODO: improve efficiency here
+      // using a loop -- works but very inefficient
+      await Promise.all(
+        actionsToAdd.map((action) =>
+          strapi.query(TRANSFER_TOKEN_PERMISSION_UID).create({
+            data: { action, token: id },
+          })
+        )
+      );
+    }
 
     // retrieve permissions
     const permissionsFromDb = await strapi.entityService.load(

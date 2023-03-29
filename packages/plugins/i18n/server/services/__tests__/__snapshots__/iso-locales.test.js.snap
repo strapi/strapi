@@ -1099,6 +1099,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Galician (Spain) (gl-ES)",
   },
   {
+    "code": "lao",
+    "name": "Laotian (Laos) (lao)",
+  },
+  {
     "code": "lg",
     "name": "Ganda (lg)",
   },
