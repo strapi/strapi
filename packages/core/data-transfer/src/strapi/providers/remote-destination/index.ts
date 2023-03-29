@@ -210,7 +210,10 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/push`;
+    const wsUrl = `${wsProtocol}//${url.host}${url.pathname.replace(
+      /\/$/,
+      ''
+    )}${TRANSFER_PATH}/push`;
 
     // No auth defined, trying public access for transfer
     if (!auth) {

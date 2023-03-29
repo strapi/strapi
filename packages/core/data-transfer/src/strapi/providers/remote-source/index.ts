@@ -227,7 +227,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     let ws: WebSocket;
     this.assertValidProtocol(url);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/pull`;
+    const wsUrl = `${wsProtocol}//${url.host}${url.pathname.replace(
+      /\/$/,
+      ''
+    )}${TRANSFER_PATH}/pull`;
 
     // No auth defined, trying public access for transfer
     if (!auth) {
