@@ -33,6 +33,16 @@ const databases = {
       password: 'strapi',
     },
   },
+  mysql2: {
+    client: 'mysql2',
+    connection: {
+      host: '127.0.0.1',
+      port: 3306,
+      database: 'strapi_test',
+      username: 'strapi',
+      password: 'strapi',
+    },
+  },
   sqlite: {
     client: 'sqlite',
     connection: {
@@ -80,7 +90,7 @@ yargs
   })
   .command(
     '$0',
-    'run end to end tests',
+    'run API integration tests',
     (yarg) => {
       yarg.option('database', {
         alias: 'db',

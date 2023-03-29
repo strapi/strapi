@@ -77,11 +77,24 @@ const TransferTokenListView = () => {
     },
     {
       enabled: canRead,
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
+      onError(err) {
+        console.log('error', err);
+
+        if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'notification.error.invalid.configuration',
+              defaultMessage:
+                'You have an invalid configuration, check your server log for more information.',
+            },
+          });
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          });
+        }
       },
     }
   );
@@ -101,6 +114,15 @@ const TransferTokenListView = () => {
       onError(err) {
         if (err?.response?.data?.data) {
           toggleNotification({ type: 'warning', message: err.response.data.data });
+        } else if (err?.response?.data?.error?.details?.code === 'INVALID_TOKEN_SALT') {
+          toggleNotification({
+            type: 'warning',
+            message: {
+              id: 'notification.error.invalid.configuration',
+              defaultMessage:
+                'You have an invalid configuration, check your server log for more information.',
+            },
+          });
         } else {
           toggleNotification({
             type: 'warning',

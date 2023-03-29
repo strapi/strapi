@@ -140,6 +140,14 @@
     "name":"Assamese (India) (as-IN)"
   },
   {
+    "code":"ast",
+    "name":"Asturian (ast)"
+  },
+  {
+    "code":"ast-ES",
+    "name":"Asturian (Spain) (ast-ES)"
+  },
+  {
     "code":"asa",
     "name":"Asu (asa)"
   },
@@ -1086,6 +1094,10 @@
   {
     "code":"gl-ES",
     "name":"Galician (Spain) (gl-ES)"
+  },
+  {
+    "code":"lao",
+    "name":"Laotian (Laos) (lao)"
   },
   {
     "code":"lg",

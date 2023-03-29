@@ -63,16 +63,37 @@ const getEventMap = (defaultEvents) => {
   }, {});
 };
 
+const getRetentionDays = (strapi) => {
+  const licenseRetentionDays = features.get('audit-logs')?.options.retentionDays;
+  const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
+
+  // For enterprise plans, use 90 days by default, but allow users to override it
+  if (licenseRetentionDays == null) {
+    return userRetentionDays ?? DEFAULT_RETENTION_DAYS;
+  }
+
+  // Allow users to override the license retention days, but not to increase it
+  if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+    return userRetentionDays;
+  }
+
+  // User didn't provide a retention days value, use the license one
+  return licenseRetentionDays;
+};
+
 const createAuditLogsService = (strapi) => {
+  // Manage internal service state privately
+  const state = {};
+
   // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
 
   const processEvent = (name, ...args) => {
-    const state = strapi.requestContext.get()?.state;
+    const requestState = strapi.requestContext.get()?.state;
 
     // Ignore events with auth strategies different from admin
-    const isUsingAdminAuth = state?.auth?.strategy.name === 'admin';
-    const user = state?.user;
+    const isUsingAdminAuth = requestState?.auth?.strategy.name === 'admin';
+    const user = requestState?.user;
 
     if (!isUsingAdminAuth || !user) {
       return null;
@@ -103,26 +124,60 @@ const createAuditLogsService = (strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      await this._provider.saveEvent(processedEvent);
+      await state.provider.saveEvent(processedEvent);
     }
   }
 
   return {
     async register() {
-      const retentionDays =
-        features.get('audit-logs')?.options.retentionDays ?? DEFAULT_RETENTION_DAYS;
-      this._provider = await localProvider.register({ strapi });
-      this._eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
-      this._deleteExpiredJob = scheduleJob('0 0 * * *', () => {
+      // Handle license being enabled
+      if (!state.eeEnableUnsubscribe) {
+        state.eeEnableUnsubscribe = strapi.eventHub.on('ee.enable', () => {
+          // Recreate the service to use the new license info
+          this.destroy();
+          this.register();
+        });
+      }
+
+      // Handle license being updated
+      if (!state.eeUpdateUnsubscribe) {
+        state.eeUpdateUnsubscribe = strapi.eventHub.on('ee.update', () => {
+          // Recreate the service to use the new license info
+          this.destroy();
+          this.register();
+        });
+      }
+
+      // Handle license being disabled
+      state.eeDisableUnsubscribe = strapi.eventHub.on('ee.disable', () => {
+        // Turn off service when the license gets disabled
+        // Only ee.enable and ee.update listeners remain active to recreate the service
+        this.destroy();
+      });
+
+      // Register the provider now because collections can't be added later at runtime
+      state.provider = await localProvider.register({ strapi });
+
+      // Check current state of license
+      if (!features.isEnabled('audit-logs')) {
+        return this;
+      }
+
+      // Start saving events
+      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+
+      // Manage audit logs auto deletion
+      const retentionDays = getRetentionDays(strapi);
+      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        this._provider.deleteExpiredEvents(expirationDate);
+        state.provider.deleteExpiredEvents(expirationDate);
       });
 
       return this;
     },
 
     async findMany(query) {
-      const { results, pagination } = await this._provider.findMany(query);
+      const { results, pagination } = await state.provider.findMany(query);
 
       const sanitizedResults = results.map((result) => {
         const { user, ...rest } = result;
@@ -139,7 +194,7 @@ const createAuditLogsService = (strapi) => {
     },
 
     async findOne(id) {
-      const result = await this._provider.findOne(id);
+      const result = await state.provider.findOne(id);
 
       if (!result) {
         return null;
@@ -153,12 +208,16 @@ const createAuditLogsService = (strapi) => {
     },
 
     unsubscribe() {
-      if (this._eventHubUnsubscribe) {
-        this._eventHubUnsubscribe();
+      if (state.eeDisableUnsubscribe) {
+        state.eeDisableUnsubscribe();
       }
 
-      if (this._deleteExpiredJob) {
-        this._deleteExpiredJob.cancel();
+      if (state.eventHubUnsubscribe) {
+        state.eventHubUnsubscribe();
+      }
+
+      if (state.deleteExpiredJob) {
+        state.deleteExpiredJob.cancel();
       }
 
       return this;
