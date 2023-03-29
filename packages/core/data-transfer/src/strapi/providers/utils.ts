@@ -14,7 +14,7 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
-const createDispatcher = (ws: WebSocket) => {
+export const createDispatcher = (ws: WebSocket) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<client.Message>;
@@ -119,4 +119,6 @@ const createDispatcher = (ws: WebSocket) => {
   };
 };
 
-export { createDispatcher };
+export const trimTrailingSlash = (input: string): string => {
+  return input.replace(/\/$/, '');
+};
