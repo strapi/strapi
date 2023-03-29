@@ -10,7 +10,3 @@ export const assertValidStrapi: ValidStrapiAssertion = (strapi?: unknown, msg = 
     throw new ProviderInitializationError(`${msg}. Strapi instance not found.`);
   }
 };
-
-export const trimTrailingSlash = (input: string): string => {
-  return input.replace(/\/$/, '');
-};

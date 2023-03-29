@@ -16,10 +16,9 @@ import {
   ProviderTransferError,
   ProviderValidationError,
 } from '../../../errors/providers';
-import { trimTrailingSlash } from '../../../utils/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher } from '../utils';
+import { createDispatcher, trimTrailingSlash } from '../utils';
 
 interface ITransferTokenAuth {
   type: 'token';

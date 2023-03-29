@@ -3,14 +3,13 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher } from '../utils';
+import { createDispatcher, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
-import { trimTrailingSlash } from '../../../utils/providers';
 
 interface ITransferTokenAuth {
   type: 'token';
