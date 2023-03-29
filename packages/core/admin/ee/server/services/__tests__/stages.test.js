@@ -156,7 +156,7 @@ describe('Review workflows - Stages service', () => {
     });
 
     test('Should move entities in a deleted stage to the previous stage', async () => {
-      await stagesService.replaceWorkflowStages(1, workflowMock.stages.slice(0, 1));
+      await stagesService.replaceWorkflowStages(1, workflowMock.stages.slice(0, 2));
 
       expect(servicesMock['admin::workflows'].findById).toBeCalled();
       expect(entityServiceMock.create).not.toBeCalled();
@@ -173,7 +173,7 @@ describe('Review workflows - Stages service', () => {
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [workflowMock.stages[0].id],
+        stages: [workflowMock.stages[0].id, workflowMock.stages[1].id],
       });
     });
 

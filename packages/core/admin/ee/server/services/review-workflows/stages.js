@@ -65,6 +65,8 @@ module.exports = ({ strapi }) => {
         const defaultWorkflow = await getDefaultWorkflow({ strapi });
 
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
+
+        const entitiesToMove = [];
         await mapAsync(deleted, async (stage) => {
           // Find any entities related to this stage
           const stageInfo = await this.findById(stage.id, {
@@ -73,25 +75,39 @@ module.exports = ({ strapi }) => {
           });
 
           if ((stageInfo?.related?.length ?? 0) === 0) {
+            // If there are no related entities, just delete the stage
             return this.delete(stage.id);
           }
 
-          // This stage has related entities that we need to move to the
-          // previous stage
-          const previousStage =
-            defaultWorkflow.stages[defaultWorkflow.stages.findIndex((s) => s.id === stage.id) - 1];
+          // This stage has related entities that need to be moved to their
+          // target stage
+          // Find the nearest stage in the workflow that is not deleted,
+          // prioritizing the previous stages
+          const targetStageId = findNearestMatchingStageID(
+            defaultWorkflow.stages,
+            defaultWorkflow.stages.findIndex((s) => s.id === stage.id),
+            (targetStage) => {
+              return !deleted.find((s) => s.id === targetStage.id);
+            }
+          );
 
-          mapAsync(stageInfo.related, (entity) => {
-            return this.updateEntity(
-              {
-                id: entity.id,
-                modelUID: entity.__type,
-              },
-              previousStage.id
-            );
-          });
+          // Keep track of the entities to move and their target stages
+          entitiesToMove.push(...stageInfo.related.map((entity) => ({ ...entity, targetStageId })));
+
           return this.delete(stage.id);
         });
+
+        // Move all the entities whose stage was deleted to their target stage
+        mapAsync(entitiesToMove, (entity) => {
+          return this.updateEntity(
+            {
+              id: entity.id,
+              modelUID: entity.__type,
+            },
+            entity.targetStageId
+          );
+        });
+
         return workflowsService.update(workflowId, {
           stages: stagesIds,
         });
@@ -173,4 +189,28 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   if (remainingStagesCount < 1) {
     throw new ApplicationError('At least one stage must remain in the workflow.');
   }
+}
+
+/**
+ * Find the nearest object in an array that matches a condition.
+ * Starts by searching the elements before the index, then the remaining elements in the array.
+ *
+ * @param {Array} array of stages
+ * @param {Number} index the index to start searching from
+ * @param {Function} condition must evaluate to true for the object to be considered a match
+ * @returns {Object}
+ */
+function findNearestMatchingStageID(array, index, condition) {
+  // Start by searching the elements before the index
+  for (let i = index; i >= 0; i -= 1) {
+    if (condition(array[i])) {
+      return array[i].id;
+    }
+  }
+
+  // If no matching element is found before the index,
+  // search the remaining elements in the array
+  const remainingArray = array.slice(index + 1);
+  const nearestObject = remainingArray.filter(condition)[0];
+  return nearestObject.id;
 }
