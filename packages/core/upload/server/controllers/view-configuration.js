@@ -22,8 +22,9 @@ module.exports = {
   },
 
   async findViewConfiguration(ctx) {
-    const data = await getService('upload').getConfiguration();
-
+    let data = await getService('upload').getConfiguration();
+    
+    if (!data) { data = { pageSize: 10, sort: "createdAt:DESC" } }
     ctx.body = { data };
   },
 };
