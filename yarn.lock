@@ -7521,7 +7521,7 @@ __metadata:
     react-router-dom: 5.3.4
     react-select: 5.7.0
     react-test-renderer: ^17.0.2
-    sharp: 0.31.1
+    sharp: 0.32.0
     styled-components: 5.3.3
     yup: ^0.32.9
   peerDependencies:
@@ -27990,9 +27990,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sharp@npm:0.31.1":
-  version: 0.31.1
-  resolution: "sharp@npm:0.31.1"
+"sharp@npm:0.32.0":
+  version: 0.32.0
+  resolution: "sharp@npm:0.32.0"
   dependencies:
     color: ^4.2.3
     detect-libc: ^2.0.1
