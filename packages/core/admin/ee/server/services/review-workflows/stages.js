@@ -7,6 +7,7 @@ const {
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
+const { getDefaultWorkflow } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
@@ -61,9 +62,36 @@ module.exports = ({ strapi }) => {
       return strapi.db.transaction(async () => {
         const newStages = await this.createMany(created, { fields: ['id'] });
         const stagesIds = stages.map((stage) => stage.id ?? newStages.shift().id);
+        const defaultWorkflow = await getDefaultWorkflow({ strapi });
 
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
-        await mapAsync(deleted, (stage) => this.delete(stage.id));
+        await mapAsync(deleted, async (stage) => {
+          // Find any entities related to this stage
+          const stageInfo = await this.findById(stage.id, {
+            workflowId: defaultWorkflow.id,
+            populate: ['related'],
+          });
+
+          if ((stageInfo?.related?.length ?? 0) === 0) {
+            return this.delete(stage.id);
+          }
+
+          // This stage has related entities that we need to move to the
+          // previous stage
+          const previousStage =
+            defaultWorkflow.stages[defaultWorkflow.stages.findIndex((s) => s.id === stage.id) - 1];
+
+          mapAsync(stageInfo.related, (entity) => {
+            return this.updateEntity(
+              {
+                id: entity.id,
+                modelUID: entity.__type,
+              },
+              previousStage.id
+            );
+          });
+          return this.delete(stage.id);
+        });
         return workflowsService.update(workflowId, {
           stages: stagesIds,
         });

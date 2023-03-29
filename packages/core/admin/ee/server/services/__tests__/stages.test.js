@@ -63,6 +63,9 @@ const servicesMock = {
 };
 
 const strapiMock = {
+  query: jest.fn(() => ({
+    findOne: jest.fn(() => workflowMock),
+  })),
   entityService: entityServiceMock,
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
