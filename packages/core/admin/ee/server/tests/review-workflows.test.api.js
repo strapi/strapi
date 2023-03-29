@@ -51,6 +51,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     return body;
   };
 
+  const findAll = async (uid) => {
+    const { body } = await requests.admin({
+      method: 'GET',
+      url: `/content-manager/collection-types/${uid}`,
+    });
+    return body;
+  };
+
   const updateContentType = async (uid, data) => {
     const result = await requests.admin({
       method: 'PUT',
@@ -455,6 +463,46 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('when review workflows is enabled on a content type, new entries should be added to the first stage of the default workflow', async () => {
       const adminResponse = await createEntry(productUID, { name: 'Product' });
       expect(await adminResponse[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
+    });
+  });
+
+  describe('Deleting a stage when content already exists', () => {
+    test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
+      // Get the default workflow stages
+      const res = await requests.admin.get(`/admin/review-workflows/workflows/1/stages`);
+      const defaultStages = res.body.data;
+
+      // Get all products and move ~30% of them to the last stage of the workflow
+      const entriesMovedToEnd = [];
+      const productsBefore = await findAll(productUID);
+      productsBefore.results.forEach(async (entry) => {
+        if (Math.random() < 0.3) {
+          await requests.admin.put(
+            `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+            {
+              body: {
+                data: { id: defaultStages.at(-1).id },
+              },
+            }
+          );
+          entriesMovedToEnd.push(entry.id);
+        }
+      });
+
+      // Delete the first and last stage stage of the default workflow
+      await requests.admin.put(`/admin/review-workflows/workflows/1/stages`, {
+        body: { data: defaultStages.slice(1, defaultStages.length - 1) },
+      });
+
+      // Expect the content in these stages to be moved to the nearest available stage
+      const productsAfter = await findAll(productUID);
+      productsAfter.results.forEach(async (entry) => {
+        if (entriesMovedToEnd.includes(entry.id)) {
+          expect(await entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[2].name);
+          return;
+        }
+        expect(await entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[1].name);
+      });
     });
   });
 });
