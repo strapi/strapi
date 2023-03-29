@@ -5,35 +5,41 @@
       "default",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
-      "!{projectRoot}/**/*.md"
+      "!{projectRoot}/**/*.test.api.js",
+      "!{projectRoot}/**/__mocks__/**",
+      "!{projectRoot}/**/__tests__/**",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/jest.config.js",
+      "!{projectRoot}/jest.config.front.js",
+      "!{projectRoot}/tsconfig.eslint.json",
+      "!{projectRoot}/.eslintignore",
+      "!{projectRoot}/.eslintrc.js"
     ]
+  },
+  "cli": {
+    "packageManager": "yarn"
   },
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
-      "dependsOn": ["^build"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
+      "dependsOn": ["^build"]
     },
     "build:ts": {
       "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
-      "dependsOn": ["^build:ts"],
-      "outputs": ["{projectRoot}/lib", "{projectRoot}/build", "{projectRoot}/dist"]
+      "dependsOn": ["^build:ts"]
     },
     "test:unit": {
-      "inputs": ["default", "{projectRoot}/jest.config.js", "{workspaceRoot}/jest-preset.unit.js"],
+      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"],
       "dependsOn": ["build:ts"]
     },
     "test:front": {
-      "inputs": [
-        "default",
-        "{projectRoot}/jest.config.front.js",
-        "{workspaceRoot}/jest-preset.front.js"
-      ],
+      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"],
       "dependsOn": ["^build"]
     },
     "lint": {
       "inputs": [
-        "default",
+        "{projectRoot}/**/*.js",
+        "{projectRoot}/**/*.ts",
         "{projectRoot}/.eslintrc.js",
         "{projectRoot}/.eslintignore",
         "{projectRoot}/tsconfig.eslint.json",
