@@ -98,7 +98,7 @@ module.exports = ({ strapi }) => {
         });
 
         // Move all the entities whose stage was deleted to their target stage
-        mapAsync(entitiesToMove, (entity) => {
+        await mapAsync(entitiesToMove, (entity) => {
           return this.updateEntity(
             {
               id: entity.id,
