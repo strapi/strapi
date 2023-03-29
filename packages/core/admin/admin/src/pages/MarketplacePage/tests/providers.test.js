@@ -111,10 +111,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('should return empty providers search results given a bad query', async () => {
-    const user = userEvent.setup();
-    const providersTab = screen.getByRole('tab', { name: /providers/i });
-    await user.click(providersTab);
-    const input = getByPlaceholderText(renderedContainer, 'Search');
+    const input = screen.getByPlaceholderText('Search');
     const badQuery = 'asdf';
     await user.type(input, badQuery);
     await waitForReload();
@@ -204,7 +201,6 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    await user.click(screen.getByTestId('filters-button'));
     await user.click(
       screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
     );

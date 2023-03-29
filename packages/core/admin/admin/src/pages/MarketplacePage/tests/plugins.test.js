@@ -281,7 +281,6 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    await user.click(screen.getByTestId('filters-button'));
     await user.click(
       screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
     );
@@ -301,15 +300,15 @@ describe('Marketplace page - plugins tab', () => {
   it('filters multiple category options', async () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByTestId('Categories-button'));
-    await user.click(screen.getByTestId('Custom fields-4'));
+    await user.click(screen.getByRole('option', { name: `Custom fields (4)` }));
 
     await waitForReload();
 
-    await user.click(screen.getByTestId('filters-button'));
     await user.click(
       screen.getByRole('combobox', { name: `Categories 1 category selected Custom fields` })
     );
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+
     await waitForReload();
 
     const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
