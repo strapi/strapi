@@ -2,31 +2,12 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const { cloneDeep } = require('lodash/fp');
+const { produce } = require('immer');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
 const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
-
-/**
- * @description
- * Mutates the current state of the OpenAPI object and returns a new immutable object
- *
- * @param {object} currentState The immutable state of the OpenAPI object
- * @param {function} mutateStateCallback A callback function that can mutate a copy of the immutable state
- *
- * @returns {object}
- * The mutated copy as the new immutable state
- */
-const mutateDocumentation = (currentState, mutateStateCallback) => {
-  // Create a copy of the current state that is mutable
-  const draftState = cloneDeep(currentState);
-  // Pass the draft to the callback for mutation
-  mutateStateCallback(draftState);
-  // Return the mutated state as a new immutable state
-  return Object.freeze(draftState);
-};
 
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
@@ -161,7 +142,7 @@ module.exports = ({ strapi }) => {
       );
 
       // Initialize the generated documentation with defaults
-      let generatedDocumentation = mutateDocumentation(
+      let generatedDocumentation = produce(
         {
           ...config,
           components: defaultOpenApiComponents,
@@ -199,7 +180,7 @@ module.exports = ({ strapi }) => {
         await fs.ensureFile(apiDocPath);
         await fs.writeJson(apiDocPath, newApiPath, { spaces: 2 });
 
-        generatedDocumentation = mutateDocumentation(generatedDocumentation, (draft) => {
+        generatedDocumentation = produce(generatedDocumentation, (draft) => {
           if (generatedSchemas) {
             draft.components = {
               schemas: { ...draft.components.schemas, ...generatedSchemas },
@@ -214,7 +195,7 @@ module.exports = ({ strapi }) => {
 
       // When overrides are present update the generatedDocumentation
       if (overrideService.registeredOverrides.length > 0) {
-        generatedDocumentation = mutateDocumentation(generatedDocumentation, (draft) => {
+        generatedDocumentation = produce(generatedDocumentation, (draft) => {
           overrideService.registeredOverrides.forEach((override) => {
             // Only run the overrrides when no override version is provided,
             // or when the generated documentation version matches the override version
@@ -251,7 +232,7 @@ module.exports = ({ strapi }) => {
       // the generated documentation before it is written to the file system
       const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
       const finalDocumentation = userMutatesDocumentation
-        ? mutateDocumentation(generatedDocumentation, userMutatesDocumentation)
+        ? produce(generatedDocumentation, userMutatesDocumentation)
         : generatedDocumentation;
 
       // Get the file path for the final documentation
