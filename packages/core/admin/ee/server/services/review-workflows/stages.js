@@ -196,7 +196,7 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
  * Used for searching for the nearest stage that is not deleted.
  * Starts by searching the elements before the index, then the remaining elements in the array.
  *
- * @param {Array} stages of stages
+ * @param {Array} stages
  * @param {Number} startIndex the index to start searching from
  * @param {Function} condition must evaluate to true for the object to be considered a match
  * @returns {Number}
