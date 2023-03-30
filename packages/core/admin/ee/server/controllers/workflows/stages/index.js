@@ -46,6 +46,11 @@ module.exports = {
     };
   },
 
+  /**
+   * Replace all stages in a workflow
+   * @param {import('koa').BaseContext} ctx - koa context
+   *
+   */
   async replace(ctx) {
     const { workflow_id: workflowId } = ctx.params;
     const stagesService = getService('stages');

@@ -28,6 +28,7 @@ const stageMock = {
   workflow: 1,
 };
 
+const relatedUID = 'uid';
 const workflowMock = {
   id: 1,
   stages: [
@@ -41,12 +42,16 @@ const workflowMock = {
       id: 3,
       name: 'done',
       workflow: 1,
+      related: [
+        { id: 1, __type: relatedUID },
+        { id: 2, __type: relatedUID },
+      ],
     },
   ],
 };
 
 const entityServiceMock = {
-  findOne: jest.fn(() => stageMock),
+  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id)),
   findMany: jest.fn(() => [stageMock]),
   create: jest.fn((uid, { data }) => ({
     ...data,
@@ -63,6 +68,9 @@ const servicesMock = {
 };
 
 const strapiMock = {
+  query: jest.fn(() => ({
+    findOne: jest.fn(() => workflowMock),
+  })),
   entityService: entityServiceMock,
   service: jest.fn((serviceName) => {
     return servicesMock[serviceName];
@@ -132,7 +140,10 @@ describe('Review workflows - Stages service', () => {
       });
     });
     test('Should delete a stage contained in the workflow', async () => {
-      await stagesService.replaceWorkflowStages(1, [workflowMock.stages[0]]);
+      await stagesService.replaceWorkflowStages(1, [
+        workflowMock.stages[0],
+        workflowMock.stages[2],
+      ]);
 
       expect(servicesMock['admin::workflows'].findById).toBeCalled();
       expect(entityServiceMock.create).not.toBeCalled();
@@ -140,9 +151,32 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [workflowMock.stages[0].id],
+        stages: [workflowMock.stages[0].id, workflowMock.stages[2].id],
       });
     });
+
+    test('Should move entities in a deleted stage to the previous stage', async () => {
+      await stagesService.replaceWorkflowStages(1, workflowMock.stages.slice(0, 2));
+
+      expect(servicesMock['admin::workflows'].findById).toBeCalled();
+      expect(entityServiceMock.create).not.toBeCalled();
+      expect(entityServiceMock.delete).toBeCalled();
+
+      expect(entityServiceMock.update).toBeCalledWith(relatedUID, 1, {
+        data: { strapi_reviewWorkflows_stage: 2 },
+        populate: ['strapi_reviewWorkflows_stage'],
+      });
+      expect(entityServiceMock.update).toBeCalledWith(relatedUID, 2, {
+        data: { strapi_reviewWorkflows_stage: 2 },
+        populate: ['strapi_reviewWorkflows_stage'],
+      });
+
+      expect(servicesMock['admin::workflows'].update).toBeCalled();
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
+        stages: [workflowMock.stages[0].id, workflowMock.stages[1].id],
+      });
+    });
+
     test('New stage + updated + deleted', async () => {
       await stagesService.replaceWorkflowStages(1, [
         workflowMock.stages[0],
