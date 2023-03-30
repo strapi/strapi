@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dist-tag:
-        description: 'The tag you want to remove from NPM'
+        description: 'The tag you want to publish to NPM'
         default: 'experimental'
 
 permissions:

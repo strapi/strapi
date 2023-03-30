@@ -18,12 +18,5 @@ if [[ "$distTag" == "latest" || "$distTag" == "beta" || "$distTag" == "alpha" ||
   exit 1
 fi
 
-# Get all the packages
-packages=$(./node_modules/.bin/lerna ls)
-
-# Loop through the packages
-for package in $packages; do
-  echo "Removing dist-tag $distTag from $package"
-  # Run npm dist-tag rm $distTag
-  npm dist-tag rm $package $distTag
-done
+# Run npm dist-tag rm $distTag on each package
+./node_modules/.bin/lerna exec --no-private --stream -- "npm dist-tag rm \$LERNA_PACKAGE_NAME $distTag"
