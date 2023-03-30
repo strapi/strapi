@@ -161,10 +161,23 @@ module.exports = async (opts) => {
     updateLoader(stage, data).fail();
   });
 
-  let results;
-  try {
+  const getTelemetryPayload = (/* payload */) => {
+    return {
+      eventProperties: {
+        source: engine.sourceProvider.name,
+        destination: engine.destinationProvider.name,
+      },
+    };
+  };
+
+  progress.on('transfer::start', async () => {
     console.log(`Starting transfer...`);
 
+    await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
+  });
+
+  let results;
+  try {
     // Abort transfer if user interrupts process
     ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
       process.removeAllListeners(signal);
@@ -173,10 +186,18 @@ module.exports = async (opts) => {
 
     results = await engine.transfer();
   } catch (e) {
+    await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
     exitWith(1, exitMessageText('transfer', true));
   }
 
-  const table = buildTransferTable(results.engine);
-  console.log(table.toString());
+  await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+
+  try {
+    const table = buildTransferTable(results.engine);
+    console.log(table.toString());
+  } catch (e) {
+    console.error('There was an error displaying the results of the transfer.');
+  }
+
   exitWith(0, exitMessageText('transfer'));
 };
