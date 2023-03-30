@@ -16,10 +16,6 @@ interface ITransferTokenAuth {
   token: string;
 }
 
-type WebsocketParams = ConstructorParameters<typeof WebSocket>;
-type Address = WebsocketParams[0];
-type Options = WebsocketParams[2];
-
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
