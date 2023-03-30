@@ -481,7 +481,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
             `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
             {
               body: {
-                data: { id: defaultStages.at(-1).id },
+                data: { id: defaultStages.slice(-1)[0].id },
               },
             }
           );
