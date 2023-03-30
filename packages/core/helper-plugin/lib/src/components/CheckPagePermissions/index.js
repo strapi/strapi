@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
 import useRBACProvider from '../../hooks/useRBACProvider';
 import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
+import NoPermissions from '../NoPermissions';
 
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
@@ -59,7 +59,7 @@ const CheckPagePermissions = ({ permissions, children }) => {
   }
 
   if (!state.canAccess) {
-    return <Redirect to="/" />;
+    return <NoPermissions />;
   }
 
   return children;
