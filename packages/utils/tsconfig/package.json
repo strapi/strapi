@@ -1,5 +1,8 @@
 {
   "name": "tsconfig",
   "version": "4.9.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@tsconfig/node-lts": "18.12.1"
+  }
 }
