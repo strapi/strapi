@@ -14,7 +14,7 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
-const createDispatcher = (ws: WebSocket) => {
+export const createDispatcher = (ws: WebSocket) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<client.Message>;
@@ -123,7 +123,7 @@ type WebsocketParams = ConstructorParameters<typeof WebSocket>;
 type Address = WebsocketParams[0];
 type Options = WebsocketParams[2];
 
-async function connectToWebsocket(address: Address, options?: Options): Promise<WebSocket> {
+export const connectToWebsocket = (address: Address, options?: Options): Promise<WebSocket> => {
   return new Promise((resolve, reject) => {
     const server = new WebSocket(address, options);
     server.once('open', () => {
@@ -140,6 +140,8 @@ async function connectToWebsocket(address: Address, options?: Options): Promise<
       );
     });
   });
-}
+};
 
-export { createDispatcher, connectToWebsocket };
+export const trimTrailingSlash = (input: string): string => {
+  return input.replace(/\/$/, '');
+};

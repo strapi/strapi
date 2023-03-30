@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher, connectToWebsocket } from '../utils';
+import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
@@ -191,7 +191,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/push`;
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
+    )}${TRANSFER_PATH}/push`;
 
     // No auth defined, trying public access for transfer
     if (!auth) {

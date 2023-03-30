@@ -11,21 +11,13 @@ const defaultOptions: IRemoteStrapiDestinationProviderOptions = {
 };
 
 jest.mock('../../utils', () => ({
+  ...jest.requireActual('../../utils'),
   createDispatcher: jest.fn(),
 }));
 
 jest.mock('ws', () => ({
   WebSocket: jest.fn().mockImplementation(() => {
-    return {
-      ...jest.requireActual('ws').WebSocket,
-      send: jest.fn(),
-      once: jest.fn((type, callback) => {
-        callback();
-        return {
-          once: jest.fn((t, c) => c),
-        };
-      }),
-    };
+    return {};
   }),
 }));
 
@@ -35,22 +27,21 @@ afterEach(() => {
 
 describe('Remote Strapi Destination', () => {
   describe('Bootstrap', () => {
-    test('Should not have a defined websocket connection if bootstrap has not been called', () => {
-      const provider = createRemoteStrapiDestinationProvider(defaultOptions);
+    test('Should not attempt to create websocket connection if bootstrap has not been called', () => {
+      createRemoteStrapiDestinationProvider(defaultOptions);
 
-      expect(provider.ws).toBeNull();
+      expect(WebSocket).not.toHaveBeenCalled();
     });
 
-    test('Should have a defined websocket connection if bootstrap has been called', async () => {
+    test('Should attempt to create websocket connection if bootstrap has been called', async () => {
       const provider = createRemoteStrapiDestinationProvider(defaultOptions);
       try {
         await provider.bootstrap();
       } catch {
-        // ignore ws connection error
+        // ignore bootstrap failures from mocked WebSocket, we only care about the attempt
       }
 
-      expect(provider.ws).not.toBeNull();
-      expect(provider.ws?.readyState).toBe(WebSocket.CLOSED);
+      expect(WebSocket).toHaveBeenCalled();
     });
   });
 
@@ -59,7 +50,7 @@ describe('Remote Strapi Destination', () => {
     try {
       await provider.bootstrap();
     } catch {
-      // ignore ws connection error
+      // ignore bootstrap failures from mocked WebSocket, we only care about the attempt
     }
 
     expect(WebSocket).toHaveBeenCalledWith(`ws://strapi.com/admin${TRANSFER_PATH}/push`, undefined);
@@ -73,7 +64,7 @@ describe('Remote Strapi Destination', () => {
     try {
       await provider.bootstrap();
     } catch {
-      // ignore ws connection error
+      // ignore bootstrap failures from mocked WebSocket, we only care about the attempt
     }
 
     expect(WebSocket).toHaveBeenCalledWith(
