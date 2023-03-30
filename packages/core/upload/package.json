@@ -50,7 +50,7 @@
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-select": "5.7.0",
-    "sharp": "0.31.1",
+    "sharp": "0.32.0",
     "yup": "^0.32.9"
   },
   "devDependencies": {
