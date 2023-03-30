@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../types/remote/protocol';
-import { ProviderError } from '../../errors/providers';
+import { ProviderError, ProviderTransferError } from '../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -119,4 +119,27 @@ const createDispatcher = (ws: WebSocket) => {
   };
 };
 
-export { createDispatcher };
+type WebsocketParams = ConstructorParameters<typeof WebSocket>;
+type Address = WebsocketParams[0];
+type Options = WebsocketParams[2];
+
+async function connectToWebsocket(address: Address, options?: Options): Promise<WebSocket> {
+  return new Promise((resolve, reject) => {
+    const server = new WebSocket(address, options);
+    server.once('open', () => {
+      resolve(server);
+    });
+
+    server.once('error', (err) => {
+      reject(
+        new ProviderTransferError(err.message, {
+          details: {
+            error: err.message,
+          },
+        })
+      );
+    });
+  });
+}
+
+export { createDispatcher, connectToWebsocket };

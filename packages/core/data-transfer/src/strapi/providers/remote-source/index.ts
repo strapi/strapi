@@ -18,7 +18,7 @@ import {
 } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher } from '../utils';
+import { createDispatcher, connectToWebsocket } from '../utils';
 
 interface ITransferTokenAuth {
   type: 'token';
@@ -231,13 +231,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = new WebSocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = new WebSocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided
