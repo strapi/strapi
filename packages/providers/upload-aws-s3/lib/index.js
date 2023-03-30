@@ -8,7 +8,7 @@
 // Public node modules.
 const { getOr } = require('lodash/fp');
 const AWS = require('aws-sdk');
-const { getBucketFromUrl } = require('./utils');
+const { isUrlFromBucket } = require('./utils');
 
 function assertUrlProtocol(url) {
   // Regex to test protocol like "http://", "https://"
@@ -83,8 +83,7 @@ module.exports = {
        */
       getSignedUrl(file, customParams = {}) {
         // Do not sign the url if it does not come from the same bucket.
-        const { bucket } = getBucketFromUrl(file.url);
-        if (bucket !== config.params.Bucket) {
+        if (!isUrlFromBucket(file.url, config.params.Bucket, baseUrl)) {
           return { url: file.url };
         }
 
