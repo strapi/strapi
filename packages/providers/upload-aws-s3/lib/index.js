@@ -40,6 +40,14 @@ module.exports = {
 
     const ACL = getOr('public-read', ['params', 'ACL'], config);
 
+    // if ACL is private and baseUrl is set, we need to warn the user
+    // signed url's will not have the baseUrl prefix
+    if (ACL === 'private' && baseUrl) {
+      process.emitWarning(
+        'You are using a private ACL with a baseUrl. This is not recommended as the files will be accessible without the baseUrl prefix.'
+      );
+    }
+
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
