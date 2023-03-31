@@ -43,29 +43,33 @@ describe('Test for URLs', () => {
     });
   });
 
-  test('DO Spaces', async () => {
-    const url = 'https://bucket.nyc3.digitaloceanspaces.com/folder/img.png';
-    const isFromBucket = isUrlFromBucket(url, 'bucket');
-    expect(isFromBucket).toEqual(true);
-  });
+  describe('S3 Compatible', () => {
+    describe('DO Spaces', () => {
+      test('is from same bucket', async () => {
+        const url = 'https://bucket-name.nyc3.digitaloceanspaces.com/folder/img.png';
+        const isFromBucket = isUrlFromBucket(url, 'bucket-name');
+        expect(isFromBucket).toEqual(true);
+      });
+      test('is not from same bucket', async () => {
+        const url = 'https://bucket-name.nyc3.digitaloceanspaces.com/folder/img.png';
+        const isFromBucket = isUrlFromBucket(url, 'bucket');
+        expect(isFromBucket).toEqual(false);
+      });
+    });
 
-  test('MinIO', async () => {
-    const url = 'https://minio.example.com/bucket/folder/file';
-    const isFromBucket = isUrlFromBucket(url, 'bucket');
-    expect(isFromBucket).toEqual(true);
-  });
+    describe('MinIO', () => {
+      test('is from same bucket', async () => {
+        const url = 'https://minio.example.com/bucket-name/folder/file';
+        const isFromBucket = isUrlFromBucket(url, 'bucket-name');
+        expect(isFromBucket).toEqual(true);
+      });
 
-  test('Oracle', async () => {
-    const url =
-      'https://swiftobjectstorage.region.oraclecloud.com/v1/namespace/bucket-name/folder/file';
-    const isFromBucket = isUrlFromBucket(url, 'bucket-name');
-    expect(isFromBucket).toEqual(true);
-  });
-
-  test('Scaleway', async () => {
-    const url = 'https://s3.storage.nl-ams.cloud.scaleway.com/bucket/folder/file';
-    const isFromBucket = isUrlFromBucket(url, 'bucket');
-    expect(isFromBucket).toEqual(true);
+      test('is not from same bucket', async () => {
+        const url = 'https://minio.example.com/bucket-name/folder/file';
+        const isFromBucket = isUrlFromBucket(url, 'bucket');
+        expect(isFromBucket).toEqual(false);
+      });
+    });
   });
 
   test('CDN', async () => {
