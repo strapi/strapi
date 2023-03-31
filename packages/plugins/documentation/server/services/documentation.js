@@ -2,47 +2,51 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const _ = require('lodash');
+const { produce } = require('immer');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
-
 const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 const defaultOpenApiComponents = require('./utils/default-openapi-components');
+const { getPluginsThatNeedDocumentation } = require('./utils/get-plugins-that-need-documentation');
 
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
-  const registeredDocs = [];
+  const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(config);
+  const overrideService = strapi.plugin('documentation').service('override');
 
   return {
-    registerDoc(doc, pluginOrigin) {
-      const plugins = this.getPluginsThatNeedDocumentation();
-      let registeredDoc = doc;
-
-      if (pluginOrigin) {
-        if (!plugins.includes(pluginOrigin)) {
-          return strapi.log.info(
-            `@strapi/documentation will not use the override provided by ${pluginOrigin} since the plugin was not specified in the x-strapi-config.plugins array`
-          );
-        }
-      } else {
-        strapi.log.warn(
-          '@strapi/documentation received an override that did not specify its origin, this could cause unexpected schema generation'
-        );
-      }
-
-      // parseYaml
-      if (typeof doc === 'string') {
-        registeredDoc = require('yaml').parse(registeredDoc);
-      }
-      // receive an object we can register it directly
-      registeredDocs.push(registeredDoc);
+    /**
+     *
+     * @deprecated
+     * registerDoc is deprecated it will be removed in the next major release,
+     * use strapi.plugin('documentation').service('override').registerOverride() instead
+     * @param {object} doc - The openapi specifcation to override
+     * @param {object} options - The options to override the documentation
+     * @param {string} options.pluginOrigin - The name of the plugin that is overriding the documentation
+     * @param {string[]} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
+     */
+    registerDoc(doc, options) {
+      strapi.log.warn(
+        "@strapi/plugin-documentation has deprecated registerDoc, use strapi.plugin('documentation').service('override').registerOverride() instead"
+      );
+      overrideService.registerOverride(doc, options);
     },
+
     getDocumentationVersion() {
-      return _.get(config, 'info.version');
+      return config.info.version;
     },
 
     getFullDocumentationPath() {
       return path.join(strapi.dirs.app.extensions, 'documentation', 'documentation');
+    },
+
+    /**
+     *
+     * @deprecated
+     * This method will be removed in the next major release
+     */
+    getCustomDocumentationPath() {
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'config', 'settings.json');
     },
 
     getDocumentationVersions() {
@@ -55,7 +59,8 @@ module.exports = ({ strapi }) => {
                 path.resolve(this.getFullDocumentationPath(), version, 'full_documentation.json')
               )
             );
-            const generatedDate = _.get(doc, ['info', 'x-generation-date'], null);
+
+            const generatedDate = doc.info['x-generation-date'];
 
             return { version, generatedDate, url: '' };
           } catch (err) {
@@ -107,29 +112,8 @@ module.exports = ({ strapi }) => {
       await fs.remove(path.join(this.getFullDocumentationPath(), version));
     },
 
-    getPluginsThatNeedDocumentation() {
-      // Default plugins that need documentation generated
-      const defaultPlugins = ['upload', 'users-permissions'];
-      // User specified plugins that need documentation generated
-      const userPluginsConfig = config['x-strapi-config'].plugins;
-
-      if (userPluginsConfig === null) {
-        // The user hasn't specified any plugins to document, use the defaults
-        return defaultPlugins;
-      }
-
-      if (userPluginsConfig.length) {
-        // The user has specified certain plugins to document, use them
-        return userPluginsConfig;
-      }
-
-      // The user has specified that no plugins should be documented
-      return [];
-    },
-
     getPluginAndApiInfo() {
-      const plugins = this.getPluginsThatNeedDocumentation();
-      const pluginsToDocument = plugins.map((plugin) => {
+      const pluginsToDocument = pluginsThatNeedDocumentation.map((plugin) => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -152,81 +136,114 @@ module.exports = ({ strapi }) => {
      * @description - Creates the Swagger json files
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
-      let paths = {};
-      let schemas = {};
       const apis = this.getPluginAndApiInfo();
-      for (const api of apis) {
-        const apiName = api.name;
-        // TODO: check if this is necessary
-        const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
-        // TODO: check if this is necessary
-        const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
+      const apisThatNeedGeneratedDocumentation = apis.filter(
+        ({ name }) => !overrideService.excludedFromGeneration.includes(name)
+      );
 
-        const apiPath = builApiEndpointPath(api);
-
-        if (!apiPath) {
-          continue;
+      // Initialize the generated documentation with defaults
+      let generatedDocumentation = produce(
+        {
+          ...config,
+          components: defaultOpenApiComponents,
+        },
+        (draft) => {
+          if (draft.servers.length === 0) {
+            // When no servers found set the defaults
+            const serverUrl = getAbsoluteServerUrl(strapi.config);
+            const apiPath = strapi.config.get('api.rest.prefix');
+            draft.servers = [
+              {
+                url: `${serverUrl}${apiPath}`,
+                description: 'Development server',
+              },
+            ];
+          }
+          // Set the generated date
+          draft.info['x-generation-date'] = new Date().toISOString();
+          // Set the plugins that need documentation
+          draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
+          // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
+          delete draft['x-strapi-config'].mutateDocumentation;
         }
+      );
+      // Generate the documentation for each api and update the generatedDocumentation
+      for (const api of apisThatNeedGeneratedDocumentation) {
+        const apiName = api.name;
 
-        // TODO: check if this is necessary
+        const newApiPath = builApiEndpointPath(api);
+        const generatedSchemas = buildComponentSchema(api);
+
+        // TODO: To be confirmed, do we still need to write these files...?
+        const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
+        const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
         await fs.ensureFile(apiDocPath);
-        await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
+        await fs.writeJson(apiDocPath, newApiPath, { spaces: 2 });
 
-        const componentSchema = buildComponentSchema(api);
+        generatedDocumentation = produce(generatedDocumentation, (draft) => {
+          if (generatedSchemas) {
+            draft.components = {
+              schemas: { ...draft.components.schemas, ...generatedSchemas },
+            };
+          }
 
-        schemas = {
-          ...schemas,
-          ...componentSchema,
-        };
-
-        paths = { ...paths, ...apiPath };
+          if (newApiPath) {
+            draft.paths = { ...draft.paths, ...newApiPath };
+          }
+        });
       }
 
+      // When overrides are present update the generatedDocumentation
+      if (overrideService.registeredOverrides.length > 0) {
+        generatedDocumentation = produce(generatedDocumentation, (draft) => {
+          overrideService.registeredOverrides.forEach((override) => {
+            // Only run the overrrides when no override version is provided,
+            // or when the generated documentation version matches the override version
+            if (!override?.info?.version || override.info.version === version) {
+              if (override.tags) {
+                // Merge override tags with the generated tags
+                draft.tags = draft.tags || [];
+                draft.tags.push(...override.tags);
+              }
+
+              if (override.paths) {
+                // Merge override paths with the generated paths
+                // The override will add a new path or replace the value of an existing path
+                draft.paths = { ...draft.paths, ...override.paths };
+              }
+
+              if (override.components) {
+                Object.entries(override.components).forEach(([overrideKey, overrideValue]) => {
+                  draft.components[overrideKey] = draft.components[overrideKey] || {};
+                  // Merge override components with the generated components,
+                  // The override will add a new component or replace the value of an existing component
+                  draft.components[overrideKey] = {
+                    ...draft.components[overrideKey],
+                    ...overrideValue,
+                  };
+                });
+              }
+            }
+          });
+        });
+      }
+
+      // Escape hatch, allow the user to provide a mutateDocumentation function that can alter any part of
+      // the generated documentation before it is written to the file system
+      const userMutatesDocumentation = config['x-strapi-config'].mutateDocumentation;
+      const finalDocumentation = userMutatesDocumentation
+        ? produce(generatedDocumentation, userMutatesDocumentation)
+        : generatedDocumentation;
+
+      // Get the file path for the final documentation
       const fullDocJsonPath = path.join(
         this.getFullDocumentationPath(),
         version,
         'full_documentation.json'
       );
-
-      // Set config defaults
-      const serverUrl = getAbsoluteServerUrl(strapi.config);
-      const apiPath = strapi.config.get('api.rest.prefix');
-      _.set(config, 'servers', [
-        {
-          url: `${serverUrl}${apiPath}`,
-          description: 'Development server',
-        },
-      ]);
-      _.set(config, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(config, ['info', 'version'], version);
-      _.set(config, ['x-strapi-config', 'plugins'], this.getPluginsThatNeedDocumentation());
-      // Prepare final doc with default config and generated paths
-      const finalDoc = { ...config, paths };
-      // Add the default components to the final doc
-      _.set(finalDoc, 'components', defaultOpenApiComponents);
-      // Merge the generated component schemas with the defaults
-      _.merge(finalDoc.components, { schemas });
-      // Apply the the registered overrides
-      registeredDocs.forEach((doc) => {
-        // Merge ovveride tags with the generated tags
-        finalDoc.tags = finalDoc.tags || [];
-        finalDoc.tags.push(...(doc.tags || []));
-        // Merge override paths with the generated paths,
-        // If the override has common properties with the finalDoc,
-        // the properties specificed on the override will replace those found on the final doc
-        _.assign(finalDoc.paths, doc.paths);
-        // Add components
-        _.forEach(doc.components || {}, (val, key) => {
-          finalDoc.components[key] = finalDoc.components[key] || {};
-          // Merge override components with the generated components,
-          // If the override has common properties with the finalDoc,
-          // the properties specificed on the override will replace those found on the final doc
-          _.assign(finalDoc.components[key], val);
-        });
-      });
-
+      // Write the documentation to the file system
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, finalDocumentation, { spaces: 2 });
     },
   };
 };
