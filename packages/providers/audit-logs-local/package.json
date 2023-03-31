@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-audit-logs-local",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "Local provider for strapi audit logs",
   "keywords": [
     "audit-logs",

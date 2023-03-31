@@ -18,7 +18,7 @@ import {
 } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher } from '../utils';
+import { createDispatcher, trimTrailingSlash } from '../utils';
 
 interface ITransferTokenAuth {
   type: 'token';
@@ -227,7 +227,9 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     let ws: WebSocket;
     this.assertValidProtocol(url);
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}/pull`;
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
+    )}${TRANSFER_PATH}/pull`;
 
     // No auth defined, trying public access for transfer
     if (!auth) {
