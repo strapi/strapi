@@ -81,7 +81,7 @@ module.exports = {
        * @param {Object} customParams
        * @returns {Promise<{url: string}>}
        */
-      getSignedUrl(file, customParams = {}) {
+      getSignedUrl(file) {
         // Do not sign the url if it does not come from the same bucket.
         if (!isUrlFromBucket(file.url, config.params.Bucket, baseUrl)) {
           return { url: file.url };
