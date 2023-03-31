@@ -1,9 +1,9 @@
 'use strict';
 
 const { omit } = require('lodash');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
-const constants = require('../services/constants');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../test/helpers/request');
+const constants = require('../../../packages/core/admin/server/services/constants');
 
 describe('Admin Transfer Token CRUD (api)', () => {
   let rq;

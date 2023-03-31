@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash/fp');
 
-jest.mock('../../server/config', () => {
-  const config = jest.requireActual('../../server/config');
+jest.mock('../../../../packages/core/upload/server/config', () => {
+  const config = jest.requireActual('../../../../packages/core/upload/server/config');
   return _.set('default.sizeLimit', 1000, config); // 1kb
 });
 

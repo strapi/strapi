@@ -1,9 +1,9 @@
 'use strict';
 
 const { prop, difference, map, uniq } = require('lodash/fp');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
+const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 
 const toIds = (arr) => uniq(map(prop('id'))(arr));
 

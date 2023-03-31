@@ -2,9 +2,9 @@
 
 const { omit } = require('lodash/fp');
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createAuthRequest } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
