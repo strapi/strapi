@@ -7,6 +7,9 @@ set -e
 
 distTag=$DIST_TAG
 
+# trim distTag for whitespace at the start and end
+distTag=$(echo "$distTag" | xargs)
+
 if [[ -z "$distTag" ]]; then
   echo "Please enter the dist-tag you want to remove"
   read -r distTag
