@@ -1,7 +1,7 @@
 'use strict';
 
-const { createAuthRequest } = require('../../../../test/helpers/request');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
 
 let strapi;
 let rq;

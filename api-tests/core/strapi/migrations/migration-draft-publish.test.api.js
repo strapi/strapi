@@ -2,10 +2,10 @@
 
 const _ = require('lodash');
 
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
-const modelsUtils = require('../../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../test/helpers/request');
+const modelsUtils = require('../../../../test/helpers/models');
 
 let builder;
 let strapi;

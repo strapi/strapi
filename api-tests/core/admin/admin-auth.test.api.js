@@ -1,9 +1,9 @@
 'use strict';
 
 // Helpers.
-const { createAuthRequest } = require('../../../../../test/helpers/request');
-const { createStrapiInstance, superAdmin } = require('../../../../../test/helpers/strapi');
-const { createUtils } = require('../../../../../test/helpers/utils');
+const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance, superAdmin } = require('../../../../test/helpers/strapi');
+const { createUtils } = require('../../../../test/helpers/utils');
 
 const internals = {
   role: null,

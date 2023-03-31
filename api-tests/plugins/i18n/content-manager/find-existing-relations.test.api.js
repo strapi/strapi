@@ -2,9 +2,9 @@
 
 const { pick } = require('lodash/fp');
 
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../test/helpers/request');
 
 let strapi;
 let rq;

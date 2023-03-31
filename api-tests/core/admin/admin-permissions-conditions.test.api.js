@@ -1,10 +1,10 @@
 'use strict';
 
 const { prop } = require('lodash/fp');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createRequest, createAuthRequest } = require('../../../../../test/helpers/request');
-const { createUtils } = require('../../../../../test/helpers/utils');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createRequest, createAuthRequest } = require('../../../../test/helpers/request');
+const { createUtils } = require('../../../../test/helpers/utils');
 
 describe('Admin Permissions - Conditions', () => {
   let strapi;

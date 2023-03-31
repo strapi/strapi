@@ -1,9 +1,9 @@
 'use strict';
 
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createContentAPIRequest } = require('../../../../../test/helpers/request');
-const modelsUtils = require('../../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createContentAPIRequest } = require('../../../../test/helpers/request');
+const modelsUtils = require('../../../../test/helpers/models');
 
 let strapi;
 let rq;

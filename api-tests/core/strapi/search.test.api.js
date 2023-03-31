@@ -1,12 +1,12 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 const {
   createContentAPIRequest,
   transformToRESTResource,
-} = require('../../../../test/helpers/request');
+} = require('../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let rq;

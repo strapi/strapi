@@ -3,12 +3,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const {
   createContentAPIRequest,
   createAuthRequest,
-} = require('../../../../../../test/helpers/request');
+} = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 

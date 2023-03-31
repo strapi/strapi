@@ -1,11 +1,11 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const {
   createContentAPIRequest,
   transformToRESTResource,
-} = require('../../../../../test/helpers/request');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
+} = require('../../../../test/helpers/request');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
 
 let strapi;
 let rq;

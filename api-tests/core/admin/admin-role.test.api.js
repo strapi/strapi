@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../test/helpers/request');
 
 const data = {
   rolesWithUsers: [],

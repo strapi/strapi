@@ -1,8 +1,8 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
-const { createAuthRequest, createRequest } = require('../../../../../../test/helpers/request');
-const { createUtils } = require('../../../../../../test/helpers/utils');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createAuthRequest, createRequest } = require('../../../../../test/helpers/request');
+const { createUtils } = require('../../../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 

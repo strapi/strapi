@@ -1,8 +1,8 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createRequest, createAuthRequest } = require('../../../../test/helpers/request');
-const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const { createRequest, createAuthRequest } = require('../../../test/helpers/request');
+const { createTestBuilder } = require('../../../test/helpers/builder');
 
 // Test a simple default API with no relations
 describe('Simple Test GraphQL Users API End to End', () => {

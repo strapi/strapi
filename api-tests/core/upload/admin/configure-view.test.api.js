@@ -1,10 +1,10 @@
 'use strict';
 
 // Helpers.
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
-const { createUtils } = require('../../../../../test/helpers/utils');
+const { createTestBuilder } = require('../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createUtils } = require('../../../../test/helpers/utils');
 
 const { ALLOWED_SORT_STRINGS } = require('../../server/constants');
 
