@@ -12,10 +12,8 @@ module.exports = async (strapi) => {
 
   const map = await loadFiles(strapi.dirs.dist.components, '*/*.*(js|json)');
 
-  return Object.keys(map).reduce((acc, category) => {
-    Object.keys(map[category]).forEach((key) => {
-      const schema = map[category][key];
-
+  Object.entries(map).forEach(([category, schemas]) => {
+    const entries = Object.entries(schemas).map(([key, schema]) => {
       if (!schema.collectionName) {
         // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
         const filePath = join(strapi.dirs.app.components, category, schema.__filename__);
@@ -25,18 +23,21 @@ module.exports = async (strapi) => {
         );
       }
 
-      const uid = `${category}.${key}`;
+      const definition = {
+        schema: Object.assign(schema, {
+          __schema__: _.cloneDeep(schema),
+          category,
+          modelName: key,
+          info: Object.assign(schema.info, {
+            singularName: key,
+          }),
+        }),
+      };
 
-      acc[uid] = Object.assign(schema, {
-        __schema__: _.cloneDeep(schema),
-        uid,
-        category,
-        modelType: 'component',
-        modelName: key,
-        globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
-      });
-    });
+      return [key, definition];
+    }, {});
 
-    return acc;
-  }, {});
+    const components = Object.fromEntries(entries);
+    strapi.container.get('components').add(category, components);
+  });
 };

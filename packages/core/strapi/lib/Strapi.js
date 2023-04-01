@@ -31,6 +31,7 @@ const createStrapiFetch = require('./utils/fetch');
 const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
+const componentsRegistry = require('./core/registries/components');
 const servicesRegistry = require('./core/registries/services');
 const policiesRegistry = require('./core/registries/policies');
 const middlewaresRegistry = require('./core/registries/middlewares');
@@ -87,6 +88,7 @@ class Strapi {
     // Register every Strapi registry in the container
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
+    this.container.register('components', componentsRegistry(this));
     this.container.register('services', servicesRegistry(this));
     this.container.register('policies', policiesRegistry(this));
     this.container.register('middlewares', middlewaresRegistry(this));
@@ -158,6 +160,14 @@ class Strapi {
 
   contentType(name) {
     return this.container.get('content-types').get(name);
+  }
+
+  get components() {
+    return this.container.get('components').getAll();
+  }
+
+  component(name) {
+    return this.container.get('components').get(name);
   }
 
   get policies() {
@@ -353,7 +363,7 @@ class Strapi {
   }
 
   async loadComponents() {
-    this.components = await loaders.loadComponents(this);
+    await loaders.loadComponents(this);
   }
 
   async loadMiddlewares() {
