@@ -211,7 +211,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .test({
             name: 'Check max component nesting is 1 lvl',
             test(compoUID) {
-              const targetCompo = strapi.components[compoUID];
+              const targetCompo = strapi.component(compoUID);
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 
               if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {

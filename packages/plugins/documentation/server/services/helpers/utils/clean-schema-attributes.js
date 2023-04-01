@@ -93,7 +93,7 @@ const cleanSchemaAttributes = (
         break;
       }
       case 'component': {
-        const componentAttributes = strapi.components[attribute.component].attributes;
+        const componentAttributes = strapi.component(attribute.component).attributes;
         const rawComponentSchema = {
           type: 'object',
           properties: {
@@ -124,7 +124,7 @@ const cleanSchemaAttributes = (
       }
       case 'dynamiczone': {
         const components = attribute.components.map((component) => {
-          const componentAttributes = strapi.components[component].attributes;
+          const componentAttributes = strapi.component(component).attributes;
           const rawComponentSchema = {
             type: 'object',
             properties: {

@@ -29,7 +29,7 @@ module.exports = ({ strapi }) => ({
   findComponent(uid) {
     const { toContentManagerModel } = getService('data-mapper');
 
-    const component = strapi.components[uid];
+    const component = strapi.component(uid);
 
     return isNil(component) ? component : toContentManagerModel(component);
   },
