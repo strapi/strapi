@@ -102,6 +102,9 @@ const loadPlugins = async (strapi) => {
     }
 
     const pluginServer = loadConfigFile(serverEntrypointPath);
+    if (pluginName === 'myplugin') {
+      // console.dir(pluginServer, { depth: Infinity})
+    }
     plugins[pluginName] = {
       ...defaultPlugin,
       ...pluginServer,

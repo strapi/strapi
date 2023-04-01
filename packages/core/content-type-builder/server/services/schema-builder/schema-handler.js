@@ -205,6 +205,8 @@ module.exports = function createSchemaHandler(infos) {
         return;
       }
 
+      // console.log(initialState);
+
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 

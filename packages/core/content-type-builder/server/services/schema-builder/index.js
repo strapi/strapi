@@ -8,6 +8,9 @@ const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
 const createContentTypeBuilder = require('./content-type-builder');
 
+let logged = false;
+let logged1 = false;
+
 /**
  * Creates a content type schema builder instance
  *
@@ -17,16 +20,38 @@ module.exports = function createBuilder() {
   const components = Object.keys(strapi.components).map((key) => {
     const compo = strapi.component(key);
 
-    return {
+    if (compo.modelName === 'my-component') {
+      console.log(compo);
+    } else if (!logged) {
+      logged = true;
+      console.log(compo);
+    }
+
+    const dir = compo.plugin
+      ? join(strapi.dirs.app.extensions, compo.plugin, 'components', compo.info.singularName)
+      : join(strapi.dirs.app.components, compo.category);
+
+    const filename = compo.plugin ? 'schema.json' : compo.__filename__;
+
+    const result = {
       category: compo.category,
       modelName: compo.modelName,
       plugin: compo.modelName,
       uid: compo.uid,
-      filename: compo.__filename__,
-      dir: compo.__dirname__,
+      filename,
+      dir,
       schema: compo.__schema__,
       config: compo.config,
     };
+
+    if (compo.modelName === 'my-component') {
+      console.log(result);
+    } else if (!logged1) {
+      logged1 = true;
+      console.log(result);
+    }
+
+    return result;
   });
 
   const contentTypes = Object.keys(strapi.contentTypes).map((key) => {

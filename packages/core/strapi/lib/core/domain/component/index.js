@@ -27,13 +27,23 @@ const createComponent = (uid, definition = {}) => {
 
   const { schema } = cloneDeep(definition);
 
-  return Object.assign(schema, {
+  Object.assign(schema, {
+    __schema__: definition.schema,
     uid,
     modelType: 'component',
     modelName: schema.info.singularName,
     category: getCategoryFromUid(uid),
     globalId: schema.globalId || upperFirst(camelCase(`component_${uid}`)),
   });
+
+  if (uid.includes('::')) {
+    const pluginName = uid.split('::')[1].split('.')[0];
+    Object.assign(schema, {
+      plugin: pluginName,
+    });
+  }
+
+  return schema;
 };
 
 module.exports = {

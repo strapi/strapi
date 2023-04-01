@@ -1,7 +1,6 @@
 'use strict';
 
 const { join } = require('path');
-const _ = require('lodash');
 const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
@@ -16,7 +15,7 @@ module.exports = async (strapi) => {
     const entries = Object.entries(schemas).map(([key, schema]) => {
       if (!schema.collectionName) {
         // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
-        const filePath = join(schema.__dirname__, schema.__filename__);
+        const filePath = join(strapi.dirs.app.components, category, schema.__filename__);
 
         return strapi.stopWithError(
           `Component ${key} is missing a "collectionName" property.\nVerify file ${filePath}.`
@@ -25,7 +24,6 @@ module.exports = async (strapi) => {
 
       const definition = {
         schema: Object.assign(schema, {
-          __schema__: _.cloneDeep(schema),
           info: Object.assign(schema.info, {
             singularName: key,
           }),

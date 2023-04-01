@@ -34,7 +34,7 @@ const editCategory = async (name, infos) => {
     // only edit the components in this specific category
     if (component.category !== name) return;
 
-    component.setUID(newUID).setDir(join(component.__dirname__, newName));
+    component.setUID(newUID).setDir(join(component.dir, newName));
 
     builder.components.forEach((compo) => {
       compo.updateComponent(oldUID, newUID);

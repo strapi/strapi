@@ -2,7 +2,6 @@
 	"collectionName": "components_myplugin_mycomponent",
 	"info": {
 		"displayName": "My Component",
-		"category": "my-plugin",
 		"singularName": "my-component"
 	},
 	"attributes": {
