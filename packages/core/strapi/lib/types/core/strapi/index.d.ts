@@ -100,6 +100,11 @@ export interface Strapi {
   readonly components: any;
 
   /**
+   * Find a component using its unique identifier
+   */
+  component(uid: string): any;
+
+  /**
    * The custom fields registry
    *
    * It returns the custom fields interface
