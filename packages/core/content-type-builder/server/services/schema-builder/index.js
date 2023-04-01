@@ -15,7 +15,7 @@ const createContentTypeBuilder = require('./content-type-builder');
  */
 module.exports = function createBuilder() {
   const components = Object.keys(strapi.components).map((key) => {
-    const compo = strapi.components[key];
+    const compo = strapi.component(key);
 
     return {
       category: compo.category,

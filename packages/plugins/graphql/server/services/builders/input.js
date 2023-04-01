@@ -97,7 +97,7 @@ module.exports = (context) => {
             // Components
             else if (isComponent(attribute)) {
               const isRepeatable = attribute.repeatable === true;
-              const component = strapi.components[attribute.component];
+              const component = strapi.component(attribute.component);
               const componentInputType = getComponentInputName(component);
 
               if (isRepeatable) {

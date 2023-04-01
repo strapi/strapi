@@ -9,7 +9,6 @@ const componentSchemaValidator = yup.object().shape({
       .shape({
         displayName: yup.string().required(),
         singularName: yup.string().isKebabCase().required(),
-        category: yup.string().isKebabCase().required(),
       })
       .required(),
     attributes: yup.object(),

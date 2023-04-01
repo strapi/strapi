@@ -74,16 +74,6 @@ const componentsRegistry = () => {
       }
     },
 
-    addAppComponents(newComponents) {
-      for (const rawComponentName of Object.keys(newComponents)) {
-        if (has(rawComponentName, components)) {
-          throw new Error(`Component ${rawComponentName} has already been registered.`);
-        }
-
-        components[rawComponentName] = newComponents[rawComponentName];
-      }
-    },
-
     /**
      * Wraps a component to extend it
      * @param {string} uid

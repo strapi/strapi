@@ -19,7 +19,7 @@ module.exports = {
     const componentService = getService('components');
 
     const data = Object.keys(strapi.components).map((uid) => {
-      return componentService.formatComponent(strapi.components[uid]);
+      return componentService.formatComponent(strapi.component(uid));
     });
 
     ctx.send({ data });
@@ -33,7 +33,7 @@ module.exports = {
   async getComponent(ctx) {
     const { uid } = ctx.params;
 
-    const component = strapi.components[uid];
+    const component = strapi.component(uid);
 
     if (!component) {
       return ctx.send({ error: 'component.notFound' }, 404);

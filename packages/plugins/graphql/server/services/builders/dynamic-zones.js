@@ -11,7 +11,7 @@ module.exports = ({ strapi }) => {
     const isEmpty = components.length === 0;
 
     const componentsTypeNames = components.map((componentUID) => {
-      const component = strapi.components[componentUID];
+      const component = strapi.component(componentUID);
 
       if (!component) {
         throw new ApplicationError(
@@ -30,7 +30,7 @@ module.exports = ({ strapi }) => {
           return ERROR_TYPE_NAME;
         }
 
-        return strapi.components[obj.__component].globalId;
+        return strapi.component(obj.__component).globalId;
       },
 
       definition(t) {
@@ -48,7 +48,7 @@ module.exports = ({ strapi }) => {
       if (!component) {
         throw new ApplicationError(
           `Component not found. expected one of: ${components
-            .map((uid) => strapi.components[uid].globalId)
+            .map((uid) => strapi.component(uid).globalId)
             .join(', ')}`
         );
       }

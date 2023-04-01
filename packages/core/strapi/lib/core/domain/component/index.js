@@ -12,19 +12,13 @@ const createComponent = (uid, definition = {}) => {
     throw new Error(`Component Definition is invalid for ${uid}'.\n${e.errors}`);
   }
 
-  const createdComponent = cloneDeep(definition);
-  const category = camelCase(createdComponent.schema.info.category);
+  const { schema } = cloneDeep(definition);
 
-  Object.assign(createdComponent.schema, {
-    __schema__: cloneDeep(createdComponent.schema),
+  return Object.assign(schema, {
     uid,
-    category,
     modelType: 'component',
-    modelName: createdComponent.schema.info.singularName,
-    globalId: createdComponent.schema.globalId || upperFirst(camelCase(`component_${uid}`)),
+    globalId: schema.globalId || upperFirst(camelCase(`component_${uid}`)),
   });
-
-  return createdComponent.schema;
 };
 
 module.exports = {

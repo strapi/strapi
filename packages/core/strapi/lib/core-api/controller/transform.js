@@ -65,14 +65,14 @@ const transformEntry = (entry, type) => {
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component') {
-      attributeValues[key] = transformComponent(property, strapi.components[attribute.component]);
+      attributeValues[key] = transformComponent(property, strapi.component(attribute.component));
     } else if (attribute && attribute.type === 'dynamiczone') {
       if (isNil(property)) {
         attributeValues[key] = property;
       }
 
       attributeValues[key] = property.map((subProperty) => {
-        return transformComponent(subProperty, strapi.components[subProperty.__component]);
+        return transformComponent(subProperty, strapi.component(subProperty.__component));
       });
     } else if (attribute && attribute.type === 'media') {
       const data = transformEntry(property, strapi.contentType('plugin::upload.file'));

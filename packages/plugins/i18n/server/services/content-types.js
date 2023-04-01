@@ -126,12 +126,12 @@ const removeIdsMut = (model, entry) => {
     if (attr.type === 'dynamiczone' && isArray(value)) {
       value.forEach((compo) => {
         if (has('__component', compo)) {
-          const model = strapi.components[compo.__component];
+          const model = strapi.component(compo.__component);
           removeIdsMut(model, compo);
         }
       });
     } else if (attr.type === 'component') {
-      const model = strapi.components[attr.component];
+      const model = strapi.component(attr.component);
       if (isArray(value)) {
         value.forEach((compo) => removeIdsMut(model, compo));
       } else {
