@@ -26,10 +26,9 @@ module.exports = async (strapi) => {
       const definition = {
         schema: Object.assign(schema, {
           __schema__: _.cloneDeep(schema),
-          category,
-          modelName: key,
           info: Object.assign(schema.info, {
             singularName: key,
+            category,
           }),
         }),
       };

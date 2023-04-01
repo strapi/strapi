@@ -17,6 +17,8 @@ const createComponent = (uid, definition = {}) => {
   return Object.assign(schema, {
     uid,
     modelType: 'component',
+    modelName: schema.info.singularName,
+    category: schema.info.category,
     globalId: schema.globalId || upperFirst(camelCase(`component_${uid}`)),
   });
 };
