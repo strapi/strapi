@@ -26,7 +26,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@sentry/node": "6.19.7",
+    "@sentry/node": "7.46.0",
     "@strapi/design-system": "1.6.6",
     "@strapi/helper-plugin": "4.9.0",
     "@strapi/icons": "1.6.5"
