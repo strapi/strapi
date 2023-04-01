@@ -28,7 +28,6 @@ module.exports = async (strapi) => {
           __schema__: _.cloneDeep(schema),
           info: Object.assign(schema.info, {
             singularName: key,
-            category,
           }),
         }),
       };
