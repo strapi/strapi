@@ -108,7 +108,7 @@ const buildNode = (model, attributeName, attribute) => {
   }
 
   if (attribute.type === 'component') {
-    const component = strapi.components[attribute.component];
+    const component = strapi.component(attribute.component);
     return { ...node, children: buildDeepAttributesCollection(component) };
   }
 

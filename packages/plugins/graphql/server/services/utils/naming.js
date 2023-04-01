@@ -105,7 +105,7 @@ module.exports = ({ strapi }) => {
    * @return {string}
    */
   const getComponentNameFromAttribute = (attribute) => {
-    return strapi.components[attribute.component].globalId;
+    return strapi.component(attribute.component).globalId;
   };
 
   /**

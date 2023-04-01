@@ -43,7 +43,7 @@ module.exports = async (uid, entity, files) => {
 
       if (attr.type === 'component') {
         modelUID = attr.component;
-        tmpModel = strapi.components[attr.component];
+        tmpModel = strapi.component(attr.component);
       } else if (attr.type === 'dynamiczone') {
         const entryIdx = path[i + 1]; // get component index
         const value = _.get(entity, [...currentPath, entryIdx]);
@@ -51,7 +51,7 @@ module.exports = async (uid, entity, files) => {
         if (!value) return {};
 
         modelUID = value.__component; // get component type
-        tmpModel = strapi.components[modelUID];
+        tmpModel = strapi.component(modelUID);
       } else if (attr.type === 'relation') {
         modelUID = attr.target;
         tmpModel = strapi.getModel(modelUID);
