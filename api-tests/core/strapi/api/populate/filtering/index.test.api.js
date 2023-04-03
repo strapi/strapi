@@ -2,9 +2,9 @@
 
 const { propEq, omit } = require('lodash/fp');
 
-const { createTestBuilder } = require('../../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
-const { createContentAPIRequest } = require('../../../../../../test/helpers/request');
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createContentAPIRequest } = require('api-tests/request');
 
 const builder = createTestBuilder();
 

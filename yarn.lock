@@ -7713,7 +7713,6 @@ __metadata:
     resolve-cwd: 3.0.0
     semver: 7.3.8
     statuses: 2.0.1
-    supertest: 6.3.3
     typescript: 4.6.2
     uuid: ^8.3.2
   bin:
@@ -10235,6 +10234,17 @@ __metadata:
   checksum: 985163db2292fac9e5a1e072bf99f1b5baccf196e4de25a0b0b81865ebddeb3b3eb4480734ef0a2ac8c002845396b91aa89121f5b84f93981a4658164a9ec6e9
   languageName: node
   linkType: hard
+
+"api-tests@workspace:packages/utils/api-tests":
+  version: 0.0.0-use.local
+  resolution: "api-tests@workspace:packages/utils/api-tests"
+  dependencies:
+    dotenv: 14.2.0
+    lodash: 4.17.21
+    qs: 6.11.1
+    supertest: 6.3.3
+  languageName: unknown
+  linkType: soft
 
 "apollo-datasource@npm:^3.3.2":
   version: 3.3.2

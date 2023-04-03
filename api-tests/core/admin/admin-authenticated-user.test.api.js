@@ -1,8 +1,8 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const { createAuthRequest, createRequest } = require('../../../test/helpers/request');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest, createRequest } = require('api-tests/request');
 
 describe('Authenticated User', () => {
   let rq;

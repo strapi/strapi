@@ -1,12 +1,12 @@
 'use strict';
 
 // Helpers.
-const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const { createContentAPIRequest } = require('../../../test/helpers/request');
-const { createTestBuilder } = require('../../../test/helpers/builder');
-const modelsUtils = require('../../../test/helpers/models');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createContentAPIRequest } = require('api-tests/request');
+const { createTestBuilder } = require('api-tests/builder');
+const modelsUtils = require('api-tests/models');
 
-const form = require('../../../test/helpers/generators');
+const form = require('api-tests/generators');
 
 const cleanDate = (entry) => {
   delete entry.updatedAt;

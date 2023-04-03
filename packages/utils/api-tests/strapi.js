@@ -3,7 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const dotenv = require('dotenv');
-const strapi = require('../../packages/core/strapi/lib');
+const strapi = require('../../core/strapi/lib');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {
@@ -15,7 +15,7 @@ const superAdminCredentials = {
 
 const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password']);
 
-const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
+const TEST_APP_URL = path.resolve(__dirname, '../../../testApp');
 
 const createStrapiInstance = async ({
   ensureSuperAdmin = true,

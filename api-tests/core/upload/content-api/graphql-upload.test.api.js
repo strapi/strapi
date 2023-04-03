@@ -3,8 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
 
 let strapi;
 let rq;

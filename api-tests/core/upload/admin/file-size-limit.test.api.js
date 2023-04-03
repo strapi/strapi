@@ -9,9 +9,9 @@ jest.mock('../../../../packages/core/upload/server/config', () => {
   return _.set('default.sizeLimit', 1000, config); // 1kb
 });
 
-const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
 
 const builder = createTestBuilder();
 let strapi;

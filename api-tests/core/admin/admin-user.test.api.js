@@ -1,9 +1,9 @@
 'use strict';
 
 const { omit } = require('lodash/fp');
-const { createStrapiInstance } = require('../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../test/helpers/request');
-const { createUtils } = require('../../../test/helpers/utils');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
+const { createUtils } = require('api-tests/utils');
 
 const omitTimestamps = omit(['updatedAt', 'createdAt']);
 const omitRegistrationToken = omit(['registrationToken']);

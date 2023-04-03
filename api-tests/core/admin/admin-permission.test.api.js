@@ -2,8 +2,8 @@
 
 const _ = require('lodash');
 
-const { createAuthRequest } = require('../../../test/helpers/request');
-const { createStrapiInstance } = require('../../../test/helpers/strapi');
+const { createAuthRequest } = require('api-tests/request');
+const { createStrapiInstance } = require('api-tests/strapi');
 
 describe('Role CRUD End to End', () => {
   let rq;

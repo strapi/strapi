@@ -5,9 +5,9 @@ const path = require('path');
 
 const { pick, map } = require('lodash/fp');
 
-const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
 
 let strapi;
 let rq;

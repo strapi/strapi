@@ -3,7 +3,7 @@
 const { get } = require('lodash/fp');
 
 const modelsUtils = require('../models');
-const { sanitize } = require('../../../packages/core/utils');
+const { sanitize } = require('../../../core/utils');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 

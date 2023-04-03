@@ -2,12 +2,9 @@
 
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 const _ = require('lodash');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const {
-  createContentAPIRequest,
-  transformToRESTResource,
-} = require('../../../../../test/helpers/request');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createTestBuilder } = require('api-tests/builder');
+const { createContentAPIRequest, transformToRESTResource } = require('api-tests/request');
 
 const builder = createTestBuilder();
 let strapi;

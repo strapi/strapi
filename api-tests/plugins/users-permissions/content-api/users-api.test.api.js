@@ -2,8 +2,8 @@
 
 // Test a simple default API with no relations
 
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createContentAPIRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createContentAPIRequest } = require('api-tests/request');
 
 let strapi;
 let rq;
