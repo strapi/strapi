@@ -160,3 +160,9 @@ strapi.log.silly('Entered loop', { count: i });
 In these examples, we are logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. We are also passing in metadata as an object in the second parameter of each logging method.
 
 The messages logged by strapi.log will be output according to the logging configuration set by the user of the Strapi application. This configuration determines which messages are logged and where they are logged (e.g. console, file, etc.).
+
+### `strapi.cron`
+- [<Type>CronService</Type>](Cron)
+
+Module to schedule cron jobs for Strapi project. It is an instance of a custom Cron object.
+

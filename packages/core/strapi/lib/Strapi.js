@@ -118,12 +118,6 @@ class Strapi {
 
     this.log = createLogger(this.config.get('logger', {}));
 
-    // TODO put this in /docs/docs/API/Strapi
-    /**
-     * CRON module that use node-schedule
-     *
-     * TODO add every method
-     */
     this.cron = createCronService();
     // TODO put this in /docs/docs/API/Strapi
     /**
