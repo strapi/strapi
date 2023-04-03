@@ -114,21 +114,6 @@ class Strapi {
 
     this.eventHub = createEventHub();
 
-    // TODO put this in /docs/docs/API/Strapi
-    /**
-     * Object containing predefined logger functions
-     * Logs for Strapi startup
-     *
-     * logStats()
-     *  Display stats about Strapi instance
-     *  TODO list stats
-     * logFirstStartupMessage()
-     *  Display the first startup message (asking to create an administrator)
-     * logDefaultStartupMessage()
-     *  Display startup message
-     * logStartupMessage({ isInitialized } = {})
-     *  Call either logFirstStartupMessage or logDefaultStartupMessage depending on ENV_VAR STRAPI_HIDE_STARTUP_MESSAGE
-     */
     this.startupLogger = createStartupLogger(this);
 
     // TODO put this in /docs/docs/API/Strapi
