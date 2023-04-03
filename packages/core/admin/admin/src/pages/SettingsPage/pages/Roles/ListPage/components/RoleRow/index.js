@@ -19,9 +19,9 @@ const RoleRow = ({ id, name, description, usersCount, icons, rowIndex }) => {
     <Tr
       aria-rowindex={rowIndex}
       key={id}
-      {...onRowClick({
+      {...(icons.length > 0 && icons[1] ? onRowClick({
         fn: icons[1].onClick,
-      })}
+      }) : {})}
     >
       <Td maxWidth={pxToRem(130)}>
         <Typography ellipsis textColor="neutral800">
