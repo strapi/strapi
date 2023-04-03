@@ -116,12 +116,6 @@ class Strapi {
 
     this.startupLogger = createStartupLogger(this);
 
-    // TODO put this in /docs/docs/API/Strapi
-    /**
-     * Logger
-     *
-     * winston -> link to winston doc
-     */
     this.log = createLogger(this.config.get('logger', {}));
 
     // TODO put this in /docs/docs/API/Strapi

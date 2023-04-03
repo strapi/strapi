@@ -112,3 +112,33 @@ Module to manipulate events around Strapi project. It is an instance of [EventEm
 
 Object containing predefined logger functions. Used for Strapi startup. (do not use as a logger elsewhere)
 
+### `strapi.log`
+- [<Type>Winston</Type>](https://github.com/winstonjs/winston#creating-your-own-logger)
+
+A logger provided by Strapi that uses the Winston logging library. It is the result of calling the `winston.createLogger()` function with the configuration defined by the user of the Strapi application.
+
+The logger provides various methods for logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. The logging level can be set via the configuration to control which messages are logged.
+
+#### Examples
+```javascript
+// Log an error message
+strapi.log.error('Failed to start server', { error: err });
+
+// Log a warning message
+strapi.log.warn('Server is running in development mode');
+
+// Log an informational message
+strapi.log.info(`Server started on port ${PORT}`);
+
+// Log a verbose message
+strapi.log.verbose('Application state', { user: currentUser });
+
+// Log a debug message
+strapi.log.debug('API request received', { method: req.method, path: req.path });
+
+// Log a silly message
+strapi.log.silly('Entered loop', { count: i });
+```
+In these examples, we are logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. We are also passing in metadata as an object in the second parameter of each logging method.
+
+The messages logged by strapi.log will be output according to the logging configuration set by the user of the Strapi application. This configuration determines which messages are logged and where they are logged (e.g. console, file, etc.).
