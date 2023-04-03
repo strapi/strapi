@@ -50,7 +50,7 @@ const myClass = new Class();
 
 The `class.method()` method display the `param1` and then skip `param2` lines.
 
-Example usage:
+#### Examples
 
 ```javascript
 const { Class } = require('pathToClassFile');
@@ -75,7 +75,7 @@ for (const text of textLines) {
 
 The `name_of_the_function()` method display the `param1` and then skip `param2` lines.
 
-Example usage:
+#### Examples
 
 ```javascript
 const { name_of_the_function } = require('pathToFunctionFile');

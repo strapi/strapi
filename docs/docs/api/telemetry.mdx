@@ -1,0 +1,86 @@
+---
+title: Telemetry Service
+slug: /api/Telemetry
+tags:
+- module
+- public
+
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+import Type from '@site/docs/api/components/Type';
+
+# Telemetry
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The telemetry service is responsible for collecting and sending anonymous usage data to Strapi. This service is disabled by default, but can be enabled or disabled via configuration.
+
+## Usage Information
+The collected usage data is used to help Strapi improve the product by identifying areas of improvement, tracking feature adoption, and measuring performance. You can learn more about the usage data that is collected by visiting the following link:
+
+https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html
+
+## Module: Telemetry Service
+
+### createTelemetryInstance()
+
+- strapi: [<Type>Strapi</Type>](Strapi) - A strapi instance.
+
+The `createTelemetryInstance()` function returns an instance of the Telemetry service.
+
+#### Examples
+
+```javascript
+const createTelemetryInstance = require('path/to/telemetry');
+
+const telemetry = createTelemetryInstance(strapi);
+```
+
+## Methods
+
+### `telemetry.register()`
+
+Registers the telemetry instance.
+
+#### Examples
+
+```javascript
+telemetry.register();
+```
+
+### `telemetry.bootstrap()`
+
+Bootstraps the telemetry instance.
+
+#### Examples
+
+```javascript
+telemetry.bootstrap();
+```
+
+### `telemetry.destroy()`
+
+Destroys the telemetry instance.
+
+#### Examples
+
+```javascript
+telemetry.destroy();
+```
+
+### `telemetry.send(event, payload)`
+- event: <Type>String</Type> - The event to be sent.
+- payload: <Type>Object</Type> - The payload to be sent with the event.
+
+Sends telemetry event with the given payload.
+
+#### Examples
+
+```javascript
+telemetry.send('event_name', { key: 'value' });
+```

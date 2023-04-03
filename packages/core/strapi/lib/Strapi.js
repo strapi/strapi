@@ -119,7 +119,7 @@ class Strapi {
     this.log = createLogger(this.config.get('logger', {}));
 
     this.cron = createCronService();
-    // TODO put this in /docs/docs/API/Strapi
+
     /**
      * Service used to send statistical data to Amplitude
      */

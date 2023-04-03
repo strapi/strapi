@@ -166,3 +166,9 @@ The messages logged by strapi.log will be output according to the logging config
 
 Module to schedule cron jobs for Strapi project. It is an instance of a custom Cron object.
 
+### `strapi.telemetry`
+- [<Type>TelemetryService</Type>](Telemetry)
+
+The `strapi.telemetry` property provides access to the telemetry service instance. This service collects anonymous usage data about your Strapi application to help the Strapi team improve the product.
+
+By default, the telemetry service is enabled, but you can disable it by setting the telemetryDisabled property to true in your application's package.json file, or by setting the `STRAPI_TELEMETRY_DISABLED` environment variable to true. You can also disable telemetry programmatically by setting the isDisabled property of the `strapi.telemetry` instance to true.
