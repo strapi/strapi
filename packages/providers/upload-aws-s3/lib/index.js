@@ -10,7 +10,7 @@ const { getOr } = require('lodash/fp');
 const AWS = require('aws-sdk');
 const { isUrlFromBucket } = require('./utils');
 
-function assertUrlProtocol(url) {
+function hasUrlProtocol(url) {
   // Regex to test protocol like "http://", "https://"
   return /^\w*:\/\//.test(url);
 }
