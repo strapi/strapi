@@ -174,11 +174,12 @@ The `strapi.telemetry` property provides access to the telemetry service instanc
 By default, the telemetry service is enabled, but you can disable it by setting the telemetryDisabled property to true in your application's package.json file, or by setting the `STRAPI_TELEMETRY_DISABLED` environment variable to true. You can also disable telemetry programmatically by setting the isDisabled property of the `strapi.telemetry` instance to true.
 
 ### `strapi.requestContext`
-- <Type>Object</Type> - Context Storage
-  - 'run(store, cb)': <Type>Function</Type>
-    - 'store': <Type>Any</Type> - Value that should be retrieved
-    - 'cb': <Type>Function</Type> - Callback
-  - 'get()': <Type>Function</Type>
+- <Type>Object</Type> Context Storage
+
+  - `run(store, cb)`: <Type>Function</Type>
+    - `store`: <Type>Any</Type> Value that should be retrieved
+    - `cb`: <Type>Function</Type> Callback
+  - `get()` <Type>Function</Type>
 
 The request context stores the ctx object from KoaJS on each request. This allows users to have access to the context from anywhere through the Strapi instance.
 
