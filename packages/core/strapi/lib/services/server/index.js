@@ -54,32 +54,6 @@ const createServer = (strapi) => {
     mounted: false,
   };
 
-  /*
-    Strapi server object
-
-    app:
-      Koa server instance -> Link to Koa doc
-    router:
-      Koa router -> Link to @koa/router doc
-    httpServer:
-      Http server -> Link to http doc
-    api(name):
-      Getter for apis available in Strapi
-      'content-api':
-        Used by users
-        TODO
-      admin:
-        Used by admin panel
-        TODO
-    use(...args):
-    routes(routes):
-    mount():
-    async initRouting():
-    async initMiddleware():
-    listRoutes():
-    listen(...args):
-    async destroy():
-   */
   return {
     app,
     router,

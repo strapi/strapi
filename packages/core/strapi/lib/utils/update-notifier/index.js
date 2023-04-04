@@ -31,16 +31,6 @@ Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
-/**
- * Utility that record if the user is using the last Strapi version
- * Store information in .strapi-updater.json file
- *
- * JS Object
- *  notify():
- *   check if notification interval have been reach. if so, display a message in the console
- *   default interval : 1 week
- *   Check every day at max
- */
 const createUpdateNotifier = (strapi) => {
   let config = null;
 
