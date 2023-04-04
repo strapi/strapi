@@ -109,27 +109,13 @@ class Strapi {
     // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
-    // Strapi utils instanciation
+    // Strapi utils instantiation
     this.fs = createStrapiFs(this);
-
     this.eventHub = createEventHub();
-
     this.startupLogger = createStartupLogger(this);
-
     this.log = createLogger(this.config.get('logger', {}));
-
     this.cron = createCronService();
-
-    /**
-     * Service used to send statistical data to Amplitude
-     */
     this.telemetry = createTelemetry(this);
-
-    // TODO put this in /docs/docs/API/Strapi
-    /**
-     * TODO ask JS | Alex
-     * Wrapper around async_hooks AsyncLocalStorage
-     */
     this.requestContext = requestContext;
 
     // TODO put this in /docs/docs/API/Strapi
