@@ -85,10 +85,9 @@ A set of path to specific Strapi project parts.
   - `true`: Everything have been loaded
   - `false`: There is something loading
 
-### `strapi.reload`
-- <Type>Function</Type>
+### `strapi.reload()`
 
-Function to reload the app.
+Reload the app.
 
 This function defines itself at the construction of the Strapi class.
 
@@ -198,4 +197,233 @@ This property is a shortcut to `strapi.container.get('custom-fields').add(custom
     type: 'string',
   });
 ```
+
+### `strapi.config`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('config')`.
+
+See the [config container](#config).
+
+### `strapi.services`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('services').getAll()`.
+
+See the [services' container](#services).
+
+### `strapi.service(uid)`
+- `uid`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('services').get(uid)`.
+
+See the [services' container](#services).
+
+### `strapi.controllers`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('controllers').getAll()`.
+
+See the [controllers' container](#controllers).
+
+### `strapi.controller(uid)`
+- `uid`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('controllers').get(uid)`.
+
+See the [controllers' container](#controllers).
+
+### `strapi.contentTypes`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('content-types').getAll()`.
+
+See the [content-types' container](#content-types).
+
+### `strapi.contentType(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('content-types').get(name)`.
+
+See the [content-types' container](#content-types).
+
+### `strapi.policies`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('policies').getAll()`.
+
+See the [policies' container](#policies).
+
+### `strapi.policy(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('policies').get(name)`.
+
+See the [policies' container](#policies).
+
+### `strapi.middlewares`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('middlewares').getAll()`.
+
+See the [middlewares container](#middlewares).
+
+### `strapi.middleware(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('middlewares').get(name)`.
+
+See the [middlewares container](#middlewares).
+
+### `strapi.plugins`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('plugins').getAll()`.
+
+See the [plugins' container](#plugins).
+
+### `strapi.plugin(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('plugins').get(name)`.
+
+See the [plugins' container](#plugins).
+
+### `strapi.hooks`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('hooks').getAll()`.
+
+See the [hooks' container](#hooks).
+
+### `strapi.hook(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('hooks').get(name)`.
+
+See the [hooks' container](#hooks).
+
+### `strapi.api`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('apis').getAll()`.
+
+See the [apis container](#apis).
+
+### `strapi.auth`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('auth')`.
+
+See the [auth' container](#auth).
+
+### `strapi.contentAPI`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('content-api')`.
+
+See the [content-api container](#content-api).
+
+### `strapi.sanitizers`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('sanitizers')`.
+
+See the [sanitizers' container](#sanitizers).
+
+### `strapi.start()`
+- Returns: Promise
+
+### `strapi.destroy()`
+- Returns: Promise
+
+### `strapi.sendStartupTelemetry()`
+
+### `strapi.openAdmin({ isInitialized })`
+- Returns: Promise
+
+### `strapi.postListen()`
+- Returns: Promise
+
+### `strapi.listen()`
+- Returns: Promise
+
+### `strapi.stopWithError()`
+
+### `strapi.stop(exitCode)`
+
+### `strapi.loadAdmin()`
+- Returns: Promise
+
+### `strapi.loadPlugins()`
+- Returns: Promise
+
+### `strapi.loadPolicies()`
+- Returns: Promise
+
+### `strapi.loadAPIs()`
+- Returns: Promise
+
+### `strapi.loadComponents()`
+- Returns: Promise
+
+### `strapi.loadMiddlewares()`
+- Returns: Promise
+
+### `strapi.loadApp()`
+- Returns: Promise
+
+### `strapi.loadSanitizers()`
+- Returns: Promise
+
+### `strapi.registerInternalHooks()`
+
+### `strapi.register()`
+- Returns: Promise
+
+### `strapi.bootstrap()`
+- Returns: Promise
+
+### `strapi.load()`
+- Returns: Promise
+
+### `strapi.startWebhooks()`
+- Returns: Promise
+
+### `strapi.reload()`
+
+### `strapi.runLifecyclesFunctions()`
+- Returns: Promise
+
+### `strapi.getModel(uid)`
+- `uid`: <Type>String</Type>
+
+### `strapi.query(uid)`
+- `uid`: <Type>String</Type>
+
+## Strapi containers
+
+The strapi containers are accessible via `strapi.container.get('name-of-the-container')`.
+
+### `config`
+
+### `services`
+
+### `controllers`
+
+### `content-types`
+
+### `policies`
+
+### `plugins`
+
+### `hooks`
+
+### `apis`
+
+### `auth`
+
+### `content-api`
+
+### `sanitizers`
 

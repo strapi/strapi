@@ -117,16 +117,6 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
-
-    // TODO put this in /docs/docs/API/Strapi
-    /**
-     * Object
-     *  register(customField):
-     *    Add a new custom field to the Strapi instance
-     *
-     *    customField:
-     *      TODO describe custom field
-     */
     this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
