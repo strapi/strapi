@@ -183,3 +183,19 @@ By default, the telemetry service is enabled, but you can disable it by setting 
 
 The request context stores the ctx object from KoaJS on each request. This allows users to have access to the context from anywhere through the Strapi instance.
 
+### `strapi.customFields`
+- <Type>Object</Type>
+
+  - `register(customField)`: <Type>Function</Type> Register a new custom field
+
+This property is a shortcut to `strapi.container.get('custom-fields').add(customField)`.
+
+#### Examples
+```javascript
+  strapi.customFields.register({
+    name: 'color',
+    plugin: 'color-picker',
+    type: 'string',
+  });
+```
+
