@@ -334,96 +334,192 @@ See the [sanitizers' container](#sanitizers).
 ### `strapi.start()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.destroy()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.sendStartupTelemetry()`
+
+//TODO
 
 ### `strapi.openAdmin({ isInitialized })`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.postListen()`
 - Returns: Promise
+
+//TODO
 
 ### `strapi.listen()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.stopWithError()`
 
+//TODO
+
 ### `strapi.stop(exitCode)`
+
+//TODO
 
 ### `strapi.loadAdmin()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.loadPlugins()`
 - Returns: Promise
+
+//TODO
 
 ### `strapi.loadPolicies()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.loadAPIs()`
 - Returns: Promise
+
+//TODO
 
 ### `strapi.loadComponents()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.loadMiddlewares()`
 - Returns: Promise
+
+//TODO
 
 ### `strapi.loadApp()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.loadSanitizers()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.registerInternalHooks()`
+
+//TODO
 
 ### `strapi.register()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.bootstrap()`
 - Returns: Promise
+
+//TODO
 
 ### `strapi.load()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.startWebhooks()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.reload()`
+
+//TODO
 
 ### `strapi.runLifecyclesFunctions()`
 - Returns: Promise
 
+//TODO
+
 ### `strapi.getModel(uid)`
 - `uid`: <Type>String</Type>
 
+//TODO
+
 ### `strapi.query(uid)`
 - `uid`: <Type>String</Type>
+
+//TODO
 
 ## Strapi containers
 
 The strapi containers are accessible via `strapi.container.get('name-of-the-container')`.
 
 ### `config`
+- <Type>Object</Type>
+
+  - `get(path, defaultValue)`: <Type>Function</Type>
+    - `path`: <Type>String</Type>
+    - `defaultValue`: <Type>Any</Type>
+    - Returns: <Type>Any</Type> - The value located at `path` or, if undefined, `defaultValue`.
+  - `set(path, value)`: <Type>Function</Type>
+    - `path`: <Type>String</Type> - Where the value should be stored
+    - `value`: <Type>Any</Type>
+  - `has(path)`: <Type>Function</Type>
+    - `path`: <Type>String</Type>
+    - Returns: <Type>Boolean</Type> - Does the `path` match a value stored in the config container.
+  - `launchedAt`: <Type>Number</Type>  **Default:** `Date.now()`
+    Date in milliseconds when the server has started
+  - `serveAdminPanel`: <Type>Boolean</Type> **Default:** `true`
+    See [Strapi constructor](#new-strapiopts) options
+  - `autoReload`: <Type>Boolean</Type> **Default:** `false`
+    See [Strapi constructor](#new-strapiopts) options
+  - `environment`: <Type>String</Type> - process.env.NODE_ENV
+  - `uuid`: <Type>String</Type> - string extracted from `package.json` located in `strapi.uuid`
+  - `packageJsonStrapi`: <Type>Object</Type> - object extracted from `package.json` located in `strapi` (except uuid)
+  - `info`: <Type>Object</Type>
+    - everything stored in the `package.json`
+    - `strapi`: <Type>String</Type> - Current version of Strapi
+
+Every file stored under the `config` folder will be injected in this config container object.
 
 ### `services`
 
+//TODO
+
 ### `controllers`
+
+//TODO
 
 ### `content-types`
 
+//TODO
+
 ### `policies`
+
+//TODO
 
 ### `plugins`
 
+//TODO
+
 ### `hooks`
+
+//TODO
 
 ### `apis`
 
+//TODO
+
 ### `auth`
+
+//TODO
 
 ### `content-api`
 
+//TODO
+
 ### `sanitizers`
+
+//TODO
 
