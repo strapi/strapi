@@ -13,6 +13,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
+import CmdK from '../../components/CmdK';
 import AppLayout from '../../layouts/AppLayout';
 import { useMenu, useConfigurations } from '../../hooks';
 import { createRoute } from '../../utils';
@@ -109,6 +110,7 @@ const Admin = () => {
         </Suspense>
         <GuidedTourModal />
 
+        <CmdK />
         {showTutorials && <Onboarding />}
       </AppLayout>
     </DndProvider>
