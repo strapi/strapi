@@ -130,32 +130,6 @@ class Strapi {
     });
   }
 
-  // TODO put this in /docs/docs/API/Strapi
-  /*
-    config attribute (JS Object)
-    Describe all possibilities inside Strapi config
-
-    launchedAt (Number, Date.now() by default):
-      Date in milliseconds when the server has started
-
-    serveAdminPanel (boolean, true by default) -> link to opts.serveAdminPanel
-    autoReload (boolean, false by default) -> link to opts.autoReload
-    environment (string):
-      process.env.NODE_ENV
-    uuid (optional):
-      uuid describe in the project's package.json
-      Generated automatically (used by Amplitude) by strapi project generator. Used to identify the project (for stats purposes).
-    packageJsonStrapi:
-      strapi object can contain any attribute to describe the Strapi project
-      uuid is omitted in this config attribute
-
-      telemetryDisabled (boolean, undefined):
-        If true, disable the telemetry for the app (connected to Amplitude)
-
-      TODO: find where this config is used and list all possible attributes
-    info:
-      Package.json + strapi version
-   */
   get config() {
     return this.container.get('config');
   }
