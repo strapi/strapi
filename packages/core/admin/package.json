@@ -28,7 +28,7 @@
     "develop:webpack": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
     "prepublishOnly": "yarn build",
     "build": "rimraf build && node ./scripts/build.js",
-    "build:mesure": "rimraf build && cross-env MESURE_BUILD_SPEED=true node ./scripts/build.js",
+    "build:measure": "rimraf build && cross-env MEASURE_BUILD_SPEED=true node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
     "test:unit": "jest",
     "test:unit:watch": "jest --watch",
