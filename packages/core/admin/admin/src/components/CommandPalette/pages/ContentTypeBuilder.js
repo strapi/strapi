@@ -1,68 +1,47 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Cog } from '@strapi/icons';
 import { useModels } from '../../../hooks';
-import Item from '../Item';
+import Items from '../Items';
 import { useCommand } from '../context';
 
-const ContentTypeBuilder = () => {
+const useContentTypesItems = () => {
   const { isLoading, collectionTypes, singleTypes, components } = useModels();
-  const { goTo, page } = useCommand();
 
-  if (isLoading) {
-    return null;
-  }
+  return useMemo(() => {
+    if (isLoading) {
+      return [];
+    }
 
-  const displayOnSearchOnly = page !== 'content-type-builder';
+    const items = [];
+    [...collectionTypes, ...singleTypes].forEach((ct) => {
+      items.push({
+        icon: Cog,
+        action({ goTo }) {
+          goTo(`/plugins/content-type-builder/content-types/${ct.uid}`);
+        },
+        label: `Edit ${ct.info.displayName} Content Type`,
+      });
+    });
 
-  return (
-    <>
-      {collectionTypes.map((ct) => {
-        const label = `Edit ${ct.info.displayName} Content Type`;
+    components.forEach((ct) => {
+      items.push({
+        icon: Cog,
+        action({ goTo }) {
+          goTo(`/plugins/content-type-builder/component-categories/${ct.category}/${ct.uid}`);
+        },
+        label: `Edit ${ct.info.displayName} Component`,
+      });
+    });
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => {
-              goTo(`/plugins/content-type-builder/content-types/${ct.uid}`);
-            }}
-            value={label}
-          >
-            <Cog /> {label}
-          </Item>
-        );
-      })}
-      {singleTypes.map((ct) => {
-        const label = `Edit ${ct.info.displayName} Content Type`;
+    return items;
+  }, [isLoading, collectionTypes, singleTypes, components]);
+};
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => {
-              goTo(`/plugins/content-type-builder/content-types/${ct.uid}`);
-            }}
-            value={label}
-          >
-            <Cog /> {label}
-          </Item>
-        );
-      })}
-      {components.map((ct) => {
-        const label = `Edit ${ct.info.displayName} Component`;
+const ContentTypeBuilder = () => {
+  const { page } = useCommand();
+  const items = useContentTypesItems();
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => {
-              goTo(`/plugins/content-type-builder/component-categories/${ct.category}/${ct.uid}`);
-            }}
-            value={label}
-          >
-            <Cog /> {label}
-          </Item>
-        );
-      })}
-    </>
-  );
+  return <Items items={items} displayOnSearchOnly={page !== 'content-type-builder'} />;
 };
 
 export default ContentTypeBuilder;

@@ -1,55 +1,47 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pencil } from '@strapi/icons';
 import { useModels } from '../../../hooks';
-import Item from '../Item';
+import Items from '../Items';
 import { useCommand } from '../context';
 
-const ContentManager = () => {
+const useContentTypesItems = () => {
   const { isLoading, collectionTypes, singleTypes } = useModels();
-  const { goTo, page } = useCommand();
 
-  if (isLoading) {
-    return null;
-  }
+  return useMemo(() => {
+    if (isLoading) {
+      return [];
+    }
 
-  const displayOnSearchOnly = page !== 'content-manager';
+    const items = [];
+    collectionTypes.forEach((ct) => {
+      items.push({
+        icon: Pencil,
+        label: `Create ${ct.info.displayName}`,
+        action({ goTo }) {
+          goTo(`/content-manager/collectionType/${ct.uid}/create`);
+        },
+      });
+    });
 
-  return (
-    <>
-      {collectionTypes.map((ct) => {
-        const label = `Create ${ct.info.displayName}`;
+    singleTypes.forEach((ct) => {
+      items.push({
+        icon: Pencil,
+        label: `Create ${ct.info.displayName}`,
+        action({ goTo }) {
+          goTo(`/content-manager/singleType/${ct.uid}`);
+        },
+      });
+    });
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => {
-              goTo(`/content-manager/collectionType/${ct.uid}/create`);
-            }}
-            value={label}
-          >
-            <Pencil />
-            {label}
-          </Item>
-        );
-      })}
-      {singleTypes.map((ct) => {
-        const label = `Edit ${ct.info.displayName}`;
+    return items;
+  }, [isLoading, collectionTypes, singleTypes]);
+};
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => {
-              goTo(`/content-manager/singleType/${ct.uid}`);
-            }}
-            value={label}
-          >
-            <Pencil />
-            {label}
-          </Item>
-        );
-      })}
-    </>
-  );
+const ContentManager = () => {
+  const { page } = useCommand();
+  const items = useContentTypesItems();
+
+  return <Items items={items} displayOnSearchOnly={page !== 'content-manager'} />;
 };
 
 export default ContentManager;

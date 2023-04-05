@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Cog } from '@strapi/icons';
-import Item from '../Item';
+import Items from '../Items';
 import { useCommand } from '../context';
 
 const links = [
@@ -31,27 +31,21 @@ const links = [
 ];
 
 const Settings = () => {
-  const { page, goTo } = useCommand();
+  const { page } = useCommand();
 
-  const displayOnSearchOnly = page !== 'settings';
+  const items = useMemo(() => {
+    return links.map(({ name, to }) => {
+      return {
+        icon: Cog,
+        label: `Go to ${name} settings`,
+        action({ goTo }) {
+          goTo(`/settings${to}`);
+        },
+      };
+    });
+  }, []);
 
-  return (
-    <>
-      {links.map(({ name, to }) => {
-        const label = `Go to ${name} settings`;
-
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => goTo(`/settings${to}`)}
-            value={label}
-          >
-            <Cog /> {label}
-          </Item>
-        );
-      })}
-    </>
-  );
+  return <Items items={items} displayOnSearchOnly={page !== 'settings'} />;
 };
 
 export default Settings;

@@ -1,37 +1,31 @@
 import React from 'react';
 import { Moon, Sun } from '@strapi/icons';
 import { useThemeToggle } from '../../../hooks';
-import Item from '../Item';
+import Items from '../Items';
 import { useCommand } from '../context';
 
 const THEMES = [
-  { name: 'dark', icon: <Moon /> },
-  { name: 'light', icon: <Sun /> },
+  { name: 'dark', icon: Moon },
+  { name: 'light', icon: Sun },
 ];
 
 const Theme = () => {
   const { onChangeTheme } = useThemeToggle();
   const { page } = useCommand();
 
-  const displayOnSearchOnly = page !== 'theme';
+  const items = THEMES.map(({ name, icon }) => {
+    const label = `Change theme to ${name}`;
 
-  return (
-    <>
-      {THEMES.map(({ name, icon }) => {
-        const label = `Change theme to ${name}`;
+    return {
+      icon,
+      label,
+      action() {
+        onChangeTheme(name);
+      },
+    };
+  });
 
-        return (
-          <Item
-            displayOnSearchOnly={displayOnSearchOnly}
-            onSelect={() => onChangeTheme(name)}
-            value={label}
-          >
-            {icon} {label}
-          </Item>
-        );
-      })}
-    </>
-  );
+  return <Items items={items} displayOnSearchOnly={page !== 'theme'} />;
 };
 
 export default Theme;
