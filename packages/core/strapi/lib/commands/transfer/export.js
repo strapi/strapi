@@ -1,35 +1,42 @@
 'use strict';
 
 const {
-  providers: { createLocalFileDestinationProvider },
-} = require('@strapi/data-transfer/lib/file');
-const {
-  providers: { createLocalStrapiSourceProvider },
-} = require('@strapi/data-transfer/lib/strapi');
-const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
+  file: {
+    providers: { createLocalFileDestinationProvider },
+  },
+  strapi: {
+    providers: { createLocalStrapiSourceProvider },
+  },
+  engine: { createTransferEngine },
+} = require('@strapi/data-transfer');
+
 const { isObject, isString, isFinite, toNumber } = require('lodash/fp');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 
-const { TransferEngineTransferError } = require('@strapi/data-transfer/lib/engine/errors');
+const { TransferEngineTransferError } = require('@strapi/data-transfer').engine.errors;
 const {
   getDefaultExportName,
   buildTransferTable,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   formatDiagnostic,
+  loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
-
+const { exitWith } = require('../utils/helpers');
 /**
  * @typedef ExportCommandOptions Options given to the CLI import command
  *
- * @property {string} [file] The file path to import
+ * @property {string} [file] The file path to export to
  * @property {boolean} [encrypt] Used to encrypt the final archive
- * @property {string} [key] Encryption key, only useful when encryption is enabled
+ * @property {string} [key] Encryption key, used only when encryption is enabled
  * @property {boolean} [compress] Used to compress the final archive
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
-
-const logger = console;
 
 const BYTES_IN_MB = 1024 * 1024;
 
@@ -43,8 +50,7 @@ const BYTES_IN_MB = 1024 * 1024;
 module.exports = async (opts) => {
   // Validate inputs from Commander
   if (!isObject(opts)) {
-    logger.error('Could not parse command arguments');
-    process.exit(1);
+    exitWith(1, 'Could not parse command arguments');
   }
 
   const strapi = await createStrapiInstance();
@@ -57,6 +63,7 @@ module.exports = async (opts) => {
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
@@ -82,6 +89,20 @@ module.exports = async (opts) => {
 
   const progress = engine.progress.stream;
 
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
+
   const getTelemetryPayload = (/* payload */) => {
     return {
       eventProperties: {
@@ -92,33 +113,41 @@ module.exports = async (opts) => {
   };
 
   progress.on('transfer::start', async () => {
-    logger.log(`Starting export...`);
+    console.log(`Starting export...`);
+
     await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
+  let results;
+  let outFile;
   try {
-    const results = await engine.transfer();
-    const outFile = results.destination.file.path;
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
 
-    const table = buildTransferTable(results.engine);
-    logger.log(table.toString());
-
+    results = await engine.transfer();
+    outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);
     if (!outFileExists) {
       throw new TransferEngineTransferError(`Export file not created "${outFile}"`);
     }
-
-    logger.log(`${chalk.bold('Export process has been completed successfully!')}`);
-    logger.log(`Export archive is in ${chalk.green(outFile)}`);
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    logger.error('Export process failed.');
-    process.exit(1);
+    exitWith(1, exitMessageText('export', true));
   }
 
-  // Note: Telemetry can't be sent in a finish event, because it runs async after this block but we can't await it, so if process.exit is used it won't send
   await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
-  process.exit(0);
+  try {
+    const table = buildTransferTable(results.engine);
+    console.log(table.toString());
+  } catch (e) {
+    console.error('There was an error displaying the results of the transfer.');
+  }
+
+  console.log(`Export archive is in ${chalk.green(outFile)}`);
+  exitWith(0, exitMessageText('export'));
 };
 
 /**

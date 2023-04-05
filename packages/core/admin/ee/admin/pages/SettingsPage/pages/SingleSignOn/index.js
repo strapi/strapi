@@ -13,13 +13,13 @@ import {
   Layout,
   Button,
   Main,
-  Stack,
   Typography,
   ToggleInput,
   Select,
   Option,
   Grid,
   GridItem,
+  Flex,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
@@ -106,7 +106,15 @@ export const SingleSignOn = () => {
             {showLoader ? (
               <LoadingIndicatorPage />
             ) : (
-              <Stack spacing={4} background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={4}
+                background="neutral0"
+                padding={6}
+                shadow="filterShadow"
+                hasRadius
+              >
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: 'global.settings',
@@ -182,7 +190,7 @@ export const SingleSignOn = () => {
                     </Select>
                   </GridItem>
                 </Grid>
-              </Stack>
+              </Flex>
             )}
           </ContentLayout>
         </form>

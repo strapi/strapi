@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { get, take } from 'lodash';
+import get from 'lodash/get';
+import take from 'lodash/take';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import { getFieldName } from '../../../utils';

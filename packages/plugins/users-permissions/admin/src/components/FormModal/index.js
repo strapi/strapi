@@ -8,7 +8,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import {
   Button,
-  Stack,
+  Flex,
   Breadcrumbs,
   Crumb,
   Grid,
@@ -58,7 +58,7 @@ const FormModal = ({
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={1}>
+                <Flex direction="column" alignItems="stretch" gap={1}>
                   <Grid gap={5}>
                     {layout.form.map((row) => {
                       return row.map((input) => {
@@ -76,7 +76,7 @@ const FormModal = ({
                       });
                     })}
                   </Grid>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={

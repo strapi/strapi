@@ -26,7 +26,7 @@ import {
   Button,
   Grid,
   GridItem,
-  Stack,
+  Flex,
   useNotifyAT,
   Select,
   Option,
@@ -208,7 +208,7 @@ const ProfilePage = () => {
               />
               <Box paddingBottom={10}>
                 <ContentLayout>
-                  <Stack spacing={6}>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
                     <Box
                       background="neutral0"
                       hasRadius
@@ -218,7 +218,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.profile',
@@ -278,7 +278,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -289,7 +289,7 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
                             id: 'global.change-password',
@@ -427,7 +427,7 @@ const ProfilePage = () => {
                             />
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                     <Box
                       background="neutral0"
@@ -438,8 +438,8 @@ const ProfilePage = () => {
                       paddingLeft={7}
                       paddingRight={7}
                     >
-                      <Stack spacing={4}>
-                        <Stack spacing={1}>
+                      <Flex direction="column" alignItems="stretch" gap={4}>
+                        <Flex direction="column" alignItems="stretch" gap={1}>
                           <Typography variant="delta" as="h2">
                             {formatMessage({
                               id: 'Settings.profile.form.section.experience.title',
@@ -469,7 +469,7 @@ const ProfilePage = () => {
                               }
                             )}
                           </Typography>
-                        </Stack>
+                        </Flex>
                         <Grid gap={5}>
                           <GridItem s={12} col={6}>
                             <Select
@@ -553,9 +553,9 @@ const ProfilePage = () => {
                             </Select>
                           </GridItem>
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
-                  </Stack>
+                  </Flex>
                 </ContentLayout>
               </Box>
             </Form>

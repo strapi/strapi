@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { request, useNotification } from '@strapi/helper-plugin';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import init from './init';
 import pluginId from '../../pluginId';
 import reducer, { initialState } from './reducer';

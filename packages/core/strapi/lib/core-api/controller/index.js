@@ -18,7 +18,7 @@ const createController = ({ contentType }) => {
       return transformResponse(data, meta, { contentType });
     },
 
-    sanitizeOutput(data, ctx) {
+    async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.output(data, contentType, { auth });
@@ -28,6 +28,12 @@ const createController = ({ contentType }) => {
       const auth = getAuthFromKoaContext(ctx);
 
       return sanitize.contentAPI.input(data, contentType, { auth });
+    },
+
+    sanitizeQuery(ctx) {
+      const auth = getAuthFromKoaContext(ctx);
+
+      return sanitize.contentAPI.query(ctx.query, contentType, { auth });
     },
   };
 

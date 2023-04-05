@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 import { useLocation } from 'react-router-dom';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { HeaderLayout, Button, Stack, Link } from '@strapi/design-system';
+import { HeaderLayout, Button, Flex, Link } from '@strapi/design-system';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { getTrad } from '../../../utils';
 import { FolderDefinition, BreadcrumbsDefinition } from '../../../constants';
@@ -60,7 +60,7 @@ export const Header = ({
       }
       primaryAction={
         canCreate && (
-          <Stack horizontal spacing={2}>
+          <Flex gap={2}>
             <Button startIcon={<Plus />} variant="secondary" onClick={onToggleEditFolderDialog}>
               {formatMessage({
                 id: getTrad('header.actions.add-folder'),
@@ -74,7 +74,7 @@ export const Header = ({
                 defaultMessage: 'Add new assets',
               })}
             </Button>
-          </Stack>
+          </Flex>
         )
       }
     />

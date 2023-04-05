@@ -6,4 +6,12 @@ module.exports = ({ env }) => ({
   apiToken: {
     salt: env('API_TOKEN_SALT', 'example-salt'),
   },
+  auditLogs: {
+    enabled: env.bool('AUDIT_LOGS_ENABLED', true),
+  },
+  transfer: {
+    token: {
+      salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
+    },
+  },
 });

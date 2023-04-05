@@ -34,13 +34,6 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
       .c0 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -53,23 +46,10 @@ describe('<Input />', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+        gap: 4px;
       }
 
       .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -87,16 +67,25 @@ describe('<Input />', () => {
         justify-content: space-between;
       }
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
       }
 
-      .c1 > * + * {
-        margin-top: 4px;
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
-      .c6 {
+      .c5 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.65625rem;
@@ -111,36 +100,36 @@ describe('<Input />', () => {
         background: inherit;
       }
 
-      .c6::-webkit-input-placeholder {
+      .c5::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::-moz-placeholder {
+      .c5::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6:-ms-input-placeholder {
+      .c5:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6::placeholder {
+      .c5::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c6:focus {
+      .c5:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -152,35 +141,33 @@ describe('<Input />', () => {
         transition-duration: 0.2s;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
       <div>
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c0 c1"
+            class="c0"
           >
             <label
-              class="c2"
+              class="c1 c2"
               for="1"
             >
-              <div
-                class="c3"
-              >
-                Enabled
-              </div>
+              Enabled
             </label>
             <div
-              class="c4 c5"
+              class="c3 c4"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
                 aria-required="false"
-                class="c6"
+                class="c5"
                 id="1"
                 name="test"
                 placeholder=""

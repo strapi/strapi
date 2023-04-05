@@ -4,7 +4,10 @@ const auditLogContentType = require('./content-types/audit-log');
 
 const provider = {
   async register({ strapi }) {
-    strapi.container.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
+    const contentTypes = strapi.container.get('content-types');
+    if (!contentTypes.keys().includes('admin::audit-log')) {
+      strapi.container.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
+    }
 
     // Return the provider object
     return {
