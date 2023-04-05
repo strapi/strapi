@@ -31,7 +31,7 @@
     "redux": "^4.2.1"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x"

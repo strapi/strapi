@@ -33,7 +33,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sendgrid/mail": "7.7.0",

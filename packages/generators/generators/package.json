@@ -29,7 +29,7 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
