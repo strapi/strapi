@@ -1,8 +1,8 @@
 import React from 'react';
 import { Pencil } from '@strapi/icons';
-import { useModels } from '../../hooks';
-import Item from './Item';
-import { useCommand } from './context';
+import { useModels } from '../../../hooks';
+import Item from '../Item';
+import { useCommand } from '../context';
 
 const ContentManager = () => {
   const { isLoading, collectionTypes, singleTypes } = useModels();

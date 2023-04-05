@@ -5,9 +5,11 @@ import { Badge, Flex } from '@strapi/design-system';
 
 import Container from './Container';
 import { CommandContext } from './context';
-import ContentManager from './ContentManager';
-import ContentTypeBuilder from './ContentTypeBuilder';
 import Main from './Main';
+import ContentManager from './pages/ContentManager';
+import ContentTypeBuilder from './pages/ContentTypeBuilder';
+import Theme from './pages/Theme';
+import Settings from './pages/Settings';
 
 export default function CommandK() {
   const [open, setOpen] = useState(false);
@@ -75,7 +77,7 @@ export default function CommandK() {
           </Flex>
           <Command.Input
             autoFocus
-            placeholder="What do you need?"
+            placeholder="What are you looking for?"
             onValueChange={setInputValue}
             value={inputValue}
             onKeyDown={onInputKeyDown}
@@ -85,6 +87,8 @@ export default function CommandK() {
             {!page && <Main />}
             {page === 'content-manager' && <ContentManager />}
             {page === 'content-type-builder' && <ContentTypeBuilder />}
+            {page === 'theme' && <Theme />}
+            {page === 'settings' && <Settings />}
           </Command.List>
         </Command.Dialog>
         <div className="container" ref={containerElement} />
