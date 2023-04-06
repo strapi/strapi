@@ -1,21 +1,16 @@
-'use strict';
+import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
+import intoStream from 'into-stream';
+import utils from '@strapi/utils';
 
-/**
- * Module dependencies
- */
+import type { File } from '@strapi/plugin-upload';
 
-// Public node modules.
-const cloudinary = require('cloudinary').v2;
-const intoStream = require('into-stream');
-const { PayloadTooLargeError } = require('@strapi/utils').errors;
+export = {
+  init(options: ConfigOptions) {
+    cloudinary.config(options);
 
-module.exports = {
-  init(config) {
-    cloudinary.config(config);
-
-    const upload = (file, customConfig = {}) =>
-      new Promise((resolve, reject) => {
-        const config = {
+    const upload = (file: File, customConfig = {}): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const config: Partial<UploadApiOptions> = {
           resource_type: 'auto',
           public_id: file.hash,
         };
@@ -33,10 +28,14 @@ module.exports = {
           (err, image) => {
             if (err) {
               if (err.message.includes('File size too large')) {
-                reject(new PayloadTooLargeError());
+                reject(new utils.errors.PayloadTooLargeError());
               } else {
                 reject(new Error(`Error uploading to cloudinary: ${err.message}`));
               }
+              return;
+            }
+
+            if (!image) {
               return;
             }
 
@@ -62,32 +61,41 @@ module.exports = {
 
         if (file.stream) {
           file.stream.pipe(uploadStream);
-        } else {
+        } else if (file.buffer) {
           intoStream(file.buffer).pipe(uploadStream);
+        } else {
+          throw new Error('Missing file stream or buffer');
         }
       });
+    };
 
     return {
-      uploadStream(file, customConfig = {}) {
+      uploadStream(file: File, customConfig = {}) {
         return upload(file, customConfig);
       },
-      upload(file, customConfig = {}) {
+      upload(file: File, customConfig = {}) {
         return upload(file, customConfig);
       },
-      async delete(file, customConfig = {}) {
+      async delete(file: File, customConfig = {}) {
         try {
           const { resource_type: resourceType, public_id: publicId } = file.provider_metadata;
-          const response = await cloudinary.uploader.destroy(publicId, {
+          const deleteConfig = {
+            resource_type: (resourceType || 'image') as string,
             invalidate: true,
-            resource_type: resourceType || 'image',
             ...customConfig,
-          });
+          };
+
+          const response = await cloudinary.uploader.destroy(`${publicId}`, deleteConfig);
 
           if (response.result !== 'ok' && response.result !== 'not found') {
             throw new Error(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {
-          throw new Error(`Error deleting on cloudinary: ${error.message}`);
+          if (error instanceof Error) {
+            throw new Error(`Error deleting on cloudinary: ${error.message}`);
+          }
+
+          throw error;
         }
       },
     };

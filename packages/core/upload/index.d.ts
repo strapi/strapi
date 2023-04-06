@@ -2,11 +2,19 @@ import type { ReadStream } from 'fs';
 
 export interface File {
   name: string;
-  size: number;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats: Record<string, unknown>;
   hash: string;
-  ext: string;
-  url: string;
+  ext?: string;
   mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  provider: string;
+  provider_metadata: Record<string, unknown>;
   path?: string;
   stream?: ReadStream;
   buffer?: Buffer;
