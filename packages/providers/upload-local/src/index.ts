@@ -1,27 +1,30 @@
-'use strict';
+import { pipeline } from 'stream';
+import fs from 'fs';
+import path from 'path';
+import fse from 'fs-extra';
+import utils from '@strapi/utils';
 
-/**
- * Module dependencies
- */
+import type { File } from '@strapi/plugin-upload';
 
-// Public node modules.
-const { pipeline } = require('stream');
-const fs = require('fs');
-const path = require('path');
-const fse = require('fs-extra');
-const {
-  errors: { PayloadTooLargeError },
-  file: { kbytesToBytes, bytesToHumanReadable },
-} = require('@strapi/utils');
+const { PayloadTooLargeError } = utils.errors;
+const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
-module.exports = {
-  init({ sizeLimit: providerOptionsSizeLimit } = {}) {
+interface InitOptions {
+  sizeLimit?: number;
+}
+
+interface CheckFileSizeOptions {
+  sizeLimit?: number;
+}
+
+export = {
+  init({ sizeLimit: providerOptionsSizeLimit }: InitOptions = {}) {
     // TODO V5: remove providerOptions sizeLimit
     if (providerOptionsSizeLimit) {
       process.emitWarning(
-        `[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config`
+        '[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config'
       );
     }
 
@@ -34,7 +37,9 @@ module.exports = {
     }
 
     return {
-      checkFileSize(file, { sizeLimit } = {}) {
+      checkFileSize(file: File, options: CheckFileSizeOptions) {
+        const { sizeLimit } = options ?? {};
+
         // TODO V5: remove providerOptions sizeLimit
         if (providerOptionsSizeLimit) {
           if (kbytesToBytes(file.size) > providerOptionsSizeLimit)
@@ -50,10 +55,16 @@ module.exports = {
             );
         }
       },
-      uploadStream(file) {
+      uploadStream(file: File): Promise<void> {
+        if (!file.stream) {
+          return Promise.reject(new Error('Missing file stream'));
+        }
+
+        const { stream } = file;
+
         return new Promise((resolve, reject) => {
           pipeline(
-            file.stream,
+            stream,
             fs.createWriteStream(path.join(uploadPath, `${file.hash}${file.ext}`)),
             (err) => {
               if (err) {
@@ -67,10 +78,16 @@ module.exports = {
           );
         });
       },
-      upload(file) {
+      upload(file: File): Promise<void> {
+        if (!file.buffer) {
+          return Promise.reject(new Error('Missing file buffer'));
+        }
+
+        const { buffer } = file;
+
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, (err) => {
+          fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), buffer, (err) => {
             if (err) {
               return reject(err);
             }
@@ -81,13 +98,13 @@ module.exports = {
           });
         });
       },
-      delete(file) {
+      delete(file: File): Promise<string | void> {
         return new Promise((resolve, reject) => {
           const filePath = path.join(uploadPath, `${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
-            // eslint-disable-next-line no-promise-executor-return
-            return resolve("File doesn't exist");
+            resolve("File doesn't exist");
+            return;
           }
 
           // remove file from public/assets folder

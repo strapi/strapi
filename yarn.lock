@@ -7732,7 +7732,12 @@ __metadata:
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
     "@strapi/utils": 4.9.0
+    "@types/jest": 29.2.0
+    eslint-config-custom: "*"
     fs-extra: 10.0.0
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 

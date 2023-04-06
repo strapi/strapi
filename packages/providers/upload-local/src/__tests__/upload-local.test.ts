@@ -1,4 +1,5 @@
-'use strict';
+import type { File } from '@strapi/plugin-upload';
+import localProvider from '../index';
 
 jest.mock('fs', () => {
   return {
@@ -12,11 +13,9 @@ jest.mock('fs-extra', () => {
   };
 });
 
-const localProvider = require('../index');
-
 describe('Local provider', () => {
   beforeAll(() => {
-    globalThis.strapi = globalThis.strapi ?? {};
+    globalThis.strapi = {};
     globalThis.strapi.dirs = { static: { public: '' } };
   });
 
@@ -28,12 +27,15 @@ describe('Local provider', () => {
     test('Should have relative url to file object', async () => {
       const providerInstance = localProvider.init({});
 
-      const file = {
+      const file: File = {
+        name: 'test',
+        size: 100,
+        url: '/',
         path: '/tmp/',
         hash: 'test',
         ext: '.json',
         mime: 'application/json',
-        buffer: '',
+        buffer: Buffer.from(''),
       };
 
       await providerInstance.upload(file);

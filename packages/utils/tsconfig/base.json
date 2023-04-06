@@ -1,7 +1,9 @@
 {
+  "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "esModuleInterop": true
   }
 }
