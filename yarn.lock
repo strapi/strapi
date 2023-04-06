@@ -7712,8 +7712,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
+    "@types/jest": 29.2.0
     aws-sdk: 2.1287.0
+    eslint-config-custom: "*"
     lodash: 4.17.21
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7723,7 +7728,11 @@ __metadata:
   dependencies:
     "@strapi/utils": 4.9.0
     cloudinary: ^1.33.0
+    eslint-config-custom: "*"
     into-stream: ^5.1.0
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 

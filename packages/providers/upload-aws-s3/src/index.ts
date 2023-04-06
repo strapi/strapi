@@ -1,23 +1,26 @@
-'use strict';
+import { getOr } from 'lodash/fp';
+import AWS from 'aws-sdk';
+import type { File } from '@strapi/plugin-upload';
+import { getBucketFromUrl } from './utils';
 
-/**
- * Module dependencies
- */
-
-/* eslint-disable no-unused-vars */
-// Public node modules.
-const { getOr } = require('lodash/fp');
-const AWS = require('aws-sdk');
-const { getBucketFromUrl } = require('./utils');
-
-function assertUrlProtocol(url) {
-  // Regex to test protocol like "http://", "https://"
+// Regex to test protocol like "http://", "https://"
+function assertUrlProtocol(url: string) {
   return /^\w*:\/\//.test(url);
 }
 
-module.exports = {
-  init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
-    if (legacyS3Options) {
+interface InitOptions extends Partial<AWS.S3.ClientConfiguration> {
+  baseUrl?: string;
+  rootPath?: string;
+  s3Options: AWS.S3.ClientConfiguration & {
+    params: {
+      Bucket: string; // making it required
+    };
+  };
+}
+
+export = {
+  init({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) {
+    if (Object.keys(legacyS3Options).length > 0) {
       process.emitWarning(
         "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
       );
@@ -32,7 +35,7 @@ module.exports = {
 
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
-    const getFileKey = (file) => {
+    const getFileKey = (file: File) => {
       const path = file.path ? `${file.path}/` : '';
 
       return `${filePrefix}${path}${file.hash}${file.ext}`;
@@ -40,33 +43,40 @@ module.exports = {
 
     const ACL = getOr('public-read', ['params', 'ACL'], config);
 
-    const upload = (file, customParams = {}) =>
+    const upload = (file: File, customParams = {}): Promise<void> =>
       new Promise((resolve, reject) => {
-        // upload file on S3 bucket
         const fileKey = getFileKey(file);
-        S3.upload(
-          {
-            Key: fileKey,
-            Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL,
-            ContentType: file.mime,
-            ...customParams,
-          },
-          (err, data) => {
-            if (err) {
-              return reject(err);
-            }
 
-            // set the bucket file url
-            if (assertUrlProtocol(data.Location)) {
-              file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
-            } else {
-              // Default protocol to https protocol
-              file.url = `https://${data.Location}`;
-            }
-            resolve();
+        if (!file.stream && !file.buffer) {
+          reject(new Error('Missing file stream or buffer'));
+          return;
+        }
+
+        const params = {
+          Key: fileKey,
+          Bucket: config.params.Bucket,
+          Body: file.stream || file.buffer,
+          ACL,
+          ContentType: file.mime,
+          ...customParams,
+        };
+
+        const onUploaded = (err: Error, data: AWS.S3.ManagedUpload.SendData) => {
+          if (err) {
+            return reject(err);
           }
-        );
+
+          // set the bucket file url
+          if (assertUrlProtocol(data.Location)) {
+            file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
+          } else {
+            // Default protocol to https protocol
+            file.url = `https://${data.Location}`;
+          }
+          resolve();
+        };
+
+        S3.upload(params, onUploaded);
       });
 
     return {
@@ -81,7 +91,7 @@ module.exports = {
        * @param {Object} customParams
        * @returns {Promise<{url: string}>}
        */
-      getSignedUrl(file, customParams = {}) {
+      getSignedUrl(file: File /* ,customParams = {} */) {
         // Do not sign the url if it does not come from the same bucket.
         const { bucket } = getBucketFromUrl(file.url);
         if (bucket !== config.params.Bucket) {
@@ -107,19 +117,20 @@ module.exports = {
           );
         });
       },
-      uploadStream(file, customParams = {}) {
+      // uploadStream(file: File, customParams = {}) {
+      //   return upload(file, customParams);
+      // },
+      upload(file: File, customParams = {}) {
         return upload(file, customParams);
       },
-      upload(file, customParams = {}) {
-        return upload(file, customParams);
-      },
-      delete(file, customParams = {}) {
+      delete(file: File, customParams = {}): Promise<void> {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
           const fileKey = getFileKey(file);
           S3.deleteObject(
             {
               Key: fileKey,
+              Bucket: config.params.Bucket,
               ...customParams,
             },
             (err) => {

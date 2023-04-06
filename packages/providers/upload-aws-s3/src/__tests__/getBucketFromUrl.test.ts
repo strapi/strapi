@@ -1,6 +1,4 @@
-'use strict';
-
-const { getBucketFromUrl } = require('../utils');
+import { getBucketFromUrl } from '../utils';
 
 describe('Test for URLs', () => {
   test('Virtual hosted style', async () => {

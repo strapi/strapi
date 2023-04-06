@@ -1,6 +1,9 @@
-'use strict';
-
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
+
+interface BucketInfo {
+  bucket?: string | null;
+  err?: string;
+}
 
 /**
  * Parse the bucket name from a URL.
@@ -9,9 +12,9 @@ const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
  * @param {string} fileUrl - the URL to parse
  * @returns {object} result
  * @returns {string} result.bucket - the bucket name
- * @returns {string} result.error - if any
+ * @returns {string} result.err - if any
  */
-function getBucketFromUrl(fileUrl) {
+export function getBucketFromUrl(fileUrl: string): BucketInfo {
   const uri = new URL(fileUrl);
 
   // S3://<bucket-name>/<key>
@@ -59,5 +62,3 @@ function getBucketFromUrl(fileUrl) {
   // https://<bucket-name>.s3.amazonaws.com/
   return { bucket: prefix.substring(0, prefix.length - 1) };
 }
-
-module.exports = { getBucketFromUrl };

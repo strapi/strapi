@@ -78,7 +78,7 @@ export = {
       },
       async delete(file: File, customConfig = {}) {
         try {
-          const { resource_type: resourceType, public_id: publicId } = file.provider_metadata;
+          const { resource_type: resourceType, public_id: publicId } = file.provider_metadata ?? {};
           const deleteConfig = {
             resource_type: (resourceType || 'image') as string,
             invalidate: true,
