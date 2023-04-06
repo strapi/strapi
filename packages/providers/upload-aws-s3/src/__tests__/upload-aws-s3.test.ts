@@ -34,8 +34,8 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
-        url: '/',
-        path: '/tmp/',
+        url: '',
+        path: 'tmp',
         hash: 'test',
         ext: '.json',
         mime: 'application/json',
@@ -64,8 +64,8 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
-        url: '/',
-        path: '/tmp/',
+        url: '',
+        path: 'tmp',
         hash: 'test',
         ext: '.json',
         mime: 'application/json',
@@ -95,8 +95,8 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
-        url: '/',
-        path: '/tmp/',
+        url: '',
+        path: 'tmp/test',
         hash: 'test',
         ext: '.json',
         mime: 'application/json',
@@ -128,8 +128,8 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
-        url: '/',
-        path: '/tmp/',
+        url: '',
+        path: 'tmp/test',
         hash: 'test',
         ext: '.json',
         mime: 'application/json',
