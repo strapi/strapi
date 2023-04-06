@@ -5,9 +5,10 @@
  */
 
 /* eslint-disable no-unused-vars */
-// Public node modules.
 const { getOr } = require('lodash/fp');
-const AWS = require('aws-sdk');
+const { Upload } = require('@aws-sdk/lib-storage');
+const { S3Client, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { getBucketFromUrl } = require('./utils');
 
 function assertUrlProtocol(url) {
@@ -15,63 +16,61 @@ function assertUrlProtocol(url) {
   return /^\w*:\/\//.test(url);
 }
 
+function getConfig({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
+  if (legacyS3Options) {
+    process.emitWarning(
+      "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
+    );
+  }
+
+  // TODO: Check config compat between v2 and v3, credentials params are not the same in v3
+  const config = { ...s3Options, ...legacyS3Options };
+  config.ACL = getOr('public-read', ['params', 'ACL'], config);
+
+  return config;
+}
+
 module.exports = {
   init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
-    if (legacyS3Options) {
-      process.emitWarning(
-        "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
-      );
-    }
+    const config = getConfig({ baseUrl, rootPath, s3Options, ...legacyS3Options });
 
-    const config = { ...s3Options, ...legacyS3Options };
-
-    const S3 = new AWS.S3({
+    const S3 = new S3Client({
       apiVersion: '2006-03-01',
       ...config,
     });
 
-    const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
-
     const getFileKey = (file) => {
+      const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
       const path = file.path ? `${file.path}/` : '';
-
       return `${filePrefix}${path}${file.hash}${file.ext}`;
     };
 
-    const ACL = getOr('public-read', ['params', 'ACL'], config);
-
-    const upload = (file, customParams = {}) =>
-      new Promise((resolve, reject) => {
-        // upload file on S3 bucket
-        const fileKey = getFileKey(file);
-        S3.upload(
-          {
-            Key: fileKey,
-            Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL,
-            ContentType: file.mime,
-            ...customParams,
-          },
-          (err, data) => {
-            if (err) {
-              return reject(err);
-            }
-
-            // set the bucket file url
-            if (assertUrlProtocol(data.Location)) {
-              file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
-            } else {
-              // Default protocol to https protocol
-              file.url = `https://${data.Location}`;
-            }
-            resolve();
-          }
-        );
+    const upload = async (file, customParams = {}) => {
+      const fileKey = getFileKey(file);
+      const parallelUpload = new Upload({
+        client: S3,
+        params: {
+          Bucket: config.params.Bucket,
+          Key: fileKey,
+          Body: file.stream || Buffer.from(file.buffer, 'binary'),
+          ACL: config.ACL,
+          ContentType: file.mime,
+          ...customParams,
+        },
       });
 
+      const upload = await parallelUpload.done();
+
+      if (assertUrlProtocol(upload.Location)) {
+        file.url = baseUrl ? `${baseUrl}/${fileKey}` : upload.Location;
+      } else {
+        // Default protocol to https protocol
+        file.url = `https://${upload.Location}`;
+      }
+    };
     return {
       isPrivate() {
-        return ACL === 'private';
+        return config.ACL === 'private';
       },
       /**
        * @param {Object} file
@@ -81,31 +80,28 @@ module.exports = {
        * @param {Object} customParams
        * @returns {Promise<{url: string}>}
        */
-      getSignedUrl(file, customParams = {}) {
+      async getSignedUrl(file, customParams = {}) {
         // Do not sign the url if it does not come from the same bucket.
         const { bucket } = getBucketFromUrl(file.url);
         if (bucket !== config.params.Bucket) {
           return { url: file.url };
         }
 
-        return new Promise((resolve, reject) => {
-          const fileKey = getFileKey(file);
+        const fileKey = getFileKey(file);
 
-          S3.getSignedUrl(
-            'getObject',
-            {
-              Bucket: config.params.Bucket,
-              Key: fileKey,
-              Expires: getOr(15 * 60, ['params', 'signedUrlExpires'], config), // 15 minutes
-            },
-            (err, url) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve({ url });
-            }
-          );
-        });
+        const url = await getSignedUrl(
+          S3,
+          new GetObjectCommand({
+            Bucket: config.params.Bucket,
+            Key: fileKey,
+            ...customParams,
+          }),
+          {
+            expiresIn: getOr(15 * 60, ['params', 'signedUrlExpires'], config),
+          }
+        );
+
+        return { url };
       },
       uploadStream(file, customParams = {}) {
         return upload(file, customParams);
@@ -114,23 +110,12 @@ module.exports = {
         return upload(file, customParams);
       },
       delete(file, customParams = {}) {
-        return new Promise((resolve, reject) => {
-          // delete file on S3 bucket
-          const fileKey = getFileKey(file);
-          S3.deleteObject(
-            {
-              Key: fileKey,
-              ...customParams,
-            },
-            (err) => {
-              if (err) {
-                return reject(err);
-              }
-
-              resolve();
-            }
-          );
+        const command = new DeleteObjectCommand({
+          Bucket: config.params.Bucket,
+          Key: getFileKey(file),
+          ...customParams,
         });
+        return S3.send(command);
       },
     };
   },

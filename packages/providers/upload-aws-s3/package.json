@@ -39,7 +39,9 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "aws-sdk": "2.1287.0",
+    "@aws-sdk/client-s3": "3.306.0",
+    "@aws-sdk/lib-storage": "3.306.0",
+    "@aws-sdk/s3-request-presigner": "3.306.0",
     "lodash": "4.17.21"
   },
   "engines": {
