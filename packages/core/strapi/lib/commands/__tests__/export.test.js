@@ -1,6 +1,6 @@
 'use strict';
 
-const { expectExit } = require('./shared/transfer.test.utils');
+const { expectExit } = require('./utils/data-transfer.test.utils');
 
 describe('Export', () => {
   const defaultFileName = 'defaultFilename';
@@ -89,7 +89,7 @@ describe('Export', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'export' command
-  const exportCommand = require('../../actions/export/action');
+  const exportCommand = require('../actions/export/action');
 
   beforeEach(() => {
     jest.clearAllMocks();

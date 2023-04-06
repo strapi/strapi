@@ -1,6 +1,6 @@
 'use strict';
 
-const { expectExit } = require('./shared/transfer.test.utils');
+const { expectExit } = require('./utils/data-transfer.test.utils');
 
 describe('Transfer', () => {
   // mock utils
@@ -71,7 +71,7 @@ describe('Transfer', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  const transferCommand = require('../../actions/transfer/action');
+  const transferCommand = require('../actions/transfer/action');
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});
