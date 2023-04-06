@@ -89,7 +89,7 @@ describe('Export', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'export' command
-  const exportCommand = require('../../transfer/export');
+  const exportCommand = require('../../actions/export/action');
 
   beforeEach(() => {
     jest.clearAllMocks();

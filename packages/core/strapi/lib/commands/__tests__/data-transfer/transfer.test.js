@@ -71,7 +71,7 @@ describe('Transfer', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  const transferCommand = require('../../transfer/transfer');
+  const transferCommand = require('../../actions/transfer/action');
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});

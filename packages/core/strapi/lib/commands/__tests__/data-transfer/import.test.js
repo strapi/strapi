@@ -95,7 +95,7 @@ describe('Import', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'import' command
-  const importCommand = require('../../transfer/import');
+  const importCommand = require('../../actions/import/action');
 
   beforeEach(() => {
     jest.clearAllMocks();

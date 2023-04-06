@@ -11,7 +11,7 @@ const { resolve, join } = require('path');
 const fse = require('fs-extra');
 const inquirer = require('inquirer');
 
-const exportTemplate = require('../generate-template');
+const exportTemplate = require('../actions/templates/generate/action');
 
 describe('generate:template command', () => {
   beforeEach(() => {

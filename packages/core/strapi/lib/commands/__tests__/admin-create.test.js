@@ -33,7 +33,7 @@ jest.mock('../../index', () => {
 });
 
 const inquirer = require('inquirer');
-const createAdminCommand = require('../admin-create');
+const createAdminCommand = require('../scripts/admin-create');
 
 describe('admin:create command', () => {
   beforeEach(() => {
