@@ -57,7 +57,7 @@ const promptQuestions = [
  * @param {string} cmdOptions.firstname - new admin's first name
  * @param {string} [cmdOptions.lastname] - new admin's last name
  */
-module.exports = async function (cmdOptions = {}) {
+module.exports = async (cmdOptions = {}) => {
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (

@@ -7,7 +7,7 @@ const getEnabledPlugins = require('../../../core/loaders/plugins/get-enabled-plu
 const addSlash = require('../../../utils/addSlash');
 const strapi = require('../../../index');
 
-module.exports = async function ({ browser }) {
+module.exports = async ({ browser }) => {
   const appContext = await strapi.compile();
 
   const strapiInstance = strapi({

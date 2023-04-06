@@ -5,7 +5,7 @@ const chalk = require('chalk');
 
 const strapi = require('../../../../index');
 
-module.exports = async function () {
+module.exports = async () => {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).register();
 
