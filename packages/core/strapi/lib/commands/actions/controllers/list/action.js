@@ -3,7 +3,7 @@
 const CLITable = require('cli-table3');
 const chalk = require('chalk');
 
-const strapi = require('../../index');
+const strapi = require('../../../../index');
 
 module.exports = async function () {
   const appContext = await strapi.compile();
