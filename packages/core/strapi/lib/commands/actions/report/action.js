@@ -1,7 +1,7 @@
 'use strict';
 
 const { EOL } = require('os');
-const strapi = require('../../index');
+const strapi = require('../../../index');
 
 module.exports = async ({ uuid, dependencies, all }) => {
   const config = {

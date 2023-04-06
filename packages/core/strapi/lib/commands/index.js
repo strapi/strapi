@@ -21,6 +21,7 @@ const availableCommands = [
   'middlewares/list',
   'new',
   'policies/list',
+  'report',
   'routes/list',
   'services/list',
   'start',
