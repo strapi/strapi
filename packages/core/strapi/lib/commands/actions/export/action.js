@@ -24,8 +24,8 @@ const {
   loadersFactory,
   exitMessageText,
   abortTransfer,
-} = require('../../scripts/transfer/utils');
-const { exitWith } = require('../../scripts/utils/helpers');
+} = require('../../utils/data-transfer');
+const { exitWith } = require('../../utils/helpers');
 /**
  * @typedef ExportCommandOptions Options given to the CLI import command
  *

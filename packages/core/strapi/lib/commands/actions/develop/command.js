@@ -1,6 +1,6 @@
 'use strict';
 
-const { getLocalScript } = require('../../scripts/utils/helpers');
+const { getLocalScript } = require('../../utils/helpers');
 
 module.exports = ({ command /* , argv */ }) => {
   // `$ strapi develop`

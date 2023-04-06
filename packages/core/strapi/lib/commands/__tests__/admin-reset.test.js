@@ -24,7 +24,7 @@ jest.mock('../../index', () => {
 });
 
 const inquirer = require('inquirer');
-const resetAdminPasswordCommand = require('../scripts/admin-reset');
+const resetAdminPasswordCommand = require('../actions/admin/reset-user-password/action');
 
 describe('admin:reset-password command', () => {
   beforeEach(() => {

@@ -1,11 +1,11 @@
 'use strict';
 
-const { loadProjectScript } = require('../../scripts/utils/helpers');
+const { getLocalScript } = require('../../utils/helpers');
 
 module.exports = ({ command /* , argv */ }) => {
   // `$ strapi start`
   command
     .command('start')
     .description('Start your Strapi application')
-    .action(loadProjectScript('start'));
+    .action(getLocalScript('start'));
 };

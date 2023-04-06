@@ -1,6 +1,6 @@
 'use strict';
 
-const { assertCwdContainsStrapiProject } = require('../../scripts/utils/helpers');
+const { assertCwdContainsStrapiProject } = require('../../utils/helpers');
 
 module.exports = ({ command, argv }) => {
   // $ strapi generate

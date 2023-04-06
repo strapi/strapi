@@ -1,6 +1,6 @@
 'use strict';
 
-const { getLocalScript } = require('../../scripts/utils/helpers');
+const { getLocalScript } = require('../../utils/helpers');
 
 module.exports = ({ command /* , argv */ }) => {
   //   `$ strapi watch-admin`
@@ -8,5 +8,5 @@ module.exports = ({ command /* , argv */ }) => {
     .command('watch-admin')
     .option('--browser <name>', 'Open the browser', true)
     .description('Start the admin development server')
-    .action(getLocalScript('watchAdmin'));
+    .action(getLocalScript('watch-admin'));
 };

@@ -2,19 +2,19 @@
 
 const inquirer = require('inquirer');
 const { Option } = require('commander');
-const { confirmMessage, forceOption, parseURL } = require('../../scripts/utils/commander');
+const { confirmMessage, forceOption, parseURL } = require('../../utils/commander');
 const {
   getLocalScript,
   exitWith,
   assertUrlHasProtocol,
   ifOptions,
-} = require('../../scripts/utils/helpers');
+} = require('../../utils/helpers');
 const {
   excludeOption,
   onlyOption,
   throttleOption,
   validateExcludeOnly,
-} = require('../../scripts/transfer/utils');
+} = require('../../utils/data-transfer');
 
 module.exports = ({ command /* , argv */ }) => {
   // `$ strapi transfer`

@@ -8,9 +8,9 @@ const {
   onlyOption,
   throttleOption,
   validateExcludeOnly,
-} = require('../../scripts/transfer/utils');
-const { confirmMessage, forceOption } = require('../../scripts/utils/commander');
-const { getLocalScript, exitWith } = require('../../scripts/utils/helpers');
+} = require('../../utils/data-transfer');
+const { confirmMessage, forceOption } = require('../../utils/commander');
+const { getLocalScript, exitWith } = require('../../utils/helpers');
 
 module.exports = (commandContext) => {
   const { command } = commandContext;

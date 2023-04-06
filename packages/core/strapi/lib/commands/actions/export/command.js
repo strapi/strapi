@@ -6,9 +6,9 @@ const {
   onlyOption,
   throttleOption,
   validateExcludeOnly,
-} = require('../../scripts/transfer/utils');
-const { promptEncryptionKey } = require('../../scripts/utils/commander');
-const { getLocalScript } = require('../../scripts/utils/helpers');
+} = require('../../utils/data-transfer');
+const { promptEncryptionKey } = require('../../utils/commander');
+const { getLocalScript } = require('../../utils/helpers');
 
 module.exports = (commandContext) => {
   const { command } = commandContext;
