@@ -14,7 +14,6 @@ const availableCommands = [
   'develop',
   'export',
   'generate',
-  'generate/template',
   'hooks/list',
   'import',
   'install',
@@ -38,6 +37,8 @@ const availableCommands = [
 const buildStrapiCommand = (argv, command = new Command()) => {
   // Initial program setup
   command.storeOptionsAsProperties(false).allowUnknownOption(true);
+
+  // Help command
   command.helpOption('-h, --help', 'Display help for command');
   command.addHelpCommand('help [command]', 'Display help for command');
 
