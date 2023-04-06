@@ -13,7 +13,7 @@ const inquirer = require('inquirer');
 
 const exportTemplate = require('../actions/templates/generate/action');
 
-describe('generate:template command', () => {
+describe('templates:generate command', () => {
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.clearAllMocks();

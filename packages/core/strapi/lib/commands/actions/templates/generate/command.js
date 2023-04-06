@@ -3,7 +3,7 @@
 const { getLocalScript } = require('../../../utils/helpers');
 
 /**
- *`$ strapi generate:template <directory>`
+ *`$ strapi templates:generate <directory>`
  * @param {import('../../../../types/core/commands').AddCommandOptions} options
  */
 module.exports = ({ command }) => {
