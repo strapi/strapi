@@ -7,6 +7,7 @@
 /* eslint-disable no-unused-vars */
 // Public node modules.
 const { getOr } = require('lodash/fp');
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 const AWS = require('aws-sdk');
 const { getBucketFromUrl } = require('./utils');
 
