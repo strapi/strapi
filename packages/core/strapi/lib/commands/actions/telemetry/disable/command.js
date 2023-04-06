@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  //    `$ strapi opt-out-telemetry`
+/**
+ * `$ strapi telemetry:disable`
+ * @param {import('../../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('telemetry:disable')
     .description('Disable anonymous telemetry and metadata sending to Strapi analytics')

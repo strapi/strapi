@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi start`
+/**
+ * `$ strapi start`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('start')
     .description('Start your Strapi application')

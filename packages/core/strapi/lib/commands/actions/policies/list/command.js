@@ -2,7 +2,11 @@
 
 const { getLocalScript } = require('../../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
+/**
+ * `$ strapi policies:list`
+ * @param {import('../../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('policies:list')
     .description('List all the application policies')

@@ -10,10 +10,11 @@ const {
 const { promptEncryptionKey } = require('../../utils/commander');
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = (commandContext) => {
-  const { command } = commandContext;
-
-  // `$ strapi export`
+/**
+ * `$ strapi export`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('export')
     .description('Export data from Strapi to file')

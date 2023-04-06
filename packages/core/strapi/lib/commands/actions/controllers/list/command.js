@@ -2,7 +2,11 @@
 
 const { getLocalScript } = require('../../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
+/**
+ * `$ strapi controllers:list`
+ * @param {import('../../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('controllers:list')
     .description('List all the application controllers')

@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi watch-admin`
+/**
+ * `$ strapi watch-admin`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('watch-admin')
     .option('--browser <name>', 'Open the browser', true)

@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi uninstall`
+/**
+ * `$ strapi uninstall`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('uninstall [plugins...]')
     .description('Uninstall a Strapi plugin')

@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi build`
+/**
+ * `$ strapi build`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('build')
     .option('--no-optimization', 'Build the admin app without optimizing assets')

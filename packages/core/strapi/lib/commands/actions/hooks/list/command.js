@@ -2,7 +2,11 @@
 
 const { getLocalScript } = require('../../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
+/**
+ * `$ strapi hooks:list`
+ * @param {import('../../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('hooks:list')
     .description('List all the application hooks')

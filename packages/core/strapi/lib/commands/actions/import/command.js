@@ -12,10 +12,11 @@ const {
 const { confirmMessage, forceOption } = require('../../utils/commander');
 const { getLocalScript, exitWith } = require('../../utils/helpers');
 
-module.exports = (commandContext) => {
-  const { command } = commandContext;
-
-  // `$ strapi import`
+/**
+ * `$ strapi import`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('import')
     .description('Import data from file to Strapi')

@@ -2,8 +2,11 @@
 
 const { getLocalScript } = require('../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi develop`
+/**
+ * `$ strapi develop`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('develop')
     .alias('dev')

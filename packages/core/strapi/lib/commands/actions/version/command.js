@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * `$ strapi version`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
 module.exports = ({ command }) => {
   // load the Strapi package.json to get version and other information
   const packageJSON = require('../../../../package.json');

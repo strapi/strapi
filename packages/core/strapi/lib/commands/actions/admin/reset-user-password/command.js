@@ -2,7 +2,11 @@
 
 const { getLocalScript } = require('../../../utils/helpers');
 
-module.exports = ({ command /* , argv */ }) => {
+/**
+ * `$ strapi admin:reset-user-password`
+ * @param {import('../../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('admin:reset-user-password')
     .alias('admin:reset-password')

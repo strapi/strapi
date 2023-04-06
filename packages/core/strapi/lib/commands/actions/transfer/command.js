@@ -16,8 +16,11 @@ const {
   validateExcludeOnly,
 } = require('../../utils/data-transfer');
 
-module.exports = ({ command /* , argv */ }) => {
-  // `$ strapi transfer`
+/**
+ * `$ strapi transfer`
+ * @param {import('../../../types/core/commands').AddCommandOptions} options
+ */
+module.exports = ({ command }) => {
   command
     .command('transfer')
     .description('Transfer data from one source to another')
