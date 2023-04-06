@@ -21,7 +21,7 @@
     }
   ],
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@graphql-tools/schema": "8.5.1",
