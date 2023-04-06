@@ -30,14 +30,14 @@
     "build": "rimraf build && node ./scripts/build.js",
     "build:mesure": "rimraf build && cross-env MESURE_BUILD_SPEED=true node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce:cov": "cross-env IS_EE=false jest --config ./jest.config.front.js --coverage",
-    "lint": "eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce:cov": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --coverage",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@babel/core": "^7.20.12",
