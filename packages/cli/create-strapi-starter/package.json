@@ -33,7 +33,7 @@
   "main": "./index.js",
   "bin": "./index.js",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/generate-new": "4.9.0",

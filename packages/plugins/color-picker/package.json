@@ -31,11 +31,11 @@
     "styled-components": "5.3.3"
   },
   "scripts": {
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
-    "lint": "eslint ."
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "run -T eslint ."
   },
   "repository": {
     "type": "git",
