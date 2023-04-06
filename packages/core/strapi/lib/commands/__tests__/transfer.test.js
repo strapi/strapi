@@ -72,7 +72,7 @@ describe('Transfer', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  const transferCommand = require('../actions/transfer/action');
+  const transferAction = require('../actions/transfer/action');
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -91,7 +91,7 @@ describe('Transfer', () => {
 
   it('exits with error when no --to or --from is provided', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: undefined, to: undefined });
+      await transferAction({ from: undefined, to: undefined });
     });
 
     expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/one source/i));
@@ -103,7 +103,7 @@ describe('Transfer', () => {
 
   it('exits with error when both --to and --from are provided', async () => {
     await expectExit(1, async () => {
-      await transferCommand({ from: sourceUrl, to: destinationUrl });
+      await transferAction({ from: sourceUrl, to: destinationUrl });
     });
 
     expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/one source/i));
@@ -116,7 +116,7 @@ describe('Transfer', () => {
   describe('--to', () => {
     it('exits with error when auth is not provided', async () => {
       await expectExit(1, async () => {
-        await transferCommand({ from: undefined, to: destinationUrl });
+        await transferAction({ from: undefined, to: destinationUrl });
       });
 
       expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/missing token/i));
@@ -128,7 +128,7 @@ describe('Transfer', () => {
 
     it('uses destination url and token provided by user', async () => {
       await expectExit(0, async () => {
-        await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
+        await transferAction({ from: undefined, to: destinationUrl, toToken: destinationToken });
       });
 
       expect(console.error).not.toHaveBeenCalled();
@@ -147,7 +147,7 @@ describe('Transfer', () => {
 
     it('uses local Strapi source when from is not specified', async () => {
       await expectExit(0, async () => {
-        await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
+        await transferAction({ from: undefined, to: destinationUrl, toToken: destinationToken });
       });
 
       expect(console.error).not.toHaveBeenCalled();
@@ -162,7 +162,7 @@ describe('Transfer', () => {
 
   it('uses restore as the default strategy', async () => {
     await expectExit(0, async () => {
-      await transferCommand({ from: undefined, to: destinationUrl, toToken: destinationToken });
+      await transferAction({ from: undefined, to: destinationUrl, toToken: destinationToken });
     });
 
     expect(console.error).not.toHaveBeenCalled();

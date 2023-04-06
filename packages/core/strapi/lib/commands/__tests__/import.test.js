@@ -96,7 +96,7 @@ describe('Import', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'import' command
-  const importCommand = require('../actions/import/action');
+  const importAction = require('../actions/import/action');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -112,7 +112,7 @@ describe('Import', () => {
     };
 
     await expectExit(0, async () => {
-      await importCommand(options);
+      await importAction(options);
     });
 
     // strapi options

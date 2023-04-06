@@ -5,7 +5,7 @@ const { Command } = require('commander');
 const availableCommands = [
   'admin/create-user',
   'admin/reset-user-password',
-  'build-action', // TODO: this should be 'build' but that is ignored
+  'build',
   'configuration/dump',
   'configuration/restore',
   'console',

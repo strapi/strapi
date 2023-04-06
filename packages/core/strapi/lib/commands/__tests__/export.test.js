@@ -90,7 +90,7 @@ describe('Export', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'export' command
-  const exportCommand = require('../actions/export/action');
+  const exportAction = require('../actions/export/action');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -100,7 +100,7 @@ describe('Export', () => {
     const filename = 'test';
 
     await expectExit(0, async () => {
-      await exportCommand({ file: filename });
+      await exportAction({ file: filename });
     });
 
     expect(console.error).not.toHaveBeenCalled();
@@ -114,7 +114,7 @@ describe('Export', () => {
 
   it('uses default path if not provided by user', async () => {
     await expectExit(0, async () => {
-      await exportCommand({});
+      await exportAction({});
     });
 
     expect(mockUtils.getDefaultExportName).toHaveBeenCalledTimes(1);
@@ -128,7 +128,7 @@ describe('Export', () => {
   it('encrypts the output file if specified', async () => {
     const encrypt = true;
     await expectExit(0, async () => {
-      await exportCommand({ encrypt });
+      await exportAction({ encrypt });
     });
 
     expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe('Export', () => {
     const key = 'secret-key';
     const encrypt = true;
     await expectExit(0, async () => {
-      await exportCommand({ encrypt, key });
+      await exportAction({ encrypt, key });
     });
 
     expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
@@ -154,7 +154,7 @@ describe('Export', () => {
 
   it('uses compress option', async () => {
     await expectExit(0, async () => {
-      await exportCommand({ compress: false });
+      await exportAction({ compress: false });
     });
 
     expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
@@ -163,7 +163,7 @@ describe('Export', () => {
       })
     );
     await expectExit(0, async () => {
-      await exportCommand({ compress: true });
+      await exportAction({ compress: true });
     });
     expect(mockDataTransfer.file.providers.createLocalFileDestinationProvider).toHaveBeenCalledWith(
       expect.objectContaining({
