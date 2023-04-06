@@ -25,7 +25,7 @@ describe('Transfer', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../../transfer/utils',
+    '../utils/data-transfer.js',
     () => {
       return mockUtils;
     },
@@ -45,6 +45,7 @@ describe('Transfer', () => {
       },
     },
     engine: {
+      ...jest.requireActual('@strapi/data-transfer').engine,
       createTransferEngine() {
         return {
           transfer: jest.fn(() => {

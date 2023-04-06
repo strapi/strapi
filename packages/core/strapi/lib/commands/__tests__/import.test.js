@@ -53,6 +53,7 @@ describe('Import', () => {
       },
     },
     engine: {
+      ...jest.requireActual('@strapi/data-transfer').engine,
       DEFAULT_SCHEMA_STRATEGY,
       DEFAULT_VERSION_STRATEGY,
       createTransferEngine,
@@ -81,7 +82,7 @@ describe('Import', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../../transfer/utils',
+    '../utils/data-transfer.js',
     () => {
       return mockUtils;
     },

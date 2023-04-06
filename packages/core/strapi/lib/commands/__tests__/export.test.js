@@ -21,6 +21,7 @@ describe('Export', () => {
       },
     },
     engine: {
+      ...jest.requireActual('@strapi/data-transfer').engine,
       errors: {},
       createTransferEngine() {
         return {
@@ -75,7 +76,7 @@ describe('Export', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../../transfer/utils',
+    '../utils/data-transfer.js',
     () => {
       return mockUtils;
     },
