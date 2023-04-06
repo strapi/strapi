@@ -7685,8 +7685,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@types/nodemailer": 6.4.7
+    eslint-config-custom: "*"
     lodash: 4.17.21
     nodemailer: 6.9.1
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
@@ -7696,7 +7699,6 @@ __metadata:
   dependencies:
     "@sendgrid/mail": 7.7.0
     "@strapi/utils": 4.9.0
-    "@types/sendmail": 1.4.4
     eslint-config-custom: "*"
     tsconfig: "*"
   languageName: unknown
@@ -7707,7 +7709,6 @@ __metadata:
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
     "@strapi/utils": 4.9.0
-    "@types/jest": 29.2.0
     "@types/sendmail": 1.4.4
     eslint-config-custom: "*"
     sendmail: ^1.6.1
@@ -8761,6 +8762,15 @@ __metadata:
   version: 16.11.58
   resolution: "@types/node@npm:16.11.58"
   checksum: efdf14c62e6c1a8e758416aaa3ae4b81015ffd4e1f31c05680d1242817ba23f0b4b1345886fe5aeb3c05d818bcaed1a7af4d637e7cca5723a5e4ac8b759d3ace
+  languageName: node
+  linkType: hard
+
+"@types/nodemailer@npm:6.4.7":
+  version: 6.4.7
+  resolution: "@types/nodemailer@npm:6.4.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: dc2a33a89135e04a5bea4921e8645e8453b90e3c3b05f0646f05071c5951ab697ea49ea1e503a690f04cb0a6abfc54967325c5a4036356793cfbb64ba64fb141
   languageName: node
   linkType: hard
 

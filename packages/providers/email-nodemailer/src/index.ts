@@ -1,11 +1,5 @@
-'use strict';
-
-/**
- * Module dependencies
- */
-
-const _ = require('lodash');
-const nodemailer = require('nodemailer');
+import _ from 'lodash';
+import nodemailer, { SendMailOptions } from 'nodemailer';
 
 const emailFields = [
   'from',
@@ -19,15 +13,20 @@ const emailFields = [
   'attachments',
 ];
 
-module.exports = {
+interface Settings {
+  defaultFrom?: string;
+  defaultReplyTo?: string;
+}
+
+export = {
   provider: 'nodemailer',
   name: 'Nodemailer',
 
-  init(providerOptions = {}, settings = {}) {
+  init(providerOptions = {}, settings: Settings = {}) {
     const transporter = nodemailer.createTransport(providerOptions);
 
     return {
-      send(options) {
+      send(options: SendMailOptions) {
         // Default values.
         const emailOptions = {
           ..._.pick(options, emailFields),
