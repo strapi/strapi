@@ -1,16 +1,20 @@
-'use strict';
+import sendmailFactory, { Options, MailInput } from 'sendmail';
+import utils from '@strapi/utils';
 
-const sendmailFactory = require('sendmail');
-const { removeUndefined } = require('@strapi/utils');
+interface Settings {
+  defaultFrom?: string;
+  defaultReplyTo?: string;
+}
 
-module.exports = {
-  init(providerOptions = {}, settings = {}) {
+export = {
+  init(providerOptions: Options = {}, settings: Settings = {}) {
     const sendmail = sendmailFactory({
       silent: true,
       ...providerOptions,
     });
+
     return {
-      send(options) {
+      send(options: MailInput): Promise<void> {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -26,7 +30,7 @@ module.exports = {
             ...rest,
           };
 
-          sendmail(removeUndefined(msg), (err) => {
+          sendmail(utils.removeUndefined(msg), (err) => {
             if (err) {
               reject(err);
             } else {

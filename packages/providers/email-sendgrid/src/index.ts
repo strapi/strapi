@@ -1,14 +1,21 @@
-'use strict';
+import sendgrid, { MailDataRequired } from '@sendgrid/mail';
+import utils from '@strapi/utils';
 
-const sendgrid = require('@sendgrid/mail');
-const { removeUndefined } = require('@strapi/utils');
+interface ProviderOptions {
+  apiKey: string;
+}
 
-module.exports = {
-  init(providerOptions = {}, settings = {}) {
+interface Settings {
+  defaultFrom?: string;
+  defaultReplyTo?: string;
+}
+
+export = {
+  init(providerOptions: ProviderOptions, settings: Settings = {}) {
     sendgrid.setApiKey(providerOptions.apiKey);
 
     return {
-      send(options) {
+      send(options: MailDataRequired): Promise<void> {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
@@ -24,7 +31,7 @@ module.exports = {
             ...rest,
           };
 
-          sendgrid.send(removeUndefined(msg), (err) => {
+          sendgrid.send(utils.removeUndefined(msg), false, (err) => {
             if (err) {
               reject(err);
             } else {

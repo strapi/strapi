@@ -7696,6 +7696,9 @@ __metadata:
   dependencies:
     "@sendgrid/mail": 7.7.0
     "@strapi/utils": 4.9.0
+    "@types/sendmail": 1.4.4
+    eslint-config-custom: "*"
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
@@ -7704,7 +7707,11 @@ __metadata:
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
     "@strapi/utils": 4.9.0
+    "@types/jest": 29.2.0
+    "@types/sendmail": 1.4.4
+    eslint-config-custom: "*"
     sendmail: ^1.6.1
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
@@ -8876,6 +8883,13 @@ __metadata:
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13"
   checksum: 00c0724d54757c2f4bc60b5032fe91cda6410e48689633d5f35ece8a0a66445e3e57fa1d6e07eb780f792e82ac542948ec4d0b76eb3484297b79bd18b8cf1cb0
+  languageName: node
+  linkType: hard
+
+"@types/sendmail@npm:1.4.4":
+  version: 1.4.4
+  resolution: "@types/sendmail@npm:1.4.4"
+  checksum: aa31facf023af0c888e6a64bfaf742d08efdf1fef4c51efd7e0e547f6f3a2d215f02bdea81f35953cefefadf9a6f1fd516bafc06f4beb708b41570e21c415e3e
   languageName: node
   linkType: hard
 
