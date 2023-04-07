@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+export default {
   kind: 'collectionType',
   collectionName: 'strapi_audit_logs',
   info: {
