@@ -17,7 +17,7 @@ function assertUrlProtocol(url) {
 
 module.exports = {
   init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
-    if (legacyS3Options) {
+    if (Object.keys(legacyS3Options).length !== 0) {
       process.emitWarning(
         "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
       );
