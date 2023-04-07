@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { createDefaultConditionsForm } from './createDefaultCTFormFromLayout';
 import findMatchingPermission from './findMatchingPermissions';
 
@@ -12,7 +11,7 @@ const createSubCategoryForm = (actions, conditions, permissions) => {
       },
       conditions: createDefaultConditionsForm(
         conditions,
-        get(foundMatchingPermission, 'conditions', [])
+        foundMatchingPermission?.conditions ?? []
       ),
     };
 

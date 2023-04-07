@@ -12,7 +12,6 @@ import {
   IconButton,
   Box,
   Flex,
-  Stack,
 } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Trash, Drag } from '@strapi/icons';
@@ -22,7 +21,7 @@ import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
 import FieldComponent from '../../FieldComponent';
 
-const ActionsStack = styled(Stack)`
+const ActionsFlex = styled(Flex)`
   /* 
     we need to remove the background from the button but we can't 
     wrap the element in styled because it breaks the forwardedAs which
@@ -149,7 +148,7 @@ const DynamicZoneComponent = ({
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   const accordionActions = !isFieldAllowed ? null : (
-    <ActionsStack horizontal spacing={0} expanded={isOpen}>
+    <ActionsFlex gap={0} expanded={isOpen}>
       <IconButtonCustom
         noBorder
         label={formatMessage(
@@ -179,7 +178,7 @@ const DynamicZoneComponent = ({
       >
         <Drag />
       </IconButton>
-    </ActionsStack>
+    </ActionsFlex>
   );
 
   return (

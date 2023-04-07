@@ -1,55 +1,61 @@
 'use strict';
 
-const { createTransferEngine } = require('@strapi/data-transfer/lib/engine');
 const {
-  providers: {
-    createRemoteStrapiDestinationProvider,
-    createLocalStrapiSourceProvider,
-    createLocalStrapiDestinationProvider,
+  engine: { createTransferEngine },
+  strapi: {
+    providers: {
+      createRemoteStrapiDestinationProvider,
+      createLocalStrapiSourceProvider,
+      createLocalStrapiDestinationProvider,
+      createRemoteStrapiSourceProvider,
+    },
   },
-} = require('@strapi/data-transfer/lib/strapi');
+} = require('@strapi/data-transfer');
 const { isObject } = require('lodash/fp');
-const chalk = require('chalk');
 
 const {
   buildTransferTable,
   createStrapiInstance,
   DEFAULT_IGNORED_CONTENT_TYPES,
   formatDiagnostic,
+  loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
-
-const logger = console;
+const { exitWith } = require('../utils/helpers');
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
  *
  * @property {URL|undefined} [to] The url of a remote Strapi to use as remote destination
  * @property {URL|undefined} [from] The url of a remote Strapi to use as remote source
+ * @property {string|undefined} [toToken] The transfer token for the remote Strapi destination
+ * @property {string|undefined} [fromToken] The transfer token for the remote Strapi source
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
 
 /**
  * Transfer command.
  *
- * It transfers data from a local file to a local strapi instance
+ * Transfers data between local Strapi and remote Strapi instances
  *
  * @param {TransferCommandOptions} opts
  */
 module.exports = async (opts) => {
   // Validate inputs from Commander
   if (!isObject(opts)) {
-    logger.error('Could not parse command arguments');
-    process.exit(1);
+    exitWith(1, 'Could not parse command arguments');
+  }
+
+  if (!(opts.from || opts.to) || (opts.from && opts.to)) {
+    exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
   }
 
   const strapi = await createStrapiInstance();
-
   let source;
   let destination;
-
-  if (!opts.from && !opts.to) {
-    logger.error('At least one source (from) or destination (to) option must be provided');
-    process.exit(1);
-  }
 
   // if no URL provided, use local Strapi
   if (!opts.from) {
@@ -59,21 +65,42 @@ module.exports = async (opts) => {
   }
   // if URL provided, set up a remote source provider
   else {
-    logger.error(`Remote Strapi source provider not yet implemented`);
-    process.exit(1);
+    if (!opts.fromToken) {
+      exitWith(1, 'Missing token for remote destination');
+    }
+
+    source = createRemoteStrapiSourceProvider({
+      getStrapi: () => strapi,
+      url: opts.from,
+      auth: {
+        type: 'token',
+        token: opts.fromToken,
+      },
+    });
   }
 
   // if no URL provided, use local Strapi
   if (!opts.to) {
     destination = createLocalStrapiDestinationProvider({
       getStrapi: () => strapi,
+      strategy: 'restore',
+      restore: {
+        entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
+      },
     });
   }
   // if URL provided, set up a remote destination provider
   else {
+    if (!opts.toToken) {
+      exitWith(1, 'Missing token for remote destination');
+    }
+
     destination = createRemoteStrapiDestinationProvider({
       url: opts.to,
-      auth: false,
+      auth: {
+        type: 'token',
+        token: opts.toToken,
+      },
       strategy: 'restore',
       restore: {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
@@ -82,13 +109,15 @@ module.exports = async (opts) => {
   }
 
   if (!source || !destination) {
-    logger.error('Could not create providers');
-    process.exit(1);
+    exitWith(1, 'Could not create providers');
   }
 
   const engine = createTransferEngine(source, destination, {
-    versionStrategy: 'strict',
+    versionStrategy: 'exact',
     schemaStrategy: 'strict',
+    exclude: opts.exclude,
+    only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
@@ -112,18 +141,42 @@ module.exports = async (opts) => {
 
   engine.diagnostics.onDiagnostic(formatDiagnostic('transfer'));
 
+  const progress = engine.progress.stream;
+
+  const { updateLoader } = loadersFactory();
+
+  progress.on(`stage::start`, ({ stage, data }) => {
+    updateLoader(stage, data).start();
+  });
+
+  progress.on('stage::finish', ({ stage, data }) => {
+    updateLoader(stage, data).succeed();
+  });
+
+  progress.on('stage::progress', ({ stage, data }) => {
+    updateLoader(stage, data);
+  });
+
+  progress.on('stage::error', ({ stage, data }) => {
+    updateLoader(stage, data).fail();
+  });
+
+  let results;
   try {
-    logger.log(`Starting transfer...`);
+    console.log(`Starting transfer...`);
 
-    const results = await engine.transfer();
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
 
-    const table = buildTransferTable(results.engine);
-    logger.log(table.toString());
-
-    logger.log(`${chalk.bold('Transfer process has been completed successfully!')}`);
-    process.exit(0);
+    results = await engine.transfer();
   } catch (e) {
-    logger.error('Transfer process failed.');
-    process.exit(1);
+    exitWith(1, exitMessageText('transfer', true));
   }
+
+  const table = buildTransferTable(results.engine);
+  console.log(table.toString());
+  exitWith(0, exitMessageText('transfer'));
 };

@@ -3,15 +3,30 @@
 const chalk = require('chalk');
 const Table = require('cli-table3');
 const { Option } = require('commander');
-const { TransferGroupPresets } = require('@strapi/data-transfer/lib/engine');
+const {
+  engine: { TransferGroupPresets },
+} = require('@strapi/data-transfer');
 
 const {
   configs: { createOutputFileConfiguration },
   createLogger,
 } = require('@strapi/logger');
+const ora = require('ora');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
-const { getParseListWithChoices } = require('../utils/commander');
+const { getParseListWithChoices, parseInteger } = require('../utils/commander');
+
+const exitMessageText = (process, error = false) => {
+  const processCapitalized = process[0].toUpperCase() + process.slice(1);
+
+  if (!error) {
+    return chalk.bold(
+      chalk.green(`${processCapitalized} process has been completed successfully!`)
+    );
+  }
+
+  return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
+};
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -82,15 +97,28 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::role',
   'admin::api-token',
   'admin::api-token-permission',
+  'admin::transfer-token',
+  'admin::transfer-token-permission',
   'admin::audit-log',
 ];
 
-const createStrapiInstance = async (logLevel = 'error') => {
+const abortTransfer = async ({ engine, strapi }) => {
+  try {
+    await engine.abortTransfer();
+    await strapi.destroy();
+  } catch (e) {
+    // ignore because there's not much else we can do
+    return false;
+  }
+  return true;
+};
+
+const createStrapiInstance = async (opts = {}) => {
   try {
     const appContext = await strapi.compile();
-    const app = strapi(appContext);
+    const app = strapi({ ...opts, ...appContext });
 
-    app.log.level = logLevel;
+    app.log.level = opts.logLevel || 'error';
     return await app.load();
   } catch (err) {
     if (err.code === 'ECONNREFUSED') {
@@ -101,6 +129,13 @@ const createStrapiInstance = async (logLevel = 'error') => {
 };
 
 const transferDataTypes = Object.keys(TransferGroupPresets);
+
+const throttleOption = new Option(
+  '--throttle <delay after each entity>',
+  `Add a delay in milliseconds between each transferred entity`
+)
+  .argParser(parseInteger)
+  .hideHelp(); // This option is not publicly documented
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
@@ -169,13 +204,55 @@ const formatDiagnostic =
     }
   };
 
+const loadersFactory = (defaultLoaders = {}) => {
+  const loaders = defaultLoaders;
+  const updateLoader = (stage, data) => {
+    if (!(stage in loaders)) {
+      createLoader(stage);
+    }
+    const stageData = data[stage];
+    const elapsedTime = stageData?.startTime
+      ? (stageData?.endTime || Date.now()) - stageData.startTime
+      : 0;
+    const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
+    const elapsed = `elapsed: ${elapsedTime} ms`;
+    const speed =
+      elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
+
+    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transfered (${size}) (${elapsed}) ${
+      !stageData?.endTime ? speed : ''
+    }`;
+
+    return loaders[stage];
+  };
+
+  const createLoader = (stage) => {
+    Object.assign(loaders, { [stage]: ora() });
+    return loaders[stage];
+  };
+
+  const getLoader = (stage) => {
+    return loaders[stage];
+  };
+
+  return {
+    updateLoader,
+    createLoader,
+    getLoader,
+  };
+};
+
 module.exports = {
+  loadersFactory,
   buildTransferTable,
   getDefaultExportName,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   excludeOption,
+  exitMessageText,
   onlyOption,
+  throttleOption,
   validateExcludeOnly,
   formatDiagnostic,
+  abortTransfer,
 };

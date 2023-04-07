@@ -11,7 +11,6 @@ import {
   Icon,
   Portal,
   PopoverPrimitives,
-  Stack,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -192,9 +191,16 @@ const Onboarding = () => {
                   </Flex>
                 </VideoLinkWrapper>
               ))}
-              <Stack spacing={2} paddingLeft={5} paddingTop={2} paddingBottom={5}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={2}
+                paddingLeft={5}
+                paddingTop={2}
+                paddingBottom={5}
+              >
                 {docLinks.map(({ label, href, icon }) => (
-                  <Stack horizontal spacing={3} key={href}>
+                  <Flex gap={3} key={href}>
                     <Icon as={icon} color="primary600" />
                     <TextLink
                       as="a"
@@ -206,9 +212,9 @@ const Onboarding = () => {
                     >
                       {formatMessage(label)}
                     </TextLink>
-                  </Stack>
+                  </Flex>
                 ))}
-              </Stack>
+              </Flex>
             </FocusTrap>
           </PopoverPrimitives.Content>
         </Portal>

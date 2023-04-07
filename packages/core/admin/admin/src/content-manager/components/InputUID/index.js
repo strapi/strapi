@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useCMEditViewDataManager, useFetchClient } from '@strapi/helper-plugin';
+import {
+  useCMEditViewDataManager,
+  useFetchClient,
+  useNotification,
+  useAPIErrorHandler,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import get from 'lodash/get';
-import { TextInput, Typography } from '@strapi/design-system';
+import { Flex, TextInput, Typography } from '@strapi/design-system';
 import { Refresh, CheckCircle, ExclamationMarkCircle, Loader } from '@strapi/icons';
+
 import { getRequestUrl } from '../../utils';
 import useDebounce from './useDebounce';
 import UID_REGEX from './regex';
-import {
-  EndActionWrapper,
-  FieldActionWrapper,
-  TextValidation,
-  LoadingWrapper,
-} from './endActionStyle';
+import { FieldActionWrapper, TextValidation, LoadingWrapper } from './endActionStyle';
 
 const InputUID = ({
   attribute,
@@ -34,9 +34,11 @@ const InputUID = ({
   const [availability, setAvailability] = useState(null);
   const debouncedValue = useDebounce(value, 300);
   const generateUid = useRef();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
   const initialValue = initialData[name];
   const { formatMessage } = useIntl();
-  const createdAtName = get(layout, ['options', 'timestamps', 0]);
+  const createdAtName = layout?.options?.timestamps ?? 0;
   const isCreation = !initialData[createdAtName];
   const debouncedTargetFieldValue = useDebounce(modifiedData[attribute.targetField], 300);
   const [isCustomized, setIsCustomized] = useState(false);
@@ -59,72 +61,74 @@ const InputUID = ({
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('uid/generate');
+
     try {
       const {
         data: { data },
-      } = await post(requestURL, {
+      } = await post(getRequestUrl('uid/generate'), {
         contentTypeUID,
         field: name,
         data: modifiedData,
       });
+
       onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
       setIsLoading(false);
-    } catch (err) {
+    } catch (error) {
       setIsLoading(false);
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     }
   };
 
   const checkAvailability = async () => {
-    setIsLoading(true);
-
-    const requestURL = getRequestUrl('uid/check-availability');
-
     if (!value) {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      const { data } = await post(requestURL, {
+      const { data } = await post(getRequestUrl('uid/check-availability'), {
         contentTypeUID,
         field: name,
         value: value ? value.trim() : '',
       });
 
+      setIsLoading(false);
       setAvailability(data);
-
+    } catch (error) {
       setIsLoading(false);
-    } catch (err) {
-      setIsLoading(false);
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     }
   };
 
-  // // FIXME: we need to find a better way to autofill the input when it is required.
+  // FIXME: we need to find a better way to autofill the input when it is required.
   useEffect(() => {
     if (!value && attribute.required) {
       generateUid.current(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [attribute.required, generateUid, value]);
 
   useEffect(() => {
-    if (
-      debouncedValue &&
-      debouncedValue.trim().match(UID_REGEX) &&
-      debouncedValue !== initialValue
-    ) {
+    if (debouncedValue?.trim().match(UID_REGEX) && debouncedValue !== initialValue) {
       checkAvailability();
     }
+
     if (!debouncedValue) {
       setAvailability(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue, initialValue]);
+  }, [initialValue, debouncedValue]);
 
   useEffect(() => {
     let timer;
 
-    if (availability && availability.isAvailable) {
+    if (availability?.isAvailable) {
       timer = setTimeout(() => {
         setAvailability(null);
       }, 4000);
@@ -176,51 +180,70 @@ const InputUID = ({
       disabled={disabled}
       error={error}
       endAction={
-        <EndActionWrapper>
-          {availability && availability.isAvailable && !regenerateLabel && (
-            <TextValidation alignItems="center" justifyContent="flex-end">
-              <CheckCircle />
-              <Typography textColor="success600" variant="pi">
-                {formatMessage({
-                  id: 'content-manager.components.uid.available',
-                  defaultMessage: 'Available',
+        <Flex position="relative" gap={1}>
+          {availability && !regenerateLabel && (
+            <TextValidation
+              alignItems="center"
+              gap={1}
+              justifyContent="flex-end"
+              available={!!availability?.isAvailable}
+              data-not-here-outer
+              position="absolute"
+              pointerEvents="none"
+              right={6}
+              width="100px"
+            >
+              {availability?.isAvailable ? <CheckCircle /> : <ExclamationMarkCircle />}
+
+              <Typography
+                textColor={availability.isAvailable ? 'success600' : 'danger600'}
+                variant="pi"
+              >
+                {formatMessage(
+                  availability.isAvailable
+                    ? {
+                        id: 'content-manager.components.uid.available',
+                        defaultMessage: 'Available',
+                      }
+                    : {
+                        id: 'content-manager.components.uid.unavailable',
+                        defaultMessage: 'Unavailable',
+                      }
+                )}
+              </Typography>
+            </TextValidation>
+          )}
+
+          {!disabled && (
+            <>
+              {regenerateLabel && (
+                <TextValidation alignItems="center" justifyContent="flex-end" gap={1}>
+                  <Typography textColor="primary600" variant="pi">
+                    {regenerateLabel}
+                  </Typography>
+                </TextValidation>
+              )}
+
+              <FieldActionWrapper
+                onClick={() => generateUid.current()}
+                label={formatMessage({
+                  id: 'content-manager.components.uid.regenerate',
+                  defaultMessage: 'Regenerate',
                 })}
-              </Typography>
-            </TextValidation>
+                onMouseEnter={handleGenerateMouseEnter}
+                onMouseLeave={handleGenerateMouseLeave}
+              >
+                {isLoading ? (
+                  <LoadingWrapper data-testid="loading-wrapper">
+                    <Loader />
+                  </LoadingWrapper>
+                ) : (
+                  <Refresh />
+                )}
+              </FieldActionWrapper>
+            </>
           )}
-          {availability && !availability.isAvailable && !regenerateLabel && (
-            <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
-              <ExclamationMarkCircle />
-              <Typography textColor="danger600" variant="pi">
-                {formatMessage({
-                  id: 'content-manager.components.uid.unavailable',
-                  defaultMessage: 'Unavailable',
-                })}
-              </Typography>
-            </TextValidation>
-          )}
-          {regenerateLabel && (
-            <TextValidation alignItems="center" justifyContent="flex-end">
-              <Typography textColor="primary600" variant="pi">
-                {regenerateLabel}
-              </Typography>
-            </TextValidation>
-          )}
-          <FieldActionWrapper
-            onClick={() => generateUid.current()}
-            label="regenerate"
-            onMouseEnter={handleGenerateMouseEnter}
-            onMouseLeave={handleGenerateMouseLeave}
-          >
-            {isLoading ? (
-              <LoadingWrapper>
-                <Loader />
-              </LoadingWrapper>
-            ) : (
-              <Refresh />
-            )}
-          </FieldActionWrapper>
-        </EndActionWrapper>
+        </Flex>
       }
       hint={hint}
       label={label}

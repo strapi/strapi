@@ -7,7 +7,7 @@ import {
   HeaderLayout,
   Box,
   Button,
-  Stack,
+  Flex,
   TextInput,
   Grid,
   GridItem,
@@ -51,7 +51,7 @@ const WebhookForm = ({
         <Form noValidate>
           <HeaderLayout
             primaryAction={
-              <Stack horizontal spacing={2}>
+              <Flex gap={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -73,7 +73,7 @@ const WebhookForm = ({
                     defaultMessage: 'Save',
                   })}
                 </Button>
-              </Stack>
+              </Flex>
             }
             title={
               isCreating
@@ -93,7 +93,7 @@ const WebhookForm = ({
             }
           />
           <ContentLayout>
-            <Stack spacing={4}>
+            <Flex direction="column" alignItems="stretch" gap={4}>
               {showTriggerResponse && (
                 <div className="trigger-wrapper">
                   <TriggerContainer
@@ -104,7 +104,7 @@ const WebhookForm = ({
                 </div>
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <Grid gap={6}>
                     <GridItem col={6}>
                       <Field
@@ -133,9 +133,9 @@ const WebhookForm = ({
                   </Grid>
                   <HeadersInput />
                   <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
-                </Stack>
+                </Flex>
               </Box>
-            </Stack>
+            </Flex>
           </ContentLayout>
         </Form>
       )}

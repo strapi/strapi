@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const createConditionsForm = (conditions, valueObject) => {
   return conditions.reduce((acc, current) => {

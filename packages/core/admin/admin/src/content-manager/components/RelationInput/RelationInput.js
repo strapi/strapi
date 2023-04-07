@@ -107,8 +107,7 @@ const RelationInput = ({
     [totalNumberOfRelations, numberOfRelationsToDisplay]
   );
 
-  const shouldDisplayLoadMoreButton =
-    (!!labelLoadMore && paginatedRelations.hasNextPage) || paginatedRelations.isLoading;
+  const shouldDisplayLoadMoreButton = !!labelLoadMore && paginatedRelations.hasNextPage;
 
   const options = useMemo(
     () =>

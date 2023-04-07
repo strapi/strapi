@@ -1,0 +1,79 @@
+<!--- useCustomFields.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="hooks/useCustomFields" />
+
+# useCustomFields
+
+This hook provides you with a `get` function to retrieve information about a specific custom field registered in the app, as well as an `getAll` function to obtain information about all custom fields registered in the app.
+
+## Usage
+
+### Get information about a specific plugin if I know its uid
+
+```js
+import { useCustomFields } from '@strapi/helper-plugin';
+
+const CustomIcon = ({ customFieldUuid }) => {
+  const customFieldsRegistry = useCustomFields();
+  const customField = customFieldsRegistry.get(customFieldUuid);
+
+  if (customField?.icon) {
+    const CustomFieldIcon = customField.icon;
+    return <CustomFieldIcon />;
+  }
+
+  return <Placeholder />;
+};
+```
+
+### Get all the custom fields
+
+```js
+import { useCustomFields } from '@strapi/helper-plugin';
+import { Typography } from '@strapi/design-system';
+
+const CustomFieldsList = () => {
+  const customFieldsRegistry = useCustomFields();
+  const registeredCustomFields = Object.entries(customFieldsRegistry.getAll());
+
+  return (
+    <>
+      {registeredCustomFields.map(([uid, customField]) => (
+        <Typography>{`${customField.name} uid: ${uid}`}</Typography>
+      ))}
+    </>
+  );
+};
+```
+
+## Methods
+
+### `get(customFieldUid: string): CustomField`
+
+With the method from `useCustomFields` hook you can have all the information of a custom field.
+
+### `getAll(): Record<string, CustomField>`
+
+With this method from `useCustomFields` hook, you will receive a dictionary containing all the custom fields with their respective information.
+
+## Typescript
+
+```ts
+interface CustomField {
+  components: object;
+  icon: React.ComponentType;
+  intlDescription: IntlObject;
+  intlLabel: IntlObject;
+  name: string;
+  options: object;
+  pluginId: string;
+  type: string;
+}
+
+type UseCustomFields = () => {
+  get: (uid: string) => CustomField | undefined;
+  getAll: () => Record<string, CustomField>;
+};
+```

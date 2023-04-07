@@ -16,7 +16,7 @@ import {
   HeaderLayout,
   Main,
   Button,
-  Stack,
+  Flex,
   Box,
   TextInput,
   Textarea,
@@ -119,7 +119,7 @@ const EditPage = () => {
               }
             />
             <ContentLayout>
-              <Stack spacing={7}>
+              <Flex direction="column" alignItems="stretch" gap={7}>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -129,7 +129,7 @@ const EditPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack spacing={4}>
+                  <Flex direction="column" alignItems="stretch" gap={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
@@ -173,7 +173,7 @@ const EditPage = () => {
                         />
                       </GridItem>
                     </Grid>
-                  </Stack>
+                  </Flex>
                 </Box>
                 {!isLoadingPlugins && (
                   <UsersPermissions
@@ -182,7 +182,7 @@ const EditPage = () => {
                     routes={routes}
                   />
                 )}
-              </Stack>
+              </Flex>
             </ContentLayout>
           </Form>
         )}

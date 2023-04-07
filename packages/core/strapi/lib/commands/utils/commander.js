@@ -7,6 +7,7 @@
 const inquirer = require('inquirer');
 const { InvalidOptionArgumentError, Option } = require('commander');
 const { bold, green, cyan } = require('chalk');
+const { isNaN } = require('lodash/fp');
 const { exitWith } = require('./helpers');
 
 /**
@@ -38,6 +39,18 @@ const getParseListWithChoices = (choices, errorMessage = 'Invalid options:') => 
 
     return list;
   };
+};
+
+/**
+ * argParser: Parse a string as an integer
+ */
+const parseInteger = (value) => {
+  // parseInt takes a string and a radix
+  const parsedValue = parseInt(value, 10);
+  if (isNaN(parsedValue)) {
+    throw new InvalidOptionArgumentError(`Not an integer: ${value}`);
+  }
+  return parsedValue;
 };
 
 /**
@@ -96,8 +109,9 @@ const promptEncryptionKey = async (thisCommand) => {
  *
  * @param {string} message The message to confirm with user
  * @param {object} options Additional options
+ * @param {string|undefined} options.failMessage The message to display when prompt is not confirmed
  */
-const confirmMessage = (message) => {
+const confirmMessage = (message, { failMessage } = {}) => {
   return async (command) => {
     // if we have a force option, assume yes
     const opts = command.opts();
@@ -116,7 +130,7 @@ const confirmMessage = (message) => {
       },
     ]);
     if (!answers.confirm) {
-      exitWith(0);
+      exitWith(1, failMessage);
     }
   };
 };
@@ -130,6 +144,7 @@ module.exports = {
   getParseListWithChoices,
   parseList,
   parseURL,
+  parseInteger,
   promptEncryptionKey,
   confirmMessage,
   forceOption,

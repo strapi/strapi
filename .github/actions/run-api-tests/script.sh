@@ -10,6 +10,6 @@ export JWT_SECRET="aSecret"
 
 opts=($DB_OPTIONS)
 
-yarn run -s build:ts
-yarn run -s test:generate-app "${opts[@]}"
-yarn run -s test:api --no-generate-app
+yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+yarn run test:generate-app "${opts[@]}"
+yarn run test:api --no-generate-app

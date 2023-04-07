@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_locales",
+  "info": {
+    "singularName": "relation-locale",
+    "pluralName": "relation-locales",
+    "displayName": "Relations",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "inversedBy": "relation_locales"
+    },
+    "title": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "repeatable_relations": {
+      "type": "component",
+      "repeatable": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "basic.relation"
+    },
+    "dynamic_relations": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "dynamiczone",
+      "components": [
+        "basic.relation",
+        "basic.simple"
+      ]
+    },
+    "single_relation": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "basic.relation"
+    },
+    "require_single_relation": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "basic.relation",
+      "required": true
+    }
+  }
+}

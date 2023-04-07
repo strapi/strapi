@@ -9,7 +9,6 @@ import {
   Main,
   Flex,
   Box,
-  Stack,
   Typography,
   Select,
   Option,
@@ -124,7 +123,7 @@ const UseCasePage = () => {
                 </TypographyCenter>
               </Box>
             </Flex>
-            <Stack spacing={6}>
+            <Flex direction="column" alignItems="stretch" gap={6}>
               <Select
                 id="usecase"
                 data-testid="usecase"
@@ -155,7 +154,7 @@ const UseCasePage = () => {
               <Button type="submit" size="L" fullWidth disabled={!role}>
                 {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
               </Button>
-            </Stack>
+            </Flex>
           </form>
         </LayoutContent>
         <Flex justifyContent="center">

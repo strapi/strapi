@@ -11,55 +11,6 @@ const enableFeatureMiddleware = (featureName) => (ctx, next) => {
 };
 
 module.exports = [
-  {
-    method: 'POST',
-    path: '/roles',
-    handler: 'role.create',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['admin::roles.create'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'DELETE',
-    path: '/roles/:id',
-    handler: 'role.deleteOne',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['admin::roles.delete'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'POST',
-    path: '/roles/batch-delete',
-    handler: 'role.deleteMany',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        {
-          name: 'admin::hasPermissions',
-          config: {
-            actions: ['admin::roles.delete'],
-          },
-        },
-      ],
-    },
-  },
-
   // SSO
   {
     method: 'GET',
@@ -143,6 +94,29 @@ module.exports = [
           name: 'admin::hasPermissions',
           config: {
             actions: ['admin::audit-logs.read'],
+          },
+        },
+      ],
+    },
+  },
+
+  // License limit infos
+  {
+    method: 'GET',
+    path: '/license-limit-information',
+    handler: 'admin.licenseLimitInformation',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: [
+              'admin::users.create',
+              'admin::users.read',
+              'admin::users.update',
+              'admin::users.delete',
+            ],
           },
         },
       ],

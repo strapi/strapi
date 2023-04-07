@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { ContentBox, useTracking } from '@strapi/helper-plugin';
-import { Stack } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import { InformationSquare, CodeSquare, PlaySquare, FeatherSquare } from '@strapi/icons';
+import CloudBox from './CloudBox';
 
 const BlockLink = styled.a`
   text-decoration: none;
@@ -18,7 +19,8 @@ const ContentBlocks = () => {
   };
 
   return (
-    <Stack spacing={5}>
+    <Flex direction="column" alignItems="stretch" gap={5}>
+      <CloudBox />
       <BlockLink
         href="https://strapi.io/resource-center"
         target="_blank"
@@ -95,7 +97,7 @@ const ContentBlocks = () => {
           iconBackground="alternative100"
         />
       </BlockLink>
-    </Stack>
+    </Flex>
   );
 };
 

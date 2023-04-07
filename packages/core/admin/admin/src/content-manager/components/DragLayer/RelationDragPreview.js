@@ -6,7 +6,7 @@ import { Drag, Cross } from '@strapi/icons';
 
 import { getTrad } from '../../utils';
 import { PUBLICATION_STATES } from '../RelationInputDataManager/constants';
-import { ChildrenWrapper, StackWrapper } from '../RelationInput/components/RelationItem';
+import { ChildrenWrapper, FlexWrapper } from '../RelationInput/components/RelationItem';
 import { LinkEllipsis, DisconnectButton } from '../RelationInput';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {
@@ -39,7 +39,7 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
         borderColor="neutral200"
         justifyContent="space-between"
       >
-        <StackWrapper spacing={1} horizontal>
+        <FlexWrapper gap={1}>
           <IconButton noBorder>
             <Drag />
           </IconButton>
@@ -59,7 +59,7 @@ export const RelationDragPreview = ({ status, displayedValue, width }) => {
               </Status>
             )}
           </ChildrenWrapper>
-        </StackWrapper>
+        </FlexWrapper>
         <Box paddingLeft={4}>
           <DisconnectButton type="button">
             <Icon width="12px" as={Cross} />

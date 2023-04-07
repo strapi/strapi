@@ -12,7 +12,7 @@ import {
   Crumb,
   Box,
   Button,
-  Stack,
+  Flex,
   Typography,
 } from '@strapi/design-system';
 
@@ -49,7 +49,10 @@ const ModalForm = ({ queryName, onToggle }) => {
     {
       async onSuccess({ data }) {
         setRegistrationToken(data.data.registrationToken);
-        await queryClient.invalidateQueries(queryName);
+
+        await queryClient.refetchQueries(queryName);
+        await queryClient.refetchQueries(['ee', 'license-limit-info']);
+
         goNext();
         setIsSubmitting(false);
       },
@@ -125,7 +128,7 @@ const ModalForm = ({ queryName, onToggle }) => {
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
                     <Typography variant="beta" as="h2">
@@ -135,7 +138,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                       })}
                     </Typography>
                     <Box paddingTop={4}>
-                      <Stack spacing={1}>
+                      <Flex direction="column" alignItems="stretch" gap={1}>
                         <Grid gap={5}>
                           {layout.map((row) => {
                             return row.map((input) => {
@@ -153,7 +156,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                             });
                           })}
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                   </Box>
                   <Box>
@@ -190,7 +193,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                       </Grid>
                     </Box>
                   </Box>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={

@@ -18,7 +18,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
     const { results, pagination } = await entityManager.findWithRelationCountsPage(
       permissionQuery,
@@ -227,7 +227,7 @@ module.exports = {
     }
 
     // TODO: fix
-    const permissionQuery = permissionChecker.buildDeleteQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.delete(query);
 
     const idsWhereClause = { id: { $in: ids } };
     const params = {
