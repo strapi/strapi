@@ -7659,6 +7659,11 @@ __metadata:
 "@strapi/provider-audit-logs-local@4.9.0, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
+  dependencies:
+    eslint-config-custom: "*"
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/strapi": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7667,7 +7672,11 @@ __metadata:
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
     "@strapi/utils": 4.9.0
+    eslint-config-custom: "*"
     node-ses: ^3.0.3
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7676,11 +7685,12 @@ __metadata:
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
     "@strapi/utils": 4.9.0
-    "@types/nodemailer": 6.4.7
     eslint-config-custom: "*"
     form-data: ^4.0.0
     mailgun.js: 8.2.1
     tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7693,6 +7703,8 @@ __metadata:
     lodash: 4.17.21
     nodemailer: 6.9.1
     tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7704,6 +7716,8 @@ __metadata:
     "@strapi/utils": 4.9.0
     eslint-config-custom: "*"
     tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7716,6 +7730,8 @@ __metadata:
     eslint-config-custom: "*"
     sendmail: ^1.6.1
     tsconfig: "*"
+  peerDependencies:
+    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
