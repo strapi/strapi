@@ -34,7 +34,7 @@ const TableRows = ({
 
   return (
     <Tbody>
-      {rows.map((data) => {
+      {rows.map((data, index) => {
         const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
 
         return (
@@ -56,8 +56,13 @@ const TableRows = ({
                     { target: getFullName(data.firstname, data.lastname) }
                   )}
                   checked={isChecked}
-                  onChange={() => {
-                    onSelectRow({ name: data.id, value: !isChecked });
+                  onChange={(event) => {
+                    onSelectRow({
+                      name: data.id,
+                      value: !isChecked,
+                      index,
+                      isShiftKeyHeld: event.nativeEvent.shiftKey,
+                    });
                   }}
                 />
               </Td>

@@ -225,8 +225,13 @@ import { DynamicTable } from '@strapi/helper-plugin';
                       <BaseCheckbox
                         aria-label={`Select ${data.firstname} ${data.lastname}`}
                         checked={isChecked}
-                        onChange={() => {
-                          onSelectRow({ name: data.id, value: !isChecked });
+                        onChange={(event) => {
+                          onSelectRow({
+                            name: data.id,
+                            value: !isChecked,
+                            index,
+                            isShiftKeyHeld: event.nativeEvent.shiftKey,
+                          });
                         }}
                       />
                     </Td>
@@ -336,8 +341,13 @@ import { DynamicTable } from '@strapi/helper-plugin';
                       <BaseCheckbox
                         aria-label={`Select ${data.firstname} ${data.lastname}`}
                         checked={isChecked}
-                        onChange={() => {
-                          onSelectRow({ name: data.id, value: !isChecked });
+                        onChange={(event) => {
+                          onSelectRow({
+                            name: data.id,
+                            value: !isChecked,
+                            index,
+                            isShiftKeyHeld: event.nativeEvent.shiftKey,
+                          });
                         }}
                       />
                     </Td>
