@@ -1,9 +1,7 @@
-'use strict';
-
-const formData = require('form-data');
-const Mailgun = require('mailgun.js');
-
-const provider = require('../index');
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
+import Options from 'mailgun.js/interfaces/Options';
+import provider from '../index';
 
 describe('@strapi/provider-email-mailgun', () => {
   describe('.convertProviderOptions()', () => {
@@ -50,7 +48,8 @@ describe('@strapi/provider-email-mailgun', () => {
     it('successfully creates a new Mailgun client', () => {
       const defaults = {
         username: 'api',
-      };
+      } as Options;
+
       const providerOptions = {
         key: 'foo',
         username: 'bar',
@@ -76,7 +75,8 @@ describe('@strapi/provider-email-mailgun', () => {
     it('fails to create a new Mailgun client due to missing key', () => {
       const defaults = {
         username: 'api',
-      };
+      } as Options;
+
       const providerOptions = {
         username: 'bar',
         domain: 'baz.example.com',

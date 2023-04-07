@@ -1,24 +1,22 @@
 import sendmailFactory, { Options, MailInput } from 'sendmail';
 import utils from '@strapi/utils';
+import type { Settings, SendOptions } from '@strapi/plugin-email';
 
-interface Settings {
-  defaultFrom?: string;
-  defaultReplyTo?: string;
-}
+type ProviderOptions = Options;
 
 export = {
-  init(providerOptions: Options = {}, settings: Settings = {}) {
+  init(providerOptions: ProviderOptions, settings: Settings) {
     const sendmail = sendmailFactory({
       silent: true,
       ...providerOptions,
     });
 
     return {
-      send(options: MailInput): Promise<void> {
+      send(options: SendOptions): Promise<void> {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          const msg = {
+          const msg: MailInput = {
             from: from || settings.defaultFrom,
             to,
             cc,

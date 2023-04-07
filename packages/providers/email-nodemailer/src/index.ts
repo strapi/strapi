@@ -1,5 +1,8 @@
 import _ from 'lodash';
 import nodemailer, { SendMailOptions } from 'nodemailer';
+import type { Settings, SendOptions } from '@strapi/plugin-email';
+
+type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 
 const emailFields = [
   'from',
@@ -13,22 +16,17 @@ const emailFields = [
   'attachments',
 ];
 
-interface Settings {
-  defaultFrom?: string;
-  defaultReplyTo?: string;
-}
-
 export = {
   provider: 'nodemailer',
   name: 'Nodemailer',
 
-  init(providerOptions = {}, settings: Settings = {}) {
+  init(providerOptions: ProviderOptions, settings: Settings) {
     const transporter = nodemailer.createTransport(providerOptions);
 
     return {
-      send(options: SendMailOptions) {
+      send(options: SendOptions) {
         // Default values.
-        const emailOptions = {
+        const emailOptions: SendMailOptions = {
           ..._.pick(options, emailFields),
           from: options.from || settings.defaultFrom,
           replyTo: options.replyTo || settings.defaultReplyTo,

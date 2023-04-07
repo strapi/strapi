@@ -1,25 +1,21 @@
 import sendgrid, { MailDataRequired } from '@sendgrid/mail';
 import utils from '@strapi/utils';
+import type { Settings, SendOptions } from '@strapi/plugin-email';
 
 interface ProviderOptions {
   apiKey: string;
 }
 
-interface Settings {
-  defaultFrom?: string;
-  defaultReplyTo?: string;
-}
-
 export = {
-  init(providerOptions: ProviderOptions, settings: Settings = {}) {
+  init(providerOptions: ProviderOptions, settings: Settings) {
     sendgrid.setApiKey(providerOptions.apiKey);
 
     return {
-      send(options: MailDataRequired): Promise<void> {
+      send(options: SendOptions): Promise<void> {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          const msg = {
+          const msg: MailDataRequired = {
             from: from || settings.defaultFrom,
             to,
             cc,
