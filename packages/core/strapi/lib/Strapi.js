@@ -6,6 +6,7 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
+const Proxy = require('node-global-proxy').default;
 
 const loadConfiguration = require('./core/app-configuration');
 
@@ -216,6 +217,7 @@ class Strapi {
       }
 
       await this.listen();
+      await this.globalProxy();
 
       return this;
     } catch (error) {
@@ -305,6 +307,22 @@ class Strapi {
       } else {
         const { host, port } = this.config.get('server');
         this.server.listen(port, host, onListen);
+      }
+    });
+  }
+
+  async globalProxy() {
+    return new Promise((resolve, reject) => {
+      const { globalProxy } = this.config.get('server');
+
+      if (globalProxy) {
+        Proxy.setConfig(globalProxy);
+        try {
+          Proxy.start();
+        } catch (error) {
+          reject(error);
+        }
+        resolve();
       }
     });
   }
