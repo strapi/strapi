@@ -273,14 +273,13 @@ module.exports = {
       throw new ApplicationError('Register action is currently disabled');
     }
 
+    const { register } = strapi.config.get('plugin.users-permissions');
+
     const params = {
-      ..._.omit(ctx.request.body, [
-        'confirmed',
-        'blocked',
-        'confirmationToken',
-        'resetPasswordToken',
-        'provider',
-      ]),
+      ..._.pick(
+        ctx.request.body,
+        register?.allowedFields ? register?.allowedFields : ['username', 'email', 'password']
+      ),
       provider: 'local',
     };
 
