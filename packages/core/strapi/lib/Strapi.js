@@ -217,7 +217,6 @@ class Strapi {
       }
 
       await this.listen();
-      await this.globalProxy();
 
       return this;
     } catch (error) {
@@ -400,6 +399,7 @@ class Strapi {
       this.loadPolicies(),
     ]);
 
+    await this.globalProxy();
     await bootstrap({ strapi: this });
 
     // init webhook runner
