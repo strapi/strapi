@@ -24,9 +24,9 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "eslint .",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "lint": "run -T eslint .",
+    "test": "run -T jest",
+    "test:watch": "run -T jest --watch"
   },
   "dependencies": {
     "chalk": "4.1.2",

@@ -32,7 +32,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

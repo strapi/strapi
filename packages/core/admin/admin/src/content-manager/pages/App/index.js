@@ -4,7 +4,7 @@ import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-route
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  NotFound,
+  AnErrorOccurred,
   useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, Main } from '@strapi/design-system';
@@ -104,7 +104,7 @@ const App = () => {
           <Route path="/content-manager/no-content-types">
             <NoContentType />
           </Route>
-          <Route path="" component={NotFound} />
+          <Route path="" component={AnErrorOccurred} />
         </Switch>
       </ModelsContext.Provider>
     </Layout>
