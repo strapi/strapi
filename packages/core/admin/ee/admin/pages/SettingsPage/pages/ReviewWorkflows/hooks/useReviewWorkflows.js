@@ -23,7 +23,7 @@ export function useReviewWorkflows(workflowId) {
   }
 
   function refetchWorkflow() {
-    client.refetchQueries(workflowQueryKey);
+    return client.refetchQueries(workflowQueryKey);
   }
 
   const workflows = useQuery(workflowQueryKey, fetchWorkflows);

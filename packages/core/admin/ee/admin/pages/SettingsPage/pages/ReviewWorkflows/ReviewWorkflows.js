@@ -89,7 +89,7 @@ export function ReviewWorkflowsPage() {
     setIsConfirmDeleteDialogOpen(false);
 
     await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
-    refetchWorkflow();
+    await refetchWorkflow();
   };
 
   const handleConfirmDeleteDialog = async () => {

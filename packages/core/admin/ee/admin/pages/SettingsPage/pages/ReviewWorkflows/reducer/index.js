@@ -97,7 +97,7 @@ export function reducer(state = initialState, action) {
     if (state.clientState.currentWorkflow.data) {
       draft.clientState.currentWorkflow.isDirty = !isEqual(
         current(draft.clientState.currentWorkflow).data,
-        state.serverState.currentWorkflow
+        draft.serverState.currentWorkflow
       );
     }
   });
