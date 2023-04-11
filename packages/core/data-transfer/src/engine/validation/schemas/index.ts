@@ -28,6 +28,7 @@ const isOptionalAdminType = (diff: Diff) => {
     const name = (diff?.values[0] as Schema)?.info?.singularName;
     return (OPTIONAL_CONTENT_TYPES as ReadonlyArray<string | undefined>).includes(name);
   }
+  return false;
 };
 
 const isIgnorableStrict = (diff: Diff) => isAttributeIgnorable(diff) || isOptionalAdminType(diff);
