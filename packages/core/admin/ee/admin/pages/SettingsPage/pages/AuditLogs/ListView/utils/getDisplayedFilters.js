@@ -12,11 +12,12 @@ const customOperators = [
   },
 ];
 
-const getDisplayedFilters = ({ formatMessage, users }) => {
+const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
   const getDisplaynameFromUser = (user) => {
     if (user.username) {
       return user.username;
     }
+
     if (user.firstname && user.lastname) {
       return formatMessage(
         {
@@ -56,7 +57,7 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
       };
     });
 
-  return [
+  const filters = [
     {
       name: 'action',
       metadatas: {
@@ -80,20 +81,28 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
       },
       fieldSchema: { type: 'datetime' },
     },
-    {
-      name: 'user',
-      metadatas: {
-        customOperators,
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.user',
-          defaultMessage: 'User',
-        }),
-        options: userOptions,
-        customInput: ComboboxFilter,
-      },
-      fieldSchema: { type: 'relation', mainField: { name: 'id' } },
-    },
   ];
+
+  if (canReadUsers) {
+    return [
+      ...filters,
+      {
+        name: 'user',
+        metadatas: {
+          customOperators,
+          label: formatMessage({
+            id: 'Settings.permissions.auditLogs.user',
+            defaultMessage: 'User',
+          }),
+          options: userOptions,
+          customInput: ComboboxFilter,
+        },
+        fieldSchema: { type: 'relation', mainField: { name: 'id' } },
+      },
+    ];
+  }
+
+  return filters;
 };
 
 export default getDisplayedFilters;

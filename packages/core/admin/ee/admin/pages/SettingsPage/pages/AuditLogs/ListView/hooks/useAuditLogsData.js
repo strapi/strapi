@@ -2,7 +2,7 @@ import { useQuery } from 'react-query';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
 
-const useAuditLogsData = ({ canRead }) => {
+const useAuditLogsData = ({ canReadAuditLogs, canReadUsers }) => {
   const { get } = useFetchClient();
   const { search } = useLocation();
   const toggleNotification = useNotification();
@@ -21,7 +21,6 @@ const useAuditLogsData = ({ canRead }) => {
   };
 
   const queryOptions = {
-    enabled: canRead,
     keepPreviousData: true,
     retry: false,
     staleTime: 1000 * 20, // 20 seconds
@@ -32,10 +31,14 @@ const useAuditLogsData = ({ canRead }) => {
     data: auditLogs,
     isLoading,
     isError: isAuditLogsError,
-  } = useQuery(['auditLogs', search], fetchAuditLogsPage, queryOptions);
+  } = useQuery(['auditLogs', search], fetchAuditLogsPage, {
+    ...queryOptions,
+    enabled: canReadAuditLogs,
+  });
 
   const { data: users, isError: isUsersError } = useQuery(['auditLogsUsers'], fetchAllUsers, {
     ...queryOptions,
+    enabled: canReadUsers,
     staleTime: 2 * (1000 * 60), // 2 minutes
   });
 

@@ -28,14 +28,22 @@ import useAuditLogsData from './hooks/useAuditLogsData';
 const ListView = () => {
   const { formatMessage } = useIntl();
   const {
-    allowedActions: { canRead },
+    allowedActions: { canRead: canReadAuditLogs },
   } = useRBAC(adminPermissions.settings.auditLogs);
+
+  const {
+    allowedActions: { canRead: canReadUsers },
+  } = useRBAC(adminPermissions.settings.users);
+
   const [{ query }, setQuery] = useQueryParams();
-  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({ canRead });
+  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
+    canReadAuditLogs,
+    canReadUsers,
+  });
 
   useFocusWhenNavigate();
 
-  const displayedFilters = getDisplayedFilters({ formatMessage, users });
+  const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -73,7 +81,7 @@ const ListView = () => {
         })}
       />
       <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
-      <ContentLayout canRead={canRead}>
+      <ContentLayout canRead={canReadAuditLogs}>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
