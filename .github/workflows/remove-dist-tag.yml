@@ -1,7 +1,11 @@
-name: 'Experimental Releases'
+name: 'Remove dist-tag from NPM'
 
 on:
   workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: 'The tag you want to remove from NPM'
+        required: true
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -19,7 +23,6 @@ jobs:
         with:
           node-version: 16
       - run: yarn
-      - run: ./scripts/pre-publish.sh --yes
+      - run: ./scripts/remove-dist-tag
         env:
-          VERSION: '0.0.0-experimental.${{ github.sha }}'
-          DIST_TAG: experimental
+          DIST_TAG: ${{ github.event.inputs.dist-tag }}
