@@ -226,7 +226,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={(date) => {
-            const formattedDate = date.toISOString();
+            const formattedDate = date?.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
