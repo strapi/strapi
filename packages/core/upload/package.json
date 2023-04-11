@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -16,18 +16,20 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest --verbose",
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
-    "@strapi/helper-plugin": "4.8.2",
+    "@strapi/helper-plugin": "4.9.0",
     "@strapi/icons": "1.6.6",
-    "@strapi/provider-upload-local": "4.8.2",
-    "@strapi/utils": "4.8.2",
+    "@strapi/provider-upload-local": "4.9.0",
+    "@strapi/utils": "4.9.0",
     "axios": "1.3.4",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
@@ -40,7 +42,7 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "prop-types": "^15.7.2",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
     "react-helmet": "^6.1.0",
@@ -48,7 +50,7 @@
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "react-select": "5.7.0",
-    "sharp": "0.31.1",
+    "sharp": "0.32.0",
     "yup": "^0.32.9"
   },
   "devDependencies": {

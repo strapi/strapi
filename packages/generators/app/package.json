@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -33,7 +33,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sentry/node": "6.19.7",

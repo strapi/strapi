@@ -15,6 +15,7 @@ concurrency:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
+  actions: read
 
 jobs:
   lint:
@@ -25,6 +26,8 @@ jobs:
         node: [14, 16, 18]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -32,12 +35,12 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
-      - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages # for lint we need to build ts, for rules checking if paths exist
-        run: yarn build:ts
+      - uses: nrwl/nx-set-shas@v3
+      - run: yarn install --immutable
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run lint
-        run: yarn run -s lint
+        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
@@ -48,6 +51,8 @@ jobs:
         node: [14, 16, 18]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -55,18 +60,12 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
-      - run: yarn install --frozen-lockfile
-      - name: Build TypeScript packages # for unit tests we need to build ts, for finding and mocking ts packages
-        run: yarn build:ts
+      - uses: nrwl/nx-set-shas@v3
+      - run: yarn install --immutable
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run tests
-        run: yarn run -s test:unit --coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
-          flags: back,unit_back
+        run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -77,6 +76,8 @@ jobs:
         node: [18]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
@@ -84,18 +85,10 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-
-      - run: yarn install --frozen-lockfile
-      - name: Build
-        run: yarn build
+      - uses: nrwl/nx-set-shas@v3
+      - run: yarn install --immutable
       - name: Run test
-        run: yarn run -s test:front --coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage
-          flags: front,unit_front
+        run: yarn nx affected --target=test:front --nx-ignore-cycles
 
   build:
     name: 'build (node: ${{ matrix.node }})'
@@ -113,9 +106,9 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - name: Build
-        run: yarn build --scope @strapi/admin --scope @strapi/helper-plugin
+        run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
 
   api_ce_pg:
     runs-on: ubuntu-latest
@@ -152,7 +145,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -160,10 +153,11 @@ jobs:
   api_ce_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
+        db_client: ['mysql', 'mysql2']
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -190,18 +184,19 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_mysql_5:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
+    name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
+        db_client: ['mysql', 'mysql2']
     services:
       mysql:
         image: bitnami/mysql:5.7
@@ -227,15 +222,15 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
 
   api_ce_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -249,7 +244,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
@@ -295,7 +290,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -304,13 +299,14 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (mysql, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [14, 16, 18]
+        db_client: ['mysql', 'mysql2']
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -337,16 +333,16 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -363,7 +359,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - uses: ./.github/actions/run-api-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}

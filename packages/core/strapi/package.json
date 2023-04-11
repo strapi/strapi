@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -66,9 +66,7 @@
   ],
   "main": "./lib",
   "types": "./lib/index.d.ts",
-  "bin": {
-    "strapi": "./bin/strapi.js"
-  },
+  "bin": "./bin/strapi.js",
   "directories": {
     "lib": "./lib",
     "bin": "./bin",
@@ -76,24 +74,26 @@
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js",
-    "test:unit": "jest --verbose"
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@koa/cors": "3.4.3",
     "@koa/router": "10.1.1",
-    "@strapi/admin": "4.8.2",
-    "@strapi/data-transfer": "4.8.2",
-    "@strapi/database": "4.8.2",
-    "@strapi/generate-new": "4.8.2",
-    "@strapi/generators": "4.8.2",
-    "@strapi/logger": "4.8.2",
-    "@strapi/permissions": "4.8.2",
-    "@strapi/plugin-content-manager": "4.8.2",
-    "@strapi/plugin-content-type-builder": "4.8.2",
-    "@strapi/plugin-email": "4.8.2",
-    "@strapi/plugin-upload": "4.8.2",
-    "@strapi/typescript-utils": "4.8.2",
-    "@strapi/utils": "4.8.2",
+    "@strapi/admin": "4.9.0",
+    "@strapi/data-transfer": "4.9.0",
+    "@strapi/database": "4.9.0",
+    "@strapi/generate-new": "4.9.0",
+    "@strapi/generators": "4.9.0",
+    "@strapi/logger": "4.9.0",
+    "@strapi/permissions": "4.9.0",
+    "@strapi/plugin-content-manager": "4.9.0",
+    "@strapi/plugin-content-type-builder": "4.9.0",
+    "@strapi/plugin-email": "4.9.0",
+    "@strapi/plugin-upload": "4.9.0",
+    "@strapi/typescript-utils": "4.9.0",
+    "@strapi/utils": "4.9.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -128,7 +128,7 @@
     "open": "8.4.0",
     "ora": "5.4.1",
     "package-json": "7.0.0",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.3.8",
     "statuses": "2.0.1",

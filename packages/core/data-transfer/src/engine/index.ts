@@ -1,7 +1,7 @@
-import { PassThrough, Transform, Readable, Writable, Stream } from 'stream';
+import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
-import { isEmpty, uniq, last } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
@@ -26,7 +26,7 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 import { filter, map } from '../utils/stream';
 
-import { TransferEngineValidationError } from './errors';
+import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
   createDiagnosticReporter,
   IDiagnosticReporter,
@@ -88,12 +88,18 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
+  // Progress of the current stage
   progress: {
+    // metrics on the progress such as size and record count
     data: TransferProgress;
+    // stream that emits events
     stream: PassThrough;
   };
 
   diagnostics: IDiagnosticReporter;
+
+  // Save the currently open stream so that we can access it at any time
+  #currentStream?: Writable;
 
   constructor(sourceProvider: S, destinationProvider: D, options: ITransferEngineOptions) {
     this.diagnostics = createDiagnosticReporter();
@@ -163,6 +169,7 @@ class TransferEngine<
     options: { includeGlobal?: boolean } = {}
   ): PassThrough | Transform {
     const { includeGlobal = true } = options;
+    const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
     let stream = new PassThrough({ objectMode: true });
@@ -181,6 +188,20 @@ class TransferEngine<
 
     if (includeGlobal) {
       applyTransforms(globalTransforms);
+    }
+
+    if (isNumber(throttle) && throttle > 0) {
+      stream = stream.pipe(
+        new PassThrough({
+          objectMode: true,
+          async transform(data, _encoding, callback) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, throttle);
+            });
+            callback(null, data);
+          },
+        })
+      );
     }
 
     applyTransforms(stageTransforms as TransferTransform<unknown>[]);
@@ -266,7 +287,10 @@ class TransferEngine<
   /**
    * Shorthand method used to trigger stage update events to every listeners
    */
-  #emitStageUpdate(type: 'start' | 'finish' | 'progress' | 'skip', transferStage: TransferStage) {
+  #emitStageUpdate(
+    type: 'start' | 'finish' | 'progress' | 'skip' | 'error',
+    transferStage: TransferStage
+  ) {
     this.progress.stream.emit(`stage::${type}`, {
       data: this.progress.data,
       stage: transferStage,
@@ -475,7 +499,7 @@ class TransferEngine<
     this.#emitStageUpdate('start', stage);
 
     await new Promise<void>((resolve, reject) => {
-      let stream: Stream = source;
+      let stream: Readable = source;
 
       if (transform) {
         stream = stream.pipe(transform);
@@ -485,21 +509,28 @@ class TransferEngine<
         stream = stream.pipe(tracker);
       }
 
-      stream
+      this.#currentStream = stream
         .pipe(destination)
         .on('error', (e) => {
           updateEndTime();
+          this.#emitStageUpdate('error', stage);
           this.#reportError(e, 'error');
           destination.destroy(e);
           reject(e);
         })
         .on('close', () => {
+          this.#currentStream = undefined;
           updateEndTime();
           resolve();
         });
     });
 
     this.#emitStageUpdate('finish', stage);
+  }
+
+  // Cause an ongoing transfer to abort gracefully
+  async abortTransfer(): Promise<void> {
+    this.#currentStream?.destroy(new TransferEngineError('fatal', 'Transfer aborted.'));
   }
 
   async init(): Promise<void> {

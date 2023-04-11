@@ -468,7 +468,7 @@ class Strapi {
     await this.startWebhooks();
 
     await this.server.initMiddlewares();
-    await this.server.initRouting();
+    this.server.initRouting();
 
     await this.contentAPI.permissions.registerActions();
 

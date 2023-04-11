@@ -24,12 +24,9 @@ const { exitWith, ifOptions, assertUrlHasProtocol } = require('../lib/commands/u
 const {
   excludeOption,
   onlyOption,
+  throttleOption,
   validateExcludeOnly,
 } = require('../lib/commands/transfer/utils');
-
-process.on('SIGINT', () => {
-  process.exit();
-});
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -262,6 +259,14 @@ program
   .action(getLocalScript('opt-in-telemetry'));
 
 program
+  .command('report')
+  .description('Get system stats for debugging and submitting issues')
+  .option('-u, --uuid', 'Include Project UUID')
+  .option('-d, --dependencies', 'Include Project Dependencies')
+  .option('--all', 'Include All Information')
+  .action(getLocalScript('report'));
+
+program
   .command('ts:generate-types')
   .description(`Generate TypeScript typings for your schemas`)
   .option(
@@ -279,13 +284,12 @@ program
   .description('Transfer data from one source to another')
   .allowExcessArguments(false)
   .addOption(
-    new Option('--from <sourceURL>', `URL of the remote Strapi instance to get data from`)
-      .argParser(parseURL)
-      .hideHelp() // Hidden until pull feature is released
+    new Option(
+      '--from <sourceURL>',
+      `URL of the remote Strapi instance to get data from`
+    ).argParser(parseURL)
   )
-  .addOption(
-    new Option('--from-token <token>', `Transfer token for the remote Strapi source`).hideHelp() // Hidden until pull feature is released
-  )
+  .addOption(new Option('--from-token <token>', `Transfer token for the remote Strapi source`))
   .addOption(
     new Option(
       '--to <destinationURL>',
@@ -296,7 +300,16 @@ program
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
+  .hook(
+    'preAction',
+    ifOptions(
+      (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
+      () =>
+        exitWith(1, 'Exactly one remote source (from) or destination (to) option must be provided')
+    )
+  )
   // If --from is used, validate the URL and token
   .hook(
     'preAction',
@@ -313,10 +326,15 @@ program
             },
           ]);
           if (!answers.fromToken?.length) {
-            exitWith(1, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote source, aborting transfer.');
           }
           thisCommand.opts().fromToken = answers.fromToken;
         }
+
+        await confirmMessage(
+          'The transfer will delete all the local Strapi assets and its database. Are you sure you want to proceed?',
+          { failMessage: 'Transfer process aborted' }
+        )(thisCommand);
       }
     )
   )
@@ -336,25 +354,18 @@ program
             },
           ]);
           if (!answers.toToken?.length) {
-            exitWith(1, 'No token entered, aborting transfer.');
+            exitWith(1, 'No token provided for remote destination, aborting transfer.');
           }
           thisCommand.opts().toToken = answers.toToken;
         }
 
         await confirmMessage(
-          'The transfer will delete all data in the remote database and media files. Are you sure you want to proceed?',
+          'The transfer will delete all the remote Strapi assets and its database. Are you sure you want to proceed?',
           { failMessage: 'Transfer process aborted' }
         )(thisCommand);
       }
     )
   )
-  // .hook(
-  //   'preAction',
-  //   ifOptions(
-  //     (opts) => !opts.from && !opts.to,
-  //     () => exitWith(1, 'At least one source (from) or destination (to) option must be provided')
-  //   )
-  // )
   .action(getLocalScript('transfer/transfer'));
 
 // `$ strapi export`
@@ -375,6 +386,7 @@ program
   .addOption(new Option('-f, --file <file>', 'name to use for exported file (without extensions)'))
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
   .hook('preAction', promptEncryptionKey)
   .action(getLocalScript('transfer/export'));
@@ -397,6 +409,7 @@ program
   .addOption(forceOption)
   .addOption(excludeOption)
   .addOption(onlyOption)
+  .addOption(throttleOption)
   .hook('preAction', validateExcludeOnly)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
@@ -451,7 +464,7 @@ program
   .hook(
     'preAction',
     confirmMessage(
-      'The import will delete all data in your database and media files. Are you sure you want to proceed?',
+      'The import will delete all assets and data in your database. Are you sure you want to proceed?',
       { failMessage: 'Import process aborted' }
     )
   )

@@ -1,6 +1,6 @@
 'use strict';
 
-const metricsService = require('../metrics');
+const metricsService = require('../metrics/weekly-metrics');
 
 describe('metrics', () => {
   describe('computeMetrics', () => {

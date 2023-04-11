@@ -1,15 +1,8 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "strict": true,
-    "lib": ["ES2020"],
-    "target": "ES2020",
-    "skipLibCheck": true,
-    "outDir": "lib",
-    "declaration": true,
-    "sourceMap": true,
-    "esModuleInterop": true
+    "outDir": "dist"
   },
-  "include": ["types", "src/**/*.ts"],
-  "exclude": ["node_modules", "src/**/__tests__"]
+  "include": ["types", "src"],
+  "exclude": ["node_modules", "**/__tests__/**"]
 }

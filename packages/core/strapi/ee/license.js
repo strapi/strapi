@@ -10,7 +10,9 @@ const machineId = require('../lib/utils/machine-id');
 const DEFAULT_FEATURES = {
   bronze: [],
   silver: [],
-  gold: ['sso', { name: 'audit-logs', options: { retentionDays: 90 } }, 'review-workflows'],
+  // Set a null retention duration to allow the user to override it
+  // The default of 90 days is set in the audit logs service
+  gold: ['sso', { name: 'audit-logs', options: { retentionDays: null } }, 'review-workflows'],
 };
 
 const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));

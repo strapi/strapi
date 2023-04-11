@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -34,7 +34,9 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "aws-sdk": "2.1287.0",
