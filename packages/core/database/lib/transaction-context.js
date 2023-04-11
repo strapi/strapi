@@ -6,12 +6,19 @@ const storage = new AsyncLocalStorage();
 
 const transactionCtx = {
   async run(store, cb) {
-    return storage.run(store, cb);
+    return storage.run({ trx: store }, cb);
   },
 
   get() {
-    const trx = storage.getStore();
-    return trx?.isCompleted() ? undefined : trx;
+    const store = storage.getStore();
+    return store?.trx;
+  },
+
+  clear() {
+    const store = storage.getStore();
+    if (store?.trx) {
+      store.trx = null;
+    }
   },
 };
 
