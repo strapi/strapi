@@ -143,6 +143,7 @@ export function ReviewWorkflowsPage() {
                     type="submit"
                     size="M"
                     disabled={!currentWorkflowIsDirty}
+                    loading={isLoading}
                   >
                     {formatMessage({
                       id: 'global.save',
