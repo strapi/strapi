@@ -4,6 +4,7 @@ import {
   useCMEditViewDataManager,
   useAPIErrorHandler,
   useFetchClient,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { Field, FieldLabel, FieldError, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -24,18 +25,29 @@ export function InformationBoxEE() {
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
+  const toggleNotification = useNotification();
 
   const { workflows: { data: [workflow] = [] } = {} } = useReviewWorkflows();
 
-  const { error, isLoading, mutateAsync } = useMutation(async ({ entityId, stageId, uid }) => {
-    const {
-      data: { data },
-    } = await put(`/admin/content-manager/collection-types/${uid}/${entityId}/stage`, {
-      data: { id: stageId },
-    });
+  const { error, isLoading, mutateAsync } = useMutation(
+    async ({ entityId, stageId, uid }) => {
+      const {
+        data: { data },
+      } = await put(`/admin/content-manager/collection-types/${uid}/${entityId}/stage`, {
+        data: { id: stageId },
+      });
 
-    return data;
-  });
+      return data;
+    },
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        });
+      },
+    }
+  );
 
   // stages are empty while the workflow is loading
   const options = (workflow?.stages ?? []).map(({ id, name }) => ({ value: id, label: name }));
