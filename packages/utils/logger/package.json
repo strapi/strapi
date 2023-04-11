@@ -29,19 +29,20 @@
     "./dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:ts": "tsc",
-    "watch": "tsc -w --preserveWatchOutput",
-    "clean": "rimraf ./dist",
+    "build": "run -T tsc",
+    "build:ts": "run -T tsc",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",
     "winston": "3.3.3"
   },
   "devDependencies": {
-    "rimraf": "3.0.2"
+    "eslint-config-custom": "*",
+    "tsconfig": "*"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

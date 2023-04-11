@@ -21,7 +21,7 @@
     }
   ],
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
