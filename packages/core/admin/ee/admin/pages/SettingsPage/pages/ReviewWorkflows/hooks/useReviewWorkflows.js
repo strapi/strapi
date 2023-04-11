@@ -22,8 +22,8 @@ export function useReviewWorkflows(workflowId) {
     }
   }
 
-  function refetchWorkflow() {
-    return client.refetchQueries(workflowQueryKey);
+  async function refetchWorkflow() {
+    await client.refetchQueries(workflowQueryKey);
   }
 
   const workflows = useQuery(workflowQueryKey, fetchWorkflows);
