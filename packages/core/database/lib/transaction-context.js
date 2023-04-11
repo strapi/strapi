@@ -10,7 +10,8 @@ const transactionCtx = {
   },
 
   get() {
-    return storage.getStore();
+    const trx = storage.getStore();
+    return trx?.isCompleted() ? undefined : trx;
   },
 };
 
