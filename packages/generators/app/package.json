@@ -34,7 +34,7 @@
   },
   "scripts": {
     "test": "echo \"no tests yet\"",
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sentry/node": "6.19.7",

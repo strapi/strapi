@@ -46,7 +46,7 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",

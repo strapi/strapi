@@ -28,9 +28,9 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
-    "lint": "eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "date-fns": "2.29.3",
