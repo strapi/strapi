@@ -425,6 +425,22 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect.objectContaining({ id: secondStage.id })
         );
       });
+      test('Should throw an error if stage does not exist', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          body: {
+            data: { id: 1234 },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toEqual('ApplicationError');
+        expect(response.body.error.message).toEqual('Selected stage does not exist');
+      });
     });
     describe('Review Workflow is disabled', () => {
       beforeAll(async () => {
