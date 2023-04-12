@@ -95,6 +95,8 @@ module.exports = {
     // TODO When multiple workflows are possible, check if the stage is part of the right one
     // Didn't need this today as their can only be one workflow
 
-    ctx.body = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
+    const data = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
+
+    ctx.body = { data };
   },
 };
