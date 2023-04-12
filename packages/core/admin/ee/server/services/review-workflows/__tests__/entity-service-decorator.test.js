@@ -1,7 +1,7 @@
 'use strict';
 
-const { decorator } = require('../entity-service-decorator')();
 const { omit } = require('lodash/fp');
+const { decorator } = require('../entity-service-decorator')();
 
 jest.mock('../../../utils');
 
