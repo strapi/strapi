@@ -51,6 +51,10 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  inTransaction() {
+    return !!transactionCtx.get();
+  }
+
   async transaction(cb) {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
