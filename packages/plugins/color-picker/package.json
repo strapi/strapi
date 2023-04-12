@@ -27,8 +27,8 @@
     "@strapi/strapi": "^4.4.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3"
   },
   "scripts": {
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
