@@ -20,6 +20,7 @@ export function InformationBoxEE() {
     initialData,
     isCreatingEntry,
     layout: { uid },
+    isSingleType,
   } = useCMEditViewDataManager();
   const { put } = useFetchClient();
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
@@ -38,9 +39,11 @@ export function InformationBoxEE() {
 
   const { error, isLoading, mutateAsync } = useMutation(
     async ({ entityId, stageId, uid }) => {
+      const typeSlug = isSingleType ? 'single-types' : 'collection-types';
+
       const {
         data: { data },
-      } = await put(`/admin/content-manager/collection-types/${uid}/${entityId}/stage`, {
+      } = await put(`/admin/content-manager/${typeSlug}/${uid}/${entityId}/stage`, {
         data: { id: stageId },
       });
 
