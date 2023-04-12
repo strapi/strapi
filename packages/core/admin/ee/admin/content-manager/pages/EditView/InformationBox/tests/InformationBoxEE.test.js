@@ -89,7 +89,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
   it('renders no select input, if no workflow stage is assigned to the entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      isCreatingEntry: true,
       layout: { uid: 'api::articles:articles' },
     });
 
@@ -98,16 +97,18 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('renders no select input, if no workflow stage is assigned to the entity', () => {
+  it('renders an error, if no workflow stage is assigned to the entity', () => {
     useCMEditViewDataManager.mockReturnValue({
-      initialData: {},
-      isCreatingEntry: true,
+      initialData: {
+        [STAGE_ATTRIBUTE_NAME]: null,
+      },
       layout: { uid: 'api::articles:articles' },
     });
 
-    const { queryByRole } = setup();
+    const { getByText, queryByRole } = setup();
 
-    expect(queryByRole('combobox')).not.toBeInTheDocument();
+    expect(getByText(/select a stage/i)).toBeInTheDocument();
+    expect(queryByRole('combobox')).toBeInTheDocument();
   });
 
   it('renders a disabled select input, if the entity is created', () => {
