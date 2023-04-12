@@ -25,17 +25,27 @@ import Filters from '../../../../../../../admin/src/pages/SettingsPage/component
 import getDisplayedFilters from './utils/getDisplayedFilters';
 import useAuditLogsData from './hooks/useAuditLogsData';
 
+const auditLogsPermissions = {
+  ...adminPermissions.settings.auditLogs,
+  readUsers: adminPermissions.settings.users.read,
+};
+
 const ListView = () => {
   const { formatMessage } = useIntl();
+
   const {
-    allowedActions: { canRead },
-  } = useRBAC(adminPermissions.settings.auditLogs);
+    allowedActions: { canRead: canReadAuditLogs, canReadUsers },
+  } = useRBAC(auditLogsPermissions);
+
   const [{ query }, setQuery] = useQueryParams();
-  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({ canRead });
+  const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
+    canReadAuditLogs,
+    canReadUsers,
+  });
 
   useFocusWhenNavigate();
 
-  const displayedFilters = getDisplayedFilters({ formatMessage, users });
+  const displayedFilters = getDisplayedFilters({ formatMessage, users, canReadUsers });
 
   const title = formatMessage({
     id: 'global.auditLogs',
@@ -73,7 +83,7 @@ const ListView = () => {
         })}
       />
       <ActionLayout startActions={<Filters displayedFilters={displayedFilters} />} />
-      <ContentLayout canRead={canRead}>
+      <ContentLayout canRead={canReadAuditLogs}>
         <DynamicTable
           contentType="Audit logs"
           headers={headers}
