@@ -4,6 +4,8 @@ import { IntlProvider } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
 import { InformationBoxEE } from '../InformationBoxEE';
 
@@ -57,14 +59,18 @@ const queryClient = new QueryClient({
 });
 
 const ComponentFixture = (props) => {
+  const store = createStore((state = {}) => state, {});
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en" defaultLocale="en">
-        <ThemeProvider theme={lightTheme}>
-          <InformationBoxEE {...props} />
-        </ThemeProvider>
-      </IntlProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en" defaultLocale="en">
+          <ThemeProvider theme={lightTheme}>
+            <InformationBoxEE {...props} />
+          </ThemeProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 
