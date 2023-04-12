@@ -92,7 +92,7 @@ export function InformationBoxEE() {
     <Information.Root>
       <Information.Title />
 
-      {!isCreatingEntry && hasReviewWorkflowsEnabled && (
+      {(hasReviewWorkflowsEnabled || isCreatingEntry) && (
         <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
