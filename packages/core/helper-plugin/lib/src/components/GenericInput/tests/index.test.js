@@ -2,6 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { render, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import GenericInput from '../index';
 
@@ -40,49 +41,6 @@ function setupNumber(props) {
   return {
     ...rendered,
     input,
-  };
-}
-
-function setupDateTime(props) {
-  const DATETIMEPICKER_FIXTURE_PROPS = {
-    type: 'datetime',
-    name: 'datetime-picker-test',
-    intlLabel: {
-      id: 'label.test-two',
-      defaultMessage: 'Default label Datetime',
-    },
-    placeholder: {
-      id: 'placeholder.test',
-      defaultMessage: 'Default placeholder',
-    },
-    selectButtonTitle: {
-      id: 'select.test',
-      defaultMessage: 'Default select button title'
-    },
-    clearLabel: {
-      id: 'clearlabel.test',
-      defaultMessage: 'Default clear label Date',
-    },
-    hint: 'Hint message datetime',
-    value: '2023-04-10T22:01:10.943Z',
-    required: true,
-    onChange: jest.fn((date) => console.log(date)),
-    onClear: jest.fn,
-    ...props,
-  }
-
-  const rendered = render(<ComponentFixture {...DATETIMEPICKER_FIXTURE_PROPS} />);
-  const inputDate = screen.getByRole('textbox', {
-    name: /datetime/i
-  });
-  const buttonTime = screen.getByRole('combobox', {
-    name: /datetime/i
-  });
-
-  return {
-    ...rendered,
-    inputDate,
-    buttonTime
   };
 }
 
@@ -173,22 +131,65 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
-    test('renders the datetime picker with the correct value for date and time', () => {
-      const { inputDate, buttonTime } = setupDateTime();
-      expect(inputDate).toHaveValue('4/10/2023');
-
-      expect(buttonTime).toHaveValue('22:01');
+    test('renders the datetime picker with the correct value for date and time', async () => {
+      const user = userEvent.setup();
+      const onClear = jest.fn();
+      const onChange = jest.fn();
+      const { getByRole } = render(
+        <ComponentFixture
+          type="datetime"
+          name="datetime-picker"
+          intlLabel={{
+            id: 'label.test',
+            defaultMessage: 'datetime',
+          }}
+          value={null}
+          onChange={onChange}
+          onClear={onClear}
+        />
+      );
+      const btnDate = getByRole('textbox', { name: /datetime/i });
+      await user.click(btnDate);
+      await user.click(getByRole('button', { name: /15/ }));
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+      
+      expect(getByRole('textbox', { name: 'datetime' })).toHaveValue(`${month}/15/${year}`);
+      expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('00:00');
     });
   });
 
   test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
-    // const { inputDate, buttonTime } = setupDateTime();
+      const user = userEvent.setup();
+      const onClear = jest.fn();
+      const onChange = jest.fn();
+      const { getByRole } = render(
+        <ComponentFixture
+          type="datetime"
+          name="datetime-picker"
+          intlLabel={{
+            id: 'label.test',
+            defaultMessage: 'datetime',
+          }}
+          value={null}
+          onChange={onChange}
+          onClear={onClear}
+        />
+      );
+      const btnDate = getByRole('textbox', { name: /datetime/i });
+      await user.click(btnDate);
+      await user.click(getByRole('button', { name: /15/ }));
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+      
+      expect(getByRole('textbox', { name: 'datetime' })).toHaveValue(`${month}/15/${year}`);
+      expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('00:00');
+      
+      await user.click(getByRole('button', { name: /clear date/i }));
 
-    // const clearTimeBtn = screen.getByRole('button', {
-    //   name: /clear time/i
-    // });
-    // await fireEvent.click(clearTimeBtn);
-    // expect(inputDate.value).toBe(undefined);
-    // expect(buttonTime.value).toBe(undefined);
+      expect(getByRole('textbox', { name: 'datetime' })).toHaveValue('');
+      expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('');
   });
 });
