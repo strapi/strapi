@@ -77,7 +77,6 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
         isCreatingEntry,
         isLoadingForData,
         onDelete,
-        onDeleteSucceeded,
         onPost,
         onPublish,
         onDraftRelationCheck,
@@ -222,11 +221,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                           </CheckPermissions>
 
                           {allowedActions.canDelete && (
-                            <DeleteLink
-                              isCreatingEntry={isCreatingEntry}
-                              onDelete={onDelete}
-                              onDeleteSucceeded={onDeleteSucceeded}
-                            />
+                            <DeleteLink isCreatingEntry={isCreatingEntry} onDelete={onDelete} />
                           )}
                         </Flex>
                       </Box>
