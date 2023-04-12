@@ -7675,8 +7675,6 @@ __metadata:
     eslint-config-custom: "*"
     node-ses: ^3.0.3
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7689,8 +7687,6 @@ __metadata:
     form-data: ^4.0.0
     mailgun.js: 8.2.1
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7703,8 +7699,6 @@ __metadata:
     lodash: 4.17.21
     nodemailer: 6.9.1
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7716,8 +7710,6 @@ __metadata:
     "@strapi/utils": 4.9.0
     eslint-config-custom: "*"
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7730,8 +7722,6 @@ __metadata:
     eslint-config-custom: "*"
     sendmail: ^1.6.1
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-email": ^4.9.0
   languageName: unknown
   linkType: soft
 

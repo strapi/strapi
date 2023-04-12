@@ -19,7 +19,6 @@
       "url": "https://strapi.io"
     }
   ],
-  "types": "index.d.ts",
   "scripts": {
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",

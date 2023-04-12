@@ -3,7 +3,23 @@ import Mailgun from 'mailgun.js';
 import utils from '@strapi/utils';
 import Options from 'mailgun.js/interfaces/Options';
 import { MailgunMessageData } from 'mailgun.js/interfaces/Messages';
-import type { Settings, SendOptions } from '@strapi/plugin-email';
+
+interface Settings {
+  defaultFrom: string;
+  defaultReplyTo: string;
+}
+
+interface SendOptions {
+  from?: string;
+  to: string;
+  cc: string;
+  bcc: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+  html: string;
+  [key: string]: unknown;
+}
 
 interface LegacyOptionMapper {
   field: string;

@@ -63,9 +63,6 @@
     "eslint-config-custom": "*",
     "tsconfig": "*"
   },
-  "peerDependencies": {
-    "@strapi/plugin-email": "^4.9.0"
-  },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"

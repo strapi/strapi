@@ -1,6 +1,22 @@
 import _ from 'lodash';
 import nodemailer, { SendMailOptions } from 'nodemailer';
-import type { Settings, SendOptions } from '@strapi/plugin-email';
+
+interface Settings {
+  defaultFrom: string;
+  defaultReplyTo: string;
+}
+
+interface SendOptions {
+  from?: string;
+  to: string;
+  cc: string;
+  bcc: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+  html: string;
+  [key: string]: unknown;
+}
 
 type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 

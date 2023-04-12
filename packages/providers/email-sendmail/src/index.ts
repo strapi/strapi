@@ -1,6 +1,22 @@
 import sendmailFactory, { Options, MailInput } from 'sendmail';
 import utils from '@strapi/utils';
-import type { Settings, SendOptions } from '@strapi/plugin-email';
+
+interface Settings {
+  defaultFrom: string;
+  defaultReplyTo: string;
+}
+
+interface SendOptions {
+  from?: string;
+  to: string;
+  cc: string;
+  bcc: string;
+  replyTo?: string;
+  subject: string;
+  text: string;
+  html: string;
+  [key: string]: unknown;
+}
 
 type ProviderOptions = Options;
 
