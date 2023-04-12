@@ -104,6 +104,7 @@ const getSelectStyles = (theme, error) => {
     },
     valueContainer: (base) => ({
       ...base,
+      cursor: 'pointer',
       padding: 0,
       paddingLeft: theme.spaces[4],
       marginLeft: 0,
