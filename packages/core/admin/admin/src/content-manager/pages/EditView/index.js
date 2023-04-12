@@ -220,8 +220,8 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                             </LinkButton>
                           </CheckPermissions>
 
-                          {allowedActions.canDelete && (
-                            <DeleteLink isCreatingEntry={isCreatingEntry} onDelete={onDelete} />
+                          {allowedActions.canDelete && !isCreatingEntry && (
+                            <DeleteLink onDelete={onDelete} />
                           )}
                         </Flex>
                       </Box>
