@@ -111,7 +111,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).toBeInTheDocument();
   });
 
-  it('renders a disabled select input, if the entity is created', () => {
+  it('does not render the select input, if the entity is created', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
@@ -123,8 +123,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     const { queryByRole } = setup();
     const select = queryByRole('combobox');
 
-    expect(select).toBeInTheDocument();
-    expect(select).toHaveAttribute('disabled');
+    expect(select).not.toBeInTheDocument();
   });
 
   it('renders an enabled select input, if the entity is edited', () => {
@@ -140,7 +139,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     const select = queryByRole('combobox');
 
     expect(select).toBeInTheDocument();
-    expect(select).not.toHaveAttribute('disabled');
   });
 
   it('renders a select input, if a workflow stage is assigned to the entity', () => {

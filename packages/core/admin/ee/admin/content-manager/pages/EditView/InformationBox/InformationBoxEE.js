@@ -99,7 +99,7 @@ export function InformationBoxEE() {
     <Information.Root>
       <Information.Title />
 
-      {hasReviewWorkflowsEnabled && (
+      {hasReviewWorkflowsEnabled && !isCreatingEntry && (
         <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
@@ -116,7 +116,6 @@ export function InformationBoxEE() {
               defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
-              isDisabled={isCreatingEntry}
               isLoading={isLoading}
               isSearchable={false}
               isClearable={false}
