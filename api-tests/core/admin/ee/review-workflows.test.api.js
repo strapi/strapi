@@ -421,7 +421,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         });
 
         expect(response.status).toEqual(200);
-        expect(response.body[ENTITY_STAGE_ATTRIBUTE]).toEqual(
+        expect(response.body.data[ENTITY_STAGE_ATTRIBUTE]).toEqual(
           expect.objectContaining({ id: secondStage.id })
         );
       });
