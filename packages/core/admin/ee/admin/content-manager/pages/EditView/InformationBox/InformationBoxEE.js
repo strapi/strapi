@@ -6,7 +6,7 @@ import {
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Field, FieldLabel, FieldError, Flex } from '@strapi/design-system';
+import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
@@ -23,11 +23,18 @@ export function InformationBoxEE() {
   } = useCMEditViewDataManager();
   const { put } = useFetchClient();
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
+  const hasReviewWorkflowsEnabled = Object.prototype.hasOwnProperty.call(
+    initialData,
+    ATTRIBUTE_NAME
+  );
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
 
-  const { workflows: { data: [workflow] = [] } = {} } = useReviewWorkflows();
+  const { workflows: { data: workflows, isLoading: workflowIsLoading } = {} } =
+    useReviewWorkflows();
+  // TODO: this works only as long as we support one workflow
+  const workflow = workflows?.[0] ?? null;
 
   const { error, isLoading, mutateAsync } = useMutation(
     async ({ entityId, stageId, uid }) => {
@@ -49,9 +56,21 @@ export function InformationBoxEE() {
     }
   );
 
-  // stages are empty while the workflow is loading
-  const options = (workflow?.stages ?? []).map(({ id, name }) => ({ value: id, label: name }));
-  const formattedError = error ? formatAPIError(error) : null;
+  // if entities are created e.g. through lifecycle methods
+  // they may not have a stage assigned. Updating the entity won't
+  // set the default stage either which may lead to entities that
+  // do not have a stage assigned for a while. By displaying an
+  // error by default we are trying to nudge users into assigning a stage.
+  const initialStageNullError =
+    activeWorkflowStage === null &&
+    !workflowIsLoading &&
+    !isCreatingEntry &&
+    formatMessage({
+      id: 'content-manager.reviewWorkflows.stage.select.placeholder',
+      defaultMessage: 'Select a stage',
+    });
+  const formattedMutationError = error && formatAPIError(error);
+  const formattedError = formattedMutationError || initialStageNullError || null;
 
   const handleStageChange = async ({ value: stageId }) => {
     try {
@@ -70,7 +89,7 @@ export function InformationBoxEE() {
     <Information.Root>
       <Information.Title />
 
-      {activeWorkflowStage && (
+      {!isCreatingEntry && hasReviewWorkflowsEnabled && (
         <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
@@ -81,16 +100,21 @@ export function InformationBoxEE() {
             </FieldLabel>
 
             <ReactSelect
+              components={{
+                LoadingIndicator: () => <Loader small />,
+              }}
+              defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
               isDisabled={isCreatingEntry}
-              options={options}
-              name={ATTRIBUTE_NAME}
-              defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
               isLoading={isLoading}
               isSearchable={false}
               isClearable={false}
+              name={ATTRIBUTE_NAME}
               onChange={handleStageChange}
+              options={
+                workflow ? workflow.stages.map(({ id, name }) => ({ value: id, label: name })) : []
+              }
             />
 
             <FieldError />
