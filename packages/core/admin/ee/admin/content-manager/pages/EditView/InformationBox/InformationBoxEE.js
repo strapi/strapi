@@ -9,9 +9,11 @@ import {
 import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
+import { useDispatch } from 'react-redux';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { submitSucceeded } from '../../../../../../admin/src/content-manager/sharedReducers/crudReducer/actions';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 
@@ -22,6 +24,7 @@ export function InformationBoxEE() {
     layout: { uid },
     isSingleType,
   } = useCMEditViewDataManager();
+  const dispatch = useDispatch();
   const { put } = useFetchClient();
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
   const hasReviewWorkflowsEnabled = Object.prototype.hasOwnProperty.call(
@@ -42,12 +45,16 @@ export function InformationBoxEE() {
       const typeSlug = isSingleType ? 'single-types' : 'collection-types';
 
       const {
-        data: { data },
+        // TODO: Once the API response is wrapped in a data attribute this
+        // needs to be updated
+        data: createdEntry,
       } = await put(`/admin/content-manager/${typeSlug}/${uid}/${entityId}/stage`, {
         data: { id: stageId },
       });
 
-      return data;
+      dispatch(submitSucceeded(createdEntry));
+
+      return createdEntry;
     },
     {
       onSuccess() {
@@ -92,7 +99,7 @@ export function InformationBoxEE() {
     <Information.Root>
       <Information.Title />
 
-      {(hasReviewWorkflowsEnabled || isCreatingEntry) && (
+      {hasReviewWorkflowsEnabled && (
         <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
           <Flex direction="column" gap={2} alignItems="stretch">
             <FieldLabel>
