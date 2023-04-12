@@ -35,13 +35,13 @@ export = {
   init(providerOptions: ProviderOptions, settings: Settings) {
     const defaults = {
       username: 'api',
-    } as Options;
+    };
 
     const mailgun = new Mailgun(formData);
     const mg = mailgun.client({
       ...defaults,
       ...this.convertProviderOptions(providerOptions),
-    });
+    } as Options);
 
     return {
       send(options: SendOptions) {

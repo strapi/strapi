@@ -88,7 +88,7 @@ export = {
           const response = await cloudinary.uploader.destroy(`${publicId}`, deleteConfig);
 
           if (response.result !== 'ok' && response.result !== 'not found') {
-            throw new Error(`Error deleting on cloudinary: ${response.result}`);
+            throw new Error(response.result);
           }
         } catch (error) {
           if (error instanceof Error) {

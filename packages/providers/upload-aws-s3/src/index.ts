@@ -14,6 +14,8 @@ interface InitOptions extends Partial<AWS.S3.ClientConfiguration> {
   s3Options: AWS.S3.ClientConfiguration & {
     params: {
       Bucket: string; // making it required
+      ACL?: string;
+      signedUrlExpires?: string;
     };
   };
 }
@@ -83,15 +85,7 @@ export = {
       isPrivate() {
         return ACL === 'private';
       },
-      /**
-       * @param {Object} file
-       * @param {string} file.path
-       * @param {string} file.hash
-       * @param {string} file.ext
-       * @param {Object} customParams
-       * @returns {Promise<{url: string}>}
-       */
-      getSignedUrl(file: File /* ,customParams = {} */) {
+      async getSignedUrl(file: File): Promise<{ url: string }> {
         // Do not sign the url if it does not come from the same bucket.
         const { bucket } = getBucketFromUrl(file.url);
         if (bucket !== config.params.Bucket) {
@@ -117,9 +111,9 @@ export = {
           );
         });
       },
-      // uploadStream(file: File, customParams = {}) {
-      //   return upload(file, customParams);
-      // },
+      uploadStream(file: File, customParams = {}) {
+        return upload(file, customParams);
+      },
       upload(file: File, customParams = {}) {
         return upload(file, customParams);
       },

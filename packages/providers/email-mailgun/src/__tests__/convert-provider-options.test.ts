@@ -48,7 +48,7 @@ describe('@strapi/provider-email-mailgun', () => {
     it('successfully creates a new Mailgun client', () => {
       const defaults = {
         username: 'api',
-      } as Options;
+      };
 
       const providerOptions = {
         key: 'foo',
@@ -59,7 +59,7 @@ describe('@strapi/provider-email-mailgun', () => {
       const mg = mailgun.client({
         ...defaults,
         ...provider.convertProviderOptions(providerOptions),
-      });
+      } as Options);
       expect(mg).toMatchObject({
         messages: {
           request: {
