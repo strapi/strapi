@@ -35,6 +35,7 @@ export function reducer(state = initialState, action) {
           draft.serverState.workflows = workflows;
           draft.serverState.currentWorkflow = defaultWorkflow;
           draft.clientState.currentWorkflow.data = defaultWorkflow;
+          draft.clientState.currentWorkflow.hasDeletedServerStages = false;
         }
         break;
       }
@@ -97,7 +98,7 @@ export function reducer(state = initialState, action) {
     if (state.clientState.currentWorkflow.data) {
       draft.clientState.currentWorkflow.isDirty = !isEqual(
         current(draft.clientState.currentWorkflow).data,
-        state.serverState.currentWorkflow
+        draft.serverState.currentWorkflow
       );
     }
   });
