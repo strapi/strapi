@@ -104,9 +104,7 @@ describe('Review workflows - Stages service', () => {
 
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();
-      expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {
-        filters: { workflow: 1 },
-      });
+      expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {});
     });
   });
   describe('replaceWorkflowStages', () => {
