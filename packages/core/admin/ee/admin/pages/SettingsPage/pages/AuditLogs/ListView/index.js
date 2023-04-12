@@ -25,15 +25,17 @@ import Filters from '../../../../../../../admin/src/pages/SettingsPage/component
 import getDisplayedFilters from './utils/getDisplayedFilters';
 import useAuditLogsData from './hooks/useAuditLogsData';
 
+const auditLogsPermissions = {
+  ...adminPermissions.settings.auditLogs,
+  readUsers: adminPermissions.settings.users.read,
+};
+
 const ListView = () => {
   const { formatMessage } = useIntl();
-  const {
-    allowedActions: { canRead: canReadAuditLogs },
-  } = useRBAC(adminPermissions.settings.auditLogs);
 
   const {
-    allowedActions: { canRead: canReadUsers },
-  } = useRBAC(adminPermissions.settings.users);
+    allowedActions: { canRead: canReadAuditLogs, canReadUsers },
+  } = useRBAC(auditLogsPermissions);
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
