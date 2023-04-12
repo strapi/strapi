@@ -45,7 +45,7 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
         action={
           canDelete ? (
             <IconButton
-              backgroundColor="transparent"
+              background="transparent"
               noBorder
               onClick={() => dispatch(deleteStage(id))}
               label={formatMessage({
