@@ -51,7 +51,8 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         ariaLabel={label}
         name="datetimepicker"
-        onChange={(date) => onChange(date.toISOString())}
+        // check if date is not null or undefined
+        onChange={(date) => onChange(date?.toISOString())}
         onClear={() => onChange(null)}
         value={value ? new Date(value) : null}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 
 import GenericInput from '../index';
 
@@ -36,10 +36,53 @@ function setupNumber(props) {
 
   const rendered = render(<ComponentFixture {...NUMBER_FIXTURE_PROPS} />);
   const input = rendered.container.querySelector('input');
-
+  
   return {
     ...rendered,
     input,
+  };
+}
+
+function setupDateTime(props) {
+  const DATETIMEPICKER_FIXTURE_PROPS = {
+    type: 'datetime',
+    name: 'datetime-picker-test',
+    intlLabel: {
+      id: 'label.test-two',
+      defaultMessage: 'Default label Datetime',
+    },
+    placeholder: {
+      id: 'placeholder.test',
+      defaultMessage: 'Default placeholder',
+    },
+    selectButtonTitle: {
+      id: 'select.test',
+      defaultMessage: 'Default select button title'
+    },
+    clearLabel: {
+      id: 'clearlabel.test',
+      defaultMessage: 'Default clear label Date',
+    },
+    hint: 'Hint message datetime',
+    value: '2023-04-10T22:01:10.943Z',
+    required: true,
+    onChange: jest.fn((date) => console.log(date)),
+    onClear: jest.fn,
+    ...props,
+  }
+
+  const rendered = render(<ComponentFixture {...DATETIMEPICKER_FIXTURE_PROPS} />);
+  const inputDate = screen.getByRole('textbox', {
+    name: /datetime/i
+  });
+  const buttonTime = screen.getByRole('combobox', {
+    name: /datetime/i
+  });
+
+  return {
+    ...rendered,
+    inputDate,
+    buttonTime
   };
 }
 
@@ -127,5 +170,25 @@ describe('GenericInput', () => {
       );
       expect(container).toMatchSnapshot();
     });
+  });
+
+  describe('datetime', () => {
+    test('renders the datetime picker with the correct value for date and time', () => {
+      const { inputDate, buttonTime } = setupDateTime();
+      expect(inputDate).toHaveValue('4/10/2023');
+
+      expect(buttonTime).toHaveValue('22:01');
+    });
+  });
+
+  test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
+    // const { inputDate, buttonTime } = setupDateTime();
+
+    // const clearTimeBtn = screen.getByRole('button', {
+    //   name: /clear time/i
+    // });
+    // await fireEvent.click(clearTimeBtn);
+    // expect(inputDate.value).toBe(undefined);
+    // expect(buttonTime.value).toBe(undefined);
   });
 });

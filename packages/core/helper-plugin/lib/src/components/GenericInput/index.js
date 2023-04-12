@@ -226,6 +226,7 @@ const GenericInput = ({
           hint={hint}
           name={name}
           onChange={(date) => {
+            // check if date is not null or undefined
             const formattedDate = date?.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
