@@ -57,7 +57,7 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
           ) : null
         }
       />
-      <AccordionContent padding={6} background="neutral0">
+      <AccordionContent padding={6} background="neutral0" hasRadius>
         <Grid gap={4}>
           <GridItem col={6}>
             <TextInput
