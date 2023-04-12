@@ -66,9 +66,6 @@ module.exports = (strapi) => {
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-    numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
-    numberOfComponents: _.size(strapi.components),
-    numberOfDynamicZones: getNumberOfDynamicZones(),
   };
 
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
@@ -87,6 +84,9 @@ module.exports = (strapi) => {
         groupProperties: {
           ...anonymousGroupProperties,
           projectType: strapi.EE ? 'Enterprise' : 'Community',
+          numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+          numberOfComponents: _.size(strapi.components),
+          numberOfDynamicZones: getNumberOfDynamicZones(),
           ...payload.groupProperties,
         },
       }),
