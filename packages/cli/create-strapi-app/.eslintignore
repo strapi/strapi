@@ -1,2 +1,5 @@
 node_modules/
 .eslintrc.js
+dist/
+index.d.ts
+bin/
