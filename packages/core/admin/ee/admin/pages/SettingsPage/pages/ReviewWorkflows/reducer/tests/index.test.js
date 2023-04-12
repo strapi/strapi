@@ -52,6 +52,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
           currentWorkflow: expect.objectContaining({
             data: WORKFLOWS_FIXTURE[0],
             isDirty: false,
+            hasDeletedServerStages: false,
           }),
         }),
       })

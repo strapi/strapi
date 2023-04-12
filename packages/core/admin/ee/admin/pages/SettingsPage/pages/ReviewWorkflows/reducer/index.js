@@ -35,6 +35,7 @@ export function reducer(state = initialState, action) {
           draft.serverState.workflows = workflows;
           draft.serverState.currentWorkflow = defaultWorkflow;
           draft.clientState.currentWorkflow.data = defaultWorkflow;
+          draft.clientState.currentWorkflow.hasDeletedServerStages = false;
         }
         break;
       }
