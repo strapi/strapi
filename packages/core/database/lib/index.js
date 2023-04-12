@@ -58,15 +58,15 @@ class Database {
     async function commit() {
       if (notNestedTransaction) {
         await trx.commit();
+        transactionCtx.clear();
       }
-      transactionCtx.clear();
     }
 
     async function rollback() {
       if (notNestedTransaction) {
         await trx.rollback();
+        transactionCtx.clear();
       }
-      transactionCtx.clear();
     }
 
     if (!cb) {
