@@ -46,9 +46,6 @@
     "@strapi/utils": "4.9.0",
     "fs-extra": "10.0.0"
   },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.9.0"
-  },
   "devDependencies": {
     "@types/jest": "29.2.0",
     "eslint-config-custom": "*",

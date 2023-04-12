@@ -1,8 +1,27 @@
+import type { ReadStream } from 'node:fs';
 import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
 import intoStream from 'into-stream';
 import utils from '@strapi/utils';
 
-import type { File } from '@strapi/plugin-upload';
+interface File {
+  name: string;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats?: Record<string, unknown>;
+  hash: string;
+  ext?: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  path?: string;
+  provider?: string;
+  provider_metadata?: Record<string, unknown>;
+  stream?: ReadStream;
+  buffer?: Buffer;
+}
 
 export = {
   init(options: ConfigOptions) {

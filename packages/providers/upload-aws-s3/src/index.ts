@@ -1,7 +1,27 @@
+import type { ReadStream } from 'node:fs';
 import { getOr } from 'lodash/fp';
 import AWS from 'aws-sdk';
-import type { File } from '@strapi/plugin-upload';
 import { getBucketFromUrl } from './utils';
+
+interface File {
+  name: string;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats?: Record<string, unknown>;
+  hash: string;
+  ext?: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  path?: string;
+  provider?: string;
+  provider_metadata?: Record<string, unknown>;
+  stream?: ReadStream;
+  buffer?: Buffer;
+}
 
 // TODO V5: Migrate to aws-sdk v3
 // eslint-disable-next-line @typescript-eslint/no-var-requires

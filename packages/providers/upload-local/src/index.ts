@@ -1,10 +1,28 @@
 import { pipeline } from 'stream';
-import fs from 'fs';
+import fs, { ReadStream } from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
 import utils from '@strapi/utils';
 
-import type { File } from '@strapi/plugin-upload';
+interface File {
+  name: string;
+  alternativeText?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  formats?: Record<string, unknown>;
+  hash: string;
+  ext?: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl?: string;
+  path?: string;
+  provider?: string;
+  provider_metadata?: Record<string, unknown>;
+  stream?: ReadStream;
+  buffer?: Buffer;
+}
 
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;

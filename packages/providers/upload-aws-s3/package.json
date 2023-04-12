@@ -48,9 +48,6 @@
     "aws-sdk": "2.1351.0",
     "lodash": "4.17.21"
   },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.9.0"
-  },
   "devDependencies": {
     "@types/jest": "29.2.0",
     "eslint-config-custom": "*",

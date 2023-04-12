@@ -46,9 +46,6 @@
     "cloudinary": "^1.33.0",
     "into-stream": "^5.1.0"
   },
-  "peerDependencies": {
-    "@strapi/plugin-upload": "^4.9.0"
-  },
   "devDependencies": {
     "eslint-config-custom": "*",
     "tsconfig": "*"

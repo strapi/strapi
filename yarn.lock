@@ -7744,8 +7744,6 @@ __metadata:
     eslint-config-custom: "*"
     lodash: 4.17.21
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7758,8 +7756,6 @@ __metadata:
     eslint-config-custom: "*"
     into-stream: ^5.1.0
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7772,8 +7768,6 @@ __metadata:
     eslint-config-custom: "*"
     fs-extra: 10.0.0
     tsconfig: "*"
-  peerDependencies:
-    "@strapi/plugin-upload": ^4.9.0
   languageName: unknown
   linkType: soft
 

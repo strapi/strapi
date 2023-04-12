@@ -15,7 +15,6 @@
       "url": "https://strapi.io"
     }
   ],
-  "types": "index.d.ts",
   "scripts": {
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
