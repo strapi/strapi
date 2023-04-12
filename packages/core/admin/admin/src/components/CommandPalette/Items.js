@@ -11,12 +11,14 @@ const Items = ({ items, displayOnSearchOnly }) => {
     <>
       {items.map((item, idx) => {
         if (item.component) {
-          return React.cloneElement(item.component, { key: idx });
+          const Component = item.component;
+
+          return <Component key={idx} />;
         }
 
         return (
           <Item
-            key={`${item.label}-${idx}`}
+            key={item.label}
             value={item.label}
             onSelect={() => item?.action(cmd)}
             displayOnSearchOnly={displayOnSearchOnly}
@@ -33,7 +35,7 @@ Items.propTypes = {
   items: PropTypes.arrayOf(
     PropTypes.oneOfType([
       PropTypes.shape({
-        component: PropTypes.element,
+        component: PropTypes.elementType,
       }),
       PropTypes.shape({
         icon: PropTypes.elementType,

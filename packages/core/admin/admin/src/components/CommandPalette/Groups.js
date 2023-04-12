@@ -3,6 +3,7 @@ import Items from './Items';
 import Group from './Group';
 
 const Groups = ({ items }) => {
+  // Grouping all items per group name before rendering
   const groups = new Map();
 
   items.forEach((item) => {

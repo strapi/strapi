@@ -26,7 +26,7 @@ const items = [
   },
   {
     group: 'Content Manager',
-    component: <ContentManager />,
+    component: ContentManager,
   },
   {
     group: 'Content Type Builder',
@@ -46,7 +46,7 @@ const items = [
   },
   {
     group: 'Content Type Builder',
-    component: <ContentTypeBuilder />,
+    component: ContentTypeBuilder,
   },
   {
     group: 'General',
@@ -58,7 +58,7 @@ const items = [
   },
   {
     group: 'General',
-    component: <Theme />,
+    component: Theme,
   },
   {
     group: 'Navigation',
@@ -86,7 +86,7 @@ const items = [
   },
   {
     group: 'Settings',
-    component: <Settings />,
+    component: Settings,
   },
   {
     group: 'Help',

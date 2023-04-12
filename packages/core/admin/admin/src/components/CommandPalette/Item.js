@@ -1,21 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { CommandItem, useCommandState } from 'cmdk';
 
-const Shortcut = styled.kbd`
-  font-size: 12px;
-  min-width: 20px;
-  padding: 4px;
-  height: 20px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-`;
-
-const Item = ({ children, shortcut, onSelect, displayOnSearchOnly, ...rest }) => {
+const Item = ({ children, shortcut, onSelect, displayOnSearchOnly, ...restProps }) => {
   const search = useCommandState((state) => state.search);
 
   if (!search && displayOnSearchOnly) {
@@ -23,15 +10,8 @@ const Item = ({ children, shortcut, onSelect, displayOnSearchOnly, ...rest }) =>
   }
 
   return (
-    <CommandItem onSelect={onSelect} {...rest}>
+    <CommandItem onSelect={onSelect} {...restProps}>
       {children}
-      {shortcut && (
-        <div>
-          {shortcut.split(' ').map((key) => {
-            return <Shortcut key={key}>{key}</Shortcut>;
-          })}
-        </div>
-      )}
     </CommandItem>
   );
 };

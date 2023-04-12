@@ -4,10 +4,11 @@ import { useModels } from '../../../hooks';
 import Items from '../Items';
 import { useCommand } from '../context';
 
-const useContentTypesItems = () => {
+const ContentTypeBuilder = () => {
+  const { page } = useCommand();
   const { isLoading, collectionTypes, singleTypes, components } = useModels();
 
-  return useMemo(() => {
+  const items = useMemo(() => {
     if (isLoading) {
       return [];
     }
@@ -35,11 +36,6 @@ const useContentTypesItems = () => {
 
     return items;
   }, [isLoading, collectionTypes, singleTypes, components]);
-};
-
-const ContentTypeBuilder = () => {
-  const { page } = useCommand();
-  const items = useContentTypesItems();
 
   return <Items items={items} displayOnSearchOnly={page !== 'content-type-builder'} />;
 };

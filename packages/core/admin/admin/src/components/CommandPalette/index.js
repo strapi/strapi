@@ -14,7 +14,7 @@ import Settings from './pages/Settings';
 export default function CommandK() {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [pages, setPages] = React.useState([]);
+  const [pages, setPages] = useState([]);
   const page = pages[pages.length - 1];
   const history = useHistory();
 
@@ -91,7 +91,7 @@ export default function CommandK() {
             {page === 'settings' && <Settings />}
           </Command.List>
         </Command.Dialog>
-        <div className="container" ref={containerElement} />
+        <div ref={containerElement} />
       </Container>
     </CommandContext.Provider>
   );
