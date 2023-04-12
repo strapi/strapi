@@ -3,8 +3,12 @@ import AWS from 'aws-sdk';
 import type { File } from '@strapi/plugin-upload';
 import { getBucketFromUrl } from './utils';
 
-// Regex to test protocol like "http://", "https://"
+// TODO V5: Migrate to aws-sdk v3
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+
 function assertUrlProtocol(url: string) {
+  // Regex to test protocol like "http://", "https://"
   return /^\w*:\/\//.test(url);
 }
 
