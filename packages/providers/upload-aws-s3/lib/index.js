@@ -10,7 +10,7 @@ const { getOr } = require('lodash/fp');
 const AWS = require('aws-sdk');
 const { isUrlFromBucket } = require('./utils');
 
-function assertUrlProtocol(url) {
+function hasUrlProtocol(url) {
   // Regex to test protocol like "http://", "https://"
   return /^\w*:\/\//.test(url);
 }
@@ -65,13 +65,15 @@ module.exports = {
               return reject(err);
             }
 
-            // set the bucket file url
-            if (assertUrlProtocol(data.Location)) {
-              file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
+            if (baseUrl) {
+              // Construct the url with the baseUrl
+              file.url = `${baseUrl}/${fileKey}`;
             } else {
-              // Default protocol to https protocol
-              file.url = `https://${data.Location}`;
+              // Add the protocol if it is missing
+              // Some providers like DigitalOcean Spaces return the url without the protocol
+              file.url = hasUrlProtocol(data.Location) ? data.Location : `https://${data.Location}`;
             }
+
             resolve();
           }
         );

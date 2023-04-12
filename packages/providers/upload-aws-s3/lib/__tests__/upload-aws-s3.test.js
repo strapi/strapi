@@ -61,7 +61,7 @@ describe('AWS-S3 provider', () => {
       const providerInstance = awsProvider.init({ baseUrl: 'https://cdn.test' });
 
       S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
-        callback(null, { Location: 'https://validurl.test' })
+        callback(null, { Location: 'validurl.test' })
       );
       const file = {
         path: 'tmp/test',
