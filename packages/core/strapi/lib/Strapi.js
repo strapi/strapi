@@ -27,6 +27,7 @@ const createCustomFields = require('./services/custom-fields');
 const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const createStrapiFetch = require('./utils/fetch');
 const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
@@ -118,6 +119,7 @@ class Strapi {
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
+    this.fetch = createStrapiFetch(this);
 
     createUpdateNotifier(this).notify();
 
