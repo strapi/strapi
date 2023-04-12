@@ -53,7 +53,7 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
   ];
 
   if (canReadUsers && users) {
-    const getDisplaynameFromUser = (user) => {
+    const getDisplayNameFromUser = (user) => {
       if (user.username) {
         return user.username;
       }
@@ -76,7 +76,7 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
 
     const userOptions = users.results.map((user) => {
       return {
-        label: getDisplaynameFromUser(user),
+        label: getDisplayNameFromUser(user),
         // Combobox expects a string value
         customValue: user.id.toString(),
       };
