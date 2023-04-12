@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const HttpsProxyAgent = require('https-proxy-agent');
 
 function createStrapiFetch(strapi) {
-  const { proxy } = strapi.config.get('server');
+  const { globalProxy: proxy } = strapi.config.get('server');
   const defaultOptions = {};
 
   if (proxy) {
