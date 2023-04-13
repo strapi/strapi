@@ -1,5 +1,5 @@
 import type { Strapi } from '@strapi/strapi';
-import { schema as auditLogContentType } from './content-types/audit-log';
+import auditLogContentType from './content-types/audit-log';
 
 interface Event {
   action: string;
