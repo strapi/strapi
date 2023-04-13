@@ -33,6 +33,7 @@ const links = [
 const Settings = () => {
   const { page } = useCommand();
 
+  /** @type {import('../types').Items} */
   const items = useMemo(() => {
     return links.map(({ name, to }) => {
       return {

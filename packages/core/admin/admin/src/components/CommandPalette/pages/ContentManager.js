@@ -13,6 +13,7 @@ const ContentManager = () => {
       return [];
     }
 
+    /** @type {import('../types').Items} */
     const items = [];
     collectionTypes.forEach((ct) => {
       items.push({

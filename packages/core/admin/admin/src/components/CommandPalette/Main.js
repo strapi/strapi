@@ -7,6 +7,7 @@ import Settings from './pages/Settings';
 import Computer from './icons/Computer';
 import Groups from './Groups';
 
+/** @type {import('./types').Items}  */
 const items = [
   {
     group: 'Content Manager',

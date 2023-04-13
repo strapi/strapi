@@ -13,6 +13,7 @@ const Theme = () => {
   const { onChangeTheme } = useThemeToggle();
   const { page } = useCommand();
 
+  /** @type {import('../types').Items} */
   const items = THEMES.map(({ name, icon }) => {
     const label = `Change theme to ${name}`;
 

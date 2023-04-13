@@ -13,6 +13,7 @@ const ContentTypeBuilder = () => {
       return [];
     }
 
+    /** @type {import('../types').Items} */
     const items = [];
     [...collectionTypes, ...singleTypes].forEach((ct) => {
       items.push({

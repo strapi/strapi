@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CommandItem, useCommandState } from 'cmdk';
 
-const Item = ({ children, shortcut, onSelect, displayOnSearchOnly, ...restProps }) => {
+const Item = ({ children, onSelect, displayOnSearchOnly, ...restProps }) => {
   const search = useCommandState((state) => state.search);
 
   if (!search && displayOnSearchOnly) {
@@ -18,13 +18,11 @@ const Item = ({ children, shortcut, onSelect, displayOnSearchOnly, ...restProps 
 
 Item.propTypes = {
   children: PropTypes.node.isRequired,
-  shortcut: PropTypes.string,
   onSelect: PropTypes.func,
   displayOnSearchOnly: PropTypes.bool,
 };
 
 Item.defaultProps = {
-  shortcut: '',
   onSelect() {},
   displayOnSearchOnly: false,
 };
