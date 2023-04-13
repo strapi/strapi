@@ -395,6 +395,7 @@ class Strapi {
       eventHub: this.eventHub,
       logger: this.log,
       configuration: this.config.get('server.webhooks', {}),
+      fetch: this.fetch,
     });
 
     this.registerInternalHooks();
