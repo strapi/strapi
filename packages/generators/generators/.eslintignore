@@ -1,3 +1,6 @@
 node_modules/
 .eslintrc.js
-lib/files/
+src/files/
+dist
+index.d.ts
+jest.config.js
