@@ -32,11 +32,23 @@ const fieldSizes = {
   integer: smallSize,
   number: smallSize,
   // Medium and resizable
-  // TODO
+  datetime: defaultSize,
+  email: defaultSize,
+  enumeration: defaultSize,
+  media: defaultSize,
+  password: defaultSize,
+  relation: defaultSize,
+  string: defaultSize,
+  text: defaultSize,
+  timestamp: defaultSize,
+  uid: defaultSize,
 };
 
 module.exports = () => ({
-  getFieldSizes() {
+  getAllFieldSizes() {
     return fieldSizes;
+  },
+  getFieldSize(type) {
+    return fieldSizes[type];
   },
 });

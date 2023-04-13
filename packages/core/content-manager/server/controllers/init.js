@@ -6,7 +6,7 @@ module.exports = {
   getInitData(ctx) {
     ctx.body = {
       data: {
-        fieldSizes: getService('field-sizes').getFieldSizes(),
+        fieldSizes: getService('field-sizes').getAllFieldSizes(),
       },
     };
   },
