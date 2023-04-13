@@ -1,5 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
+import { Typography } from '@strapi/design-system';
 
 import ReviewWorkflowsStage from '.';
 import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
@@ -32,6 +33,12 @@ export default (layout) => {
       sortable: false,
     },
     cellFormatter({ strapi_reviewWorkflows_stage }) {
+      // if entities are created e.g. through lifecycle methods
+      // they may not have a stage assigned
+      if (!strapi_reviewWorkflows_stage) {
+        return <Typography textColor="neutral800">-</Typography>;
+      }
+
       return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
     },
   };
