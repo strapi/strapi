@@ -45,16 +45,14 @@ export function InformationBoxEE() {
       const typeSlug = isSingleType ? 'single-types' : 'collection-types';
 
       const {
-        // TODO: Once the API response is wrapped in a data attribute this
-        // needs to be updated
-        data: createdEntry,
+        data: { data: createdEntity },
       } = await put(`/admin/content-manager/${typeSlug}/${uid}/${entityId}/stage`, {
         data: { id: stageId },
       });
 
-      dispatch(submitSucceeded(createdEntry));
+      dispatch(submitSucceeded(createdEntity));
 
-      return createdEntry;
+      return createdEntity;
     },
     {
       onSuccess() {
