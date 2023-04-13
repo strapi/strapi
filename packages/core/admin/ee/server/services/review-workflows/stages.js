@@ -60,9 +60,9 @@ module.exports = ({ strapi }) => {
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
       return strapi.db.transaction(async () => {
-        const newStages = await this.createMany(created, { fields: ['id'] });
-        const stagesIds = stages.map((stage) => stage.id ?? newStages.shift().id);
         const defaultWorkflow = await getDefaultWorkflow({ strapi });
+        const newStages = await this.createMany(created, { fields: ['id'] });
+        const stagesIds = stages.map((stage) => stage.id ?? [...newStages].shift().id);
 
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
 
@@ -81,10 +81,10 @@ module.exports = ({ strapi }) => {
 
           // This stage has related entities that need to be moved to their
           // target stage
-          // Find the nearest stage in the workflow that is not deleted,
-          // prioritizing the previous stages
+          // Find the nearest stage in the workflow and newly created stages
+          // that is not deleted, prioritizing the previous stages
           const targetStageId = findNearestMatchingStageID(
-            defaultWorkflow.stages,
+            [...defaultWorkflow.stages, ...newStages],
             defaultWorkflow.stages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
