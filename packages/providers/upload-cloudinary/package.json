@@ -28,17 +28,27 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
+    "build": "run -T tsc",
+    "build:ts": "run -T tsc",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
     "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/utils": "4.9.1",
     "cloudinary": "^1.33.0",
     "into-stream": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "*",
+    "tsconfig": "*"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
