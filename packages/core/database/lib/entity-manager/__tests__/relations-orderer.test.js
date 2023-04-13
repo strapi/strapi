@@ -123,7 +123,7 @@ describe('Given I have some relations in the database', () => {
   });
 
   describe('When you connect a relation before one with null order', () => {
-    test('Then it is placed at the end with the correct order', () => {
+    test('Then it replaces null order values to 1 and properly reorders relations', () => {
       const orderer = relationsOrderer(
         [
           { id: 2, order: null },
