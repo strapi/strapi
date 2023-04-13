@@ -13604,9 +13604,11 @@ __metadata:
   dependencies:
     "@strapi/generate-new": 4.9.1
     commander: 8.3.0
+    eslint-config-custom: "*"
     inquirer: 8.2.5
+    tsconfig: "*"
   bin:
-    create-strapi-app: ./index.js
+    create-strapi-app: ./bin/index.js
   languageName: unknown
   linkType: soft
 
