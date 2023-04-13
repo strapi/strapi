@@ -41,14 +41,6 @@ module.exports = (strapi) => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const getNumberOfDynamicZones = () => {
-    return pipe(
-      map('attributes'),
-      flatMap(values),
-      sumBy(propEq('type', 'dynamiczone'))
-    )(strapi.contentTypes);
-  };
-
   const anonymousUserProperties = {
     environment: strapi.config.environment,
     os: os.type(),
