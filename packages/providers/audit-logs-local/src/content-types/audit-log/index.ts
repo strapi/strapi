@@ -1,1 +1,5 @@
-export { default as schema } from './schema';
+import schema from './schema';
+
+export default {
+  schema,
+};
