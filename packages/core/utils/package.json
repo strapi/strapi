@@ -28,6 +28,7 @@
     }
   ],
   "main": "./lib",
+  "types": "./index.d.ts",
   "directories": {
     "lib": "./lib"
   },
