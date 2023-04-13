@@ -112,6 +112,38 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'completed'
+          
+      # Enhancement redirections
+      - name: 'Comment: redirect enhancement to canny'
+        if: "${{ github.event.label.name == 'issue: enhancement' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            First thank you for reporting this enhancement need.
+            To manage enhancement requests and the Strapi roadmap, we are using Canny.
+            You will be able to access the Public Roadmap here: https://feedback.strapi.io.
+
+            In your message, please mention the URL of this thread in case some messages are posted there. But the most important is to have your feedback posted on our feedback/roadmap site.
+            The product team is reading EVERY comment, that really helps us to develop the project in the right direction. We are keeping all enhancement requests and project insights in one place, our feedback website.
+
+            In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
+
+            Thank you for your insight and have a good day.
+      - name: 'Close: redirect enhancement request to canny'
+        if: "${{ github.event.label.name == 'issue: enhancement' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'completed'
 
       # Invalid bug report template actions
       - name: 'Comment: invalid bug report template'
