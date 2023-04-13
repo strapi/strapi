@@ -1,19 +1,23 @@
 'use strict';
 
-const fetch = require('node-fetch');
+const nodeFetch = require('node-fetch');
 const HttpsProxyAgent = require('https-proxy-agent');
 
 function createStrapiFetch(strapi) {
-  const { globalProxy: proxy } = strapi.config.get('server');
-  const defaultOptions = {};
-
-  if (proxy) {
-    defaultOptions.agent = new HttpsProxyAgent(proxy);
+  function fetch(url, options) {
+    return nodeFetch(url, {
+      ...(fetch.agent ? { agent: fetch.agent } : {}),
+      ...options,
+    });
   }
 
-  return (url, options) => {
-    return fetch(url, { ...defaultOptions, ...options });
-  };
+  const { globalProxy: proxy } = strapi.config.get('server');
+
+  if (proxy) {
+    fetch.agent = new HttpsProxyAgent(proxy);
+  }
+
+  return fetch;
 }
 
 module.exports = createStrapiFetch;
