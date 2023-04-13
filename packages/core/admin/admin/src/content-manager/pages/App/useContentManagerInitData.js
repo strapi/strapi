@@ -32,22 +32,11 @@ const useContentManagerInitData = () => {
     dispatch(getInitData());
 
     try {
-      const [
-        {
-          data: { data: components },
+      const {
+        data: {
+          data: { components, contentTypes: models, fieldSizes },
         },
-        {
-          data: { data: models },
-        },
-        {
-          data: { data: initData },
-        },
-      ] = await Promise.all(
-        ['components', 'content-types', 'init'].map((endPoint) =>
-          get(getRequestUrl(endPoint), { cancelToken: source.token })
-        )
-      );
-
+      } = await get(getRequestUrl('init'), { cancelToken: source.token });
       notifyStatus(
         formatMessage({
           id: getTrad('App.schemas.data-loaded'),
@@ -75,7 +64,7 @@ const useContentManagerInitData = () => {
         authorizedStLinks: stLinks,
         contentTypeSchemas: models,
         components,
-        fieldSizes: initData.fieldSizes,
+        fieldSizes,
       });
 
       dispatch(actionToDispatch);
