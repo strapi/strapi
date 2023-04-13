@@ -1,5 +1,11 @@
 import reducer from '../reducer';
 
+const fieldSizes = {
+  richtext: { default: 12, resizable: false },
+  string: { default: 6, resizable: true },
+  boolean: { default: 4, resizable: true },
+};
+
 describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
   let state;
 
@@ -82,7 +88,11 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'description' };
+      const action = {
+        type: 'ON_ADD_FIELD',
+        name: 'description',
+        fieldSizes,
+      };
       expect(reducer(state, action)).toEqual(expected);
     });
 
@@ -121,7 +131,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'title' };
+      const action = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
 
@@ -163,7 +173,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'isActive' };
+      const action = { type: 'ON_ADD_FIELD', name: 'isActive', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
 
@@ -214,7 +224,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
           },
         },
       };
-      const action = { type: 'ON_ADD_FIELD', name: 'title' };
+      const action = { type: 'ON_ADD_FIELD', name: 'title', fieldSizes };
       expect(reducer(state, action)).toEqual(expected);
     });
   });
