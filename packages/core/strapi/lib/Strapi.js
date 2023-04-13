@@ -43,6 +43,7 @@ const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
+const getNumberOfDynamicZones = require('./services/utils/dynamic-zones');
 const sanitizersRegistry = require('./core/registries/sanitizers');
 const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
@@ -249,6 +250,9 @@ class Strapi {
       groupProperties: {
         database: strapi.config.get('database.connection.client'),
         plugins: Object.keys(strapi.plugins),
+        numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+        numberOfComponents: _.size(this.components),
+        numberOfDynamicZones: getNumberOfDynamicZones(),
         // TODO: to add back
         // providers: this.config.installedProviders,
       },

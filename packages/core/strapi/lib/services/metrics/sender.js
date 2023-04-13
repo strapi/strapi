@@ -17,7 +17,7 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
+const ANALYTICS_URI = 'http://localhost:4000';
 
 /**
  * Add properties from the package.json strapi key in the metadata
@@ -71,7 +71,9 @@ module.exports = (strapi) => {
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
   return async (event, payload = {}, opts = {}) => {
+    console.log('event', event, payload);
     const userId = generateAdminUserHash(strapi);
+    console.log('anonymousGroupProperties', anonymousGroupProperties);
 
     const reqParams = {
       method: 'POST',
@@ -84,9 +86,6 @@ module.exports = (strapi) => {
         groupProperties: {
           ...anonymousGroupProperties,
           projectType: strapi.EE ? 'Enterprise' : 'Community',
-          numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
-          numberOfComponents: _.size(strapi.components),
-          numberOfDynamicZones: getNumberOfDynamicZones(),
           ...payload.groupProperties,
         },
       }),
