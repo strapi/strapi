@@ -3102,7 +3102,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           { name: 'third', __temp_key__: 'Zz' },
           { name: 'second', __temp_key__: 'a0G' },
           { name: 'fourth', __temp_key__: 'a0V' },
-          { name: 'first', __temp_key__: 'a0O' },
+          { name: 'first', __temp_key__: 'a1' },
         ])
       );
 
@@ -3113,7 +3113,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           { name: 'third', __temp_key__: 'Zz' },
           { name: 'fourth', __temp_key__: 'a0' },
           { name: 'second', __temp_key__: 'a0G' },
-          { name: 'first', __temp_key__: 'a0O' },
+          { name: 'first', __temp_key__: 'a1' },
         ])
       );
     });
