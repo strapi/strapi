@@ -86,10 +86,10 @@ export function ReviewWorkflowsPage() {
   };
 
   const submitForm = async () => {
-    setIsConfirmDeleteDialogOpen(false);
-
     await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
-    refetchWorkflow();
+    await refetchWorkflow();
+
+    setIsConfirmDeleteDialogOpen(false);
   };
 
   const handleConfirmDeleteDialog = async () => {
@@ -143,6 +143,9 @@ export function ReviewWorkflowsPage() {
                     type="submit"
                     size="M"
                     disabled={!currentWorkflowIsDirty}
+                    // if the confirm dialog is open the loading state is on
+                    // the confirm button already
+                    loading={!isConfirmDeleteDialogOpen && isLoading}
                   >
                     {formatMessage({
                       id: 'global.save',
