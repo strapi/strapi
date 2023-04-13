@@ -4,7 +4,7 @@
  */
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { GET_DATA, RESET_PROPS, SET_CONTENT_TYPE_LINKS } from './constants';
+import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
 
 const initialState = {
   components: [],
@@ -20,14 +20,14 @@ const initialState = {
 const mainReducer = (state = initialState, action) =>
   produce(state, (draftState) => {
     switch (action.type) {
-      case GET_DATA: {
+      case GET_INIT_DATA: {
         draftState.status = 'loading';
         break;
       }
-      case RESET_PROPS: {
+      case RESET_INIT_DATA: {
         return initialState;
       }
-      case SET_CONTENT_TYPE_LINKS: {
+      case SET_INIT_DATA: {
         draftState.collectionTypeLinks = action.data.authorizedCtLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
@@ -36,6 +36,7 @@ const mainReducer = (state = initialState, action) =>
         );
         draftState.components = action.data.components;
         draftState.models = action.data.contentTypeSchemas;
+        draftState.fieldSizes = action.data.fieldSizes;
         draftState.status = 'resolved';
         break;
       }

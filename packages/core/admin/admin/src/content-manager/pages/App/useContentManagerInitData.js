@@ -11,11 +11,11 @@ import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getRequestUrl, getTrad } from '../../utils';
-import { getData, resetProps, setContentTypeLinks } from './actions';
+import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
 
-const useModels = () => {
+const useContentManagerInitData = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const state = useSelector(selectAppDomain());
@@ -29,7 +29,7 @@ const useModels = () => {
   const { get } = useFetchClient();
 
   const fetchData = async () => {
-    dispatch(getData());
+    dispatch(getInitData());
 
     try {
       const [
@@ -39,8 +39,11 @@ const useModels = () => {
         {
           data: { data: models },
         },
+        {
+          data: { data: initData },
+        },
       ] = await Promise.all(
-        ['components', 'content-types'].map((endPoint) =>
+        ['components', 'content-types', 'init'].map((endPoint) =>
           get(getRequestUrl(endPoint), { cancelToken: source.token })
         )
       );
@@ -67,7 +70,13 @@ const useModels = () => {
         models,
       });
 
-      const actionToDispatch = setContentTypeLinks(ctLinks, stLinks, models, components);
+      const actionToDispatch = setInitData({
+        authorizedCtLinks: ctLinks,
+        authorizedStLinks: stLinks,
+        contentTypeSchemas: models,
+        components,
+        fieldSizes: initData.fieldSizes,
+      });
 
       dispatch(actionToDispatch);
     } catch (err) {
@@ -88,7 +97,7 @@ const useModels = () => {
 
     return () => {
       source.cancel('Operation canceled by the user.');
-      dispatch(resetProps());
+      dispatch(resetInitData());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, toggleNotification]);
@@ -96,4 +105,4 @@ const useModels = () => {
   return { ...state, refetchData: fetchDataRef.current };
 };
 
-export default useModels;
+export default useContentManagerInitData;
