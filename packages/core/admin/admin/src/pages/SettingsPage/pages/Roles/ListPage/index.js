@@ -356,6 +356,7 @@ const RoleListPage = () => {
                   usersCount={role.usersCount}
                   icons={getIcons(role)}
                   rowIndex={index + 2}
+                  canUpdate={canUpdate}
                 />
               ))}
             </Tbody>
