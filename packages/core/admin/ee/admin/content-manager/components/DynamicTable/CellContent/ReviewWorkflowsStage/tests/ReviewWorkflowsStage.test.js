@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 
-import { ReviewWorkflowsStage } from '..';
+import ReviewWorkflowsStage from '..';
 
 const ComponentFixture = (props) => (
   <ThemeProvider theme={lightTheme}>
