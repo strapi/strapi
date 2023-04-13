@@ -21,6 +21,12 @@ export const TableRows = ({
   const { formatMessage } = useIntl();
 
   const handleRowClickFn = (element, elementType, id) => {
+    const selectedElement = {
+      id: element.id,
+      type: elementType,
+    };
+    onSelectOne(selectedElement);
+
     if (elementType === 'asset') {
       onEditAsset(element);
     } else {
@@ -33,7 +39,10 @@ export const TableRows = ({
       {rows.map((element) => {
         const { id, isSelectable, name, folderURL, type: contentType } = element;
 
-        const isSelected = !!selected.find((currentRow) => currentRow.id === id);
+        // True, if the selected array contains the 'id' and 'type' of the current item
+        const isSelected = !!selected.find(
+          (currentRow) => currentRow.id === id && currentRow.type === contentType
+        );
 
         return (
           <Tr
