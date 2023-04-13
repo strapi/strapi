@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test';
 const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
+const { cleanTestApp, generateTestApp } = require('./test-app-generator');
 
 const databases = {
   postgres: {

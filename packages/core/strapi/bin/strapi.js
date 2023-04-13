@@ -259,6 +259,14 @@ program
   .action(getLocalScript('opt-in-telemetry'));
 
 program
+  .command('report')
+  .description('Get system stats for debugging and submitting issues')
+  .option('-u, --uuid', 'Include Project UUID')
+  .option('-d, --dependencies', 'Include Project Dependencies')
+  .option('--all', 'Include All Information')
+  .action(getLocalScript('report'));
+
+program
   .command('ts:generate-types')
   .description(`Generate TypeScript typings for your schemas`)
   .option(

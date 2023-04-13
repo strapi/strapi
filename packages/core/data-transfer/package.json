@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.8.2",
+  "version": "4.9.1",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -31,17 +31,17 @@
     "build:ts": "tsc",
     "clean": "rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
     "watch": "tsc -w --preserveWatchOutput",
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "files": [
     "./dist"
   ],
   "dependencies": {
-    "@strapi/logger": "4.8.2",
-    "@strapi/strapi": "4.8.2",
+    "@strapi/logger": "4.9.1",
+    "@strapi/strapi": "4.9.1",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",

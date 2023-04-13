@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../types/remote/protocol';
-import { ProviderError } from '../../errors/providers';
+import { ProviderError, ProviderTransferError } from '../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -14,7 +14,7 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
-const createDispatcher = (ws: WebSocket) => {
+export const createDispatcher = (ws: WebSocket) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<client.Message>;
@@ -119,4 +119,29 @@ const createDispatcher = (ws: WebSocket) => {
   };
 };
 
-export { createDispatcher };
+type WebsocketParams = ConstructorParameters<typeof WebSocket>;
+type Address = WebsocketParams[0];
+type Options = WebsocketParams[2];
+
+export const connectToWebsocket = (address: Address, options?: Options): Promise<WebSocket> => {
+  return new Promise((resolve, reject) => {
+    const server = new WebSocket(address, options);
+    server.once('open', () => {
+      resolve(server);
+    });
+
+    server.once('error', (err) => {
+      reject(
+        new ProviderTransferError(err.message, {
+          details: {
+            error: err.message,
+          },
+        })
+      );
+    });
+  });
+};
+
+export const trimTrailingSlash = (input: string): string => {
+  return input.replace(/\/$/, '');
+};

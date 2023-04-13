@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "4.8.2",
+  "version": "4.9.1",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -21,15 +21,15 @@
   ],
   "main": "./lib/index.js",
   "scripts": {
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
-    "lint": "eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@casl/ability": "5.4.4",
-    "@strapi/utils": "4.8.2",
+    "@strapi/utils": "4.9.1",
     "lodash": "4.17.21",
-    "sift": "16.0.0"
+    "sift": "16.0.1"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
