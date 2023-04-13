@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import React, { useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
@@ -26,6 +26,7 @@ import {
   Divider,
 } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
+import { useSelector } from 'react-redux';
 import { getTrad } from '../../utils';
 import reducer, { initialState } from './reducer';
 import init from './init';
@@ -34,6 +35,7 @@ import ModalForm from './components/FormModal';
 import LayoutDndProvider from '../../components/LayoutDndProvider';
 import { unformatLayout } from './utils/layout';
 import putCMSettingsEV from './utils/api';
+import { makeSelectFieldSizes } from '../App/selectors';
 
 const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, updateLayout }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -49,6 +51,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const { formatMessage } = useIntl();
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
+  const fieldSizesSelector = useMemo(makeSelectFieldSizes, []);
+  const fieldSizes = useSelector((state) => fieldSizesSelector(state));
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
@@ -318,6 +322,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                     dispatch({
                       type: 'ON_ADD_FIELD',
                       name: field,
+                      fieldSizes,
                     });
                   }}
                   onRemoveField={(rowId, index) => {

@@ -26,7 +26,7 @@ const cmPermissions = permissions.contentManager;
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData, fieldSizes } =
+  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
     useContentManagerInitData();
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
     model.title.toLowerCase()
