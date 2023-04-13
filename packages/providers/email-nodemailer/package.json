@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "4.9.0",
+  "version": "4.9.1",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -41,16 +41,27 @@
       "email": "git@roschaefer.de"
     }
   ],
-  "main": "./lib",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
+    "build": "run -T tsc",
+    "build:ts": "run -T tsc",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
     "lint": "run -T eslint ."
   },
   "dependencies": {
     "lodash": "4.17.21",
     "nodemailer": "6.9.1"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "6.4.7",
+    "eslint-config-custom": "*",
+    "tsconfig": "*"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
