@@ -242,10 +242,25 @@ const loadersFactory = (defaultLoaders = {}) => {
   };
 };
 
+/**
+ *
+ * @param {import('@strapi/data-transfer/types').ITransferEngine} engine
+ * @returns {object} Telemetry properties object
+ */
+const getTransferTelemetryPayload = (engine) => {
+  return {
+    eventProperties: {
+      source: engine?.sourceProvider?.name,
+      destination: engine?.destinationProvider?.name,
+    },
+  };
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
   getDefaultExportName,
+  getTransferTelemetryPayload,
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   excludeOption,
