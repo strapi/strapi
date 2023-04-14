@@ -1,8 +1,9 @@
 'use strict';
 
-const { set, get, forEach, keys, pickBy, pipe } = require('lodash/fp');
+const { set, forEach, pipe } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
+const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
@@ -12,13 +13,6 @@ const {
   disableOnContentTypes: disableReviewWorkflows,
 } = require('../../migrations/review-workflows');
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
-
-const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
-  // Pick only content-types with reviewWorkflows options set to true
-  pickBy(get('options.reviewWorkflows')),
-  // Get UIDs
-  keys,
-]);
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
