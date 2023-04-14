@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import path from 'path';
-import { keyBy } from 'lodash/fp';
+import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
@@ -73,6 +73,8 @@ class LocalFileSourceProvider implements ISourceProvider {
     try {
       // Read the metadata to ensure the file can be parsed
       this.#metadata = await this.getMetadata();
+
+      // TODO: we might also need to read the schema.jsonl files & implements a custom stream-check
     } catch (e) {
       if (this.options?.encryption?.enabled) {
         throw new ProviderInitializationError(
@@ -81,11 +83,17 @@ class LocalFileSourceProvider implements ISourceProvider {
       }
       throw new ProviderInitializationError(`File '${filePath}' is not a valid Strapi data file.`);
     }
+
+    if (!this.#metadata) {
+      throw new ProviderInitializationError('Could not load metadata from Strapi data file.');
+    }
   }
 
-  getMetadata() {
-    // TODO: need to read the file & extract the metadata json file
-    // => we might also need to read the schema.jsonl files & implements a custom stream-check
+  async getMetadata() {
+    if (this.#metadata) {
+      return this.#metadata;
+    }
+
     const backupStream = this.#getBackupStream();
     return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
