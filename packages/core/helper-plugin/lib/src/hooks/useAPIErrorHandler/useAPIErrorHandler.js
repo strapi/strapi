@@ -8,7 +8,7 @@ import { formatAxiosError } from './utils/formatAxiosError';
  * Hook that exports an error message formatting function.
  *
  * @export
- * @param {function=} - Error message prefix function (usually getTrad())
+ * @param {function} - Error message prefix function (usually getTrad())
  * @return {{ formatAPIError }} - Object containing an formatting function
  */
 
