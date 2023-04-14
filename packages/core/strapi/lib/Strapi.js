@@ -540,16 +540,16 @@ class Strapi {
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
-    // user
-    const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
-      await userLifecycleFunction({ strapi: this });
-    }
-
     // admin
     const adminLifecycleFunction = this.admin && this.admin[lifecycleName];
     if (isFunction(adminLifecycleFunction)) {
       await adminLifecycleFunction({ strapi: this });
+    }
+
+    // user
+    const userLifecycleFunction = this.app && this.app[lifecycleName];
+    if (isFunction(userLifecycleFunction)) {
+      await userLifecycleFunction({ strapi: this });
     }
   }
 
