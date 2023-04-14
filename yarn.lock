@@ -211,6 +211,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/code-frame@npm:^7.21.4":
+  version: 7.21.4
+  resolution: "@babel/code-frame@npm:7.21.4"
+  dependencies:
+    "@babel/highlight": ^7.18.6
+  checksum: e5390e6ec1ac58dcef01d4f18eaf1fd2f1325528661ff6d4a5de8979588b9f5a8e852a54a91b923846f7a5c681b217f0a45c2524eb9560553160cd963b7d592c
+  languageName: node
+  linkType: hard
+
 "@babel/compat-data@npm:^7.17.7":
   version: 7.17.7
   resolution: "@babel/compat-data@npm:7.17.7"
@@ -389,6 +398,18 @@ __metadata:
     "@jridgewell/gen-mapping": ^0.3.2
     jsesc: ^2.5.1
   checksum: 5f6aa2d86af26e76d276923a5c34191124a119b16ee9ccc34aef654a7dec84fbd7d2daed2e6458a6a06bf87f3661deb77c9fea59b8f67faff5c90793c96d76d6
+  languageName: node
+  linkType: hard
+
+"@babel/generator@npm:^7.21.4":
+  version: 7.21.4
+  resolution: "@babel/generator@npm:7.21.4"
+  dependencies:
+    "@babel/types": ^7.21.4
+    "@jridgewell/gen-mapping": ^0.3.2
+    "@jridgewell/trace-mapping": ^0.3.17
+    jsesc: ^2.5.1
+  checksum: 9ffbb526a53bb8469b5402f7b5feac93809b09b2a9f82fcbfcdc5916268a65dae746a1f2479e03ba4fb0776facd7c892191f63baa61ab69b2cfdb24f7b92424d
   languageName: node
   linkType: hard
 
@@ -628,6 +649,16 @@ __metadata:
     "@babel/template": ^7.18.10
     "@babel/types": ^7.19.0
   checksum: eac1f5db428ba546270c2b8d750c24eb528b8fcfe50c81de2e0bdebf0e20f24bec688d4331533b782e4a907fad435244621ca2193cfcf80a86731299840e0f6e
+  languageName: node
+  linkType: hard
+
+"@babel/helper-function-name@npm:^7.21.0":
+  version: 7.21.0
+  resolution: "@babel/helper-function-name@npm:7.21.0"
+  dependencies:
+    "@babel/template": ^7.20.7
+    "@babel/types": ^7.21.0
+  checksum: d63e63c3e0e3e8b3138fa47b0cd321148a300ef12b8ee951196994dcd2a492cc708aeda94c2c53759a5c9177fffaac0fd8778791286746f72a000976968daf4e
   languageName: node
   linkType: hard
 
@@ -909,7 +940,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.12.11, @babel/parser@npm:^7.12.7, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.17.9, @babel/parser@npm:^7.18.10, @babel/parser@npm:^7.18.13, @babel/parser@npm:^7.18.9, @babel/parser@npm:^7.19.0, @babel/parser@npm:^7.7.0, @babel/parser@npm:^7.8.3":
+"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.12.11, @babel/parser@npm:^7.12.7, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.17.9, @babel/parser@npm:^7.18.10, @babel/parser@npm:^7.18.13, @babel/parser@npm:^7.18.9, @babel/parser@npm:^7.19.0, @babel/parser@npm:^7.8.3":
   version: 7.19.0
   resolution: "@babel/parser@npm:7.19.0"
   bin:
@@ -924,6 +955,15 @@ __metadata:
   bin:
     parser: ./bin/babel-parser.js
   checksum: 7eb2e3d9d9ad5e24b087c88d137f5701d94f049e28b9dce9f3f5c6d4d9b06a0d7c43b9106f1c02df8a204226200e0517de4bc81a339768a4ebd4c59107ea93a4
+  languageName: node
+  linkType: hard
+
+"@babel/parser@npm:^7.21.4, @babel/parser@npm:^7.7.0":
+  version: 7.21.4
+  resolution: "@babel/parser@npm:7.21.4"
+  bin:
+    parser: ./bin/babel-parser.js
+  checksum: de610ecd1bff331766d0c058023ca11a4f242bfafefc42caf926becccfb6756637d167c001987ca830dd4b34b93c629a4cef63f8c8c864a8564cdfde1989ac77
   languageName: node
   linkType: hard
 
@@ -2441,7 +2481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/traverse@npm:^7.4.5, @babel/traverse@npm:^7.7.0, @babel/traverse@npm:^7.8.3":
+"@babel/traverse@npm:^7.4.5, @babel/traverse@npm:^7.8.3":
   version: 7.17.9
   resolution: "@babel/traverse@npm:7.17.9"
   dependencies:
@@ -2456,6 +2496,24 @@ __metadata:
     debug: ^4.1.0
     globals: ^11.1.0
   checksum: d907c71d1617589cc0cddc9837cb27bcb9b8f2117c379e13e72653745abe01da24e8c072bd0c91b9db33323ddb1086722756fbc50b487b2608733baf9dd6fd2c
+  languageName: node
+  linkType: hard
+
+"@babel/traverse@npm:^7.7.0":
+  version: 7.21.4
+  resolution: "@babel/traverse@npm:7.21.4"
+  dependencies:
+    "@babel/code-frame": ^7.21.4
+    "@babel/generator": ^7.21.4
+    "@babel/helper-environment-visitor": ^7.18.9
+    "@babel/helper-function-name": ^7.21.0
+    "@babel/helper-hoist-variables": ^7.18.6
+    "@babel/helper-split-export-declaration": ^7.18.6
+    "@babel/parser": ^7.21.4
+    "@babel/types": ^7.21.4
+    debug: ^4.1.0
+    globals: ^11.1.0
+  checksum: f22f067c2d9b6497abf3d4e53ea71f3aa82a21f2ed434dd69b8c5767f11f2a4c24c8d2f517d2312c9e5248e5c69395fdca1c95a2b3286122c75f5783ddb6f53c
   languageName: node
   linkType: hard
 
@@ -2477,7 +2535,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/types@npm:^7.0.0, @babel/types@npm:^7.16.7, @babel/types@npm:^7.17.0, @babel/types@npm:^7.18.6, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.4, @babel/types@npm:^7.7.0":
+"@babel/types@npm:^7.0.0, @babel/types@npm:^7.16.7, @babel/types@npm:^7.17.0, @babel/types@npm:^7.18.6, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.4":
   version: 7.18.8
   resolution: "@babel/types@npm:7.18.8"
   dependencies:
@@ -2538,6 +2596,17 @@ __metadata:
     "@babel/helper-validator-identifier": ^7.19.1
     to-fast-properties: ^2.0.0
   checksum: b39af241f0b72bba67fd6d0d23914f6faec8c0eba8015c181cbd5ea92e59fc91a52a1ab490d3520c7dbd19ddb9ebb76c476308f6388764f16d8201e37fae6811
+  languageName: node
+  linkType: hard
+
+"@babel/types@npm:^7.21.0, @babel/types@npm:^7.21.4, @babel/types@npm:^7.7.0":
+  version: 7.21.4
+  resolution: "@babel/types@npm:7.21.4"
+  dependencies:
+    "@babel/helper-string-parser": ^7.19.4
+    "@babel/helper-validator-identifier": ^7.19.1
+    to-fast-properties: ^2.0.0
+  checksum: 587bc55a91ce003b0f8aa10d70070f8006560d7dc0360dc0406d306a2cb2a10154e2f9080b9c37abec76907a90b330a536406cb75e6bdc905484f37b75c73219
   languageName: node
   linkType: hard
 
@@ -3690,7 +3759,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/resolve-uri@npm:^3.0.3":
+"@jridgewell/resolve-uri@npm:3.1.0, @jridgewell/resolve-uri@npm:^3.0.3":
   version: 3.1.0
   resolution: "@jridgewell/resolve-uri@npm:3.1.0"
   checksum: b5ceaaf9a110fcb2780d1d8f8d4a0bfd216702f31c988d8042e5f8fbe353c55d9b0f55a1733afdc64806f8e79c485d2464680ac48a0d9fcadb9548ee6b81d267
@@ -3714,7 +3783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/sourcemap-codec@npm:^1.4.10":
+"@jridgewell/sourcemap-codec@npm:1.4.14, @jridgewell/sourcemap-codec@npm:^1.4.10":
   version: 1.4.14
   resolution: "@jridgewell/sourcemap-codec@npm:1.4.14"
   checksum: 61100637b6d173d3ba786a5dff019e1a74b1f394f323c1fee337ff390239f053b87266c7a948777f4b1ee68c01a8ad0ab61e5ff4abb5a012a0b091bec391ab97
@@ -3738,6 +3807,16 @@ __metadata:
     "@jridgewell/resolve-uri": ^3.0.3
     "@jridgewell/sourcemap-codec": ^1.4.10
   checksum: 38917e9c2b014d469a9f51c016ed506acbe44dd16ec2f6f99b553ebf3764d22abadbf992f2367b6d2b3511f3eae8ed3a8963f6c1030093fda23efd35ecab2bae
+  languageName: node
+  linkType: hard
+
+"@jridgewell/trace-mapping@npm:^0.3.17":
+  version: 0.3.17
+  resolution: "@jridgewell/trace-mapping@npm:0.3.17"
+  dependencies:
+    "@jridgewell/resolve-uri": 3.1.0
+    "@jridgewell/sourcemap-codec": 1.4.14
+  checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
   languageName: node
   linkType: hard
 
@@ -6895,7 +6974,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/admin@4.9.0, @strapi/admin@workspace:packages/core/admin":
+"@strapi/admin@4.9.1, @strapi/admin@workspace:packages/core/admin":
   version: 0.0.0-use.local
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
@@ -6907,15 +6986,15 @@ __metadata:
     "@casl/ability": ^5.4.3
     "@fingerprintjs/fingerprintjs": 3.3.6
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
-    "@strapi/babel-plugin-switch-ee-ce": 4.9.0
-    "@strapi/data-transfer": 4.9.0
+    "@strapi/babel-plugin-switch-ee-ce": 4.9.1
+    "@strapi/data-transfer": 4.9.1
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/permissions": 4.9.0
-    "@strapi/provider-audit-logs-local": 4.9.0
-    "@strapi/typescript-utils": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/permissions": 4.9.1
+    "@strapi/provider-audit-logs-local": 4.9.1
+    "@strapi/typescript-utils": 4.9.1
+    "@strapi/utils": 4.9.1
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7013,7 +7092,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/babel-plugin-switch-ee-ce@4.9.0, @strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce":
+"@strapi/babel-plugin-switch-ee-ce@4.9.1, @strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce":
   version: 0.0.0-use.local
   resolution: "@strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce"
   dependencies:
@@ -7031,12 +7110,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/data-transfer@4.9.0, @strapi/data-transfer@workspace:packages/core/data-transfer":
+"@strapi/data-transfer@4.9.1, @strapi/data-transfer@workspace:packages/core/data-transfer":
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
-    "@strapi/logger": 4.9.0
-    "@strapi/strapi": 4.9.0
+    "@strapi/logger": 4.9.1
+    "@strapi/strapi": 4.9.1
     "@tsconfig/node16": 1.0.3
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.2.0
@@ -7066,7 +7145,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/database@4.9.0, @strapi/database@workspace:packages/core/database":
+"@strapi/database@4.9.1, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
@@ -7127,7 +7206,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/generate-new@4.9.0, @strapi/generate-new@workspace:packages/generators/app":
+"@strapi/generate-new@4.9.1, @strapi/generate-new@workspace:packages/generators/app":
   version: 0.0.0-use.local
   resolution: "@strapi/generate-new@workspace:packages/generators/app"
   dependencies:
@@ -7146,13 +7225,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/generators@4.9.0, @strapi/generators@workspace:packages/generators/generators":
+"@strapi/generators@4.9.1, @strapi/generators@workspace:packages/generators/generators":
   version: 0.0.0-use.local
   resolution: "@strapi/generators@workspace:packages/generators/generators"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/typescript-utils": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/typescript-utils": 4.9.1
+    "@strapi/utils": 4.9.1
     chalk: 4.1.2
     fs-extra: 10.0.0
     node-plop: 0.26.3
@@ -7161,7 +7240,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/helper-plugin@4.9.0, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
+"@strapi/helper-plugin@4.9.1, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
@@ -7200,12 +7279,12 @@ __metadata:
     webpack: ^5.76.0
     webpack-cli: ^5.0.1
   peerDependencies:
-    "@strapi/design-system": 1.6.6
-    "@strapi/icons": 1.6.6
+    "@strapi/design-system": ^1.6.6
+    "@strapi/icons": ^1.6.6
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
@@ -7229,33 +7308,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/logger@4.9.0, @strapi/logger@workspace:packages/utils/logger":
+"@strapi/logger@4.9.1, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
+    eslint-config-custom: 4.9.1
     lodash: 4.17.21
-    rimraf: 3.0.2
+    tsconfig: 4.9.1
     winston: 3.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/permissions@4.9.0, @strapi/permissions@workspace:packages/core/permissions":
+"@strapi/permissions@4.9.1, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
   dependencies:
     "@casl/ability": 5.4.4
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     lodash: 4.17.21
     sift: 16.0.1
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-color-picker@4.9.0, @strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
+"@strapi/plugin-color-picker@4.9.1, @strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
     "@testing-library/react": 12.1.4
     prop-types: ^15.7.2
@@ -7269,33 +7349,33 @@ __metadata:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-content-manager@4.9.0, @strapi/plugin-content-manager@workspace:packages/core/content-manager":
+"@strapi/plugin-content-manager@4.9.1, @strapi/plugin-content-manager@workspace:packages/core/content-manager":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     lodash: 4.17.21
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-content-type-builder@4.9.0, @strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder":
+"@strapi/plugin-content-type-builder@4.9.1, @strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/admin": 4.9.0
+    "@strapi/admin": 4.9.1
     "@strapi/design-system": 1.6.6
-    "@strapi/generators": 4.9.0
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/generators": 4.9.1
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/strapi": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/strapi": 4.9.1
+    "@strapi/utils": 4.9.1
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
     fs-extra: 10.0.0
@@ -7319,19 +7399,19 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-documentation@4.9.0, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
+"@strapi/plugin-documentation@4.9.1, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     "@testing-library/react": 12.1.4
     bcryptjs: 2.4.3
     cheerio: ^1.0.0-rc.12
@@ -7361,20 +7441,20 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-email@4.9.0, @strapi/plugin-email@workspace:packages/core/email":
+"@strapi/plugin-email@4.9.1, @strapi/plugin-email@workspace:packages/core/email":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/provider-email-sendmail": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/provider-email-sendmail": 4.9.1
+    "@strapi/utils": 4.9.1
     "@testing-library/react": 12.1.4
     lodash: 4.17.21
     msw: 1.0.0
@@ -7388,21 +7468,21 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-graphql@4.9.0, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
+"@strapi/plugin-graphql@4.9.1, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
     "@graphql-tools/schema": 8.5.1
     "@graphql-tools/utils": ^8.12.0
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     apollo-server-core: 3.11.1
     apollo-server-koa: 3.10.0
     cross-env: ^7.0.3
@@ -7425,19 +7505,19 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-i18n@4.9.0, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
+"@strapi/plugin-i18n@4.9.1, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     "@testing-library/react": 12.1.4
     formik: 2.2.9
     immer: 9.0.19
@@ -7457,18 +7537,18 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-sentry@4.9.0, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
+"@strapi/plugin-sentry@4.9.1, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
     "@sentry/node": 6.19.7
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.5
     react: ^17.0.2
     react-dom: ^17.0.2
@@ -7478,20 +7558,20 @@ __metadata:
     "@strapi/strapi": ^4.0.0
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-upload@4.9.0, @strapi/plugin-upload@workspace:packages/core/upload":
+"@strapi/plugin-upload@4.9.1, @strapi/plugin-upload@workspace:packages/core/upload":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/provider-upload-local": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/provider-upload-local": 4.9.1
+    "@strapi/utils": 4.9.1
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7527,19 +7607,19 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-users-permissions@4.9.0, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
+"@strapi/plugin-users-permissions@4.9.1, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.0
+    "@strapi/helper-plugin": 4.9.1
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7571,14 +7651,19 @@ __metadata:
   peerDependencies:
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-audit-logs-local@4.9.0, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
+"@strapi/provider-audit-logs-local@4.9.1, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
+  dependencies:
+    eslint-config-custom: "*"
+    tsconfig: "*"
+  peerDependencies:
+    "@strapi/strapi": ^4.9.0
   languageName: unknown
   linkType: soft
 
@@ -7586,18 +7671,22 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
+    eslint-config-custom: "*"
     node-ses: ^3.0.3
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-email-mailgun@4.9.0, @strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
+"@strapi/provider-email-mailgun@4.9.1, @strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
+    eslint-config-custom: "*"
     form-data: ^4.0.0
-    mailgun.js: 5.2.2
+    mailgun.js: 8.2.1
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
@@ -7605,8 +7694,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
+    "@types/nodemailer": 6.4.7
+    eslint-config-custom: "*"
     lodash: 4.17.21
     nodemailer: 6.9.1
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
@@ -7615,66 +7707,79 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": 7.7.0
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
+    eslint-config-custom: "*"
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-email-sendmail@4.9.0, @strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail":
+"@strapi/provider-email-sendmail@4.9.1, @strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
+    "@types/sendmail": 1.4.4
+    eslint-config-custom: "*"
     sendmail: ^1.6.1
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-aws-s3@4.9.0, @strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
+"@strapi/provider-upload-aws-s3@4.9.1, @strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
-    aws-sdk: 2.1287.0
+    "@types/jest": 29.2.0
+    aws-sdk: 2.1351.0
+    eslint-config-custom: "*"
     lodash: 4.17.21
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-cloudinary@4.9.0, @strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
+"@strapi/provider-upload-cloudinary@4.9.1, @strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
     cloudinary: ^1.33.0
+    eslint-config-custom: "*"
     into-stream: ^5.1.0
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-local@4.9.0, @strapi/provider-upload-local@workspace:packages/providers/upload-local":
+"@strapi/provider-upload-local@4.9.1, @strapi/provider-upload-local@workspace:packages/providers/upload-local":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
-    "@strapi/utils": 4.9.0
+    "@strapi/utils": 4.9.1
+    "@types/jest": 29.2.0
+    eslint-config-custom: "*"
     fs-extra: 10.0.0
+    tsconfig: "*"
   languageName: unknown
   linkType: soft
 
-"@strapi/strapi@4.9.0, @strapi/strapi@workspace:packages/core/strapi":
+"@strapi/strapi@4.9.1, @strapi/strapi@workspace:packages/core/strapi":
   version: 0.0.0-use.local
   resolution: "@strapi/strapi@workspace:packages/core/strapi"
   dependencies:
     "@koa/cors": 3.4.3
     "@koa/router": 10.1.1
-    "@strapi/admin": 4.9.0
-    "@strapi/data-transfer": 4.9.0
-    "@strapi/database": 4.9.0
-    "@strapi/generate-new": 4.9.0
-    "@strapi/generators": 4.9.0
-    "@strapi/logger": 4.9.0
-    "@strapi/permissions": 4.9.0
-    "@strapi/plugin-content-manager": 4.9.0
-    "@strapi/plugin-content-type-builder": 4.9.0
-    "@strapi/plugin-email": 4.9.0
-    "@strapi/plugin-upload": 4.9.0
-    "@strapi/typescript-utils": 4.9.0
-    "@strapi/utils": 4.9.0
+    "@strapi/admin": 4.9.1
+    "@strapi/data-transfer": 4.9.1
+    "@strapi/database": 4.9.1
+    "@strapi/generate-new": 4.9.1
+    "@strapi/generators": 4.9.1
+    "@strapi/logger": 4.9.1
+    "@strapi/permissions": 4.9.1
+    "@strapi/plugin-content-manager": 4.9.1
+    "@strapi/plugin-content-type-builder": 4.9.1
+    "@strapi/plugin-email": 4.9.1
+    "@strapi/plugin-upload": 4.9.1
+    "@strapi/typescript-utils": 4.9.1
+    "@strapi/utils": 4.9.1
     bcryptjs: 2.4.3
     boxen: 5.1.2
     chalk: 4.1.2
@@ -7721,7 +7826,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/typescript-utils@4.9.0, @strapi/typescript-utils@workspace:packages/utils/typescript":
+"@strapi/typescript-utils@4.9.1, @strapi/typescript-utils@workspace:packages/utils/typescript":
   version: 0.0.0-use.local
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
@@ -7734,7 +7839,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/utils@4.9.0, @strapi/utils@workspace:packages/core/utils":
+"@strapi/utils@4.9.1, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
@@ -8663,6 +8768,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/nodemailer@npm:6.4.7":
+  version: 6.4.7
+  resolution: "@types/nodemailer@npm:6.4.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: dc2a33a89135e04a5bea4921e8645e8453b90e3c3b05f0646f05071c5951ab697ea49ea1e503a690f04cb0a6abfc54967325c5a4036356793cfbb64ba64fb141
+  languageName: node
+  linkType: hard
+
 "@types/normalize-package-data@npm:^2.4.0":
   version: 2.4.1
   resolution: "@types/normalize-package-data@npm:2.4.1"
@@ -8782,6 +8896,13 @@ __metadata:
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13"
   checksum: 00c0724d54757c2f4bc60b5032fe91cda6410e48689633d5f35ece8a0a66445e3e57fa1d6e07eb780f792e82ac542948ec4d0b76eb3484297b79bd18b8cf1cb0
+  languageName: node
+  linkType: hard
+
+"@types/sendmail@npm:1.4.4":
+  version: 1.4.4
+  resolution: "@types/sendmail@npm:1.4.4"
+  checksum: aa31facf023af0c888e6a64bfaf742d08efdf1fef4c51efd7e0e547f6f3a2d215f02bdea81f35953cefefadf9a6f1fd516bafc06f4beb708b41570e21c415e3e
   languageName: node
   linkType: hard
 
@@ -9843,15 +9964,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abort-controller@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "abort-controller@npm:3.0.0"
-  dependencies:
-    event-target-shim: ^5.0.0
-  checksum: 170bdba9b47b7e65906a28c8ce4f38a7a369d78e2271706f020849c1bfe0ee2067d4261df8bbb66eb84f79208fd5b710df759d64191db58cfba7ce8ef9c54b75
-  languageName: node
-  linkType: hard
-
 "accepts@npm:^1.3.5, accepts@npm:^1.3.7, accepts@npm:~1.3.4, accepts@npm:~1.3.5, accepts@npm:~1.3.8":
   version: 1.3.8
   resolution: "accepts@npm:1.3.8"
@@ -10235,6 +10347,17 @@ __metadata:
   checksum: 985163db2292fac9e5a1e072bf99f1b5baccf196e4de25a0b0b81865ebddeb3b3eb4480734ef0a2ac8c002845396b91aa89121f5b84f93981a4658164a9ec6e9
   languageName: node
   linkType: hard
+
+"api-tests@workspace:packages/utils/api-tests":
+  version: 0.0.0-use.local
+  resolution: "api-tests@workspace:packages/utils/api-tests"
+  dependencies:
+    dotenv: 14.2.0
+    lodash: 4.17.21
+    qs: 6.11.1
+    supertest: 6.3.3
+  languageName: unknown
+  linkType: soft
 
 "apollo-datasource@npm:^3.3.2":
   version: 3.3.2
@@ -10834,9 +10957,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1287.0":
-  version: 2.1287.0
-  resolution: "aws-sdk@npm:2.1287.0"
+"aws-sdk@npm:2.1351.0":
+  version: 2.1351.0
+  resolution: "aws-sdk@npm:2.1351.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -10848,7 +10971,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.4.19
-  checksum: 528bbddd87b49782f50bfd4763c7d7c2b45f6c71ef3f303c72e0881e2799fff81d7fa24aa09af8e5fd493e9ce396437529d3dd6db6d53cde4ba78bd9ede53cd4
+  checksum: e0ff895e40e10ca79cd9af6706a6f0a731112812caea7a08cffcb0ab9d21146100ad8795c29f441f7c5fa19f42f50824d75da98e43f0e1ed52f13d5d4bb5fb2e
   languageName: node
   linkType: hard
 
@@ -10904,6 +11027,17 @@ __metadata:
   dependencies:
     follow-redirects: ^1.14.8
   checksum: d9eb58ff4bc0b36a04783fc9ff760e9245c829a5a1052ee7ca6013410d427036b1d10d04e7380c02f3508c5eaf3485b1ae67bd2adbfec3683704745c8d7a6e1a
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.3.3":
+  version: 1.3.5
+  resolution: "axios@npm:1.3.5"
+  dependencies:
+    follow-redirects: ^1.15.0
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 4d6bcf933b1cdff86d4993752aaeeeedc4a7f7a4b1c942847f6884bb13fc6106610ff826b076acf0b08d8ced55dee9344bb9a11f3624c3e70ab1da1a40bb5506
   languageName: node
   linkType: hard
 
@@ -11436,7 +11570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bluebird@npm:^3.5.5, bluebird@npm:^3.7.2":
+"bluebird@npm:^3.5.5":
   version: 3.7.2
   resolution: "bluebird@npm:3.7.2"
   checksum: 869417503c722e7dc54ca46715f70e15f4d9c602a423a02c825570862d12935be59ed9c7ba34a9b31f186c017c23cac6b54e35446f8353059c101da73eac22ef
@@ -13468,7 +13602,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
-    "@strapi/generate-new": 4.9.0
+    "@strapi/generate-new": 4.9.1
     commander: 8.3.0
     inquirer: 8.2.5
   bin:
@@ -13480,7 +13614,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "create-strapi-starter@workspace:packages/cli/create-strapi-starter"
   dependencies:
-    "@strapi/generate-new": 4.9.0
+    "@strapi/generate-new": 4.9.1
     chalk: 4.1.2
     ci-info: 3.8.0
     commander: 8.3.0
@@ -13794,7 +13928,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"data-uri-to-buffer@npm:3, data-uri-to-buffer@npm:^3.0.1":
+"data-uri-to-buffer@npm:3":
   version: 3.0.1
   resolution: "data-uri-to-buffer@npm:3.0.1"
   checksum: c59c3009686a78c071806b72f4810856ec28222f0f4e252aa495ec027ed9732298ceea99c50328cf59b151dd34cbc3ad6150bbb43e41fc56fa19f48c99e9fc30
@@ -15263,26 +15397,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@*, eslint-config-custom@4.9.1, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
-  dependencies:
-    "@babel/eslint-parser": ^7.19.1
-    "@strapi/eslint-config": 0.1.2
-    "@typescript-eslint/eslint-plugin": ^5.55.0
-    "@typescript-eslint/parser": 5.43.0
-    babel-eslint: 10.1.0
-    eslint: 8.27.0
-    eslint-config-airbnb: ^19.0.4
-    eslint-config-airbnb-base: ^15.0.0
-    eslint-config-airbnb-typescript: ^17.0.0
-    eslint-config-prettier: ^8.7.0
-    eslint-plugin-import: ^2.27.5
-    eslint-plugin-jsx-a11y: ^6.7.1
-    eslint-plugin-node: ^11.1.0
-    eslint-plugin-prettier: ^4.2.1
-    eslint-plugin-react: ^7.32.2
-    eslint-plugin-react-hooks: ^4.6.0
   languageName: unknown
   linkType: soft
 
@@ -15763,13 +15880,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"event-target-shim@npm:^5.0.0":
-  version: 5.0.1
-  resolution: "event-target-shim@npm:5.0.1"
-  checksum: 1ffe3bb22a6d51bdeb6bf6f7cf97d2ff4a74b017ad12284cc9e6a279e727dc30a5de6bb613e5596ff4dc3e517841339ad09a7eec44266eccb1aa201a30448166
-  languageName: node
-  linkType: hard
-
 "eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.4":
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
@@ -16217,16 +16327,6 @@ __metadata:
   version: 4.2.3
   resolution: "fecha@npm:4.2.3"
   checksum: f94e2fb3acf5a7754165d04549460d3ae6c34830394d20c552197e3e000035d69732d74af04b9bed3283bf29fe2a9ebdcc0085e640b0be3cc3658b9726265e31
-  languageName: node
-  linkType: hard
-
-"fetch-blob@npm:^2.1.1":
-  version: 2.1.2
-  resolution: "fetch-blob@npm:2.1.2"
-  peerDependenciesMeta:
-    domexception:
-      optional: true
-  checksum: 22d4487ce78ea4e52b432b0057d8d42922d5d93c0374b0bc2692cebdcb11bf8fac4f6d141b31f1633db1e9212effd38385adbd765a2c7412a621307058499214
   languageName: node
   linkType: hard
 
@@ -17204,16 +17304,16 @@ __metadata:
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
     "@strapi/icons": 1.6.6
-    "@strapi/plugin-color-picker": 4.9.0
-    "@strapi/plugin-documentation": 4.9.0
-    "@strapi/plugin-graphql": 4.9.0
-    "@strapi/plugin-i18n": 4.9.0
-    "@strapi/plugin-sentry": 4.9.0
-    "@strapi/plugin-users-permissions": 4.9.0
-    "@strapi/provider-email-mailgun": 4.9.0
-    "@strapi/provider-upload-aws-s3": 4.9.0
-    "@strapi/provider-upload-cloudinary": 4.9.0
-    "@strapi/strapi": 4.9.0
+    "@strapi/plugin-color-picker": 4.9.1
+    "@strapi/plugin-documentation": 4.9.1
+    "@strapi/plugin-graphql": 4.9.1
+    "@strapi/plugin-i18n": 4.9.1
+    "@strapi/plugin-sentry": 4.9.1
+    "@strapi/plugin-users-permissions": 4.9.1
+    "@strapi/provider-email-mailgun": 4.9.1
+    "@strapi/provider-upload-aws-s3": 4.9.1
+    "@strapi/provider-upload-cloudinary": 4.9.1
+    "@strapi/strapi": 4.9.1
     "@vscode/sqlite3": 5.1.2
     better-sqlite3: 8.0.1
     lodash: 4.17.21
@@ -20913,9 +21013,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchensink-ts@workspace:examples/kitchensink-ts"
   dependencies:
-    "@strapi/plugin-i18n": 4.9.0
-    "@strapi/plugin-users-permissions": 4.9.0
-    "@strapi/strapi": 4.9.0
+    "@strapi/plugin-i18n": 4.9.1
+    "@strapi/plugin-users-permissions": 4.9.1
+    "@strapi/strapi": 4.9.1
     better-sqlite3: 8.0.1
   languageName: unknown
   linkType: soft
@@ -20924,10 +21024,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchensink@workspace:examples/kitchensink"
   dependencies:
-    "@strapi/provider-email-mailgun": 4.9.0
-    "@strapi/provider-upload-aws-s3": 4.9.0
-    "@strapi/provider-upload-cloudinary": 4.9.0
-    "@strapi/strapi": 4.9.0
+    "@strapi/provider-email-mailgun": 4.9.1
+    "@strapi/provider-upload-aws-s3": 4.9.1
+    "@strapi/provider-upload-cloudinary": 4.9.1
+    "@strapi/strapi": 4.9.1
     lodash: 4.17.21
     mysql: 2.18.1
     passport-google-oauth2: 0.2.0
@@ -21187,29 +21287,6 @@ __metadata:
   version: 2.0.0
   resolution: "kuler@npm:2.0.0"
   checksum: 9e10b5a1659f9ed8761d38df3c35effabffbd19fc6107324095238e4ef0ff044392cae9ac64a1c2dda26e532426485342226b93806bd97504b174b0dcf04ed81
-  languageName: node
-  linkType: hard
-
-"ky-universal@npm:^0.8.2":
-  version: 0.8.2
-  resolution: "ky-universal@npm:0.8.2"
-  dependencies:
-    abort-controller: ^3.0.0
-    node-fetch: 3.0.0-beta.9
-  peerDependencies:
-    ky: ">=0.17.0"
-    web-streams-polyfill: ">=2.0.0"
-  peerDependenciesMeta:
-    web-streams-polyfill:
-      optional: true
-  checksum: 87ed38c5c5a5b4448502fd5a64b68f30db69d366e148e5321cd9c0cb57d616519578ff0ae50146ff92ad037ef5cd77fbc40d893675459eead0d3f13101374570
-  languageName: node
-  linkType: hard
-
-"ky@npm:^0.25.1":
-  version: 0.25.1
-  resolution: "ky@npm:0.25.1"
-  checksum: ae1b7bebb48001d00d53e386e077939eeef7398a36b4fb45660f988ddb17d583d077290f2adb9706b4761f9d3b74918eb8d9f45ce799760143e104e1053b33ef
   languageName: node
   linkType: hard
 
@@ -21925,18 +22002,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mailgun.js@npm:5.2.2":
-  version: 5.2.2
-  resolution: "mailgun.js@npm:5.2.2"
+"mailgun.js@npm:8.2.1":
+  version: 8.2.1
+  resolution: "mailgun.js@npm:8.2.1"
   dependencies:
+    axios: ^1.3.3
     base-64: ^1.0.0
-    bluebird: ^3.7.2
-    ky: ^0.25.1
-    ky-universal: ^0.8.2
     url-join: ^4.0.1
-    web-streams-polyfill: ^3.0.1
-    webpack-merge: ^5.4.0
-  checksum: 5fa48c4c29ef64d453225c3511a72546e028a40348b71af6a29213997791aa6ab782bddb12690c6488f83112f08df3a44b0d181ef44ef31ecb56f0dc6fa1b6a7
+  checksum: 512b76a8b688cc2b88c14472a2c7c9715dd927c5bb588a6197c2eed8b9effc8edddb3a7c99a1f2993c5f205154b24585db5fa573c15701401759b8702258b944
   languageName: node
   linkType: hard
 
@@ -23283,16 +23356,6 @@ __metadata:
     encoding:
       optional: true
   checksum: acb04f9ce7224965b2b59e71b33c639794d8991efd73855b0b250921382b38331ffc9d61bce502571f6cc6e11a8905ca9b1b6d4aeb586ab093e2756a1fd190d0
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:3.0.0-beta.9":
-  version: 3.0.0-beta.9
-  resolution: "node-fetch@npm:3.0.0-beta.9"
-  dependencies:
-    data-uri-to-buffer: ^3.0.1
-    fetch-blob: ^2.1.1
-  checksum: 586af0910649cb62f1c044ddac41e71c0b0f48133fba406ad5e0fab51baff18f22cd187ea65ef690ceed7386a71910e904348105dc8eae55f907fa94df7e76ca
   languageName: node
   linkType: hard
 
@@ -28696,15 +28759,31 @@ __metadata:
   resolution: "strapi@workspace:."
   dependencies:
     "@babel/core": ^7.20.12
+    "@babel/eslint-parser": ^7.19.1
     "@babel/preset-react": 7.18.6
+    "@strapi/eslint-config": 0.1.2
     "@swc/cli": 0.1.62
     "@swc/core": 1.3.37
     "@swc/jest": 0.2.24
+    "@typescript-eslint/eslint-plugin": ^5.55.0
+    "@typescript-eslint/parser": 5.43.0
+    babel-eslint: 10.1.0
     chalk: 4.1.2
     chokidar: 3.5.3
     core-js: 3.28.0
     cross-env: 7.0.3
     dotenv: 14.2.0
+    eslint: 8.27.0
+    eslint-config-airbnb: ^19.0.4
+    eslint-config-airbnb-base: ^15.0.0
+    eslint-config-airbnb-typescript: ^17.0.0
+    eslint-config-prettier: ^8.7.0
+    eslint-plugin-import: ^2.27.5
+    eslint-plugin-jsx-a11y: ^6.7.1
+    eslint-plugin-node: ^11.1.0
+    eslint-plugin-prettier: ^4.2.1
+    eslint-plugin-react: ^7.32.2
+    eslint-plugin-react-hooks: ^4.6.0
     execa: 1.0.0
     fs-extra: 10.1.0
     get-port: 5.1.1
@@ -30101,7 +30180,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@*, tsconfig@4.9.1, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   languageName: unknown
@@ -31193,13 +31272,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-streams-polyfill@npm:^3.0.1":
-  version: 3.2.1
-  resolution: "web-streams-polyfill@npm:3.2.1"
-  checksum: b119c78574b6d65935e35098c2afdcd752b84268e18746606af149e3c424e15621b6f1ff0b42b2676dc012fc4f0d313f964b41a4b5031e525faa03997457da02
-  languageName: node
-  linkType: hard
-
 "webidl-conversions@npm:^3.0.0":
   version: 3.0.1
   resolution: "webidl-conversions@npm:3.0.1"
@@ -31389,7 +31461,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-merge@npm:^5.4.0, webpack-merge@npm:^5.7.3":
+"webpack-merge@npm:^5.7.3":
   version: 5.8.0
   resolution: "webpack-merge@npm:5.8.0"
   dependencies:

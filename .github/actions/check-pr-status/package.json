@@ -1,13 +1,13 @@
 {
   "name": "check-pr-status",
-  "version": "4.9.0",
+  "version": "4.9.1",
   "main": "dist/index.js",
   "license": "MIT",
   "private": true,
   "scripts": {
     "build": "NODE_ENV=production ncc build index.js -o dist --minify",
     "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify",
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@actions/core": "1.10.0",
