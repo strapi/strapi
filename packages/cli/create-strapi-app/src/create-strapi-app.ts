@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import commander, { Option } from 'commander';
+import commander from 'commander';
 import { checkInstallPath, generateNewApp } from '@strapi/generate-new';
 import promptUser from './utils/prompt-user';
 import type { Program } from './types';
