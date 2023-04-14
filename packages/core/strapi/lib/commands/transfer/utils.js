@@ -243,8 +243,9 @@ const loadersFactory = (defaultLoaders = {}) => {
 };
 
 /**
+ * Get the telemetry data to be sent for a didDEITSProcess* event from an initialized transfer engine object
  *
- * @param {import('@strapi/data-transfer/types').ITransferEngine} engine
+ * @param {import('@strapi/data-transfer/types').ITransferEngine} engine Initialized transfer engine
  * @returns {object} Telemetry properties object
  */
 const getTransferTelemetryPayload = (engine) => {
