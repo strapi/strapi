@@ -21,9 +21,8 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findMany(STAGE_MODEL_UID, params);
     },
 
-    findById(id, { workflowId, populate }) {
+    findById(id, { populate } = {}) {
       const params = {
-        filters: { workflow: workflowId },
         populate,
       };
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
@@ -70,7 +69,6 @@ module.exports = ({ strapi }) => {
         await mapAsync(deleted, async (stage) => {
           // Find any entities related to this stage
           const stageInfo = await this.findById(stage.id, {
-            workflowId: defaultWorkflow.id,
             populate: ['related'],
           });
 
@@ -122,7 +120,13 @@ module.exports = ({ strapi }) => {
      * @param {string} entityInfo.modelUID - the content-type of the entity
      * @param {number} stageId - The id of the stage to assign to the entity
      */
-    updateEntity(entityInfo, stageId) {
+    async updateEntity(entityInfo, stageId) {
+      const stage = await this.findById(stageId);
+
+      if (!stage) {
+        throw new ApplicationError(`Selected stage does not exist`);
+      }
+
       return strapi.entityService.update(entityInfo.modelUID, entityInfo.id, {
         data: { [ENTITY_STAGE_ATTRIBUTE]: stageId },
         populate: [ENTITY_STAGE_ATTRIBUTE],
