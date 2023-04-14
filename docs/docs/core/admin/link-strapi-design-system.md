@@ -21,5 +21,5 @@ Alternatively, you can use [`yarn link`](https://classic.yarnpkg.com/lang/en/doc
 Once the link is setup, run the following command from the root of the monorepo
 
 ```
-yarn lerna clean && yarn setup
+yarn clean && yarn setup
 ```
