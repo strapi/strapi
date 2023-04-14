@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
@@ -12,7 +12,6 @@ import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
-import { ReviewWorkflowsStage } from './CellContent/ReviewWorkflowsStage';
 
 const DynamicTable = ({
   canCreate,
@@ -28,7 +27,6 @@ const DynamicTable = ({
 }) => {
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options?.draftAndPublish ?? false;
-  const hasReviewWorkflows = layout.contentType.options?.reviewWorkflows ?? false;
   const { formatMessage } = useIntl();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
 
@@ -75,42 +73,19 @@ const DynamicTable = ({
       });
     }
 
-    if (hasReviewWorkflows) {
-      formattedHeaders.push({
-        key: '__strapi_reviewWorkflows_stage_temp_key__',
-        name: 'strapi_reviewWorkflows_stage',
-        fieldSchema: {
-          type: 'custom',
-        },
-        metadatas: {
-          label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.reviewWorkflows.stage`),
-            defaultMessage: 'Review stage',
-          }),
-          searchable: false,
-          sortable: false,
-        },
-        cellFormatter({ strapi_reviewWorkflows_stage }) {
-          // if entities are created e.g. through lifecycle methods
-          // they may not have a stage assigned
-          if (!strapi_reviewWorkflows_stage) {
-            return <Typography textColor="neutral800">-</Typography>;
-          }
+    // this should not exist. Ideally we would use registerHook() similar to what has been done
+    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
+    // a future iteration we need to find a better pattern.
 
-          return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
-        },
-      });
+    // In CE this will return null - in EE a column definition including the custom formatting component.
+    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
+
+    if (reviewWorkflowColumn) {
+      formattedHeaders.push(reviewWorkflowColumn);
     }
 
     return formattedHeaders;
-  }, [
-    runHookWaterfall,
-    displayedHeaders,
-    layout,
-    hasDraftAndPublish,
-    hasReviewWorkflows,
-    formatMessage,
-  ]);
+  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   return (
     <Table
