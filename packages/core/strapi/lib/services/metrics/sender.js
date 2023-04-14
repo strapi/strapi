@@ -3,7 +3,6 @@
 const os = require('os');
 const path = require('path');
 const _ = require('lodash');
-const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
 const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');

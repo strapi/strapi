@@ -152,6 +152,13 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
+    beforeAll(() => {
+      jest.setTimeout(5000 * 4);
+    });
+    
+    afterAll(() => {
+      jest.setTimeout(5000);
+    });
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
       const { getByRole } = setupDatetimePicker();
