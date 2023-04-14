@@ -14,7 +14,7 @@ import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
-import { getRequestUrl, getTrad } from '../../../../utils';
+import { getRequestUrl, getTrad } from '../../../../../utils';
 import CellValue from '../CellValue';
 
 const TypographyMaxWidth = styled(Typography)`

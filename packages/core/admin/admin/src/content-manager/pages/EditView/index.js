@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import {
@@ -6,18 +6,22 @@ import {
   useTracking,
   LinkButton,
   LoadingIndicatorPage,
+  useNotification,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout, Box, Flex, Grid, GridItem, Main } from '@strapi/design-system';
 import { Pencil, Layer } from '@strapi/icons';
 import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
+import { useLocation } from 'react-router-dom';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
+import { getTrad } from '../../utils';
+
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
-import { getTrad } from '../../utils';
 import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Header from './Header';
@@ -25,6 +29,7 @@ import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 import GridRow from './GridRow';
 import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
+import { useOnce } from './hooks/useOnce';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -33,6 +38,23 @@ const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: 
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+  const location = useLocation();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
+
+  useOnce(() => {
+    /**
+     * We only ever want to fire the notification once otherwise
+     * whenever the app re-renders it'll pop up regardless of
+     * what we do because the state comes from react-router-dom
+     */
+    if ('error' in location.state) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError({ response: { data: location.state.error } }),
+      });
+    }
+  });
 
   const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
@@ -258,4 +280,4 @@ EditView.propTypes = {
   userPermissions: PropTypes.array,
 };
 
-export default memo(EditView);
+export default EditView;
