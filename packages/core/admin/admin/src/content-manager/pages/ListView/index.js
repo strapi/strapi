@@ -1,7 +1,7 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import isEqual from 'lodash/isEqual';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
@@ -22,6 +22,10 @@ import {
   Link,
   useAPIErrorHandler,
   getYupInnerErrors,
+  useStrapiApp,
+  DynamicTable,
+  PaginationURLQuery,
+  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 
 import {
@@ -33,23 +37,29 @@ import {
   HeaderLayout,
   useNotifyAT,
   Button,
+  Flex,
+  Typography,
+  Status,
 } from '@strapi/design-system';
 
 import { ArrowLeft, Plus, Cog } from '@strapi/icons';
 import { useMutation } from 'react-query';
 
-import DynamicTable from '../../components/DynamicTable';
 import AttributeFilter from '../../components/AttributeFilter';
 import { InjectionZone } from '../../../shared/components';
+import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 
 import permissions from '../../../permissions';
 
 import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
-import FieldPicker from './FieldPicker';
-import PaginationFooter from './PaginationFooter';
+import { FieldPicker } from './components/FieldPicker';
+import { TableRows } from './components/TableRows';
+import { ConfirmDialogDelete } from './components/ConfirmDialogDelete';
+import { ConfirmDialogDeleteAll } from './components/ConfirmDialogDeleteAll';
+
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
-import makeSelectListView from './selectors';
+import makeSelectListView, { selectDisplayedHeaders } from './selectors';
 import { buildQueryString } from './utils';
 
 const cmPermissions = permissions.contentManager;
@@ -78,6 +88,8 @@ function ListView({
   const { total } = pagination;
   const { contentType } = layout;
   const {
+    info,
+    options,
     metadatas,
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
@@ -85,8 +97,8 @@ function ListView({
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-  const trackUsageRef = useRef(trackUsage);
-  const fetchPermissionsRef = useRef(refetchPermissions);
+  const trackUsageRef = React.useRef(trackUsage);
+  const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
 
@@ -99,7 +111,7 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
+  const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
@@ -150,9 +162,12 @@ function ListView({
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
-  const requestUrlRef = useRef('');
+  const requestUrlRef = React.useRef('');
 
-  const fetchData = useCallback(
+  /**
+   * TODO: re-write all of this, it's a mess.
+   */
+  const fetchData = React.useCallback(
     async (endPoint, source) => {
       getData();
 
@@ -204,7 +219,7 @@ function ListView({
     [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
   );
 
-  const handleConfirmDeleteAllData = useCallback(
+  const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
         await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
@@ -224,7 +239,7 @@ function ListView({
     [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
-  const handleConfirmDeleteData = useCallback(
+  const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
         await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
@@ -310,7 +325,7 @@ function ListView({
     return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
@@ -333,9 +348,89 @@ function ListView({
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
-    id: contentType.info.displayName,
-    defaultMessage: contentType.info.displayName || defaultHeaderLayoutTitle,
+    id: info.displayName,
+    defaultMessage: info.displayName || defaultHeaderLayoutTitle,
   });
+
+  const { runHookWaterfall } = useStrapiApp();
+  const displayedHeaders = useSelector(selectDisplayedHeaders);
+
+  const tableHeaders = React.useMemo(() => {
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
+      displayedHeaders,
+      layout,
+    });
+
+    const formattedHeaders = headers.displayedHeaders.map((header) => {
+      const { metadatas } = header;
+
+      if (header.fieldSchema.type === 'relation') {
+        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
+
+        return {
+          ...header,
+          metadatas: {
+            ...metadatas,
+            label: formatMessage({
+              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+              defaultMessage: metadatas.label,
+            }),
+          },
+          name: sortFieldValue,
+        };
+      }
+
+      return {
+        ...header,
+        metadatas: {
+          ...metadatas,
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            defaultMessage: metadatas.label,
+          }),
+        },
+      };
+    });
+
+    if (!hasDraftAndPublish) {
+      return formattedHeaders;
+    }
+
+    return [
+      ...formattedHeaders,
+      {
+        key: '__published_at_temp_key__',
+        name: 'publishedAt',
+        fieldSchema: {
+          type: 'custom',
+        },
+        metadatas: {
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+            defaultMessage: 'publishedAt',
+          }),
+          searchable: false,
+          sortable: true,
+        },
+        // eslint-disable-next-line react/no-unstable-nested-components
+        cellFormatter(cellData) {
+          const isPublished = cellData.publishedAt;
+          const variant = isPublished ? 'success' : 'secondary';
+
+          return (
+            <Status width="min-content" showBullet={false} variant={variant} size="S">
+              <Typography fontWeight="bold" textColor={`${variant}700`}>
+                {formatMessage({
+                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
+                  defaultMessage: isPublished ? 'Published' : 'Draft',
+                })}
+              </Typography>
+            </Status>
+          );
+        },
+      },
+    ];
+  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -452,9 +547,28 @@ function ListView({
               // FIXME: remove the layout props drilling
               layout={layout}
               rows={data}
+              components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
+              contentType={headerLayoutTitle}
               action={getCreateAction({ variant: 'secondary' })}
-            />
-            <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
+              headers={tableHeaders}
+              onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
+              withBulkActions
+              withMainAction={canDelete && isBulkable}
+            >
+              <TableRows
+                canCreate={canCreate}
+                canDelete={canDelete}
+                contentType={contentType}
+                headers={tableHeaders}
+                rows={data}
+                withBulkActions
+                withMainAction={canDelete && isBulkable}
+              />
+            </DynamicTable>
+            <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
+              <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+              <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
+            </Flex>
           </>
         ) : (
           <NoPermissions />
@@ -507,4 +621,4 @@ export function mapDispatchToProps(dispatch) {
 }
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect)(memo(ListView, isEqual));
+export default compose(withConnect)(React.memo(ListView, isEqual));
