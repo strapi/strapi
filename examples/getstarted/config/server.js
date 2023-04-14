@@ -19,5 +19,5 @@ module.exports = ({ env }) => ({
     // This only populates relations in all content-manager endpoints
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', true),
   },
-  globalProxy: 'http://localhost:3128',
+  globalProxy: env('http_proxy'),
 });
