@@ -54,17 +54,16 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
-    async replaceWorkflowStages(workflowId, stages) {
+    async replaceWorkflowStages(workflowId, newStages) {
       const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
 
-      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
+      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, newStages);
 
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
       return strapi.db.transaction(async () => {
-        const defaultWorkflow = await getDefaultWorkflow({ strapi });
-        const newStages = await this.createMany(created, { fields: ['id'] });
-        const stagesIds = stages.map((stage) => stage.id ?? [...newStages].shift().id);
+        const createdStages = await this.createMany(created, { fields: ['id'] });
+        const stages = newStages.map((stage) => (stage.id ? stage : createdStages.shift()));
         const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
 
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
@@ -73,8 +72,8 @@ module.exports = ({ strapi }) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            [...defaultWorkflow.stages, ...newStages],
-            defaultWorkflow.stages.findIndex((s) => s.id === stage.id),
+            stages,
+            stages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
             }
@@ -92,7 +91,7 @@ module.exports = ({ strapi }) => {
         });
 
         return workflowsService.update(workflowId, {
-          stages: stagesIds,
+          stages: stages.map((stage) => stage.id),
         });
       });
     },
