@@ -1,4 +1,4 @@
-import { request, hasPermissions } from '@strapi/helper-plugin';
+import { getFetchClient, hasPermissions } from '@strapi/helper-plugin';
 import getContentTypeLinks from '../getContentTypeLinks';
 
 // FIXME
@@ -44,24 +44,24 @@ describe('checkPermissions', () => {
       },
     ];
 
-    const data = [
+    const contentTypes = [
       {
-        uid: 'api::address.address',
-        isDisplayed: true,
         apiID: 'address',
-        kind: 'collectionType',
         info: {
-          label: 'address',
+          displayName: 'Address',
         },
+        isDisplayed: true,
+        kind: 'collectionType',
+        uid: 'api::address.address',
       },
       {
-        uid: 'api::article.article',
-        isDisplayed: true,
         apiID: 'article',
-        kind: 'collectionType',
         info: {
-          label: 'article',
+          displayName: 'Article',
         },
+        isDisplayed: true,
+        kind: 'collectionType',
+        uid: 'api::article.article',
         pluginOptions: {
           i18n: {
             localized: true,
@@ -70,32 +70,36 @@ describe('checkPermissions', () => {
       },
     ];
 
-    request.mockImplementation((url) => {
-      if (url === '/content-manager/content-types') {
-        return Promise.resolve({ data });
-      }
-
-      return Promise.resolve({
-        data: [
-          {
-            uid: 'api::address.address',
-            settings: {
-              pageSize: 10,
-              defaultSortBy: 'name',
-              defaultSortOrder: 'ASC',
+    getFetchClient.mockImplementation(() => ({
+      get(url) {
+        if (url === '/content-manager/content-types-settings') {
+          return Promise.resolve({
+            data: {
+              data: [
+                {
+                  uid: 'api::address.address',
+                  settings: {
+                    pageSize: 10,
+                    defaultSortBy: 'name',
+                    defaultSortOrder: 'ASC',
+                  },
+                },
+              ],
             },
-          },
-        ],
-      });
-    });
+          });
+        }
+
+        // To please the linter
+        return Promise.resolve(null);
+      },
+    }));
 
     const expected = {
-      authorizedCtLinks: [
+      authorizedCollectionTypeLinks: [
         {
-          destination: '/content-manager/collectionType/api::address.address',
-          icon: 'circle',
           isDisplayed: true,
-          label: 'address',
+          kind: 'collectionType',
+          name: 'api::address.address',
           permissions: [
             {
               action: 'plugin::content-manager.explorer.create',
@@ -107,13 +111,14 @@ describe('checkPermissions', () => {
             },
           ],
           search: 'page=1&pageSize=10&sort=name:ASC',
+          title: 'Address',
+          to: '/content-manager/collectionType/api::address.address',
+          uid: 'api::address.address',
         },
         {
-          destination: '/content-manager/collectionType/api::article.article',
-          icon: 'circle',
           isDisplayed: true,
-          label: 'article',
-          search: null,
+          kind: 'collectionType',
+          name: 'api::article.article',
           permissions: [
             {
               action: 'plugin::content-manager.explorer.create',
@@ -124,12 +129,15 @@ describe('checkPermissions', () => {
               subject: 'api::article.article',
             },
           ],
+          search: null,
+          title: 'Article',
+          to: '/content-manager/collectionType/api::article.article',
+          uid: 'api::article.article',
         },
       ],
-      authorizedStLinks: [],
-      contentTypes: data,
+      authorizedSingleTypeLinks: [],
     };
-    const actual = await getContentTypeLinks(userPermissions);
+    const actual = await getContentTypeLinks({ userPermissions, models: contentTypes });
 
     expect(actual).toEqual(expected);
   });
@@ -139,11 +147,13 @@ describe('checkPermissions', () => {
     const toggleNotification = jest.fn();
     const userPermissions = [];
 
-    request.mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
+    getFetchClient.mockImplementation(() => ({
+      get() {
+        throw new Error('Something went wrong');
+      },
+    }));
 
-    await getContentTypeLinks(userPermissions, toggleNotification);
+    await getContentTypeLinks({ userPermissions, toggleNotification });
     expect(toggleNotification).toBeCalled();
   });
 });

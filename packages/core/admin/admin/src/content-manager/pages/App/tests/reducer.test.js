@@ -31,7 +31,7 @@ describe('Content Manager | App | reducer', () => {
   });
 
   it('should handle the setInitData action correctly', () => {
-    const collectionTypeLinks = [
+    const authorizedCollectionTypeLinks = [
       {
         name: 'authorizedCt',
         isDisplayed: true,
@@ -41,7 +41,7 @@ describe('Content Manager | App | reducer', () => {
         isDisplayed: false,
       },
     ];
-    const singleTypeLinks = [
+    const authorizedSingleTypeLinks = [
       {
         name: 'authorizedSt',
         isDisplayed: false,
@@ -73,8 +73,8 @@ describe('Content Manager | App | reducer', () => {
       mainReducer(
         state,
         setInitData({
-          authorizedCtLinks: collectionTypeLinks,
-          authorizedStLinks: singleTypeLinks,
+          authorizedCollectionTypeLinks,
+          authorizedSingleTypeLinks,
           contentTypeSchemas: ['test'],
           components: ['test'],
           fieldSizes: {},
