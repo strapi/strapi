@@ -16,8 +16,8 @@ const isAllowedFieldSize = (type, size) => {
     return false;
   }
 
-  // Otherwise always allow
-  return true;
+  // Otherwise allow unless it's bigger than a row
+  return size <= MAX_ROW_SIZE;
 };
 
 const getDefaultFieldSize = (type) => {
