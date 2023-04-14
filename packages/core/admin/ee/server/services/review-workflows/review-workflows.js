@@ -75,14 +75,13 @@ function enableReviewWorkflow({ strapi }) {
     const firstStage = defaultWorkflow.stages[0];
 
     const up = async (contentTypeUID) => {
-      await strapi.db.query(contentTypeUID).update({
-        data: {
-          [ENTITY_STAGE_ATTRIBUTE]: firstStage.id,
-        },
-        where: {
-          [ENTITY_STAGE_ATTRIBUTE]: null,
-        },
-      });
+      const { tableName, attributes } = strapi.db.metadata.get(contentTypeUID);
+      const stageColumnName = attributes[ENTITY_STAGE_ATTRIBUTE].joinColumn.name;
+
+      await strapi.db
+        .getConnection(tableName)
+        .update({ [stageColumnName]: firstStage.id })
+        .where({ [stageColumnName]: null });
     };
 
     return pipe([

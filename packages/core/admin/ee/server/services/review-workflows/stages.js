@@ -58,31 +58,40 @@ module.exports = ({ strapi }) => {
 
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
-      return strapi.db.transaction(async () => {
+      return strapi.db.transaction(async ({ trx }) => {
+        // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
-        const stages = newStages.map((stage) => (stage.id ? stage : createdStages.shift()));
+        // Put all the newly created stages ids
+        const createdStagesCopy = [...createdStages];
+        const stages = newStages.map((stage) => (stage.id ? stage : createdStagesCopy.shift()));
         const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
 
+        // Update the workflow stages
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
 
+        // Delete the stages that are not in the new stages list
         await mapAsync(deleted, async (stage) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            stages,
-            stages.findIndex((s) => s.id === stage.id),
+            [...workflow.stages, ...createdStages],
+            workflow.stages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
             }
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypes, (contentTypeUID) =>
-            strapi.db.query(contentTypeUID).update({
-              data: { [ENTITY_STAGE_ATTRIBUTE]: nearestStage.id },
-              where: { [ENTITY_STAGE_ATTRIBUTE]: stage.id },
-            })
-          );
+          await mapAsync(contentTypes, (contentTypeUID) => {
+            const { tableName, attributes } = strapi.db.metadata.get(contentTypeUID);
+            const stageColumnName = attributes[ENTITY_STAGE_ATTRIBUTE].joinColumn.name;
+
+            return strapi.db
+              .getConnection(tableName)
+              .update({ [stageColumnName]: nearestStage.id })
+              .where({ [stageColumnName]: stage.id })
+              .transacting(trx);
+          });
 
           return this.delete(stage.id);
         });
