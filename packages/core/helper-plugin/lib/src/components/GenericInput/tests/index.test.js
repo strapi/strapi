@@ -44,6 +44,27 @@ function setupNumber(props) {
   };
 }
 
+function setupDatetimePicker(props) {
+  const DATETIMEPICKER_FIXTURE_PROPS = {
+    type: 'datetime',
+    name: 'datetime-picker',
+    intlLabel: {
+      id: 'label.test',
+      defaultMessage: 'datetime',
+    },
+    value: null,
+    onChange: jest.fn(),
+    onClear: jest.fn(),
+    ...props,
+  };
+
+  const rendered = render(<ComponentFixture {...DATETIMEPICKER_FIXTURE_PROPS} />);
+  
+  return {
+    ...rendered,
+  };
+}
+
 describe('GenericInput', () => {
   describe('number', () => {
     test('renders and matches the snapshot', () => {
@@ -133,21 +154,7 @@ describe('GenericInput', () => {
   describe('datetime', () => {
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
-      const onClear = jest.fn();
-      const onChange = jest.fn();
-      const { getByRole } = render(
-        <ComponentFixture
-          type="datetime"
-          name="datetime-picker"
-          intlLabel={{
-            id: 'label.test',
-            defaultMessage: 'datetime',
-          }}
-          value={null}
-          onChange={onChange}
-          onClear={onClear}
-        />
-      );
+      const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: /datetime/i });
       await user.click(btnDate);
       await user.click(getByRole('button', { name: /15/ }));
@@ -162,21 +169,7 @@ describe('GenericInput', () => {
 
   test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
       const user = userEvent.setup();
-      const onClear = jest.fn();
-      const onChange = jest.fn();
-      const { getByRole } = render(
-        <ComponentFixture
-          type="datetime"
-          name="datetime-picker"
-          intlLabel={{
-            id: 'label.test',
-            defaultMessage: 'datetime',
-          }}
-          value={null}
-          onChange={onChange}
-          onClear={onClear}
-        />
-      );
+      const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: /datetime/i });
       await user.click(btnDate);
       await user.click(getByRole('button', { name: /15/ }));
