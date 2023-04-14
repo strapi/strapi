@@ -20,28 +20,6 @@ const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
   keys,
 ]);
 
-/**
- * Map every stage in the array to be ordered in the relation
- * @param {Object[]} stages
- * @param {number} stages.id
- * @return {Object[]}
- */
-function buildStagesConnectArray(stages) {
-  return stages.map((stage, index) => {
-    const connect = {
-      id: stage.id,
-      position: {},
-    };
-
-    if (index === 0) {
-      connect.position.start = true;
-    } else {
-      connect.position.after = stages[index - 1].id;
-    }
-    return connect;
-  });
-}
-
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
@@ -53,7 +31,7 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
     const workflow = {
       ...defaultWorkflow,
       stages: {
-        connect: buildStagesConnectArray(stages),
+        connect: stages.map((stage) => stage.id),
       },
     };
 
@@ -68,10 +46,10 @@ const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
   private: false,
   configurable: false,
   visible: false,
+  useJoinTable: false,
   type: 'relation',
-  relation: 'morphOne',
+  relation: 'oneToOne',
   target: 'admin::workflow-stage',
-  morphBy: 'related',
 });
 
 function extendReviewWorkflowContentTypes({ strapi }) {
@@ -103,51 +81,14 @@ function enableReviewWorkflow({ strapi }) {
     const firstStage = defaultWorkflow.stages[0];
 
     const up = async (contentTypeUID) => {
-      const contentTypeMetadata = strapi.db.metadata.get(contentTypeUID);
-      const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
-      const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
-      const { idColumn, typeColumn } = joinTable.morphColumn;
-
-      // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
-      // Only entities that do not have a record in the join table yet are selected.
-      const selectStatement = strapi.db
-        .getConnection()
-        .select({
-          [idColumn.name]: 'entity.id',
-          field: strapi.db.connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
-          order: 1,
-          [joinTable.joinColumn.name]: firstStage.id,
-          [typeColumn.name]: strapi.db.connection.raw('?', [contentTypeUID]),
-        })
-        .leftJoin(`${joinTable.name} AS jointable`, function joinFunc() {
-          this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
-            `jointable.${typeColumn.name}`,
-            '=',
-            strapi.db.connection.raw('?', [contentTypeUID])
-          );
-        })
-        .where(`jointable.${idColumn.name}`, null)
-        .from(`${contentTypeMetadata.tableName} AS entity`)
-        .toSQL();
-
-      const columnsToInsert = [
-        idColumn.name,
-        'field',
-        strapi.db.connection.raw('??', ['order']),
-        joinTable.joinColumn.name,
-        typeColumn.name,
-      ];
-
-      // Insert rows for all entries of the content type that do not have a
-      // default stage
-      await strapi.db
-        .getConnection(joinTable.name)
-        .insert(
-          strapi.db.connection.raw(
-            `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
-            selectStatement.bindings
-          )
-        );
+      await strapi.db.query(contentTypeUID).update({
+        data: {
+          [ENTITY_STAGE_ATTRIBUTE]: firstStage.id,
+        },
+        where: {
+          [ENTITY_STAGE_ATTRIBUTE]: null,
+        },
+      });
     };
 
     return pipe([
