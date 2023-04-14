@@ -100,6 +100,12 @@ const createAuthentication = () => {
       }
 
       if (typeof auth.strategy.verify === 'function') {
+        strapi.telemetry.send('didCompleteRequest', {
+          eventProperties: {
+            authenticationMethod: auth.strategy.name,
+            isAuthenticated: true,
+          },
+        });
         return auth.strategy.verify(auth, config);
       }
     },
