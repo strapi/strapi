@@ -1,10 +1,12 @@
-import React, { memo } from 'react';
+import * as React from 'react';
 
-import { Box, ContentLayout, Flex, Grid, GridItem, Main } from '@strapi/design-system';
+import { Main, ContentLayout, Grid, GridItem, Flex, Box } from '@strapi/design-system';
 import {
   CheckPermissions,
   LinkButton,
   LoadingIndicatorPage,
+  useNotification,
+  useAPIErrorHandler,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
@@ -12,6 +14,7 @@ import InformationBox from 'ee_else_ce/content-manager/pages/EditView/Informatio
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
@@ -26,7 +29,8 @@ import DeleteLink from './DeleteLink';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import GridRow from './GridRow';
 import Header from './Header';
-import { selectAttributesLayout, selectCurrentLayout, selectCustomFieldUids } from './selectors';
+import { useOnce } from './hooks/useOnce';
+import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 import { getFieldsActionMatchingPermissions } from './utils';
 
 // TODO: this seems suspicious
@@ -37,6 +41,24 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
+  const location = useLocation();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
+
+  useOnce(() => {
+    /**
+     * We only ever want to fire the notification once otherwise
+     * whenever the app re-renders it'll pop up regardless of
+     * what we do because the state comes from react-router-dom
+     */
+    if ('error' in location.state) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError({ response: { data: location.state.error } }),
+      });
+    }
+  });
+
   const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
@@ -261,4 +283,4 @@ EditView.propTypes = {
   userPermissions: PropTypes.array,
 };
 
-export default memo(EditView);
+export default EditView;

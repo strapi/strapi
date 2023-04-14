@@ -1,17 +1,19 @@
 import React from 'react';
 
-import { BaseCheckbox, Box, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
-import { onRowClick, stopPropagation, useTracking } from '@strapi/helper-plugin';
+import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
+import { useTracking, useFetchClient } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Trash } from '@strapi/icons';
+import { AxiosError } from 'axios';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { getFullName } from '../../../../utils';
-import { usePluginsQueryParams } from '../../../hooks';
+import { getFullName } from '../../../../../utils';
+import { usePluginsQueryParams } from '../../../../hooks';
 import CellContent from '../CellContent';
 
-const TableRows = ({
+export const TableRows = ({
   canCreate,
   canDelete,
   contentType,
@@ -23,19 +25,64 @@ const TableRows = ({
   withBulkActions,
   rows,
 }) => {
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
+  const { push, location } = useHistory();
+  const { pathname } = location;
   const { formatMessage } = useIntl();
+  const { post } = useFetchClient();
 
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
 
+  /**
+   *
+   * @param {string} id
+   * @returns void
+   */
+  const handleRowClick = (id) => () => {
+    if (!withBulkActions) return;
+
+    trackUsage('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+      search: pluginsQueryParams,
+    });
+  };
+
+  const handleCloneClick = (id) => async () => {
+    try {
+      const { data } = await post(
+        `/content-manager/collection-types/${contentType.uid}/clone/${id}`
+      );
+
+      if ('id' in data) {
+        push({
+          pathname: `${pathname}/${data.id}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        });
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        const serverError = err.response.data;
+
+        push({
+          pathname: `${pathname}/create/clone/${id}`,
+          state: { from: pathname, error: serverError },
+          search: pluginsQueryParams,
+        });
+      }
+    }
+  };
+
+  /**
+   * Table Cells with actions e.g edit, delete, duplicate have `stopPropagation`
+   * to prevent the row from being selected.
+   */
   return (
     <Tbody>
       {rows.map((data, index) => {
-        const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
+        const isChecked = entriesToDelete.includes(data.id);
         const itemLineText = formatMessage(
           {
             id: 'content-manager.components.DynamicTable.row-line',
@@ -45,22 +92,9 @@ const TableRows = ({
         );
 
         return (
-          <Tr
-            key={data.id}
-            {...onRowClick({
-              fn() {
-                trackUsage('willEditEntryFromList');
-                push({
-                  pathname: `${pathname}/${data.id}`,
-                  state: { from: pathname },
-                  search: pluginsQueryParams,
-                });
-              },
-              condition: withBulkActions,
-            })}
-          >
+          <Row key={data.id} onClick={handleRowClick(data.id)} $isClickable={withBulkActions}>
             {withMainAction && (
-              <Td {...stopPropagation}>
+              <Td onClick={(e) => e.stopPropagation()}>
                 <BaseCheckbox
                   aria-label={formatMessage(
                     {
@@ -96,7 +130,7 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Flex justifyContent="end" {...stopPropagation}>
+                <Flex as="span" justifyContent="end" gap={1} onClick={(e) => e.stopPropagation()}>
                   <IconButton
                     forwardedAs={Link}
                     onClick={() => {
@@ -112,56 +146,54 @@ const TableRows = ({
                       { target: itemLineText }
                     )}
                     noBorder
-                    icon={<Pencil />}
-                  />
+                  >
+                    <Pencil />
+                  </IconButton>
 
                   {canCreate && (
-                    <Box paddingLeft={1}>
-                      <IconButton
-                        forwardedAs={Link}
-                        to={{
-                          pathname: `${pathname}/create/clone/${data.id}`,
-                          state: { from: pathname },
-                          search: pluginsQueryParams,
-                        }}
-                        label={formatMessage(
-                          {
-                            id: 'app.component.table.duplicate',
-                            defaultMessage: 'Duplicate {target}',
-                          },
-                          { target: itemLineText }
-                        )}
-                        noBorder
-                        icon={<Duplicate />}
-                      />
-                    </Box>
+                    <IconButton
+                      onClick={handleCloneClick(data.id)}
+                      label={formatMessage(
+                        {
+                          id: 'app.component.table.duplicate',
+                          defaultMessage: 'Duplicate {target}',
+                        },
+                        { target: itemLineText }
+                      )}
+                      noBorder
+                    >
+                      <Duplicate />
+                    </IconButton>
                   )}
 
                   {canDelete && (
-                    <Box paddingLeft={1}>
-                      <IconButton
-                        onClick={() => {
-                          trackUsage('willDeleteEntryFromList');
-                          onClickDelete(data.id);
-                        }}
-                        label={formatMessage(
-                          { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                          { target: itemLineText }
-                        )}
-                        noBorder
-                        icon={<Trash />}
-                      />
-                    </Box>
+                    <IconButton
+                      onClick={() => {
+                        trackUsage('willDeleteEntryFromList');
+                        onClickDelete(data.id);
+                      }}
+                      label={formatMessage(
+                        { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+                        { target: itemLineText }
+                      )}
+                      noBorder
+                    >
+                      <Trash />
+                    </IconButton>
                   )}
                 </Flex>
               </Td>
             )}
-          </Tr>
+          </Row>
         );
       })}
     </Tbody>
   );
 };
+
+const Row = styled(Tr)`
+  cursor: ${({ $isClickable }) => ($isClickable ? 'pointer' : 'default')};
+`;
 
 TableRows.defaultProps = {
   canCreate: false,
@@ -188,5 +220,3 @@ TableRows.propTypes = {
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
 };
-
-export default TableRows;

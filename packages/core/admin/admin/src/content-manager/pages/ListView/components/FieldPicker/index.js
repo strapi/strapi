@@ -1,18 +1,16 @@
-import React, { memo } from 'react';
+import React from 'react';
 
-import { Box, Option, Select } from '@strapi/design-system';
+import { Select, Option, Box } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 
-import getTrad from '../../../utils/getTrad';
-import { onChangeListHeaders } from '../actions';
-import { selectDisplayedHeaders } from '../selectors';
+import { getTrad, checkIfAttributeIsDisplayable } from '../../../../utils';
+import { onChangeListHeaders } from '../../actions';
+import { selectDisplayedHeaders } from '../../selectors';
 
-import getAllAllowedHeaders from './utils/getAllAllowedHeader';
-
-const FieldPicker = ({ layout }) => {
+export const FieldPicker = ({ layout }) => {
   const dispatch = useDispatch();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
   const { trackUsage } = useTracking();
@@ -94,4 +92,16 @@ FieldPicker.propTypes = {
   }).isRequired,
 };
 
-export default memo(FieldPicker);
+const getAllAllowedHeaders = (attributes) => {
+  const allowedAttributes = Object.keys(attributes).reduce((acc, current) => {
+    const attribute = attributes[current];
+
+    if (checkIfAttributeIsDisplayable(attribute)) {
+      acc.push(current);
+    }
+
+    return acc;
+  }, []);
+
+  return allowedAttributes.sort();
+};
