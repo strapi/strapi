@@ -44,24 +44,24 @@ const useContentManagerInitData = () => {
         })
       );
 
-      const { authorizedCtLinks, authorizedStLinks } = await getContentTypeLinks(
+      const { authorizedContentTypeLinks, authorizedSingleTypeLinks } = await getContentTypeLinks({
         models,
-        allPermissions,
-        toggleNotification
-      );
+        userPermissions: allPermissions,
+        toggleNotification,
+      });
 
       const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-        ctLinks: authorizedCtLinks,
+        ctLinks: authorizedContentTypeLinks,
         models,
       });
       const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: authorizedStLinks,
+        stLinks: authorizedSingleTypeLinks,
         models,
       });
 
       const actionToDispatch = setInitData({
-        authorizedCtLinks: ctLinks,
-        authorizedStLinks: stLinks,
+        authorizedCollectionTypeLinks: ctLinks,
+        authorizedSingleTypeLinks: stLinks,
         contentTypeSchemas: models,
         components,
         fieldSizes,

@@ -7,12 +7,18 @@ export const getInitData = () => ({
 export const resetInitData = () => ({ type: RESET_INIT_DATA });
 
 export const setInitData = ({
-  authorizedCtLinks,
-  authorizedStLinks,
+  authorizedCollectionTypeLinks,
+  authorizedSingleTypeLinks,
   contentTypeSchemas,
   components,
   fieldSizes,
 }) => ({
   type: SET_INIT_DATA,
-  data: { authorizedCtLinks, authorizedStLinks, components, contentTypeSchemas, fieldSizes },
+  data: {
+    authorizedCollectionTypeLinks,
+    authorizedSingleTypeLinks,
+    components,
+    contentTypeSchemas,
+    fieldSizes,
+  },
 });

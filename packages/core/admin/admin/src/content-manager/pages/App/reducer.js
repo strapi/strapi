@@ -28,10 +28,10 @@ const mainReducer = (state = initialState, action) =>
         return initialState;
       }
       case SET_INIT_DATA: {
-        draftState.collectionTypeLinks = action.data.authorizedCtLinks.filter(
+        draftState.collectionTypeLinks = action.data.authorizedCollectionTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
-        draftState.singleTypeLinks = action.data.authorizedStLinks.filter(
+        draftState.singleTypeLinks = action.data.authorizedSingleTypeLinks.filter(
           ({ isDisplayed }) => isDisplayed
         );
         draftState.components = action.data.components;
