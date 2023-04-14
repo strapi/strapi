@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher, trimTrailingSlash } from '../utils';
+import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
@@ -15,10 +15,6 @@ interface ITransferTokenAuth {
   type: 'token';
   token: string;
 }
-
-type WebsocketParams = ConstructorParameters<typeof WebSocket>;
-type Address = WebsocketParams[0];
-type Options = WebsocketParams[2];
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
@@ -175,25 +171,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  async #connectToWebsocket(address: Address, options?: Options): Promise<WebSocket> {
-    return new Promise((resolve, reject) => {
-      const server = new WebSocket(address, options);
-      server.once('open', () => {
-        resolve(server);
-      });
-
-      server.once('error', (err) => {
-        reject(
-          new ProviderTransferError(err.message, {
-            details: {
-              error: err.message,
-            },
-          })
-        );
-      });
-    });
-  }
-
   async bootstrap(): Promise<void> {
     const { url, auth } = this.options;
     const validProtocols = ['https:', 'http:'];
@@ -216,13 +193,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = await this.#connectToWebsocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await this.#connectToWebsocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided

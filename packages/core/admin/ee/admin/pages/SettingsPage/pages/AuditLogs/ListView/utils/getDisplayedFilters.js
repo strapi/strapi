@@ -12,27 +12,7 @@ const customOperators = [
   },
 ];
 
-const getDisplayedFilters = ({ formatMessage, users }) => {
-  const getDisplaynameFromUser = (user) => {
-    if (user.username) {
-      return user.username;
-    }
-    if (user.firstname && user.lastname) {
-      return formatMessage(
-        {
-          id: 'Settings.permissions.auditLogs.user.fullname',
-          defaultMessage: '{firstname} {lastname}',
-        },
-        {
-          firstname: user.firstname,
-          lastname: user.lastname,
-        }
-      );
-    }
-
-    return user.email;
-  };
-
+const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
   const actionOptions = Object.keys(actionTypes).map((action) => {
     return {
       label: formatMessage(
@@ -46,17 +26,7 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
     };
   });
 
-  const userOptions =
-    users &&
-    users.results.map((user) => {
-      return {
-        label: getDisplaynameFromUser(user),
-        // Combobox expects a string value
-        customValue: user.id.toString(),
-      };
-    });
-
-  return [
+  const filters = [
     {
       name: 'action',
       metadatas: {
@@ -80,20 +50,57 @@ const getDisplayedFilters = ({ formatMessage, users }) => {
       },
       fieldSchema: { type: 'datetime' },
     },
-    {
-      name: 'user',
-      metadatas: {
-        customOperators,
-        label: formatMessage({
-          id: 'Settings.permissions.auditLogs.user',
-          defaultMessage: 'User',
-        }),
-        options: userOptions,
-        customInput: ComboboxFilter,
-      },
-      fieldSchema: { type: 'relation', mainField: { name: 'id' } },
-    },
   ];
+
+  if (canReadUsers && users) {
+    const getDisplayNameFromUser = (user) => {
+      if (user.username) {
+        return user.username;
+      }
+
+      if (user.firstname && user.lastname) {
+        return formatMessage(
+          {
+            id: 'Settings.permissions.auditLogs.user.fullname',
+            defaultMessage: '{firstname} {lastname}',
+          },
+          {
+            firstname: user.firstname,
+            lastname: user.lastname,
+          }
+        );
+      }
+
+      return user.email;
+    };
+
+    const userOptions = users.results.map((user) => {
+      return {
+        label: getDisplayNameFromUser(user),
+        // Combobox expects a string value
+        customValue: user.id.toString(),
+      };
+    });
+
+    return [
+      ...filters,
+      {
+        name: 'user',
+        metadatas: {
+          customOperators,
+          label: formatMessage({
+            id: 'Settings.permissions.auditLogs.user',
+            defaultMessage: 'User',
+          }),
+          options: userOptions,
+          customInput: ComboboxFilter,
+        },
+        fieldSchema: { type: 'relation', mainField: { name: 'id' } },
+      },
+    ];
+  }
+
+  return filters;
 };
 
 export default getDisplayedFilters;
