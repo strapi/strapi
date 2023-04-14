@@ -7,10 +7,7 @@ const {
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
-const {
-  getDefaultWorkflow,
-  getContentTypeUIDsWithActivatedReviewWorkflows,
-} = require('../../utils/review-workflows');
+const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
