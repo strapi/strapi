@@ -93,6 +93,10 @@ class LocalFileSourceProvider implements ISourceProvider {
   async getSchemas() {
     const schemas = await collect<Schema>(this.createSchemasReadStream());
 
+    if (isEmpty(schemas)) {
+      throw new ProviderInitializationError('Could not load schemas from Strapi data file.');
+    }
+
     return keyBy('uid', schemas);
   }
 
