@@ -11,6 +11,7 @@ const { getDefaultWorkflow } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
+  const metrics = getService('review-workflows-metrics', { strapi });
 
   return {
     find({ workflowId, populate }) {
@@ -28,23 +29,36 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    createMany(stagesList, { fields }) {
-      const params = {
-        select: fields,
-      };
-      return Promise.all(
+    async createMany(stagesList, { fields }) {
+      const params = { select: fields };
+
+      const stages = await Promise.all(
         stagesList.map((stage) =>
           strapi.entityService.create(STAGE_MODEL_UID, { data: stage, ...params })
         )
       );
+
+      metrics.sendDidCreateStage();
+
+      return stages;
     },
 
-    update(stageId, stageData) {
-      return strapi.entityService.update(STAGE_MODEL_UID, stageId, { data: stageData });
+    async update(stageId, stageData) {
+      const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
+        data: stageData,
+      });
+
+      metrics.sendDidUpdateStage();
+
+      return stage;
     },
 
-    delete(stageId) {
-      return strapi.entityService.delete(STAGE_MODEL_UID, stageId);
+    async delete(stageId) {
+      const stage = await strapi.entityService.delete(STAGE_MODEL_UID, stageId);
+
+      metrics.sendDidDeleteStage();
+
+      return stage;
     },
 
     count() {
@@ -127,10 +141,14 @@ module.exports = ({ strapi }) => {
         throw new ApplicationError(`Selected stage does not exist`);
       }
 
-      return strapi.entityService.update(entityInfo.modelUID, entityInfo.id, {
+      const entity = await strapi.entityService.update(entityInfo.modelUID, entityInfo.id, {
         data: { [ENTITY_STAGE_ATTRIBUTE]: stageId },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
+
+      metrics.sendDidUpdateEntityStage();
+
+      return entity;
     },
   };
 };
