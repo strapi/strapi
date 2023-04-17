@@ -2,17 +2,17 @@
 
 const needsFullSize = {
   default: 12,
-  resizable: false,
+  isResizable: false,
 };
 
 const smallSize = {
   default: 4,
-  resizable: true,
+  isResizable: true,
 };
 
 const defaultSize = {
   default: 6,
-  resizable: true,
+  isResizable: true,
 };
 
 const fieldSizes = {

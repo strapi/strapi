@@ -12,7 +12,7 @@ const isAllowedFieldSize = (type, size) => {
   const fieldSize = getFieldSize(type);
 
   // Check if field was locked to another size
-  if (!fieldSize.resizable && size !== fieldSize.default) {
+  if (!fieldSize.isResizable && size !== fieldSize.default) {
     return false;
   }
 

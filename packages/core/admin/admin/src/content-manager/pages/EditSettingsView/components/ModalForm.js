@@ -152,7 +152,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   return (
     <>
       {metaFields}
-      {fieldSizeInfo.resizable && sizeField}
+      {fieldSizeInfo.isResizable && sizeField}
       {hasTimePicker && timeStepField}
     </>
   );
