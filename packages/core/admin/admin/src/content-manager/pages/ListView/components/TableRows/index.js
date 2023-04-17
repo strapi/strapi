@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
-import { useTracking, useFetchClient } from '@strapi/helper-plugin';
-import { Duplicate, Pencil, Trash } from '@strapi/icons';
+import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
+import { useTracking, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
+import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { AxiosError } from 'axios';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { getFullName } from '../../../../../utils';
 import { usePluginsQueryParams } from '../../../../hooks';
+import { getTrad } from '../../../../utils';
 import CellContent from '../CellContent';
 
 export const TableRows = ({
@@ -32,6 +32,7 @@ export const TableRows = ({
 
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   /**
    *
@@ -64,11 +65,9 @@ export const TableRows = ({
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        const serverError = err.response.data;
-
         push({
           pathname: `${pathname}/create/clone/${id}`,
-          state: { from: pathname, error: serverError },
+          state: { from: pathname, error: formatAPIError(err) },
           search: pluginsQueryParams,
         });
       }
@@ -92,7 +91,11 @@ export const TableRows = ({
         );
 
         return (
-          <Row key={data.id} onClick={handleRowClick(data.id)} $isClickable={withBulkActions}>
+          <Tr
+            cursor={withBulkActions ? 'pointer' : 'default'}
+            key={data.id}
+            onClick={handleRowClick(data.id)}
+          >
             {withMainAction && (
               <Td onClick={(e) => e.stopPropagation()}>
                 <BaseCheckbox
@@ -184,16 +187,12 @@ export const TableRows = ({
                 </Flex>
               </Td>
             )}
-          </Row>
+          </Tr>
         );
       })}
     </Tbody>
   );
 };
-
-const Row = styled(Tr)`
-  cursor: ${({ $isClickable }) => ($isClickable ? 'pointer' : 'default')};
-`;
 
 TableRows.defaultProps = {
   canCreate: false,

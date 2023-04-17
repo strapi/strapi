@@ -24,6 +24,7 @@ export const FieldPicker = ({ layout }) => {
       intlLabel: { id: metadatas.label, defaultMessage: metadatas.label },
     };
   });
+
   const values = displayedHeaders.map(({ name }) => name);
 
   const handleChange = (updatedValues) => {
