@@ -7,7 +7,6 @@ import {
   LinkButton,
   LoadingIndicatorPage,
   useNotification,
-  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -41,7 +40,6 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const { formatMessage } = useIntl();
   const location = useLocation();
   const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   useOnce(() => {
     /**
@@ -49,10 +47,10 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
      * whenever the app re-renders it'll pop up regardless of
      * what we do because the state comes from react-router-dom
      */
-    if ('error' in location.state) {
+    if (location?.state && 'error' in location.state) {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError({ response: { data: location.state.error } }),
+        message: location.state.error,
       });
     }
   });
