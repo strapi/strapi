@@ -1,9 +1,9 @@
 import reducer from '../reducer';
 
 const fieldSizes = {
-  richtext: { default: 12, resizable: false },
-  string: { default: 6, resizable: true },
-  boolean: { default: 4, resizable: true },
+  richtext: { default: 12, isResizable: false },
+  string: { default: 6, isResizable: true },
+  boolean: { default: 4, isResizable: true },
 };
 
 describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
