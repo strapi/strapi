@@ -1,6 +1,6 @@
 'use strict';
 
-const fullSize = {
+const needsFullSize = {
   default: 12,
   resizable: false,
 };
@@ -17,10 +17,10 @@ const defaultSize = {
 
 const fieldSizes = {
   // Full row and not resizable
-  dynamiczone: fullSize,
-  component: fullSize,
-  json: fullSize,
-  richtext: fullSize,
+  dynamiczone: needsFullSize,
+  component: needsFullSize,
+  json: needsFullSize,
+  richtext: needsFullSize,
   // Small and resizable
   checkbox: smallSize,
   boolean: smallSize,
