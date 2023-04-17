@@ -34,7 +34,7 @@ const HomePage = () => {
   const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
 
 
-  const { contains } = useFilter(locale, {
+  const { includes } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -44,7 +44,7 @@ const HomePage = () => {
 
 
   const sortedList = items
-    .filter((item) => contains(item.name, _q) || contains(item.instrument, _q))
+    .filter((item) => includes(item.name, _q) || includes(item.instrument, _q))
     .sort(
       (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.instrument, b.instrument)
     );
@@ -83,14 +83,14 @@ const HomePage = () => {
         { name: 'George', instrument: 'guitar' },
       ];
       const { locale } = useIntl();
-      const { contains } = useFilter(locale, {
+      const { includes } = useFilter(locale, {
         sensitivity: 'base',
       });
       const formatter = useCollator(locale, {
         sensitivity: 'base',
       });
       const sortedList = items
-        .filter((item) => contains(item.name, _q) || contains(item.instrument, _q))
+        .filter((item) => includes(item.name, _q) || includes(item.instrument, _q))
         .sort(
           (a, b) =>
             formatter.compare(a.name, b.name) || formatter.compare(a.instrument, b.instrument)

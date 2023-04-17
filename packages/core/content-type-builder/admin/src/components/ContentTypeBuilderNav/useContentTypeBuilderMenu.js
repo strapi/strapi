@@ -25,7 +25,7 @@ const useContentTypeBuilderMenu = () => {
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
   const { locale } = useIntl();
 
-  const { contains } = useFilter(locale, {
+  const { includes } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -117,10 +117,10 @@ const useContentTypeBuilderMenu = () => {
         }
       },
       links: components
-        .map((compo) => ({
-          name: compo.uid,
-          to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
-          title: compo.schema.displayName,
+        .map((component) => ({
+          name: component.uid,
+          to: `/plugins/${pluginId}/component-categories/${category}/${component.uid}`,
+          title: component.schema.displayName,
         }))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     }))
@@ -177,7 +177,7 @@ const useContentTypeBuilderMenu = () => {
         links: section.links.map((link) => ({
           ...link,
           links: link.links
-            .filter((link) => contains(link.title, search))
+            .filter((link) => includes(link.title, search))
             .sort((a, b) => formatter.compare(a.title, b.title)),
         })),
       };
@@ -186,7 +186,7 @@ const useContentTypeBuilderMenu = () => {
     return {
       ...section,
       links: section.links
-        .filter((link) => contains(link.title, search))
+        .filter((link) => includes(link.title, search))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     };
   });

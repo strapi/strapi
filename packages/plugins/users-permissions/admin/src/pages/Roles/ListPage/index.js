@@ -79,7 +79,7 @@ const RoleListPage = () => {
     enabled: canRead,
   });
 
-  const { contains } = useFilter(locale, {
+  const { includes } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -131,7 +131,7 @@ const RoleListPage = () => {
   };
 
   const sortedRoles = (roles || [])
-    .filter((role) => contains(role.name, _q) || contains(role.description, _q))
+    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
     .sort(
       (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
     );

@@ -8,7 +8,7 @@ import { useCollator } from './useCollator';
  * @typedef {Object} Filter
  * @property {(string: string, substring: string) => boolean} startsWith – Returns whether a string starts with a given substring.
  * @property {(string: string, substring: string) => boolean} endsWith – Returns whether a string ends with a given substring.
- * @property {(string: string, substring: string) => boolean} contains – Returns whether a string contains a given substring.
+ * @property {(string: string, substring: string) => boolean} includes – Returns whether a string contains a given substring.
  */
 
 /**
@@ -45,7 +45,7 @@ export function useFilter(locale, options) {
 
       return collator.compare(string.slice(-substring.length), substring) === 0;
     },
-    contains(string, substring) {
+    includes(string, substring) {
       if (substring.length === 0) {
         return true;
       }
