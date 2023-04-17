@@ -103,7 +103,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     );
   });
 
-  const fieldSizeInfo = fieldSizes[attributes[selectedField].type];
+  const { isResizable } = fieldSizes[attributes[selectedField].type];
 
   const sizeField = (
     <GridItem col={6} key="size">
@@ -152,7 +152,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   return (
     <>
       {metaFields}
-      {fieldSizeInfo.isResizable && sizeField}
+      {isResizable && sizeField}
       {hasTimePicker && timeStepField}
     </>
   );
