@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.9.0",
+  "version": "4.9.1",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -29,18 +29,29 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
-    "lint": "eslint ."
+    "build": "run -T tsc",
+    "build:ts": "run -T tsc",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
-    "aws-sdk": "2.1287.0",
+    "aws-sdk": "2.1351.0",
     "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@types/jest": "29.2.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

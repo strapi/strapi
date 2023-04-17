@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "4.9.0",
+  "version": "4.9.1",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -20,13 +20,13 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest",
-    "test:unit:watch": "jest --watch",
-    "lint": "eslint ."
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/utils": "4.9.0",
+    "@strapi/utils": "4.9.1",
     "lodash": "4.17.21"
   },
   "engines": {
