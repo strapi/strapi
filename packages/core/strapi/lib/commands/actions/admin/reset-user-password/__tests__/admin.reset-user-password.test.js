@@ -15,7 +15,7 @@ const mock = {
   admin,
 };
 
-jest.mock('../../index', () => {
+jest.mock('@strapi/strapi', () => {
   const impl = jest.fn(() => mock);
 
   impl.compile = jest.fn();
@@ -24,7 +24,7 @@ jest.mock('../../index', () => {
 });
 
 const inquirer = require('inquirer');
-const resetAdminPasswordCommand = require('../actions/admin/reset-user-password/action');
+const resetAdminPasswordCommand = require('../action');
 
 describe('admin:reset-password command', () => {
   beforeEach(() => {

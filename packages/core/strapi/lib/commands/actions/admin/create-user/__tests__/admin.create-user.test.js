@@ -24,7 +24,7 @@ const mock = {
   admin,
 };
 
-jest.mock('../../index', () => {
+jest.mock('@strapi/strapi', () => {
   const impl = jest.fn(() => mock);
 
   impl.compile = jest.fn();
@@ -33,7 +33,7 @@ jest.mock('../../index', () => {
 });
 
 const inquirer = require('inquirer');
-const createAdminCommand = require('../actions/admin/create-user/action');
+const createAdminCommand = require('../action');
 
 describe('admin:create command', () => {
   beforeEach(() => {

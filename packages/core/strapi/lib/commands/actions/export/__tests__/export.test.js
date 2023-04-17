@@ -1,6 +1,6 @@
 'use strict';
 
-const { expectExit } = require('./utils/data-transfer.test.utils');
+const { expectExit } = require('../../../__tests__/commands.test.utils');
 
 describe('Export', () => {
   const defaultFileName = 'defaultFilename';
@@ -54,7 +54,7 @@ describe('Export', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  // mock utils
+  // command utils
   const mockUtils = {
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -76,7 +76,7 @@ describe('Export', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../utils/data-transfer.js',
+    '../../../utils/data-transfer.js',
     () => {
       return mockUtils;
     },
@@ -90,7 +90,7 @@ describe('Export', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'export' command
-  const exportAction = require('../actions/export/action');
+  const exportAction = require('../action');
 
   beforeEach(() => {
     jest.clearAllMocks();

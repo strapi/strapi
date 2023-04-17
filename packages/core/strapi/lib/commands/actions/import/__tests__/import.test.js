@@ -7,7 +7,7 @@ const {
   engine: { DEFAULT_SCHEMA_STRATEGY, DEFAULT_VERSION_STRATEGY },
 } = require('@strapi/data-transfer');
 
-const { expectExit } = require('./utils/data-transfer.test.utils');
+const { expectExit } = require('../../../__tests__/commands.test.utils');
 
 const createTransferEngine = jest.fn(() => {
   return {
@@ -62,7 +62,7 @@ describe('Import', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  // mock utils
+  // command utils
   const mockUtils = {
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -82,7 +82,7 @@ describe('Import', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../utils/data-transfer.js',
+    '../../../utils/data-transfer.js',
     () => {
       return mockUtils;
     },
@@ -96,7 +96,7 @@ describe('Import', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Now that everything is mocked, load the 'import' command
-  const importAction = require('../actions/import/action');
+  const importAction = require('../action');
 
   beforeEach(() => {
     jest.clearAllMocks();

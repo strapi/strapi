@@ -1,9 +1,9 @@
 'use strict';
 
-const { expectExit } = require('./utils/data-transfer.test.utils');
+const { expectExit } = require('../../../__tests__/commands.test.utils');
 
 describe('Transfer', () => {
-  // mock utils
+  // command utils
   const mockUtils = {
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
@@ -25,7 +25,7 @@ describe('Transfer', () => {
     exitMessageText: jest.fn(),
   };
   jest.mock(
-    '../utils/data-transfer.js',
+    '../../../utils/data-transfer.js',
     () => {
       return mockUtils;
     },
@@ -72,7 +72,7 @@ describe('Transfer', () => {
 
   jest.mock('@strapi/data-transfer', () => mockDataTransfer);
 
-  const transferAction = require('../actions/transfer/action');
+  const transferAction = require('../action');
 
   // console spies
   jest.spyOn(console, 'log').mockImplementation(() => {});
