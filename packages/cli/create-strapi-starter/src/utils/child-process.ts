@@ -9,12 +9,6 @@ export function runInstall(path: string, { useYarn }: Options = {}) {
     stdin: 'ignore',
   });
 }
-
-/**
- * @param {string} rootPath
- * @param {Object} options
- * @param {boolean} options.useYarn
- */
 export function runApp(rootPath: string, { useYarn }: Options = {}) {
   if (useYarn) {
     return execa('yarn', ['develop'], {
