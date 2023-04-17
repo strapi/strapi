@@ -1,15 +1,22 @@
-'use strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const commander = require('commander');
+import commander, { CommanderError } from 'commander';
 
-// eslint-disable-next-line import/extensions
-const packageJson = require('./package.json');
-const buildStarter = require('./utils/build-starter');
-const promptUser = require('./utils/prompt-user');
+import buildStarter from './utils/build-starter';
+import promptUser from './utils/prompt-user';
+import type { Program } from './types';
+
+interface ProjectArgs {
+  projectName: string;
+  starter: string;
+}
+
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 const program = new commander.Command(packageJson.name);
 
-const incompatibleQuickstartOptions = [
+const incompatibleQuickstartOptions: Array<keyof Program> = [
   'dbclient',
   'dbhost',
   'dbport',
@@ -39,12 +46,12 @@ program
     'Create a fullstack monorepo application using the strapi backend template specified in the provided starter'
   )
   .action((directory, starter, programArgs) => {
-    const projectArgs = { projectName: directory, starter };
+    const projectArgs: ProjectArgs = { projectName: directory, starter };
 
     initProject(projectArgs, programArgs);
   });
 
-function generateApp(projectArgs, programArgs) {
+function generateApp(projectArgs: ProjectArgs, programArgs: Program) {
   if (!projectArgs.projectName || !projectArgs.starter) {
     console.error(
       'Please specify the <directory> and <starter> of your project when using --quickstart'
@@ -56,12 +63,12 @@ function generateApp(projectArgs, programArgs) {
   return buildStarter(projectArgs, programArgs);
 }
 
-async function initProject(projectArgs, program) {
+async function initProject(projectArgs: ProjectArgs, programArgs: Program) {
   const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(
-    (opt) => program[opt]
+    (opt) => programArgs[opt]
   );
 
-  if (program.quickstart && hasIncompatibleQuickstartOptions) {
+  if (programArgs.quickstart && hasIncompatibleQuickstartOptions) {
     console.error(
       `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
         ', '
@@ -71,34 +78,34 @@ async function initProject(projectArgs, program) {
   }
 
   if (hasIncompatibleQuickstartOptions) {
-    program.quickstart = false; // Will disable the quickstart question because != 'undefined'
+    programArgs.quickstart = false; // Will disable the quickstart question because != 'undefined'
   }
 
   const { projectName, starter } = projectArgs;
 
-  if (program.quickstart) {
-    return generateApp(projectArgs, program);
+  if (programArgs.quickstart) {
+    return generateApp(projectArgs, programArgs);
   }
 
-  const prompt = await promptUser(projectName, starter, program);
+  const prompt = await promptUser(projectName, starter, programArgs);
 
   const promptProjectArgs = {
     projectName: prompt.directory || projectName,
     starter: prompt.starter || starter,
   };
 
-  const programArgs = {
-    ...program,
-    quickstart: prompt.quick || program.quickstart,
-  };
-
-  return generateApp(promptProjectArgs, programArgs);
+  return generateApp(promptProjectArgs, {
+    ...programArgs,
+    quickstart: prompt.quick || programArgs.quickstart,
+  });
 }
 
 try {
   program.parse(process.argv);
 } catch (err) {
-  if (err.exitCode && err.exitCode !== 0) {
-    program.outputHelp();
+  if (err instanceof CommanderError) {
+    if (err.exitCode && err.exitCode !== 0) {
+      program.outputHelp();
+    }
   }
 }
