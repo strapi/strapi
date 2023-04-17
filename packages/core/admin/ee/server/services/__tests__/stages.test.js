@@ -69,6 +69,8 @@ const servicesMock = {
   },
 };
 
+const queryUpdateMock = jest.fn(() => true);
+
 const strapiMock = {
   query: jest.fn(() => ({
     findOne: jest.fn(() => workflowMock),
@@ -78,7 +80,30 @@ const strapiMock = {
     return servicesMock[serviceName];
   }),
   db: {
-    transaction: jest.fn((func) => func()),
+    transaction: jest.fn((func) => func({})),
+    query: jest.fn(() => ({
+      updateMany: queryUpdateMock,
+    })),
+    metadata: {
+      get: () => ({
+        attributes: {
+          strapi_reviewWorkflows_stage: {
+            joinColumn: {
+              name: 'strapi_reviewWorkflows_stage_id',
+            },
+          },
+        },
+      }),
+    },
+  },
+  contentTypes: {
+    'api::shop.shop': {
+      kind: 'collectionType',
+      collectionName: 'shop',
+      options: {
+        reviewWorkflows: true,
+      },
+    },
   },
 };
 
@@ -165,12 +190,10 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
 
       // Here we are only deleting the stage containing related IDs 1 & 2
-      for (let i = 0; i < 2; i += 1) {
-        expect(entityServiceMock.update).toBeCalledWith(relatedUID, i + 1, {
-          data: { strapi_reviewWorkflows_stage: 3 },
-          populate: ['strapi_reviewWorkflows_stage'],
-        });
-      }
+      expect(queryUpdateMock).toBeCalledWith({
+        data: { strapi_reviewWorkflows_stage_id: 3 },
+        where: { strapi_reviewWorkflows_stage_id: 4 },
+      });
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
@@ -189,10 +212,10 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
 
       // Here we are deleting all stages and expecting all entities to be moved to the new stage
-      for (let i = 0; i < 3; i += 1) {
-        expect(entityServiceMock.update).toBeCalledWith(relatedUID, i + 1, {
-          data: { strapi_reviewWorkflows_stage: newStageID },
-          populate: ['strapi_reviewWorkflows_stage'],
+      for (const stage of workflowMock.stages) {
+        expect(queryUpdateMock).toBeCalledWith({
+          data: { strapi_reviewWorkflows_stage_id: newStageID },
+          where: { strapi_reviewWorkflows_stage_id: stage.id },
         });
       }
 
