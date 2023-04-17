@@ -212,8 +212,11 @@ describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
       };
       const expected = {
         ...state,
-        fieldToEdit: '',
-        fieldForm: {},
+        fieldToEdit: 'cover',
+        fieldForm: {
+          label: 'New Cover',
+          sortable: true,
+        },
         modifiedData: {
           metadatas: {
             cover: {

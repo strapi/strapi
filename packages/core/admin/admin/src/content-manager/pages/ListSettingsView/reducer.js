@@ -68,8 +68,6 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case 'SUBMIT_FIELD_FORM': {
-        draftState.fieldForm = {};
-        draftState.fieldToEdit = '';
         const fieldMetadataPath = ['modifiedData', 'metadatas', state.fieldToEdit, 'list'];
         set(draftState, [...fieldMetadataPath, 'label'], state.fieldForm.label);
         set(draftState, [...fieldMetadataPath, 'sortable'], state.fieldForm.sortable);
