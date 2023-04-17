@@ -37,7 +37,7 @@ const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
   private: false,
   configurable: false,
   visible: false,
-  useJoinTable: false,
+  useJoinTable: true, // We want a join table to persist data when downgrading to CE
   type: 'relation',
   relation: 'oneToOne',
   target: 'admin::workflow-stage',
@@ -70,14 +70,12 @@ function enableReviewWorkflow({ strapi }) {
       return;
     }
     const firstStage = defaultWorkflow.stages[0];
+    const stagesService = getService('stages', { strapi });
 
     const up = async (contentTypeUID) => {
-      const { attributes } = strapi.db.metadata.get(contentTypeUID);
-      const stageColumnName = attributes[ENTITY_STAGE_ATTRIBUTE].joinColumn.name;
-
-      await strapi.db.query(contentTypeUID).updateMany({
-        data: { [stageColumnName]: firstStage.id },
-        where: { [stageColumnName]: null },
+      return stagesService.updateEntitiesStage(contentTypeUID, {
+        fromStageId: null,
+        toStageId: firstStage.id,
       });
     };
 
