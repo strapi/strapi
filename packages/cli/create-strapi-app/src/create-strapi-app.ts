@@ -1,15 +1,15 @@
-'use strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import commander from 'commander';
+import { checkInstallPath, generateNewApp } from '@strapi/generate-new';
+import promptUser from './utils/prompt-user';
+import type { Program } from './types';
 
-const { resolve } = require('path');
-const commander = require('commander');
-const { checkInstallPath, generateNewApp } = require('@strapi/generate-new');
-const promptUser = require('./utils/prompt-user');
-// eslint-disable-next-line import/extensions
-const packageJson = require('./package.json');
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
-const program = new commander.Command();
+const command = new commander.Command(packageJson.name);
 
-const databaseOptions = [
+const databaseOptions: Array<keyof Program> = [
   'dbclient',
   'dbhost',
   'dbport',
@@ -20,8 +20,7 @@ const databaseOptions = [
   'dbfile',
 ];
 
-program
-  .command(packageJson.name)
+command
   .version(packageJson.version)
   .arguments('[directory]')
   .option('--no-run', 'Do not start the application after it is created')
@@ -40,12 +39,12 @@ program
   .option('--template <templateurl>', 'Specify a Strapi template')
   .option('--ts, --typescript', 'Use TypeScript to generate the project')
   .description('create a new application')
-  .action((directory, options) => {
-    initProject(directory, program, options);
+  .action((directory, programArgs) => {
+    initProject(directory, programArgs);
   })
   .parse(process.argv);
 
-function generateApp(projectName, options) {
+function generateApp(projectName: string, options: unknown) {
   if (!projectName) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
@@ -58,22 +57,25 @@ function generateApp(projectName, options) {
   });
 }
 
-async function initProject(projectName, program, inputOptions) {
+async function initProject(projectName: string, programArgs: Program) {
   if (projectName) {
     await checkInstallPath(resolve(projectName));
   }
 
-  const programFlags = program.options
-    .reduce((acc, { short, long }) => [...acc, short, long], [])
+  const programFlags = command
+    .createHelp()
+    .visibleOptions(command)
+    .reduce<Array<string | undefined>>((acc, { short, long }) => [...acc, short, long], [])
     .filter(Boolean);
-  if (inputOptions.template && programFlags.includes(inputOptions.template)) {
-    console.error(`${inputOptions.template} is not a valid template`);
+
+  if (programArgs.template && programFlags.includes(programArgs.template)) {
+    console.error(`${programArgs.template} is not a valid template`);
     process.exit(1);
   }
 
-  const hasDatabaseOptions = databaseOptions.some((opt) => inputOptions[opt]);
+  const hasDatabaseOptions = databaseOptions.some((opt) => programArgs[opt]);
 
-  if (inputOptions.quickstart && hasDatabaseOptions) {
+  if (programArgs.quickstart && hasDatabaseOptions) {
     console.error(
       `The quickstart option is incompatible with the following options: ${databaseOptions.join(
         ', '
@@ -83,24 +85,24 @@ async function initProject(projectName, program, inputOptions) {
   }
 
   if (hasDatabaseOptions) {
-    inputOptions.quickstart = false; // Will disable the quickstart question because != 'undefined'
+    programArgs.quickstart = false; // Will disable the quickstart question because != 'undefined'
   }
 
-  if (inputOptions.quickstart) {
-    return generateApp(projectName, inputOptions);
+  if (programArgs.quickstart) {
+    return generateApp(projectName, programArgs);
   }
 
-  const prompt = await promptUser(projectName, inputOptions, hasDatabaseOptions);
+  const prompt = await promptUser(projectName, programArgs, hasDatabaseOptions);
   const directory = prompt.directory || projectName;
   await checkInstallPath(resolve(directory));
 
   const options = {
-    template: inputOptions.template,
-    quickstart: prompt.quick || inputOptions.quickstart,
+    template: programArgs.template,
+    quickstart: prompt.quick || programArgs.quickstart,
   };
 
   const generateStrapiAppOptions = {
-    ...inputOptions,
+    ...programArgs,
     ...options,
   };
 

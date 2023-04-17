@@ -1,39 +1,29 @@
-'use strict';
+import { resolve, join, basename } from 'path';
+import os from 'os';
+import fse from 'fs-extra';
+import ora from 'ora';
+import ciEnv from 'ci-info';
+import chalk from 'chalk';
 
-const { resolve, join, basename } = require('path');
-const os = require('os');
-const fse = require('fs-extra');
-const ora = require('ora');
-const ciEnv = require('ci-info');
-const chalk = require('chalk');
+import { generateNewApp } from '@strapi/generate-new';
 
-const { generateNewApp } = require('@strapi/generate-new');
+import hasYarn from './has-yarn';
+import { runInstall, runApp, initGit } from './child-process';
+import { getStarterPackageInfo, downloadNpmStarter } from './fetch-npm-starter';
+import logger from './logger';
+import stopProcess from './stop-process';
+import type { Options, PackageInfo, Program } from '../types';
 
-const hasYarn = require('./has-yarn');
-const { runInstall, runApp, initGit } = require('./child-process');
-const { getStarterPackageInfo, downloadNpmStarter } = require('./fetch-npm-starter');
-const logger = require('./logger');
-const stopProcess = require('./stop-process');
-
-/**
- * @param  {string} - filePath Path to starter.json file
- */
-function readStarterJson(filePath, starter) {
+function readStarterJson(filePath: string, starter: string) {
   try {
     const data = fse.readFileSync(filePath);
-    return JSON.parse(data);
+    return JSON.parse(data.toString());
   } catch (err) {
     stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starter)}`);
   }
 }
 
-/**
- * @param {string} rootPath - Path to the project directory
- * @param {string} projectName - Name of the project
- * @param {Object} options
- * @param {boolean} options.useYarn - Use yarn instead of npm
- */
-async function initPackageJson(rootPath, projectName, { useYarn } = {}) {
+async function initPackageJson(rootPath: string, projectName: string, { useYarn }: Options = {}) {
   const packageManager = useYarn ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
@@ -59,16 +49,11 @@ async function initPackageJson(rootPath, projectName, { useYarn } = {}) {
       }
     );
   } catch (err) {
-    stopProcess(`Failed to create ${chalk.yellow(`package.json`)} in ${chalk.yellow(rootPath)}`);
+    stopProcess(`Failed to create ${chalk.yellow('package.json')} in ${chalk.yellow(rootPath)}`);
   }
 }
 
-/**
- * @param {string} path The directory path for install
- * @param {Object} options
- * @param {boolean} options.useYarn Use yarn instead of npm
- */
-async function installWithLogs(path, options) {
+async function installWithLogs(path: string, options: Options) {
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
   const logInstall = (chunk = '') => {
@@ -76,8 +61,8 @@ async function installWithLogs(path, options) {
   };
 
   const runner = runInstall(path, options);
-  runner.stdout.on('data', logInstall);
-  runner.stderr.on('data', logInstall);
+  runner.stdout?.on('data', logInstall);
+  runner.stderr?.on('data', logInstall);
 
   await runner;
 
@@ -85,17 +70,12 @@ async function installWithLogs(path, options) {
   console.log(`Dependencies installed ${chalk.green('successfully')}.`);
 }
 
-/**
- * @param {string} starter The name of the starter as provided by the user
- * @param {Object} options
- * @param {boolean} options.useYarn Use yarn instead of npm
- */
-async function getStarterInfo(starter, { useYarn } = {}) {
+async function getStarterInfo(starter: string, { useYarn }: Options = {}) {
   const isLocalStarter = ['./', '../', '/'].some((filePrefix) => starter.startsWith(filePrefix));
 
   let starterPath;
   let starterParentPath;
-  let starterPackageInfo = {};
+  let starterPackageInfo: PackageInfo | undefined;
 
   if (isLocalStarter) {
     // Starter is a local directory
@@ -120,7 +100,10 @@ async function getStarterInfo(starter, { useYarn } = {}) {
  * @param {string|null} projectArgs.starter - The npm package of the starter
  * @param {Object} program - Commands for generating new application
  */
-module.exports = async function buildStarter({ projectName, starter }, program) {
+export default async function buildStarter(
+  { projectName, starter }: { projectName: string; starter: string },
+  program: Program
+) {
   const hasYarnInstalled = await hasYarn();
   const { isLocalStarter, starterPath, starterParentPath, starterPackageInfo } =
     await getStarterInfo(starter, { useYarn: hasYarnInstalled });
@@ -133,7 +116,11 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
   try {
     await fse.ensureDir(rootPath);
   } catch (error) {
-    stopProcess(`Failed to create ${chalk.yellow(rootPath)}: ${error.message}`);
+    if (error instanceof Error) {
+      stopProcess(`Failed to create ${chalk.yellow(rootPath)}: ${error.message}`);
+    }
+
+    stopProcess(`Failed to create ${chalk.yellow(rootPath)}: ${error}`);
   }
 
   // Copy the downloaded frontend folder to the project folder
@@ -145,18 +132,22 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
       recursive: true,
     });
   } catch (error) {
-    stopProcess(`Failed to create ${chalk.yellow(frontendPath)}: ${error.message}`);
+    if (error instanceof Error) {
+      stopProcess(`Failed to create ${chalk.yellow(frontendPath)}: ${error.message}`);
+    }
+
+    stopProcess(`Failed to create ${chalk.yellow(frontendPath)}`);
   }
 
   // Delete the starter directory if it was downloaded
-  if (!isLocalStarter) {
+  if (!isLocalStarter && starterParentPath) {
     await fse.remove(starterParentPath);
   }
 
   // Set command options for Strapi app
   const generateStrapiAppOptions = {
     ...program,
-    starter: starterPackageInfo.name,
+    starter: starterPackageInfo?.name,
     run: false,
   };
   if (starterJson.template.version) {
@@ -192,4 +183,4 @@ module.exports = async function buildStarter({ projectName, starter }, program) 
 
   console.log(chalk.green('Starting the app'));
   await runApp(rootPath, { useYarn: hasYarnInstalled });
-};
+}
