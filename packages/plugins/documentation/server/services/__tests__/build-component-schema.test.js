@@ -9,7 +9,7 @@ const strapi = {
       contentTypes: {
         role: {
           attributes: {
-            name: {
+            test: {
               type: 'string',
             },
           },
@@ -27,7 +27,7 @@ const strapi = {
       contentTypes: {
         restaurant: {
           attributes: {
-            name: {
+            test: {
               type: 'string',
             },
           },
@@ -71,6 +71,12 @@ describe('Build Component Schema', () => {
     }
 
     const expectedSchemas = {
+      UsersPermissionsRole: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
+        },
+      },
       UsersPermissionsRoleResponseDataObject: {
         type: 'object',
         properties: {
@@ -78,16 +84,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/UsersPermissionsRole',
           },
         },
       },
       UsersPermissionsRoleResponse: {
+        type: 'object',
         properties: {
           data: {
             $ref: '#/components/schemas/UsersPermissionsRoleResponseDataObject',
@@ -97,6 +99,12 @@ describe('Build Component Schema', () => {
           },
         },
       },
+      Restaurant: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
+        },
+      },
       RestaurantResponseDataObject: {
         type: 'object',
         properties: {
@@ -104,16 +112,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/Restaurant',
           },
         },
       },
       RestaurantResponse: {
+        type: 'object',
         properties: {
           data: {
             $ref: '#/components/schemas/RestaurantResponseDataObject',
@@ -154,6 +158,12 @@ describe('Build Component Schema', () => {
     }
 
     const expectedSchemas = {
+      UsersPermissionsRole: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
+        },
+      },
       UsersPermissionsRoleListResponseDataItem: {
         type: 'object',
         properties: {
@@ -161,16 +171,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/UsersPermissionsRole',
           },
         },
       },
       UsersPermissionsRoleListResponse: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -182,6 +188,7 @@ describe('Build Component Schema', () => {
             type: 'object',
             properties: {
               pagination: {
+                type: 'object',
                 properties: {
                   page: {
                     type: 'integer',
@@ -210,16 +217,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/UsersPermissionsRole',
           },
         },
       },
       UsersPermissionsRoleResponse: {
+        type: 'object',
         properties: {
           data: {
             $ref: '#/components/schemas/UsersPermissionsRoleResponseDataObject',
@@ -236,16 +239,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/Restaurant',
           },
         },
       },
       RestaurantListResponse: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -257,6 +256,7 @@ describe('Build Component Schema', () => {
             type: 'object',
             properties: {
               pagination: {
+                type: 'object',
                 properties: {
                   page: {
                     type: 'integer',
@@ -285,16 +285,12 @@ describe('Build Component Schema', () => {
             type: 'number',
           },
           attributes: {
-            type: 'object',
-            properties: {
-              test: {
-                type: 'string',
-              },
-            },
+            $ref: '#/components/schemas/Restaurant',
           },
         },
       },
       RestaurantResponse: {
+        type: 'object',
         properties: {
           data: {
             $ref: '#/components/schemas/RestaurantResponseDataObject',
@@ -302,6 +298,12 @@ describe('Build Component Schema', () => {
           meta: {
             type: 'object',
           },
+        },
+      },
+      Restaurant: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
         },
       },
     };
@@ -380,9 +382,11 @@ describe('Build Component Schema', () => {
   it('builds the LocalizationResponse schema', () => {
     global.strapi.plugins['users-permissions'].routes['content-api'].routes = [
       { method: 'GET', path: '/localizations', handler: 'test' },
+      { method: 'GET', path: '/test', handler: 'test.find' },
     ];
     global.strapi.api.restaurant.routes.restaurant.routes = [
       { method: 'GET', path: '/localizations', handler: 'test' },
+      { method: 'GET', path: '/test', handler: 'test.find' },
     ];
 
     const apiMocks = [
@@ -402,22 +406,294 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaNames = Object.keys(schemas);
-    const pluginListLocalizationResponseValue = schemas.UsersPermissionsRoleLocalizationResponse;
-    const apiListLocalizationResponseValue = schemas.RestaurantLocalizationResponse;
-
-    const expectedShape = {
-      type: 'object',
-      properties: {
-        id: { type: 'number' },
-        test: { type: 'string' },
+    const expectedSchemas = {
+      UsersPermissionsRole: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
+        },
+      },
+      UsersPermissionsRoleListResponseDataItem: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/UsersPermissionsRole',
+          },
+        },
+      },
+      UsersPermissionsRoleListResponseDataItemLocalized: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/UsersPermissionsRole',
+          },
+        },
+      },
+      UsersPermissionsRoleListResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UsersPermissionsRoleListResponseDataItem',
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: {
+                    type: 'integer',
+                  },
+                  pageSize: {
+                    type: 'integer',
+                    minimum: 25,
+                  },
+                  pageCount: {
+                    type: 'integer',
+                    maximum: 1,
+                  },
+                  total: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      UsersPermissionsRoleLocalizationListResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UsersPermissionsRoleListResponseDataItemLocalized',
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: {
+                    type: 'integer',
+                  },
+                  pageSize: {
+                    type: 'integer',
+                    minimum: 25,
+                  },
+                  pageCount: {
+                    type: 'integer',
+                    maximum: 1,
+                  },
+                  total: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      UsersPermissionsRoleResponseDataObject: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/UsersPermissionsRole',
+          },
+        },
+      },
+      UsersPermissionsRoleResponseDataObjectLocalized: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/UsersPermissionsRole',
+          },
+        },
+      },
+      UsersPermissionsRoleResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/UsersPermissionsRoleResponseDataObject',
+          },
+          meta: {
+            type: 'object',
+          },
+        },
+      },
+      UsersPermissionsRoleLocalizationResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/UsersPermissionsRoleResponseDataObjectLocalized',
+          },
+          meta: {
+            type: 'object',
+          },
+        },
+      },
+      RestaurantListResponseDataItem: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/Restaurant',
+          },
+        },
+      },
+      RestaurantListResponseDataItemLocalized: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/Restaurant',
+          },
+        },
+      },
+      RestaurantListResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RestaurantListResponseDataItem',
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: {
+                    type: 'integer',
+                  },
+                  pageSize: {
+                    type: 'integer',
+                    minimum: 25,
+                  },
+                  pageCount: {
+                    type: 'integer',
+                    maximum: 1,
+                  },
+                  total: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      RestaurantLocalizationListResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RestaurantListResponseDataItemLocalized',
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: {
+                    type: 'integer',
+                  },
+                  pageSize: {
+                    type: 'integer',
+                    minimum: 25,
+                  },
+                  pageCount: {
+                    type: 'integer',
+                    maximum: 1,
+                  },
+                  total: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      RestaurantResponseDataObject: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/Restaurant',
+          },
+        },
+      },
+      RestaurantResponseDataObjectLocalized: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'number',
+          },
+          attributes: {
+            $ref: '#/components/schemas/Restaurant',
+          },
+        },
+      },
+      RestaurantLocalizationResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/RestaurantResponseDataObjectLocalized',
+          },
+          meta: {
+            type: 'object',
+          },
+        },
+      },
+      RestaurantResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/RestaurantResponseDataObject',
+          },
+          meta: {
+            type: 'object',
+          },
+        },
+      },
+      Restaurant: {
+        type: 'object',
+        properties: {
+          test: { type: 'string' },
+        },
       },
     };
 
-    expect(schemaNames.includes('UsersPermissionsRoleLocalizationResponse')).toBe(true);
-    expect(schemaNames.includes('RestaurantLocalizationResponse')).toBe(true);
-    expect(pluginListLocalizationResponseValue).toStrictEqual(expectedShape);
-    expect(apiListLocalizationResponseValue).toStrictEqual(expectedShape);
+    expect(schemas).toStrictEqual(expectedSchemas);
   });
 
   it('builds the LocalizationRequest schema', () => {
@@ -471,10 +747,13 @@ describe('Build Component Schema', () => {
     const schemas = buildComponentSchema(apiMock);
     const schemaNames = Object.keys(schemas);
     expect(schemaNames).toStrictEqual([
+      'UsersPermissionsPermission',
       'UsersPermissionsPermissionResponseDataObject',
       'UsersPermissionsPermissionResponse',
+      'UsersPermissionsRole',
       'UsersPermissionsRoleResponseDataObject',
       'UsersPermissionsRoleResponse',
+      'UsersPermissionsUser',
       'UsersPermissionsUserResponseDataObject',
       'UsersPermissionsUserResponse',
     ]);
