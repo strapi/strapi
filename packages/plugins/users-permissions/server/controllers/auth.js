@@ -280,6 +280,11 @@ module.exports = {
         'confirmationToken',
         'resetPasswordToken',
         'provider',
+        'id',
+        'createdAt',
+        'updatedAt',
+        'createdBy',
+        'updatedBy',
       ]),
       provider: 'local',
     };
