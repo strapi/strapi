@@ -285,6 +285,7 @@ module.exports = {
         'updatedAt',
         'createdBy',
         'updatedBy',
+        'role',
       ]),
       provider: 'local',
     };
