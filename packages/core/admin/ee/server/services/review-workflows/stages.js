@@ -83,14 +83,13 @@ module.exports = ({ strapi }) => {
 
           // Assign the new stage to entities that had the deleted stage
           await mapAsync(contentTypes, (contentTypeUID) => {
-            const { tableName, attributes } = strapi.db.metadata.get(contentTypeUID);
+            const { attributes } = strapi.db.metadata.get(contentTypeUID);
             const stageColumnName = attributes[ENTITY_STAGE_ATTRIBUTE].joinColumn.name;
 
-            return strapi.db
-              .getConnection(tableName)
-              .update({ [stageColumnName]: nearestStage.id })
-              .where({ [stageColumnName]: stage.id })
-              .transacting(trx);
+            return strapi.db.query(contentTypeUID).updateMany({
+              data: { [stageColumnName]: nearestStage.id },
+              where: { [stageColumnName]: stage.id },
+            });
           });
 
           return this.delete(stage.id);
