@@ -111,7 +111,6 @@ export function InformationBoxEE() {
               components={{
                 LoadingIndicator: () => <Loader small />,
               }}
-              defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
               isLoading={isLoading}
@@ -122,6 +121,7 @@ export function InformationBoxEE() {
               options={
                 workflow ? workflow.stages.map(({ id, name }) => ({ value: id, label: name })) : []
               }
+              value={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
             />
 
             <FieldError />
