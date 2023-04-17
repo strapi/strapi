@@ -1,11 +1,13 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { useCommand } from './context';
 import Item from './Item';
 
 const Items = ({ items, displayOnSearchOnly }) => {
   const cmd = useCommand();
+  const { formatMessage } = useIntl();
 
   return (
     <>
@@ -23,7 +25,8 @@ const Items = ({ items, displayOnSearchOnly }) => {
             onSelect={() => item?.action(cmd)}
             displayOnSearchOnly={displayOnSearchOnly}
           >
-            <item.icon /> {item.label}
+            <item.icon />{' '}
+            {formatMessage(typeof item.label === 'string' ? { id: item.label } : item.label)}
           </Item>
         );
       })}

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Command } from 'cmdk';
+import { useIntl } from 'react-intl';
 import { Badge, Flex } from '@strapi/design-system';
 
 import Container from './Container';
@@ -61,13 +62,15 @@ export default function CommandK() {
     };
   }, [history, page, pages]);
 
+  const { formatMessage } = useIntl();
+
   return (
     <CommandContext.Provider value={context}>
       <Container open={open}>
         <Command.Dialog
           open={open}
           onOpenChange={setOpen}
-          label="Global Command Menu"
+          label={formatMessage({ id: 'command-palette.Dialog.label' })}
           container={containerElement.current}
         >
           <Flex gap={2}>
@@ -77,7 +80,7 @@ export default function CommandK() {
           </Flex>
           <Command.Input
             autoFocus
-            placeholder="What are you looking for?"
+            placeholder={formatMessage({ id: 'command-palette.Input.placeholder' })}
             onValueChange={setInputValue}
             value={inputValue}
             onKeyDown={onInputKeyDown}
