@@ -9,9 +9,6 @@ const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
-const {
-  disableOnContentTypes: disableReviewWorkflows,
-} = require('../../migrations/review-workflows');
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
@@ -103,7 +100,6 @@ module.exports = ({ strapi }) => {
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
-      strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkflows);
     },
   };
 };
