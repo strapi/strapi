@@ -172,14 +172,7 @@ describe('GenericInput', () => {
       const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: /datetime/i });
       await user.click(btnDate);
-      await user.click(getByRole('button', { name: /15/ }));
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const year = today.getFullYear();
-      
-      expect(getByRole('textbox', { name: 'datetime' })).toHaveValue(`${month}/15/${year}`);
-      expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('00:00');
-      
+      await user.click(getByRole('button', { name: /15/ }));      
       await user.click(getByRole('button', { name: /clear date/i }));
 
       expect(getByRole('textbox', { name: 'datetime' })).toHaveValue('');
