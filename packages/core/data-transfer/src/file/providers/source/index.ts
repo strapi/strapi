@@ -100,8 +100,7 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     try {
       // Read the metadata to ensure the file can be parsed
-      this.#metadata = await this.getMetadata();
-
+      await this.#loadMetadata();
       // TODO: we might also need to read the schema.jsonl files & implements a custom stream-check
     } catch (e) {
       if (this.options?.encryption?.enabled) {
@@ -117,13 +116,18 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
   }
 
+  async #loadMetadata() {
+    const backupStream = this.#getBackupStream();
+    this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
+    return this.#metadata;
+  }
+
   async getMetadata() {
     if (this.#metadata) {
-      return this.#metadata;
+      await this.#loadMetadata();
     }
 
-    const backupStream = this.#getBackupStream();
-    return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
+    return this.#metadata || null;
   }
 
   async getSchemas() {
