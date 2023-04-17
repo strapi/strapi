@@ -44,24 +44,27 @@ const useContentManagerInitData = () => {
         })
       );
 
-      const { authorizedContentTypeLinks, authorizedSingleTypeLinks } = await getContentTypeLinks({
+      const unmutatedContentTypeLinks = await getContentTypeLinks({
         models,
         userPermissions: allPermissions,
         toggleNotification,
       });
 
-      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-        ctLinks: authorizedContentTypeLinks,
-        models,
-      });
-      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: authorizedSingleTypeLinks,
+      const { ctLinks: authorizedCollectionTypeLinks } = runHookWaterfall(
+        MUTATE_COLLECTION_TYPES_LINKS,
+        {
+          ctLinks: unmutatedContentTypeLinks.authorizedCollectionTypeLinks,
+          models,
+        }
+      );
+      const { stLinks: authorizedSingleTypeLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+        stLinks: unmutatedContentTypeLinks.authorizedSingleTypeLinks,
         models,
       });
 
       const actionToDispatch = setInitData({
-        authorizedCollectionTypeLinks: ctLinks,
-        authorizedSingleTypeLinks: stLinks,
+        authorizedCollectionTypeLinks,
+        authorizedSingleTypeLinks,
         contentTypeSchemas: models,
         components,
         fieldSizes,

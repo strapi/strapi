@@ -6,7 +6,7 @@ import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { useLayoutDnd } from '../../../hooks';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
-import { makeSelectModelAndComponentSchemas, makeSelectFieldSizes } from '../../App/selectors';
+import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
 import getTrad from '../../../utils/getTrad';
 import GenericInput from './GenericInput';
 
@@ -25,9 +25,8 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const fieldSizesSelector = useMemo(makeSelectFieldSizes, []);
   const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
-  const fieldSizes = useSelector((state) => fieldSizesSelector(state));
+  const fieldSizes = useSelector(selectFieldSizes);
 
   const formToDisplay = useMemo(() => {
     if (!selectedField) {

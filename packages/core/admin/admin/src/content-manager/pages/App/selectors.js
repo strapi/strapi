@@ -23,13 +23,13 @@ const makeSelectModelAndComponentSchemas = () =>
     schemas: [...components, ...models],
   }));
 
-const makeSelectFieldSizes = () => createSelector(selectAppDomain(), (state) => state.fieldSizes);
+const selectFieldSizes = createSelector(selectAppDomain(), (state) => state.fieldSizes);
 
 export default makeSelectApp;
 export {
   makeSelectModelAndComponentSchemas,
   makeSelectModelLinks,
   makeSelectModels,
-  makeSelectFieldSizes,
+  selectFieldSizes,
   selectAppDomain,
 };
