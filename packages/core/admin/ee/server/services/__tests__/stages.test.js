@@ -230,6 +230,7 @@ describe('Review workflows - Stages service', () => {
         workflowMock.stages[0],
         { id: workflowMock.stages[1].id, name: 'new_name' },
         { name: 'new stage' },
+        { name: 'new stage2' },
       ]);
 
       expect(servicesMock['admin::workflows'].findById).toBeCalled();
@@ -238,7 +239,12 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [workflowMock.stages[0].id, workflowMock.stages[1].id, expect.any(Number)],
+        stages: [
+          workflowMock.stages[0].id,
+          workflowMock.stages[1].id,
+          expect.any(Number),
+          expect.any(Number),
+        ],
       });
     });
   });
