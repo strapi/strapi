@@ -40,29 +40,29 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     isLocalizedPath(route.path)
   ).length;
 
+  const attributesToOmit = [
+    'createdAt',
+    'updatedAt',
+    'publishedAt',
+    'publishedBy',
+    'updatedBy',
+    'createdBy',
+    'localizations',
+  ];
+  const attributesForRequest = _.omit(attributes, attributesToOmit);
+  // Get a list of required attribute names
+  const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
+    const [attributeKey, attributeValue] = attribute;
+
+    if (attributeValue.required) {
+      acc.push(attributeKey);
+    }
+
+    return acc;
+  }, []);
+
   // Build the request schemas when the route has POST or PUT methods
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
-    const attributesToOmit = [
-      'createdAt',
-      'updatedAt',
-      'publishedAt',
-      'publishedBy',
-      'updatedBy',
-      'createdBy',
-      'localizations',
-    ];
-    const attributesForRequest = _.omit(attributes, attributesToOmit);
-    // Get a list of required attribute names
-    const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
-      const [attributeKey, attributeValue] = attribute;
-
-      if (attributeValue.required) {
-        acc.push(attributeKey);
-      }
-
-      return acc;
-    }, []);
-
     // Build localization requests schemas
     if (hasLocalizationPath) {
       schemas = {
@@ -102,25 +102,22 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   if (hasLocalizationPath) {
     schemas = {
       ...schemas,
-      [`${pascalCase(uniqueName)}LocalizationResponse`]: {
-        type: 'object',
-        properties: {
-          id: { type: 'number' },
-          ...cleanSchemaAttributes(attributes, {
-            didAddStrapiComponentsToSchemas,
-          }),
-        },
-      },
       [`${pascalCase(uniqueName)}ResponseDataObjectLocalized`]: {
         type: 'object',
         properties: {
           id: { type: 'number' },
           attributes: {
-            type: 'object',
-            properties: cleanSchemaAttributes(attributes, {
-              didAddStrapiComponentsToSchemas,
-            }),
+            $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
           },
+        },
+      },
+      [`${pascalCase(uniqueName)}LocalizationResponse`]: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: `#/components/schemas/${pascalCase(uniqueName)}ResponseDataObjectLocalized`,
+          },
+          meta: { type: 'object' },
         },
       },
     };
@@ -138,10 +135,32 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           properties: {
             id: { type: 'number' },
             attributes: {
+              $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
+            },
+          },
+        },
+        [`${pascalCase(uniqueName)}LocalizationListResponse`]: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: `#/components/schemas/${pascalCase(uniqueName)}ListResponseDataItemLocalized`,
+              },
+            },
+            meta: {
               type: 'object',
-              properties: cleanSchemaAttributes(attributes, {
-                didAddStrapiComponentsToSchemas,
-              }),
+              properties: {
+                pagination: {
+                  type: 'object',
+                  properties: {
+                    page: { type: 'integer' },
+                    pageSize: { type: 'integer', minimum: 25 },
+                    pageCount: { type: 'integer', maximum: 1 },
+                    total: { type: 'integer' },
+                  },
+                },
+              },
             },
           },
         },
@@ -155,17 +174,12 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         properties: {
           id: { type: 'number' },
           attributes: {
-            type: 'object',
-            properties: cleanSchemaAttributes(attributes, {
-              didAddStrapiComponentsToSchemas,
-              componentSchemaRefName: `#/components/schemas/${pascalCase(
-                uniqueName
-              )}ListResponseDataItemLocalized`,
-            }),
+            $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
           },
         },
       },
       [`${pascalCase(uniqueName)}ListResponse`]: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -177,6 +191,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
             type: 'object',
             properties: {
               pagination: {
+                type: 'object',
                 properties: {
                   page: { type: 'integer' },
                   pageSize: { type: 'integer', minimum: 25 },
@@ -193,22 +208,24 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Build the response schema
   schemas = {
     ...schemas,
+    [`${pascalCase(uniqueName)}`]: {
+      type: 'object',
+      properties: cleanSchemaAttributes(attributes, {
+        didAddStrapiComponentsToSchemas,
+        componentSchemaRefName: `#/components/schemas/${pascalCase(uniqueName)}`,
+      }),
+    },
     [`${pascalCase(uniqueName)}ResponseDataObject`]: {
       type: 'object',
       properties: {
         id: { type: 'number' },
         attributes: {
-          type: 'object',
-          properties: cleanSchemaAttributes(attributes, {
-            didAddStrapiComponentsToSchemas,
-            componentSchemaRefName: `#/components/schemas/${pascalCase(
-              uniqueName
-            )}ResponseDataObjectLocalized`,
-          }),
+          $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
         },
       },
     },
     [`${pascalCase(uniqueName)}Response`]: {
+      type: 'object',
       properties: {
         data: {
           $ref: `#/components/schemas/${pascalCase(uniqueName)}ResponseDataObject`,
