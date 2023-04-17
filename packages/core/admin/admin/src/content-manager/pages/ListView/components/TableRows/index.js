@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import { AxiosError } from 'axios';
 
 import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
-import { useTracking, useFetchClient } from '@strapi/helper-plugin';
+import { useTracking, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 
 import { usePluginsQueryParams } from '../../../../hooks';
 
 import { getFullName } from '../../../../../utils';
 
 import CellContent from '../CellContent';
+import { getTrad } from '../../../../utils';
 
 export const TableRows = ({
   canCreate,
@@ -34,6 +34,7 @@ export const TableRows = ({
 
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   /**
    *
@@ -66,11 +67,9 @@ export const TableRows = ({
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        const serverError = err.response.data;
-
         push({
           pathname: `${pathname}/create/clone/${id}`,
-          state: { from: pathname, error: serverError },
+          state: { from: pathname, error: formatAPIError(err) },
           search: pluginsQueryParams,
         });
       }
@@ -94,7 +93,11 @@ export const TableRows = ({
         );
 
         return (
-          <Row key={data.id} onClick={handleRowClick(data.id)} $isClickable={withBulkActions}>
+          <Tr
+            cursor={withBulkActions ? 'pointer' : 'default'}
+            key={data.id}
+            onClick={handleRowClick(data.id)}
+          >
             {withMainAction && (
               <Td onClick={(e) => e.stopPropagation()}>
                 <BaseCheckbox
@@ -186,16 +189,12 @@ export const TableRows = ({
                 </Flex>
               </Td>
             )}
-          </Row>
+          </Tr>
         );
       })}
     </Tbody>
   );
 };
-
-const Row = styled(Tr)`
-  cursor: ${({ $isClickable }) => ($isClickable ? 'pointer' : 'default')};
-`;
 
 TableRows.defaultProps = {
   canCreate: false,

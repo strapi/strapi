@@ -422,7 +422,7 @@ function ListView({
       )}
       <ContentLayout>
         {canRead ? (
-          <>
+          <Flex gap={4} direction="column" alignItems="stretch">
             <DynamicTable
               components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
               contentType={headerLayoutTitle}
@@ -446,11 +446,11 @@ function ListView({
                 withMainAction={canDelete && isBulkable}
               />
             </DynamicTable>
-            <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
+            <Flex alignItems="flex-end" justifyContent="space-between">
               <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
               <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
             </Flex>
-          </>
+          </Flex>
         ) : (
           <NoPermissions />
         )}
