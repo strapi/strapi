@@ -49,6 +49,15 @@ module.exports = () => ({
     return fieldSizes;
   },
   getFieldSize(type) {
-    return fieldSizes[type];
+    if (!type) {
+      throw new Error('The type is required');
+    }
+
+    const fieldSize = fieldSizes[type];
+    if (!fieldSize) {
+      throw new Error(`Could not find field size for type ${type}`);
+    }
+
+    return fieldSize;
   },
 });
