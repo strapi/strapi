@@ -102,7 +102,6 @@
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
-    "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "2.7.2",
     "node-schedule": "2.1.0",
     "p-map": "4.0.0",
