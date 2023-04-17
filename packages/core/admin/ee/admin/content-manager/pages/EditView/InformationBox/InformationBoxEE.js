@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
-import { submitSucceeded } from '../../../../../../admin/src/content-manager/sharedReducers/crudReducer/actions';
+import { updatePartialData } from '../../../../../../admin/src/content-manager/sharedReducers/crudReducer/actions';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 
@@ -50,7 +50,7 @@ export function InformationBoxEE() {
         data: { id: stageId },
       });
 
-      dispatch(submitSucceeded(createdEntity));
+      dispatch(updatePartialData({ [ATTRIBUTE_NAME]: createdEntity[ATTRIBUTE_NAME] }));
 
       return createdEntity;
     },
@@ -111,7 +111,6 @@ export function InformationBoxEE() {
               components={{
                 LoadingIndicator: () => <Loader small />,
               }}
-              defaultValue={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
               isLoading={isLoading}
@@ -122,6 +121,7 @@ export function InformationBoxEE() {
               options={
                 workflow ? workflow.stages.map(({ id, name }) => ({ value: id, label: name })) : []
               }
+              value={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
             />
 
             <FieldError />
