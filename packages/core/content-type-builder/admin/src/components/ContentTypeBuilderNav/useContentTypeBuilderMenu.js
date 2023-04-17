@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
-import isEmpty from 'lodash/isEmpty';
-import sortBy from 'lodash/sortBy';
-import toLower from 'lodash/toLower';
+import { useNotification, useTracking, useFilter, useCollator } from '@strapi/helper-plugin';
 import isEqual from 'lodash/isEqual';
-import matchSorter from 'match-sorter';
+import { useIntl } from 'react-intl';
+
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
@@ -24,32 +23,18 @@ const useContentTypeBuilderMenu = () => {
   const { trackUsage } = useTracking();
   const [search, setSearch] = useState('');
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
+  const { locale } = useIntl();
 
-  const componentsData = sortBy(
-    Object.keys(componentsGroupedByCategory).map((category) => ({
-      name: category,
-      title: category,
-      isEditable: isInDevelopmentMode,
-      onClickEdit(e, data) {
-        e.stopPropagation();
+  const { contains } = useFilter(locale, {
+    sensitivity: 'base',
+  });
 
-        if (canOpenModalCreateCTorComponent) {
-          onOpenModalEditCategory(data.name);
-        } else {
-          toggleNotificationCannotCreateSchema();
-        }
-      },
-      links: sortBy(
-        componentsGroupedByCategory[category].map((compo) => ({
-          name: compo.uid,
-          to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
-          title: compo.schema.displayName,
-        })),
-        (obj) => obj.title
-      ),
-    })),
-    (obj) => obj.title
-  );
+  /**
+   * @type {Intl.Collator}
+   */
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
@@ -111,11 +96,35 @@ const useContentTypeBuilderMenu = () => {
     toggleNotification({
       type: 'info',
       message: {
-        id: `${getTrad('notification.info.creating.notSaved')}`,
+        id: getTrad('notification.info.creating.notSaved'),
         defaultMessage: 'Please save your work before creating a new collection type or component',
       },
     });
   };
+
+  const componentsData = Object.entries(componentsGroupedByCategory)
+    .map(([category, components]) => ({
+      name: category,
+      title: category,
+      isEditable: isInDevelopmentMode,
+      onClickEdit(e, data) {
+        e.stopPropagation();
+
+        if (canOpenModalCreateCTorComponent) {
+          onOpenModalEditCategory(data.name);
+        } else {
+          toggleNotificationCannotCreateSchema();
+        }
+      },
+      links: components
+        .map((compo) => ({
+          name: compo.uid,
+          to: `/plugins/${pluginId}/component-categories/${category}/${compo.uid}`,
+          title: compo.schema.displayName,
+        }))
+        .sort((a, b) => formatter.compare(a.title, b.title)),
+    }))
+    .sort((a, b) => formatter.compare(a.title, b.title));
 
   const displayedContentTypes = sortedContentTypesList.filter((obj) => obj.visible);
 
@@ -159,31 +168,34 @@ const useContentTypeBuilderMenu = () => {
       },
       links: componentsData,
     },
-  ];
+  ].map((section) => {
+    const hasChild = section.links.some((l) => Array.isArray(l.links));
 
-  const matchByTitle = (links) =>
-    search ? matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] }) : links;
-
-  const getMenu = () => {
-    // Maybe we can do it simpler with matchsorter wildcards ?
-    return data.map((section) => {
-      const hasChild = section.links.some((l) => !isEmpty(l.links));
-
-      if (hasChild) {
-        return {
-          ...section,
-          links: section.links.map((l) => ({ ...l, links: matchByTitle(l.links) })),
-        };
-      }
-
+    if (hasChild) {
       return {
         ...section,
-        links: matchByTitle(section.links),
+        links: section.links.map((link) => ({
+          ...link,
+          links: link.links
+            .filter((link) => contains(link.title, search))
+            .sort((a, b) => formatter.compare(a.title, b.title)),
+        })),
       };
-    });
-  };
+    }
 
-  return { menu: getMenu(), searchValue: search, onSearchChange: setSearch };
+    return {
+      ...section,
+      links: section.links
+        .filter((link) => contains(link.title, search))
+        .sort((a, b) => formatter.compare(a.title, b.title)),
+    };
+  });
+
+  return {
+    menu: data,
+    searchValue: search,
+    onSearchChange: setSearch,
+  };
 };
 
 export default useContentTypeBuilderMenu;
