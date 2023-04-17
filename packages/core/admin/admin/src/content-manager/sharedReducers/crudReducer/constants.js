@@ -7,3 +7,4 @@ export const SET_STATUS = 'ContentManager/CrudReducer/SET_STATUS';
 export const SUBMIT_SUCCEEDED = 'ContentManager/CrudReducer/SUBMIT_SUCCEEDED';
 export const CLEAR_SET_MODIFIED_DATA_ONLY =
   'ContentManager/CrudReducer/CLEAR_SET_MODIFIED_DATA_ONLY';
+export const UPDATE_PARTIAL_DATA = 'ContentManager/CrudReducer/PARTIAL_DATA_UPDATE';
