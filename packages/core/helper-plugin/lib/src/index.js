@@ -12,7 +12,6 @@ export { default as TrackingContext } from './contexts/TrackingContext';
 // Hooks
 export { default as useGuidedTour } from './hooks/useGuidedTour';
 export { default as useAppInfos } from './hooks/useAppInfos';
-
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useCustomFields } from './hooks/useCustomFields';
@@ -20,6 +19,9 @@ export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useTracking } from './hooks/useTracking';
 export { useSelectionState } from './hooks/useSelectionState';
+export * from './hooks/useAPIErrorHandler';
+export { useFilter } from './hooks/useFilter';
+export { useCollator } from './hooks/useCollator';
 
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
@@ -101,6 +103,5 @@ export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
-export * from './hooks/useAPIErrorHandler';
 
 export { default as getFetchClient } from './utils/getFetchClient';
