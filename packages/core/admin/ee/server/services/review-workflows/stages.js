@@ -58,7 +58,7 @@ module.exports = ({ strapi }) => {
 
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
-      return strapi.db.transaction(async ({ trx }) => {
+      return strapi.db.transaction(async () => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
