@@ -4,6 +4,7 @@ const {
   mapAsync,
   errors: { ApplicationError },
 } = require('@strapi/utils');
+const { map } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
@@ -51,10 +52,10 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
-    async replaceWorkflowStages(workflowId, newStages) {
+    async replaceWorkflowStages(workflowId, stages) {
       const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
 
-      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, newStages);
+      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
 
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
@@ -62,8 +63,8 @@ module.exports = ({ strapi }) => {
         // Create the new stages
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
-        const createdStagesCopy = [...createdStages];
-        const stages = newStages.map((stage) => (stage.id ? stage : createdStagesCopy.shift()));
+        const createdStagesIds = map('id', createdStages);
+        const stagesIds = stages.map((stage) => stage.id ?? createdStagesIds.shift());
         const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
 
         // Update the workflow stages
@@ -96,7 +97,7 @@ module.exports = ({ strapi }) => {
         });
 
         return workflowsService.update(workflowId, {
-          stages: stages.map((stage) => stage.id),
+          stages: stagesIds,
         });
       });
     },
