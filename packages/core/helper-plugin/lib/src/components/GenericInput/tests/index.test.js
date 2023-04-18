@@ -66,6 +66,20 @@ function setupDatetimePicker(props) {
 }
 
 describe('GenericInput', () => {
+  /**
+  * We do this because –
+  * https://github.com/facebook/jest/issues/12670
+  */
+  beforeAll(() => {
+    jest.setTimeout(30000);
+  });
+
+  /**
+   * Reset timeout to what is expected
+   */
+  afterAll(() => {
+    jest.setTimeout(5000);
+  });
   describe('number', () => {
     test('renders and matches the snapshot', () => {
       const { container } = setupNumber();
@@ -152,20 +166,6 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
-    /**
-     * We do this because –
-     * https://github.com/facebook/jest/issues/12670
-    */
-    beforeAll(() => {
-      jest.setTimeout(30000);
-    });
-
-    /**
-     * Reset timeout to what is expected
-     */
-    afterAll(() => {
-      jest.setTimeout(5000);
-    });
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
       const { getByRole } = setupDatetimePicker();
