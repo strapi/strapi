@@ -13,6 +13,7 @@ import path from 'path';
  * */
 
 // Check if the directory of a given filePath (which can be either posix or win32) resolves to the same as the given posix-format path posixDirName
+// We must be able to assume the first argument is a path, otherwise path.dirname will interpret a path without any slashes as the filename
 export const isDirPathEquivalent = (posixDirName: string, filePath: string) => {
   const normalizedDir = path.posix.dirname(unknownPathToPosix(filePath));
   return isPathEquivalent(posixDirName, normalizedDir);
