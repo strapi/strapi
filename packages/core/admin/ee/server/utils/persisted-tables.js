@@ -1,5 +1,19 @@
 'use strict';
 
+const { differenceWith, isEqual } = require('lodash/fp');
+
+/**
+ * Transform table name to the object format
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} table
+ * @returns Array<{ table: string; dependsOn?: Array<{ table: string;}> }>
+ */
+const transformTableName = (table) => {
+  if (typeof table === 'string') {
+    return { name: table };
+  }
+  return table;
+};
+
 /**
  * Finds all tables in the database matching the regular expression
  * @param {Object} ctx
@@ -16,22 +30,59 @@ async function findTables({ strapi }, regex) {
  * Add tables name to the reserved tables in core store
  * @param {Object} ctx
  * @param {Strapi} ctx.strapi
- * @param  {string[]} tableNames
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
  * @return {Promise<void>}
  */
 async function addPersistTables({ strapi }, tableNames) {
   const persistedTables = await getPersistedTables({ strapi });
-  const notReservedTableNames = tableNames.filter((name) => !persistedTables.includes(name));
+  const tables = tableNames.map(transformTableName);
 
-  if (!notReservedTableNames.length) {
+  // Get new tables to be persisted, remove tables if they already were persisted
+  const notPersistedTableNames = differenceWith(isEqual, tables, persistedTables);
+  // Remove tables that are going to be changed
+  const tablesToPersist = differenceWith(
+    (t1, t2) => t1.name === t2.name,
+    persistedTables,
+    notPersistedTableNames
+  );
+
+  if (!notPersistedTableNames.length) {
     return;
   }
 
-  persistedTables.push(...notReservedTableNames);
+  tablesToPersist.push(...notPersistedTableNames);
   await strapi.store.set({
     type: 'core',
     key: 'persisted_tables',
-    value: persistedTables,
+    value: tablesToPersist,
+  });
+}
+
+/**
+ * Remove tables name from the reserved tables in core store
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {Array<string>} tableNames
+ * @return {Promise<void>}
+ */
+async function removePersistedTables({ strapi }, tableNames) {
+  const persistedTables = await getPersistedTables({ strapi }); // Array<{name: string, dependsOn: Array<{name: string}>}>
+
+  // Using differenceWith instead of filter to avoid mutating the original array
+  const newPersistedTables = differenceWith(
+    (t1, t2) => t1.name === t2,
+    persistedTables,
+    tableNames
+  );
+
+  if (newPersistedTables.length === persistedTables.length) {
+    return;
+  }
+
+  await strapi.store.set({
+    type: 'core',
+    key: 'persisted_tables',
+    value: newPersistedTables,
   });
 }
 
@@ -42,10 +93,12 @@ async function addPersistTables({ strapi }, tableNames) {
  * @returns {Promise<string[]>}
  */
 const getPersistedTables = async ({ strapi }) =>
-  (await strapi.store.get({
-    type: 'core',
-    key: 'persisted_tables',
-  })) ?? [];
+  (
+    await strapi.store.get({
+      type: 'core',
+      key: 'persisted_tables',
+    })
+  ).map(transformTableName) ?? [];
 
 /**
  * Add all table names that start with a prefix to the reserved tables in
@@ -62,19 +115,25 @@ const persistTablesWithPrefix = async (tableNamePrefix) => {
 };
 
 /**
- * Add all table names that end with a suffix to the reserved tables in core store
+ * Remove all table names that end with a suffix from the reserved tables in core store
  * @param {string} tableNameSuffix
  * @return {Promise<void>}
  */
-const persistTablesWithSuffix = async (tableNameSuffix) => {
+const removePersistedTablesWithSuffix = async (tableNameSuffix) => {
   const tableNameRegex = new RegExp(`.*${tableNameSuffix}$`);
   const tableNames = await findTables({ strapi }, tableNameRegex);
+  await removePersistedTables({ strapi }, tableNames);
+};
 
-  await addPersistTables({ strapi }, tableNames);
+const persistTable = async (tableName, dependsOn) => {
+  await addPersistTables({ strapi }, [
+    { name: tableName, dependsOn: dependsOn?.map((depTableName) => ({ name: depTableName })) },
+  ]);
 };
 
 module.exports = {
   persistTablesWithPrefix,
-  persistTablesWithSuffix,
+  removePersistedTablesWithSuffix,
+  persistTable,
   findTables,
 };
