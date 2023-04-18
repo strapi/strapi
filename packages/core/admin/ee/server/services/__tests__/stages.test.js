@@ -53,7 +53,7 @@ const workflowMock = {
 };
 
 const entityServiceMock = {
-  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id)),
+  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id) || { id }),
   findMany: jest.fn(() => [stageMock]),
   create: jest.fn((uid, { data }) => ({
     ...data,
