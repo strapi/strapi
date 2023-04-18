@@ -3,7 +3,6 @@
 const os = require('os');
 const path = require('path');
 const _ = require('lodash');
-const { map, values, sumBy, pipe, flatMap, propEq } = require('lodash/fp');
 const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
@@ -41,14 +40,6 @@ module.exports = (strapi) => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const getNumberOfDynamicZones = () => {
-    return pipe(
-      map('attributes'),
-      flatMap(values),
-      sumBy(propEq('type', 'dynamiczone'))
-    )(strapi.contentTypes);
-  };
-
   const anonymousUserProperties = {
     environment: strapi.config.environment,
     os: os.type(),
@@ -66,9 +57,6 @@ module.exports = (strapi) => {
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-    numberOfAllContentTypes: _.size(strapi.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
-    numberOfComponents: _.size(strapi.components),
-    numberOfDynamicZones: getNumberOfDynamicZones(),
   };
 
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);

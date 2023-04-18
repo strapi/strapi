@@ -63,6 +63,7 @@ describe('Import', () => {
 
   // mock utils
   const mockUtils = {
+    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance: jest.fn().mockReturnValue({
