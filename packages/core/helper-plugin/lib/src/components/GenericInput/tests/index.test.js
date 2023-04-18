@@ -68,20 +68,6 @@ function setupDatetimePicker(props) {
 jest.setTimeout(50000);
 
 describe('GenericInput', () => {
-  /**
-  * We do this because –
-  * https://github.com/facebook/jest/issues/12670
-  */
-  beforeAll(() => {
-    jest.setTimeout(30000);
-  });
-
-  /**
-   * Reset timeout to what is expected
-   */
-  afterAll(() => {
-    jest.setTimeout(5000);
-  });
   describe('number', () => {
     test('renders and matches the snapshot', () => {
       const { container } = setupNumber();
@@ -170,19 +156,7 @@ describe('GenericInput', () => {
   describe('datetime', () => {
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
-      const { getByRole } = render(
-        <ComponentFixture
-          type='datetime'
-          name='datetime-picker'
-          intlLabel={{
-            id: 'label.test',
-            defaultMessage: 'datetime picker',
-          }}
-          value={null}
-          onChange={jest.fn()}
-          onClear={jest.fn()}
-        />
-      );;
+      const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: 'datetime picker' });
       
       await user.click(btnDate);
@@ -194,7 +168,7 @@ describe('GenericInput', () => {
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
       expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('00:00');
     });
-  }, 30000);
+  });
 
   test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
       const user = userEvent.setup();
@@ -206,5 +180,5 @@ describe('GenericInput', () => {
 
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
       expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
-  }, 30000);
+  });
 });
