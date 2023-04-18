@@ -344,6 +344,13 @@ module.exports = (db) => {
       }
     }
 
+    const parsePersistedTable = (persistedTable) => {
+      if (typeof persistedTable === 'string') {
+        return persistedTable;
+      }
+      return persistedTable.table;
+    };
+
     const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
       ? (await strapi.store.get({
           type: 'core',
@@ -351,12 +358,19 @@ module.exports = (db) => {
         })) ?? []
       : [];
 
+    const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
+
     for (const srcTable of srcSchema.tables) {
-      if (
-        !helpers.hasTable(destSchema, srcTable.name) &&
-        ![...RESERVED_TABLE_NAMES, ...persistedTables].includes(srcTable.name)
-      ) {
-        removedTables.push(srcTable);
+      if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
+        const dependencies = persistedTables
+          .filter((table) => {
+            return table?.dependsOn?.some((dep) => dep.table === srcTable.name);
+          })
+          .map((table) => {
+            return srcSchema.tables.find((t) => t.name === table.table);
+          });
+
+        removedTables.push(srcTable, ...dependencies);
       }
     }
 
@@ -369,7 +383,7 @@ module.exports = (db) => {
           added: addedTables,
           updated: updatedTables,
           unchanged: unchangedTables,
-          removed: removedTables,
+          removed: [...removedTables],
         },
       },
     };
