@@ -33,6 +33,7 @@ describe('File source provider', () => {
       ['some\\windows\\filename.jpg', 'some/windows/filename.jpg'],
       ['some\\windows\\noendingslash', 'some/windows/noendingslash'],
       ['some\\windows\\endingslash\\', 'some/windows/endingslash/'],
+      ['some\\windows/mixed', 'some\\windows/mixed'], // improper usage resulting in invalid path if provided mixed windows path, but test expected behaviour
     ];
     test.each(unknownConversionCases)('unknownPathToPosix: %p -> %p', (input, expected) => {
       expect(unknownPathToPosix(input)).toEqual(expected);
