@@ -187,7 +187,7 @@ const SocialLinks = () => {
       <GridGap>
         {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <GridItem col={6} s={12} key={name}>
+            <GridItem col={6} s={12} key={name.id}>
               <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
                 {formatMessage(name)}
               </LinkCustom>

@@ -20,6 +20,7 @@ const {
   loadersFactory,
   exitMessageText,
   abortTransfer,
+  getTransferTelemetryPayload,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
 
@@ -122,18 +123,12 @@ module.exports = async (opts) => {
     updateLoader(stage, data);
   });
 
-  const getTelemetryPayload = () => {
-    return {
-      eventProperties: {
-        source: engine.sourceProvider.name,
-        destination: engine.destinationProvider.name,
-      },
-    };
-  };
-
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
-    await strapiInstance.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
+    await strapiInstance.telemetry.send(
+      'didDEITSProcessStart',
+      getTransferTelemetryPayload(engine)
+    );
   });
 
   let results;
@@ -146,7 +141,7 @@ module.exports = async (opts) => {
 
     results = await engine.transfer();
   } catch (e) {
-    await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
+    await strapiInstance.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
     exitWith(1, exitMessageText('import', true));
   }
 
@@ -157,7 +152,8 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  // Note: we need to await telemetry or else the process ends before it is sent
+  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTransferTelemetryPayload(engine));
   await strapiInstance.destroy();
 
   exitWith(0, exitMessageText('import'));

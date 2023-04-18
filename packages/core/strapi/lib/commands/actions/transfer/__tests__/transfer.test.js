@@ -5,6 +5,7 @@ const { expectExit } = require('../../../__tests__/commands.test.utils');
 describe('Transfer', () => {
   // command utils
   const mockUtils = {
+    getTransferTelemetryPayload: jest.fn().mockReturnValue({}),
     loadersFactory: jest.fn().mockReturnValue({ updateLoader: jest.fn() }),
     formatDiagnostic: jest.fn(),
     createStrapiInstance() {
