@@ -37,7 +37,7 @@ export function useContentType(contentType, id) {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const query = useQuery(
-    'content-type',
+    ['content-manger', 'content-type', uid, id],
     async () => {
       dispatch(getData());
 
