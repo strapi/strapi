@@ -92,13 +92,15 @@ async function removePersistedTables({ strapi }, tableNames) {
  * @param {Strapi} ctx.strapi
  * @returns {Promise<string[]>}
  */
-const getPersistedTables = async ({ strapi }) =>
-  (
-    await strapi.store.get({
-      type: 'core',
-      key: 'persisted_tables',
-    })
-  ).map(transformTableName) ?? [];
+
+async function getPersistedTables({ strapi }) {
+  const persistedTables = await strapi.store.get({
+    type: 'core',
+    key: 'persisted_tables',
+  });
+
+  return (persistedTables || []).map(transformTableName);
+}
 
 /**
  * Add all table names that start with a prefix to the reserved tables in
