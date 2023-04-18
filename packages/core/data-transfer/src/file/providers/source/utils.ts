@@ -12,23 +12,37 @@ import path from 'path';
  *
  * */
 
-// Check if the directory of a given filePath (which can be either posix or win32) resolves to the same as the given posix-format path posixDirName
-// We must be able to assume the first argument is a path, otherwise path.dirname will interpret a path without any slashes as the filename
-export const isDirPathEquivalent = (posixDirName: string, filePath: string) => {
+/**
+ * Check if the directory of a given filePath (which can be either posix or win32) resolves to the same as the given posix-format path posixDirName
+ * We must be able to assume the first argument is a path to a directory and the second is a path to a file, otherwise path.dirname will interpret a path without any slashes as the filename
+ *
+ * @param {string} posixDirName A posix path pointing to a directory
+ * @param {string} filePath an unknown filesystem path pointing to a file
+ * @returns {boolean} is the file located in the given directory
+ */
+export const isFilePathInDirname = (posixDirName: string, filePath: string) => {
   const normalizedDir = path.posix.dirname(unknownPathToPosix(filePath));
   return isPathEquivalent(posixDirName, normalizedDir);
 };
 
-// Check if two paths that can be either in posix or win32 format resolves to the same file
-export const isPathEquivalent = (fileA: string, fileB: string) => {
+/**
+ *  Check if two paths that can be either in posix or win32 format resolves to the same file
+ *
+ * @param {string} pathA a path that may be either win32 or posix
+ * @param {string} pathB a path that may be either win32 or posix
+ *
+ * @returns {boolean} do paths point to the same place
+ */
+export const isPathEquivalent = (pathA: string, pathB: string) => {
   // Check if paths appear to be win32 or posix, and if win32 convert to posix
-  const normalizedPathA = unknownPathToPosix(fileA);
-  const normalizedPathB = unknownPathToPosix(fileB);
+  const normalizedPathA = path.posix.normalize(unknownPathToPosix(pathA));
+  const normalizedPathB = path.posix.normalize(unknownPathToPosix(pathB));
 
   return !path.posix.relative(normalizedPathB, normalizedPathA).length;
 };
 
 /**
+ *  Convert an unknown format path (win32 or posix) to a posix path
  *
  * @param {string} filePath a path that may be either win32 or posix
  *

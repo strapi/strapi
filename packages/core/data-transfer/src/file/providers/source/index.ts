@@ -15,7 +15,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
-import { isDirPathEquivalent, isPathEquivalent, unknownPathToPosix } from './utils';
+import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -143,7 +143,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             if (entry.type !== 'File') {
               return false;
             }
-            return isDirPathEquivalent('assets/uploads', filePath);
+            return isFilePathInDirname('assets/uploads', filePath);
           },
           onentry(entry) {
             // TODO: Check if we need to handle win32 paths here for the assets
@@ -203,7 +203,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            return isDirPathEquivalent(directory, filePath);
+            return isFilePathInDirname(directory, filePath);
           },
 
           async onentry(entry) {
