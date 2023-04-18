@@ -117,14 +117,23 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
+                  label: 'useAPIErrorHandler',
+                  id: 'core/helper-plugin/hooks/use-api-error-handler',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCollator',
+                  id: 'core/helper-plugin/hooks/use-collator',
+                },
+                {
+                  type: 'doc',
                   label: 'useFetchClient',
                   id: 'core/helper-plugin/hooks/use-fetch-client',
                 },
-
                 {
                   type: 'doc',
-                  label: 'useAPIErrorHandler',
-                  id: 'core/helper-plugin/hooks/use-api-error-handler',
+                  label: 'useFilter',
+                  id: 'core/helper-plugin/hooks/use-filter',
                 },
               ],
             },
