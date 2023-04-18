@@ -104,7 +104,7 @@ export interface DeletedDiff<T = unknown> {
   value: T;
 }
 
-export type Diff = AddedDiff | ModifiedDiff | DeletedDiff;
+export type Diff<T = unknown> = AddedDiff<T> | ModifiedDiff<T> | DeletedDiff<T>;
 
 export interface Context {
   path: string[];
