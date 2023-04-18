@@ -152,32 +152,45 @@ describe('GenericInput', () => {
   });
 
   describe('datetime', () => {
+    /**
+     * We do this because –
+     * https://github.com/facebook/jest/issues/12670
+    */
+    beforeAll(() => {
+      jest.setTimeout(30000);
+    });
+
+    /**
+     * Reset timeout to what is expected
+     */
+    afterAll(() => {
+      jest.setTimeout(5000);
+    });
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
-      const { getByRole, debug } = setupDatetimePicker();
+      const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: 'datetime picker' });
-      debug();
-
+      
       await user.click(btnDate);
       await user.click(getByRole('button', { name: /15/ }));
-      // const today = new Date();
-      // const month = today.getMonth() + 1;
-      // const year = today.getFullYear();
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
       
-      // expect(getByRole('textbox', { name: 'datetime' })).toHaveValue(`${month}/15/${year}`);
-      // expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('00:00');
+      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
+      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('00:00');
     });
   });
 
-  // test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
-  //     const user = userEvent.setup();
-  //     const { getByRole } = setupDatetimePicker();
-  //     const btnDate = getByRole('textbox', { name: /datetime/i });
-  //     await user.click(btnDate);
-  //     await user.click(getByRole('button', { name: /15/ }));      
-  //     await user.click(getByRole('button', { name: /clear date/i }));
+  test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
+      const user = userEvent.setup();
+      const { getByRole } = setupDatetimePicker();
+      const btnDate = getByRole('textbox', { name: /datetime picker/i });
+      await user.click(btnDate);
+      await user.click(getByRole('button', { name: /15/ }));      
+      await user.click(getByRole('button', { name: /clear date/i }));
 
-  //     expect(getByRole('textbox', { name: 'datetime' })).toHaveValue('');
-  //     expect(getByRole('combobox', { name: /datetime/i })).toHaveValue('');
-  // });
+      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
+      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
+  });
 });
