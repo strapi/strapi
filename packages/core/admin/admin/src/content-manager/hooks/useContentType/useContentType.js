@@ -44,17 +44,29 @@ export function useContentType(layout, id) {
   const query = useQuery(
     'content-type',
     async () => {
-      const url = getRequestUrl(`${collectionTypeUrlSlug}/${uid}/${id}`);
-
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(url);
-
-        dispatch(getDataSucceeded(data));
+        const { data } = await fetchClient.get(
+          getRequestUrl(`${collectionTypeUrlSlug}/${uid}/${id}`)
+        );
 
         return data;
       } catch (error) {
+        // todo
+      }
+
+      return null;
+    },
+    {
+      // Entities that have not yet been created can not be fetched
+      enabled: !isCreating,
+
+      onSuccess(data) {
+        dispatch(getDataSucceeded(data));
+      },
+
+      onError(error) {
         const responseStatus = error.response.status;
 
         switch (responseStatus) {
@@ -76,13 +88,7 @@ export function useContentType(layout, id) {
               message: formatAPIError(error),
             });
         }
-      }
-
-      return null;
-    },
-    {
-      // Entities that have not yet been created can not be fetched
-      enabled: !isCreating,
+      },
     }
   );
   const mutation = useMutation(contentTypeMutation);

@@ -41,10 +41,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     formattedContentTypeLayout: selectAttributesLayout(state),
     customFieldUids: selectCustomFieldUids(state),
   }));
-  const { create, update, publish, unpublish, del, contentType, isCreating } = useContentType(
-    layout,
-    id
-  );
+  const { del, contentType, isCreating } = useContentType(layout, id);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
@@ -90,15 +87,10 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
             componentsDataStructure={componentsDataStructure}
             contentTypeDataStructure={contentTypeDataStructure}
             from={redirectionLink}
-            initialValues={contentType.query.data}
-            isCreatingEntry={isCreating}
             isLoadingForData={contentType.query.isLoading}
             isSingleType={isSingleType}
-            onPost={create}
-            onPublish={publish}
+            // todo
             onDraftRelationCheck={onDraftRelationCheck}
-            onPut={update}
-            onUnpublish={unpublish}
             readActionAllowedFields={readActionAllowedFields}
             redirectToPreviousPage={goBack}
             slug={slug}

@@ -22,7 +22,7 @@ import {
 } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
-
+import { useContentType } from '../../hooks/useContentType';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
@@ -38,15 +38,8 @@ const EditViewDataManagerProvider = ({
   contentTypeDataStructure,
   createActionAllowedFields,
   from,
-  initialValues,
-  isCreatingEntry,
-  isLoadingForData,
   isSingleType,
-  onPost,
-  onPublish,
   onDraftRelationCheck,
-  onPut,
-  onUnpublish,
   readActionAllowedFields,
   // Not sure this is needed anymore
   redirectToPreviousPage,
@@ -54,6 +47,7 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  const { create, update, publish, unpublish, contentType, isCreating } = useContentType();
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -89,11 +83,11 @@ const EditViewDataManagerProvider = ({
   const trackUsageRef = useRef(trackUsage);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (isLoadingForData) {
+    if (contentType.query.isLoading) {
       return false;
     }
 
-    if (isCreatingEntry) {
+    if (isCreating) {
       return false;
     }
 
@@ -102,7 +96,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoadingForData, isCreatingEntry, canRead, canUpdate]);
+  }, [contentType.query.isLoading, isCreating, canRead, canUpdate]);
 
   useEffect(() => {
     if (status === 'resolved') {
@@ -114,7 +108,7 @@ const EditViewDataManagerProvider = ({
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!isLoadingForData) {
+    if (!contentType.query.isLoading) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,7 +148,7 @@ const EditViewDataManagerProvider = ({
 
   const { components } = allLayoutData;
 
-  const previousInitialValues = usePrev(initialValues);
+  const previousInitialValues = usePrev(contentType.query.data);
 
   useEffect(() => {
     /**
@@ -162,13 +156,13 @@ const EditViewDataManagerProvider = ({
      * otherwise it's a fruitless effort no matter what happens.
      */
     if (
-      initialValues &&
+      contentType.query.data &&
       currentContentTypeLayout?.attributes &&
-      !isEqual(previousInitialValues, initialValues)
+      !isEqual(previousInitialValues, contentType.query.data)
     ) {
       dispatch({
         type: 'INIT_FORM',
-        initialValues,
+        initialValues: contentType.query.data,
         components,
         attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
@@ -183,7 +177,7 @@ const EditViewDataManagerProvider = ({
       }
     }
   }, [
-    initialValues,
+    contentType.query.data,
     currentContentTypeLayout,
     components,
     setModifiedDataOnly,
@@ -245,7 +239,11 @@ const EditViewDataManagerProvider = ({
   const addRepeatableComponentToField = dispatchAddComponent('ADD_REPEATABLE_COMPONENT_TO_FIELD');
 
   const yupSchema = useMemo(() => {
-    const options = { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false };
+    const options = {
+      isCreatingEntry: isCreating,
+      isDraft: shouldNotRunValidations,
+      isFromComponent: false,
+    };
 
     return createYupSchema(
       currentContentTypeLayout,
@@ -254,12 +252,7 @@ const EditViewDataManagerProvider = ({
       },
       options
     );
-  }, [
-    allLayoutData.components,
-    currentContentTypeLayout,
-    isCreatingEntry,
-    shouldNotRunValidations,
-  ]);
+  }, [allLayoutData.components, currentContentTypeLayout, isCreating, shouldNotRunValidations]);
 
   const checkFormErrors = useCallback(
     async (dataToSet = {}) => {
@@ -376,10 +369,10 @@ const EditViewDataManagerProvider = ({
         if (isEmpty(errors)) {
           const formData = createFormData(modifiedData, initialData);
 
-          if (isCreatingEntry) {
-            await onPost(formData, trackerProperty);
+          if (isCreating) {
+            await create(formData, trackerProperty);
           } else {
-            await onPut(formData, trackerProperty);
+            await update(formData, trackerProperty);
           }
         }
       } catch (err) {
@@ -396,13 +389,13 @@ const EditViewDataManagerProvider = ({
     },
     [
       createFormData,
-      isCreatingEntry,
+      isCreating,
       modifiedData,
       initialData,
-      onPost,
-      onPut,
       trackerProperty,
       yupSchema,
+      create,
+      update,
     ]
   );
 
@@ -413,7 +406,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry, isDraft: false, isFromComponent: false }
+      { isCreatingEntry: isCreating, isDraft: false, isFromComponent: false }
     );
 
     const draftCount = await onDraftRelationCheck();
@@ -444,7 +437,7 @@ const EditViewDataManagerProvider = ({
 
     try {
       if (isEmpty(errors)) {
-        await onPublish();
+        await publish();
       }
     } catch (err) {
       errors = {
@@ -460,11 +453,11 @@ const EditViewDataManagerProvider = ({
   }, [
     allLayoutData,
     currentContentTypeLayout,
-    isCreatingEntry,
+    isCreating,
     modifiedData,
     publishConfirmation.show,
-    onPublish,
     onDraftRelationCheck,
+    publish,
   ]);
 
   const shouldCheckDZErrors = useCallback(
@@ -598,7 +591,7 @@ const EditViewDataManagerProvider = ({
         formErrors,
         hasDraftAndPublish,
         initialData,
-        isCreatingEntry,
+        isCreatingEntry: isCreating,
         isSingleType,
         shouldNotRunValidations,
         status,
@@ -615,7 +608,8 @@ const EditViewDataManagerProvider = ({
         moveComponentUp,
         onChange: handleChange,
         onPublish: handlePublish,
-        onUnpublish,
+        // todo
+        onUnpublish: unpublish,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
@@ -632,7 +626,7 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+      {contentType.query.isLoading || (!isCreating && !initialData.id) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>
@@ -653,7 +647,6 @@ const EditViewDataManagerProvider = ({
 
 EditViewDataManagerProvider.defaultProps = {
   from: '/',
-  initialValues: null,
   redirectToPreviousPage() {},
 };
 
@@ -665,15 +658,8 @@ EditViewDataManagerProvider.propTypes = {
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,
   from: PropTypes.string,
-  initialValues: PropTypes.object,
-  isCreatingEntry: PropTypes.bool.isRequired,
-  isLoadingForData: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
-  onPost: PropTypes.func.isRequired,
-  onPublish: PropTypes.func.isRequired,
   onDraftRelationCheck: PropTypes.func.isRequired,
-  onPut: PropTypes.func.isRequired,
-  onUnpublish: PropTypes.func.isRequired,
   readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
