@@ -43,7 +43,7 @@ function setupNumber(props) {
     input,
   };
 }
-
+/*
 function setupDatetimePicker(props) {
   const DATETIMEPICKER_FIXTURE_PROPS = {
     type: 'datetime',
@@ -64,7 +64,7 @@ function setupDatetimePicker(props) {
     ...rendered,
   };
 }
-
+*/
 jest.setTimeout(50000);
 
 describe('GenericInput', () => {
