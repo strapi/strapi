@@ -154,8 +154,9 @@ describe('GenericInput', () => {
   describe('datetime', () => {
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
-      const { getByRole } = setupDatetimePicker();
-      const btnDate = getByRole('textbox', { name: /datetime/i });
+      const { getByRole, debug } = setupDatetimePicker();
+      const btnDate = getByRole('textbox', { name: 'datetime' });
+      debug();
       await user.click(btnDate);
       await user.click(getByRole('button', { name: /15/ }));
       // const today = new Date();
