@@ -191,6 +191,13 @@ export function useContentType(contentType, id) {
   async function publish() {
     dispatch(setStatus('publish-pending'));
 
+    const numberOfDraftRelations = await fetchNumberOfDraftRelations();
+
+    // TODO
+    if (numberOfDraftRelations) {
+      throw new Error('bla');
+    }
+
     return mutation.mutateAsync({ method: 'post', action: 'publish', type: 'publish' });
   }
 
@@ -213,6 +220,30 @@ export function useContentType(contentType, id) {
         }
       },
     });
+  }
+
+  // react-query too?
+  async function fetchNumberOfDraftRelations() {
+    try {
+      trackUsage('willCheckDraftRelations');
+
+      const endPoint = getRequestUrl(`${uid}/actions/numberOfDraftRelations`);
+
+      dispatch(setStatus('draft-relation-check-pending'));
+
+      const {
+        data: { data },
+      } = await fetchClient.get(endPoint);
+      trackUsage('didCheckDraftRelations');
+
+      dispatch(setStatus('resolved'));
+
+      return data;
+    } catch (err) {
+      dispatch(setStatus('resolved'));
+    }
+
+    return null;
   }
 
   return {

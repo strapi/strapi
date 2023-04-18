@@ -45,7 +45,6 @@ const EditViewDataManagerProvider = ({
   createActionAllowedFields,
   from,
   isSingleType,
-  onDraftRelationCheck,
   readActionAllowedFields,
   // Not sure this is needed anymore
   redirectToPreviousPage,
@@ -454,21 +453,6 @@ const EditViewDataManagerProvider = ({
       { isCreatingEntry: isCreating, isDraft: false, isFromComponent: false }
     );
 
-    const draftCount = await onDraftRelationCheck();
-
-    if (!publishConfirmation.show && draftCount > 0) {
-      // If the warning hasn't already been shown and draft relations are found,
-      // abort the publish call and ask for confirmation from the user
-      dispatch({
-        type: 'SET_PUBLISH_CONFIRMATION',
-        publishConfirmation: {
-          show: true,
-          draftCount,
-        },
-      });
-
-      return;
-    }
     dispatch({
       type: 'RESET_PUBLISH_CONFIRMATION',
     });
@@ -485,6 +469,22 @@ const EditViewDataManagerProvider = ({
         await publish();
       }
     } catch (err) {
+      // TODO: find out what the best way to catch the error would be
+      if (!publishConfirmation.show && err) {
+        // If the warning hasn't already been shown and draft relations are found,
+        // abort the publish call and ask for confirmation from the user
+        dispatch({
+          type: 'SET_PUBLISH_CONFIRMATION',
+          publishConfirmation: {
+            show: true,
+            // maybe?
+            draftCount: err.details,
+          },
+        });
+
+        return;
+      }
+
       errors = {
         ...errors,
         ...getAPIInnerErrors(err, { getTrad }),
@@ -501,7 +501,6 @@ const EditViewDataManagerProvider = ({
     isCreating,
     modifiedData,
     publishConfirmation.show,
-    onDraftRelationCheck,
     publish,
   ]);
 
@@ -704,7 +703,6 @@ EditViewDataManagerProvider.propTypes = {
   createActionAllowedFields: PropTypes.array.isRequired,
   from: PropTypes.string,
   isSingleType: PropTypes.bool.isRequired,
-  onDraftRelationCheck: PropTypes.func.isRequired,
   readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,

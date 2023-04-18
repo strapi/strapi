@@ -72,13 +72,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
-      {({
-        componentsDataStructure,
-        contentTypeDataStructure,
-        onDraftRelationCheck,
-        redirectionLink,
-        status,
-      }) => {
+      {({ componentsDataStructure, contentTypeDataStructure, redirectionLink, status }) => {
         return (
           <EditViewDataManagerProvider
             allowedActions={allowedActions}
@@ -90,7 +84,6 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
             isLoadingForData={contentType.query.isLoading}
             isSingleType={isSingleType}
             // todo
-            onDraftRelationCheck={onDraftRelationCheck}
             readActionAllowedFields={readActionAllowedFields}
             redirectToPreviousPage={goBack}
             slug={slug}
