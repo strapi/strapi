@@ -109,6 +109,9 @@ describe('File source provider', () => {
       ['.\\one\\two\\file.jpg', './one/two/file.jpg', true],
       ['.\\one\\two\\file.jpg', '.\\one\\two\\file.jpg', true],
       ['.\\one\\two\\file.jpg', 'one\\two\\file.jpg', true],
+      // special characters
+      [".\\one\\two\\fi ' ^&*() le.jpg", "one/two/fi ' ^&*() le.jpg", true], // valid characters on win32
+      ['test/backslash\\file.jpg', 'test/backslash\\file.jpg', true], // backlash is valid on posix but not win32
 
       // NEGATIVES
       ['file.jpg', 'one/file.jpg', false],
@@ -118,6 +121,7 @@ describe('File source provider', () => {
       ['one/file.jpg', '\\one\\file.jpg', false],
       ['one/file.jpg', '/one/file.jpg', false],
       ['one/file.jpg', 'file.jpg', false],
+      ['test/mixedslash\\file.jpg', 'test/mixedslash/file.jpg', false], // windows path with mixed path separators should fail
     ];
     test.each(isPathEquivalentCases)(
       'isPathEquivalent: %p : %p -> %p',
