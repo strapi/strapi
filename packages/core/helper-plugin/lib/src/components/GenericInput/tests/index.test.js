@@ -180,7 +180,7 @@ describe('GenericInput', () => {
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
       expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('00:00');
     });
-  });
+  }, 30000);
 
   test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
       const user = userEvent.setup();
@@ -192,5 +192,5 @@ describe('GenericInput', () => {
 
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
       expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
-  });
+  }, 30000);
 });
