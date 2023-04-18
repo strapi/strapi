@@ -40,7 +40,7 @@ const checkCwdIsStrapiApp = (name) => {
 
   try {
     const pkgJSON = require(`${process.cwd()}/package.json`);
-    if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
+    if (!_.has(pkgJSON, 'dependencies.@strapi/strapi') || !_.has(pkgJSON, 'devDependencies.@strapi/strapi')) {
       logErrorAndExit(name);
     }
   } catch (err) {
