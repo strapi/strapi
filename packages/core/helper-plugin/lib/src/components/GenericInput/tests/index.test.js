@@ -157,7 +157,7 @@ describe('GenericInput', () => {
       const { getByRole } = setupDatetimePicker();
       const btnDate = getByRole('textbox', { name: /datetime/i });
       await user.click(btnDate);
-      // await user.click(getByRole('button', { name: /15/ }));
+      await user.click(getByRole('button', { name: /15/ }));
       // const today = new Date();
       // const month = today.getMonth() + 1;
       // const year = today.getFullYear();
