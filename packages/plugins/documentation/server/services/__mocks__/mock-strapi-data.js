@@ -92,6 +92,46 @@ module.exports = {
     },
   },
   api: {
+    homepage: {
+      contentTypes: {
+        homepage: contentTypes['api::homepage.homepage'],
+      },
+      routes: {
+        homepage: {
+          type: 'content-api',
+          routes: [
+            {
+              method: 'GET',
+              path: '/homepage',
+              handler: 'api::homepage.homepage.find',
+              config: { auth: { scope: ['api::homepage.homepage.find'] } },
+              info: { apiName: 'homepage', type: 'content-api' },
+            },
+            {
+              method: 'PUT',
+              path: '/homepage',
+              handler: 'api::homepage.homepage.update',
+              config: { auth: { scope: ['api::homepage.homepage.update'] } },
+              info: { apiName: 'homepage', type: 'content-api' },
+            },
+            {
+              method: 'DELETE',
+              path: '/homepage',
+              handler: 'api::homepage.homepage.delete',
+              config: { auth: { scope: ['api::homepage.homepage.delete'] } },
+              info: { apiName: 'homepage', type: 'content-api' },
+            },
+            {
+              method: 'POST',
+              path: '/homepage',
+              handler: 'api::homepage.homepage.create',
+              config: { auth: { scope: ['api::homepage.homepage.create'] } },
+              info: { apiName: 'homepage', type: 'content-api' },
+            },
+          ],
+        },
+      },
+    },
     kitchensink: {
       contentTypes: {
         kitchensink: contentTypes['api::kitchensink.kitchensink'],
