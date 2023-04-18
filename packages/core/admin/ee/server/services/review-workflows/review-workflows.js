@@ -10,6 +10,7 @@ const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
+const { persistTable, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
@@ -73,11 +74,19 @@ function enableReviewWorkflow({ strapi }) {
     const stagesService = getService('stages', { strapi });
 
     const up = async (contentTypeUID) => {
+      // Persist the stage join table
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
+      const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
+      await persistTable(joinTableName, [tableName]);
+
+      // Update CT entities stage
       return stagesService.updateEntitiesStage(contentTypeUID, {
         fromStageId: null,
         toStageId: firstStage.id,
       });
     };
+
+    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
 
     return pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
