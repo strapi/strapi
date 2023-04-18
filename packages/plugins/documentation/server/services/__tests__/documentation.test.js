@@ -78,6 +78,57 @@ describe('Documentation service', () => {
     await expect(validatePromise).resolves.not.toThrow();
   });
 
+  it('generates the correct response component schema for a single type', async () => {
+    const docService = documentation({ strapi: global.strapi });
+    await docService.generateFullDoc();
+    const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+    const mockFinalDoc = lastMockCall[1];
+    const expected = {
+      description: 'OK',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/HomepageResponse',
+          },
+        },
+      },
+    };
+    expect(mockFinalDoc.paths['/homepage'].get.responses['200']).toEqual(expected);
+    expect(mockFinalDoc.paths['/homepage'].put.responses['200']).toEqual(expected);
+    expect(mockFinalDoc.paths['/homepage'].post.responses['200']).toEqual(expected);
+  });
+
+  it('generates the correct response component schema for a collection type', async () => {
+    const docService = documentation({ strapi: global.strapi });
+    await docService.generateFullDoc();
+    const lastMockCall = fse.writeJson.mock.calls[fse.writeJson.mock.calls.length - 1];
+    const mockFinalDoc = lastMockCall[1];
+    const expectedList = {
+      description: 'OK',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/KitchensinkListResponse',
+          },
+        },
+      },
+    };
+    const expectedOne = {
+      description: 'OK',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/KitchensinkResponse',
+          },
+        },
+      },
+    };
+    expect(mockFinalDoc.paths['/kitchensinks'].get.responses['200']).toEqual(expectedList);
+    expect(mockFinalDoc.paths['/kitchensinks'].post.responses['200']).toEqual(expectedOne);
+    expect(mockFinalDoc.paths['/kitchensinks/{id}'].get.responses['200']).toEqual(expectedOne);
+    expect(mockFinalDoc.paths['/kitchensinks/{id}'].put.responses['200']).toEqual(expectedOne);
+  });
+
   describe('Determines the plugins that need documentation', () => {
     it('generates documentation for the default plugins if the user provided nothing in the config', async () => {
       const docService = documentation({ strapi: global.strapi });
