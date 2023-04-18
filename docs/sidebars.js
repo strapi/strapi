@@ -75,6 +75,11 @@ const sidebars = {
               label: 'Relations',
               id: 'core/content-manager/relations',
             },
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-manager/review-workflows',
+            },
           ],
         },
         {
@@ -84,7 +89,13 @@ const sidebars = {
             type: 'doc',
             id: 'core/content-type-builder/intro',
           },
-          items: ['example'],
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-type-builder/review-workflows',
+            },
+          ],
         },
         {
           type: 'category',
@@ -158,6 +169,21 @@ const sidebars = {
                   id: 'core/permissions/frontend/using-permissions',
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Settings',
+          link: {
+            type: 'doc',
+            id: 'core/settings/intro',
+          },
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/settings/review-workflows',
             },
           ],
         },
