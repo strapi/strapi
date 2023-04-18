@@ -27,7 +27,7 @@ const LeftMenu = () => {
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
   const { collectionTypeLinks, singleTypeLinks } = useSelector(modelLinksSelector, shallowEqual);
 
-  const { includes } = useFilter(locale, {
+  const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -65,7 +65,7 @@ const LeftMenu = () => {
           /**
            * Filter by the search value
            */
-          .filter((link) => includes(link.title, search))
+          .filter((link) => startsWith(link.title, search))
           /**
            * Sort correctly using the language
            */
@@ -80,7 +80,7 @@ const LeftMenu = () => {
             };
           }),
       })),
-    [collectionTypeLinks, search, singleTypeLinks, includes, formatMessage, formatter]
+    [collectionTypeLinks, search, singleTypeLinks, startsWith, formatMessage, formatter]
   );
 
   const handleClear = () => {

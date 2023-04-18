@@ -25,7 +25,7 @@ const useContentTypeBuilderMenu = () => {
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
   const { locale } = useIntl();
 
-  const { includes } = useFilter(locale, {
+  const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -186,7 +186,7 @@ const useContentTypeBuilderMenu = () => {
     return {
       ...section,
       links: section.links
-        .filter((link) => includes(link.title, search))
+        .filter((link) => startsWith(link.title, search))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     };
   });
