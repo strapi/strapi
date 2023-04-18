@@ -44,7 +44,7 @@ const customFieldsRegistry = (strapi) => {
           throw new Error(`Custom fields require a 'name' and 'type' key`);
         }
 
-        const { name, plugin, type } = cf;
+        const { name, plugin, type, inputSize } = cf;
         if (!ALLOWED_TYPES.includes(type)) {
           throw new Error(
             `Custom field type: '${type}' is not a valid Strapi type or it can't be used with a Custom Field`
@@ -54,6 +54,23 @@ const customFieldsRegistry = (strapi) => {
         const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;
         if (!isValidObjectKey.test(name)) {
           throw new Error(`Custom field name: '${name}' is not a valid object key`);
+        }
+
+        // Validate inputSize when provided
+        if (inputSize) {
+          if (
+            typeof inputSize !== 'object' ||
+            !has('default', inputSize) ||
+            !has('isResizable', inputSize)
+          ) {
+            throw new Error(`inputSize should be an object with 'default' and 'isResizable' keys`);
+          }
+          if (![4, 6, 8, 12].includes(inputSize.default)) {
+            throw new Error('Custom fields require a valid default input size');
+          }
+          if (typeof inputSize.isResizable !== 'boolean') {
+            throw new Error('Custom fields should specify if their input is resizable');
+          }
         }
 
         // When no plugin is specified, or it isn't found in Strapi, default to global

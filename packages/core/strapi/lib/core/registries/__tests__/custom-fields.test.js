@@ -90,6 +90,25 @@ describe('Custom fields registry', () => {
       );
     });
 
+    it('validates inputSize', () => {
+      const mockCF = {
+        name: 'test',
+        type: 'text',
+      };
+
+      const customFields = customFieldsRegistry(strapi);
+
+      expect(() => customFields.add({ ...mockCF, inputSize: 'small' })).toThrowError(
+        `inputSize should be an object with 'default' and 'isResizable' keys`
+      );
+      expect(() =>
+        customFields.add({ ...mockCF, inputSize: { default: 99, isResizable: true } })
+      ).toThrowError('Custom fields require a valid default input size');
+      expect(() =>
+        customFields.add({ ...mockCF, inputSize: { default: 12, isResizable: 'true' } })
+      ).toThrowError('Custom fields should specify if their input is resizable');
+    });
+
     it('confirms the custom field does not already exist', () => {
       const mockCF = {
         name: 'test',
