@@ -68,7 +68,7 @@ async function addPersistTables({ strapi }, tableNames) {
 async function removePersistedTables({ strapi }, tableNames) {
   const persistedTables = await getPersistedTables({ strapi }); // Array<{name: string, dependsOn: Array<{name: string}>}>
 
-  // Using differenceWith instead of filter to avoid mutating the original array
+  // Get new tables to be persisted, remove tables if they already were persisted
   const newPersistedTables = differenceWith(
     (t1, t2) => t1.name === t2,
     persistedTables,
