@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  formatContentTypeData,
   useFetchClient,
   useAPIErrorHandler,
   useNotification,
@@ -21,7 +22,8 @@ import {
 } from '../../sharedReducers/crudReducer/actions';
 
 // todo: useEntity(id, contentTypeLayout) ?
-export function useContentType(contentType, id) {
+export function useContentType(layout, id) {
+  const { contentType, components } = layout;
   const { uid } = contentType;
 
   const isCreating = !id;
@@ -60,8 +62,10 @@ export function useContentType(contentType, id) {
       enabled: !isCreating,
 
       onSuccess(data) {
+        // this is hell
+        const normalizedData = formatContentTypeData(data, contentType, components);
         // Write data to store
-        dispatch(getDataSucceeded(data));
+        dispatch(getDataSucceeded(normalizedData));
       },
 
       onError(error) {

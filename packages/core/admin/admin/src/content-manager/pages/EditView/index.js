@@ -41,7 +41,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
   }));
   const { componentsDataStructure, contentTypeDataStructure, status } =
     useSelector(selectCrudReducer);
-  const { del, contentType, isCreating } = useContentType(layout.contentType, id);
+  const { del, contentType, isCreating } = useContentType(layout, id);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 

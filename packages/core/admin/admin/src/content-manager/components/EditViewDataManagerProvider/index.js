@@ -54,9 +54,8 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, contentType, isCreating } = useContentType(
-    allLayoutData.contentType
-  );
+  const { create, update, publish, unpublish, contentType, isCreating } =
+    useContentType(allLayoutData);
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
