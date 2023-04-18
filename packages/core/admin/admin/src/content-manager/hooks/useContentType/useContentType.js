@@ -5,7 +5,6 @@ import {
   useNotification,
   useTracking,
   useQueryParams,
-  useGuidedTour,
   formatContentTypeData,
 } from '@strapi/helper-plugin';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
@@ -94,7 +93,6 @@ export function useContentType(layout, id) {
   const mutation = useMutation(contentTypeMutation);
   const redirectLink = useFindRedirectionLink(uid);
   const queryClient = useQueryClient();
-  const { setCurrentStep } = useGuidedTour();
 
   // TODO: can we find a way to not do this?
   React.useEffect(() => {
@@ -207,10 +205,8 @@ export function useContentType(layout, id) {
       data: body,
       type: 'create',
       onSuccess() {
-        // TODO: Move guided tour out of this
-        setCurrentStep('contentManager.success');
+        // maeh
         queryClient.invalidateQueries(['relation']);
-        replace(getRequestUrl(`/content-manager/collectionType/${uid}/${id}${rawQuery}`));
 
         if (!isCollectionType) {
           setIsCreatingEntry(false);

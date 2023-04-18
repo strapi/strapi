@@ -7,7 +7,7 @@ import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Prompt, Redirect } from 'react-router-dom';
+import { Prompt, Redirect, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Main } from '@strapi/design-system';
@@ -19,9 +19,10 @@ import {
   useTracking,
   getYupInnerErrors,
   getAPIInnerErrors,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 
-import { getTrad } from '../../utils';
+import { getTrad, getRequestUrl } from '../../utils';
 import { useContentType } from '../../hooks/useContentType';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
@@ -47,6 +48,8 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  const { replace } = useHistory();
+  const { setCurrentStep } = useGuidedTour();
   const { create, update, publish, unpublish, contentType, isCreating } = useContentType();
   /**
    * TODO: this should be moved into the global reducer
@@ -370,7 +373,13 @@ const EditViewDataManagerProvider = ({
           const formData = createFormData(modifiedData, initialData);
 
           if (isCreating) {
-            await create(formData, trackerProperty);
+            const { id } = await create(formData, trackerProperty);
+
+            // Move the guided tour forward
+            setCurrentStep('contentManager.success');
+
+            // Update URL for the new entity
+            replace(getRequestUrl(`/content-manager/collectionType/${slug}/${id}`));
           } else {
             await update(formData, trackerProperty);
           }
@@ -396,6 +405,9 @@ const EditViewDataManagerProvider = ({
       yupSchema,
       create,
       update,
+      replace,
+      setCurrentStep,
+      slug,
     ]
   );
 
