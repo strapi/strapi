@@ -86,7 +86,20 @@ export function useContentType(contentType, id) {
       },
     }
   );
-  const mutation = useMutation(contentTypeMutation);
+  const mutation = useMutation(contentTypeMutation, {
+    onSuccess() {
+      dispatch(setStatus('resolved'));
+    },
+
+    onError(error) {
+      dispatch(setStatus('resolved'));
+
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+    },
+  });
   const redirectLink = useFindRedirectionLink(uid);
   const queryClient = useQueryClient();
 
@@ -146,14 +159,6 @@ export function useContentType(contentType, id) {
       return data;
     } catch (error) {
       trackUsage(`didNot${trackingEventName}Entry`);
-
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
-      });
-    } finally {
-      // TODO: could be derived outside from mutation
-      dispatch(setStatus('resolved'));
     }
 
     return null;
