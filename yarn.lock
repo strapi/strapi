@@ -7003,6 +7003,7 @@ __metadata:
     babel-loader: ^9.1.2
     babel-plugin-styled-components: 2.0.2
     bcryptjs: 2.4.3
+    browserslist: ^4.17.3
     browserslist-to-esbuild: 1.2.0
     chalk: ^4.1.2
     chokidar: ^3.5.1
@@ -7045,7 +7046,6 @@ __metadata:
     markdown-it-mark: ^3.0.1
     markdown-it-sub: ^1.0.0
     markdown-it-sup: 1.0.0
-    match-sorter: ^4.0.2
     mini-css-extract-plugin: 2.7.2
     msw: 1.0.1
     node-schedule: 2.1.0
@@ -7263,7 +7263,6 @@ __metadata:
     history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
-    match-sorter: ^4.0.2
     prop-types: ^15.7.2
     qs: 6.11.1
     react: ^17.0.2
@@ -7382,7 +7381,6 @@ __metadata:
     history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
-    match-sorter: ^4.0.2
     pluralize: ^8.0.0
     prop-types: ^15.7.2
     qs: 6.11.1
@@ -7634,7 +7632,6 @@ __metadata:
     koa: ^2.13.4
     koa2-ratelimit: ^1.1.2
     lodash: 4.17.21
-    match-sorter: ^4.0.2
     msw: 1.0.1
     prop-types: ^15.7.2
     purest: 4.0.2
@@ -22246,16 +22243,6 @@ __metadata:
   bin:
     marked: bin/marked.js
   checksum: bd551cd61028ee639d4ca2ccdfcc5a6ba4227c1b143c4538f3cde27f569dcb57df8e6313560394645b418b84a7336c07ab1e438b89b6324c29d7d8cdd3102d63
-  languageName: node
-  linkType: hard
-
-"match-sorter@npm:^4.0.2":
-  version: 4.2.1
-  resolution: "match-sorter@npm:4.2.1"
-  dependencies:
-    "@babel/runtime": ^7.10.5
-    remove-accents: 0.4.2
-  checksum: 7f3cd8f84cdb4567b7a81f66a095e418044f318f41b6c8a1640730c99e370af9e5054f5a1ed2dfa1287a23101d75a105da63e4d95e8ac2f7061a8f8b32367c7d
   languageName: node
   linkType: hard
 

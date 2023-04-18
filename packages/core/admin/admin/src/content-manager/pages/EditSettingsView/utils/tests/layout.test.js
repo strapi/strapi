@@ -1,7 +1,6 @@
 import {
   createLayout,
   formatLayout,
-  getDefaultInputSize,
   getFieldSize,
   setFieldSize,
   getRowSize,
@@ -115,24 +114,6 @@ describe('Content Manager | containers | EditSettingsView | utils | layout', () 
       ];
 
       expect(formatLayout(expected)).toEqual(expected);
-    });
-  });
-
-  describe('getDefaultInputSize', () => {
-    it('Should return 6 if the type is unknown, undefined or text', () => {
-      expect(getDefaultInputSize(undefined)).toBe(6);
-      expect(getDefaultInputSize('unkown')).toBe(6);
-      expect(getDefaultInputSize('text')).toBe(6);
-    });
-
-    it('Should return 12 if the type is either json, component or richtext', () => {
-      expect(getDefaultInputSize('json')).toBe(12);
-      expect(getDefaultInputSize('richtext')).toBe(12);
-      expect(getDefaultInputSize('component')).toBe(12);
-    });
-
-    it('Should return 4 if the type is boolean', () => {
-      expect(getDefaultInputSize('boolean')).toBe(4);
     });
   });
 
