@@ -44,12 +44,10 @@ describe('File source provider', () => {
       ['some/path/on/posix/', 'some/path/on/posix/file.jpg', true],
       ['./some/path/on/posix', 'some/path/on/posix/file.jpg', true],
       ['some/path/on/posix/', './some/path/on/posix/file.jpg', true],
-      ['some/path/on/posix/', 'some/path/on/posix/', false], // invalid; second method should include a filename
-      ['some/path/on/posix', 'some/path/on/posix', false], // 'posix' in second case should be interpreted as a filename
-      ['', 'file.jpg', true],
+      ['some/path/on/posix/', 'some/path/on/posix/', false], // invalid; second should include a filename
+      ['some/path/on/posix', 'some/path/on/posix', false], // 'posix' in second should be interpreted as a filename
       ['', './file.jpg', true],
       ['./', './file.jpg', true],
-      ['noextension', 'noextension', false], // second case is a file
       ['noextension', './noextension/file.jpg', true],
       ['./noextension', './noextension/file.jpg', true],
       ['./noextension', 'noextension/file.jpg', true],
@@ -57,16 +55,17 @@ describe('File source provider', () => {
       // win32 paths
       ['some/path/on/win32', 'some\\path\\on\\win32\\file.jpg', true],
       ['some/path/on/win32/', 'some\\path\\on\\win32\\file.jpg', true],
-      ['some/path/on/win32/', 'some\\path\\on\\win32\\', false], // invalid; second method should include a filename
-      ['some/path/on/win32', 'some\\path\\on\\win32', false], // 'win32' in second case should be interpreted as a filename
-      ['', 'file.jpg', true],
+      ['some/path/on/win32/', 'some\\path\\on\\win32\\', false], // invalid; second should include a filename
+      ['some/path/on/win32', 'some\\path\\on\\win32', false], // 'win32' in second should be interpreted as a filename
       ['', '.\\file.jpg', true],
       ['./', '.\\file.jpg', true],
-      ['noextension', 'noextension', false], // second case is a file
       ['noextension', '.\\noextension\\file.jpg', true],
       ['./noextension', '.\\noextension\\file.jpg', true],
       ['./noextension', 'noextension\\file.jpg', true],
       ['noextension', 'noextension\\noextension', true],
+      // no path structure
+      ['', 'file.jpg', true],
+      ['noextension', 'noextension', false], // second case is a file
     ];
     test.each(isFilePathInDirnameCases)(
       'isFilePathInDirname: %p : %p -> %p',

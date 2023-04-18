@@ -9,6 +9,7 @@ import tar from 'tar-stream';
 export const createFilePathFactory =
   (type: string) =>
   (fileIndex = 0): string => {
+    // always write tar files with posix paths so we have a standard format for paths regardless of system
     return posix.join(
       // "{type}" directory
       type,
