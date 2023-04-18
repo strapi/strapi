@@ -5,7 +5,7 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
-const { persistTablesWithPrefix, persistTablesWithSuffix } = require('./utils/persisted-tables');
+const { persistTablesWithPrefix } = require('./utils/persisted-tables');
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');
@@ -22,7 +22,6 @@ module.exports = async () => {
 
   if (features.isEnabled('review-workflows')) {
     await persistTablesWithPrefix('strapi_workflows');
-    await persistTablesWithSuffix('_strapi_review_workflows_stage_links');
 
     const { bootstrap: rwBootstrap } = getService('review-workflows');
 
