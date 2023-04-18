@@ -1,5 +1,5 @@
 /**
- * Stolen from @react-aria/i18n
+ * Borrowed from @react-aria/i18n
  */
 
 /**

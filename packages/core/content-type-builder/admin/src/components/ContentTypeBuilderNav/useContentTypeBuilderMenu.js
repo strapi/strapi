@@ -174,12 +174,20 @@ const useContentTypeBuilderMenu = () => {
     if (hasChild) {
       return {
         ...section,
-        links: section.links.map((link) => ({
-          ...link,
-          links: link.links
-            .filter((link) => includes(link.title, search))
-            .sort((a, b) => formatter.compare(a.title, b.title)),
-        })),
+        links: section.links
+          .map((link) => {
+            const filteredLinks = link.links.filter((link) => startsWith(link.title, search));
+
+            if (filteredLinks.length === 0) {
+              return null;
+            }
+
+            return {
+              ...link,
+              links: filteredLinks.sort((a, b) => formatter.compare(a.title, b.title)),
+            };
+          })
+          .filter(Boolean),
       };
     }
 
