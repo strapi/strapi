@@ -373,7 +373,7 @@ class TransferEngine<
       const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
 
       if (schemaDiffs.length) {
-        diffs[key] = schemaDiffs;
+        diffs[key] = schemaDiffs as Diff<Schema>[];
       }
     });
 
