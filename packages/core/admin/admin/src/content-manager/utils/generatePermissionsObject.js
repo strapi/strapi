@@ -18,4 +18,3 @@ const generatePermissionsObject = (uid) => {
 };
 
 export default generatePermissionsObject;
-export { addSubjectToPermissionsArray };

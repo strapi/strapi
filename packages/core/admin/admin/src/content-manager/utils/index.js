@@ -15,5 +15,3 @@ export { default as getTrad } from './getTrad';
 export { default as ItemTypes } from './ItemTypes';
 
 export { default as mergeMetasWithSchema } from './mergeMetasWithSchema';
-
-export { default as removeKeyInObject } from './removeKeyInObject';
