@@ -11,11 +11,11 @@ import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getRequestUrl, getTrad } from '../../utils';
-import { getData, resetProps, setContentTypeLinks } from './actions';
+import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
 
-const useModels = () => {
+const useContentManagerInitData = () => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const state = useSelector(selectAppDomain());
@@ -29,22 +29,14 @@ const useModels = () => {
   const { get } = useFetchClient();
 
   const fetchData = async () => {
-    dispatch(getData());
+    dispatch(getInitData());
 
     try {
-      const [
-        {
-          data: { data: components },
+      const {
+        data: {
+          data: { components, contentTypes: models, fieldSizes },
         },
-        {
-          data: { data: models },
-        },
-      ] = await Promise.all(
-        ['components', 'content-types'].map((endPoint) =>
-          get(getRequestUrl(endPoint), { cancelToken: source.token })
-        )
-      );
-
+      } = await get(getRequestUrl('init'), { cancelToken: source.token });
       notifyStatus(
         formatMessage({
           id: getTrad('App.schemas.data-loaded'),
@@ -52,22 +44,31 @@ const useModels = () => {
         })
       );
 
-      const { authorizedCtLinks, authorizedStLinks } = await getContentTypeLinks(
+      const unmutatedContentTypeLinks = await getContentTypeLinks({
         models,
-        allPermissions,
-        toggleNotification
+        userPermissions: allPermissions,
+        toggleNotification,
+      });
+
+      const { ctLinks: authorizedCollectionTypeLinks } = runHookWaterfall(
+        MUTATE_COLLECTION_TYPES_LINKS,
+        {
+          ctLinks: unmutatedContentTypeLinks.authorizedCollectionTypeLinks,
+          models,
+        }
       );
-
-      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
-        ctLinks: authorizedCtLinks,
-        models,
-      });
-      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: authorizedStLinks,
+      const { stLinks: authorizedSingleTypeLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
+        stLinks: unmutatedContentTypeLinks.authorizedSingleTypeLinks,
         models,
       });
 
-      const actionToDispatch = setContentTypeLinks(ctLinks, stLinks, models, components);
+      const actionToDispatch = setInitData({
+        authorizedCollectionTypeLinks,
+        authorizedSingleTypeLinks,
+        contentTypeSchemas: models,
+        components,
+        fieldSizes,
+      });
 
       dispatch(actionToDispatch);
     } catch (err) {
@@ -88,7 +89,7 @@ const useModels = () => {
 
     return () => {
       source.cancel('Operation canceled by the user.');
-      dispatch(resetProps());
+      dispatch(resetInitData());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, toggleNotification]);
@@ -96,4 +97,4 @@ const useModels = () => {
   return { ...state, refetchData: fetchDataRef.current };
 };
 
-export default useModels;
+export default useContentManagerInitData;
