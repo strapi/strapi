@@ -7003,6 +7003,7 @@ __metadata:
     babel-loader: ^9.1.2
     babel-plugin-styled-components: 2.0.2
     bcryptjs: 2.4.3
+    browserslist: ^4.17.3
     browserslist-to-esbuild: 1.2.0
     chalk: ^4.1.2
     chokidar: ^3.5.1

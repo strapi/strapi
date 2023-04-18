@@ -7,6 +7,14 @@ module.exports = {
   routes: [
     {
       method: 'GET',
+      path: '/init',
+      handler: 'init.getInitData',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/content-types',
       handler: 'content-types.findContentTypes',
       config: {
