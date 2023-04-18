@@ -27,6 +27,8 @@ import DeleteLink from './DeleteLink';
 import GridRow from './GridRow';
 import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 
+import { useContentType } from '../../hooks/useContentType';
+
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
@@ -34,12 +36,15 @@ const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: 
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-
   const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
     customFieldUids: selectCustomFieldUids(state),
   }));
+  const { create, update, publish, unpublish, del, contentType, isCreating } = useContentType(
+    layout,
+    id
+  );
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
@@ -73,15 +78,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
       {({
         componentsDataStructure,
         contentTypeDataStructure,
-        data,
-        isCreatingEntry,
-        isLoadingForData,
-        onDelete,
-        onPost,
-        onPublish,
         onDraftRelationCheck,
-        onPut,
-        onUnpublish,
         redirectionLink,
         status,
       }) => {
@@ -93,15 +90,15 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
             componentsDataStructure={componentsDataStructure}
             contentTypeDataStructure={contentTypeDataStructure}
             from={redirectionLink}
-            initialValues={data}
-            isCreatingEntry={isCreatingEntry}
-            isLoadingForData={isLoadingForData}
+            initialValues={contentType.query.data}
+            isCreatingEntry={isCreating}
+            isLoadingForData={contentType.query.isLoading}
             isSingleType={isSingleType}
-            onPost={onPost}
-            onPublish={onPublish}
+            onPost={create}
+            onPublish={publish}
             onDraftRelationCheck={onDraftRelationCheck}
-            onPut={onPut}
-            onUnpublish={onUnpublish}
+            onPut={update}
+            onUnpublish={unpublish}
             readActionAllowedFields={readActionAllowedFields}
             redirectToPreviousPage={goBack}
             slug={slug}
@@ -220,9 +217,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                             </LinkButton>
                           </CheckPermissions>
 
-                          {allowedActions.canDelete && !isCreatingEntry && (
-                            <DeleteLink onDelete={onDelete} />
-                          )}
+                          {allowedActions.canDelete && !isCreating && <DeleteLink onDelete={del} />}
                         </Flex>
                       </Box>
                     </Flex>
