@@ -20,6 +20,7 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 
+// todo: useEntity(id, contentTypeLayout) ?
 export function useContentType(contentType, id) {
   const { uid } = contentType;
 
@@ -39,6 +40,7 @@ export function useContentType(contentType, id) {
   const query = useQuery(
     ['content-manger', 'content-type', uid, id],
     async () => {
+      // Data fetching has started
       dispatch(getData());
 
       try {
@@ -58,6 +60,7 @@ export function useContentType(contentType, id) {
       enabled: !isCreating,
 
       onSuccess(data) {
+        // Write data to store
         dispatch(getDataSucceeded(data));
       },
 
@@ -181,6 +184,7 @@ export function useContentType(contentType, id) {
         // maeh
         queryClient.invalidateQueries(['relation']);
 
+        // todo: this can be done outside
         if (!isCollectionType) {
           setIsCreatingEntry(false);
         }
@@ -212,6 +216,7 @@ export function useContentType(contentType, id) {
       method: 'delete',
       type: 'delete',
       onSuccess() {
+        // todo: at least the else branch should be done outside
         if (!isCollectionType) {
           dispatch(initForm(rawQuery, true));
         } else {
