@@ -41,7 +41,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     formattedContentTypeLayout: selectAttributesLayout(state),
     customFieldUids: selectCustomFieldUids(state),
   }));
-  const { del, contentType, isCreating } = useContentType(layout, id);
+  const { del, contentType, isCreating } = useContentType(layout.contentType, id);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 

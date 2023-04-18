@@ -17,18 +17,23 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  formatContentTypeData,
   getYupInnerErrors,
   getAPIInnerErrors,
   useGuidedTour,
 } from '@strapi/helper-plugin';
 
-import { getTrad, getRequestUrl } from '../../utils';
+import { getTrad, getRequestUrl, createDefaultForm } from '../../utils';
 import { useContentType } from '../../hooks/useContentType';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema } from './utils';
-import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
+import {
+  clearSetModifiedDataOnly,
+  setDataStructures,
+  resetProps,
+} from '../../sharedReducers/crudReducer/actions';
 import { usePrev } from '../../hooks';
 
 const EditViewDataManagerProvider = ({
@@ -50,7 +55,9 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, contentType, isCreating } = useContentType();
+  const { create, update, publish, unpublish, contentType, isCreating } = useContentType(
+    allLayoutData.contentType
+  );
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -85,6 +92,8 @@ const EditViewDataManagerProvider = ({
   const { formatMessage } = useIntl();
   const trackUsageRef = useRef(trackUsage);
 
+  const { components } = allLayoutData;
+
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
     if (contentType.query.isLoading) {
       return false;
@@ -108,6 +117,10 @@ const EditViewDataManagerProvider = ({
       lockApp();
     }
   }, [lockApp, unlockApp, status]);
+
+  useEffect(() => {
+    dispatch(resetProps());
+  }, [dispatch]);
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
@@ -149,7 +162,27 @@ const EditViewDataManagerProvider = ({
     });
   }, [componentsDataStructure, contentTypeDataStructure]);
 
-  const { components } = allLayoutData;
+  useEffect(() => {
+    const componentsDataStructure = Object.keys(components).reduce((acc, current) => {
+      const defaultComponentForm = createDefaultForm(
+        components?.[current]?.attributes ?? {},
+        components
+      );
+
+      acc[current] = formatContentTypeData(defaultComponentForm, components[current], components);
+
+      return acc;
+    }, {});
+
+    const contentTypeDataStructure = createDefaultForm(contentType.attributes, components);
+    const contentTypeDataStructureFormatted = formatContentTypeData(
+      contentTypeDataStructure,
+      contentType,
+      components
+    );
+
+    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+  }, [dispatch, contentType, components]);
 
   const previousInitialValues = usePrev(contentType.query.data);
 

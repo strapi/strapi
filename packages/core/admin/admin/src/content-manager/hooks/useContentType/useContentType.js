@@ -5,26 +5,22 @@ import {
   useNotification,
   useTracking,
   useQueryParams,
-  formatContentTypeData,
 } from '@strapi/helper-plugin';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { useFindRedirectionLink } from '..';
-import { getRequestUrl, getTrad, createDefaultForm } from '../../utils';
+import { getRequestUrl, getTrad } from '../../utils';
 import {
   getData,
   getDataSucceeded,
   initForm,
-  resetProps,
-  setDataStructures,
   setStatus,
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 
-export function useContentType(layout, id) {
-  const { components, contentType } = layout;
+export function useContentType(contentType, id) {
   const { uid } = contentType;
 
   const isCreating = !id;
@@ -93,34 +89,6 @@ export function useContentType(layout, id) {
   const mutation = useMutation(contentTypeMutation);
   const redirectLink = useFindRedirectionLink(uid);
   const queryClient = useQueryClient();
-
-  // TODO: can we find a way to not do this?
-  React.useEffect(() => {
-    dispatch(resetProps());
-  }, [dispatch]);
-
-  // TODO: maeh
-  React.useEffect(() => {
-    const componentsDataStructure = Object.keys(components).reduce((acc, current) => {
-      const defaultComponentForm = createDefaultForm(
-        components?.[current]?.attributes ?? {},
-        components
-      );
-
-      acc[current] = formatContentTypeData(defaultComponentForm, components[current], components);
-
-      return acc;
-    }, {});
-
-    const contentTypeDataStructure = createDefaultForm(contentType.attributes, components);
-    const contentTypeDataStructureFormatted = formatContentTypeData(
-      contentTypeDataStructure,
-      contentType,
-      components
-    );
-
-    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
-  }, [dispatch, contentType, components]);
 
   async function contentTypeMutation({ method, body, action, type, onSuccess = () => {} }) {
     const typeMapping = {
