@@ -383,7 +383,7 @@ module.exports = (db) => {
           added: addedTables,
           updated: updatedTables,
           unchanged: unchangedTables,
-          removed: [...removedTables],
+          removed: removedTables,
         },
       },
     };
