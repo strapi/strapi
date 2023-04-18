@@ -50,7 +50,7 @@ function setupDatetimePicker(props) {
     name: 'datetime-picker',
     intlLabel: {
       id: 'label.test',
-      defaultMessage: 'datetime',
+      defaultMessage: 'datetime picker',
     },
     value: null,
     onChange: jest.fn(),
@@ -155,8 +155,9 @@ describe('GenericInput', () => {
     test('renders the datetime picker with the correct value for date and time', async () => {
       const user = userEvent.setup();
       const { getByRole, debug } = setupDatetimePicker();
-      const btnDate = getByRole('textbox', { name: 'datetime' });
+      const btnDate = getByRole('textbox', { name: 'datetime picker' });
       debug();
+
       await user.click(btnDate);
       await user.click(getByRole('button', { name: /15/ }));
       // const today = new Date();
