@@ -15,7 +15,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
-import { isDirPathEquivalent, isPathEquivalent } from './utils';
+import { isDirPathEquivalent, isPathEquivalent, unknownPathToPosix } from './utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -143,16 +143,17 @@ class LocalFileSourceProvider implements ISourceProvider {
             if (entry.type !== 'File') {
               return false;
             }
-            console.log(`${filePath} is assets?`, isDirPathEquivalent('assets/uploads', filePath));
             return isDirPathEquivalent('assets/uploads', filePath);
           },
           onentry(entry) {
             // TODO: Check if we need to handle win32 paths here for the assets
             const { path: filePath, size = 0 } = entry;
-            const file = path.basename(filePath);
+            const normalizedPath = unknownPathToPosix(filePath);
+            const file = path.basename(normalizedPath);
+
             const asset: IAsset = {
               filename: file,
-              filepath: filePath,
+              filepath: normalizedPath,
               stats: { size },
               stream: entry as unknown as Readable,
             };
