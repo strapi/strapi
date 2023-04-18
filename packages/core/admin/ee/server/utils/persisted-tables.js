@@ -66,7 +66,7 @@ async function addPersistTables({ strapi }, tableNames) {
  * @return {Promise<void>}
  */
 async function removePersistedTables({ strapi }, tableNames) {
-  const persistedTables = await getPersistedTables({ strapi }); // Array<{name: string, dependsOn: Array<{name: string}>}>
+  const persistedTables = await getPersistedTables({ strapi });
 
   // Get new tables to be persisted, remove tables if they already were persisted
   const newPersistedTables = differenceWith(
