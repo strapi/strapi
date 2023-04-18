@@ -8,14 +8,14 @@ import PropTypes from 'prop-types';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
 
-const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerProperty }) => {
-  const [showWarningDelete, setWarningDelete] = useState(false);
+const DeleteLink = ({ onDelete, trackerProperty }) => {
+  const [displayDeleteConfirmation, setDisplayDeleteConfirmation] = useState(false);
   const [isModalConfirmButtonLoading, setIsModalConfirmButtonLoading] = useState(false);
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const toggleNotification = useNotification();
 
-  const toggleWarningDelete = () => setWarningDelete((prevState) => !prevState);
+  const toggleWarningDelete = () => setDisplayDeleteConfirmation((prevState) => !prevState);
 
   const handleConfirmDelete = async () => {
     try {
@@ -27,7 +27,6 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       setIsModalConfirmButtonLoading(false);
 
       toggleWarningDelete();
-      onDeleteSucceeded();
     } catch (err) {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();
@@ -38,10 +37,6 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
     }
   };
 
-  if (isCreatingEntry) {
-    return null;
-  }
-
   return (
     <>
       <Button onClick={toggleWarningDelete} size="S" startIcon={<Trash />} variant="danger-light">
@@ -50,9 +45,10 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
           defaultMessage: 'Delete this entry',
         })}
       </Button>
+
       <ConfirmDialog
         isConfirmButtonLoading={isModalConfirmButtonLoading}
-        isOpen={showWarningDelete}
+        isOpen={displayDeleteConfirmation}
         onConfirm={handleConfirmDelete}
         onToggleDialog={toggleWarningDelete}
       />
@@ -61,9 +57,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
 };
 
 DeleteLink.propTypes = {
-  isCreatingEntry: PropTypes.bool.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onDeleteSucceeded: PropTypes.func.isRequired,
   trackerProperty: PropTypes.object.isRequired,
 };
 
