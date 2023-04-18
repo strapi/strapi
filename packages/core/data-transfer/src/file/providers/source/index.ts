@@ -146,7 +146,6 @@ class LocalFileSourceProvider implements ISourceProvider {
             return isFilePathInDirname('assets/uploads', filePath);
           },
           onentry(entry) {
-            // TODO: Check if we need to handle win32 paths here for the assets
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
@@ -189,6 +188,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return chain(streams);
   }
 
+  // `directory` must be posix formatted path
   #streamJsonlDirectory(directory: string) {
     const inStream = this.#getBackupStream();
 
