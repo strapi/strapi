@@ -3,7 +3,7 @@ import { Strapi } from '../../';
 
 interface PolicyContext extends ExtendableContext {
   type: string;
-  is(name): boolean;
+  is(name: string): boolean;
 }
 
 export type Policy<T = unknown> = (
