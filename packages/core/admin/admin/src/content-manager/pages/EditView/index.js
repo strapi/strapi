@@ -31,7 +31,6 @@ import { useContentType } from '../../hooks/useContentType';
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
-/* eslint-disable  react/no-array-index-key */
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -102,6 +101,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
                     } = row;
 
                     return (
+                      // eslint-disable-next-line react/no-array-index-key
                       <Box key={index}>
                         <Grid gap={4}>
                           <GridItem col={12} s={12} xs={12}>
@@ -119,14 +119,12 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
 
                   return (
                     <Box
+                      // eslint-disable-next-line react/no-array-index-key
                       key={index}
                       hasRadius
                       background="neutral0"
                       shadow="tableShadow"
-                      paddingLeft={6}
-                      paddingRight={6}
-                      paddingTop={6}
-                      paddingBottom={6}
+                      padding={6}
                       borderColor="neutral150"
                     >
                       <Flex direction="column" alignItems="stretch" gap={6}>
@@ -134,6 +132,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
                           <GridRow
                             columns={grid}
                             customFieldInputs={lazyComponentStore}
+                            // eslint-disable-next-line react/no-array-index-key
                             key={gridRowIndex}
                           />
                         ))}
