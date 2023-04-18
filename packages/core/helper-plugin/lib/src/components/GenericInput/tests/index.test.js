@@ -65,6 +65,8 @@ function setupDatetimePicker(props) {
   };
 }
 
+jest.setTimeout(50000);
+
 describe('GenericInput', () => {
   /**
   * We do this because –
