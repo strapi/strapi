@@ -348,7 +348,7 @@ module.exports = (db) => {
       if (typeof persistedTable === 'string') {
         return persistedTable;
       }
-      return persistedTable.table;
+      return persistedTable.name;
     };
 
     const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
@@ -364,10 +364,10 @@ module.exports = (db) => {
       if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
         const dependencies = persistedTables
           .filter((table) => {
-            return table?.dependsOn?.some((dep) => dep.table === srcTable.name);
+            return table?.dependsOn?.some((table) => table.name === srcTable.name);
           })
-          .map((table) => {
-            return srcSchema.tables.find((t) => t.name === table.table);
+          .map((dependsOnTable) => {
+            return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
           });
 
         removedTables.push(srcTable, ...dependencies);
