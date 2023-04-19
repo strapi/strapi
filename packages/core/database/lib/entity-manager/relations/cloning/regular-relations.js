@@ -2,7 +2,13 @@
 
 const { cleanInverseOrderColumn } = require('../../regular-relations');
 
-const replaceRegularRelations = async ({ targetId, sourceId, attribute, transaction: trx }) => {
+const replaceRegularRelations = async ({
+  targetId,
+  sourceId,
+  attribute,
+  omitIds,
+  transaction: trx,
+}) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
@@ -11,8 +17,7 @@ const replaceRegularRelations = async ({ targetId, sourceId, attribute, transact
     .createQueryBuilder(joinTable.name)
     .update({ [joinColumn.name]: targetId })
     .where({ [joinColumn.name]: sourceId })
-    // TODO: Exclude some relations from being replaced
-    // .where({ $not: { [inverseJoinColumn.name]: relationsToDeleteIds } })
+    .where({ $not: { [inverseJoinColumn.name]: omitIds } })
     .onConflict([joinColumn.name, inverseJoinColumn.name])
     .ignore()
     .transacting(trx)
@@ -38,8 +43,6 @@ const cloneRegularRelations = async ({ targetId, sourceId, attribute, transactio
       ...columns.slice(1)
     )
     .where(joinColumn.name, sourceId)
-    // TODO: Exclude some relations from being replaced
-    // .where({ $not: { [inverseJoinColumn.name]: relationsToDeleteIds } })
     .from(joinTable.name)
     .toSQL();
 
