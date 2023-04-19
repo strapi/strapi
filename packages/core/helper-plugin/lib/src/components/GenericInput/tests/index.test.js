@@ -64,7 +64,11 @@ function setupDatetimePicker(props) {
     ...rendered,
   };
 }
-// Increase the jest timeout to accommodate long running tests
+/**
+ * We extend the timeout of these tests because the DS 
+ * DateTimePicker has a slow rendering issue at the moment. 
+ * It passes locally, but fails in the CI.
+ */
 jest.setTimeout(50000);
 
 describe('GenericInput', () => {
