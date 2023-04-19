@@ -16,51 +16,72 @@ import {
   SubNavSections,
   SubNavLink,
 } from '@strapi/design-system/v2';
+import { useFilter, useCollator } from '@strapi/helper-plugin';
 
-import { matchByTitle } from './utils';
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
-  const { collectionTypeLinks, singleTypeLinks } = useSelector(
-    (state) => modelLinksSelector(state),
-    shallowEqual
+  const { collectionTypeLinks, singleTypeLinks } = useSelector(modelLinksSelector, shallowEqual);
+
+  const { startsWith } = useFilter(locale, {
+    sensitivity: 'base',
+  });
+
+  /**
+   * @type {Intl.Collator}
+   */
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const menu = useMemo(
+    () =>
+      [
+        {
+          id: 'collectionTypes',
+          title: {
+            id: getTrad('components.LeftMenu.collection-types'),
+            defaultMessage: 'Collection Types',
+          },
+          searchable: true,
+          links: collectionTypeLinks,
+        },
+        {
+          id: 'singleTypes',
+          title: {
+            id: getTrad('components.LeftMenu.single-types'),
+            defaultMessage: 'Single Types',
+          },
+          searchable: true,
+          links: singleTypeLinks,
+        },
+      ].map((section) => ({
+        ...section,
+        links: section.links
+          /**
+           * Filter by the search value
+           */
+          .filter((link) => startsWith(link.title, search))
+          /**
+           * Sort correctly using the language
+           */
+          .sort((a, b) => formatter.compare(a.title, b.title))
+          /**
+           * Apply the formated strings to the links from react-intl
+           */
+          .map((link) => {
+            return {
+              ...link,
+              title: formatMessage({ id: link.title, defaultMessage: link.title }),
+            };
+          }),
+      })),
+    [collectionTypeLinks, search, singleTypeLinks, startsWith, formatMessage, formatter]
   );
-
-  const toIntl = (links) =>
-    links.map((link) => {
-      return {
-        ...link,
-        title: formatMessage({ id: link.title, defaultMessage: link.title }),
-      };
-    });
-
-  const intlCollectionTypeLinks = toIntl(collectionTypeLinks);
-  const intlSingleTypeLinks = toIntl(singleTypeLinks);
-
-  const menu = [
-    {
-      id: 'collectionTypes',
-      title: {
-        id: getTrad('components.LeftMenu.collection-types'),
-        defaultMessage: 'Collection Types',
-      },
-      searchable: true,
-      links: matchByTitle(intlCollectionTypeLinks, search),
-    },
-    {
-      id: 'singleTypes',
-      title: {
-        id: getTrad('components.LeftMenu.single-types'),
-        defaultMessage: 'Single Types',
-      },
-      searchable: true,
-      links: matchByTitle(intlSingleTypeLinks, search),
-    },
-  ];
 
   const handleClear = () => {
     setSearch('');
