@@ -185,7 +185,7 @@ export function ReviewWorkflowsPage() {
             bodyText={{
               id: 'Settings.review-workflows.page.delete.confirm.body',
               defaultMessage:
-                'All entries assigned to deleted stages will be moved to the first stage. Are you sure you want to save this?',
+                'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
             }}
             isConfirmButtonLoading={isLoading}
             isOpen={isConfirmDeleteDialogOpen}
