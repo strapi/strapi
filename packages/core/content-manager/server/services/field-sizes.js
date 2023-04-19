@@ -44,7 +44,7 @@ const fieldSizes = {
   uid: defaultSize,
 };
 
-module.exports = () => ({
+module.exports = ({ strapi }) => ({
   getAllFieldSizes() {
     return fieldSizes;
   },
@@ -59,5 +59,27 @@ module.exports = () => ({
     }
 
     return fieldSize;
+  },
+  setFieldSize(type, size) {
+    if (!type) {
+      throw new Error('The type is required');
+    }
+
+    if (!size) {
+      throw new Error('The size is required');
+    }
+
+    fieldSizes[type] = size;
+  },
+  registerCustomFields() {
+    // Find all custom fields already registered
+    const customFields = strapi.container.get('custom-fields').getAll();
+
+    // If they have a custom field size, register it
+    Object.entries(customFields).forEach(([uid, customField]) => {
+      if (customField.inputSize) {
+        this.setFieldSize(uid, customField.inputSize);
+      }
+    });
   },
 });
