@@ -82,7 +82,7 @@ const verify = async (auth, config) => {
 
   strapi.telemetry.send('didReceiveAPIRequest', {
     eventProperties: {
-      authenticationMetod: auth?.strategy?.name,
+      authenticationMethod: auth?.strategy?.name,
       isAuthenticated: !isEmpty(user),
     },
   });
