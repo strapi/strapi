@@ -80,10 +80,10 @@ const authenticate = async (ctx) => {
 const verify = async (auth, config) => {
   const { credentials: user, ability } = auth;
 
-  strapi.telemetry.send('didCompleteRequest', {
+  strapi.telemetry.send('didReceiveAPIRequest', {
     eventProperties: {
       authenticationMetod: auth?.strategy?.name,
-      isAuthenticated: !isEmpty(auth.credentials),
+      isAuthenticated: !isEmpty(user),
     },
   });
 

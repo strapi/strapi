@@ -78,7 +78,7 @@ const authenticate = async (ctx) => {
 const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
 
-  strapi.telemetry.send('didCompleteRequest', {
+  strapi.telemetry.send('didReceiveAPIRequest', {
     eventProperties: {
       authenticationMetod: auth?.strategy?.name || 'api-token',
       isAuthenticated: !isEmpty(apiToken),
