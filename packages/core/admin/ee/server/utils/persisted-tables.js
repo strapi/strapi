@@ -127,15 +127,17 @@ const removePersistedTablesWithSuffix = async (tableNameSuffix) => {
   await removePersistedTables({ strapi }, tableNames);
 };
 
-const persistTable = async (tableName, dependsOn) => {
-  await addPersistTables({ strapi }, [
-    { name: tableName, dependsOn: dependsOn?.map((depTableName) => ({ name: depTableName })) },
-  ]);
+/**
+ * Add tables to the reserved tables in core store
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }} tables
+ */
+const persistTables = async (tables) => {
+  await addPersistTables({ strapi }, tables);
 };
 
 module.exports = {
   persistTablesWithPrefix,
   removePersistedTablesWithSuffix,
-  persistTable,
+  persistTables,
   findTables,
 };
