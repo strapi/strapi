@@ -26,7 +26,7 @@ import GridRow from './GridRow';
 import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
-import { useContentType } from '../../hooks/useContentType';
+import { useEntity } from '../../hooks/useEntity';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
@@ -41,7 +41,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
   }));
   const { componentsDataStructure, contentTypeDataStructure, status } =
     useSelector(selectCrudReducer);
-  const { del, contentType, isCreating } = useContentType(layout, id);
+  const { del, entity, isCreating } = useEntity(layout, id);
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
@@ -77,7 +77,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       contentTypeDataStructure={contentTypeDataStructure}
       // todo
       from={/* redirectionLink */ '/'}
-      isLoadingForData={contentType.isLoading}
+      isLoadingForData={entity.isLoading}
       isSingleType={isSingleType}
       // todo
       readActionAllowedFields={readActionAllowedFields}

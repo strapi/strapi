@@ -24,7 +24,7 @@ import {
 } from '@strapi/helper-plugin';
 
 import { getTrad, getRequestUrl, createDefaultForm } from '../../utils';
-import { useContentType } from '../../hooks/useContentType';
+import { useEntity } from '../../hooks/useEntity';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
@@ -54,8 +54,8 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, contentType } = useContentType(allLayoutData);
-  const [isCreating, setIsCreating] = React.useState(!contentType.id);
+  const { create, update, publish, unpublish, entity } = useEntity(allLayoutData);
+  const [isCreating, setIsCreating] = React.useState(!entity.id);
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -93,7 +93,7 @@ const EditViewDataManagerProvider = ({
   const { components } = allLayoutData;
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (contentType.isLoading) {
+    if (entity.isLoading) {
       return false;
     }
 
@@ -106,7 +106,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [contentType.isLoading, isCreating, canRead, canUpdate]);
+  }, [entity.isLoading, isCreating, canRead, canUpdate]);
 
   useEffect(() => {
     if (status === 'resolved') {
@@ -122,7 +122,7 @@ const EditViewDataManagerProvider = ({
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!contentType.isLoading) {
+    if (!entity.isLoading) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,17 +172,17 @@ const EditViewDataManagerProvider = ({
       return acc;
     }, {});
 
-    const contentTypeDataStructure = createDefaultForm(contentType.attributes, components);
+    const contentTypeDataStructure = createDefaultForm(entity.attributes, components);
     const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
-      contentType,
+      entity,
       components
     );
 
     dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
-  }, [dispatch, contentType, components]);
+  }, [dispatch, entity, components]);
 
-  const previousInitialValues = usePrev(contentType.data);
+  const previousInitialValues = usePrev(entity.data);
 
   useEffect(() => {
     /**
@@ -190,13 +190,13 @@ const EditViewDataManagerProvider = ({
      * otherwise it's a fruitless effort no matter what happens.
      */
     if (
-      contentType.data &&
+      entity.data &&
       currentContentTypeLayout?.attributes &&
-      !isEqual(previousInitialValues, contentType.data)
+      !isEqual(previousInitialValues, entity.data)
     ) {
       dispatch({
         type: 'INIT_FORM',
-        initialValues: contentType.data,
+        initialValues: entity.data,
         components,
         attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
@@ -211,7 +211,7 @@ const EditViewDataManagerProvider = ({
       }
     }
   }, [
-    contentType.data,
+    entity.data,
     currentContentTypeLayout,
     components,
     setModifiedDataOnly,
@@ -413,7 +413,7 @@ const EditViewDataManagerProvider = ({
             replace(getRequestUrl(`/content-manager/collectionType/${slug}/${id}`));
 
             // todo
-            if (!contentType.kind === 'singleType') {
+            if (!entity.kind === 'singleType') {
               setIsCreating(false);
             }
           } else {
@@ -444,7 +444,7 @@ const EditViewDataManagerProvider = ({
       replace,
       setCurrentStep,
       slug,
-      contentType.kind,
+      entity.kind,
     ]
   );
 
@@ -675,7 +675,7 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {contentType.isLoading || (!isCreating && !initialData.id) ? (
+      {entity.isLoading || (!isCreating && !initialData.id) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>
