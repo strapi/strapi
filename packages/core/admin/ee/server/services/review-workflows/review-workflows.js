@@ -72,12 +72,7 @@ function enableReviewWorkflow({ strapi }) {
     const firstStage = defaultWorkflow.stages[0];
     const stagesService = getService('stages', { strapi });
 
-    const up = async (contentTypeUID) => {
-      // Persist the stage join table
-      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
-      const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
-      await persistTable(joinTableName, [tableName]);
-
+    const updateEntitiesStage = async (contentTypeUID) => {
       // Update CT entities stage
       return stagesService.updateEntitiesStage(contentTypeUID, {
         fromStageId: null,
@@ -85,13 +80,31 @@ function enableReviewWorkflow({ strapi }) {
       });
     };
 
-    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
-
     return pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
       // Iterate over UIDs to extend the content-type
-      (contentTypesUIDs) => mapAsync(contentTypesUIDs, up),
+      (contentTypesUIDs) => mapAsync(contentTypesUIDs, updateEntitiesStage),
     ])(contentTypes);
+  };
+}
+
+function persistStagesJoinTables({ strapi }) {
+  return async ({ contentTypes }) => {
+    const getStageTableToPersist = (contentTypeUID) => {
+      // Persist the stage join table
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
+      const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
+      return { name: joinTableName, dependsOn: { name: tableName } };
+    };
+
+    const joinTablesToPersist = pipe([
+      getContentTypeUIDsWithActivatedReviewWorkflows,
+      (contentTypesUIDs) => contentTypesUIDs.map(getStageTableToPersist),
+    ])(contentTypes);
+
+    // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
+    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
+    await persistTables(joinTablesToPersist);
   };
 }
 
