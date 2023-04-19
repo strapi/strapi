@@ -43,9 +43,8 @@ export function useEntity(layout, id) {
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(
-          getRequestUrl(`${collectionTypeUrlSlug}/${uid}/${id}`)
-        );
+        const url = [collectionTypeUrlSlug, uid, id].join('/');
+        const { data } = await fetchClient.get(getRequestUrl(url));
 
         return data;
       } catch (error) {
@@ -109,15 +108,12 @@ export function useEntity(layout, id) {
 
   async function contentTypeMutation({ method, body, action, type }) {
     const trackingKey = capitalize(type === 'update' ? 'save' : type);
-    console.log({ type });
 
     trackUsage(`will${trackingKey}Entry`);
 
     try {
-      let url = getRequestUrl(
-        `${collectionTypeUrlSlug}/${uid}/${id}/${action ? `/${action}` : ''}`
-      );
-      const { data } = await fetchClient[method](url, { body });
+      let url = [collectionTypeUrlSlug, uid, id, action].join('/');
+      const { data } = await fetchClient[method](getRequestUrl(url), { body });
 
       trackUsage(`did${trackingKey}Entry`);
 
