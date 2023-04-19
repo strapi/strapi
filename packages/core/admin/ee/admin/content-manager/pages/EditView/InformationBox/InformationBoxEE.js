@@ -9,11 +9,9 @@ import {
 import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useDispatch } from 'react-redux';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
-import { updatePartialData } from '../../../../../../admin/src/content-manager/sharedReducers/crudReducer/actions';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 
@@ -23,9 +21,12 @@ export function InformationBoxEE() {
     isCreatingEntry,
     layout: { uid },
     isSingleType,
+    onChange,
   } = useCMEditViewDataManager();
-  const dispatch = useDispatch();
   const { put } = useFetchClient();
+  // it is possible to rely on initialData here, because it always will
+  // be updated at the same time when modifiedData is updated, otherwise
+  // the entity is flagged as modified
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
   const hasReviewWorkflowsEnabled = Object.prototype.hasOwnProperty.call(
     initialData,
@@ -50,7 +51,9 @@ export function InformationBoxEE() {
         data: { id: stageId },
       });
 
-      dispatch(updatePartialData({ [ATTRIBUTE_NAME]: createdEntity[ATTRIBUTE_NAME] }));
+      // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
+      // as modified, which is what the boolean flag is for
+      onChange({ target: { name: ATTRIBUTE_NAME, value: createdEntity[ATTRIBUTE_NAME] } }, true);
 
       return createdEntity;
     },

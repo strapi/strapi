@@ -3,7 +3,6 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
-  UPDATE_PARTIAL_DATA,
   SET_DATA_STRUCTURES,
   SET_STATUS,
   SUBMIT_SUCCEEDED,
@@ -104,41 +103,5 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
     });
 
     expect(crudReducer(state, action)).toEqual(expected);
-  });
-
-  it('should set data using the UPDATE_PARTIAL_DATA action', () => {
-    const action = { type: UPDATE_PARTIAL_DATA, data: { new: true } };
-
-    expect(crudReducer(state, action)).toEqual(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          new: true,
-        }),
-      })
-    );
-  });
-
-  it('should merge data using the UPDATE_PARTIAL_DATA action', () => {
-    const setupAction = {
-      type: GET_DATA_SUCCEEDED,
-      data: {
-        something: true,
-      },
-    };
-
-    state = crudReducer(state, setupAction);
-
-    const action = { type: UPDATE_PARTIAL_DATA, data: { new: true } };
-
-    state = crudReducer(state, action);
-
-    expect(state).toEqual(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          something: true,
-          new: true,
-        }),
-      })
-    );
   });
 });

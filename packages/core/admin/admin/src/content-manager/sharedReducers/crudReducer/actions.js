@@ -2,7 +2,6 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
-  UPDATE_PARTIAL_DATA,
   RESET_PROPS,
   SET_DATA_STRUCTURES,
   SET_STATUS,
@@ -47,9 +46,4 @@ export const submitSucceeded = (data) => ({
 
 export const clearSetModifiedDataOnly = () => ({
   type: CLEAR_SET_MODIFIED_DATA_ONLY,
-});
-
-export const updatePartialData = (data) => ({
-  type: UPDATE_PARTIAL_DATA,
-  data,
 });
