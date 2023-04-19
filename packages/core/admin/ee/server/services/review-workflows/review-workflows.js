@@ -33,19 +33,18 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
   }
 }
 
-const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
-  writable: true,
-  private: false,
-  configurable: false,
-  visible: false,
-  useJoinTable: true, // We want a join table to persist data when downgrading to CE
-  type: 'relation',
-  relation: 'oneToOne',
-  target: 'admin::workflow-stage',
-});
-
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
+    const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
+      writable: true,
+      private: false,
+      configurable: false,
+      visible: false,
+      useJoinTable: true, // We want a join table to persist data when downgrading to CE
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'admin::workflow-stage',
+    });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
   pipe([
