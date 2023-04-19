@@ -64,7 +64,7 @@ function setupDatetimePicker(props) {
     ...rendered,
   };
 }
-
+// Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
 
 describe('GenericInput', () => {
