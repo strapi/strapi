@@ -7,6 +7,18 @@ const loopContentTypeNames = require('./utils/loop-content-type-names');
 const pascalCase = require('./utils/pascal-case');
 const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 
+const getRequiredAttributes = (allAttributes) => {
+  return Object.entries(allAttributes).reduce((acc, attribute) => {
+    const [attributeKey, attributeValue] = attribute;
+
+    if (attributeValue.required) {
+      acc.push(attributeKey);
+    }
+
+    return acc;
+  }, []);
+};
+
 /**
  * @decription Get all open api schema objects for a given content type
  *
@@ -51,16 +63,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   ];
   const attributesForRequest = _.omit(attributes, attributesToOmit);
   // Get a list of required attribute names
-  const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
-    const [attributeKey, attributeValue] = attribute;
-
-    if (attributeValue.required) {
-      acc.push(attributeKey);
-    }
-
-    return acc;
-  }, []);
-
+  const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     // Build localization requests schemas
@@ -68,7 +71,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       schemas = {
         ...schemas,
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
-          required: [...requiredAttributes, 'locale'],
+          required: [...requiredRequestAttributes, 'locale'],
           type: 'object',
           properties: cleanSchemaAttributes(attributesForRequest, {
             isRequest: true,
@@ -86,7 +89,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         required: ['data'],
         properties: {
           data: {
-            ...(requiredAttributes.length && { required: requiredAttributes }),
+            ...(requiredRequestAttributes.length && { required: requiredRequestAttributes }),
             type: 'object',
             properties: cleanSchemaAttributes(attributesForRequest, {
               isRequest: true,
@@ -205,6 +208,8 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       },
     };
   }
+
+  const requiredAttributes = getRequiredAttributes(attributes);
   // Build the response schema
   schemas = {
     ...schemas,
