@@ -1,8 +1,6 @@
-import get from 'lodash/get';
-
 const createDefaultForm = (attributes, allComponentsSchema) => {
   return Object.keys(attributes).reduce((acc, current) => {
-    const attribute = get(attributes, [current], {});
+    const attribute = attributes?.[current] ?? {};
     const { default: defaultValue, component, type, required, min, repeatable } = attribute;
 
     if (defaultValue !== undefined) {

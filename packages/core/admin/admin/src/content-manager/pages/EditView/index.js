@@ -85,6 +85,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       slug={slug}
       status={status}
       updateActionAllowedFields={updateActionAllowedFields}
+      id={id}
     >
       <Main aria-busy={status !== 'resolved'}>
         <Header allowedActions={allowedActions} />

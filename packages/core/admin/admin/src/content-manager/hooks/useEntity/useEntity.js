@@ -109,14 +109,13 @@ export function useEntity(layout, id) {
 
   async function contentTypeMutation({ method, body, action, type }) {
     const trackingKey = capitalize(type === 'update' ? 'save' : type);
+    console.log({ type });
 
     trackUsage(`will${trackingKey}Entry`);
 
     try {
       let url = getRequestUrl(
-        `${collectionTypeUrlSlug}/${uid}/${method !== 'post' || action ? id : ''}/${
-          action ? `/${action}` : ''
-        }`
+        `${collectionTypeUrlSlug}/${uid}/${id}/${action ? `/${action}` : ''}`
       );
       const { data } = await fetchClient[method](url, { body });
 

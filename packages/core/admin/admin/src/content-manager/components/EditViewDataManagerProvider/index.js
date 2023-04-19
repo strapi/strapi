@@ -51,11 +51,15 @@ const EditViewDataManagerProvider = ({
   slug,
   status,
   updateActionAllowedFields,
+  // todo: what is a better way to pass this down?
+  // eslint-disable-next-line
+  id,
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, entity } = useEntity(allLayoutData);
-  const [isCreating, setIsCreating] = React.useState(!entity.id);
+  const { create, update, publish, unpublish, entity } = useEntity(allLayoutData, id);
+  const [isCreating, setIsCreating] = React.useState(!id);
+
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -172,14 +176,18 @@ const EditViewDataManagerProvider = ({
       return acc;
     }, {});
 
-    const contentTypeDataStructure = createDefaultForm(entity.attributes, components);
-    const contentTypeDataStructureFormatted = formatContentTypeData(
-      contentTypeDataStructure,
-      entity,
-      components
-    );
+    if (entity.isLoading === false) {
+      console.log(entity);
 
-    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+      const contentTypeDataStructure = createDefaultForm(entity.data, components);
+      const contentTypeDataStructureFormatted = formatContentTypeData(
+        contentTypeDataStructure,
+        entity,
+        components
+      );
+
+      dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+    }
   }, [dispatch, entity, components]);
 
   const previousInitialValues = usePrev(entity.data);
@@ -410,7 +418,7 @@ const EditViewDataManagerProvider = ({
             setCurrentStep('contentManager.success');
 
             // Update URL for the new entity
-            replace(getRequestUrl(`/content-manager/collectionType/${slug}/${id}`));
+            replace(getRequestUrl(`collectionType/${slug}/${id}`));
 
             // todo
             if (!entity.kind === 'singleType') {
