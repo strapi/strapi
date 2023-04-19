@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil } = require('lodash/fp');
+const { isNil, isNull } = require('lodash/fp');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { hasReviewWorkflow, getDefaultWorkflow } = require('../../utils/review-workflows');
 
@@ -30,10 +30,22 @@ const decorator = (service) => ({
     }
 
     const data = await getDataWithStage(opts.data);
-    return service.create.call(this, uid, {
-      ...opts,
-      data,
-    });
+    return service.create.call(this, uid, { ...opts, data });
+  },
+  async update(uid, entityId, opts = {}) {
+    const hasRW = hasReviewWorkflow({ strapi }, uid);
+
+    if (!hasRW) {
+      return service.update.call(this, uid, entityId, opts);
+    }
+
+    // Prevents the stage from being set to null
+    const data = { ...opts.data };
+    if (isNull(data[ENTITY_STAGE_ATTRIBUTE])) {
+      delete data[ENTITY_STAGE_ATTRIBUTE];
+    }
+
+    return service.update.call(this, uid, entityId, { ...opts, data });
   },
 });
 
