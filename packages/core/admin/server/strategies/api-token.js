@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, isNil } = require('lodash/fp');
+const { castArray, isNil, isEmpty } = require('lodash/fp');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -77,6 +77,13 @@ const authenticate = async (ctx) => {
  */
 const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
+
+  strapi.telemetry.send('didCompleteRequest', {
+    eventProperties: {
+      authenticationMetod: auth?.strategy?.name || 'api-token',
+      isAuthenticated: !isEmpty(apiToken),
+    },
+  });
 
   if (!apiToken) {
     throw new UnauthorizedError('Token not found');

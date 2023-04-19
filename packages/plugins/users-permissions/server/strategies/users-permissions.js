@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, map, every, pipe } = require('lodash/fp');
+const { castArray, map, every, pipe, isEmpty } = require('lodash/fp');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -79,6 +79,13 @@ const authenticate = async (ctx) => {
 
 const verify = async (auth, config) => {
   const { credentials: user, ability } = auth;
+
+  strapi.telemetry.send('didCompleteRequest', {
+    eventProperties: {
+      authenticationMetod: auth?.strategy?.name,
+      isAuthenticated: !isEmpty(auth.credentials),
+    },
+  });
 
   if (!config.scope) {
     if (!user) {
