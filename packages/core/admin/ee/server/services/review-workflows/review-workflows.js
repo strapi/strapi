@@ -1,6 +1,6 @@
 'use strict';
 
-const { set, forEach, pipe } = require('lodash/fp');
+const { set, forEach, pipe, map } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
 const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
@@ -99,7 +99,7 @@ function persistStagesJoinTables({ strapi }) {
 
     const joinTablesToPersist = pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
-      (contentTypesUIDs) => contentTypesUIDs.map(getStageTableToPersist),
+      map(getStageTableToPersist),
     ])(contentTypes);
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
