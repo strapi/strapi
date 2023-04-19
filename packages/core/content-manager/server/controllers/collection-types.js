@@ -143,7 +143,9 @@ module.exports = {
     // Trying to automatically clone the entity
     // and model has unique or relational fields
     if (isEmpty(body) && hasProhibitedCloningFields(model)) {
-      throw new ApplicationError('clone.prohibitedFields');
+      throw new ApplicationError(
+        'Failed to clone entity. There are prohibited fields to be manually addressed.'
+      );
     }
 
     const entity = await entityManager.findOneWithCreatorRoles(id, model);
