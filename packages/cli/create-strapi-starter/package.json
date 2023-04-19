@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "4.9.1",
+  "version": "4.9.2",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-starter",
@@ -44,7 +44,7 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/generate-new": "4.9.1",
+    "@strapi/generate-new": "4.9.2",
     "chalk": "4.1.2",
     "ci-info": "3.8.0",
     "commander": "8.3.0",
@@ -54,8 +54,8 @@
     "ora": "5.4.1"
   },
   "devDependencies": {
-    "eslint-config-custom": "*",
-    "tsconfig": "*"
+    "eslint-config-custom": "4.9.2",
+    "tsconfig": "4.9.2"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

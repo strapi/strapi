@@ -6974,7 +6974,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/admin@4.9.1, @strapi/admin@workspace:packages/core/admin":
+"@strapi/admin@4.9.2, @strapi/admin@workspace:packages/core/admin":
   version: 0.0.0-use.local
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
@@ -6986,15 +6986,15 @@ __metadata:
     "@casl/ability": ^5.4.3
     "@fingerprintjs/fingerprintjs": 3.3.6
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
-    "@strapi/babel-plugin-switch-ee-ce": 4.9.1
-    "@strapi/data-transfer": 4.9.1
+    "@strapi/babel-plugin-switch-ee-ce": 4.9.2
+    "@strapi/data-transfer": 4.9.2
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/permissions": 4.9.1
-    "@strapi/provider-audit-logs-local": 4.9.1
-    "@strapi/typescript-utils": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/permissions": 4.9.2
+    "@strapi/provider-audit-logs-local": 4.9.2
+    "@strapi/typescript-utils": 4.9.2
+    "@strapi/utils": 4.9.2
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7092,7 +7092,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/babel-plugin-switch-ee-ce@4.9.1, @strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce":
+"@strapi/babel-plugin-switch-ee-ce@4.9.2, @strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce":
   version: 0.0.0-use.local
   resolution: "@strapi/babel-plugin-switch-ee-ce@workspace:packages/utils/babel-plugin-switch-ee-ce"
   dependencies:
@@ -7110,12 +7110,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/data-transfer@4.9.1, @strapi/data-transfer@workspace:packages/core/data-transfer":
+"@strapi/data-transfer@4.9.2, @strapi/data-transfer@workspace:packages/core/data-transfer":
   version: 0.0.0-use.local
   resolution: "@strapi/data-transfer@workspace:packages/core/data-transfer"
   dependencies:
-    "@strapi/logger": 4.9.1
-    "@strapi/strapi": 4.9.1
+    "@strapi/logger": 4.9.2
+    "@strapi/strapi": 4.9.2
     "@tsconfig/node16": 1.0.3
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.2.0
@@ -7145,7 +7145,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/database@4.9.1, @strapi/database@workspace:packages/core/database":
+"@strapi/database@4.9.2, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
@@ -7206,7 +7206,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/generate-new@4.9.1, @strapi/generate-new@workspace:packages/generators/app":
+"@strapi/generate-new@4.9.2, @strapi/generate-new@workspace:packages/generators/app":
   version: 0.0.0-use.local
   resolution: "@strapi/generate-new@workspace:packages/generators/app"
   dependencies:
@@ -7225,13 +7225,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/generators@4.9.1, @strapi/generators@workspace:packages/generators/generators":
+"@strapi/generators@4.9.2, @strapi/generators@workspace:packages/generators/generators":
   version: 0.0.0-use.local
   resolution: "@strapi/generators@workspace:packages/generators/generators"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/typescript-utils": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/typescript-utils": 4.9.2
+    "@strapi/utils": 4.9.2
     chalk: 4.1.2
     fs-extra: 10.0.0
     node-plop: 0.26.3
@@ -7240,7 +7240,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/helper-plugin@4.9.1, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
+"@strapi/helper-plugin@4.9.2, @strapi/helper-plugin@workspace:packages/core/helper-plugin":
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
@@ -7307,34 +7307,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/logger@4.9.1, @strapi/logger@workspace:packages/utils/logger":
+"@strapi/logger@4.9.2, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
   dependencies:
-    eslint-config-custom: 4.9.1
+    eslint-config-custom: 4.9.2
     lodash: 4.17.21
-    tsconfig: 4.9.1
+    tsconfig: 4.9.2
     winston: 3.3.3
   languageName: unknown
   linkType: soft
 
-"@strapi/permissions@4.9.1, @strapi/permissions@workspace:packages/core/permissions":
+"@strapi/permissions@4.9.2, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
   dependencies:
     "@casl/ability": 5.4.4
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     lodash: 4.17.21
     sift: 16.0.1
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-color-picker@4.9.1, @strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
+"@strapi/plugin-color-picker@4.9.2, @strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
     "@testing-library/react": 12.1.4
     prop-types: ^15.7.2
@@ -7353,28 +7353,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-content-manager@4.9.1, @strapi/plugin-content-manager@workspace:packages/core/content-manager":
+"@strapi/plugin-content-manager@4.9.2, @strapi/plugin-content-manager@workspace:packages/core/content-manager":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     lodash: 4.17.21
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-content-type-builder@4.9.1, @strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder":
+"@strapi/plugin-content-type-builder@4.9.2, @strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
-    "@strapi/admin": 4.9.1
+    "@strapi/admin": 4.9.2
     "@strapi/design-system": 1.6.6
-    "@strapi/generators": 4.9.1
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/generators": 4.9.2
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/strapi": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/strapi": 4.9.2
+    "@strapi/utils": 4.9.2
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
     fs-extra: 10.0.0
@@ -7402,14 +7402,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-documentation@4.9.1, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
+"@strapi/plugin-documentation@4.9.2, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     "@testing-library/react": 12.1.4
     bcryptjs: 2.4.3
     cheerio: ^1.0.0-rc.12
@@ -7444,15 +7444,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-email@4.9.1, @strapi/plugin-email@workspace:packages/core/email":
+"@strapi/plugin-email@4.9.2, @strapi/plugin-email@workspace:packages/core/email":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/provider-email-sendmail": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/provider-email-sendmail": 4.9.2
+    "@strapi/utils": 4.9.2
     "@testing-library/react": 12.1.4
     lodash: 4.17.21
     msw: 1.0.0
@@ -7471,16 +7471,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-graphql@4.9.1, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
+"@strapi/plugin-graphql@4.9.2, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
     "@graphql-tools/schema": 8.5.1
     "@graphql-tools/utils": ^8.12.0
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     apollo-server-core: 3.11.1
     apollo-server-koa: 3.10.0
     cross-env: ^7.0.3
@@ -7508,14 +7508,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-i18n@4.9.1, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
+"@strapi/plugin-i18n@4.9.2, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     "@testing-library/react": 12.1.4
     formik: 2.2.9
     immer: 9.0.19
@@ -7540,13 +7540,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-sentry@4.9.1, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
+"@strapi/plugin-sentry@4.9.2, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
     "@sentry/node": 6.19.7
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.5
     react: ^17.0.2
     react-dom: ^17.0.2
@@ -7561,15 +7561,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-upload@4.9.1, @strapi/plugin-upload@workspace:packages/core/upload":
+"@strapi/plugin-upload@4.9.2, @strapi/plugin-upload@workspace:packages/core/upload":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/provider-upload-local": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/provider-upload-local": 4.9.2
+    "@strapi/utils": 4.9.2
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7610,14 +7610,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-users-permissions@4.9.1, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
+"@strapi/plugin-users-permissions@4.9.2, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
     "@strapi/design-system": 1.6.6
-    "@strapi/helper-plugin": 4.9.1
+    "@strapi/helper-plugin": 4.9.2
     "@strapi/icons": 1.6.6
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     "@testing-library/dom": 8.19.0
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
@@ -7653,12 +7653,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-audit-logs-local@4.9.1, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
+"@strapi/provider-audit-logs-local@4.9.2, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
-    eslint-config-custom: "*"
-    tsconfig: "*"
+    eslint-config-custom: 4.9.2
+    tsconfig: 4.9.2
   peerDependencies:
     "@strapi/strapi": ^4.9.0
   languageName: unknown
@@ -7668,22 +7668,22 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses"
   dependencies:
-    "@strapi/utils": 4.9.1
-    eslint-config-custom: "*"
+    "@strapi/utils": 4.9.2
+    eslint-config-custom: 4.9.2
     node-ses: ^3.0.3
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-email-mailgun@4.9.1, @strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
+"@strapi/provider-email-mailgun@4.9.2, @strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
-    "@strapi/utils": 4.9.1
-    eslint-config-custom: "*"
+    "@strapi/utils": 4.9.2
+    eslint-config-custom: 4.9.2
     form-data: ^4.0.0
     mailgun.js: 8.2.1
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
@@ -7692,10 +7692,10 @@ __metadata:
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
     "@types/nodemailer": 6.4.7
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     lodash: 4.17.21
     nodemailer: 6.9.1
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
@@ -7704,79 +7704,79 @@ __metadata:
   resolution: "@strapi/provider-email-sendgrid@workspace:packages/providers/email-sendgrid"
   dependencies:
     "@sendgrid/mail": 7.7.0
-    "@strapi/utils": 4.9.1
-    eslint-config-custom: "*"
-    tsconfig: "*"
+    "@strapi/utils": 4.9.2
+    eslint-config-custom: 4.9.2
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-email-sendmail@4.9.1, @strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail":
+"@strapi/provider-email-sendmail@4.9.2, @strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-sendmail@workspace:packages/providers/email-sendmail"
   dependencies:
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     "@types/sendmail": 1.4.4
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     sendmail: ^1.6.1
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-aws-s3@4.9.1, @strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
+"@strapi/provider-upload-aws-s3@4.9.2, @strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
     "@types/jest": 29.2.0
     aws-sdk: 2.1351.0
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     lodash: 4.17.21
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-cloudinary@4.9.1, @strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
+"@strapi/provider-upload-cloudinary@4.9.2, @strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     cloudinary: ^1.33.0
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     into-stream: ^5.1.0
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-upload-local@4.9.1, @strapi/provider-upload-local@workspace:packages/providers/upload-local":
+"@strapi/provider-upload-local@4.9.2, @strapi/provider-upload-local@workspace:packages/providers/upload-local":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-local@workspace:packages/providers/upload-local"
   dependencies:
-    "@strapi/utils": 4.9.1
+    "@strapi/utils": 4.9.2
     "@types/jest": 29.2.0
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     fs-extra: 10.0.0
-    tsconfig: "*"
+    tsconfig: 4.9.2
   languageName: unknown
   linkType: soft
 
-"@strapi/strapi@4.9.1, @strapi/strapi@workspace:packages/core/strapi":
+"@strapi/strapi@4.9.2, @strapi/strapi@workspace:packages/core/strapi":
   version: 0.0.0-use.local
   resolution: "@strapi/strapi@workspace:packages/core/strapi"
   dependencies:
     "@koa/cors": 3.4.3
     "@koa/router": 10.1.1
-    "@strapi/admin": 4.9.1
-    "@strapi/data-transfer": 4.9.1
-    "@strapi/database": 4.9.1
-    "@strapi/generate-new": 4.9.1
-    "@strapi/generators": 4.9.1
-    "@strapi/logger": 4.9.1
-    "@strapi/permissions": 4.9.1
-    "@strapi/plugin-content-manager": 4.9.1
-    "@strapi/plugin-content-type-builder": 4.9.1
-    "@strapi/plugin-email": 4.9.1
-    "@strapi/plugin-upload": 4.9.1
-    "@strapi/typescript-utils": 4.9.1
-    "@strapi/utils": 4.9.1
+    "@strapi/admin": 4.9.2
+    "@strapi/data-transfer": 4.9.2
+    "@strapi/database": 4.9.2
+    "@strapi/generate-new": 4.9.2
+    "@strapi/generators": 4.9.2
+    "@strapi/logger": 4.9.2
+    "@strapi/permissions": 4.9.2
+    "@strapi/plugin-content-manager": 4.9.2
+    "@strapi/plugin-content-type-builder": 4.9.2
+    "@strapi/plugin-email": 4.9.2
+    "@strapi/plugin-upload": 4.9.2
+    "@strapi/typescript-utils": 4.9.2
+    "@strapi/utils": 4.9.2
     bcryptjs: 2.4.3
     boxen: 5.1.2
     chalk: 4.1.2
@@ -7824,7 +7824,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/typescript-utils@4.9.1, @strapi/typescript-utils@workspace:packages/utils/typescript":
+"@strapi/typescript-utils@4.9.2, @strapi/typescript-utils@workspace:packages/utils/typescript":
   version: 0.0.0-use.local
   resolution: "@strapi/typescript-utils@workspace:packages/utils/typescript"
   dependencies:
@@ -7837,7 +7837,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/utils@4.9.1, @strapi/utils@workspace:packages/core/utils":
+"@strapi/utils@4.9.2, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
@@ -13600,11 +13600,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
-    "@strapi/generate-new": 4.9.1
+    "@strapi/generate-new": 4.9.2
     commander: 8.3.0
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     inquirer: 8.2.5
-    tsconfig: "*"
+    tsconfig: 4.9.2
   bin:
     create-strapi-app: ./bin/index.js
   languageName: unknown
@@ -13614,16 +13614,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "create-strapi-starter@workspace:packages/cli/create-strapi-starter"
   dependencies:
-    "@strapi/generate-new": 4.9.1
+    "@strapi/generate-new": 4.9.2
     chalk: 4.1.2
     ci-info: 3.8.0
     commander: 8.3.0
-    eslint-config-custom: "*"
+    eslint-config-custom: 4.9.2
     execa: 5.1.1
     fs-extra: 10.0.0
     inquirer: 8.2.5
     ora: 5.4.1
-    tsconfig: "*"
+    tsconfig: 4.9.2
   bin:
     create-strapi-starter: ./bin/index.js
   languageName: unknown
@@ -15399,7 +15399,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@*, eslint-config-custom@4.9.1, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@4.9.2, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
@@ -17306,16 +17306,16 @@ __metadata:
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
     "@strapi/icons": 1.6.6
-    "@strapi/plugin-color-picker": 4.9.1
-    "@strapi/plugin-documentation": 4.9.1
-    "@strapi/plugin-graphql": 4.9.1
-    "@strapi/plugin-i18n": 4.9.1
-    "@strapi/plugin-sentry": 4.9.1
-    "@strapi/plugin-users-permissions": 4.9.1
-    "@strapi/provider-email-mailgun": 4.9.1
-    "@strapi/provider-upload-aws-s3": 4.9.1
-    "@strapi/provider-upload-cloudinary": 4.9.1
-    "@strapi/strapi": 4.9.1
+    "@strapi/plugin-color-picker": 4.9.2
+    "@strapi/plugin-documentation": 4.9.2
+    "@strapi/plugin-graphql": 4.9.2
+    "@strapi/plugin-i18n": 4.9.2
+    "@strapi/plugin-sentry": 4.9.2
+    "@strapi/plugin-users-permissions": 4.9.2
+    "@strapi/provider-email-mailgun": 4.9.2
+    "@strapi/provider-upload-aws-s3": 4.9.2
+    "@strapi/provider-upload-cloudinary": 4.9.2
+    "@strapi/strapi": 4.9.2
     "@vscode/sqlite3": 5.1.2
     better-sqlite3: 8.0.1
     lodash: 4.17.21
@@ -21015,9 +21015,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchensink-ts@workspace:examples/kitchensink-ts"
   dependencies:
-    "@strapi/plugin-i18n": 4.9.1
-    "@strapi/plugin-users-permissions": 4.9.1
-    "@strapi/strapi": 4.9.1
+    "@strapi/plugin-i18n": 4.9.2
+    "@strapi/plugin-users-permissions": 4.9.2
+    "@strapi/strapi": 4.9.2
     better-sqlite3: 8.0.1
   languageName: unknown
   linkType: soft
@@ -21026,10 +21026,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchensink@workspace:examples/kitchensink"
   dependencies:
-    "@strapi/provider-email-mailgun": 4.9.1
-    "@strapi/provider-upload-aws-s3": 4.9.1
-    "@strapi/provider-upload-cloudinary": 4.9.1
-    "@strapi/strapi": 4.9.1
+    "@strapi/provider-email-mailgun": 4.9.2
+    "@strapi/provider-upload-aws-s3": 4.9.2
+    "@strapi/provider-upload-cloudinary": 4.9.2
+    "@strapi/strapi": 4.9.2
     lodash: 4.17.21
     mysql: 2.18.1
     passport-google-oauth2: 0.2.0
@@ -30172,7 +30172,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@*, tsconfig@4.9.1, tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@4.9.2, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   languageName: unknown
