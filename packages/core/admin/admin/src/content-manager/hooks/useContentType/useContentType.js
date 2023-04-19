@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   formatContentTypeData,
   useFetchClient,
@@ -10,6 +9,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import capitalize from 'lodash/capitalize';
 
 import { useFindRedirectionLink } from '..';
 import { getRequestUrl, getTrad } from '../../utils';
@@ -26,11 +26,8 @@ export function useContentType(layout, id) {
   const { contentType, components } = layout;
   const { uid } = contentType;
 
-  const isCreating = !id;
   const isCollectionType = contentType.kind === 'collectionType';
   const collectionTypeUrlSlug = `${isCollectionType ? 'collection' : 'single'}-types`;
-
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(isCreating);
 
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const { trackUsage } = useTracking();
@@ -59,7 +56,7 @@ export function useContentType(layout, id) {
     },
     {
       // Entities that have not yet been created can not be fetched
-      enabled: !isCreating,
+      enabled: !!id,
 
       onSuccess(data) {
         // this is hell
@@ -110,37 +107,10 @@ export function useContentType(layout, id) {
   const redirectLink = useFindRedirectionLink(uid);
   const queryClient = useQueryClient();
 
-  async function contentTypeMutation({ method, body, action, type, onSuccess = () => {} }) {
-    const typeMapping = {
-      create: {
-        trackingEventName: 'Create',
-        notificationkey: 'save',
-      },
+  async function contentTypeMutation({ method, body, action, type }) {
+    const trackingKey = capitalize(type === 'update' ? 'save' : type);
 
-      update: {
-        trackingEventName: 'Edit',
-        notificationkey: 'save',
-      },
-
-      publish: {
-        trackingEventName: 'Publish',
-        notificationkey: 'publish',
-      },
-
-      unpublish: {
-        trackingEventName: 'Unpublish',
-        notificationkey: 'unpublish',
-      },
-
-      delete: {
-        trackingEventName: 'Delete',
-        notificationkey: 'delete',
-      },
-    };
-
-    const { notificationkey, trackingEventName } = typeMapping[type];
-
-    trackUsage(`will${trackingEventName}Entry`);
+    trackUsage(`will${trackingKey}Entry`);
 
     try {
       let url = getRequestUrl(
@@ -150,22 +120,18 @@ export function useContentType(layout, id) {
       );
       const { data } = await fetchClient[method](url, { body });
 
-      trackUsage(`did${trackingEventName}Entry`);
+      trackUsage(`did${trackingKey}Entry`);
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad(`success.record.${notificationkey}`) },
+        message: { id: getTrad(`success.record.${type === 'update' ? 'save' : type}`) },
       });
 
-      if (method !== 'delete') {
-        dispatch(submitSucceeded(data));
-      }
-
-      onSuccess();
+      dispatch(submitSucceeded(data));
 
       return data;
     } catch (error) {
-      trackUsage(`didNot${trackingEventName}Entry`);
+      trackUsage(`didNot${trackingKey}Entry`);
     }
 
     return null;
@@ -180,20 +146,15 @@ export function useContentType(layout, id) {
   async function create(body) {
     dispatch(setStatus('submit-pending'));
 
-    return mutation.mutateAsync({
+    const res = await mutation.mutateAsync({
       method: 'post',
       data: body,
       type: 'create',
-      onSuccess() {
-        // maeh
-        queryClient.invalidateQueries(['relation']);
-
-        // todo: this can be done outside
-        if (!isCollectionType) {
-          setIsCreatingEntry(false);
-        }
-      },
     });
+
+    queryClient.invalidateQueries(['relation']);
+
+    return res;
   }
 
   async function publish() {
@@ -216,19 +177,19 @@ export function useContentType(layout, id) {
   }
 
   async function del() {
-    return mutation.mutateAsync({
+    const res = mutation.mutateAsync({
       method: 'delete',
       type: 'delete',
-      onSuccess() {
-        // todo: at least the else branch should be done outside
-        if (!isCollectionType) {
-          dispatch(initForm(rawQuery, true));
-        } else {
-          // Back to the CM list view
-          replace(redirectLink);
-        }
-      },
     });
+
+    if (!isCollectionType) {
+      dispatch(initForm(rawQuery, true));
+    } else {
+      // Back to the CM list view
+      replace(redirectLink);
+    }
+
+    return res;
   }
 
   // react-query too?
@@ -256,11 +217,7 @@ export function useContentType(layout, id) {
   }
 
   return {
-    contentType: {
-      query,
-      mutation,
-    },
-    isCreating: isCreatingEntry,
+    contentType: query,
     create,
     update,
     del,

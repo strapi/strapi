@@ -54,8 +54,8 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, contentType, isCreating } =
-    useContentType(allLayoutData);
+  const { create, update, publish, unpublish, contentType } = useContentType(allLayoutData);
+  const [isCreating, setIsCreating] = React.useState(!contentType.id);
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -93,7 +93,7 @@ const EditViewDataManagerProvider = ({
   const { components } = allLayoutData;
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (contentType.query.isLoading) {
+    if (contentType.isLoading) {
       return false;
     }
 
@@ -106,7 +106,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [contentType.query.isLoading, isCreating, canRead, canUpdate]);
+  }, [contentType.isLoading, isCreating, canRead, canUpdate]);
 
   useEffect(() => {
     if (status === 'resolved') {
@@ -122,7 +122,7 @@ const EditViewDataManagerProvider = ({
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!contentType.query.isLoading) {
+    if (!contentType.isLoading) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,7 +182,7 @@ const EditViewDataManagerProvider = ({
     dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
   }, [dispatch, contentType, components]);
 
-  const previousInitialValues = usePrev(contentType.query.data);
+  const previousInitialValues = usePrev(contentType.data);
 
   useEffect(() => {
     /**
@@ -190,13 +190,13 @@ const EditViewDataManagerProvider = ({
      * otherwise it's a fruitless effort no matter what happens.
      */
     if (
-      contentType.query.data &&
+      contentType.data &&
       currentContentTypeLayout?.attributes &&
-      !isEqual(previousInitialValues, contentType.query.data)
+      !isEqual(previousInitialValues, contentType.data)
     ) {
       dispatch({
         type: 'INIT_FORM',
-        initialValues: contentType.query.data,
+        initialValues: contentType.data,
         components,
         attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
@@ -211,7 +211,7 @@ const EditViewDataManagerProvider = ({
       }
     }
   }, [
-    contentType.query.data,
+    contentType.data,
     currentContentTypeLayout,
     components,
     setModifiedDataOnly,
@@ -411,6 +411,11 @@ const EditViewDataManagerProvider = ({
 
             // Update URL for the new entity
             replace(getRequestUrl(`/content-manager/collectionType/${slug}/${id}`));
+
+            // todo
+            if (!contentType.kind === 'singleType') {
+              setIsCreating(false);
+            }
           } else {
             await update(formData, trackerProperty);
           }
@@ -439,6 +444,7 @@ const EditViewDataManagerProvider = ({
       replace,
       setCurrentStep,
       slug,
+      contentType.kind,
     ]
   );
 
@@ -669,7 +675,7 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {contentType.query.isLoading || (!isCreating && !initialData.id) ? (
+      {contentType.isLoading || (!isCreating && !initialData.id) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>

@@ -77,7 +77,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       contentTypeDataStructure={contentTypeDataStructure}
       // todo
       from={/* redirectionLink */ '/'}
-      isLoadingForData={contentType.query.isLoading}
+      isLoadingForData={contentType.isLoading}
       isSingleType={isSingleType}
       // todo
       readActionAllowedFields={readActionAllowedFields}
