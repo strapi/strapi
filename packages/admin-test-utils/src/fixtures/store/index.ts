@@ -1,6 +1,4 @@
-'use strict';
-
-const { combineReducers, createStore } = require('redux');
+import { combineReducers, createStore } from 'redux';
 
 const reducers = {
   admin_app: jest.fn(() => ({ status: 'init' })),
@@ -37,7 +35,7 @@ const reducers = {
 
 const store = createStore(combineReducers(reducers));
 
-module.exports = {
+export default {
   store,
   state: store.getState(),
 };

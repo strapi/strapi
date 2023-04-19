@@ -3869,6 +3869,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@juggle/resize-observer@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@juggle/resize-observer@npm:3.4.0"
+  checksum: 2505028c05cc2e17639fcad06218b1c4b60f932a4ebb4b41ab546ef8c157031ae377e3f560903801f6d01706dbefd4943b6c4704bf19ed86dfa1c62f1473a570
+  languageName: node
+  linkType: hard
+
 "@koa/cors@npm:3.4.3":
   version: 3.4.3
   resolution: "@koa/cors@npm:3.4.3"
@@ -7006,18 +7013,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/admin-test-utils@workspace:packages/admin-test-utils":
+"@strapi/admin-test-utils@workspace:*, @strapi/admin-test-utils@workspace:packages/admin-test-utils":
   version: 0.0.0-use.local
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
+    "@juggle/resize-observer": 3.4.0
     "@testing-library/jest-dom": 5.16.5
+    eslint-config-custom: 4.9.2
     jest-styled-components: 7.1.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-is: ^17.0.2
     redux: ^4.2.1
-    styled-components: 5.3.3
-    whatwg-fetch: 3.6.2
+    tsconfig: 4.9.2
   peerDependencies:
     redux: ^4.2.1
   languageName: unknown
@@ -28872,6 +28877,7 @@ __metadata:
     "@babel/core": ^7.20.12
     "@babel/eslint-parser": ^7.19.1
     "@babel/preset-react": 7.18.6
+    "@strapi/admin-test-utils": "workspace:*"
     "@strapi/eslint-config": 0.1.2
     "@swc/cli": 0.1.62
     "@swc/core": 1.3.37
@@ -31772,13 +31778,6 @@ __metadata:
   dependencies:
     iconv-lite: 0.6.3
   checksum: 7087810c410aa9b689cbd6af8773341a53cdc1f3aae2a882c163bd5522ec8ca4cdfc269aef417a5792f411807d5d77d50df4c24e3abb00bb60192858a40cc675
-  languageName: node
-  linkType: hard
-
-"whatwg-fetch@npm:3.6.2":
-  version: 3.6.2
-  resolution: "whatwg-fetch@npm:3.6.2"
-  checksum: ee976b7249e7791edb0d0a62cd806b29006ad7ec3a3d89145921ad8c00a3a67e4be8f3fb3ec6bc7b58498724fd568d11aeeeea1f7827e7e1e5eae6c8a275afed
   languageName: node
   linkType: hard
 
