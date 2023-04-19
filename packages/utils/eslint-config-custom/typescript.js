@@ -24,7 +24,7 @@ module.exports = {
     'node/no-missing-import': 'off',
     '@typescript-eslint/brace-style': 'off', // TODO: fix conflict with prettier/prettier in data-transfer/engine/index.ts
     // to be cleaned up throughout codebase (too many to fix at the moment)
-    '@typescript-eslint/no-use-before-define': 'warn',
+    '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/comma-dangle': 'off',
   },
   overrides: [

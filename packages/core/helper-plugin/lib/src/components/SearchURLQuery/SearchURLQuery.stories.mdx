@@ -2,8 +2,10 @@
 
 import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
 import { Flex } from '@strapi/design-system';
-import matchSorter from 'match-sorter';
+import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
+import { useFilter } from '../../hooks/useFilter';
+import { useCollator } from '../../hooks/useCollator';
 import SearchURLQuery from './index';
 
 <Meta title="components/SearchURLQuery" />
@@ -22,16 +24,31 @@ import { useIntl } from 'react-intl';
 ## Usage
 
 ```jsx
-import { SearchURLQuery, useQueryParams } from '@strapi/helper-plugin';
-import matchSorter from 'match-sorter';
+import { useIntl } from 'react-intl';
+import { SearchURLQuery, useQueryParams, useFilter, useCollator } from '@strapi/helper-plugin';
 
 const HomePage = () => {
   const [{ query }] = useQueryParams()
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const _q = query?._q || ''
   const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
 
-  const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
+
+  const { includes } = useFilter(locale, {
+    sensitivity: 'base',
+  });
+
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+
+  const sortedList = items
+    .filter((item) => includes(item.name, _q) || includes(item.instrument, _q))
+    .sort(
+      (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.instrument, b.instrument)
+    );
+
   const itemsList = sortedList?.length ? sortedList : items
 
   return (
@@ -65,7 +82,19 @@ const HomePage = () => {
         { name: 'Paul', instrument: 'bass' },
         { name: 'George', instrument: 'guitar' },
       ];
-      const sortedList = matchSorter(items, _q, { keys: ['name', 'instrument'] });
+      const { locale } = useIntl();
+      const { includes } = useFilter(locale, {
+        sensitivity: 'base',
+      });
+      const formatter = useCollator(locale, {
+        sensitivity: 'base',
+      });
+      const sortedList = items
+        .filter((item) => includes(item.name, _q) || includes(item.instrument, _q))
+        .sort(
+          (a, b) =>
+            formatter.compare(a.name, b.name) || formatter.compare(a.instrument, b.instrument)
+        );
       const itemsList = sortedList?.length ? sortedList : items;
       return (
         <Flex direction="column" alignItems="stretch" paddingTop={6} gap={4}>
