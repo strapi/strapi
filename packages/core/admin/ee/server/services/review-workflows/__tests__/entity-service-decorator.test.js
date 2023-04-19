@@ -1,5 +1,6 @@
 'use strict';
 
+const { omit } = require('lodash/fp');
 const { decorator } = require('../entity-service-decorator')();
 
 jest.mock('../../../utils');
@@ -73,6 +74,73 @@ describe('Entity service decorator', () => {
         data: {
           ...input.data,
           strapi_reviewWorkflows_stage: 1,
+        },
+      });
+    });
+  });
+
+  describe('Update', () => {
+    test('Calls original update for non review workflow content types', async () => {
+      const entry = {
+        id: 1,
+      };
+
+      const defaultService = {
+        update: jest.fn(() => Promise.resolve(entry)),
+      };
+
+      const service = decorator(defaultService);
+
+      const id = 1;
+      const input = { data: { title: 'title ' } };
+      await service.update('non-rw-model', id, input);
+
+      expect(defaultService.update).toHaveBeenCalledWith('non-rw-model', id, input);
+    });
+
+    test('Assigns a stage to new review workflow entity', async () => {
+      const entry = {
+        id: 1,
+      };
+
+      const defaultService = {
+        update: jest.fn(() => Promise.resolve(entry)),
+      };
+
+      const service = decorator(defaultService);
+
+      const id = 1;
+      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: 1 } };
+      await service.update('test-model', id, input);
+
+      expect(defaultService.update).toHaveBeenCalledWith('test-model', id, {
+        ...input,
+        data: {
+          ...input.data,
+          strapi_reviewWorkflows_stage: 1,
+        },
+      });
+    });
+
+    test('Can not assign a null stage to new review workflow entity', async () => {
+      const entry = {
+        id: 1,
+      };
+
+      const defaultService = {
+        update: jest.fn(() => Promise.resolve(entry)),
+      };
+
+      const service = decorator(defaultService);
+
+      const id = 1;
+      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: null } };
+      await service.update('test-model', id, input);
+
+      expect(defaultService.update).toHaveBeenCalledWith('test-model', id, {
+        ...input,
+        data: {
+          ...omit('strapi_reviewWorkflows_stage', input.data),
         },
       });
     });

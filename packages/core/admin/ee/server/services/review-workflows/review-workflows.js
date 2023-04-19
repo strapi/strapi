@@ -1,46 +1,16 @@
 'use strict';
 
-const { set, get, forEach, keys, pickBy, pipe } = require('lodash/fp');
+const { set, forEach, pipe } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
+const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
-const {
-  disableOnContentTypes: disableReviewWorkflows,
-} = require('../../migrations/review-workflows');
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
-
-const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
-  // Pick only content-types with reviewWorkflows options set to true
-  pickBy(get('options.reviewWorkflows')),
-  // Get UIDs
-  keys,
-]);
-
-/**
- * Map every stage in the array to be ordered in the relation
- * @param {Object[]} stages
- * @param {number} stages.id
- * @return {Object[]}
- */
-function buildStagesConnectArray(stages) {
-  return stages.map((stage, index) => {
-    const connect = {
-      id: stage.id,
-      position: {},
-    };
-
-    if (index === 0) {
-      connect.position.start = true;
-    } else {
-      connect.position.after = stages[index - 1].id;
-    }
-    return connect;
-  });
-}
+const { persistTable, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
@@ -53,7 +23,7 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
     const workflow = {
       ...defaultWorkflow,
       stages: {
-        connect: buildStagesConnectArray(stages),
+        connect: stages.map((stage) => stage.id),
       },
     };
 
@@ -63,19 +33,18 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
   }
 }
 
-const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
-  writable: true,
-  private: false,
-  configurable: false,
-  visible: false,
-  type: 'relation',
-  relation: 'morphOne',
-  target: 'admin::workflow-stage',
-  morphBy: 'related',
-});
-
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
+    const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
+      writable: true,
+      private: false,
+      configurable: false,
+      visible: false,
+      useJoinTable: true, // We want a join table to persist data when downgrading to CE
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'admin::workflow-stage',
+    });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
   pipe([
@@ -101,54 +70,22 @@ function enableReviewWorkflow({ strapi }) {
       return;
     }
     const firstStage = defaultWorkflow.stages[0];
+    const stagesService = getService('stages', { strapi });
 
     const up = async (contentTypeUID) => {
-      const contentTypeMetadata = strapi.db.metadata.get(contentTypeUID);
-      const { target, morphBy } = contentTypeMetadata.attributes[ENTITY_STAGE_ATTRIBUTE];
-      const { joinTable } = strapi.db.metadata.get(target).attributes[morphBy];
-      const { idColumn, typeColumn } = joinTable.morphColumn;
+      // Persist the stage join table
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
+      const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
+      await persistTable(joinTableName, [tableName]);
 
-      // Execute an SQL query to insert records into the join table mapping the specified content type with the first stage of the default workflow.
-      // Only entities that do not have a record in the join table yet are selected.
-      const selectStatement = strapi.db
-        .getConnection()
-        .select({
-          [idColumn.name]: 'entity.id',
-          field: strapi.db.connection.raw('?', [ENTITY_STAGE_ATTRIBUTE]),
-          order: 1,
-          [joinTable.joinColumn.name]: firstStage.id,
-          [typeColumn.name]: strapi.db.connection.raw('?', [contentTypeUID]),
-        })
-        .leftJoin(`${joinTable.name} AS jointable`, function joinFunc() {
-          this.on('entity.id', '=', `jointable.${idColumn.name}`).andOn(
-            `jointable.${typeColumn.name}`,
-            '=',
-            strapi.db.connection.raw('?', [contentTypeUID])
-          );
-        })
-        .where(`jointable.${idColumn.name}`, null)
-        .from(`${contentTypeMetadata.tableName} AS entity`)
-        .toSQL();
-
-      const columnsToInsert = [
-        idColumn.name,
-        'field',
-        strapi.db.connection.raw('??', ['order']),
-        joinTable.joinColumn.name,
-        typeColumn.name,
-      ];
-
-      // Insert rows for all entries of the content type that do not have a
-      // default stage
-      await strapi.db
-        .getConnection(joinTable.name)
-        .insert(
-          strapi.db.connection.raw(
-            `(${columnsToInsert.join(',')})  ${selectStatement.sql}`,
-            selectStatement.bindings
-          )
-        );
+      // Update CT entities stage
+      return stagesService.updateEntitiesStage(contentTypeUID, {
+        fromStageId: null,
+        toStageId: firstStage.id,
+      });
     };
+
+    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
 
     return pipe([
       getContentTypeUIDsWithActivatedReviewWorkflows,
@@ -169,7 +106,6 @@ module.exports = ({ strapi }) => {
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
-      strapi.hook('strapi::content-types.afterSync').register(disableReviewWorkflows);
     },
   };
 };

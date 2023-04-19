@@ -123,7 +123,7 @@ describe('Review workflows service', () => {
       expect(extendFunc({})).toEqual({
         attributes: {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({
-            relation: 'morphOne',
+            relation: 'oneToOne',
             target: 'admin::workflow-stage',
             type: 'relation',
           }),

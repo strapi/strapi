@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapAsync } = require('@strapi/utils');
+
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest, createRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
@@ -75,12 +77,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
   };
-
-  const getRWMorphTableResults = async (connection) =>
-    connection
-      .select('*')
-      .from('strapi_workflows_stages_related_morphs')
-      .where('related_type', productUID);
 
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
@@ -371,13 +367,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
 
-      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
+      const {
+        body: { results },
+      } = await requests.admin({
+        method: 'GET',
+        url: '/content-manager/collection-types/api::product.product',
+      });
 
-      expect(morphTableResults.length).toEqual(3);
-      for (let i = 0; i < morphTableResults.length; i += 1) {
-        const entry = morphTableResults[i];
-        expect(entry.related_id).toEqual(i + 1);
-        expect(entry.order).toEqual(1);
+      expect(results.length).toEqual(3);
+      for (let i = 0; i < results.length; i += 1) {
+        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeDefined();
       }
     });
 
@@ -395,8 +394,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
       expect(response.body.data.schema.reviewWorkflows).toBeFalsy();
 
-      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
-      expect(morphTableResults.length).toEqual(0);
+      const {
+        body: { results },
+      } = await requests.admin({
+        method: 'GET',
+        url: '/content-manager/collection-types/api::product.product',
+      });
+
+      for (let i = 0; i < results.length; i += 1) {
+        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
+      }
     });
   });
 
@@ -489,22 +496,21 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       const res = await requests.admin.get(`/admin/review-workflows/workflows/1/stages`);
       const defaultStages = res.body.data;
 
-      // Get all products and move ~30% of them to the last stage of the workflow
-      const entriesMovedToEnd = [];
       const productsBefore = await findAll(productUID);
-      productsBefore.results.forEach(async (entry) => {
-        if (Math.random() < 0.3) {
-          await requests.admin.put(
-            `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
-            {
-              body: {
-                data: { id: defaultStages.slice(-1)[0].id },
-              },
-            }
-          );
-          entriesMovedToEnd.push(entry.id);
-        }
-      });
+      const entriesMovedToEnd = productsBefore.results
+        .filter((entry) => entry.id % 2 === 0)
+        .map((entry) => entry.id);
+
+      await mapAsync(entriesMovedToEnd, async (entityId) =>
+        requests.admin.put(
+          `/admin/content-manager/collection-types/${productUID}/${entityId}/stage`,
+          {
+            body: {
+              data: { id: defaultStages.slice(-1)[0].id },
+            },
+          }
+        )
+      );
 
       // Delete the first and last stage stage of the default workflow
       await requests.admin.put(`/admin/review-workflows/workflows/1/stages`, {
@@ -513,7 +519,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       // Expect the content in these stages to be moved to the nearest available stage
       const productsAfter = await findAll(productUID);
-      productsAfter.results.forEach(async (entry) => {
+      await mapAsync(productsAfter.results, async (entry) => {
         if (entriesMovedToEnd.includes(entry.id)) {
           expect(await entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[2].name);
           return;

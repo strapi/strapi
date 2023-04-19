@@ -4,10 +4,11 @@ const {
   mapAsync,
   errors: { ApplicationError },
 } = require('@strapi/utils');
+const { map } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
-const { getDefaultWorkflow } = require('../../utils/review-workflows');
+const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
@@ -72,52 +73,39 @@ module.exports = ({ strapi }) => {
 
       assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
 
-      return strapi.db.transaction(async () => {
-        const defaultWorkflow = await getDefaultWorkflow({ strapi });
-        const newStages = await this.createMany(created, { fields: ['id'] });
-        const stagesIds = stages.map((stage) => stage.id ?? [...newStages].shift().id);
+      return strapi.db.transaction(async ({ trx }) => {
+        // Create the new stages
+        const createdStages = await this.createMany(created, { fields: ['id'] });
+        // Put all the newly created stages ids
+        const createdStagesIds = map('id', createdStages);
+        const stagesIds = stages.map((stage) => stage.id ?? createdStagesIds.shift());
+        const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
 
+        // Update the workflow stages
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
 
-        const entitiesToMove = [];
+        // Delete the stages that are not in the new stages list
         await mapAsync(deleted, async (stage) => {
-          // Find any entities related to this stage
-          const stageInfo = await this.findById(stage.id, {
-            populate: ['related'],
-          });
-
-          if (!stageInfo?.related?.length) {
-            // If there are no related entities, just delete the stage
-            return this.delete(stage.id);
-          }
-
-          // This stage has related entities that need to be moved to their
-          // target stage
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
-          const targetStageId = findNearestMatchingStageID(
-            [...defaultWorkflow.stages, ...newStages],
-            defaultWorkflow.stages.findIndex((s) => s.id === stage.id),
+          const nearestStage = findNearestMatchingStage(
+            [...workflow.stages, ...createdStages],
+            workflow.stages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
             }
           );
 
-          // Keep track of the entities to move and their target stages
-          entitiesToMove.push(...stageInfo.related.map((entity) => ({ ...entity, targetStageId })));
+          // Assign the new stage to entities that had the deleted stage
+          await mapAsync(contentTypes, (contentTypeUID) => {
+            this.updateEntitiesStage(contentTypeUID, {
+              fromStageId: stage.id,
+              toStageId: nearestStage.id,
+              trx,
+            });
+          });
 
           return this.delete(stage.id);
-        });
-
-        // Move all the entities whose stage was deleted to their target stage
-        await mapAsync(entitiesToMove, (entity) => {
-          return this.updateEntity(
-            {
-              id: entity.id,
-              modelUID: entity.__type,
-            },
-            entity.targetStageId
-          );
         });
 
         return workflowsService.update(workflowId, {
@@ -149,6 +137,46 @@ module.exports = ({ strapi }) => {
       metrics.sendDidUpdateEntityStage();
 
       return entity;
+    },
+
+    /**
+     * Updates the stage of all entities of a content type that are in a specific stage
+     * @param {string} contentTypeUID
+     * @param {number} fromStageId
+     * @param {number} toStageId
+     * @param {KnexTransaction} trx
+     * @returns
+     */
+    async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId, trx = null }) {
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
+      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const joinColumn = joinTable.joinColumn.name;
+      const invJoinColumn = joinTable.inverseJoinColumn.name;
+
+      const selectStatement = strapi.db
+        .getConnection()
+        .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
+        .from(`${tableName} as t1`)
+        .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
+        .where(`t2.${invJoinColumn}`, fromStageId)
+        .toSQL();
+
+      // Insert rows for all entries of the content type that do not have a
+      // default stage
+      const query = strapi.db
+        .getConnection(joinTable.name)
+        .insert(
+          strapi.db.connection.raw(
+            `(${joinColumn}, ${invJoinColumn})  ${selectStatement.sql}`,
+            selectStatement.bindings
+          )
+        );
+
+      if (trx) {
+        query.transacting(trx);
+      }
+
+      return query;
     },
   };
 };
@@ -221,13 +249,13 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
  * @param {Array} stages
  * @param {Number} startIndex the index to start searching from
  * @param {Function} condition must evaluate to true for the object to be considered a match
- * @returns {Number}
+ * @returns {Object} stage
  */
-function findNearestMatchingStageID(stages, startIndex, condition) {
+function findNearestMatchingStage(stages, startIndex, condition) {
   // Start by searching the elements before the startIndex
   for (let i = startIndex; i >= 0; i -= 1) {
     if (condition(stages[i])) {
-      return stages[i].id;
+      return stages[i];
     }
   }
 
@@ -235,5 +263,5 @@ function findNearestMatchingStageID(stages, startIndex, condition) {
   // search the remaining elements in the array
   const remainingArray = stages.slice(startIndex + 1);
   const nearestObject = remainingArray.filter(condition)[0];
-  return nearestObject.id;
+  return nearestObject;
 }

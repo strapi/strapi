@@ -53,7 +53,7 @@ const workflowMock = {
 };
 
 const entityServiceMock = {
-  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id)),
+  findOne: jest.fn((uid, id) => workflowMock.stages.find((stage) => stage.id === id) || { id }),
   findMany: jest.fn(() => [stageMock]),
   create: jest.fn((uid, { data }) => ({
     ...data,
@@ -69,6 +69,8 @@ const servicesMock = {
   },
 };
 
+const queryUpdateMock = jest.fn(() => Promise.resolve());
+
 const strapiMock = {
   query: jest.fn(() => ({
     findOne: jest.fn(() => workflowMock),
@@ -78,15 +80,49 @@ const strapiMock = {
     return servicesMock[serviceName];
   }),
   db: {
-    transaction: jest.fn((func) => func()),
+    transaction: jest.fn((func) => func({})),
+    query: jest.fn(() => ({
+      updateMany: queryUpdateMock,
+    })),
+    metadata: {
+      get: () => ({
+        tableName: 'test',
+        attributes: {
+          strapi_reviewWorkflows_stage: {
+            joinColumn: {
+              name: 'strapi_reviewWorkflows_stage_id',
+            },
+          },
+        },
+      }),
+    },
+  },
+  contentTypes: {
+    'api::shop.shop': {
+      kind: 'collectionType',
+      collectionName: 'shop',
+      options: {
+        reviewWorkflows: true,
+      },
+    },
   },
 };
 
 const stagesService = stageFactory({ strapi: strapiMock });
 
 describe('Review workflows - Stages service', () => {
+  let mockUpdateEntitiesStage;
+  beforeEach(() => {
+    mockUpdateEntitiesStage = jest
+      .spyOn(stagesService, 'updateEntitiesStage')
+      .mockImplementation(() => {
+        return Promise.resolve();
+      });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    mockUpdateEntitiesStage.mockRestore();
   });
 
   describe('find', () => {
@@ -165,12 +201,10 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
 
       // Here we are only deleting the stage containing related IDs 1 & 2
-      for (let i = 0; i < 2; i += 1) {
-        expect(entityServiceMock.update).toBeCalledWith(relatedUID, i + 1, {
-          data: { strapi_reviewWorkflows_stage: 3 },
-          populate: ['strapi_reviewWorkflows_stage'],
-        });
-      }
+      expect(stagesService.updateEntitiesStage).toHaveBeenCalledWith('api::shop.shop', {
+        fromStageId: workflowMock.stages[3].id,
+        toStageId: workflowMock.stages[2].id,
+      });
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
@@ -189,10 +223,10 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
 
       // Here we are deleting all stages and expecting all entities to be moved to the new stage
-      for (let i = 0; i < 3; i += 1) {
-        expect(entityServiceMock.update).toBeCalledWith(relatedUID, i + 1, {
-          data: { strapi_reviewWorkflows_stage: newStageID },
-          populate: ['strapi_reviewWorkflows_stage'],
+      for (const stage of workflowMock.stages) {
+        expect(stagesService.updateEntitiesStage).toHaveBeenCalledWith('api::shop.shop', {
+          fromStageId: stage.id,
+          toStageId: newStageID,
         });
       }
 
@@ -200,6 +234,8 @@ describe('Review workflows - Stages service', () => {
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
         stages: [newStageID],
       });
+
+      mockUpdateEntitiesStage.mockRestore();
     });
 
     test('New stage + updated + deleted', async () => {
@@ -207,6 +243,7 @@ describe('Review workflows - Stages service', () => {
         workflowMock.stages[0],
         { id: workflowMock.stages[1].id, name: 'new_name' },
         { name: 'new stage' },
+        { name: 'new stage2' },
       ]);
 
       expect(servicesMock['admin::workflows'].findById).toBeCalled();
@@ -215,7 +252,12 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [workflowMock.stages[0].id, workflowMock.stages[1].id, expect.any(Number)],
+        stages: [
+          workflowMock.stages[0].id,
+          workflowMock.stages[1].id,
+          expect.any(Number),
+          expect.any(Number),
+        ],
       });
     });
   });

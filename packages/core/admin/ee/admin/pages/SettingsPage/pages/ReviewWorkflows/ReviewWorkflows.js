@@ -122,7 +122,8 @@ export function ReviewWorkflowsPage() {
 
   useEffect(() => {
     trackUsage('didViewWorkflow');
-  }, [trackUsage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>

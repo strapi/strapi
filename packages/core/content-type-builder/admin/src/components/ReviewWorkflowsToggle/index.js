@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system';
-import { ConfirmDialog } from '@strapi/helper-plugin';
+import { ConfirmDialog, useTracking } from '@strapi/helper-plugin';
+
 import { getTrad } from '../../utils';
 
 const ReviewWorkflowsToggle = ({
@@ -14,6 +15,7 @@ const ReviewWorkflowsToggle = ({
   onChange,
   value,
 }) => {
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const [showWarning, setShowWarning] = useState(false);
   const label = intlLabel.id
@@ -34,7 +36,7 @@ const ReviewWorkflowsToggle = ({
 
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });
-
+    trackUsage('willDisableWorkflow');
     handleToggle();
   };
 
@@ -43,6 +45,10 @@ const ReviewWorkflowsToggle = ({
       handleToggle();
 
       return;
+    }
+
+    if (checked) {
+      trackUsage('willEnableWorkflow');
     }
 
     onChange({ target: { name, value: checked } });

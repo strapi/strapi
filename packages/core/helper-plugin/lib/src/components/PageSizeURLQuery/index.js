@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
-const PageSizeURLQuery = ({ trackedEvent }) => {
+const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const { trackUsage } = useTracking();
@@ -26,7 +26,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
       page: 1,
     });
   };
-  const pageSize = query?.pageSize || '10';
+  const pageSize = query?.pageSize || defaultValue;
 
   return (
     <Flex>
@@ -39,10 +39,11 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
         onChange={handleChange}
         value={pageSize}
       >
-        <Option value="10">10</Option>
-        <Option value="20">20</Option>
-        <Option value="50">50</Option>
-        <Option value="100">100</Option>
+        {options.map((option) => (
+          <Option key={option} value={option}>
+            {option}
+          </Option>
+        ))}
       </Select>
       <Box paddingLeft={2}>
         <Typography textColor="neutral600" as="label" htmlFor="page-size">
@@ -58,10 +59,14 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
 
 PageSizeURLQuery.defaultProps = {
   trackedEvent: null,
+  options: ['10', '20', '50', '100'],
+  defaultValue: '10',
 };
 
 PageSizeURLQuery.propTypes = {
   trackedEvent: PropTypes.string,
+  options: PropTypes.arrayOf(PropTypes.string.isRequired),
+  defaultValue: PropTypes.string,
 };
 
 export default PageSizeURLQuery;
