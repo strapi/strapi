@@ -210,6 +210,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     ...schemas,
     [`${pascalCase(uniqueName)}`]: {
       type: 'object',
+      ...(requiredAttributes.length && { required: requiredAttributes }),
       properties: cleanSchemaAttributes(attributes, {
         didAddStrapiComponentsToSchemas,
         componentSchemaRefName: `#/components/schemas/${pascalCase(uniqueName)}`,
