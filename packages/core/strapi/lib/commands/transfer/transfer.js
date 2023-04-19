@@ -21,6 +21,7 @@ const {
   loadersFactory,
   exitMessageText,
   abortTransfer,
+  getTransferTelemetryPayload,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
@@ -161,10 +162,14 @@ module.exports = async (opts) => {
     updateLoader(stage, data).fail();
   });
 
-  let results;
-  try {
+  progress.on('transfer::start', async () => {
     console.log(`Starting transfer...`);
 
+    await strapi.telemetry.send('didDEITSProcessStart', getTransferTelemetryPayload(engine));
+  });
+
+  let results;
+  try {
     // Abort transfer if user interrupts process
     ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
       process.removeAllListeners(signal);
@@ -173,10 +178,19 @@ module.exports = async (opts) => {
 
     results = await engine.transfer();
   } catch (e) {
+    await strapi.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
     exitWith(1, exitMessageText('transfer', true));
   }
 
-  const table = buildTransferTable(results.engine);
-  console.log(table.toString());
+  // Note: we need to await telemetry or else the process ends before it is sent
+  await strapi.telemetry.send('didDEITSProcessFinish', getTransferTelemetryPayload(engine));
+
+  try {
+    const table = buildTransferTable(results.engine);
+    console.log(table.toString());
+  } catch (e) {
+    console.error('There was an error displaying the results of the transfer.');
+  }
+
   exitWith(0, exitMessageText('transfer'));
 };

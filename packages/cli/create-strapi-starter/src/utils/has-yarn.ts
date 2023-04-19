@@ -1,8 +1,6 @@
-'use strict';
+import execa from 'execa';
 
-const execa = require('execa');
-
-module.exports = async function hasYarn() {
+export default async function hasYarn() {
   try {
     const { exitCode } = await execa.commandSync('yarn --version', { shell: true });
 
@@ -10,4 +8,4 @@ module.exports = async function hasYarn() {
   } catch (err) {
     return false;
   }
-};
+}
