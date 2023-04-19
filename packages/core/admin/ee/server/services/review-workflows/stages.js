@@ -49,7 +49,7 @@ module.exports = ({ strapi }) => {
         data: stageData,
       });
 
-      metrics.sendDidUpdateStage();
+      metrics.sendDidEditStage();
 
       return stage;
     },
