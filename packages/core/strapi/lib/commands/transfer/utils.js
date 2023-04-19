@@ -14,7 +14,19 @@ const {
 const ora = require('ora');
 const { readableBytes, exitWith } = require('../utils/helpers');
 const strapi = require('../../index');
-const { getParseListWithChoices } = require('../utils/commander');
+const { getParseListWithChoices, parseInteger } = require('../utils/commander');
+
+const exitMessageText = (process, error = false) => {
+  const processCapitalized = process[0].toUpperCase() + process.slice(1);
+
+  if (!error) {
+    return chalk.bold(
+      chalk.green(`${processCapitalized} process has been completed successfully!`)
+    );
+  }
+
+  return chalk.bold(chalk.red(`${processCapitalized} process failed.`));
+};
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -90,12 +102,23 @@ const DEFAULT_IGNORED_CONTENT_TYPES = [
   'admin::audit-log',
 ];
 
-const createStrapiInstance = async (logLevel = 'error') => {
+const abortTransfer = async ({ engine, strapi }) => {
+  try {
+    await engine.abortTransfer();
+    await strapi.destroy();
+  } catch (e) {
+    // ignore because there's not much else we can do
+    return false;
+  }
+  return true;
+};
+
+const createStrapiInstance = async (opts = {}) => {
   try {
     const appContext = await strapi.compile();
-    const app = strapi(appContext);
+    const app = strapi({ ...opts, ...appContext });
 
-    app.log.level = logLevel;
+    app.log.level = opts.logLevel || 'error';
     return await app.load();
   } catch (err) {
     if (err.code === 'ECONNREFUSED') {
@@ -106,6 +129,13 @@ const createStrapiInstance = async (logLevel = 'error') => {
 };
 
 const transferDataTypes = Object.keys(TransferGroupPresets);
+
+const throttleOption = new Option(
+  '--throttle <delay after each entity>',
+  `Add a delay in milliseconds between each transferred entity`
+)
+  .argParser(parseInteger)
+  .hideHelp(); // This option is not publicly documented
 
 const excludeOption = new Option(
   '--exclude <comma-separated data types>',
@@ -219,7 +249,10 @@ module.exports = {
   DEFAULT_IGNORED_CONTENT_TYPES,
   createStrapiInstance,
   excludeOption,
+  exitMessageText,
   onlyOption,
+  throttleOption,
   validateExcludeOnly,
   formatDiagnostic,
+  abortTransfer,
 };

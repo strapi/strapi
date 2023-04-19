@@ -22,15 +22,20 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
+  abortTransfer,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 /**
  * @typedef ExportCommandOptions Options given to the CLI import command
  *
- * @property {string} [file] The file path to import
+ * @property {string} [file] The file path to export to
  * @property {boolean} [encrypt] Used to encrypt the final archive
- * @property {string} [key] Encryption key, only useful when encryption is enabled
+ * @property {string} [key] Encryption key, used only when encryption is enabled
  * @property {boolean} [compress] Used to compress the final archive
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
  */
 
 const BYTES_IN_MB = 1024 * 1024;
@@ -58,6 +63,7 @@ module.exports = async (opts) => {
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     transforms: {
       links: [
         {
@@ -108,12 +114,19 @@ module.exports = async (opts) => {
 
   progress.on('transfer::start', async () => {
     console.log(`Starting export...`);
+
     await strapi.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
   });
 
   let results;
   let outFile;
   try {
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
     outFile = results.destination.file.path;
     const outFileExists = await fs.pathExists(outFile);
@@ -122,7 +135,7 @@ module.exports = async (opts) => {
     }
   } catch {
     await strapi.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    exitWith(1, 'Export process failed.');
+    exitWith(1, exitMessageText('export', true));
   }
 
   await strapi.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
@@ -133,8 +146,8 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  console.log(`${chalk.bold('Export process has been completed successfully!')}`);
-  exitWith(0, `Export archive is in ${chalk.green(outFile)}`);
+  console.log(`Export archive is in ${chalk.green(outFile)}`);
+  exitWith(0, exitMessageText('export'));
 };
 
 /**

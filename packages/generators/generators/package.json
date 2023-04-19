@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "4.8.2",
+  "version": "4.9.1",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -29,12 +29,12 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "4.8.2",
-    "@strapi/utils": "4.8.2",
+    "@strapi/typescript-utils": "4.9.1",
+    "@strapi/utils": "4.9.1",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "node-plop": "0.26.3",

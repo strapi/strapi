@@ -1,4 +1,4 @@
-import { format, Logform } from 'winston';
+import { format } from 'winston';
 
 /**
  * This will remove the chalk color codes from the message provided.

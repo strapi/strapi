@@ -298,7 +298,7 @@ describe('Transfer engine', () => {
     versionStrategy: 'exact',
     schemaStrategy: 'exact',
     exclude: [],
-  } as ITransferEngineOptions;
+  } as unknown as ITransferEngineOptions;
 
   let completeSource;
   let completeDestination;
@@ -490,7 +490,7 @@ describe('Transfer engine', () => {
           versionStrategy: 'exact',
           schemaStrategy: 'exact',
           exclude: [],
-        } as ITransferEngineOptions;
+        } as unknown as ITransferEngineOptions;
         test('source with source schema missing in destination fails', async () => {
           const source = createSource();
           source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
