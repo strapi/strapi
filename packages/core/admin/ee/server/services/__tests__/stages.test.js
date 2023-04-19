@@ -67,6 +67,12 @@ const servicesMock = {
     findById: jest.fn(() => workflowMock),
     update: jest.fn((id, data) => data),
   },
+  'admin::review-workflows-metrics': {
+    sendDidCreateStage: jest.fn(),
+    sendDidEditStage: jest.fn(),
+    sendDidDeleteStage: jest.fn(),
+    sendDidChangeEntryStage: jest.fn(),
+  },
 };
 
 const queryUpdateMock = jest.fn(() => Promise.resolve());
