@@ -12,7 +12,6 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
-  UPDATE_PARTIAL_DATA,
   RESET_PROPS,
   SET_DATA_STRUCTURES,
   SET_STATUS,
@@ -52,10 +51,6 @@ const crudReducer = (state = crudInitialState, action) =>
 
         draftState.isLoading = false;
         draftState.data = state.contentTypeDataStructure;
-        break;
-      }
-      case UPDATE_PARTIAL_DATA: {
-        draftState.data = { ...state.data, ...action.data };
         break;
       }
       case RESET_PROPS: {
