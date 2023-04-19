@@ -1,40 +1,41 @@
 const createDefaultForm = (attributes, allComponentsSchema) => {
-  return Object.keys(attributes).reduce((acc, current) => {
-    const attribute = attributes?.[current] ?? {};
-    const { default: defaultValue, component, type, required, min, repeatable } = attribute;
+  return Object.entries(attributes)
+    .filter(([, value]) => Boolean(value))
+    .reduce((acc, [key, value]) => {
+      const { default: defaultValue, component, type, required, min, repeatable } = value;
 
-    if (defaultValue !== undefined) {
-      acc[current] = defaultValue;
-    }
-
-    if (type === 'component') {
-      const currentComponentSchema = allComponentsSchema?.[component]?.attributes ?? {};
-      const currentComponentDefaultForm = createDefaultForm(
-        currentComponentSchema,
-        allComponentsSchema
-      );
-
-      if (required === true) {
-        acc[current] = repeatable === true ? [] : currentComponentDefaultForm;
+      if (defaultValue !== undefined) {
+        acc[key] = defaultValue;
       }
 
-      if (min && repeatable === true && required) {
-        acc[current] = [];
+      if (type === 'component') {
+        const currentComponentSchema = allComponentsSchema?.[component]?.attributes ?? {};
+        const currentComponentDefaultForm = createDefaultForm(
+          currentComponentSchema,
+          allComponentsSchema
+        );
 
-        for (let i = 0; i < min; i += 1) {
-          acc[current].push(currentComponentDefaultForm);
+        if (required === true) {
+          acc[key] = repeatable === true ? [] : currentComponentDefaultForm;
+        }
+
+        if (min && repeatable === true && required) {
+          acc[key] = [];
+
+          for (let i = 0; i < min; i += 1) {
+            acc[key].push(currentComponentDefaultForm);
+          }
         }
       }
-    }
 
-    if (type === 'dynamiczone') {
-      if (required === true) {
-        acc[current] = [];
+      if (type === 'dynamiczone') {
+        if (required === true) {
+          acc[key] = [];
+        }
       }
-    }
 
-    return acc;
-  }, {});
+      return acc;
+    }, {});
 };
 
 export default createDefaultForm;
