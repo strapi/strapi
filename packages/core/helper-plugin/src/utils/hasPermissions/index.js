@@ -3,6 +3,7 @@ import pickBy from 'lodash/pickBy';
 import transform from 'lodash/transform';
 
 import request from '../request';
+import getFetchClient from '../getFetchClient';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
   return transform(
@@ -47,13 +48,15 @@ const hasPermissions = async (userPermissions, permissions, signal) => {
     let hasPermission = false;
 
     try {
-      const { data } = await request('/admin/permissions/check', {
-        method: 'POST',
-        body: {
+      const {
+        data: { data },
+      } = await getFetchClient().post(
+        '/admin/permissions/check',
+        {
           permissions: formatPermissionsForRequest(matchingPermissions),
         },
-        signal,
-      });
+        { signal }
+      );
 
       hasPermission = data.every((v) => v === true);
     } catch (err) {
