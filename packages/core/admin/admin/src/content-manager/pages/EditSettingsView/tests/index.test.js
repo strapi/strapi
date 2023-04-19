@@ -4,10 +4,13 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { combineReducers, createStore } from 'redux';
+import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import EditSettingsView from '../index';
+import cmReducers from '../../../../reducers';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -57,22 +60,31 @@ const makeApp = (history, layout) => {
     compo1: { uid: 'compo1' },
   };
 
+  const rootReducer = combineReducers(cmReducers);
+  const store = createStore(rootReducer, {
+    'content-manager_app': {
+      fieldSizes: {},
+    },
+  });
+
   return (
     <Router history={history}>
-      <QueryClientProvider client={client}>
-        <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
-          <ThemeProvider theme={lightTheme}>
-            <DndProvider backend={HTML5Backend}>
-              <EditSettingsView
-                mainLayout={layout || mainLayout}
-                components={components}
-                isContentTypeView
-                slug="api::address.address"
-              />
-            </DndProvider>
-          </ThemeProvider>
-        </IntlProvider>
-      </QueryClientProvider>
+      <Provider store={store}>
+        <QueryClientProvider client={client}>
+          <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+            <ThemeProvider theme={lightTheme}>
+              <DndProvider backend={HTML5Backend}>
+                <EditSettingsView
+                  mainLayout={layout || mainLayout}
+                  components={components}
+                  isContentTypeView
+                  slug="api::address.address"
+                />
+              </DndProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </QueryClientProvider>
+      </Provider>
     </Router>
   );
 };

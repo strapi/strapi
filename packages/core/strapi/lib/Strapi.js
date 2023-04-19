@@ -43,6 +43,7 @@ const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
+const getNumberOfDynamicZones = require('./services/utils/dynamic-zones');
 const sanitizersRegistry = require('./core/registries/sanitizers');
 const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
@@ -249,6 +250,9 @@ class Strapi {
       groupProperties: {
         database: strapi.config.get('database.connection.client'),
         plugins: Object.keys(strapi.plugins),
+        numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
+        numberOfComponents: _.size(this.components),
+        numberOfDynamicZones: getNumberOfDynamicZones(),
         // TODO: to add back
         // providers: this.config.installedProviders,
       },
@@ -468,7 +472,7 @@ class Strapi {
     await this.startWebhooks();
 
     await this.server.initMiddlewares();
-    await this.server.initRouting();
+    this.server.initRouting();
 
     await this.contentAPI.permissions.registerActions();
 
@@ -536,16 +540,16 @@ class Strapi {
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
-    // user
-    const userLifecycleFunction = this.app && this.app[lifecycleName];
-    if (isFunction(userLifecycleFunction)) {
-      await userLifecycleFunction({ strapi: this });
-    }
-
     // admin
     const adminLifecycleFunction = this.admin && this.admin[lifecycleName];
     if (isFunction(adminLifecycleFunction)) {
       await adminLifecycleFunction({ strapi: this });
+    }
+
+    // user
+    const userLifecycleFunction = this.app && this.app[lifecycleName];
+    if (isFunction(userLifecycleFunction)) {
+      await userLifecycleFunction({ strapi: this });
     }
   }
 

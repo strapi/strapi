@@ -18,13 +18,33 @@ const {
   createStrapiInstance,
   formatDiagnostic,
   loadersFactory,
+  exitMessageText,
+  abortTransfer,
+  getTransferTelemetryPayload,
 } = require('./utils');
 const { exitWith } = require('../utils/helpers');
 
 /**
- * @typedef {import('@strapi/data-transfer').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
+ * @typedef {import('@strapi/data-transfer/src/file/providers').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
  */
 
+/**
+ * @typedef ImportCommandOptions Options given to the CLI import command
+ *
+ * @property {string} [file] The file path to import
+ * @property {string} [key] Encryption key, used when encryption is enabled
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [only] If present, only include these filtered groups of data
+ * @property {(keyof import('@strapi/data-transfer/src/engine').TransferGroupFilter)[]} [exclude] If present, exclude these filtered groups of data
+ * @property {number|undefined} [throttle] Delay in ms after each record
+ */
+
+/**
+ * Import command.
+ *
+ * It transfers data from a file to a local Strapi instance
+ *
+ * @param {ImportCommandOptions} opts
+ */
 module.exports = async (opts) => {
   // validate inputs from Commander
   if (!isObject(opts)) {
@@ -63,6 +83,7 @@ module.exports = async (opts) => {
     schemaStrategy: opts.schemaStrategy || DEFAULT_SCHEMA_STRATEGY,
     exclude: opts.exclude,
     only: opts.only,
+    throttle: opts.throttle,
     rules: {
       links: [
         {
@@ -102,27 +123,26 @@ module.exports = async (opts) => {
     updateLoader(stage, data);
   });
 
-  const getTelemetryPayload = () => {
-    return {
-      eventProperties: {
-        source: engine.sourceProvider.name,
-        destination: engine.destinationProvider.name,
-      },
-    };
-  };
-
   progress.on('transfer::start', async () => {
     console.log('Starting import...');
-    await strapiInstance.telemetry.send('didDEITSProcessStart', getTelemetryPayload());
+    await strapiInstance.telemetry.send(
+      'didDEITSProcessStart',
+      getTransferTelemetryPayload(engine)
+    );
   });
 
   let results;
   try {
+    // Abort transfer if user interrupts process
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
+      process.removeAllListeners(signal);
+      process.on(signal, () => abortTransfer({ engine, strapi }));
+    });
+
     results = await engine.transfer();
   } catch (e) {
-    await strapiInstance.telemetry.send('didDEITSProcessFail', getTelemetryPayload());
-    console.error('Import process failed.');
-    process.exit(1);
+    await strapiInstance.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
+    exitWith(1, exitMessageText('import', true));
   }
 
   try {
@@ -132,10 +152,11 @@ module.exports = async (opts) => {
     console.error('There was an error displaying the results of the transfer.');
   }
 
-  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTelemetryPayload());
+  // Note: we need to await telemetry or else the process ends before it is sent
+  await strapiInstance.telemetry.send('didDEITSProcessFinish', getTransferTelemetryPayload(engine));
   await strapiInstance.destroy();
 
-  exitWith(0, 'Import process has been completed successfully!');
+  exitWith(0, exitMessageText('import'));
 };
 
 /**
