@@ -39,7 +39,6 @@
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
-    "match-sorter": "^4.0.2",
     "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",
     "qs": "6.11.1",
