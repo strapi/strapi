@@ -170,12 +170,13 @@ export function useEntity(layout, id) {
         const {
           data: { data },
         } = await fetchClient.get(endPoint);
-        trackUsage('didCheckDraftRelations');
 
-        dispatch(setStatus('resolved'));
+        trackUsage('didCheckDraftRelations');
 
         return data;
       } catch (err) {
+        // silence
+      } finally {
         dispatch(setStatus('resolved'));
       }
 
@@ -186,12 +187,25 @@ export function useEntity(layout, id) {
 
     const numberOfDraftRelations = await fetchNumberOfDraftRelations();
 
-    // TODO
-    if (numberOfDraftRelations) {
-      throw new Error('bla');
+    // Display confirmation overlay
+    if (numberOfDraftRelations !== 0) {
+      dispatch({
+        type: 'SET_PUBLISH_CONFIRMATION',
+        publishConfirmation: {
+          show: true,
+          draftCount: numberOfDraftRelations,
+        },
+      });
+
+      return Promise.reject(
+        new Error('More than one related entity is in draft.', {
+          cause: 'number-of-draft-relations',
+        })
+      );
     }
 
     return mutation.mutateAsync({ method: 'post', action: 'publish', type: 'publish' });
+
     // TODO: trackUsage is not stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, fetchClient, mutation, uid]);
