@@ -78,12 +78,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     requests.admin = await createAuthRequest({ strapi });
   };
 
-  const getRWMorphTableResults = async (connection) =>
-    connection
-      .select('*')
-      .from('strapi_workflows_stages_related_morphs')
-      .where('related_type', productUID);
-
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
     // eslint-disable-next-line node/no-extraneous-require
@@ -373,13 +367,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
 
-      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
+      const {
+        body: { results },
+      } = await requests.admin({
+        method: 'GET',
+        url: '/content-manager/collection-types/api::product.product',
+      });
 
-      expect(morphTableResults.length).toEqual(3);
-      for (let i = 0; i < morphTableResults.length; i += 1) {
-        const entry = morphTableResults[i];
-        expect(entry.related_id).toEqual(i + 1);
-        expect(entry.order).toEqual(1);
+      expect(results.length).toEqual(3);
+      for (let i = 0; i < results.length; i += 1) {
+        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeDefined();
       }
     });
 
@@ -397,8 +394,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
       expect(response.body.data.schema.reviewWorkflows).toBeFalsy();
 
-      const morphTableResults = await getRWMorphTableResults(strapi.db.getConnection());
-      expect(morphTableResults.length).toEqual(0);
+      const {
+        body: { results },
+      } = await requests.admin({
+        method: 'GET',
+        url: '/content-manager/collection-types/api::product.product',
+      });
+
+      for (let i = 0; i < results.length; i += 1) {
+        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
+      }
     });
   });
 
