@@ -10,7 +10,7 @@ const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
-const { persistTable, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
+const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
