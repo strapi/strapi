@@ -59,10 +59,6 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const attributes = get(modifiedData, ['attributes'], {});
   const fieldSizes = useSelector(selectFieldSizes);
   const customFieldsRegistry = useCustomFields();
-  console.log('registry', customFieldsRegistry.getAll());
-
-  // TODO: find out why logs don't show on port 8000
-  // TODO: find out why custom fields registry is empty
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
