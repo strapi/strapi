@@ -34,7 +34,10 @@ const emitDefinitions = (definitions) => {
     ts.ScriptKind.TS
   );
 
-  const printer = ts.createPrinter({ newLine: true, omitTrailingSemicolon: true });
+  const printer = ts.createPrinter({
+    newLine: ts.NewLineKind.LineFeed,
+    omitTrailingSemicolon: true,
+  });
 
   return printer.printList(ts.ListFormat.MultiLine, nodeArray, sourceFile);
 };
