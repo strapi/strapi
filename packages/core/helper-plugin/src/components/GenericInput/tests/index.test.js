@@ -65,8 +65,8 @@ function setupDatetimePicker(props) {
   };
 }
 /**
- * We extend the timeout of these tests because the DS 
- * DateTimePicker has a slow rendering issue at the moment. 
+ * We extend the timeout of these tests because the DS
+ * DateTimePicker has a slow rendering issue at the moment.
  * It passes locally, but fails in the CI.
  */
 jest.setTimeout(50000);
@@ -169,7 +169,7 @@ describe('GenericInput', () => {
       await act(async () => {
         await user.click(numberDayBtn);
       });
-      
+
       const today = new Date();
       const month = today.getMonth() + 1;
       const year = today.getFullYear();
@@ -189,6 +189,6 @@ describe('GenericInput', () => {
 
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
       expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
-  });
+    });
   });
 });
