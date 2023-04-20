@@ -2,8 +2,15 @@
 
 const { features } = require('@strapi/strapi/lib/utils/ee');
 
-const enableFeatureMiddleware = (featureName) => (ctx, next) => {
-  if (features.isEnabled(featureName)) {
+const enableFeatureMiddleware = (featureName, strapiConfigPath) => (ctx, next) => {
+  // If the feature is not enabled in the license
+  const featureEnabledInLicense = features.isEnabled(featureName);
+  // If the feature is not enabled in the config
+  const featureEnabledInConfig = strapiConfigPath
+    ? strapi.config.get(strapiConfigPath, true)
+    : true;
+
+  if (featureEnabledInLicense && featureEnabledInConfig) {
     return next();
   }
 
@@ -129,7 +136,7 @@ module.exports = [
     path: '/review-workflows/workflows',
     handler: 'workflows.find',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
@@ -146,7 +153,7 @@ module.exports = [
     path: '/review-workflows/workflows/:id',
     handler: 'workflows.findById',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
@@ -163,7 +170,7 @@ module.exports = [
     path: '/review-workflows/workflows/:workflow_id/stages',
     handler: 'stages.find',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
@@ -180,7 +187,7 @@ module.exports = [
     path: '/review-workflows/workflows/:workflow_id/stages',
     handler: 'stages.replace',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
@@ -197,7 +204,7 @@ module.exports = [
     path: '/review-workflows/workflows/:workflow_id/stages/:id',
     handler: 'stages.findById',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
@@ -214,7 +221,7 @@ module.exports = [
     path: '/content-manager/(collection|single)-types/:model_uid/:id/stage',
     handler: 'stages.updateEntity',
     config: {
-      middlewares: [enableFeatureMiddleware('review-workflows')],
+      middlewares: [enableFeatureMiddleware('review-workflows', 'admin.reviewWorkflows.enabled')],
       policies: [
         'admin::isAuthenticatedAdmin',
         {
