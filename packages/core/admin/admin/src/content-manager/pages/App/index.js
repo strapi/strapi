@@ -4,7 +4,7 @@ import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-route
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  NotFound,
+  AnErrorOccurred,
   useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, Main } from '@strapi/design-system';
@@ -20,13 +20,14 @@ import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import LeftMenu from './LeftMenu';
-import useModels from './useModels';
+import useContentManagerInitData from './useContentManagerInitData';
 
 const cmPermissions = permissions.contentManager;
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } = useModels();
+  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
+    useContentManagerInitData();
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
     model.title.toLowerCase()
   );
@@ -104,7 +105,7 @@ const App = () => {
           <Route path="/content-manager/no-content-types">
             <NoContentType />
           </Route>
-          <Route path="" component={NotFound} />
+          <Route path="" component={AnErrorOccurred} />
         </Switch>
       </ModelsContext.Provider>
     </Layout>

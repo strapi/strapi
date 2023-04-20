@@ -127,6 +127,7 @@ const ListSettingsView = ({ layout, slug }) => {
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
+    handleCloseModal();
   };
 
   const submitMutation = useMutation((body) => putCMSettingsLV(body, slug), {

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.9.0",
+  "version": "4.9.2",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -70,7 +70,6 @@
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.21.0",
     "history": "^4.9.0",
-    "match-sorter": "^4.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",
@@ -82,12 +81,12 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.6.6",
-    "@strapi/icons": "1.6.6",
+    "@strapi/design-system": "^1.6.6",
+    "@strapi/icons": "^1.6.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
