@@ -3,6 +3,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 function useSelect() {
   const {
     initialData,
+    isCreatingEntry,
     isSingleType,
     status,
     layout,
@@ -16,6 +17,7 @@ function useSelect() {
 
   return {
     initialData,
+    isCreatingEntry,
     isSingleType,
     status,
     layout,

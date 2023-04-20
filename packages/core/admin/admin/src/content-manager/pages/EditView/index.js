@@ -212,7 +212,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
                       </LinkButton>
                     </CheckPermissions>
 
-                    {allowedActions.canDelete && !isLoading && !isCreating && (
+                    {allowedActions.canDelete && !isCreating && (
                       <DeleteLink
                         onDelete={async () => {
                           await del();

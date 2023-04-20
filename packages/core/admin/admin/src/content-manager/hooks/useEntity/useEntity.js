@@ -40,19 +40,26 @@ export function useEntity(layout, id) {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const query = useQuery(
-    ['content-manger', 'content-type', uid, id].filter(Boolean),
+    ['content-manger', 'content-type', uid, id, rawQuery].filter(Boolean),
     async () => {
       dispatch(getData());
 
       try {
-        const url = [collectionTypeUrlSlug, uid, isCollectionType ? id : null]
+        const url = [collectionTypeUrlSlug, uid, isCollectionType ? id : null, rawQuery]
           .filter(Boolean)
           .join('/');
         const { data } = await fetchClient.get(getRequestUrl(url));
 
         return data;
-      } catch (err) {
-        return isCollectionType ? undefined : {};
+      } catch (error) {
+        // Single-types are expected to throw a 404 if they don't exist yet. We must make sure
+        // react-query does recognize this as error, but empty response, so that everything in
+        // the onSuccess callback is still executed.
+        if (isCollectionType) {
+          throw error;
+        }
+
+        return {};
       }
     },
     {
@@ -76,63 +83,67 @@ export function useEntity(layout, id) {
       },
 
       onError(error) {
-        const responseStatus = error.response.status;
+        if (error?.response?.status) {
+          switch (error.response.status) {
+            case 404:
+              if (isCollectionType) {
+                push(redirectLink);
+              }
+              break;
 
-        switch (responseStatus) {
-          case 404:
-            if (isCollectionType) {
+            case 403:
               push(redirectLink);
-            }
-            break;
+              toggleNotification({
+                type: 'info',
+                message: { id: getTrad('permissions.not-allowed.update') },
+              });
+              break;
 
-          case 403:
-            push(redirectLink);
-            toggleNotification({
-              type: 'info',
-              message: { id: getTrad('permissions.not-allowed.update') },
-            });
-            break;
-
-          default:
-            toggleNotification({
-              type: 'warning',
-              message: formatAPIError(error),
-            });
+            default:
+              toggleNotification({
+                type: 'warning',
+                message: formatAPIError(error),
+              });
+          }
         }
       },
     }
   );
   const mutation = useMutation(contentTypeMutation, {
-    onSuccess() {
-      dispatch(setStatus('resolved'));
-    },
-
     onError(error) {
-      dispatch(setStatus('resolved'));
-
       toggleNotification({
         type: 'warning',
         message: formatAPIError(error),
       });
+
+      // All mutation methods are wrapped in try/ catch blocks
+      // in order to make the error returned by the API handleable
+      // in other locations, where they have to be merged e.g. with
+      // frontend yup validation errors. The error is forwared by
+      // re-throwing it.
+      throw error;
     },
   });
   const contentTypeRedirectLink = useFindRedirectionLink(uid);
   const redirectLink = `${contentTypeRedirectLink}${rawQuery}`;
   const queryClient = useQueryClient();
 
-  async function contentTypeMutation({ method, body, action, type }) {
+  async function contentTypeMutation({ method, body, action, type, trackerProperty }) {
     const trackingKey = capitalize(type === 'update' ? 'save' : type);
 
     trackUsage(`will${trackingKey}Entry`);
 
     try {
-      let url = [collectionTypeUrlSlug, uid, id, action ? 'actions' : null, action]
+      let url = [collectionTypeUrlSlug, uid, id, action ? 'actions' : null, action, rawQuery]
         .filter(Boolean)
         .join('/');
 
-      const { data } = await fetchClient[method](getRequestUrl(url), body);
+      const res = await fetchClient[method](getRequestUrl(url), body);
 
-      trackUsage(`did${trackingKey}Entry`);
+      // TODO: the CM returns all of these formats?
+      const data = res?.data?.data ?? res?.data ?? res;
+
+      trackUsage(`did${trackingKey}Entry`, trackerProperty ? { trackerProperty } : undefined);
 
       toggleNotification({
         type: 'success',
@@ -147,22 +158,24 @@ export function useEntity(layout, id) {
       return data;
     } catch (error) {
       trackUsage(`didNot${trackingKey}Entry`);
-    }
 
-    return null;
+      throw error;
+    } finally {
+      dispatch(setStatus('resolved'));
+    }
   }
 
   const update = React.useCallback(
-    async (body) => {
+    async (body, trackerProperty) => {
       dispatch(setStatus('submit-pending'));
 
-      return mutation.mutateAsync({ method: 'put', body, type: 'update' });
+      return mutation.mutateAsync({ method: 'put', body, type: 'update', trackerProperty });
     },
     [dispatch, mutation]
   );
 
   const create = React.useCallback(
-    async (body) => {
+    async (body, trackerProperty) => {
       dispatch(setStatus('submit-pending'));
 
       const res = await mutation.mutateAsync({
@@ -170,6 +183,7 @@ export function useEntity(layout, id) {
         method: isCollectionType ? 'post' : 'put',
         body,
         type: 'create',
+        trackerProperty,
       });
 
       return res;
@@ -195,8 +209,6 @@ export function useEntity(layout, id) {
         return data;
       } catch (err) {
         return null;
-      } finally {
-        dispatch(setStatus('resolved'));
       }
     }
 
@@ -245,6 +257,11 @@ export function useEntity(layout, id) {
 
     return res;
   }, [dispatch, isCollectionType, mutation, rawQuery]);
+
+  React.useEffect(() => {
+    dispatch(getData());
+    dispatch(initForm(rawQuery));
+  }, [dispatch, rawQuery]);
 
   return {
     entity: query.data,

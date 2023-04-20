@@ -44,6 +44,7 @@ const EditViewDataManagerProvider = ({
   contentTypeDataStructure,
   createActionAllowedFields,
   from,
+  isCreatingEntry,
   isSingleType,
   readActionAllowedFields,
   // Not sure this is needed anymore
@@ -58,10 +59,7 @@ const EditViewDataManagerProvider = ({
   const [{ rawQuery }] = useQueryParams();
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, entity, isLoading, isCreating } = useEntity(
-    allLayoutData,
-    id
-  );
+  const { create, update, publish, unpublish, entity, isLoading } = useEntity(allLayoutData, id);
 
   /**
    * TODO: this should be moved into the global reducer
@@ -104,7 +102,7 @@ const EditViewDataManagerProvider = ({
       return false;
     }
 
-    if (isCreating) {
+    if (isCreatingEntry) {
       return false;
     }
 
@@ -113,7 +111,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [isLoading, isCreating, canRead, canUpdate]);
+  }, [isLoading, isCreatingEntry, canRead, canUpdate]);
 
   useEffect(() => {
     if (status === 'resolved') {
@@ -281,7 +279,7 @@ const EditViewDataManagerProvider = ({
 
   const yupSchema = useMemo(() => {
     const options = {
-      isCreatingEntry: isCreating,
+      isCreatingEntry,
       isDraft: shouldNotRunValidations,
       isFromComponent: false,
     };
@@ -293,7 +291,12 @@ const EditViewDataManagerProvider = ({
       },
       options
     );
-  }, [allLayoutData.components, currentContentTypeLayout, isCreating, shouldNotRunValidations]);
+  }, [
+    allLayoutData.components,
+    currentContentTypeLayout,
+    isCreatingEntry,
+    shouldNotRunValidations,
+  ]);
 
   const checkFormErrors = useCallback(
     async (dataToSet = {}) => {
@@ -410,7 +413,7 @@ const EditViewDataManagerProvider = ({
         if (isEmpty(errors)) {
           const formData = createFormData(modifiedData, initialData);
 
-          if (isCreating) {
+          if (isCreatingEntry) {
             const { id } = await create(formData, trackerProperty);
             const redirectLink =
               contentType.kind === 'singleType'
@@ -426,10 +429,10 @@ const EditViewDataManagerProvider = ({
             await update(formData, trackerProperty);
           }
         }
-      } catch (err) {
+      } catch (error) {
         errors = {
           ...errors,
-          ...getAPIInnerErrors(err, { getTrad }),
+          ...getAPIInnerErrors(error, { getTrad }),
         };
       }
 
@@ -443,7 +446,7 @@ const EditViewDataManagerProvider = ({
       modifiedData,
       createFormData,
       initialData,
-      isCreating,
+      isCreatingEntry,
       create,
       trackerProperty,
       contentType.kind,
@@ -462,7 +465,7 @@ const EditViewDataManagerProvider = ({
       {
         components: get(allLayoutData, 'components', {}),
       },
-      { isCreatingEntry: isCreating, isDraft: false, isFromComponent: false }
+      { isCreatingEntry, isDraft: false, isFromComponent: false }
     );
 
     dispatch({
@@ -510,7 +513,7 @@ const EditViewDataManagerProvider = ({
   }, [
     allLayoutData,
     currentContentTypeLayout,
-    isCreating,
+    isCreatingEntry,
     modifiedData,
     publishConfirmation.show,
     publish,
@@ -647,7 +650,7 @@ const EditViewDataManagerProvider = ({
         formErrors,
         hasDraftAndPublish,
         initialData,
-        isCreatingEntry: isCreating,
+        isCreatingEntry,
         isSingleType,
         shouldNotRunValidations,
         status,
@@ -682,7 +685,7 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {isLoading || (!isCreating && !initialData.id) ? (
+      {isLoading || (!isCreatingEntry && !initialData.id) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>
@@ -714,6 +717,7 @@ EditViewDataManagerProvider.propTypes = {
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,
   from: PropTypes.string,
+  isCreatingEntry: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,
   readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
