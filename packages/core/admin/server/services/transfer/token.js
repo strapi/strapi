@@ -402,8 +402,7 @@ const flattenTokenPermissions = (token) => {
 
 /**
  * Assert that a token's permissions are valid
- *
- * @param {TransferToken} token
+ * @param {object} attributes
  */
 const assertTokenPermissionsValidity = (attributes) => {
   const permissionService = strapi.admin.services.transfer.permission;
