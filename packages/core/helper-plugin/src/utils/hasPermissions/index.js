@@ -2,7 +2,6 @@ import isEmpty from 'lodash/isEmpty';
 import pickBy from 'lodash/pickBy';
 import transform from 'lodash/transform';
 
-import request from '../request';
 import getFetchClient from '../getFetchClient';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
