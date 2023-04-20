@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { Main } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
@@ -21,6 +20,7 @@ import {
   getYupInnerErrors,
   getAPIInnerErrors,
   useGuidedTour,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 
 import { usePrev } from '../../hooks';
@@ -55,6 +55,7 @@ const EditViewDataManagerProvider = ({
   // eslint-disable-next-line
   id,
 }) => {
+  const [{ rawQuery }] = useQueryParams();
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
   const { create, update, publish, unpublish, entity, isLoading, isCreating } = useEntity(
@@ -411,12 +412,16 @@ const EditViewDataManagerProvider = ({
 
           if (isCreating) {
             const { id } = await create(formData, trackerProperty);
+            const redirectLink =
+              contentType.kind === 'singleType'
+                ? `${contentType.kind}/${slug}${rawQuery}`
+                : `${contentType.kind}/${slug}/${id}${rawQuery}`;
 
             // Move the guided tour forward
             setCurrentStep('contentManager.success');
 
             // Update URL for the new entity
-            replace(getRequestUrl(`collectionType/${slug}/${id}`));
+            replace(getRequestUrl(redirectLink));
           } else {
             await update(formData, trackerProperty);
           }
@@ -434,17 +439,19 @@ const EditViewDataManagerProvider = ({
       });
     },
     [
-      createFormData,
-      isCreating,
-      modifiedData,
-      initialData,
-      trackerProperty,
       yupSchema,
+      modifiedData,
+      createFormData,
+      initialData,
+      isCreating,
       create,
-      update,
-      replace,
-      setCurrentStep,
+      trackerProperty,
+      contentType.kind,
       slug,
+      rawQuery,
+      setCurrentStep,
+      replace,
+      update,
     ]
   );
 

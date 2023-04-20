@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
 

@@ -44,7 +44,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
   }));
   const { componentsDataStructure, contentTypeDataStructure, status } =
     useSelector(selectCrudReducer);
-  const { del, isLoading, isCreating } = useEntity(layout, id);
+  const { create, update, del, publish, unpublish, isLoading, isCreating } = useEntity(layout, id);
   const redirectLink = useFindRedirectionLink(layout.contentType.uid);
   const { replace } = useHistory();
 
@@ -80,17 +80,25 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       createActionAllowedFields={createActionAllowedFields}
       componentsDataStructure={componentsDataStructure}
       contentTypeDataStructure={contentTypeDataStructure}
-      // todo
-      from={/* redirectionLink */ '/'}
+      from={redirectLink}
       isLoadingForData={isLoading}
       isSingleType={isSingleType}
-      // todo
       readActionAllowedFields={readActionAllowedFields}
       redirectToPreviousPage={goBack}
       slug={slug}
       status={status}
       updateActionAllowedFields={updateActionAllowedFields}
+      // TODO
       id={id}
+      // TODO (v5): these are now exposed through the useEntity() hook
+      // and are only in here for compatiblity reasons, because useCMEditViewDataManager()
+      // is used by some plugin developers too
+      isCreatingEntry={!isLoading && isCreating}
+      onPost={create}
+      onPut={update}
+      onDelete={del}
+      onPublish={publish}
+      onUnpublish={unpublish}
     >
       <Main aria-busy={status !== 'resolved'}>
         <Header allowedActions={allowedActions} />
@@ -204,7 +212,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
                       </LinkButton>
                     </CheckPermissions>
 
-                    {allowedActions.canDelete && isCreating && (
+                    {allowedActions.canDelete && !isLoading && !isCreating && (
                       <DeleteLink
                         onDelete={async () => {
                           await del();

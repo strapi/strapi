@@ -29,7 +29,9 @@ export function useEntity(layout, id) {
   const isCollectionType = contentType.kind === 'collectionType';
   const collectionTypeUrlSlug = `${isCollectionType ? 'collection' : 'single'}-types`;
 
-  const [isCreating] = React.useState((isCollectionType && !id) || !isCollectionType);
+  const [isCreating, setIsCreating] = React.useState(
+    (isCollectionType && !id) || !isCollectionType
+  );
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const { trackUsage } = useTracking();
   const { push } = useHistory();
@@ -40,11 +42,12 @@ export function useEntity(layout, id) {
   const query = useQuery(
     ['content-manger', 'content-type', uid, id].filter(Boolean),
     async () => {
-      // Data fetching has started
       dispatch(getData());
 
       try {
-        const url = [collectionTypeUrlSlug, uid, id].filter(Boolean).join('/');
+        const url = [collectionTypeUrlSlug, uid, isCollectionType ? id : null]
+          .filter(Boolean)
+          .join('/');
         const { data } = await fetchClient.get(getRequestUrl(url));
 
         return data;
@@ -60,11 +63,15 @@ export function useEntity(layout, id) {
       onSuccess(data) {
         // this is hell
         const normalizedData = formatContentTypeData(data, contentType, components);
-        // Write data to store
-        dispatch(getDataSucceeded(normalizedData));
 
-        if (!isCollectionType && Object.keys(data).length === 0) {
-          dispatch(initForm(rawQuery, true));
+        dispatch(getDataSucceeded(normalizedData));
+        dispatch(initForm(rawQuery, true));
+
+        // the admin app can not know before it has fetched a single-type (it doesn't have an id)
+        // if it has been created or not. Therefore `isCreating` needs to be
+        // reactive and updated after the single-type has been fetched.
+        if (!isCollectionType && Object.keys(data).length > 0) {
+          setIsCreating(false);
         }
       },
 
@@ -109,7 +116,8 @@ export function useEntity(layout, id) {
       });
     },
   });
-  const redirectLink = useFindRedirectionLink(uid);
+  const contentTypeRedirectLink = useFindRedirectionLink(uid);
+  const redirectLink = `${contentTypeRedirectLink}${rawQuery}`;
   const queryClient = useQueryClient();
 
   async function contentTypeMutation({ method, body, action, type }) {
@@ -118,9 +126,11 @@ export function useEntity(layout, id) {
     trackUsage(`will${trackingKey}Entry`);
 
     try {
-      let url = [collectionTypeUrlSlug, uid, id, action].filter(Boolean).join('/');
+      let url = [collectionTypeUrlSlug, uid, id, action ? 'actions' : null, action]
+        .filter(Boolean)
+        .join('/');
 
-      const { data } = await fetchClient[method](getRequestUrl(url), { body });
+      const { data } = await fetchClient[method](getRequestUrl(url), body);
 
       trackUsage(`did${trackingKey}Entry`);
 
@@ -130,6 +140,9 @@ export function useEntity(layout, id) {
       });
 
       dispatch(submitSucceeded(data));
+
+      // TODO: this should probably be done somewhere else
+      queryClient.invalidateQueries(['relation']);
 
       return data;
     } catch (error) {
@@ -153,20 +166,19 @@ export function useEntity(layout, id) {
       dispatch(setStatus('submit-pending'));
 
       const res = await mutation.mutateAsync({
-        method: 'post',
+        // Creating a single-type is done through put
+        method: isCollectionType ? 'post' : 'put',
         body,
         type: 'create',
       });
 
-      queryClient.invalidateQueries(['relation']);
-
       return res;
     },
-    [dispatch, mutation, queryClient]
+    [dispatch, isCollectionType, mutation]
   );
 
   const publish = React.useCallback(async () => {
-    async function fetchNumberOfDraftRelations() {
+    async function fetchRelationDraftCount() {
       try {
         trackUsage('willCheckDraftRelations');
 
@@ -182,25 +194,23 @@ export function useEntity(layout, id) {
 
         return data;
       } catch (err) {
-        // silence
+        return null;
       } finally {
         dispatch(setStatus('resolved'));
       }
-
-      return null;
     }
 
     dispatch(setStatus('publish-pending'));
 
-    const numberOfDraftRelations = await fetchNumberOfDraftRelations();
+    const relationDraftCount = await fetchRelationDraftCount();
 
     // Display confirmation overlay
-    if (numberOfDraftRelations !== 0) {
+    if (relationDraftCount && relationDraftCount > 0) {
       dispatch({
         type: 'SET_PUBLISH_CONFIRMATION',
         publishConfirmation: {
           show: true,
-          draftCount: numberOfDraftRelations,
+          draftCount: relationDraftCount,
         },
       });
 
