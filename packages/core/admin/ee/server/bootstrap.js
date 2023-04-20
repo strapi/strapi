@@ -20,7 +20,10 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
-  if (features.isEnabled('review-workflows')) {
+  if (
+    features.isEnabled('review-workflows') &&
+    strapi.config.get('admin.reviewWorkflows.enabled', true)
+  ) {
     await persistTablesWithPrefix('strapi_workflows');
 
     const { bootstrap: rwBootstrap } = getService('review-workflows');

@@ -9,6 +9,9 @@ const { getService } = require('./utils');
 
 module.exports = async ({ strapi }) => {
   const auditLogsIsEnabled = strapi.config.get('admin.auditLogs.enabled', true);
+  const reviewWorkflowsIsEnabled =
+    features.isEnabled('review-workflows') &&
+    strapi.config.get('admin.reviewWorkflows.enabled', true);
 
   if (auditLogsIsEnabled) {
     strapi.hook('strapi::content-types.beforeSync').register(migrateAuditLogsTable);
@@ -16,7 +19,7 @@ module.exports = async ({ strapi }) => {
     strapi.container.register('audit-logs', auditLogsService);
     await auditLogsService.register();
   }
-  if (features.isEnabled('review-workflows')) {
+  if (reviewWorkflowsIsEnabled) {
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
