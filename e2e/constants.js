@@ -1,3 +1,5 @@
+export { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from './app-template/template/src/constants';
+
 export const ALLOWED_CONTENT_TYPES = ['admin::user', 'admin::role', 'admin::permission'];
 
 // TODO: we should start using @strapi.io addresses to have the chance one day to
