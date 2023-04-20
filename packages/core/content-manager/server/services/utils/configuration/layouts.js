@@ -25,7 +25,7 @@ const getDefaultFieldSize = (attribute) => {
   if (attribute.customField) {
     const customField = strapi.container.get('custom-fields').get(attribute.customField);
     if (customField.inputSize) {
-      return customField.inputSize;
+      return customField.inputSize.default;
     }
   }
 

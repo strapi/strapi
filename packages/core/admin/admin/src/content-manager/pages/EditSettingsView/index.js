@@ -9,7 +9,13 @@ import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
+import {
+  useNotification,
+  useTracking,
+  useCustomFields,
+  ConfirmDialog,
+  Link,
+} from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import {
   Main,
@@ -52,6 +58,11 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
   const fieldSizes = useSelector(selectFieldSizes);
+  const customFieldsRegistry = useCustomFields();
+  console.log('registry', customFieldsRegistry.getAll());
+
+  // TODO: find out why logs don't show on port 8000
+  // TODO: find out why custom fields registry is empty
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
@@ -322,6 +333,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       type: 'ON_ADD_FIELD',
                       name: field,
                       fieldSizes,
+                      getCustomField: customFieldsRegistry.get,
                     });
                   }}
                   onRemoveField={(rowId, index) => {
