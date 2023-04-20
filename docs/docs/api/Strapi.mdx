@@ -48,7 +48,8 @@ const strapiInstance = new Strapi();
 ### `strapi.container`
 - [<Type>Container</Type>](./container)
 
-This is where all registries are stored.
+The container provides a simple and efficient way to register and manage these resources, making it easy to access and use them throughout the application.
+By registering a registry with the container, it can be easily retrieved by other parts of the application, making it a powerful tool for organizing and reusing code across the entire codebase.
 
 See [Container](./container).
 
@@ -82,8 +83,10 @@ A set of path to specific Strapi project parts.
 ### `strapi.isLoaded`
 - <Type>Boolean</Type>
 
-  - `true`: Everything have been loaded
+  - `true`: Everything (all `register` and `bootstrap` functions available in your strapi project) have been loaded
   - `false`: There is something loading
+
+Note: `register` functions are called before the `bootstrap` functions.
 
 ### `strapi.reload()`
 

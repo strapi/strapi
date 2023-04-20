@@ -75,7 +75,7 @@ telemetry.destroy();
 
 ### `telemetry.send(event, payload)`
 - `event`: <Type>String</Type> - The event to be sent.
-- `payload`: <Type>Object</Type> - The payload to be sent with the event.
+- `payload`: [<Type>TelemetryPayload</Type>](#telemetrypayload) - The payload to be sent with the event.
 - Returns: Promise
 
 Sends telemetry event with the given payload.
@@ -85,3 +85,18 @@ Sends telemetry event with the given payload.
 ```javascript
 telemetry.send('event_name', { key: 'value' });
 ```
+
+## Types
+
+### `TelemetryPayload`
+- <Type>Object</Type>
+
+  - `eventProperties`: <Type>Object</Type> An object that contains additional information about the event.
+  - `userProperties`: <Type>Object</Type> An object that defines the identity of the user who triggered the event.
+  - `groupProperties`: <Type>Object</Type> An object that defines properties of the application or environment in which the event occurred.
+
+Examples of event properties in Strapi include model, containsRelationalFields, displayedFields, kind, and hasDraftAndPublish. These properties are specific to the event and are used to provide additional context about what happened.
+
+User properties can include information such as the user's operating system, node version, and hostname. These properties are typically used to group events by user or to filter events based on certain user characteristics.
+
+Group properties can include information such as the language(s) used in the application, the database being used, and the number of locales. These properties are typically used to group events by application version, environment, or other characteristics.
