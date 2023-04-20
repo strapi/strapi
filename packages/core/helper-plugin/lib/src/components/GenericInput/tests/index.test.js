@@ -1,7 +1,8 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import GenericInput from '../index';
 
@@ -42,6 +43,33 @@ function setupNumber(props) {
     input,
   };
 }
+
+function setupDatetimePicker(props) {
+  const DATETIMEPICKER_FIXTURE_PROPS = {
+    type: 'datetime',
+    name: 'datetime-picker',
+    intlLabel: {
+      id: 'label.test',
+      defaultMessage: 'datetime picker',
+    },
+    value: null,
+    onChange: jest.fn(),
+    onClear: jest.fn(),
+    ...props,
+  };
+
+  const rendered = render(<ComponentFixture {...DATETIMEPICKER_FIXTURE_PROPS} />);
+
+  return {
+    ...rendered,
+  };
+}
+/**
+ * We extend the timeout of these tests because the DS 
+ * DateTimePicker has a slow rendering issue at the moment. 
+ * It passes locally, but fails in the CI.
+ */
+jest.setTimeout(50000);
 
 describe('GenericInput', () => {
   describe('number', () => {
@@ -127,5 +155,40 @@ describe('GenericInput', () => {
       );
       expect(container).toMatchSnapshot();
     });
+  });
+
+  describe('datetime', () => {
+    test('renders the datetime picker with the correct value for date and time', async () => {
+      const user = userEvent.setup();
+      const { getByRole } = setupDatetimePicker();
+
+      const btnDate = getByRole('textbox', { name: 'datetime picker' });
+
+      await user.click(btnDate);
+      const numberDayBtn = await getByRole('button', { name: /15/ });
+      await act(async () => {
+        await user.click(numberDayBtn);
+      });
+      
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
+      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('00:00');
+    });
+
+    test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
+      const user = userEvent.setup();
+      const { getByRole } = setupDatetimePicker();
+      const btnDate = getByRole('textbox', { name: /datetime picker/i });
+      await user.click(btnDate);
+      await act(async () => {
+        await user.click(getByRole('button', { name: /15/ }));
+      });
+      await user.click(getByRole('button', { name: /clear date/i }));
+
+      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
+      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
+  });
   });
 });
