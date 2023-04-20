@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const { features } = require('@strapi/strapi/lib/utils/ee');
+const features = require('./utils/features');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');
@@ -20,10 +20,7 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
-  if (
-    features.isEnabled('review-workflows') &&
-    strapi.config.get('admin.reviewWorkflows.enabled', true)
-  ) {
+  if (features.isEnabled('review-workflows')) {
     await persistTablesWithPrefix('strapi_workflows');
 
     const { bootstrap: rwBootstrap } = getService('review-workflows');
