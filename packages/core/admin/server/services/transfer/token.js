@@ -407,7 +407,6 @@ const flattenTokenPermissions = (token) => {
 const assertTokenPermissionsValidity = (attributes) => {
   const permissionService = strapi.admin.services.transfer.permission;
   const validPermissions = permissionService.providers.action.keys();
-  console.log(permissionService.providers.action.keys());
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 
   if (!isEmpty(invalidPermissions)) {
