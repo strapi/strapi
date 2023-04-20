@@ -5,9 +5,5 @@ module.exports = ({ strapi }) => {
     name: 'color',
     plugin: 'color-picker',
     type: 'string',
-    inputSize: {
-      default: 4,
-      isResizable: true,
-    },
   });
 };
