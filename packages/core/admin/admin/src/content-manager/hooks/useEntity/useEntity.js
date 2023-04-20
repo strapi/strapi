@@ -83,6 +83,7 @@ export function useEntity(layout, id) {
       },
 
       onError(error) {
+        // TODO: move this out
         if (error?.response?.status) {
           switch (error.response.status) {
             case 404:
@@ -142,6 +143,7 @@ export function useEntity(layout, id) {
 
       // TODO: the CM returns all of these formats?
       const data = res?.data?.data ?? res?.data ?? res;
+      const normalizedData = formatContentTypeData(data, contentType, components);
 
       trackUsage(`did${trackingKey}Entry`, trackerProperty ? { trackerProperty } : undefined);
 
@@ -150,7 +152,7 @@ export function useEntity(layout, id) {
         message: { id: getTrad(`success.record.${type === 'update' ? 'save' : type}`) },
       });
 
-      dispatch(submitSucceeded(data));
+      dispatch(submitSucceeded(normalizedData));
 
       // TODO: this should probably be done somewhere else
       queryClient.invalidateQueries(['relation']);
@@ -226,13 +228,10 @@ export function useEntity(layout, id) {
         },
       });
 
-      return Promise.reject(
-        new Error('More than one related entity is in draft.', {
-          cause: 'number-of-draft-relations',
-        })
-      );
+      return undefined;
     }
 
+    // eslint-disable-next-line consistent-return
     return mutation.mutateAsync({ method: 'post', action: 'publish', type: 'publish' });
 
     // TODO: trackUsage is not stable
