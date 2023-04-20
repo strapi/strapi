@@ -13,7 +13,7 @@ const nodeModules = [];
 
 /** @type {Omit<import('webpack').Configuration, 'output'>} */
 const baseConfig = {
-  entry: `${__dirname}/lib/src/index.js`,
+  entry: `${__dirname}/src/index.js`,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',

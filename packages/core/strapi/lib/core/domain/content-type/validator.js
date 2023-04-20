@@ -61,7 +61,7 @@ const contentTypeSchemaValidator = yup.object().shape({
 
             // should match the GraphQL regex
             if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
-              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
+              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }

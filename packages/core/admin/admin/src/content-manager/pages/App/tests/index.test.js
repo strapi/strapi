@@ -13,9 +13,9 @@ import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import { App as ContentManagerApp } from '..';
 import cmReducers from '../../../../reducers';
-import useModels from '../useModels';
+import useContentManagerInitData from '../useContentManagerInitData';
 
-jest.mock('../useModels', () =>
+jest.mock('../useContentManagerInitData', () =>
   jest.fn(() => {
     return {};
   })
@@ -88,7 +88,7 @@ describe('Content manager | App | main', () => {
       components: [],
       status: 'resolved',
     };
-    useModels.mockImplementation(() => contentManagerState);
+    useContentManagerInitData.mockImplementation(() => contentManagerState);
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
@@ -815,7 +815,7 @@ describe('Content manager | App | main', () => {
       components: [],
       status: 'resolved',
     };
-    useModels.mockImplementation(() => contentManagerState);
+    useContentManagerInitData.mockImplementation(() => contentManagerState);
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
@@ -857,8 +857,8 @@ describe('Content manager | App | main', () => {
       components: [],
       status: 'resolved',
     };
-    useModels.mockImplementation(() => contentManagerState);
-    jest.mock('../useModels', () =>
+    useContentManagerInitData.mockImplementation(() => contentManagerState);
+    jest.mock('../useContentManagerInitData', () =>
       jest.fn(() => {
         return contentManagerState;
       })
@@ -902,8 +902,8 @@ describe('Content manager | App | main', () => {
       components: [],
       status: 'resolved',
     };
-    useModels.mockImplementation(() => contentManagerState);
-    jest.mock('../useModels', () =>
+    useContentManagerInitData.mockImplementation(() => contentManagerState);
+    jest.mock('../useContentManagerInitData', () =>
       jest.fn(() => {
         return contentManagerState;
       })
