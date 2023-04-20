@@ -1,6 +1,6 @@
 const createDefaultForm = (attributes, allComponentsSchema) => {
   return Object.entries(attributes)
-    .filter(([, value]) => Boolean(value))
+    .filter(([, value]) => typeof value === 'object')
     .reduce((acc, [key, value]) => {
       const { default: defaultValue, component, type, required, min, repeatable } = value;
 

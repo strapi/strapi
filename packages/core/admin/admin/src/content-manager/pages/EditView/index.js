@@ -10,6 +10,8 @@ import {
 import { useIntl } from 'react-intl';
 import { ContentLayout, Box, Grid, GridItem, Main, Flex } from '@strapi/design-system';
 import { Pencil, Layer } from '@strapi/icons';
+import { useHistory } from 'react-router-dom';
+
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
@@ -26,6 +28,7 @@ import GridRow from './GridRow';
 import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
+import { useFindRedirectionLink } from '../../hooks';
 import { useEntity } from '../../hooks/useEntity';
 
 const cmPermissions = permissions.contentManager;
@@ -41,7 +44,9 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
   }));
   const { componentsDataStructure, contentTypeDataStructure, status } =
     useSelector(selectCrudReducer);
-  const { del, entity, isCreating } = useEntity(layout, id);
+  const { del, isLoading, isCreating } = useEntity(layout, id);
+  const redirectLink = useFindRedirectionLink(layout.contentType.uid);
+  const { replace } = useHistory();
 
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
@@ -77,7 +82,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       contentTypeDataStructure={contentTypeDataStructure}
       // todo
       from={/* redirectionLink */ '/'}
-      isLoadingForData={entity.isLoading}
+      isLoadingForData={isLoading}
       isSingleType={isSingleType}
       // todo
       readActionAllowedFields={readActionAllowedFields}
@@ -199,7 +204,19 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
                       </LinkButton>
                     </CheckPermissions>
 
-                    {allowedActions.canDelete && !isCreating && <DeleteLink onDelete={del} />}
+                    {allowedActions.canDelete && isCreating && (
+                      <DeleteLink
+                        onDelete={async () => {
+                          await del();
+
+                          // after deleting an entity from a collection-type redirect back to the CM list view
+                          // single-types do not have a list-view
+                          if (layout.contentType.kind === 'collectionType') {
+                            replace(redirectLink);
+                          }
+                        }}
+                      />
+                    )}
                   </Flex>
                 </Box>
               </Flex>

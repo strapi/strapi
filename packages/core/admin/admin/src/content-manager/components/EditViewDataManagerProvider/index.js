@@ -23,6 +23,7 @@ import {
   useGuidedTour,
 } from '@strapi/helper-plugin';
 
+import { usePrev } from '../../hooks';
 import { getTrad, getRequestUrl, createDefaultForm } from '../../utils';
 import { useEntity } from '../../hooks/useEntity';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
@@ -34,7 +35,6 @@ import {
   setDataStructures,
   resetProps,
 } from '../../sharedReducers/crudReducer/actions';
-import { usePrev } from '../../hooks';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -57,8 +57,10 @@ const EditViewDataManagerProvider = ({
 }) => {
   const { replace } = useHistory();
   const { setCurrentStep } = useGuidedTour();
-  const { create, update, publish, unpublish, entity } = useEntity(allLayoutData, id);
-  const [isCreating, setIsCreating] = React.useState(!id);
+  const { create, update, publish, unpublish, entity, isLoading, isCreating } = useEntity(
+    allLayoutData,
+    id
+  );
 
   /**
    * TODO: this should be moved into the global reducer
@@ -94,10 +96,10 @@ const EditViewDataManagerProvider = ({
   const { formatMessage } = useIntl();
   const trackUsageRef = useRef(trackUsage);
 
-  const { components } = allLayoutData;
+  const { components, contentType } = allLayoutData;
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
-    if (entity.isLoading) {
+    if (isLoading) {
       return false;
     }
 
@@ -110,7 +112,7 @@ const EditViewDataManagerProvider = ({
     }
 
     return false;
-  }, [entity.isLoading, isCreating, canRead, canUpdate]);
+  }, [isLoading, isCreating, canRead, canUpdate]);
 
   useEffect(() => {
     if (status === 'resolved') {
@@ -126,7 +128,7 @@ const EditViewDataManagerProvider = ({
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!entity.isLoading) {
+    if (!isLoading) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,6 +167,10 @@ const EditViewDataManagerProvider = ({
   }, [componentsDataStructure, contentTypeDataStructure]);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     const componentsDataStructure = Object.keys(components).reduce((acc, current) => {
       const defaultComponentForm = createDefaultForm(
         components?.[current]?.attributes ?? {},
@@ -176,35 +182,27 @@ const EditViewDataManagerProvider = ({
       return acc;
     }, {});
 
-    if (entity.isLoading === false) {
-      console.log(entity);
+    const contentTypeDataStructure = createDefaultForm(contentType.attributes ?? {}, components);
+    const contentTypeDataStructureFormatted = formatContentTypeData(
+      contentTypeDataStructure,
+      contentType,
+      components
+    );
 
-      const contentTypeDataStructure = createDefaultForm(entity.data, components);
-      const contentTypeDataStructureFormatted = formatContentTypeData(
-        contentTypeDataStructure,
-        entity,
-        components
-      );
+    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+  }, [dispatch, entity, components, contentType, isLoading]);
 
-      dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
-    }
-  }, [dispatch, entity, components]);
-
-  const previousInitialValues = usePrev(entity.data);
+  const previousInitialValues = usePrev(entity);
 
   useEffect(() => {
     /**
      * Only fire this effect if the initialValues are different
      * otherwise it's a fruitless effort no matter what happens.
      */
-    if (
-      entity.data &&
-      currentContentTypeLayout?.attributes &&
-      !isEqual(previousInitialValues, entity.data)
-    ) {
+    if (entity && currentContentTypeLayout?.attributes && !isEqual(previousInitialValues, entity)) {
       dispatch({
         type: 'INIT_FORM',
-        initialValues: entity.data,
+        initialValues: entity,
         components,
         attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
@@ -219,7 +217,7 @@ const EditViewDataManagerProvider = ({
       }
     }
   }, [
-    entity.data,
+    entity,
     currentContentTypeLayout,
     components,
     setModifiedDataOnly,
@@ -419,11 +417,6 @@ const EditViewDataManagerProvider = ({
 
             // Update URL for the new entity
             replace(getRequestUrl(`collectionType/${slug}/${id}`));
-
-            // todo
-            if (!entity.kind === 'singleType') {
-              setIsCreating(false);
-            }
           } else {
             await update(formData, trackerProperty);
           }
@@ -452,7 +445,6 @@ const EditViewDataManagerProvider = ({
       replace,
       setCurrentStep,
       slug,
-      entity.kind,
     ]
   );
 
@@ -683,7 +675,7 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      {entity.isLoading || (!isCreating && !initialData.id) ? (
+      {isLoading || (!isCreating && !initialData.id) ? (
         <Main aria-busy="true">
           <LoadingIndicatorPage />
         </Main>

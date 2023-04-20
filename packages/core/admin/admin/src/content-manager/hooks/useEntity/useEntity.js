@@ -29,39 +29,43 @@ export function useEntity(layout, id) {
   const isCollectionType = contentType.kind === 'collectionType';
   const collectionTypeUrlSlug = `${isCollectionType ? 'collection' : 'single'}-types`;
 
+  const [isCreating] = React.useState((isCollectionType && !id) || !isCollectionType);
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const { trackUsage } = useTracking();
-  const { push, replace } = useHistory();
+  const { push } = useHistory();
   const [{ rawQuery }] = useQueryParams();
   const fetchClient = useFetchClient();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const query = useQuery(
-    ['content-manger', 'content-type', uid, id],
+    ['content-manger', 'content-type', uid, id].filter(Boolean),
     async () => {
       // Data fetching has started
       dispatch(getData());
 
       try {
-        const url = [collectionTypeUrlSlug, uid, id].join('/');
+        const url = [collectionTypeUrlSlug, uid, id].filter(Boolean).join('/');
         const { data } = await fetchClient.get(getRequestUrl(url));
 
         return data;
-      } catch (error) {
-        // todo
+      } catch (err) {
+        return isCollectionType ? undefined : {};
       }
-
-      return null;
     },
     {
-      // Entities that have not yet been created can not be fetched
-      enabled: !!id,
+      // Single-types are expected to return an HTTP 404 error code if they have
+      // not been created
+      retry: false,
 
       onSuccess(data) {
         // this is hell
         const normalizedData = formatContentTypeData(data, contentType, components);
         // Write data to store
         dispatch(getDataSucceeded(normalizedData));
+
+        if (!isCollectionType && Object.keys(data).length === 0) {
+          dispatch(initForm(rawQuery, true));
+        }
       },
 
       onError(error) {
@@ -69,7 +73,9 @@ export function useEntity(layout, id) {
 
         switch (responseStatus) {
           case 404:
-            push(redirectLink);
+            if (isCollectionType) {
+              push(redirectLink);
+            }
             break;
 
           case 403:
@@ -112,7 +118,8 @@ export function useEntity(layout, id) {
     trackUsage(`will${trackingKey}Entry`);
 
     try {
-      let url = [collectionTypeUrlSlug, uid, id, action].join('/');
+      let url = [collectionTypeUrlSlug, uid, id, action].filter(Boolean).join('/');
+
       const { data } = await fetchClient[method](getRequestUrl(url), { body });
 
       trackUsage(`did${trackingKey}Entry`);
@@ -136,7 +143,7 @@ export function useEntity(layout, id) {
     async (body) => {
       dispatch(setStatus('submit-pending'));
 
-      return mutation.mutateAsync({ method: 'put', data: body, type: 'update' });
+      return mutation.mutateAsync({ method: 'put', body, type: 'update' });
     },
     [dispatch, mutation]
   );
@@ -147,7 +154,7 @@ export function useEntity(layout, id) {
 
       const res = await mutation.mutateAsync({
         method: 'post',
-        data: body,
+        body,
         type: 'create',
       });
 
@@ -216,24 +223,24 @@ export function useEntity(layout, id) {
     return mutation.mutateAsync({ method: 'post', action: 'unpublish', type: 'unpublish' });
   }, [dispatch, mutation]);
 
-  const del = React.useCallback(() => {
-    const res = mutation.mutateAsync({
-      method: 'delete',
+  const del = React.useCallback(async () => {
+    const res = await mutation.mutateAsync({
+      method: 'del',
       type: 'delete',
     });
 
     if (!isCollectionType) {
       dispatch(initForm(rawQuery, true));
-    } else {
-      // Back to the CM list view
-      replace(redirectLink);
     }
 
     return res;
-  }, [dispatch, isCollectionType, mutation, rawQuery, redirectLink, replace]);
+  }, [dispatch, isCollectionType, mutation, rawQuery]);
 
   return {
-    entity: query,
+    entity: query.data,
+    isLoading: query.isLoading,
+    isCreating,
+
     create,
     update,
     del,
