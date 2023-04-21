@@ -9,7 +9,7 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import {
-  request,
+  useFetchClient,
   useRBAC,
   LoadingIndicatorPage,
   useNotification,
@@ -63,6 +63,8 @@ const ListView = () => {
   );
   const { notifyStatus } = useNotifyAT();
 
+  const { get, del, post, put } = useFetchClient();
+
   useFocusWhenNavigate();
   const { push } = useHistory();
   const { pathname } = useLocation();
@@ -78,42 +80,45 @@ const ListView = () => {
     };
   }, []);
 
+  /**
+   * TODO: refactor this, but actually refactor
+   * the whole component. Needs some love.
+   */
   useEffect(() => {
+    const fetchWebHooks = async () => {
+      try {
+        const {
+          data: { data },
+        } = await get('/admin/webhooks');
+
+        if (isMounted.current) {
+          dispatch({
+            type: 'GET_DATA_SUCCEEDED',
+            data,
+          });
+          notifyStatus('webhooks have been loaded');
+        }
+      } catch (err) {
+        console.log(err);
+
+        if (isMounted.current) {
+          if (err.code !== 20) {
+            toggleNotification({
+              type: 'warning',
+              message: { id: 'notification.error' },
+            });
+          }
+          dispatch({
+            type: 'TOGGLE_LOADING',
+          });
+        }
+      }
+    };
+
     if (canRead) {
       fetchWebHooks();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canRead]);
-
-  const fetchWebHooks = async () => {
-    try {
-      const { data } = await request('/admin/webhooks', {
-        method: 'GET',
-      });
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-        notifyStatus('webhooks have been loaded');
-      }
-    } catch (err) {
-      console.log(err);
-
-      if (isMounted.current) {
-        if (err.code !== 20) {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-        dispatch({
-          type: 'TOGGLE_LOADING',
-        });
-      }
-    }
-  };
+  }, [canRead, get, notifyStatus, toggleNotification]);
 
   const handleToggleModal = () => {
     setShowModal((prev) => !prev);
@@ -129,15 +134,16 @@ const ListView = () => {
 
   const handleConfirmDeleteOne = async () => {
     try {
-      await request(`/admin/webhooks/${webhookToDelete}`, {
-        method: 'DELETE',
-      });
+      await del(`/admin/webhooks/${webhookToDelete}`);
 
       dispatch({
         type: 'WEBHOOK_DELETED',
         index: getWebhookIndex(webhookToDelete),
       });
     } catch (err) {
+      /**
+       * TODO: especially this.
+       */
       if (err.code !== 20) {
         toggleNotification({
           type: 'warning',
@@ -154,10 +160,7 @@ const ListView = () => {
     };
 
     try {
-      await request('/admin/webhooks/batch-delete', {
-        method: 'POST',
-        body,
-      });
+      await post('/admin/webhooks/batch-delete', body);
 
       if (isMounted.current) {
         dispatch({
@@ -207,10 +210,7 @@ const ListView = () => {
         value,
       });
 
-      await request(`/admin/webhooks/${id}`, {
-        method: 'PUT',
-        body,
-      });
+      await put(`/admin/webhooks/${id}`, body);
     } catch (err) {
       if (isMounted.current) {
         dispatch({
