@@ -137,7 +137,7 @@
   "menu.section.models.name": "Collection Types",
   "menu.section.single-types.name": "Single Types",
   "modalForm.attribute.form.base.name.description": "No space is allowed for the name of the attribute",
-  "modalForm.attribute.form.base.name.placeholder": "e.g. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "e.g. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Attached field",
   "modalForm.attributes.select-component": "Select a component",
   "modalForm.attributes.select-components": "Select the components",
