@@ -151,8 +151,6 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          console.log('collectionNames', collectionNames);
-
           return !collectionNames.includes(value?.trim()?.toLowerCase());
         },
       })
