@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { ALLOWED_CONTENT_TYPES } from '../constants';
+import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../constants';
 
 const {
   file: {
@@ -66,6 +66,7 @@ const createSourceProvider = (filePath) =>
 const createDestinationProvider = () =>
   createRemoteStrapiDestinationProvider({
     url: new URL('http://localhost:1337/admin'),
+    auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {
       entities: {
