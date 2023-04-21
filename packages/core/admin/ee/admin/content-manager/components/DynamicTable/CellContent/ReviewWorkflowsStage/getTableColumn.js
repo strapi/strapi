@@ -12,7 +12,9 @@ export default (layout) => {
   // `false` once a user is in CE mode again. We shouldn't have to perform the window.strapi.isEE check here
   // and it is meant to be in interim solution until we find a better one.
   const hasReviewWorkflows =
-    (window.strapi.isEE && layout.contentType.options?.reviewWorkflows) ?? false;
+    (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS) &&
+      layout.contentType.options?.reviewWorkflows) ??
+    false;
 
   if (!hasReviewWorkflows) {
     return null;
