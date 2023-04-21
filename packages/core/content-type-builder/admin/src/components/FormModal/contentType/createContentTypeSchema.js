@@ -9,6 +9,7 @@ const createContentTypeSchema = ({
   reservedModels = [],
   singularNames = [],
   pluralNames = [],
+  collectionNames = []
 }) => {
   const shape = {
     displayName: yup
@@ -82,6 +83,17 @@ const createContentTypeSchema = ({
           }
 
           return !reservedModels.includes(value?.trim()?.toLowerCase());
+        },
+      })
+      .test({
+        name: 'pluralNameNotAlreadyUsedInCollectionName',
+        message: getTrad('error.contentTypeName.pluralIDEqualsCollectionName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !collectionNames.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),

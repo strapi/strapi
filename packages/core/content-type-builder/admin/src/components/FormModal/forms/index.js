@@ -157,6 +157,7 @@ const forms = {
     },
   },
   contentType: {
+    
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
@@ -186,11 +187,16 @@ const forms = {
           })
         : pluralNames;
 
+      const collectionNames = Object.values(contentTypes).map((contentType) => {
+        return get(contentType, ['schema', 'collectionName'], '');
+      });
+
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,
         reservedModels: reservedNames.models,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
+        collectionNames
       });
 
       // FIXME
