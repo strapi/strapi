@@ -1,6 +1,6 @@
 'use strict';
 
-const features = require('./utils/features');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
 const actions = require('./config/admin-actions');

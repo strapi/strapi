@@ -1,6 +1,6 @@
 'use strict';
 
-const features = require('./utils/features');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const createAuditLogsService = require('./services/audit-logs');

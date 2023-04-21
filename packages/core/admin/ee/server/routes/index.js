@@ -1,6 +1,6 @@
 'use strict';
 
-const features = require('../utils/features');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 
 const enableFeatureMiddleware = (featureName) => (ctx, next) => {
   if (features.isEnabled(featureName)) {
