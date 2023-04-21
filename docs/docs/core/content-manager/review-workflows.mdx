@@ -62,7 +62,7 @@ Please see [Data Shapes](/settings/review-workflows#data-shapes) for type defini
 
 `http://localhost:1337/content-manager/content-types` returns whether the feature is enabled for the content-type. `options.reviewWorkflows` is either `true`, `false` or undefined.
 
-**Note**: Downgrading from EE to CE won't delte the associated review workflow data and `http://localhost:1337/content-manager/content-types` still returns true. The admin app had to
+**Note**: Downgrading from EE to CE won't delete the associated review workflow data and `http://localhost:1337/content-manager/content-types` still returns true. The admin app had to
 add an additional check if the feature toggle returned in `http://localhost:1337/admin/project-type` is enabled.
 
 ## Edit View
