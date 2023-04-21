@@ -1,6 +1,6 @@
 import startsWith from 'lodash/startsWith';
 import auth from '../auth';
-
+import { once } from '../once';
 /**
  * Parses the JSON returned by a network request
  *
@@ -89,8 +89,12 @@ function serverRestartWatcher(response) {
   });
 }
 
+const warnOnce = once(console.warn);
+
 /**
  * Requests a URL, returning a promise
+ *
+ * @deprecated use `useFetchClient` instead.
  *
  * @param  {string} url       The URL we want to request
  * @param  {object} [options] The options we want to pass to "fetch"
@@ -100,6 +104,10 @@ function serverRestartWatcher(response) {
 export default function request(...args) {
   let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
   let noAuth;
+
+  warnOnce(
+    'The `request` function is deprecated and will be removed in the next major version. Please use `useFetchClient` instead.'
+  );
 
   try {
     [{ noAuth }] = rest;

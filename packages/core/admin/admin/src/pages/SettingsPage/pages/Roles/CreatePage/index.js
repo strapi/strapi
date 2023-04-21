@@ -5,7 +5,7 @@ import {
   Form,
   LoadingIndicatorPage,
   SettingsPageTitle,
-  request,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -59,6 +59,8 @@ const CreatePage = () => {
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
+  const { post, put } = useFetchClient();
+
   const handleCreateRoleSubmit = (data) => {
     lockApp();
     setIsSubmiting(true);
@@ -69,13 +71,8 @@ const CreatePage = () => {
       trackUsage('willCreateNewRole');
     }
 
-    Promise.resolve(
-      request('/admin/roles', {
-        method: 'POST',
-        body: data,
-      })
-    )
-      .then(async (res) => {
+    Promise.resolve(post('/admin/roles', data))
+      .then(async ({ data: res }) => {
         const { permissionsToSend } = permissionsRef.current.getPermissions();
 
         if (id) {
@@ -85,10 +82,7 @@ const CreatePage = () => {
         }
 
         if (res.data.id && !isEmpty(permissionsToSend)) {
-          await request(`/admin/roles/${res.data.id}/permissions`, {
-            method: 'PUT',
-            body: { permissions: permissionsToSend },
-          });
+          await put(`/admin/roles/${res.data.id}/permissions`, { permissions: permissionsToSend });
         }
 
         return res;
