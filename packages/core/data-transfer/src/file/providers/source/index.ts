@@ -96,11 +96,11 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getMetadata() {
-    if (this.#metadata) {
+    if (!this.#metadata) {
       await this.#loadMetadata();
     }
 
-    return this.#metadata || null;
+    return this.#metadata ?? null;
   }
 
   async getSchemas() {
