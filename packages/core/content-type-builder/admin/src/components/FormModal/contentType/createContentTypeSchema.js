@@ -52,6 +52,17 @@ const createContentTypeSchema = ({
         },
       })
       .test({
+        name: 'pluralNameAlreadyUsedAsSingular',
+        message: getTrad('error.contentType.pluralIDEqualsSingularID'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !singularNames.includes(value);
+        },
+      })
+      .test({
         name: 'pluralAndSingularAreUnique',
         message: getTrad('error.contentType.pluralName-used'),
         test(value, context) {
@@ -85,6 +96,17 @@ const createContentTypeSchema = ({
           }
 
           return !singularNames.includes(value);
+        },
+      })
+      .test({
+        name: 'singularNameAlreadyUsedAsPlural',
+        message: getTrad('error.contentType.singularIDEqualsPluralID'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !pluralNames.includes(value);
         },
       })
       .test({
