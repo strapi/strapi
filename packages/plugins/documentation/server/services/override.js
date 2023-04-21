@@ -26,10 +26,10 @@ module.exports = ({ strapi }) => {
      * @TODO pluginOrigin should be required in next major release
      * @param {object} doc - The openapi specifcation to override
      * @param {object} options - The options to override the documentation
-     * @param {string} options.pluginOrigin - The name of the plugin that is overriding the documentation
-     * @param {string[]} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
+     * @param {string | undefined} options.pluginOrigin - The name of the plugin that is overriding the documentation
+     * @param {string[] | []} options.excludeFromGeneration - The name of the plugin that is overriding the documentation
      */
-    registerOverride(override, { pluginOrigin, excludeFromGeneration = [] }) {
+    registerOverride(override, { pluginOrigin, excludeFromGeneration = [] } = {}) {
       const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
         strapi.config.get('plugin.documentation')
       );
