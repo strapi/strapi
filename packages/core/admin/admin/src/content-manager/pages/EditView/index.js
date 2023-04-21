@@ -44,7 +44,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
   }));
   const { componentsDataStructure, contentTypeDataStructure, status } =
     useSelector(selectCrudReducer);
-  const { create, update, del, publish, unpublish, isLoading, isCreating } = useEntity(layout, id);
+  const { create, update, del, publish, unpublish, isLoading, isCreating, entity } = useEntity(layout, id);
   const redirectLink = useFindRedirectionLink(layout.contentType.uid);
   const { replace } = useHistory();
 
@@ -81,7 +81,6 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       componentsDataStructure={componentsDataStructure}
       contentTypeDataStructure={contentTypeDataStructure}
       from={redirectLink}
-      isLoadingForData={isLoading}
       isSingleType={isSingleType}
       readActionAllowedFields={readActionAllowedFields}
       redirectToPreviousPage={goBack}
@@ -93,7 +92,9 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       // TODO (v5): these are now exposed through the useEntity() hook
       // and are only in here for compatiblity reasons, because useCMEditViewDataManager()
       // is used by some plugin developers too
+      initialValues={entity}
       isCreatingEntry={!isLoading && isCreating}
+      isLoadingForData={isLoading}
       onPost={create}
       onPut={update}
       onDelete={del}
