@@ -1,3 +1,6 @@
+import * as React from 'react';
+
+import { MemoryRouter } from 'react-router-dom';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { renderHook, act } from '@testing-library/react-hooks';
 
@@ -21,10 +24,22 @@ const CM_DATA_FIXTURE = {
   },
 };
 
-function setup(props) {
+/**
+ *
+ * @param {Object} props
+ * @param {string[] | undefined} initialEntries
+ * @returns {Promise<import('@testing-library/react-hooks').RenderHookResult>}
+ */
+function setup(props, initialEntries) {
   return new Promise((resolve) => {
     act(() => {
-      resolve(renderHook(() => useSelect(props)));
+      resolve(
+        renderHook(() => useSelect(props), {
+          wrapper: ({ children }) => (
+            <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+          ),
+        })
+      );
     });
   });
 }
@@ -277,5 +292,33 @@ describe('RelationInputDataManager | select', () => {
     });
 
     expect(result.current.componentId).toBeUndefined();
+  });
+
+  describe('Cloning entities', () => {
+    it('should return isCloningEntry if on the cloning route', async () => {
+      const { result } = await setup(
+        {
+          ...SELECT_ATTR_FIXTURE,
+          isCloningEntity: true,
+        },
+        ['/content-manager/collectionType/test-content/create/clone/test-id']
+      );
+
+      expect(result.current.isCloningEntry).toBe(true);
+    });
+
+    it('should return the endpoint of the origin id if on the cloning route', async () => {
+      const { result } = await setup(
+        {
+          ...SELECT_ATTR_FIXTURE,
+          isCloningEntity: true,
+        },
+        ['/content-manager/collectionType/test-content/create/clone/test-id']
+      );
+
+      expect(result.current.queryInfos.endpoints.relation).toMatchInlineSnapshot(
+        `"/content-manager/relations/slug/test-id/test"`
+      );
+    });
   });
 });
