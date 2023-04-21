@@ -1,6 +1,5 @@
 'use strict';
 
-// const { features } = require('@strapi/strapi/lib/utils/ee');
 const { register } = require('@strapi/provider-audit-logs-local');
 const { scheduleJob } = require('node-schedule');
 const features = require('../../utils/features');
