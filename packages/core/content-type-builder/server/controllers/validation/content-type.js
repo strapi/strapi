@@ -134,7 +134,7 @@ const nameIsAvailable = (isEdition) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value)) {
+      if (value && usedNames.includes(value)) {
         return false;
       }
       return true;
