@@ -8,7 +8,9 @@ const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
 const { getService } = require('./utils');
 
 module.exports = async ({ strapi }) => {
-  if (features.isEnabled('audit-logs')) {
+  const auditLogsIsEnabled = strapi.config.get('admin.auditLogs.enabled', true);
+
+  if (auditLogsIsEnabled) {
     strapi.hook('strapi::content-types.beforeSync').register(migrateAuditLogsTable);
     const auditLogsService = createAuditLogsService(strapi);
     strapi.container.register('audit-logs', auditLogsService);
