@@ -12,6 +12,11 @@ const ee = {
   licenseInfo: {},
 };
 
+const CONFIG_FEATURE_FLAGS = {
+  'audit-logs': 'admin.auditLogs.enabled',
+  'review-workflows': 'admin.reviewWorkflows.enabled',
+};
+
 const disable = (message) => {
   // Prevent emitting ee.disable if it was already disabled
   const shouldEmitEvent = ee.enabled !== false;
@@ -183,9 +188,10 @@ const checkLicense = async ({ strapi }) => {
 
 const list = () => {
   return (
-    ee.licenseInfo.features?.map((feature) =>
-      typeof feature === 'object' ? feature : { name: feature }
-    ) || []
+    (ee.licenseInfo.features || [])
+      .map((feature) => (typeof feature === 'object' ? feature : { name: feature }))
+      // Filter out features that are disabled in the config
+      .filter((feature) => strapi.config.get(CONFIG_FEATURE_FLAGS[feature.name], true))
   );
 };
 
