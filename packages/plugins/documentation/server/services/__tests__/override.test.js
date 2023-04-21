@@ -2,7 +2,7 @@
 
 const override = require('../override');
 
-const strapi = {
+const strapiMock = {
   config: {
     get: () => ({
       'x-strapi-config': {
@@ -12,7 +12,12 @@ const strapi = {
   },
 };
 
+let strapi = strapiMock;
 describe('Documentation plugin | Override service', () => {
+  afterEach(() => {
+    // Reset strapi after each test
+    strapi = strapiMock;
+  });
   it('should register an override', () => {
     const mockOverride = {
       openapi: '3.0.0',
