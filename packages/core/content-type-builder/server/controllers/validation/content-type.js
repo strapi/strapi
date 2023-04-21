@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const { flatMap, getOr, has } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { getService } = require('../../utils');
@@ -43,7 +43,7 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'custo
  * @param {Object} data payload
  */
 const createContentTypeSchema = (data, { isEdition = false } = {}) => {
-  const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
+  const kind = getOr(typeKinds.COLLECTION_TYPE, 'contentType.kind', data);
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
   })
@@ -52,14 +52,14 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
       singularName: yup
         .string()
         .min(1)
-        .test(alreadyUsedContentTypeName(isEdition))
+        .test(nameIsAvailable(isEdition))
         .test(forbiddenContentTypeNameValidator())
         .isKebabCase()
         .required(),
       pluralName: yup
         .string()
         .min(1)
-        .test(alreadyUsedContentTypeName(isEdition))
+        .test(nameIsAvailable(isEdition))
         .test(forbiddenContentTypeNameValidator())
         .isKebabCase()
         .required(),
@@ -89,13 +89,13 @@ const validateContentTypeInput = (data) => {
  * Validator for content type edition
  */
 const validateUpdateContentTypeInput = (data) => {
-  if (_.has(data, 'contentType')) {
+  if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
   }
 
-  if (_.has(data, 'components') && Array.isArray(data.components)) {
+  if (has('components', data) && Array.isArray(data.components)) {
     data.components.forEach((data) => {
-      if (_.has(data, 'uid')) {
+      if (has('uid', data)) {
         removeEmptyDefaults(data);
       }
     });
@@ -122,8 +122,10 @@ const forbiddenContentTypeNameValidator = () => {
   };
 };
 
-const alreadyUsedContentTypeName = (isEdition) => {
-  const usedNames = _.flatMap(strapi.contentTypes, (ct) => [ct.singularName, ct.pluralName]);
+const nameIsAvailable = (isEdition) => {
+  const usedNames = flatMap((ct) => {
+    return [ct.info?.singularName, ct.info?.pluralName, ct.collectionName];
+  })(strapi.contentTypes);
 
   return {
     name: 'nameAlreadyUsed',
@@ -132,7 +134,7 @@ const alreadyUsedContentTypeName = (isEdition) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(value)) {
+      if (value && usedNames.includes(value)) {
         return false;
       }
       return true;
