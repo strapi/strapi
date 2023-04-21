@@ -1,5 +1,7 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
+
 const needsFullSize = {
   default: 12,
   isResizable: false,
@@ -52,12 +54,12 @@ const createFieldSizesService = ({ strapi }) => {
 
     getFieldSize(type) {
       if (!type) {
-        throw new Error('The type is required');
+        throw new ApplicationError('The type is required');
       }
 
       const fieldSize = fieldSizes[type];
       if (!fieldSize) {
-        throw new Error(`Could not find field size for type ${type}`);
+        throw new ApplicationError(`Could not find field size for type ${type}`);
       }
 
       return fieldSize;
@@ -65,11 +67,11 @@ const createFieldSizesService = ({ strapi }) => {
 
     setFieldSize(type, size) {
       if (!type) {
-        throw new Error('The type is required');
+        throw new ApplicationError('The type is required');
       }
 
       if (!size) {
-        throw new Error('The size is required');
+        throw new ApplicationError('The size is required');
       }
 
       fieldSizes[type] = size;

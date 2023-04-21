@@ -1,5 +1,6 @@
 'use strict';
 
+const { ApplicationError } = require('@strapi/utils').errors;
 const createFieldSizesService = require('../field-sizes');
 
 const strapi = {
@@ -46,14 +47,24 @@ describe('field sizes service', () => {
 
   it('should throw an error if the type is not found', () => {
     const { getFieldSize } = createFieldSizesService({ strapi });
-    expect(() => getFieldSize('not-found')).toThrowError(
-      'Could not find field size for type not-found'
-    );
+
+    try {
+      getFieldSize('not-found');
+    } catch (error) {
+      expect(error instanceof ApplicationError).toBe(true);
+      expect(error.message).toBe('Could not find field size for type not-found');
+    }
   });
 
   it('should throw an error if the type is not provided', () => {
     const { getFieldSize } = createFieldSizesService({ strapi });
-    expect(() => getFieldSize()).toThrowError('The type is required');
+
+    try {
+      getFieldSize();
+    } catch (error) {
+      expect(error instanceof ApplicationError).toBe(true);
+      expect(error.message).toBe('The type is required');
+    }
   });
 
   it('should set the custom fields input sizes', () => {
