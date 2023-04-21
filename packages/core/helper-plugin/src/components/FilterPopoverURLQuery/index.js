@@ -10,7 +10,7 @@ import { Button, Flex, Box, Popover, FocusTrap, Select, Option } from '@strapi/d
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
-import useTracking from '../../hooks/useTracking';
+import { useTracking } from '../../features/Tracking';
 import DefaultInputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 

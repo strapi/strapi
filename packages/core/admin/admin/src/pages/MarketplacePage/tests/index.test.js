@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useTracking, useAppInfos, TrackingProvider } from '@strapi/helper-plugin';
+import { useTracking, useAppInfo, TrackingProvider } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
@@ -23,7 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useAppInfos: jest.fn(() => ({
+  useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
       '@strapi/plugin-documentation': '4.2.0',
@@ -147,7 +147,7 @@ describe('Marketplace page - layout', () => {
 
   it('handles production environment', async () => {
     // Simulate production environment
-    useAppInfos.mockImplementation(() => ({
+    useAppInfo.mockImplementation(() => ({
       autoReload: false,
       dependencies: {},
       useYarn: true,

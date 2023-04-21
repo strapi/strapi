@@ -1,4 +1,4 @@
-import useStrapiApp from '../../hooks/useStrapiApp';
+import { useStrapiApp } from '../../features/StrapiApp';
 
 const useInjectionZone = (area) => {
   const { getPlugin } = useStrapiApp();
