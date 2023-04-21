@@ -1,6 +1,6 @@
 'use strict';
 
-const { has } = require('lodash/fp');
+const { has, isObject } = require('lodash/fp');
 
 const ALLOWED_TYPES = [
   'biginteger',
@@ -59,7 +59,7 @@ const customFieldsRegistry = (strapi) => {
         // Validate inputSize when provided
         if (inputSize) {
           if (
-            typeof inputSize !== 'object' ||
+            !isObject(inputSize) ||
             !has('default', inputSize) ||
             !has('isResizable', inputSize)
           ) {

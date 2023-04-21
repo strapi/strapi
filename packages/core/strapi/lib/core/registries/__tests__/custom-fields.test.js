@@ -101,6 +101,9 @@ describe('Custom fields registry', () => {
       expect(() => customFields.add({ ...mockCF, inputSize: 'small' })).toThrowError(
         `inputSize should be an object with 'default' and 'isResizable' keys`
       );
+      expect(() => customFields.add({ ...mockCF, inputSize: ['array'] })).toThrowError(
+        `inputSize should be an object with 'default' and 'isResizable' keys`
+      );
       expect(() =>
         customFields.add({ ...mockCF, inputSize: { default: 99, isResizable: true } })
       ).toThrowError('Custom fields require a valid default input size');
