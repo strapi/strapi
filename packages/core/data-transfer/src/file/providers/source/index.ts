@@ -92,7 +92,6 @@ class LocalFileSourceProvider implements ISourceProvider {
   async #loadMetadata() {
     const backupStream = this.#getBackupStream();
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
-    return this.#metadata;
   }
 
   async getMetadata() {
