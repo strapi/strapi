@@ -186,6 +186,14 @@ const checkLicense = async ({ strapi }) => {
   }
 };
 
+/**
+ * Returns the list of EE enabled features
+ * Features can be enabled or disabled based on
+ * - The license
+ * - The project config (see CONFIG_FEATURE_FLAGS)
+ *
+ * @returns {Array<{ name: string, options?: Object }>}
+ */
 const list = () => {
   return (
     (ee.licenseInfo.features || [])
