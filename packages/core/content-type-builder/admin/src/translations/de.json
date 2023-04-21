@@ -134,7 +134,7 @@
   "menu.section.models.name": "Sammlungen",
   "menu.section.single-types.name": "Einzel-Einträge",
   "modalForm.attribute.form.base.name.description": "Leerzeichen sind im Name eines Attributs nicht erlaubt",
-  "modalForm.attribute.form.base.name.placeholder": "z.B. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "z.B. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Verknüpftes Feld",
   "modalForm.attributes.select-component": "Wähle eine Komponente",
   "modalForm.attributes.select-components": "Wähle die Komponenten",

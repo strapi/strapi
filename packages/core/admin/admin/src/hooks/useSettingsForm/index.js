@@ -1,10 +1,15 @@
 import { useEffect, useReducer } from 'react';
-import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
 import init from './init';
 
+/**
+ * TODO: refactor this, it's confusing and hard to read.
+ * It's also only used in `Settings/pages/SingleSignOn` so it can
+ * probably be deleted and everything written there...
+ */
 const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
@@ -13,10 +18,14 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
 
+  const { get, put } = useFetchClient();
+
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await request(endPoint, { method: 'GET' });
+        const {
+          data: { data },
+        } = await get(endPoint);
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -85,10 +94,9 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }
 
-        const { data } = await request(endPoint, {
-          method: 'PUT',
-          body: cleanedData,
-        });
+        const {
+          data: { data },
+        } = await put(endPoint, cleanedData);
 
         cbSuccess(data);
 
