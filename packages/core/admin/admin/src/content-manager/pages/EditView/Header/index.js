@@ -99,7 +99,7 @@ const Header = ({
     const onClick = isPublished ? () => setWarningUnpublish(true) : () => onPublish();
 
     primaryAction = (
-      <Flex>
+      <Flex gap={2}>
         {shouldShowPublishButton && (
           <Button
             disabled={didChangeData}
@@ -111,14 +111,13 @@ const Header = ({
             {formatMessage(pubishButtonLabel)}
           </Button>
         )}
-        <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
-          <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
-            {formatMessage({
-              id: getTrad('containers.Edit.submit'),
-              defaultMessage: 'Save',
-            })}
-          </Button>
-        </Box>
+
+        <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
+          {formatMessage({
+            id: getTrad('containers.Edit.submit'),
+            defaultMessage: 'Save',
+          })}
+        </Button>
       </Flex>
     );
   }

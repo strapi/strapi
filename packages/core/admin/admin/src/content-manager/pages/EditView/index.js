@@ -42,12 +42,11 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
     formattedContentTypeLayout: selectAttributesLayout(state),
     customFieldUids: selectCustomFieldUids(state),
   }));
-  const { componentsDataStructure, contentTypeDataStructure, status } =
+  const { componentsDataStructure, contentTypeDataStructure, status, data } =
     useSelector(selectCrudReducer);
-  const { create, update, del, publish, unpublish, isLoading, isCreating, entity } = useEntity(layout, id);
+  const { create, update, del, publish, unpublish, isLoading, isCreating } = useEntity(layout, id);
   const redirectLink = useFindRedirectionLink(layout.contentType.uid);
   const { replace } = useHistory();
-
   const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
 
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
@@ -92,7 +91,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, userPermissi
       // TODO (v5): these are now exposed through the useEntity() hook
       // and are only in here for compatiblity reasons, because useCMEditViewDataManager()
       // is used by some plugin developers too
-      initialValues={entity}
+      initialValues={data}
       isCreatingEntry={!isLoading && isCreating}
       isLoadingForData={isLoading}
       onPost={create}

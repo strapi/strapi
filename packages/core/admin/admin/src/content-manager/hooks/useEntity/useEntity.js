@@ -15,7 +15,6 @@ import capitalize from 'lodash/capitalize';
 import { useFindRedirectionLink } from '..';
 import { getRequestUrl, getTrad } from '../../utils';
 import {
-  getData,
   getDataSucceeded,
   initForm,
   setStatus,
@@ -42,8 +41,6 @@ export function useEntity(layout, id) {
   const query = useQuery(
     ['content-manger', 'content-type', uid, id, rawQuery].filter(Boolean),
     async () => {
-      dispatch(getData());
-
       try {
         const url = [collectionTypeUrlSlug, uid, isCollectionType ? id : null, rawQuery]
           .filter(Boolean)
@@ -72,7 +69,6 @@ export function useEntity(layout, id) {
         const normalizedData = formatContentTypeData(data, contentType, components);
 
         dispatch(getDataSucceeded(normalizedData));
-        dispatch(initForm(rawQuery, true));
 
         // the admin app can not know before it has fetched a single-type (it doesn't have an id)
         // if it has been created or not. Therefore `isCreating` needs to be
@@ -143,19 +139,16 @@ export function useEntity(layout, id) {
 
       // TODO: the CM returns all of these formats?
       const data = res?.data?.data ?? res?.data ?? res;
-      const normalizedData = formatContentTypeData(data, contentType, components);
 
+      // TODO: this should probably be done somewhere else
+      queryClient.invalidateQueries(['relation']);
+
+      dispatch(submitSucceeded(formatContentTypeData(data, contentType, components)));
       trackUsage(`did${trackingKey}Entry`, trackerProperty ? { trackerProperty } : undefined);
-
       toggleNotification({
         type: 'success',
         message: { id: getTrad(`success.record.${type === 'update' ? 'save' : type}`) },
       });
-
-      dispatch(submitSucceeded(normalizedData));
-
-      // TODO: this should probably be done somewhere else
-      queryClient.invalidateQueries(['relation']);
 
       return data;
     } catch (error) {
@@ -206,6 +199,7 @@ export function useEntity(layout, id) {
           data: { data },
         } = await fetchClient.get(endPoint);
 
+        dispatch(setStatus('resolved'));
         trackUsage('didCheckDraftRelations');
 
         return data;
@@ -256,11 +250,6 @@ export function useEntity(layout, id) {
 
     return res;
   }, [dispatch, isCollectionType, mutation, rawQuery]);
-
-  React.useEffect(() => {
-    dispatch(getData());
-    dispatch(initForm(rawQuery));
-  }, [dispatch, rawQuery]);
 
   return {
     entity: query.data,

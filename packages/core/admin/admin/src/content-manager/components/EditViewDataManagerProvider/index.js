@@ -32,8 +32,9 @@ import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema } from './utils';
 import {
   clearSetModifiedDataOnly,
+  getData,
+  initForm,
   setDataStructures,
-  resetProps,
 } from '../../sharedReducers/crudReducer/actions';
 
 const EditViewDataManagerProvider = ({
@@ -52,6 +53,7 @@ const EditViewDataManagerProvider = ({
   slug,
   status,
   updateActionAllowedFields,
+  initialValues,
   // todo: what is a better way to pass this down?
   // eslint-disable-next-line
   id,
@@ -120,10 +122,6 @@ const EditViewDataManagerProvider = ({
       lockApp();
     }
   }, [lockApp, unlockApp, status]);
-
-  useEffect(() => {
-    dispatch(resetProps());
-  }, [dispatch]);
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
@@ -198,10 +196,14 @@ const EditViewDataManagerProvider = ({
      * Only fire this effect if the initialValues are different
      * otherwise it's a fruitless effort no matter what happens.
      */
-    if (entity && currentContentTypeLayout?.attributes && !isEqual(previousInitialValues, entity)) {
+    if (
+      initialValues &&
+      currentContentTypeLayout?.attributes &&
+      !isEqual(previousInitialValues, entity)
+    ) {
       dispatch({
         type: 'INIT_FORM',
-        initialValues: entity,
+        initialValues,
         components,
         attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
@@ -216,13 +218,19 @@ const EditViewDataManagerProvider = ({
       }
     }
   }, [
-    entity,
+    initialValues,
     currentContentTypeLayout,
     components,
     setModifiedDataOnly,
     reduxDispatch,
     previousInitialValues,
+    entity,
   ]);
+
+  useEffect(() => {
+    dispatch(getData());
+    dispatch(initForm(rawQuery));
+  }, [dispatch, rawQuery]);
 
   const dispatchAddComponent = useCallback(
     (type) =>
@@ -463,7 +471,7 @@ const EditViewDataManagerProvider = ({
     const schema = createYupSchema(
       currentContentTypeLayout,
       {
-        components: get(allLayoutData, 'components', {}),
+        components: allLayoutData?.components ?? {},
       },
       { isCreatingEntry, isDraft: false, isFromComponent: false }
     );
@@ -484,22 +492,6 @@ const EditViewDataManagerProvider = ({
         await publish();
       }
     } catch (err) {
-      // TODO: find out what the best way to catch the error would be
-      if (!publishConfirmation.show && err) {
-        // If the warning hasn't already been shown and draft relations are found,
-        // abort the publish call and ask for confirmation from the user
-        dispatch({
-          type: 'SET_PUBLISH_CONFIRMATION',
-          publishConfirmation: {
-            show: true,
-            // maybe?
-            draftCount: err.details,
-          },
-        });
-
-        return;
-      }
-
       errors = {
         ...errors,
         ...getAPIInnerErrors(err, { getTrad }),
@@ -510,14 +502,7 @@ const EditViewDataManagerProvider = ({
       type: 'SET_FORM_ERRORS',
       errors,
     });
-  }, [
-    allLayoutData,
-    currentContentTypeLayout,
-    isCreatingEntry,
-    modifiedData,
-    publishConfirmation.show,
-    publish,
-  ]);
+  }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, publish]);
 
   const shouldCheckDZErrors = useCallback(
     (dzName) => {
