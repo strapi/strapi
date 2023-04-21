@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const features = require('./utils/features');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
