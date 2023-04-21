@@ -1,10 +1,35 @@
 'use strict';
 
-const fieldSizesService = require('../field-sizes');
+const createFieldSizesService = require('../field-sizes');
+
+const strapi = {
+  container: {
+    // Mock container.get('custom-fields')
+    get: jest.fn(() => ({
+      // Mock container.get('custom-fields').getAll()
+      getAll: jest.fn(() => ({
+        'plugin::mycustomfields.color': {
+          name: 'color',
+          plugin: 'mycustomfields',
+          type: 'string',
+        },
+        'plugin::mycustomfields.smallColor': {
+          name: 'smallColor',
+          plugin: 'mycustomfields',
+          type: 'string',
+          inputSize: {
+            default: 4,
+            isResizable: false,
+          },
+        },
+      })),
+    })),
+  },
+};
 
 describe('field sizes service', () => {
   it('should return the correct field sizes', () => {
-    const { getAllFieldSizes } = fieldSizesService();
+    const { getAllFieldSizes } = createFieldSizesService({ strapi });
     const fieldSizes = getAllFieldSizes();
     Object.values(fieldSizes).forEach((fieldSize) => {
       expect(typeof fieldSize.isResizable).toBe('boolean');
@@ -13,21 +38,32 @@ describe('field sizes service', () => {
   });
 
   it('should return the correct field size for a given type', () => {
-    const { getFieldSize } = fieldSizesService();
+    const { getFieldSize } = createFieldSizesService({ strapi });
     const fieldSize = getFieldSize('string');
     expect(fieldSize.isResizable).toBe(true);
     expect(fieldSize.default).toBe(6);
   });
 
   it('should throw an error if the type is not found', () => {
-    const { getFieldSize } = fieldSizesService();
+    const { getFieldSize } = createFieldSizesService({ strapi });
     expect(() => getFieldSize('not-found')).toThrowError(
       'Could not find field size for type not-found'
     );
   });
 
   it('should throw an error if the type is not provided', () => {
-    const { getFieldSize } = fieldSizesService();
+    const { getFieldSize } = createFieldSizesService({ strapi });
     expect(() => getFieldSize()).toThrowError('The type is required');
+  });
+
+  it('should set the custom fields input sizes', () => {
+    const { setCustomFieldInputSizes, getAllFieldSizes } = createFieldSizesService({ strapi });
+    setCustomFieldInputSizes();
+    const fieldSizes = getAllFieldSizes();
+    console.log(fieldSizes);
+
+    expect(fieldSizes).not.toHaveProperty('plugin::mycustomfields.color');
+    expect(fieldSizes['plugin::mycustomfields.smallColor'].default).toBe(4);
+    expect(fieldSizes['plugin::mycustomfields.smallColor'].isResizable).toBe(false);
   });
 });
