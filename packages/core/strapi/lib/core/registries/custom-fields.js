@@ -60,6 +60,7 @@ const customFieldsRegistry = (strapi) => {
         if (inputSize) {
           if (
             !isObject(inputSize) ||
+            Array.isArray(inputSize) ||
             !has('default', inputSize) ||
             !has('isResizable', inputSize)
           ) {
