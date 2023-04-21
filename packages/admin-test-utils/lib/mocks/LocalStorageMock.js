@@ -2,24 +2,36 @@
 
 class LocalStorageMock {
   constructor() {
-    this.store = {};
+    this.store = new Map();
   }
 
   clear() {
-    this.store = {};
+    this.store.clear();
   }
 
   getItem(key) {
-    return this.store[key] || null;
+    /**
+     * We return null to avoid returning `undefined`
+     * because `undefined` is not a valid JSON value.
+     */
+    return this.store.get(key) ?? null;
   }
 
   setItem(key, value) {
-    this.store[key] = String(value);
+    this.store.set(key, String(value));
   }
 
   removeItem(key) {
-    delete this.store[key];
+    this.store.delete(key);
+  }
+
+  get length() {
+    return this.store.size;
   }
 }
 
-global.localStorage = new LocalStorageMock();
+// eslint-disable-next-line no-undef
+Object.defineProperty(window, 'localStorage', {
+  writable: true,
+  value: new LocalStorageMock(),
+});
