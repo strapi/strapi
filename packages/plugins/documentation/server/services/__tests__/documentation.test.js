@@ -34,7 +34,7 @@ jest.mock('fs-extra', () => ({
   ensureFile: jest.fn(),
 }));
 
-describe('Documentation service', () => {
+describe('Documentation plugin | Documentation service', () => {
   beforeAll(() => {
     global.strapi = mockStrapiInstance;
     global.strapi.contentType = jest.fn((uid) => {

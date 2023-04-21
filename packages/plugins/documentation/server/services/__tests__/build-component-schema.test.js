@@ -41,7 +41,7 @@ const strapi = {
   contentType: () => ({ info: {}, attributes: { test: { type: 'string' } } }),
 };
 
-describe('Build Component Schema', () => {
+describe('Documentation plugin | Build component schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
     global.strapi = _.cloneDeep(strapi);
