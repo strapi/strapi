@@ -145,6 +145,8 @@ const getInitialProviders = ({ purest }) => ({
         oauth: {
           consumer_key: providers.twitter.key,
           consumer_secret: providers.twitter.secret,
+          token: providers.twitter.oauth_token,
+          token_secret: providers.twitter.oauth_token_secret
         },
       },
     });
