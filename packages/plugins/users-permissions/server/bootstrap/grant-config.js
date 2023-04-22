@@ -50,6 +50,8 @@ module.exports = (baseURL) => ({
     icon: 'twitter',
     key: '',
     secret: '',
+    auth_token: '',
+    auth_token_secret: '',
     callback: `${baseURL}/twitter/callback`,
   },
   instagram: {
