@@ -34,6 +34,16 @@ const secretLabel = {
   defaultMessage: 'Client Secret',
 };
 
+const accessToken = {
+  id: getTrad('PopUpForm.Providers.accessToken.label'),
+  defaultMessage: 'Access Token',
+};
+
+const accessTokenSecret = {
+  id: getTrad('PopUpForm.Providers.accessTokenSecret.label'),
+  defaultMessage: 'Access Token Secret',
+};
+
 const forms = {
   email: {
     form: [
@@ -170,6 +180,30 @@ const forms = {
           size: 12,
           validations: {
             required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: accessToken,
+          name: 'access_token',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 50,
+          validations: {
+            required: false,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: accessTokenSecret,
+          name: 'access_token_secret',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 45,
+          validations: {
+            required: false,
           },
         },
       ],
