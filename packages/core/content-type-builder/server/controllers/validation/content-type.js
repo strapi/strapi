@@ -60,6 +60,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
         .string()
         .min(1)
         .test(nameIsAvailable(isEdition))
+        .test(nameIsNotExistingCollectionName(isEdition)) // TODO: v5: require singularName to not match a collection name
         .test(forbiddenContentTypeNameValidator())
         .isKebabCase()
         .required(),
@@ -124,7 +125,7 @@ const forbiddenContentTypeNameValidator = () => {
 
 const nameIsAvailable = (isEdition) => {
   const usedNames = flatMap((ct) => {
-    return [ct.info?.singularName, ct.info?.pluralName, ct.collectionName];
+    return [ct.info?.singularName, ct.info?.pluralName];
   })(strapi.contentTypes);
 
   return {
@@ -134,7 +135,27 @@ const nameIsAvailable = (isEdition) => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (value && usedNames.includes(value)) {
+      if (usedNames.includes(value)) {
+        return false;
+      }
+      return true;
+    },
+  };
+};
+
+const nameIsNotExistingCollectionName = (isEdition) => {
+  const usedNames = flatMap((ct) => {
+    return [ct.collectionName];
+  })(strapi.contentTypes);
+
+  return {
+    name: 'nameAlreadyUsed',
+    message: 'Content Type name `${value}` is already being used by another content type.',
+    test(value) {
+      // don't check on edition
+      if (isEdition) return true;
+
+      if (usedNames.includes(value)) {
         return false;
       }
       return true;

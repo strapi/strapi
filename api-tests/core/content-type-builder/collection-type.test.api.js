@@ -92,7 +92,7 @@ describe('Content Type Builder - Content types', () => {
       expect(res.body).toMatchSnapshot();
     });
 
-    test('Successfull creation of a collection type with draftAndPublish enabled', async () => {
+    test('Successful creation of a collection type with draftAndPublish enabled', async () => {
       const res = await rq({
         method: 'POST',
         url: '/content-type-builder/content-types',
@@ -193,19 +193,9 @@ describe('Content Type Builder - Content types', () => {
                 path: ['contentType', 'displayName'],
               },
               {
-                message: 'Content Type name `undefined` is already being used.',
-                name: 'ValidationError',
-                path: ['contentType', 'singularName'],
-              },
-              {
                 message: 'contentType.singularName is a required field',
                 name: 'ValidationError',
                 path: ['contentType', 'singularName'],
-              },
-              {
-                message: 'Content Type name `undefined` is already being used.',
-                name: 'ValidationError',
-                path: ['contentType', 'pluralName'],
               },
               {
                 message: 'contentType.pluralName is a required field',
@@ -219,7 +209,7 @@ describe('Content Type Builder - Content types', () => {
               },
             ],
           },
-          message: '6 errors occurred',
+          message: '4 errors occurred',
           name: 'ValidationError',
         },
       });
