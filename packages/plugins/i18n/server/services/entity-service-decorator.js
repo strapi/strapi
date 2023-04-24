@@ -178,15 +178,15 @@ const decorator = (service) => ({
   
       };
 
-      const result = strapi.db.query(uid).findOne(query);
+      const result = await strapi.db.query(uid).findOne(query);
       if(result === null){
         return null
       }
       // Since we change from findMany to findOne we need to restart the process so we use the entityService
-      return strapi.entityService.findOne(uid, result.id)
+      return await strapi.entityService.findOne(uid, result.id)
     }
 
-    return service.findMany.call(this, uid, wrappedParams);
+    return await service.findMany.call(this, uid, wrappedParams);
   },
 });
 
