@@ -360,6 +360,11 @@ describe('Entity service decorator', () => {
         global.strapi = {
           ...global.strapi,
           getModel: jest.fn((uid) => models[uid || 'test-model']),
+          entityService: {
+            findOne() {
+              return entry;
+            },
+          },
           db,
         };
         const input = { data: { title: 'title ' }, locale: 'all' };
@@ -367,7 +372,6 @@ describe('Entity service decorator', () => {
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
         expect(defaultService.findMany).toBeCalled();
-        expect(findManySpy).toHaveBeenCalled();
       });
 
       test('calls db.findMany for single type with no local param', async () => {
@@ -386,8 +390,7 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(global.strapi.db.query).toHaveBeenCalledWith('localized-single-type-model');
-        expect(findOneSpy).toHaveBeenCalled();
+        expect(defaultService.findMany).toHaveBeenCalledWith('localized-single-type-model');
       });
     });
   });
