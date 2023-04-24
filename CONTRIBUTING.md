@@ -79,7 +79,7 @@ Go to the root of the repository and run the setup:
 
 ```bash
 cd strapi
-# NOTE: If you don't already have node_modules, you will need to run `yarn install` first.
+yarn install
 yarn setup
 
 ```
