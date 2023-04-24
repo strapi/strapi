@@ -112,7 +112,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, wrappedParams);
 
     const page = await db.query(uid).findPage(query);
-    return this.wrapResult(page);
+    return {
+      ...page,
+      results: await this.wrapResult(page.results),
+    };
   },
 
   // TODO: streamline the logic based on the populate option
