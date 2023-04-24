@@ -2,5 +2,4 @@ node_modules/
 .eslintrc.js
 src/files/
 dist
-index.d.ts
 jest.config.js

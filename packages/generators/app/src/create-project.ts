@@ -148,7 +148,7 @@ export default async function createProject(
 
     await trackUsage({ event: 'didInstallProjectDependencies', scope });
   } catch (error) {
-    const stderr = (isStderrError(error) ? error.stderr : '') as string;
+    const stderr = isStderrError(error) ? error.stderr : '';
 
     loader.stop();
     await trackUsage({
@@ -193,7 +193,7 @@ export default async function createProject(
   console.log();
   console.log(`  ${cmd} develop`);
   console.log(
-    ' Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)'
+    '  Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)'
   );
   console.log();
   console.log(`  ${cmd} start`);

@@ -1,5 +1,3 @@
-import type { ExecaError } from 'execa';
-
 export interface Scope {
   name?: string;
   rootPath: string;
@@ -77,5 +75,10 @@ export interface StderrError extends Error {
 }
 
 export function isStderrError(error: unknown): error is StderrError {
-  return typeof error === 'object' && error !== null && 'stderr' in error;
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'stderr' in error &&
+    typeof error.stderr === 'string'
+  );
 }
