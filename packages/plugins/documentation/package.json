@@ -21,7 +21,8 @@
     }
   ],
   "scripts": {
-    "lint": "run -T eslint ."
+    "lint": "run -T eslint .",
+    "test:unit": "jest --verbose"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
@@ -32,6 +33,7 @@
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.2.9",
     "fs-extra": "10.0.0",
+    "immer": "9.0.19",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
@@ -55,6 +57,7 @@
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@testing-library/react": "12.1.4",
     "history": "^4.9.0",
     "msw": "1.0.1",
