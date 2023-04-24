@@ -59,6 +59,22 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return options;
   },
 
+  async wrapEntity(entity) {
+    return entity;
+  },
+
+  async wrapResult(result) {
+    // If result is an array, wrap each entity
+    if (Array.isArray(result)) {
+      const wrappedEntities = Array(result.length);
+      for (const entity of result) {
+        wrappedEntities.push(this.wrapEntity(entity));
+      }
+      return Promise.all(wrappedEntities);
+    }
+    return this.wrapEntity(result);
+  },
+
   async emitEvent(uid, event, entity) {
     // Ignore audit log events to prevent infinite loops
     if (uid === 'admin::audit-log') {
@@ -86,7 +102,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return db.query(uid).findOne(query);
     }
 
-    return db.query(uid).findMany(query);
+    const entities = await db.query(uid).findMany(query);
+    return this.wrapResult(entities);
   },
 
   async findPage(uid, opts) {
@@ -94,7 +111,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findPage(query);
+    const page = await db.query(uid).findPage(query);
+    return this.wrapResult(page);
   },
 
   // TODO: streamline the logic based on the populate option
@@ -103,7 +121,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findPage(query);
+    const entities = await db.query(uid).findPage(query);
+    return this.wrapResult(entities);
   },
 
   async findWithRelationCounts(uid, opts) {
@@ -111,7 +130,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findMany(query);
+    const entities = db.query(uid).findMany(query);
+    return this.wrapResult(entities);
   },
 
   async findOne(uid, entityId, opts) {
@@ -119,7 +139,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    return db.query(uid).findOne({ ...query, where: { id: entityId } });
+    const entity = db.query(uid).findOne({ ...query, where: { id: entityId } });
+    return this.wrapResult(entity);
   },
 
   async count(uid, opts) {
@@ -164,7 +185,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
-    return entity;
+    return this.wrapResult(entity);
   },
 
   async update(uid, entityId, opts) {
@@ -215,7 +236,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
-    return entity;
+    return this.wrapResult(entity);
   },
 
   async delete(uid, entityId, opts) {
@@ -240,7 +261,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
-    return entityToDelete;
+    return this.wrapResult(entityToDelete);
   },
 
   // FIXME: used only for the CM to be removed
@@ -268,18 +289,22 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // Trigger webhooks. One for each entity
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
-    return deletedEntities;
+    return this.wrapResult(deletedEntities);
   },
 
-  load(uid, entity, field, params = {}) {
+  async load(uid, entity, field, params = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
-    return db.query(uid).load(entity, field, transformLoadParamsToQuery(uid, field, params));
+    const loadedEntity = await db
+      .query(uid)
+      .load(entity, field, transformLoadParamsToQuery(uid, field, params));
+
+    return this.wrapResult(loadedEntity);
   },
 
-  loadPages(uid, entity, field, params = {}, pagination = {}) {
+  async loadPages(uid, entity, field, params = {}, pagination = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
@@ -293,7 +318,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformLoadParamsToQuery(uid, field, params, pagination);
 
-    return db.query(uid).loadPages(entity, field, query);
+    const loadedPage = db.query(uid).loadPages(entity, field, query);
+
+    return {
+      ...loadedPage,
+      results: await this.wrapResult(loadedPage.results),
+    };
   },
 });
 
