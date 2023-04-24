@@ -7,7 +7,12 @@ const stageObject = yup.object().shape({
   name: yup.string().max(255).required(),
 });
 
-const validateUpdateStagesSchema = yup.array().of(stageObject).required();
+const validateUpdateStagesSchema = yup
+  .array()
+  .of(stageObject)
+  .required()
+  .max(200, 'You can not create more than 200 stages');
+
 const validateUpdateStageOnEntity = yup
   .object()
   .shape({
