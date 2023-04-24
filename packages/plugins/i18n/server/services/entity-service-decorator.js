@@ -5,7 +5,6 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 
 const { getService } = require('../utils');
-const { unformatLayout } = require('../../../../core/admin/admin/src/content-manager/pages/EditSettingsView/utils/layout');
 
 const LOCALE_QUERY_FILTER = 'locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
@@ -174,19 +173,18 @@ const decorator = (service) => ({
       const query = {
         ...transformParamsToQuery(uid, wrappedParams),
         select: [],
-        populate: {}
-  
+        populate: {},
       };
 
       const result = await strapi.db.query(uid).findOne(query);
-      if(result === null){
-        return null
+      if (result === null) {
+        return null;
       }
       // Since we change from findMany to findOne we need to restart the process so we use the entityService
-      return await strapi.entityService.findOne(uid, result.id)
+      return strapi.entityService.findOne(uid, result.id);
     }
 
-    return await service.findMany.call(this, uid, wrappedParams);
+    return service.findMany.call(this, uid, wrappedParams);
   },
 });
 
