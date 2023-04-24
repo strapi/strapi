@@ -105,7 +105,7 @@
   "form.button.single-type.description": "Het beste voor een enkele instantie zoals over ons, homepage, enz.",
   "from": "van",
   "modalForm.attribute.form.base.name.description": "Er is geen ruimte toegestaan voor de naam van het attribuut",
-  "modalForm.attribute.form.base.name.placeholder": "Bijv.: Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "Bijv.: slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Gekoppeld veld",
   "modalForm.attributes.select-component": "Selecteer een component",
   "modalForm.attributes.select-components": "Selecteer de componenten",

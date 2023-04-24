@@ -1,43 +1,36 @@
 import { useState } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
 import { DELETE_LOCALE } from '../constants';
-
-const deleteLocale = async (id, toggleNotification) => {
-  try {
-    const data = await request(`/i18n/locales/${id}`, {
-      method: 'DELETE',
-    });
-
-    toggleNotification({
-      type: 'success',
-      message: { id: getTrad('Settings.locales.modal.delete.success') },
-    });
-
-    return data;
-  } catch (e) {
-    toggleNotification({
-      type: 'warning',
-      message: { id: 'notification.error' },
-    });
-
-    return e;
-  }
-};
 
 const useDeleteLocale = () => {
   const [isLoading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
 
+  const { del } = useFetchClient();
+
   const removeLocale = async (id) => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await deleteLocale(id, toggleNotification);
+      await del(`/i18n/locales/${id}`);
 
-    dispatch({ type: DELETE_LOCALE, id });
-    setLoading(false);
+      toggleNotification({
+        type: 'success',
+        message: { id: getTrad('Settings.locales.modal.delete.success') },
+      });
+
+      dispatch({ type: DELETE_LOCALE, id });
+    } catch {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return { isDeleting: isLoading, deleteLocale: removeLocale };
