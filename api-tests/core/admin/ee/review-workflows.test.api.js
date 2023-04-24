@@ -344,6 +344,19 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
+    test('It should throw an error if trying to create more than 200 stages', async () => {
+      const stagesRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        { body: { data: Array(201).fill({ name: 'new stage' }) } }
+      );
+
+      if (hasRW) {
+        expect(stagesRes.status).toBe(400);
+        expect(stagesRes.body.error).toBeDefined();
+        expect(stagesRes.body.error.name).toEqual('ValidationError');
+        expect(stagesRes.body.error.message).toBeDefined();
+      }
+    });
   });
 
   describe('Enabling/Disabling review workflows on a content type', () => {
@@ -407,7 +420,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('update a stage on an entity', () => {
+  describe('Update a stage on an entity', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         await updateContentType(productUID, {
