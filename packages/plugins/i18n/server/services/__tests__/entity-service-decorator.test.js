@@ -354,9 +354,7 @@ describe('Entity service decorator', () => {
         const db = {
           query: jest.fn(() => ({
             findMany: findManySpy,
-            findOne() {
-              return entry;
-            },
+            findOne: jest.fn(() => Promise.resolve(entry)),
           })),
         };
         global.strapi = {
