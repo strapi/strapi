@@ -318,7 +318,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformLoadParamsToQuery(uid, field, params, pagination);
 
-    const loadedPage = db.query(uid).loadPages(entity, field, query);
+    const loadedPage = await db.query(uid).loadPages(entity, field, query);
 
     return {
       ...loadedPage,
