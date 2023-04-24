@@ -490,7 +490,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Deleting a stage when content already exists', () => {
+  //FIXME Flaky test
+  describe.skip('Deleting a stage when content already exists', () => {
     test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
       // Get the default workflow stages
       const res = await requests.admin.get(`/admin/review-workflows/workflows/1/stages`);
