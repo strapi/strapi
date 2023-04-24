@@ -102,7 +102,9 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     );
   });
 
-  const { isResizable } = fieldSizes[attributes[selectedField].type];
+  // Check for a custom input provided by a custom field, or use the default one for that type
+  const { type, customField } = attributes[selectedField];
+  const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
 
   const sizeField = (
     <GridItem col={6} key="size">

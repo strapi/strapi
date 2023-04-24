@@ -2,24 +2,18 @@
 
 Follow these steps to use a local version of the Strapi design system with the Strapi monorepo
 
-First, run `yarn build` in `strapi-design-system/packages/strapi-design-system` to generate the bundle.
+In your copy of the design system run `yarn build` to generate the bundle.
 
-In your copy of Strapi, you can link the design system using either a [relative path](#relative-path) or [yarn link](#yarn-link).
-
-### Relative path
-
-Replace the version number in both `strapi/packages/core/admin/package.json` and `strapi/packages/core/helper-plugin/package.json` with the relative path to your copy of the design system:
+In the Strapi monorepo link your local copy of the design system with [`yarn link`](https://yarnpkg.com/cli/link#gatsby-focus-wrapper):
 
 ```
-"@strapi/design-system": "link:../../../../strapi-design-system/packages/strapi-design-system"
+yarn link -r ../<relative-path-to-strapi-design-system>
 ```
 
-### Yarn link
+Running yarn build in `examples/getstarted` should now use your local version of the design system.
 
-Alternatively, you can use [`yarn link`](https://classic.yarnpkg.com/lang/en/docs/cli/link/) by first running `yarn link` in `strapi-design-system/packages/design-system` and then `yarn link @strapi/design-system` in both `strapi/packages/core/admin` and `strapi/packages/core/helper-plugin`. With this approach, no changes need to be made to the `package.json`
-
-Once the link is setup, run the following command from the root of the monorepo
+To revert back to the released version of the design system use [`yarn unlink`](https://yarnpkg.com/cli/unlink#usage):
 
 ```
-yarn clean && yarn setup
+yarn unlink ../<relative-path-to-strapi-design-system>
 ```
