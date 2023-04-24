@@ -134,7 +134,7 @@ module.exports = ({ strapi }) => {
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
 
-      metrics.sendDidUpdateEntityStage();
+      metrics.sendDidEditStage();
 
       return entity;
     },
