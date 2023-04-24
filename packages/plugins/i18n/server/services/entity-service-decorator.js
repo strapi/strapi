@@ -96,7 +96,7 @@ const decorator = (service) => ({
       return wrappedParams;
     }
 
-    return wrapParams(params, ctx);
+    return wrapParams(wrappedParams, ctx);
   },
 
   /**
