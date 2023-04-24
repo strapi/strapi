@@ -66,7 +66,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async wrapResult(result) {
     // If result is an array, wrap each entity
     if (Array.isArray(result)) {
-      const wrappedEntities = Array(result.length);
+      const wrappedEntities = [];
       for (const entity of result) {
         wrappedEntities.push(this.wrapEntity(entity));
       }
