@@ -334,7 +334,6 @@ describe('Entity service decorator', () => {
 
       expect(global.strapi.getModel).toHaveBeenCalledWith('test-model');
       expect(defaultService.findMany).toBeCalled();
-      expect(findManySpy).toHaveBeenCalled();
     });
 
     describe('single types', () => {
@@ -355,16 +354,14 @@ describe('Entity service decorator', () => {
         const db = {
           query: jest.fn(() => ({
             findMany: findManySpy,
+            findOne() {
+              return entry;
+            },
           })),
         };
         global.strapi = {
           ...global.strapi,
           getModel: jest.fn((uid) => models[uid || 'test-model']),
-          entityService: {
-            findOne() {
-              return entry;
-            },
-          },
           db,
         };
         const input = { data: { title: 'title ' }, locale: 'all' };
