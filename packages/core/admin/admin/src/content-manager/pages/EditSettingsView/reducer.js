@@ -30,8 +30,14 @@ const reducer = (state = initialState, action) =>
       }
       case 'ON_ADD_FIELD': {
         const newState = cloneDeep(state);
-        const type = get(newState, ['modifiedData', 'attributes', action.name, 'type'], '');
-        const size = action.fieldSizes[type]?.default ?? DEFAULT_FIELD_SIZE;
+        const attribute = get(newState, ['modifiedData', 'attributes', action.name], {});
+
+        // Get the default size, checking custom fields first, then the type and generic defaults
+        const size =
+          action.fieldSizes[attribute?.customField]?.default ??
+          action.fieldSizes[attribute?.type]?.default ??
+          DEFAULT_FIELD_SIZE;
+
         const listSize = get(newState, layoutPathEdit, []).length;
         const actualRowContentPath = [...layoutPathEdit, listSize - 1, 'rowContent'];
         const rowContentToSet = get(newState, actualRowContentPath, []);

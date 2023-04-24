@@ -97,11 +97,17 @@ const DraggedItem = ({
   const accordionRef = useRef(null);
   const { formatMessage } = useIntl();
 
-  const [parentFieldName] = componentFieldName.split('.');
+  /**
+   * The last item in the fieldName array will be the index of this component.
+   * Drag and drop should be isolated to the parent component so nested repeatable
+   * components are not affected by the drag and drop of the parent component in
+   * their own re-ordering context.
+   */
+  const componentKey = componentFieldName.split('.').slice(0, -1).join('.');
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!isReadOnly, {
-      type: `${ItemTypes.COMPONENT}_${parentFieldName}`,
+      type: `${ItemTypes.COMPONENT}_${componentKey}`,
       index,
       item: {
         displayedValue,
