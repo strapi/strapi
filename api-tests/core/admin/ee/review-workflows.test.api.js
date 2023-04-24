@@ -270,10 +270,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       ];
     });
 
+    test("It should assign a default color to stages if they don't have one", async () => {
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}/stages`, {
+        body: {
+          data: [defaultStage, { id: secondStage.id, name: 'new_name', color: '#000000' }],
+        },
+      });
+
+      const workflowRes = await requests.admin.get(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      );
+
+      expect(workflowRes.status).toBe(200);
+      expect(workflowRes.body.data.stages[0].color).toBe('#4945FF');
+      expect(workflowRes.body.data.stages[1].color).toBe('#000000');
+    });
     test("It shouldn't be available for public", async () => {
       const stagesRes = await requests.public.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        stagesUpdateData
+        { body: { data: stagesUpdateData } }
       );
       const workflowRes = await requests.public.get(
         `/admin/review-workflows/workflows/${testWorkflow.id}`
