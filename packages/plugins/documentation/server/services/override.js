@@ -11,7 +11,7 @@ module.exports = ({ strapi }) => {
     excludedFromGeneration,
     /**
      *
-     * @param {string | string[]} api - The name of the api or and array of apis to exclude from generation
+     * @param {(string | string[])} api - The name of the api or and array of apis to exclude from generation
      */
     excludeFromGeneration(api) {
       if (Array.isArray(api)) {
@@ -26,8 +26,8 @@ module.exports = ({ strapi }) => {
      * @TODO pluginOrigin should be required in next major release
      * @param {object} doc - The openapi specifcation to override
      * @param {object} options - The options to override the documentation
-     * @param {string | undefined} options.pluginOrigin - The name of the plugin that is overriding the documentation
-     * @param {string[]}  options.excludeFromGeneration - The list of apis or plugins to exclude from generation
+     * @param {(string | undefined)} options.pluginOrigin - The name of the plugin that is overriding the documentation
+     * @param {string[]} options.excludeFromGeneration - The list of apis or plugins to exclude from generation
      */
     registerOverride(override, { pluginOrigin, excludeFromGeneration = [] } = {}) {
       const pluginsThatNeedDocumentation = getPluginsThatNeedDocumentation(
