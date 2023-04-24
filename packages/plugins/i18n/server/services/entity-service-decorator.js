@@ -170,7 +170,6 @@ const decorator = (service) => ({
 
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
 
-
     if (kind === 'singleType' && opts[LOCALE_QUERY_FILTER] !== 'all') {
       const query = {
         ...transformParamsToQuery(uid, wrappedParams),
@@ -179,11 +178,11 @@ const decorator = (service) => ({
   
       };
 
-      // Since we change from findMany to findOne we need to restart the process so we use the entityService
       const result = strapi.db.query(uid).findOne(query);
       if(result === null){
         return null
       }
+      // Since we change from findMany to findOne we need to restart the process so we use the entityService
       return strapi.entityService.findOne(uid, result.id)
     }
 
