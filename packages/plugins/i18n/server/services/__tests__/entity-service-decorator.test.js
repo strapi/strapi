@@ -63,6 +63,9 @@ describe('Entity service decorator', () => {
           update() {},
         };
       },
+      entityService: {
+        findOne() {},
+      },
       getModel(uid) {
         return models[uid || 'test-model'];
       },
@@ -321,6 +324,7 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         wrapParams: jest.fn(() => Promise.resolve(entry)),
+        findMany: jest.fn(() => Promise.resolve(entry)),
       };
 
       const service = decorator(defaultService);
@@ -329,7 +333,7 @@ describe('Entity service decorator', () => {
       await service.findMany('test-model', input);
 
       expect(global.strapi.getModel).toHaveBeenCalledWith('test-model');
-      expect(global.strapi.db.query).toHaveBeenCalledWith('test-model');
+      expect(defaultService.findMany).toBeCalled();
       expect(findManySpy).toHaveBeenCalled();
     });
 
@@ -341,6 +345,7 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         wrapParams: jest.fn(() => Promise.resolve(entry)),
+        findMany: jest.fn(() => Promise.resolve(entry)),
       };
 
       const service = decorator(defaultService);
@@ -361,7 +366,7 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(global.strapi.db.query).toHaveBeenCalledWith('localized-single-type-model');
+        expect(defaultService.findMany).toBeCalled();
         expect(findManySpy).toHaveBeenCalled();
       });
 
