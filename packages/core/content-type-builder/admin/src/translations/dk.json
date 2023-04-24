@@ -125,7 +125,7 @@
   "from": "fra",
   "listView.headerLayout.description": "Byg datastrukturen for dit indhold",
   "modalForm.attribute.form.base.name.description": "Mellemrum er ikke tilladt i navnet",
-  "modalForm.attribute.form.base.name.placeholder": "f.eks. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "f.eks. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Vedhæftet felt",
   "modalForm.attributes.select-component": "Vælg et komponent",
   "modalForm.attributes.select-components": "Vælg komponenterne",
