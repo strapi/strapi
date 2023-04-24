@@ -244,6 +244,16 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
         name: `${joinTableName}_fk`,
         columns: [joinColumnName],
       },
+      {
+        name: `${joinTableName}_order_index`,
+        columns: ['order'],
+        type: null,
+      },
+      {
+        name: `${joinTableName}_id_column_index`,
+        columns: [idColumnName],
+        type: null,
+      },
     ],
     foreignKeys: [
       {
