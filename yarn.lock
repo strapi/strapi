@@ -7792,6 +7792,7 @@ __metadata:
     fs-extra: 10.0.0
     glob: 7.2.0
     http-errors: 1.8.1
+    https-proxy-agent: 5.0.1
     inquirer: 8.2.5
     is-docker: 2.2.1
     koa: 2.13.4
@@ -18576,7 +18577,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:5, https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
+"https-proxy-agent@npm:5, https-proxy-agent@npm:5.0.1, https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
   version: 5.0.1
   resolution: "https-proxy-agent@npm:5.0.1"
   dependencies:

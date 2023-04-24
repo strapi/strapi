@@ -6,7 +6,6 @@
 
 const debug = require('debug')('strapi:webhook');
 const _ = require('lodash');
-const fetch = require('node-fetch');
 
 const WorkerQueue = require('./worker-queue');
 
@@ -15,12 +14,13 @@ const defaultConfiguration = {
 };
 
 class WebhookRunner {
-  constructor({ eventHub, logger, configuration = {} }) {
-    debug('Initialized webhook runer');
+  constructor({ eventHub, logger, configuration = {}, fetch }) {
+    debug('Initialized webhook runner');
     this.eventHub = eventHub;
     this.logger = logger;
     this.webhooksMap = new Map();
     this.listeners = new Map();
+    this.fetch = fetch;
 
     if (typeof configuration !== 'object') {
       throw new Error(
@@ -76,7 +76,7 @@ class WebhookRunner {
   run(webhook, event, info = {}) {
     const { url, headers } = webhook;
 
-    return fetch(url, {
+    return this.fetch(url, {
       method: 'post',
       body: JSON.stringify({
         event,
