@@ -91,6 +91,27 @@ describe('ImageAssetCard', () => {
         min-width: 20px;
       }
 
+      .c24 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c33 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
       .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -155,27 +176,6 @@ describe('ImageAssetCard', () => {
         justify-content: center;
       }
 
-      .c24 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c33 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c31 {
         border-radius: 4px;
         height: 1.5rem;
@@ -186,13 +186,13 @@ describe('ImageAssetCard', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 

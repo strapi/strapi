@@ -32,11 +32,9 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
             name="pageSize"
             value={pageSize}
-            test-pageSize={pageSize}
-            data-testid="pageSize-select"
           >
             {pageSizes.map((pageSize) => (
-              <Option data-testid={`pageSize-option-${pageSize}`} key={pageSize} value={pageSize}>
+              <Option key={pageSize} value={pageSize}>
                 {pageSize}
               </Option>
             ))}
