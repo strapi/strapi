@@ -24,7 +24,6 @@ module.exports = {
 
     return factory.createImportDeclaration(
       undefined,
-      undefined,
       factory.createImportClause(false, undefined, factory.createNamedImports(formattedImports)),
       factory.createStringLiteral('@strapi/strapi'),
       undefined
