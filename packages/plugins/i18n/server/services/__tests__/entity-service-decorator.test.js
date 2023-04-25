@@ -140,13 +140,16 @@ describe('Entity service decorator', () => {
 
     test.each(testModels)('Always uses original wrapParams in output - %s', async (modelName) => {
       const defaultService = {
-        wrapParams: jest.fn(() => Promise.resolve('Test')),
+        wrapParams: jest.fn(() => Promise.resolve({ Test: 'Test' })),
       };
       const service = decorator(defaultService);
 
       const output = await service.wrapParams({}, { uid: modelName, action: 'findMany' });
 
-      expect(output).toEqual('Test');
+      expect(output).toEqual({
+        Test: 'Test',
+        filters: { $and: [{ locale: 'en' }] },
+      });
     });
     test.each(testData)(
       "Doesn't add locale param when the params contain id or id_in - %s",
