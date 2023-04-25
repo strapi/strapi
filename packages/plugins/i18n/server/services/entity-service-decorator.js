@@ -178,12 +178,10 @@ const decorator = (service) => ({
         select: [],
         populate: {},
       };
-
-      const result = await strapi.db.query(uid).findOne(query);
-      if (result === null) {
+      const output = service.findMany.call(this, uid, wrappedParams);
+      if (output == null || output.length == 0) {
         return null;
       }
-      const output = service.findMany.call(this, uid, wrappedParams);
       return output[0];
     }
 
