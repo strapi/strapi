@@ -2,11 +2,9 @@ import { join } from 'node:path';
 import { Plop, run } from 'plop';
 import nodePlop from 'node-plop';
 
-const PLOPFILE = process.env.NODE_ENV === 'test' ? 'plopfile.ts' : 'plopfile.js';
-
 // Starts the Plop CLI programmatically
 export const runCLI = () => {
-  Plop.launch({ configPath: join(__dirname, PLOPFILE) }, (env) => {
+  Plop.launch({ configPath: join(__dirname, 'plopfile.js') }, (env) => {
     const options = { ...env, dest: join(process.cwd(), 'src') };
     run(options, undefined, true);
   });
@@ -16,9 +14,9 @@ export const runCLI = () => {
 export const generate = async (
   generatorName: string,
   options: unknown,
-  { dir = process.cwd() } = {}
+  { dir = process.cwd(), plopFile = 'plopfile.js' } = {}
 ) => {
-  const plop = nodePlop(join(__dirname, PLOPFILE), {
+  const plop = nodePlop(join(__dirname, plopFile), {
     destBasePath: join(dir, 'src'),
     force: false,
   });

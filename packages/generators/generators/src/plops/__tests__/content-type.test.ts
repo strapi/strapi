@@ -33,7 +33,7 @@ describe('Content Type Generator', () => {
         bootstrapApi: false,
         attributes: [],
       },
-      { dir: outputDirectory }
+      { dir: outputDirectory, plopFile: 'plopfile.ts' }
     );
 
     const generatedSchemaPath = path.join(
@@ -80,7 +80,7 @@ describe('Content Type Generator', () => {
         bootstrapApi: true,
         attributes: [],
       },
-      { dir: outputDirectory }
+      { dir: outputDirectory, plopFile: 'plopfile.ts' }
     );
     const generatedApiPath = path.join(outputDirectory, 'src/api/testContentType');
 
@@ -162,7 +162,7 @@ describe('Content Type Generator', () => {
           },
         ],
       },
-      { dir: outputDirectory }
+      { dir: outputDirectory, plopFile: 'plopfile.ts' }
     );
 
     const generatedSchemaPath = path.join(
