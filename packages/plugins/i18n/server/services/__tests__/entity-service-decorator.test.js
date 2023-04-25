@@ -384,7 +384,9 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(defaultService.findMany).toHaveBeenCalledWith('localized-single-type-model');
+        expect(defaultService.findMany).toHaveBeenCalledWith('localized-single-type-model', {
+          data: { title: 'title ' },
+        });
       });
     });
   });
