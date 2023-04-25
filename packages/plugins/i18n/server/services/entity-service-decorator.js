@@ -169,7 +169,10 @@ const decorator = (service) => ({
 
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
 
-    if (kind === 'singleType' && opts[LOCALE_QUERY_FILTER] !== 'all') {
+    if (kind === 'singleType') {
+      if (opts[LOCALE_QUERY_FILTER] === 'all') {
+        return service.findMany.call(this, uid, wrappedParams);
+      }
       const query = {
         ...transformParamsToQuery(uid, wrappedParams),
         select: [],
