@@ -148,6 +148,7 @@ describe('Entity service decorator', () => {
 
       expect(output).toEqual({
         Test: 'Test',
+        filters: { $and: [{ locale: 'en' }] },
       });
     });
     test.each(testData)(
