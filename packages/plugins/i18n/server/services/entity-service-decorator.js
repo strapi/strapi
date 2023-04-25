@@ -167,25 +167,18 @@ const decorator = (service) => ({
 
     const { kind } = strapi.getModel(uid);
 
-    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-
     if (kind === 'singleType') {
-      if (opts[LOCALE_QUERY_FILTER] === 'all') {
-        return service.findMany.call(this, uid, wrappedParams);
+      if (opts[LOCALE_QUERY_FILTER] !== 'all') {
+        return service.findMany.call(this, uid, opts);
       }
-      const query = {
-        ...transformParamsToQuery(uid, wrappedParams),
-        select: [],
-        populate: {},
-      };
-      const output = service.findMany.call(this, uid, wrappedParams);
+      const output = service.findMany.call(this, uid, opts);
       if (output == null || output.length == 0) {
         return null;
       }
       return output[0];
     }
 
-    return service.findMany.call(this, uid, wrappedParams);
+    return service.findMany.call(this, uid, opts);
   },
 });
 
