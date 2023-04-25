@@ -168,7 +168,7 @@ const decorator = (service) => ({
     const { kind } = strapi.getModel(uid);
 
     if (kind === 'singleType') {
-      if (opts[LOCALE_QUERY_FILTER] !== 'all') {
+      if (opts[LOCALE_QUERY_FILTER] === 'all') {
         return service.findMany.call(this, uid, opts);
       }
       const output = service.findMany.call(this, uid, opts);
