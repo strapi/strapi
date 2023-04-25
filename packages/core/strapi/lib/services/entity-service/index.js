@@ -174,9 +174,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
+    entity = await this.wrapResult(entity);
+
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
-    return this.wrapResult(entity);
+    return entity;
   },
 
   async update(uid, entityId, opts) {
@@ -225,9 +227,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
+    entity = await this.wrapResult(entity);
+
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
-    return this.wrapResult(entity);
+    return entity;
   },
 
   async delete(uid, entityId, opts) {
@@ -236,7 +240,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entityToDelete = await db.query(uid).findOne({
+    let entityToDelete = await db.query(uid).findOne({
       ...query,
       where: { id: entityId },
     });
@@ -250,9 +254,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
     await deleteComponents(uid, componentsToDelete, { loadComponents: false });
 
+    entityToDelete = await this.wrapResult(entityToDelete);
+
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
-    return this.wrapResult(entityToDelete);
+    return entityToDelete;
   },
 
   // FIXME: used only for the CM to be removed
@@ -262,7 +268,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const entitiesToDelete = await db.query(uid).findMany(query);
+    let entitiesToDelete = await db.query(uid).findMany(query);
 
     if (!entitiesToDelete.length) {
       return null;
@@ -277,10 +283,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       componentsToDelete.map((compos) => deleteComponents(uid, compos, { loadComponents: false }))
     );
 
+    entitiesToDelete = await this.wrapResult(entitiesToDelete);
+
     // Trigger webhooks. One for each entity
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
-    return this.wrapResult(deletedEntities);
+    return deletedEntities;
   },
 
   async load(uid, entity, field, params = {}) {
