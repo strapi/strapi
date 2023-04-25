@@ -354,7 +354,6 @@ describe('Entity service decorator', () => {
         const db = {
           query: jest.fn(() => ({
             findMany: findManySpy,
-            findOne: jest.fn(() => Promise.resolve(entry)),
           })),
         };
         global.strapi = {
@@ -370,7 +369,7 @@ describe('Entity service decorator', () => {
       });
 
       test('calls db.findMany for single type with no local param', async () => {
-        const findOneSpy = jest.fn();
+        const findOneSpy = jest.fn(() => Promise.resolve(entry));
         const db = {
           query: jest.fn(() => ({
             findOne: findOneSpy,
