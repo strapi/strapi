@@ -39,7 +39,7 @@
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
     "prepublishOnly": "yarn clean && yarn build",
-    "copy-files": "copyfiles -u 1 src/resources/files/**/* src/resources/dot-files/**/* src/resources/**/*.template dist",
+    "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
     "lint": "run -T eslint ."
   },
   "dependencies": {

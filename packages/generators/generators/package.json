@@ -37,7 +37,7 @@
     "build:ts": "run build",
     "watch": "run -T tsc -w --preserveWatchOutput",
     "clean": "run -T rimraf ./dist",
-    "copy-files": "copyfiles -u 1 src/templates/**/* src/files/**/* dist",
+    "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
