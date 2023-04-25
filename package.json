@@ -47,7 +47,7 @@
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
-    "test:e2e": "yarn test:e2e:setup && playwright test",
+    "test:e2e": "playwright test",
     "test:e2e:codegen": "playwright codegen",
     "test:e2e:debug": "yarn test:e2e:setup && PWDEBUG=1 playwright test",
     "test:e2e:setup": "yarn test:generate-app --appPath test-apps/playwright --template=./e2e/app-template",

@@ -32,7 +32,8 @@ const generateTestApp = async ({ appPath, database, template }) => {
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);
-    strapiVersion: require('../packages/core/strapi/package.json').version,
+    strapiVersion: require(path.resolve(__dirname, '../../packages/core/strapi/package.json'))
+      .version,
     debug: false,
     quick: false,
     uuid: undefined,
