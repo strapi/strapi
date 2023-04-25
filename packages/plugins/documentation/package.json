@@ -46,7 +46,7 @@
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
     "swagger-ui-dist": "4.18.1",
-    "yaml": "1.10.2",
+    "yaml": "2.2.2",
     "yup": "^0.32.9"
   },
   "peerDependencies": {
