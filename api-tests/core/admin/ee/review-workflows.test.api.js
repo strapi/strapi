@@ -503,8 +503,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
       const products = await findAll(productUID);
 
-      // Move the first half of the entries to the last stage,
-      // and the second half to the first stage
+      // Move half of the entries to the last stage,
+      // and the other half to the first stage
       await mapAsync(products.results, async (entity) =>
         updateEntry(productUID, entity.id, {
           [ENTITY_STAGE_ATTRIBUTE]: entity.id % 2 ? defaultStage.id : secondStage.id,
