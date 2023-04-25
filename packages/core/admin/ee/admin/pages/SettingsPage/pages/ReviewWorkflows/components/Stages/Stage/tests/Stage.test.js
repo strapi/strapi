@@ -11,6 +11,8 @@ import configureStore from '../../../../../../../../../../admin/src/core/store/c
 import { Stage } from '../Stage';
 import { reducer } from '../../../../reducer';
 
+import { STAGE_COLOR_DEFAULT } from '../../../../constants';
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
@@ -18,8 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const STAGES_FIXTURE = {
   id: 1,
-  name: 'stage-1',
-  index: 1,
+  index: 0,
 };
 
 const ComponentFixture = (props) => {
@@ -30,6 +31,7 @@ const ComponentFixture = (props) => {
     initialValues: {
       stages: [
         {
+          color: STAGE_COLOR_DEFAULT,
           name: 'something',
         },
       ],
@@ -60,15 +62,19 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { getByRole, queryByRole } = setup();
+    const { getByRole, getByText, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
+    // open accordion
     await user.click(getByRole('button'));
 
     expect(queryByRole('textbox')).toBeInTheDocument();
-    expect(getByRole('textbox').value).toBe(STAGES_FIXTURE.name);
-    expect(getByRole('textbox').getAttribute('name')).toBe('stages.1.name');
+    expect(getByRole('textbox').value).toBe('something');
+    expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
+
+    expect(getByText(/blue/i)).toBeInTheDocument();
+
     expect(
       queryByRole('button', {
         name: /delete stage/i,

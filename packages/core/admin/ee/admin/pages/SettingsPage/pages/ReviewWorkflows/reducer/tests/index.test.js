@@ -13,6 +13,7 @@ const WORKFLOWS_FIXTURE = [
     stages: [
       {
         id: 1,
+        color: 'red',
         name: 'stage-1',
       },
 
@@ -41,16 +42,26 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       payload: { status: 'loading-state', workflows: WORKFLOWS_FIXTURE },
     };
 
+    const DEFAULT_WORKFLOW_FIXTURE = {
+      ...WORKFLOWS_FIXTURE[0],
+
+      // stages without a color should have a default color assigned
+      stages: WORKFLOWS_FIXTURE[0].stages.map((stage) => ({
+        ...stage,
+        color: stage?.color ?? '#4945ff',
+      })),
+    };
+
     expect(reducer(state, action)).toStrictEqual(
       expect.objectContaining({
         status: 'loading-state',
         serverState: expect.objectContaining({
-          currentWorkflow: WORKFLOWS_FIXTURE[0],
+          currentWorkflow: DEFAULT_WORKFLOW_FIXTURE,
           workflows: WORKFLOWS_FIXTURE,
         }),
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
-            data: WORKFLOWS_FIXTURE[0],
+            data: DEFAULT_WORKFLOW_FIXTURE,
             isDirty: false,
             hasDeletedServerStages: false,
           }),
@@ -338,6 +349,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   id: 1,
+                  color: 'red',
                   name: 'stage-1-modified',
                 },
               ]),
