@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { posix, win32 } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
@@ -48,13 +48,13 @@ const getAssetsMockSourceStream = (
   data: Iterable<IAsset> = [
     {
       filename: 'foo.jpg',
-      filepath: join(__dirname, 'foo.jpg'),
+      filepath: posix.join(__dirname, 'foo.jpg'), // test a file with a posix path
       stats: { size: 24 },
       stream: Readable.from([1, 2, 3]),
     },
     {
       filename: 'bar.jpg',
-      filepath: join(__dirname, 'bar.jpg'),
+      filepath: win32.join(__dirname, 'bar.jpg'), // test a file with a win32 path
       stats: { size: 48 },
       stream: Readable.from([4, 5, 6, 7, 8, 9]),
     },
@@ -298,7 +298,7 @@ describe('Transfer engine', () => {
     versionStrategy: 'exact',
     schemaStrategy: 'exact',
     exclude: [],
-  } as ITransferEngineOptions;
+  } as unknown as ITransferEngineOptions;
 
   let completeSource;
   let completeDestination;
@@ -490,7 +490,7 @@ describe('Transfer engine', () => {
           versionStrategy: 'exact',
           schemaStrategy: 'exact',
           exclude: [],
-        } as ITransferEngineOptions;
+        } as unknown as ITransferEngineOptions;
         test('source with source schema missing in destination fails', async () => {
           const source = createSource();
           source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);

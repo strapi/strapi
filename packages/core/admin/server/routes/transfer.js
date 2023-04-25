@@ -3,15 +3,24 @@
 const dataTransferAuthStrategy = require('../strategies/data-transfer');
 
 module.exports = [
-  // Transfer route
+  // Transfer Push
   {
     method: 'GET',
-    path: '/transfer/runner/connect',
-    handler: 'transfer.runner-connect',
+    path: '/transfer/runner/push',
+    handler: 'transfer.runner-push',
     config: {
       middlewares: ['admin::data-transfer'],
-      // TODO: Allow not passing any scope <> Add a way to prevent assigning one by default
       auth: { strategies: [dataTransferAuthStrategy], scope: ['push'] },
+    },
+  },
+  // Transfer Pull
+  {
+    method: 'GET',
+    path: '/transfer/runner/pull',
+    handler: 'transfer.runner-pull',
+    config: {
+      middlewares: ['admin::data-transfer'],
+      auth: { strategies: [dataTransferAuthStrategy], scope: ['pull'] },
     },
   },
   // Transfer Tokens

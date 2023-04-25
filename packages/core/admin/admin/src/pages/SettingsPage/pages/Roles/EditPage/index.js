@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
-  request,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
@@ -37,6 +37,8 @@ const EditPage = () => {
     onSubmitSucceeded,
   } = useFetchRole(id);
 
+  const { put } = useFetchClient();
+
   const handleEditRoleSubmit = async (data) => {
     try {
       lockApp();
@@ -44,17 +46,11 @@ const EditPage = () => {
 
       const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
 
-      await request(`/admin/roles/${id}`, {
-        method: 'PUT',
-        body: data,
-      });
+      await put(`/admin/roles/${id}`, data);
 
       if (role.code !== 'strapi-super-admin') {
-        await request(`/admin/roles/${id}/permissions`, {
-          method: 'PUT',
-          body: {
-            permissions: permissionsToSend,
-          },
+        await put(`/admin/roles/${id}/permissions`, {
+          permissions: permissionsToSend,
         });
 
         if (didUpdateConditions) {

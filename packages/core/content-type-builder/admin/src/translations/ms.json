@@ -112,7 +112,7 @@
   "form.button.single-type.description": "Sesuai untuk data tunggal seperti mengenai kami, laman utama dan lain-lain",
   "from": "dari",
   "modalForm.attribute.form.base.name.description": "Tidak boleh ada jarak dalam nama",
-  "modalForm.attribute.form.base.name.placeholder": "cth. Slug, URL SEO, URL Canonical",
+  "modalForm.attribute.form.base.name.placeholder": "cth. slug, urlSeo, urlCanonical",
   "modalForm.attribute.target-field": "Ruang terpasang",
   "modalForm.attributes.select-component": "Pilih komponen",
   "modalForm.attributes.select-components": "Pilih komponen",

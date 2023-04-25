@@ -9,6 +9,8 @@ import {
   useQueryParams,
   useRBAC,
   useFocusWhenNavigate,
+  useFilter,
+  useCollator,
 } from '@strapi/helper-plugin';
 import { Plus, Trash, Duplicate, Pencil } from '@strapi/icons';
 import {
@@ -27,7 +29,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import get from 'lodash/get';
-import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { useRolesList } from '../../../../../hooks';
@@ -38,6 +39,7 @@ import reducer, { initialState } from './reducer';
 
 const useSortedRoles = () => {
   useFocusWhenNavigate();
+  const { locale } = useIntl();
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
@@ -46,7 +48,23 @@ const useSortedRoles = () => {
   const { getData, roles, isLoading } = useRolesList(false);
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
-  const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
+
+  const { includes } = useFilter(locale, {
+    sensitivity: 'base',
+  });
+
+  /**
+   * @type {Intl.Collator}
+   */
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const sortedRoles = (roles || [])
+    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
+    .sort(
+      (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
+    );
 
   useEffect(() => {
     if (!isLoadingForPermissions && canRead) {
@@ -356,6 +374,7 @@ const RoleListPage = () => {
                   usersCount={role.usersCount}
                   icons={getIcons(role)}
                   rowIndex={index + 2}
+                  canUpdate={canUpdate}
                 />
               ))}
             </Tbody>

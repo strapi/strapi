@@ -1,42 +1,37 @@
 'use strict';
 
 const _ = require('lodash');
+const { getService } = require('../../../utils');
 const { isListable, hasEditableAttribute, hasRelationAttribute } = require('./attributes');
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
-const FIELD_TYPES_FULL_SIZE = ['dynamiczone', 'component', 'json', 'richtext'];
-const FIELD_TYPES_SMALL = [
-  'checkbox',
-  'boolean',
-  'date',
-  'time',
-  'biginteger',
-  'decimal',
-  'float',
-  'integer',
-  'number',
-];
 
 const isAllowedFieldSize = (type, size) => {
-  if (FIELD_TYPES_FULL_SIZE.includes(type)) {
-    return size === MAX_ROW_SIZE;
+  const { getFieldSize } = getService('field-sizes');
+  const fieldSize = getFieldSize(type);
+
+  // Check if field was locked to another size
+  if (!fieldSize.isResizable && size !== fieldSize.default) {
+    return false;
   }
 
-  // validate, whether the field has 4, 6, 8 or 12 columns?
+  // Otherwise allow unless it's bigger than a row
   return size <= MAX_ROW_SIZE;
 };
 
-const getDefaultFieldSize = (type) => {
-  if (FIELD_TYPES_FULL_SIZE.includes(type)) {
-    return MAX_ROW_SIZE;
+const getDefaultFieldSize = (attribute) => {
+  // Check if it's a custom field with a custom size
+  if (attribute.customField) {
+    const customField = strapi.container.get('custom-fields').get(attribute.customField);
+    if (customField.inputSize) {
+      return customField.inputSize.default;
+    }
   }
 
-  if (FIELD_TYPES_SMALL.includes(type)) {
-    return MAX_ROW_SIZE / 3;
-  }
-
-  return MAX_ROW_SIZE / 2;
+  // Get the default size for the field type
+  const { getFieldSize } = getService('field-sizes');
+  return getFieldSize(attribute.type).default;
 };
 
 async function createDefaultLayouts(schema) {
@@ -141,7 +136,7 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
   for (const key of keysToAppend) {
     const attribute = schema.attributes[key];
 
-    const attributeSize = getDefaultFieldSize(attribute.type);
+    const attributeSize = getDefaultFieldSize(attribute);
     const currenRowSize = rowSize(layout[currentRowIndex]);
 
     if (currenRowSize + attributeSize > MAX_ROW_SIZE) {
