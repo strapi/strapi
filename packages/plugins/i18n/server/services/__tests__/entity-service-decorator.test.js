@@ -7,7 +7,7 @@ jest.mock('../localizations', () => {
   });
 });
 
-const { decorator } = require('../entity-service-decorator')();
+const { decorator, wrapParams } = require('../entity-service-decorator')();
 const localizations = require('../localizations')();
 const locales = require('../locales')();
 const contentTypes = require('../content-types')();
@@ -44,6 +44,8 @@ const models = {
   'non-localized-model': nonLocalizedModel,
   'localized-single-type-model': singleTypeModel,
 };
+
+const testModels = [['test-model'], ['non-localized-model'], ['localized-single-type-model']];
 
 describe('Entity service decorator', () => {
   beforeAll(() => {
@@ -136,6 +138,16 @@ describe('Entity service decorator', () => {
       ['delete', { filters: [{ id: { $in: [1] } }] }],
     ];
 
+    test.each(testModels)('Always uses original wrapParams in output - %s', async (modelName) => {
+      const defaultService = {
+        wrapParams: jest.fn(() => Promise.resolve('Test')),
+      };
+      const service = decorator(defaultService);
+
+      const output = await service.wrapParams({}, { uid: modelName, action: 'findMany' });
+
+      expect(output).toEqual('Test');
+    });
     test.each(testData)(
       "Doesn't add locale param when the params contain id or id_in - %s",
       async (action, params) => {
