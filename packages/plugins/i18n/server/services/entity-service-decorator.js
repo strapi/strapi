@@ -150,45 +150,6 @@ const decorator = (service) => ({
     await syncNonLocalizedAttributes(entry, { model });
     return entry;
   },
-
-  /**
-   * Find an entry or several if fetching all locales
-   * @param {string} uid - Model uid
-   * @param {object} opts - Query options object (params, data, files, populate)
-   */
-  async findMany(uid, opts = {}) {
-    const model = strapi.getModel(uid);
-
-    const { isLocalizedContentType } = getService('content-types');
-
-    if (!isLocalizedContentType(model)) {
-      return service.findMany.call(this, uid, opts);
-    }
-
-    const { kind } = strapi.getModel(uid);
-
-    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-
-    if (kind === 'singleType') {
-      if (opts[LOCALE_QUERY_FILTER] === 'all') {
-        return service.findMany.call(this, uid, wrappedParams);
-      }
-      const query = {
-        ...transformParamsToQuery(uid, wrappedParams),
-        select: [],
-        populate: {},
-      };
-
-      const result = await strapi.db.query(uid).findOne(query);
-      if (result === null) {
-        return null;
-      }
-      // Since we change from findMany to findOne we need to restart the process so we use the entityService
-      return strapi.entityService.findOne(uid, result.id);
-    }
-
-    return service.findMany.call(this, uid, wrappedParams);
-  },
 });
 
 module.exports = () => ({
