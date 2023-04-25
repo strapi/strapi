@@ -59,20 +59,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return options;
   },
 
-  async wrapEntity(entity) {
-    return entity;
-  },
-
   async wrapResult(result) {
-    // If result is an array, wrap each entity
-    if (Array.isArray(result)) {
-      const wrappedEntities = [];
-      for (const entity of result) {
-        wrappedEntities.push(this.wrapEntity(entity));
-      }
-      return Promise.all(wrappedEntities);
-    }
-    return this.wrapEntity(result);
+    return result;
   },
 
   async emitEvent(uid, event, entity) {
