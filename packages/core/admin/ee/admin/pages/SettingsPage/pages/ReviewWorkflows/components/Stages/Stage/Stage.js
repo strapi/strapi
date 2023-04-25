@@ -97,7 +97,12 @@ export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
           </GridItem>
 
           <GridItem col={6}>
-            <Field error={colorMeta?.error ?? false} required>
+            <Field
+              error={colorMeta?.error ?? false}
+              name={colorField.name}
+              id={colorField.name}
+              required
+            >
               <Flex direction="column" gap={1} alignItems="stretch">
                 <FieldLabel>
                   {formatMessage({
@@ -109,7 +114,7 @@ export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
                 <ReactSelect
                   components={{ Option: OptionColor, SingleValue: SingleValueColor }}
                   error={colorMeta?.error}
-                  id={colorField.name}
+                  inputId={colorField.name}
                   name={colorField.name}
                   options={colorOptions}
                   onChange={({ value }) => {
