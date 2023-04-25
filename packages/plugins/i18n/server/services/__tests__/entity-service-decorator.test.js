@@ -7,7 +7,7 @@ jest.mock('../localizations', () => {
   });
 });
 
-const { decorator, wrapParams } = require('../entity-service-decorator')();
+const { decorator } = require('../entity-service-decorator')();
 const localizations = require('../localizations')();
 const locales = require('../locales')();
 const contentTypes = require('../content-types')();
