@@ -6,6 +6,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGE_POSITION,
   STAGE_COLOR_DEFAULT,
 } from '../constants';
 
@@ -99,6 +100,27 @@ export function reducer(state = initialState, action) {
               }
             : stage
         );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGE_POSITION: {
+        const {
+          currentWorkflow: {
+            data: { stages },
+          },
+        } = state.clientState;
+        const { newIndex, oldIndex } = payload;
+
+        if (newIndex >= 0 && newIndex < stages.length) {
+          const stage = stages[oldIndex];
+          let newStages = [...stages];
+
+          newStages.splice(oldIndex, 1);
+          newStages.splice(newIndex, 0, stage);
+
+          draft.clientState.currentWorkflow.data.stages = newStages;
+        }
 
         break;
       }

@@ -6,6 +6,7 @@ export const ACTION_SET_WORKFLOWS = `Settings/Review_Workflows/SET_WORKFLOWS`;
 export const ACTION_DELETE_STAGE = `Settings/Review_Workflows/WORKFLOW_DELETE_STAGE`;
 export const ACTION_ADD_STAGE = `Settings/Review_Workflows/WORKFLOW_ADD_STAGE`;
 export const ACTION_UPDATE_STAGE = `Settings/Review_Workflows/WORKFLOW_UPDATE_STAGE`;
+export const ACTION_UPDATE_STAGE_POSITION = `Settings/Review_Workflows/WORKFLOW_UPDATE_STAGE_POSITION`;
 
 export const STAGE_COLORS = {
   primary600: 'Blue',
@@ -25,3 +26,7 @@ export const STAGE_COLORS = {
 };
 
 export const STAGE_COLOR_DEFAULT = lightTheme.colors.primary600;
+
+export const DRAG_DROP_TYPES = {
+  STAGE: 'stage',
+};
