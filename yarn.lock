@@ -7307,6 +7307,7 @@ __metadata:
     "@strapi/icons": 1.6.6
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
+    "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     browserslist-to-esbuild: 1.2.0
     cross-env: ^7.0.3
@@ -7324,7 +7325,6 @@ __metadata:
     react-intl: 6.3.2
     react-router-dom: 5.3.4
     react-select: 5.7.0
-    react-test-renderer: ^17.0.2
     rimraf: 3.0.2
     styled-components: 5.3.3
     typescript: 5.0.4

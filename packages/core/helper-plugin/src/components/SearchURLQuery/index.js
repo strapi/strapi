@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Search as SearchIcon } from '@strapi/icons';
 import { Searchbar, SearchForm, IconButton, Icon } from '@strapi/design-system';
 import useQueryParams from '../../hooks/useQueryParams';
-import useTracking from '../../hooks/useTracking';
+import { useTracking } from '../../features/Tracking';
 
 const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
   const wrapperRef = useRef(null);

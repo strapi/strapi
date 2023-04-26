@@ -4,6 +4,7 @@ import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { deleteRequest } from '../../utils/deleteRequest';
 
 import { useRemoveAsset } from '../useRemoveAsset';
@@ -45,11 +46,13 @@ const client = new QueryClient({
 function ComponentFixture({ children }) {
   return (
     <QueryClientProvider client={client}>
-      <NotificationsProvider toggleNotification={() => jest.fn()}>
-        <IntlProvider locale="en" messages={{}}>
-          {children}
-        </IntlProvider>
-      </NotificationsProvider>
+      <ThemeProvider theme={lightTheme}>
+        <NotificationsProvider>
+          <IntlProvider locale="en" messages={{}}>
+            {children}
+          </IntlProvider>
+        </NotificationsProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
