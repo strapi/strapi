@@ -60,11 +60,6 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
-                  label: 'useCallbackRef',
-                  id: 'core/content-manager/hooks/use-callback-ref',
-                },
-                {
-                  type: 'doc',
                   label: 'useDragAndDrop',
                   id: 'core/content-manager/hooks/use-drag-and-drop',
                 },
@@ -130,6 +125,11 @@ const sidebars = {
                   type: 'doc',
                   label: 'useAPIErrorHandler',
                   id: 'core/helper-plugin/hooks/use-api-error-handler',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/helper-plugin/hooks/use-callback-ref',
                 },
                 {
                   type: 'doc',

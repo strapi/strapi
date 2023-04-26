@@ -5,12 +5,9 @@ const path = require('path');
 const IS_EE = process.env.IS_EE === 'true';
 
 const moduleNameMapper = {
-  '.*\\.(css|less|styl|scss|sass)$': path.join(
-    __dirname,
-    'packages/admin-test-utils/lib/mocks/cssModule.js'
-  ),
+  '.*\\.(css|less|styl|scss|sass)$': '@strapi/admin-test-utils/file-mock',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/image.js'),
+    '@strapi/admin-test-utils/file-mock',
   '^ee_else_ce(/.*)$': IS_EE
     ? [
         path.join(__dirname, 'packages/core/admin/ee/admin$1'),
@@ -34,21 +31,9 @@ module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
   testPathIgnorePatterns: ['/node_modules/', '__tests__'],
-  globalSetup: path.join(__dirname, 'test/config/front/global-setup.js'),
-  setupFiles: [
-    path.join(__dirname, 'packages/admin-test-utils/lib/setup/test-bundler.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/fetch.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/LocalStorageMock.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/IntersectionObserver.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/ResizeObserver.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/windowMatchMedia.js'),
-    path.join(__dirname, 'packages/admin-test-utils/lib/mocks/mockRangeApi.js'),
-  ],
-  setupFilesAfterEnv: [
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/styled-components.js'),
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/strapi.js'),
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/prop-types.js'),
-  ],
+  globalSetup: '@strapi/admin-test-utils/global-setup',
+  setupFiles: ['@strapi/admin-test-utils/environment'],
+  setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: 'jsdom',
   transform: {
     '^.+\\.js$': [

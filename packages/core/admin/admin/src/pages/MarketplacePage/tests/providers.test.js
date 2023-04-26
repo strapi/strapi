@@ -25,7 +25,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useAppInfos: jest.fn(() => ({
+  useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
       '@strapi/plugin-documentation': '4.2.0',
