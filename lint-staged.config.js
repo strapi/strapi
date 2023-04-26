@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const cp = require('child_process');
 const findUp = require('find-up');
 
 const includes = ['packages', '.github'];
@@ -34,8 +33,6 @@ function getLintCommand(files) {
 module.exports = {
   '*.{js,ts}': (files) => {
     const lintCmd = getLintCommand(files);
-
-    console.log(lintCmd);
 
     const prettierCmd = `prettier --write ${files.join(' ')}`;
 
