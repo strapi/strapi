@@ -9,9 +9,9 @@ import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import TableRows from './TableRows';
-import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import BulkActionsBar from './BulkActionsBar';
 
 const DynamicTable = ({
   canCreate,
@@ -89,17 +89,23 @@ const DynamicTable = ({
 
   return (
     <Table
-      components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
+      components={{ ConfirmDialogDelete }}
       contentType={contentTypeName}
       action={action}
       isLoading={isLoading}
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
-      onConfirmDeleteAll={onConfirmDeleteAll}
       onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
+      bulkActionsBar={
+        <BulkActionsBar
+          showPublish={hasDraftAndPublish}
+          showDelete={canDelete}
+          onConfirmDeleteAll={onConfirmDeleteAll}
+        />
+      }
     >
       <TableRows
         canCreate={canCreate}
