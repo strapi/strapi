@@ -7,23 +7,43 @@ import {
   Accordion,
   AccordionToggle,
   AccordionContent,
+  Field,
+  FieldLabel,
+  FieldError,
+  Flex,
   Grid,
   GridItem,
   IconButton,
   TextInput,
 } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { ReactSelect, useTracking } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
 
 import { deleteStage, updateStage } from '../../../actions';
+import { getAvailableStageColors } from '../../../utils/colors';
+import { OptionColor } from './components/OptionColor';
+import { SingleValueColor } from './components/SingleValueColor';
 
-function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
+const AVAILABLE_COLORS = getAvailableStageColors();
+
+export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = useState(isOpenDefault);
-  const fieldIdentifier = `stages.${index}.name`;
-  const [field, meta] = useField(fieldIdentifier);
+  const [nameField, nameMeta] = useField(`stages.${index}.name`);
+  const [colorField, colorMeta] = useField(`stages.${index}.color`);
   const dispatch = useDispatch();
+  const colorOptions = AVAILABLE_COLORS.map(({ themeColorName, hex, name }) => ({
+    value: hex,
+    label: formatMessage(
+      {
+        id: 'Settings.review-workflows.stage.color.name',
+        defaultMessage: '{name}',
+      },
+      { name }
+    ),
+    themeColorName,
+  }));
 
   return (
     <Accordion
@@ -40,7 +60,7 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
       shadow="tableShadow"
     >
       <AccordionToggle
-        title={name}
+        title={nameField.value}
         togglePosition="left"
         action={
           canDelete ? (
@@ -61,19 +81,55 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
         <Grid gap={4}>
           <GridItem col={6}>
             <TextInput
-              {...field}
-              id={fieldIdentifier}
-              value={name}
+              {...nameField}
+              id={nameField.name}
               label={formatMessage({
                 id: 'Settings.review-workflows.stage.name.label',
                 defaultMessage: 'Stage name',
               })}
-              error={meta.error ?? false}
+              error={nameMeta.error ?? false}
               onChange={(event) => {
-                field.onChange(event);
+                nameField.onChange(event);
                 dispatch(updateStage(id, { name: event.target.value }));
               }}
+              required
             />
+          </GridItem>
+
+          <GridItem col={6}>
+            <Field
+              error={colorMeta?.error ?? false}
+              name={colorField.name}
+              id={colorField.name}
+              required
+            >
+              <Flex direction="column" gap={1} alignItems="stretch">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'content-manager.reviewWorkflows.stage.color',
+                    defaultMessage: 'Color',
+                  })}
+                </FieldLabel>
+
+                <ReactSelect
+                  components={{ Option: OptionColor, SingleValue: SingleValueColor }}
+                  error={colorMeta?.error}
+                  inputId={colorField.name}
+                  name={colorField.name}
+                  options={colorOptions}
+                  onChange={({ value }) => {
+                    colorField.onChange({ target: { value } });
+                    dispatch(updateStage(id, { color: value }));
+                  }}
+                  value={{
+                    value: colorField.value,
+                    label: colorOptions.find(({ value }) => value === colorField.value).label,
+                  }}
+                />
+
+                <FieldError />
+              </Flex>
+            </Field>
           </GridItem>
         </Grid>
       </AccordionContent>
@@ -81,10 +137,8 @@ function Stage({ id, name, index, canDelete, isOpen: isOpenDefault = false }) {
   );
 }
 
-export { Stage };
-
 Stage.propTypes = PropTypes.shape({
   id: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
+  color: PropTypes.string.isRequired,
   canDelete: PropTypes.bool.isRequired,
 }).isRequired;

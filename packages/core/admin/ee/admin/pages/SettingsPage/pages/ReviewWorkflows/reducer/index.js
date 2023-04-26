@@ -6,6 +6,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  STAGE_COLOR_DEFAULT,
 } from '../constants';
 
 export const initialState = {
@@ -29,8 +30,18 @@ export function reducer(state = initialState, action) {
 
         draft.status = status;
 
-        if (workflows) {
-          const defaultWorkflow = workflows[0];
+        if (workflows?.length > 0) {
+          let defaultWorkflow = workflows[0];
+
+          // A safety net in case a stage does not have a color assigned;
+          // this normallly should not happen
+          defaultWorkflow = {
+            ...defaultWorkflow,
+            stages: defaultWorkflow.stages.map((stage) => ({
+              ...stage,
+              color: stage?.color ?? STAGE_COLOR_DEFAULT,
+            })),
+          };
 
           draft.serverState.workflows = workflows;
           draft.serverState.currentWorkflow = defaultWorkflow;
@@ -69,6 +80,7 @@ export function reducer(state = initialState, action) {
 
         draft.clientState.currentWorkflow.data.stages.push({
           ...payload,
+          color: payload?.color ?? STAGE_COLOR_DEFAULT,
           __temp_key__: newTempKey,
         });
 

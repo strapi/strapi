@@ -19,6 +19,15 @@ export function getWorkflowValidationSchema({ formatMessage }) {
               defaultMessage: 'Name can not be longer than 255 characters',
             })
           ),
+        color: yup
+          .string()
+          .required(
+            formatMessage({
+              id: 'Settings.review-workflows.validation.stage.color',
+              defaultMessage: 'Color is required',
+            })
+          )
+          .matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i),
       })
     ),
   });

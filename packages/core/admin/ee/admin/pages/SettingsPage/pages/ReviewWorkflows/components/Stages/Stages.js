@@ -44,13 +44,7 @@ function Stages({ stages }) {
 
             return (
               <Box key={`stage-${id}`} as="li">
-                <Stage
-                  {...stage}
-                  id={id}
-                  index={index}
-                  canDelete={stages.length > 1}
-                  isOpen={!stage.id}
-                />
+                <Stage id={id} index={index} canDelete={stages.length > 1} isOpen={!stage.id} />
               </Box>
             );
           })}
