@@ -60,11 +60,6 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
-                  label: 'useCallbackRef',
-                  id: 'core/content-manager/hooks/use-callback-ref',
-                },
-                {
-                  type: 'doc',
                   label: 'useDragAndDrop',
                   id: 'core/content-manager/hooks/use-drag-and-drop',
                 },
@@ -75,6 +70,11 @@ const sidebars = {
               label: 'Relations',
               id: 'core/content-manager/relations',
             },
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-manager/review-workflows',
+            },
           ],
         },
         {
@@ -84,7 +84,13 @@ const sidebars = {
             type: 'doc',
             id: 'core/content-type-builder/intro',
           },
-          items: ['example'],
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-type-builder/review-workflows',
+            },
+          ],
         },
         {
           type: 'category',
@@ -119,6 +125,11 @@ const sidebars = {
                   type: 'doc',
                   label: 'useAPIErrorHandler',
                   id: 'core/helper-plugin/hooks/use-api-error-handler',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/helper-plugin/hooks/use-callback-ref',
                 },
                 {
                   type: 'doc',
@@ -167,6 +178,21 @@ const sidebars = {
                   id: 'core/permissions/frontend/using-permissions',
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Settings',
+          link: {
+            type: 'doc',
+            id: 'core/settings/intro',
+          },
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/settings/review-workflows',
             },
           ],
         },

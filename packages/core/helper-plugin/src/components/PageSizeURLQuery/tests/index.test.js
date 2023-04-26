@@ -12,8 +12,10 @@ import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import PageSizeURLQuery from '../index';
 
-jest.mock('../../../hooks/useTracking', () => () => ({
-  trackUsage: jest.fn(),
+jest.mock('../../../features/Tracking', () => ({
+  useTracking: () => ({
+    trackUsage: jest.fn(),
+  }),
 }));
 
 const messages = {
