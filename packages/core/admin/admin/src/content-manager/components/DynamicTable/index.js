@@ -99,7 +99,7 @@ const DynamicTable = ({
       onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
-      withMainAction={canDelete && isBulkable}
+      withMainAction={(canDelete || canPublish) && isBulkable}
       bulkActionsBar={
         <BulkActionsBar
           showPublish={canPublish && hasDraftAndPublish}
