@@ -54,7 +54,7 @@ const createContentTypeSchema = ({
       })
       .test({
         name: 'pluralNameAlreadyUsedAsSingular',
-        message: getTrad('error.contentType.pluralIDEqualsSingularID'),
+        message: getTrad('error.contentType.pluralName-equals-singularName'),
         test(value) {
           if (!value) {
             return false;
@@ -87,7 +87,7 @@ const createContentTypeSchema = ({
       })
       .test({
         name: 'pluralNameNotAlreadyUsedInCollectionName',
-        message: getTrad('error.contentTypeName.pluralIDEqualsCollectionName'),
+        message: getTrad('error.contentType.pluralName-equals-collectionName'),
         test(value) {
           if (!value) {
             return false;
@@ -112,7 +112,7 @@ const createContentTypeSchema = ({
       })
       .test({
         name: 'singularNameAlreadyUsedAsPlural',
-        message: getTrad('error.contentType.singularIDEqualsPluralID'),
+        message: getTrad('error.contentType.singularName-equals-pluralName'),
         test(value) {
           if (!value) {
             return false;
