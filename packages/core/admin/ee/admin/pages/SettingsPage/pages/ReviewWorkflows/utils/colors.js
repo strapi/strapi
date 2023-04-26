@@ -28,7 +28,6 @@ export function getStageColorByHex(hex) {
 export function getAvailableStageColors() {
   return Object.entries(STAGE_COLORS).map(([themeColorName, name]) => ({
     hex: lightTheme.colors[themeColorName],
-    themeColorName,
     name,
   }));
 }
