@@ -4,10 +4,13 @@ import PropTypes from 'prop-types';
 import { Box, Flex, IconButton, Typography, Status, Icon } from '@strapi/design-system';
 import { Drag, Cross } from '@strapi/icons';
 
-import { getTrad } from '../../utils';
-import { PUBLICATION_STATES } from '../RelationInputDataManager/constants';
-import { ChildrenWrapper, FlexWrapper } from '../RelationInput/components/RelationItem';
-import { LinkEllipsis, DisconnectButton } from '../RelationInput';
+import { getTrad } from '../../../utils';
+import { PUBLICATION_STATES } from '../../../components/RelationInputDataManager/constants';
+import {
+  ChildrenWrapper,
+  FlexWrapper,
+} from '../../../components/RelationInput/components/RelationItem';
+import { LinkEllipsis, DisconnectButton } from '../../../components/RelationInput';
 
 export const RelationDragPreview = ({ status, displayedValue, width }) => {
   const { formatMessage } = useIntl();
