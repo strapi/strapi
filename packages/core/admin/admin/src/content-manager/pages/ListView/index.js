@@ -64,6 +64,7 @@ function ListView({
   canCreate,
   canDelete,
   canRead,
+  canPublish,
   data,
   getData,
   getDataSucceeded,
@@ -331,6 +332,7 @@ function ListView({
             <DynamicTable
               canCreate={canCreate}
               canDelete={canDelete}
+              canPublish={canPublish}
               contentTypeName={headerLayoutTitle}
               onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmDelete={handleConfirmDeleteData}
@@ -355,6 +357,7 @@ ListView.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   data: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
