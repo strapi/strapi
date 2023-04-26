@@ -34,7 +34,7 @@ const createContentType = (uid, definition) => {
     Object.assign(schema, {
       uid,
       apiName: uid.split('::')[1].split('.')[0],
-      collectionName: schema.collectionName || schema.info.singularName,
+      collectionName: schema.collectionName || schema.info.pluralName,
       globalId: getGlobalId(schema, schema.info.singularName),
     });
   } else if (uid.startsWith('plugin::')) {
