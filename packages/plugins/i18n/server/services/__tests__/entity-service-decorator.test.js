@@ -146,9 +146,7 @@ describe('Entity service decorator', () => {
 
       const output = await service.wrapParams({}, { uid: modelName, action: 'findMany' });
 
-      expect(output).toContain({
-        Test: 'Test',
-      });
+      expect(output.Test).toEqual('Test');
     });
     test.each(testData)(
       "Doesn't add locale param when the params contain id or id_in - %s",
