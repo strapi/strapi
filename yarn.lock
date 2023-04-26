@@ -7169,7 +7169,7 @@ __metadata:
     "@types/fs-extra": 9.0.13
     "@types/jest": 29.2.0
     "@types/koa": 2.13.4
-    "@types/lodash": ^4.14.191
+    "@types/lodash": ^4.14.194
     "@types/semver": 7.3.13
     "@types/stream-chain": 2.0.1
     "@types/stream-json": 1.7.3
@@ -8739,10 +8739,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.191":
-  version: 4.14.191
-  resolution: "@types/lodash@npm:4.14.191"
-  checksum: ba0d5434e10690869f32d5ea49095250157cae502f10d57de0a723fd72229ce6c6a4979576f0f13e0aa9fbe3ce2457bfb9fa7d4ec3d6daba56730a51906d1491
+"@types/lodash@npm:^4.14.194":
+  version: 4.14.194
+  resolution: "@types/lodash@npm:4.14.194"
+  checksum: 113f34831c461469d91feca2dde737f88487732898b4d25e9eb23b087bb193985f864d1e1e0f3b777edc5022e460443588b6000a3b2348c966f72d17eedc35ea
   languageName: node
   linkType: hard
 
