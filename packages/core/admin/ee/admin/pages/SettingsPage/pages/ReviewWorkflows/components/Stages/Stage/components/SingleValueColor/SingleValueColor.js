@@ -4,12 +4,12 @@ import { components } from 'react-select';
 import { Box, Flex, Typography } from '@strapi/design-system';
 
 export function SingleValueColor({ children, ...props }) {
-  const { value } = props.data;
+  const { color } = props.data;
 
   return (
     <components.SingleValue {...props}>
       <Flex alignItems="center" gap={2}>
-        <Box height={2} background={value} hasRadius width={2} />
+        <Box height={2} background={color} hasRadius width={2} />
 
         <Typography textColor="neutral800" ellipsis>
           {children}
@@ -19,9 +19,13 @@ export function SingleValueColor({ children, ...props }) {
   );
 }
 
+SingleValueColor.defaultProps = {
+  children: null,
+};
+
 SingleValueColor.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
   data: PropTypes.shape({
-    value: PropTypes.string,
+    color: PropTypes.string,
   }).isRequired,
 };

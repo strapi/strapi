@@ -33,7 +33,7 @@ export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
   const [nameField, nameMeta] = useField(`stages.${index}.name`);
   const [colorField, colorMeta] = useField(`stages.${index}.color`);
   const dispatch = useDispatch();
-  const colorOptions = AVAILABLE_COLORS.map(({ themeColorName, hex, name }) => ({
+  const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,
     label: formatMessage(
       {
@@ -42,7 +42,7 @@ export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
       },
       { name }
     ),
-    themeColorName,
+    color: hex,
   }));
 
   return (
@@ -121,10 +121,7 @@ export function Stage({ id, index, canDelete, isOpen: isOpenDefault = false }) {
                     colorField.onChange({ target: { value } });
                     dispatch(updateStage(id, { color: value }));
                   }}
-                  value={{
-                    value: colorField.value,
-                    label: colorOptions.find(({ value }) => value === colorField.value).label,
-                  }}
+                  value={colorOptions.find(({ value }) => value === colorField.value)}
                 />
 
                 <FieldError />

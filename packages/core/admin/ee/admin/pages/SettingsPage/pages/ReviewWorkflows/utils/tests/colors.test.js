@@ -9,7 +9,6 @@ describe('Settings | Review Workflows | colors', () => {
     colors.forEach((color) => {
       expect(color).toMatchObject({
         hex: expect.any(String),
-        themeColorName: expect.any(String),
         name: expect.any(String),
       });
     });
