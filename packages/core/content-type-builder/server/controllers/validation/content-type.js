@@ -144,9 +144,7 @@ const nameIsAvailable = (isEdition) => {
 };
 
 const nameIsNotExistingCollectionName = (isEdition) => {
-  const usedNames = flatMap((ct) => {
-    return [ct.collectionName];
-  })(strapi.contentTypes);
+  const usedNames = strapi.contentTypes.map((ct) => ct.collectioName);
 
   return {
     name: 'nameAlreadyUsed',
