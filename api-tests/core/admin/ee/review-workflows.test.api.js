@@ -270,10 +270,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       ];
     });
 
+    test("It should assign a default color to stages if they don't have one", async () => {
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}/stages`, {
+        body: {
+          data: [defaultStage, { id: secondStage.id, name: 'new_name', color: '#000000' }],
+        },
+      });
+
+      const workflowRes = await requests.admin.get(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      );
+
+      expect(workflowRes.status).toBe(200);
+      expect(workflowRes.body.data.stages[0].color).toBe('#4945FF');
+      expect(workflowRes.body.data.stages[1].color).toBe('#000000');
+    });
     test("It shouldn't be available for public", async () => {
       const stagesRes = await requests.public.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        stagesUpdateData
+        { body: { data: stagesUpdateData } }
       );
       const workflowRes = await requests.public.get(
         `/admin/review-workflows/workflows/${testWorkflow.id}`
@@ -344,6 +359,19 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
+    test('It should throw an error if trying to create more than 200 stages', async () => {
+      const stagesRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
+        { body: { data: Array(201).fill({ name: 'new stage' }) } }
+      );
+
+      if (hasRW) {
+        expect(stagesRes.status).toBe(400);
+        expect(stagesRes.body.error).toBeDefined();
+        expect(stagesRes.body.error.name).toEqual('ValidationError');
+        expect(stagesRes.body.error.message).toBeDefined();
+      }
+    });
   });
 
   describe('Enabling/Disabling review workflows on a content type', () => {
@@ -407,7 +435,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('update a stage on an entity', () => {
+  describe('Update a stage on an entity', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         await updateContentType(productUID, {
