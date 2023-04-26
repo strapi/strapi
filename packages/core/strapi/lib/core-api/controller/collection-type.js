@@ -102,7 +102,7 @@ const createCollectionTypeController = ({ contentType }) => {
     async delete(ctx) {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { id } = sanitizedQuery.params;
+      const { id } = ctx.params;
       const { query } = sanitizedQuery;
 
       const entity = await strapi.service(uid).delete(id, query);
