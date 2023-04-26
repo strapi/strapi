@@ -4,6 +4,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: sunday
+      time: '22:00'
     versioning-strategy: increase
     ignore:
       # Only allow patch as minor babel versions need to be upgraded all together
