@@ -4,6 +4,7 @@ import { Typography } from '@strapi/design-system';
 
 import ReviewWorkflowsStage from '.';
 import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
+import { STAGE_COLOR_DEFAULT } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 
 export default (layout) => {
   const { formatMessage } = useIntl();
@@ -41,7 +42,9 @@ export default (layout) => {
         return <Typography textColor="neutral800">-</Typography>;
       }
 
-      return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
+      const { color, name } = strapi_reviewWorkflows_stage;
+
+      return <ReviewWorkflowsStage color={color ?? STAGE_COLOR_DEFAULT} name={name} />;
     },
   };
 };
