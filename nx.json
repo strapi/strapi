@@ -35,13 +35,23 @@
     "test:front": {
       "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"],
       "dependsOn": ["^build"]
+    },
+    "lint": {
+      "inputs": [
+        "{projectRoot}/**/*.js",
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/.eslintrc.js",
+        "{projectRoot}/.eslintignore",
+        "{projectRoot}/tsconfig.eslint.json",
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+      ]
     }
   },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "build:ts", "test:unit", "test:front"]
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
       }
     }
   }

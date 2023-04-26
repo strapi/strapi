@@ -35,8 +35,6 @@ module.exports = {
   '*.{js,ts}': (files) => {
     const lintCmd = getLintCommand(files);
 
-    console.log(lintCmd);
-
     const prettierCmd = `prettier --write ${files.join(' ')}`;
 
     if (lintCmd) {
