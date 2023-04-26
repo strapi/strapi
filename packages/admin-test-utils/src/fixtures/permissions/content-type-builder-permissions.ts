@@ -1,6 +1,4 @@
-'use strict';
-
-const ctbPermissions = [
+const contentTypeBuilder = [
   {
     id: 2820,
     action: 'plugin::content-type-builder.read',
@@ -39,4 +37,6 @@ const ctbPermissions = [
   },
 ];
 
-module.exports = ctbPermissions;
+type ContentTypeBuilder = typeof contentTypeBuilder;
+
+export { contentTypeBuilder, ContentTypeBuilder };
