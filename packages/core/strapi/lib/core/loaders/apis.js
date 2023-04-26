@@ -116,8 +116,13 @@ const loadContentTypes = async (dir) => {
     const contentTypeName = normalizeName(fd.name);
     const contentType = await loadDir(join(dir, fd.name));
 
-    if (isEmpty(contentType.schema)) {
-      strapi?.log?.error(`Could not load content type found at ${dir}`);
+    if (
+      isEmpty(contentType) ||
+      (isEmpty(contentType.schema) &&
+        isEmpty(contentType.actions) &&
+        isEmpty(contentType.lifecycles))
+    ) {
+      throw new Error(`Could not load content type found at ${dir}`);
     }
 
     contentTypes[normalizeName(contentTypeName)] = _.defaults(contentType, DEFAULT_CONTENT_TYPE);
