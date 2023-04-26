@@ -1,15 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { LibraryProvider, CustomFieldsProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import {
+  LibraryProvider,
+  CustomFieldsProvider,
+  StrapiAppProvider,
+  AutoReloadOverlayBlockerProvider,
+  OverlayBlockerProvider,
+  NotificationsProvider,
+} from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
 import { AdminContext } from '../../contexts';
 import ConfigurationsProvider from '../ConfigurationsProvider';
 import LanguageProvider from '../LanguageProvider';
 import GuidedTour from '../GuidedTour';
-import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
-import Notifications from '../Notifications';
-import OverlayBlocker from '../OverlayBlocker';
 import ThemeToggleProvider from '../ThemeToggleProvider';
 import Theme from '../Theme';
 
@@ -68,11 +72,11 @@ const Providers = ({
                     <CustomFieldsProvider customFields={customFields}>
                       <LanguageProvider messages={messages} localeNames={localeNames}>
                         <AutoReloadOverlayBlockerProvider>
-                          <OverlayBlocker>
+                          <OverlayBlockerProvider>
                             <GuidedTour>
-                              <Notifications>{children}</Notifications>
+                              <NotificationsProvider>{children}</NotificationsProvider>
                             </GuidedTour>
-                          </OverlayBlocker>
+                          </OverlayBlockerProvider>
                         </AutoReloadOverlayBlockerProvider>
                       </LanguageProvider>
                     </CustomFieldsProvider>

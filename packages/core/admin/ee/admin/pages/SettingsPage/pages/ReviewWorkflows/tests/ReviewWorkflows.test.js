@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
@@ -111,10 +111,10 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
 
-  test('display stages', () => {
+  test('display stages', async () => {
     const { getByText } = setup();
 
-    expect(getByText('1 stage')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('1 stage')).toBeInTheDocument());
     expect(getByText('stage-1')).toBeInTheDocument();
   });
 

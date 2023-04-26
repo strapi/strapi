@@ -87,6 +87,8 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --immutable
+      - name: Run build:ts for admin-test-utils
+        run: yarn build:ts --projects=@strapi/admin-test-utils --skip-nx-cache
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles
 
