@@ -152,7 +152,7 @@ const deleteRelations = async ({
         .transacting(trx)
         .execute();
       done = batchToDelete.length < batchSize;
-      lastId = batchToDelete[batchToDelete.length - 1]?.id;
+      lastId = batchToDelete[batchToDelete.length - 1]?.id || 0;
 
       const batchIds = map(inverseJoinColumn.name, batchToDelete);
 

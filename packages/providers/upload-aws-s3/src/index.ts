@@ -27,7 +27,7 @@ interface File {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
-function assertUrlProtocol(url: string) {
+function hasUrlProtocol(url: string) {
   // Regex to test protocol like "http://", "https://"
   return /^\w*:\/\//.test(url);
 }
@@ -93,11 +93,13 @@ export = {
           }
 
           // set the bucket file url
-          if (assertUrlProtocol(data.Location)) {
-            file.url = baseUrl ? `${baseUrl}/${fileKey}` : data.Location;
+          if (baseUrl) {
+            // Construct the url with the baseUrl
+            file.url = `${baseUrl}/${fileKey}`;
           } else {
-            // Default protocol to https protocol
-            file.url = `https://${data.Location}`;
+            // Add the protocol if it is missing
+            // Some providers like DigitalOcean Spaces return the url without the protocol
+            file.url = hasUrlProtocol(data.Location) ? data.Location : `https://${data.Location}`;
           }
           resolve();
         };

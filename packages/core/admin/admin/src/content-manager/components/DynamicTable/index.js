@@ -3,20 +3,15 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 
-import { Status, Typography } from '@strapi/design-system';
-
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
-
-const StyledStatus = styled(Status)`
-  width: min-content;
-`;
+import { PublicationState } from './CellContent/PublicationState/PublicationState';
 
 const DynamicTable = ({
   canCreate,
@@ -31,7 +26,7 @@ const DynamicTable = ({
   rows,
 }) => {
   const { runHookWaterfall } = useStrapiApp();
-  const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
+  const hasDraftAndPublish = layout.contentType.options?.draftAndPublish ?? false;
   const { formatMessage } = useIntl();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
 
@@ -42,43 +37,23 @@ const DynamicTable = ({
     });
 
     const formattedHeaders = headers.displayedHeaders.map((header) => {
-      const { metadatas } = header;
-
-      if (header.fieldSchema.type === 'relation') {
-        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
-
-        return {
-          ...header,
-          metadatas: {
-            ...metadatas,
-            label: formatMessage({
-              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
-              defaultMessage: metadatas.label,
-            }),
-          },
-          name: sortFieldValue,
-        };
-      }
+      const { fieldSchema, metadatas, name } = header;
 
       return {
         ...header,
         metadatas: {
           ...metadatas,
           label: formatMessage({
-            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            id: getTrad(`containers.ListPage.table-headers.${name}`),
             defaultMessage: metadatas.label,
           }),
         },
+        name: fieldSchema.type === 'relation' ? `${name}.${metadatas.mainField.name}` : name,
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -92,23 +67,24 @@ const DynamicTable = ({
           searchable: false,
           sortable: true,
         },
-        cellFormatter(cellData) {
-          const isPublished = cellData.publishedAt;
-          const variant = isPublished ? 'success' : 'secondary';
-
-          return (
-            <StyledStatus showBullet={false} variant={variant} size="S">
-              <Typography fontWeight="bold" textColor={`${variant}700`}>
-                {formatMessage({
-                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-                  defaultMessage: isPublished ? 'Published' : 'Draft',
-                })}
-              </Typography>
-            </StyledStatus>
-          );
+        cellFormatter({ publishedAt }) {
+          return <PublicationState isPublished={!!publishedAt} />;
         },
-      },
-    ];
+      });
+    }
+
+    // this should not exist. Ideally we would use registerHook() similar to what has been done
+    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
+    // a future iteration we need to find a better pattern.
+
+    // In CE this will return null - in EE a column definition including the custom formatting component.
+    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
+
+    if (reviewWorkflowColumn) {
+      formattedHeaders.push(reviewWorkflowColumn);
+    }
+
+    return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   return (

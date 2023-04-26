@@ -20,6 +20,7 @@
     }
   ],
   "main": "./lib/index.js",
+  "types": "index.d.ts",
   "directories": {
     "lib": "./lib"
   },

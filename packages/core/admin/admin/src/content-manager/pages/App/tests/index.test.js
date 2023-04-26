@@ -163,10 +163,6 @@ describe('Content manager | App | main', () => {
         overflow-x: hidden;
       }
 
-      .c36 {
-        height: 100vh;
-      }
-
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -529,6 +525,10 @@ describe('Content manager | App | main', () => {
 
       .c19 svg path {
         fill: #8e8ea9;
+      }
+
+      .c36 {
+        height: 100vh;
       }
 
       <div

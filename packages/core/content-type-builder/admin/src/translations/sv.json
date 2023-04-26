@@ -135,7 +135,7 @@
   "menu.section.models.name": "Samlingstyper",
   "menu.section.single-types.name": "Engångstyper",
   "modalForm.attribute.form.base.name.description": "Mellanslag tillåts inte i namnet på attributet",
-  "modalForm.attribute.form.base.name.placeholder": "t.ex Titel, Slug, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "t.ex titel, slug, canonicalUrl",
   "modalForm.attribute.target-field": "Kopplat fält",
   "modalForm.attributes.select-component": "Välj komponent",
   "modalForm.attributes.select-components": "Välj komponenter",

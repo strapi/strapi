@@ -51,9 +51,9 @@ const PluginPage = () => {
   const colCount = 4;
   const rowCount = (data?.docVersions?.length || 0) + 1;
 
-  const openDocVersion = () => {
+  const openDocVersion = (version) => {
     const slash = data?.prefix.startsWith('/') ? '' : '/';
-    openWithNewTab(`${slash}${data?.prefix}/v${data?.currentVersion}`);
+    openWithNewTab(`${slash}${data?.prefix}/v${version}`);
   };
 
   const handleRegenerateDoc = (version) => {
@@ -141,7 +141,7 @@ const PluginPage = () => {
                       <Td>
                         <Flex justifyContent="end" {...stopPropagation}>
                           <IconButton
-                            onClick={openDocVersion}
+                            onClick={() => openDocVersion(doc.version)}
                             noBorder
                             icon={<Show />}
                             label={formatMessage(

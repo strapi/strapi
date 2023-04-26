@@ -90,19 +90,16 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (
-  props = { canUpdate: true, canCopyLink: true, canDownload: true },
-  toggleNotification = jest.fn()
-) =>
+const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: true }) =>
   render(
     <QueryClientProvider client={queryClient}>
       <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
-          <NotificationsProvider toggleNotification={toggleNotification}>
-            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+            <NotificationsProvider>
               <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
-            </IntlProvider>
-          </NotificationsProvider>
+            </NotificationsProvider>
+          </IntlProvider>
         </ThemeProvider>
       </TrackingProvider>
     </QueryClientProvider>,
@@ -187,29 +184,15 @@ describe('<EditAssetDialog />', () => {
     });
 
     it('copies the link and shows a notification when pressing "Copy link" and the user has permission to copy', () => {
-      const toggleNotificationSpy = jest.fn();
-      renderCompo(
-        { canUpdate: false, canCopyLink: true, canDownload: false },
-        toggleNotificationSpy
-      );
+      renderCompo({ canUpdate: false, canCopyLink: true, canDownload: false });
 
       fireEvent.click(screen.getByLabelText('Copy link'));
 
-      expect(toggleNotificationSpy).toHaveBeenCalledWith({
-        message: {
-          defaultMessage: 'Link copied into the clipboard',
-          id: 'notification.link-copied',
-        },
-        type: 'success',
-      });
+      expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument();
     });
 
     it('hides the copy link button when the user is not allowed to see it', () => {
-      const toggleNotificationSpy = jest.fn();
-      renderCompo(
-        { canUpdate: false, canCopyLink: false, canDownload: false },
-        toggleNotificationSpy
-      );
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
       expect(screen.queryByLabelText('Copy link')).not.toBeInTheDocument();
     });
@@ -231,23 +214,13 @@ describe('<EditAssetDialog />', () => {
     });
 
     it('shows the crop link when the user is allowed to update', () => {
-      const toggleNotificationSpy = jest.fn();
-
-      renderCompo(
-        { canUpdate: true, canCopyLink: false, canDownload: false },
-        toggleNotificationSpy
-      );
+      renderCompo({ canUpdate: true, canCopyLink: false, canDownload: false });
 
       expect(screen.getByLabelText('Crop')).toBeInTheDocument();
     });
 
     it('hides the crop link when the user is not allowed to update', () => {
-      const toggleNotificationSpy = jest.fn();
-
-      renderCompo(
-        { canUpdate: false, canCopyLink: false, canDownload: false },
-        toggleNotificationSpy
-      );
+      renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
       expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument();
     });

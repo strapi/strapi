@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfos: jest.fn(() => ({ communityEdition: true })),
+  useAppInfo: jest.fn(() => ({ communityEdition: true })),
 }));
 
 const App = (
@@ -47,7 +47,7 @@ describe('Onboarding', () => {
   });
 
   test('should display support link for EE edition', () => {
-    useAppInfos.mockImplementation(() => ({ communityEdition: false }));
+    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
     const { getByRole } = render(App);
 
     fireEvent.click(getByRole('button', { name: /open help menu/i }));

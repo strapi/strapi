@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useAppInfos, useRBAC, TrackingProvider } from '@strapi/helper-plugin';
+import { useAppInfo, useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
 import server from './server';
 
@@ -13,7 +13,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
-  useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
+  useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false, latestStrapiReleaseTag: 'v3.6.8' })),
   useNotification: jest.fn(() => jest.fn()),
   useRBAC: jest.fn(() => ({ allowedActions: { canRead: true, canUpdate: true } })),
   useFetchClient: jest.fn().mockReturnValue({
@@ -78,7 +78,7 @@ describe('Application page', () => {
   });
 
   it('should display upgrade version warning if the version is behind the latest one', () => {
-    useAppInfos.mockImplementationOnce(() => {
+    useAppInfo.mockImplementationOnce(() => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
