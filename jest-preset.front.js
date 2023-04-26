@@ -30,7 +30,7 @@ const moduleNameMapper = {
 module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
-  testPathIgnorePatterns: ['/node_modules/', '__tests__'],
+  testPathIgnorePatterns: ['node_modules/', '__tests__'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/environment'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
@@ -60,7 +60,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons|fractional-indexing)/)',
   ],
-  testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
+  testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
   },
