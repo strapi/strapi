@@ -7431,7 +7431,6 @@ __metadata:
     "@strapi/generators": 4.10.1
     "@strapi/helper-plugin": 4.10.1
     "@strapi/icons": 1.6.6
-    "@strapi/strapi": 4.10.1
     "@strapi/utils": 4.10.1
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1

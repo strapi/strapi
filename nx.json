@@ -44,8 +44,7 @@
         "{projectRoot}/.eslintignore",
         "{projectRoot}/tsconfig.eslint.json",
         "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
-      ],
-      "dependsOn": ["build:ts"]
+      ]
     }
   },
   "tasksRunnerOptions": {
