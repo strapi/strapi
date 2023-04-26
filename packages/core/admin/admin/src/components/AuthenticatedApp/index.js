@@ -1,9 +1,9 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 //  TODO: DS add loader
 import {
   auth,
   LoadingIndicatorPage,
-  AppInfosContext,
+  AppInfoProvider,
   useGuidedTour,
   useNotification,
 } from '@strapi/helper-plugin';
@@ -27,7 +27,6 @@ const strapiVersion = packageJSON.version;
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
   const toggleNotification = useNotification();
-  const setGuidedTourVisibilityRef = useRef(setGuidedTourVisibility);
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
   const [userDisplayName, setUserDisplayName] = useState(userName);
@@ -35,7 +34,7 @@ const AuthenticatedApp = () => {
   const { showReleaseNotification } = useConfigurations();
   const [
     { data: appInfos, status },
-    { data: tag_name, isLoading },
+    { data: tagName, isLoading },
     { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
     { data: userRoles },
   ] = useQueries([
@@ -57,20 +56,20 @@ const AuthenticatedApp = () => {
     },
   ]);
 
-  const shouldUpdateStrapi = useMemo(
-    () => checkLatestStrapiVersion(strapiVersion, tag_name),
-    [tag_name]
-  );
+  const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tagName);
 
+  /**
+   * TODO: does this actually need to be an effect?
+   */
   useEffect(() => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
       if (isUserSuperAdmin && appInfos?.autoReload) {
-        setGuidedTourVisibilityRef.current(true);
+        setGuidedTourVisibility(true);
       }
     }
-  }, [userRoles, appInfos]);
+  }, [userRoles, appInfos, setGuidedTourVisibility]);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -88,32 +87,28 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
-  const appInfosValue = useMemo(() => {
-    return {
-      ...appInfos,
-      userId,
-      latestStrapiReleaseTag: tag_name,
-      setUserDisplayName,
-      shouldUpdateStrapi,
-      userDisplayName,
-    };
-  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName, userId]);
-
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
 
-  // TODO add error state
+  // TODO: add error state
   if (status === 'error') {
     return <div>error...</div>;
   }
 
   return (
-    <AppInfosContext.Provider value={appInfosValue}>
+    <AppInfoProvider
+      {...appInfos}
+      userId={userId}
+      latestStrapiReleaseTag={tagName}
+      setUserDisplayName={setUserDisplayName}
+      shouldUpdateStrapi={shouldUpdateStrapi}
+      userDisplayName={userDisplayName}
+    >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
         <PluginsInitializer />
       </RBACProvider>
-    </AppInfosContext.Provider>
+    </AppInfoProvider>
   );
 };
 

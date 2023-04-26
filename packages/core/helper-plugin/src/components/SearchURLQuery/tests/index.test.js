@@ -13,8 +13,10 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import SearchURLQuery from '../index';
 
 const trackUsage = jest.fn();
-jest.mock('../../../hooks/useTracking', () => () => ({
-  trackUsage,
+jest.mock('../../../features/Tracking', () => ({
+  useTracking: () => ({
+    trackUsage,
+  }),
 }));
 
 const makeApp = (history, trackedEvent) => (
