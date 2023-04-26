@@ -113,7 +113,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, wrappedParams);
 
     const entities = await db.query(uid).findPage(query);
-    return this.wrapResult(entities);
+    return {
+      ...entities,
+      results: await this.wrapResult(entities.results),
+    };
   },
 
   async findWithRelationCounts(uid, opts) {
