@@ -134,7 +134,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entity = db.query(uid).findOne({ ...query, where: { id: entityId } });
+    const entity = await db.query(uid).findOne({ ...query, where: { id: entityId } });
     return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
