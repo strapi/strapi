@@ -24,6 +24,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: sunday
+      time: '22:00'
     labels:
       - 'source: dependencies'
       - 'pr: chore'
