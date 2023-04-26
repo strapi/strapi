@@ -170,12 +170,7 @@ const decorator = (service) => ({
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         return service.findMany.call(this, uid, opts, { ...opts, ignoreKind: true });
       }
-      const output = service.findMany.call(this, uid, opts);
-      if (output === null || output.length === 0) {
-        return null;
-      }
-      //This could break future decorators since they don't expect the value not to be an array
-      return output[0];
+      return service.findMany.call(this, uid, opts);
     }
 
     return service.findMany.call(this, uid, opts);
