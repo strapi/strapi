@@ -69,13 +69,13 @@ const BulkActionsBar = ({
 };
 
 BulkActionsBar.defaultProps = {
-  showPublishUnpublish: false,
+  showPublish: false,
   showDelete: false,
   onConfirmDeleteAll: () => {},
 };
 
 BulkActionsBar.propTypes = {
-  showPublishUnpublish: PropTypes.bool,
+  showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   selectedEntries: PropTypes.array.isRequired,
