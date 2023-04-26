@@ -90,6 +90,7 @@ pids
 logs
 results
 build
+!**/lib/commands/actions/build
 node_modules
 .node_history
 package-lock.json

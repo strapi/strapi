@@ -1,0 +1,95 @@
+---
+title: Review Workflows
+slug: /content-manager/review-workflows
+description: Guide for review workflows in the content-manager.
+tags:
+  - content-manager
+  - review-workflows
+---
+
+## Summary
+
+Review workflows are disabled for all content-types by default and have to be enabled for each of them. More about how to [enable review-workflows for a content-type](/content-type-builder/review-workflows).
+
+The feature is visible in two locations of the content-manager:
+
+### List view
+
+If the feature is enabled for a content-type a new column will show up, displaying the current stage. If no stage was assigned to an entity,
+the column is displayed as empty.
+
+### Edit view
+
+If the feature is enabled for a content-type the currently selected stage will show up in the information sidebar next to the edit view. Users
+can select any other stage of the current workflow.
+
+Stage assignments are decoupled from entities, meaning that updating an entity won't set the selected stage. Instead the stage select
+component will trigger an atomic update using the admin API to assign/ update a stage to the current entity, when a new value is selected.
+Because of this decoupling stages **can not be assigned on entity creation** and only after the have been created.
+
+If no stage was assigned to the current entity the select component displays and error and asks a user to select a stage.
+
+## Default stage
+
+By default every entity which is part of a content-type with review workflows enabled, will get the first stage of the attached workflow
+assigned upon creation via the **admin API**, **content API** and the **entity Service**.
+
+### Stage assignments
+
+The default stage is assigned upon entity creation. In the bootstrap phase of Strapi all entities that do not have a stage assigned
+(and are part of a content-type which has the feature enabled) will have the default stage assigned. Initially this was meant as the
+migration when the feature is enabled for the first time to ensure all entities, but became also a safety-net for entities
+that do not have a stage set.
+
+### Nullish stages
+
+Entities which are not created through the admin API, content API or entity service will not have a stage assigned by default (e.g. lifecycle methods).
+If entities are created through more low-level ways, developers need to take care to assign a stage individually.
+
+This means at any place where the UI displays a stage, it has to be prepared to receive `null` and should not crash.
+
+## List view
+
+The information which stage is current assigned to an entity is send as part of the content-type response payload for each entity in the attribute `strapi_reviewWorkflows_stage`.
+Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
+
+```ts
+{
+  // ... entity attributes
+  strapi_reviewWorkflows_stage?: Stage | null
+}
+```
+
+`http://localhost:1337/content-manager/content-types` returns whether the feature is enabled for the content-type. `options.reviewWorkflows` is either `true`, `false` or undefined.
+
+**Note**: Downgrading from EE to CE won't delete the associated review workflow data and `http://localhost:1337/content-manager/content-types` still returns true. The admin app had to
+add an additional check if the feature toggle returned in `http://localhost:1337/admin/project-type` is enabled.
+
+## Edit View
+
+The information which stage is current assigned to an entity is send as part of the entity response payload in the attribute `strapi_reviewWorkflows_stage`.
+Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
+
+```ts
+{
+  // ... entity attributes
+  strapi_reviewWorkflows_stage?: Stage | null
+}
+```
+
+- `undefined`: the feature is not enabled for this content-type
+- `null`: no stage is assigned to the entity
+
+### Endpoints
+
+#### `PUT /admin/content-manager/[kind]/[content-type-uid]/[entity-id]/stage`
+
+Assigns a stage to an entity.
+
+##### Payload
+
+```ts
+data: {
+  id: int // assigned stage id
+}
+```
