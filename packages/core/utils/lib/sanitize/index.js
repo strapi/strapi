@@ -61,9 +61,13 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeQuery = async (query, schema, { auth } = {}) => {
-    const { filters, sort, fields, populate } = query;
+    const { filters, sort, fields, populate, ignoreKind } = query;
 
     const sanitizedQuery = cloneDeep(query);
+
+    if (ignoreKind) {
+      delete sanitizedQuery.ignoreKind;
+    }
 
     if (filters) {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });

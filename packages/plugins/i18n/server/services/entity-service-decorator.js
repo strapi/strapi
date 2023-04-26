@@ -169,7 +169,7 @@ const decorator = (service) => ({
 
     if (kind === 'singleType') {
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
-        return service.findMany.call(this, uid, opts);
+        return service.findMany.call(this, uid, opts, { ...opts, ignoreKind: true });
       }
       const output = service.findMany.call(this, uid, opts);
       if (output === null || output.length === 0) {
