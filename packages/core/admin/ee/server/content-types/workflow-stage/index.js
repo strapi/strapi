@@ -24,6 +24,11 @@ module.exports = {
         type: 'string',
         configurable: false,
       },
+      color: {
+        type: 'string',
+        configurable: false,
+        default: '#4945FF',
+      },
       workflow: {
         type: 'relation',
         target: 'admin::workflow',
