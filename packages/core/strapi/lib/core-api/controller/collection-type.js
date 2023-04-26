@@ -75,7 +75,7 @@ const createCollectionTypeController = ({ contentType }) => {
     async update(ctx) {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { id } = sanitizedQuery.params;
+      const { id } = ctx.params;
       const { query } = sanitizedQuery.request;
 
       const { data, files } = parseBody(ctx);
