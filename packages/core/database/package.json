@@ -35,7 +35,7 @@
   "dependencies": {
     "date-fns": "2.29.3",
     "debug": "4.3.4",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "knex": "2.4.0",
     "lodash": "4.17.21",
     "semver": "7.3.8",

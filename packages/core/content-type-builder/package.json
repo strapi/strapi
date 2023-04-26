@@ -36,7 +36,7 @@
     "@strapi/icons": "1.6.6",
     "@strapi/strapi": "4.9.2",
     "@strapi/utils": "4.9.2",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
