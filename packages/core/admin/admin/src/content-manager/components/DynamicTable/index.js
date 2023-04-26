@@ -16,6 +16,7 @@ import BulkActionsBar from './BulkActionsBar';
 const DynamicTable = ({
   canCreate,
   canDelete,
+  canPublish,
   contentTypeName,
   action,
   isBulkable,
@@ -101,7 +102,7 @@ const DynamicTable = ({
       withMainAction={canDelete && isBulkable}
       bulkActionsBar={
         <BulkActionsBar
-          showPublish={hasDraftAndPublish}
+          showPublish={canPublish && hasDraftAndPublish}
           showDelete={canDelete}
           onConfirmDeleteAll={onConfirmDeleteAll}
         />
