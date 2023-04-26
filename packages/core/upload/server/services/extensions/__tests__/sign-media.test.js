@@ -1,10 +1,9 @@
 'use strict';
 
-const { signEntityMedia } = require('../entity-manager');
+const { signEntityMedia } = require('../utils');
+const { getService } = require('../../../utils');
 
-const { getService } = require('../../../../utils');
-
-jest.mock('../../../../utils');
+jest.mock('../../../utils');
 
 describe('Upload | extensions | entity-manager', () => {
   const modelUID = 'model';
