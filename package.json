@@ -57,11 +57,6 @@
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
-  "lint-staged": {
-    "*.{js,ts,md,css,scss,yaml,yml}": [
-      "prettier --write"
-    ]
-  },
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
@@ -91,6 +86,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "execa": "1.0.0",
+    "find-up": "5.0.0",
     "fs-extra": "10.1.0",
     "get-port": "5.1.1",
     "glob": "7.2.3",
