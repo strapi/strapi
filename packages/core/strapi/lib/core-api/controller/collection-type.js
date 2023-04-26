@@ -31,8 +31,10 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async findOne(ctx) {
-      const { id } = ctx.params;
-      const { query } = ctx;
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+      const { id } = sanitizedQuery.params;
+      const { query } = sanitizedQuery;
 
       const entity = await strapi.service(uid).findOne(id, query);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
@@ -46,8 +48,9 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async create(ctx) {
-      const { query } = ctx.request;
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
 
+      const { query } = sanitizedQuery.request;
       const { data, files } = parseBody(ctx);
 
       if (!isObject(data)) {
@@ -70,8 +73,10 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async update(ctx) {
-      const { id } = ctx.params;
-      const { query } = ctx.request;
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+      const { id } = sanitizedQuery.params;
+      const { query } = sanitizedQuery.request;
 
       const { data, files } = parseBody(ctx);
 
@@ -95,8 +100,10 @@ const createCollectionTypeController = ({ contentType }) => {
      * @return {Object}
      */
     async delete(ctx) {
-      const { id } = ctx.params;
-      const { query } = ctx;
+      const sanitizedQuery = await this.sanitizeQuery(ctx);
+
+      const { id } = sanitizedQuery.params;
+      const { query } = sanitizedQuery;
 
       const entity = await strapi.service(uid).delete(id, query);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
