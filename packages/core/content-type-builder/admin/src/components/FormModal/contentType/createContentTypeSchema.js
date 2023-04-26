@@ -143,17 +143,6 @@ const createContentTypeSchema = ({
           return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
-      .test({
-        name: 'singularNameNotAlreadyUsedInCollectionName',
-        message: getTrad('error.contentTypeName.singularIDEqualsCollectionName'),
-        test(value) {
-          if (!value) {
-            return false;
-          }
-
-          return !collectionNames.includes(value?.trim()?.toLowerCase());
-        },
-      })
       .required(errorsTrads.required),
     draftAndPublish: yup.boolean(),
     kind: yup.string().oneOf(['singleType', 'collectionType']),
