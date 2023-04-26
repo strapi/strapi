@@ -7,7 +7,7 @@ import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
-import isFieldTypeNumber from '../../../utils/isFieldTypeNumber';
+import isFieldTypeNumber from './isFieldTypeNumber';
 
 yup.addMethod(yup.mixed, 'defined', function () {
   return this.test('defined', errorsTrads.required, (value) => value !== undefined);
