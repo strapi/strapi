@@ -45,6 +45,8 @@ const models = {
   'localized-single-type-model': singleTypeModel,
 };
 
+const testModels = [['test-model'], ['non-localized-model'], ['localized-single-type-model']];
+
 describe('Entity service decorator', () => {
   beforeAll(() => {
     global.strapi = {
@@ -139,6 +141,16 @@ describe('Entity service decorator', () => {
       ['delete', { filters: [{ id: { $in: [1] } }] }],
     ];
 
+    test.each(testModels)('Always uses original wrapParams in output - %s', async (modelName) => {
+      const defaultService = {
+        wrapParams: jest.fn(() => Promise.resolve({ Test: 'Test' })),
+      };
+      const service = decorator(defaultService);
+
+      const output = await service.wrapParams({}, { uid: modelName, action: 'findMany' });
+
+      expect(output.Test).toEqual('Test');
+    });
     test.each(testData)(
       "Doesn't add locale param when the params contain id or id_in - %s",
       async (action, params) => {
