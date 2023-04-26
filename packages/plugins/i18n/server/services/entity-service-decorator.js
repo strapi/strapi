@@ -172,9 +172,10 @@ const decorator = (service) => ({
         return service.findMany.call(this, uid, opts);
       }
       const output = service.findMany.call(this, uid, opts);
-      if (output == null || output.length == 0) {
+      if (output === null || output.length === 0) {
         return null;
       }
+      //This could break future decorators since they don't expect the value not to be an array
       return output[0];
     }
 
