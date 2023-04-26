@@ -32,7 +32,7 @@ const Table = ({
   rows,
   withBulkActions,
   withMainAction,
-  bulkActionsBar,
+  renderBulkActionsBar,
   ...rest
 }) => {
   const [selectedEntries, setSelectedEntries] = useState([]);
@@ -148,12 +148,8 @@ const Table = ({
                     { number: selectedEntries.length }
                   )}
                 </Typography>
-                {bulkActionsBar ? (
-                  React.cloneElement(bulkActionsBar, {
-                    ...bulkActionsBar.props,
-                    selectedEntries,
-                    clearSelectedEntries,
-                  })
+                {renderBulkActionsBar ? (
+                  renderBulkActionsBar({ selectedEntries, clearSelectedEntries })
                 ) : (
                   <Button
                     onClick={handleToggleConfirmDeleteAll}
@@ -232,7 +228,7 @@ Table.defaultProps = {
   rows: [],
   withBulkActions: false,
   withMainAction: false,
-  bulkActionsBar: undefined,
+  renderBulkActionsBar: undefined,
 };
 
 Table.propTypes = {
@@ -262,7 +258,7 @@ Table.propTypes = {
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
-  bulkActionsBar: PropTypes.node,
+  renderBulkActionsBar: PropTypes.func,
 };
 
 export default Table;
