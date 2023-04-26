@@ -236,6 +236,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 3,
+                  color: '#4945ff',
                   name: 'something',
                 },
               ]),
@@ -268,6 +269,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 0,
+                  color: expect.any(String),
                   name: 'something',
                 },
               ]),
@@ -317,6 +319,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 4,
+                  color: expect.any(String),
                   name: 'something',
                 },
               ]),
