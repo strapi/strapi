@@ -33,7 +33,7 @@ const createCollectionTypeController = ({ contentType }) => {
     async findOne(ctx) {
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
-      const { id } = sanitizedQuery.params;
+      const { id } = ctx.params;
       const { query } = sanitizedQuery;
 
       const entity = await strapi.service(uid).findOne(id, query);
