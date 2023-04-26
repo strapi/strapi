@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import ConfirmDialogDeleteAll from '../ConfirmDialogDeleteAll';
 import { useTracking } from '@strapi/helper-plugin';
+import ConfirmDialogDeleteAll from '../ConfirmDialogDeleteAll';
 
 const BulkActionsBar = ({
   showPublish,
@@ -71,7 +71,7 @@ const BulkActionsBar = ({
 BulkActionsBar.defaultProps = {
   showPublish: false,
   showDelete: false,
-  onConfirmDeleteAll: () => {},
+  onConfirmDeleteAll() {},
 };
 
 BulkActionsBar.propTypes = {
