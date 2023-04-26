@@ -100,13 +100,15 @@ const DynamicTable = ({
       rows={rows}
       withBulkActions
       withMainAction={(canDelete || canPublish) && isBulkable}
-      bulkActionsBar={
+      renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
         <BulkActionsBar
           showPublish={canPublish && hasDraftAndPublish}
           showDelete={canDelete}
           onConfirmDeleteAll={onConfirmDeleteAll}
+          selectedEntries={selectedEntries}
+          clearSelectedEntries={clearSelectedEntries}
         />
-      }
+      )}
     >
       <TableRows
         canCreate={canCreate}
