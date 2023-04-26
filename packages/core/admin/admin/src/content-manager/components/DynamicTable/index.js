@@ -130,6 +130,7 @@ DynamicTable.defaultProps = {
 DynamicTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   action: PropTypes.node,
   isBulkable: PropTypes.bool.isRequired,
