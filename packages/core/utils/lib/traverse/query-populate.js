@@ -5,7 +5,6 @@ const {
   isString,
   isArray,
   eq,
-  constant,
   split,
   isObject,
   trim,
@@ -27,10 +26,31 @@ const isStringArray = (value) => isArray(value) && value.every(isString);
 const populate = traverseFactory()
   // Array of strings ['foo', 'foo.bar'] => map(recurse), then filter out empty items
   .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
-    return Promise.all(populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate)));
+    const visitedPopulate = await Promise.all(
+      populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate))
+    );
+
+    return visitedPopulate.filter((item) => !isNil(item));
   })
-  // Return wildcards as is
-  .intercept(eq('*'), constant('*'))
+  // Transform wildcard populate to an exhaustive list of attributes to populate.
+  // Avoid populating attributes from the database that will be sanitized in the output anyway.
+  .intercept(eq('*'), (visitor, options, data, { recurse }) => {
+    const attributes = options.schema?.attributes;
+
+    // This should never happen, but adding the check in
+    // case this method is called with wrong parameters
+    if (!attributes) {
+      return '*';
+    }
+
+    const parsedPopulate = Object.entries(attributes)
+      // Get the list of all attributes that can be populated
+      .filter(([, value]) => ['relation', 'component', 'dynamiczone', 'media'].includes(value.type))
+      // Only keep the attributes key
+      .map(([key]) => key);
+
+    return recurse(visitor, options, parsedPopulate);
+  })
   // Parse string values
   .parse(isString, () => {
     const tokenize = split('.');
@@ -107,9 +127,7 @@ const populate = traverseFactory()
       const model = strapi.getModel(uid);
       const newPath = { ...path, raw: `${path.raw}[${uid}]` };
 
-      const newSubPopulate = await recurse(visitor, { schema: model, path: newPath }, subPopulate);
-
-      newOn[uid] = newSubPopulate;
+      newOn[uid] = await recurse(visitor, { schema: model, path: newPath }, subPopulate);
     }
 
     set(key, newOn);
