@@ -124,7 +124,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const entities = db.query(uid).findMany(query);
+    const entities = await db.query(uid).findMany(query);
     return this.wrapResult(entities);
   },
 
