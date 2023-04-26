@@ -33,7 +33,7 @@ const moduleNameMapper = {
 module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
-  testPathIgnorePatterns: ['/node_modules/', '__tests__'],
+  testPathIgnorePatterns: ['node_modules/', '__tests__'],
   globalSetup: path.join(__dirname, 'test/config/front/global-setup.js'),
   setupFiles: [
     path.join(__dirname, 'packages/admin-test-utils/lib/setup/test-bundler.js'),
@@ -45,9 +45,9 @@ module.exports = {
     path.join(__dirname, 'packages/admin-test-utils/lib/mocks/mockRangeApi.js'),
   ],
   setupFilesAfterEnv: [
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/styled-components.js'),
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/strapi.js'),
-    path.join(__dirname, '/packages/admin-test-utils/lib/setup/prop-types.js'),
+    path.join(__dirname, 'packages/admin-test-utils/lib/setup/styled-components.js'),
+    path.join(__dirname, 'packages/admin-test-utils/lib/setup/strapi.js'),
+    path.join(__dirname, 'packages/admin-test-utils/lib/setup/prop-types.js'),
   ],
   testEnvironment: 'jsdom',
   transform: {
@@ -75,7 +75,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@strapi/design-system|@strapi/icons|fractional-indexing)/)',
   ],
-  testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
+  testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
   },
