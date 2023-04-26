@@ -5,6 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase, importDefault } = require('@strapi/utils');
+const { isEmpty } = require('lodash/fp');
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
@@ -114,6 +115,10 @@ const loadContentTypes = async (dir) => {
 
     const contentTypeName = normalizeName(fd.name);
     const contentType = await loadDir(join(dir, fd.name));
+
+    if (isEmpty(contentType.schema)) {
+      strapi?.log?.error(`Could not load content type found at ${dir}`);
+    }
 
     contentTypes[normalizeName(contentTypeName)] = _.defaults(contentType, DEFAULT_CONTENT_TYPE);
   }
