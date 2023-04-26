@@ -1,6 +1,4 @@
-'use strict';
-
-const cmPermissions = [
+const contentManager = [
   {
     id: 2817,
     action: 'plugin::content-manager.single-types.configure-view',
@@ -60,4 +58,6 @@ const cmPermissions = [
   },
 ];
 
-module.exports = cmPermissions;
+type ContentManager = typeof contentManager;
+
+export { contentManager, ContentManager };

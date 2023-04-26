@@ -1,6 +1,4 @@
-'use strict';
-
-const adminPermissions = [
+const admin = [
   {
     id: 169,
     action: 'admin::provider-login.read',
@@ -108,4 +106,6 @@ const adminPermissions = [
   },
 ];
 
-module.exports = adminPermissions;
+type Admin = typeof admin;
+
+export { admin, Admin };

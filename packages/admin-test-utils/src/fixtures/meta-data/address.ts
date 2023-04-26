@@ -1,6 +1,4 @@
-'use strict';
-
-const addressMetaData = {
+const address = {
   id: { edit: {}, list: { label: 'Id', searchable: true, sortable: true } },
   postal_coder: {
     edit: {
@@ -98,4 +96,6 @@ const addressMetaData = {
   },
 };
 
-module.exports = addressMetaData;
+type Address = typeof address;
+
+export { address, Address };
