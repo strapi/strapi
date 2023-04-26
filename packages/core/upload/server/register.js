@@ -6,7 +6,6 @@ const {
 } = require('@strapi/utils');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
-const { getService } = require('./utils');
 
 /**
  * Register upload plugin
@@ -16,8 +15,6 @@ module.exports = async ({ strapi }) => {
   strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
   await registerUploadMiddleware({ strapi });
-
-  getService('extensions').contentManager.entityManager.addSignedFileUrlsToAdmin();
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
