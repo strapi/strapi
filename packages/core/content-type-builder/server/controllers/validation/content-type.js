@@ -75,7 +75,13 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
 
   return yup
     .object({
-      contentType: contentTypeSchema.required().noUnknown(),
+      // FIXME .noUnknown(false) will strip off the unwanted properties without throwing an error
+      // Why not having .noUnknown() ? Because we want to be able to add options relatable to EE features
+      // without having any reference to them in CE.
+      // Why not handle an "options" object in the content-type ? The admin panel needs lots of rework
+      // to be able to send this options object instead of top-level attributes.
+      // @nathan-pichon 20/02/2023
+      contentType: contentTypeSchema.required().noUnknown(false),
       components: nestedComponentSchema,
     })
     .noUnknown();

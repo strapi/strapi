@@ -29,4 +29,14 @@ module.exports = {
       subCategory: 'options',
     },
   ],
+  reviewWorkflows: [
+    {
+      uid: 'review-workflows.read',
+      displayName: 'Read',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'review workflows',
+      subCategory: 'options',
+    },
+  ],
 };

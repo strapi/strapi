@@ -114,7 +114,7 @@
   "form.button.single-type.description": "Terbaik untuk satu contoh seperti tentang kami, beranda, dll.",
   "from": "dari",
   "modalForm.attribute.form.base.name.description": "Tidak ada spasi yang diperbolehkan untuk nama atribut",
-  "modalForm.attribute.form.base.name.placeholder": "Misalnya Siput, URL SEO, URL Kanonis",
+  "modalForm.attribute.form.base.name.placeholder": "Misalnya Siput, urlSeo, urlKanonis",
   "modalForm.attribute.target-field": "Bidang terlampir",
   "modalForm.attributes.select-component": "Pilih komponen",
   "modalForm.attributes.select-components": "Pilih komponen",
