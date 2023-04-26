@@ -67,8 +67,8 @@ const createContentAPISanitizers = () => {
 
     // This is here since when you do a findMany on single types, it will become a findOne.
     // To keep it a findMany, you give it the ignoreKind flag.
-    // This sensitization  is here since potentially, if a decorator like i18n makes a mistake and returns two values, findOne will only return the first value.
-    // So this query.ignoreKind could return the second record, which is why we sanitize it .
+    // This sensitization is here since potentially, if a decorator like i18n makes a mistake and returns two values, findOne will only return the first value.
+    // So this query.ignoreKind could return the second record, which is why we sanitize it.
     if (ignoreKind) {
       delete sanitizedQuery.ignoreKind;
     }
