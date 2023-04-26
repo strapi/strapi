@@ -91,7 +91,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     }
 
     const entities = await db.query(uid).findMany(query);
-    return this.wrapResult(entities);
+    return this.wrapResult(entities, { uid, action: 'findMany' });
   },
 
   async findPage(uid, opts) {
@@ -102,7 +102,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const page = await db.query(uid).findPage(query);
     return {
       ...page,
-      results: await this.wrapResult(page.results),
+      results: await this.wrapResult(page.results, { uid, action: 'findPage' }),
     };
   },
 
@@ -113,7 +113,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, wrappedParams);
 
     const entities = await db.query(uid).findPage(query);
-    return this.wrapResult(entities);
+    return {
+      ...entities,
+      results: await this.wrapResult(entities.results, { uid, action: 'findWithRelationCounts' }),
+    };
   },
 
   async findWithRelationCounts(uid, opts) {
@@ -121,8 +124,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const entities = db.query(uid).findMany(query);
-    return this.wrapResult(entities);
+    const entities = await db.query(uid).findMany(query);
+    return this.wrapResult(entities, { uid, action: 'findWithRelationCounts' });
   },
 
   async findOne(uid, entityId, opts) {
@@ -131,7 +134,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     const entity = db.query(uid).findOne({ ...query, where: { id: entityId } });
-    return this.wrapResult(entity);
+    return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
   async count(uid, opts) {
@@ -174,7 +177,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
-    entity = await this.wrapResult(entity);
+    entity = await this.wrapResult(entity, { uid, action: 'create' });
 
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
@@ -227,7 +230,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
-    entity = await this.wrapResult(entity);
+    entity = await this.wrapResult(entity, { uid, action: 'update' });
 
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
@@ -254,7 +257,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
     await deleteComponents(uid, componentsToDelete, { loadComponents: false });
 
-    entityToDelete = await this.wrapResult(entityToDelete);
+    entityToDelete = await this.wrapResult(entityToDelete, { uid, action: 'delete' });
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
@@ -283,7 +286,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       componentsToDelete.map((compos) => deleteComponents(uid, compos, { loadComponents: false }))
     );
 
-    entitiesToDelete = await this.wrapResult(entitiesToDelete);
+    entitiesToDelete = await this.wrapResult(entitiesToDelete, { uid, action: 'delete' });
 
     // Trigger webhooks. One for each entity
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
@@ -300,7 +303,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       .query(uid)
       .load(entity, field, transformLoadParamsToQuery(uid, field, params));
 
-    return this.wrapResult(loadedEntity);
+    return this.wrapResult(loadedEntity, { uid, action: 'load' });
   },
 
   async loadPages(uid, entity, field, params = {}, pagination = {}) {
@@ -321,7 +324,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     return {
       ...loadedPage,
-      results: await this.wrapResult(loadedPage.results),
+      results: await this.wrapResult(loadedPage.results, { uid, action: 'load' }),
     };
   },
 });
