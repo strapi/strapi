@@ -84,11 +84,13 @@ const populate = {
   },
 };
 
-const mockProvider = (signUrl = true) => ({
+const isPrivate = true;
+
+const mockProvider = () => ({
   init() {
     return {
       isPrivate() {
-        return signUrl;
+        return isPrivate;
       },
       getSignedUrl() {
         return { url: 'signedUrl' };
@@ -227,38 +229,23 @@ describe('Upload Plugin url signing', () => {
 
     test('entityService.update', async () => {
       const model = await createModel();
-      const en = await strapi.entityService.update(modelUID, model.id, {
+      const entity = await strapi.entityService.update(modelUID, model.id, {
         data: {
           name: 'model_updated',
         },
         populate,
       });
 
-      responseExpectations(en);
+      responseExpectations(entity);
     });
 
-    //   test('entityService.delete', async () => {
-    //     const en = await strapi.entityService.findMany(modelUID, entity, {
-    //       populate,
-    //     });
+    test('entityService.delete', async () => {
+      const model = await createModel();
+      const entity = await strapi.entityService.delete(modelUID, model.id, {
+        populate,
+      });
 
-    //     responseExpectations(en);
-    //   });
-    // });
-
-    // test('entityService.load', async () => {
-    //   const en = await strapi.entityService.findMany(modelUID, entity, {
-    //     populate,
-    //   });
-
-    //   responseExpectations(en);
-    // });
-
-    // test('entityService.loadPages', async () => {
-    //   const en = await strapi.entityService.findMany(modelUID, entity, {
-    //     populate,
-    //   });
-
-    //   responseExpectations(en);
+      responseExpectations(entity);
+    });
   });
 });
