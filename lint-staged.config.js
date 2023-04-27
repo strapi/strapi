@@ -29,7 +29,7 @@ function getLintCommand(files) {
   if (affectedPackages.length === 0) {
     return null;
   }
-  return `nx run-many -t lint -p ${affectedPackages.join()} --parallel 5`;
+  return `nx run-many -t lint -p ${affectedPackages.join()}`;
 }
 
 function getCodeCommands(files) {
