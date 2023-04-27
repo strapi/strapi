@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -16,6 +16,8 @@ jest.mock('../../../../../shared/hooks', () => ({
   ...jest.requireActual('../../../../../shared/hooks'),
   useInjectionZone: () => [],
 }));
+
+const user = userEvent.setup();
 
 describe('BulkActionsBar', () => {
   const requiredProps = {
@@ -59,12 +61,10 @@ describe('BulkActionsBar', () => {
     expect(screen.queryByRole('button', { name: /\bDelete\b/ })).not.toBeInTheDocument();
   });
 
-  it('should show delete modal if delete button is clicked', () => {
+  it('should show delete modal if delete button is clicked', async () => {
     setup({ showDelete: true });
 
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-    });
+    await userEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
   });
@@ -77,10 +77,8 @@ describe('BulkActionsBar', () => {
       onConfirmDeleteAll: mockConfirmDeleteAll,
     });
 
-    await act(async () => {
-      await fireEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
-    });
+    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+    await user.click(screen.getByRole('button', { name: /confirm/i }));
 
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([]);
   });
