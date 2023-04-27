@@ -1,6 +1,4 @@
-'use strict';
-
-const addressCT = {
+const address = {
   uid: 'api::address.address',
   settings: {
     bulkable: true,
@@ -421,4 +419,6 @@ const addressCT = {
   },
 };
 
-module.exports = addressCT;
+type Address = typeof address;
+
+export { address, Address };
