@@ -365,9 +365,8 @@ module.exports = (db) => {
         const dependencies = persistedTables
           .filter((table) => {
             const dependsOn = table?.dependsOn;
-            if (_.isNil(dependsOn)) return;
-            // FIXME: The array parse should not be necessary
-            return _.toArray(dependsOn).some((table) => table.name === srcTable.name);
+            if (_.isNil(dependsOn) || !_.isArray(dependsOn)) return;
+            return dependsOn.some((table) => table.name === srcTable.name);
           })
           .map((dependsOnTable) => {
             return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
