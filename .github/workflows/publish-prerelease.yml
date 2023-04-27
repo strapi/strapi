@@ -1,0 +1,29 @@
+name: 'Publish Prerelease'
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: 'The tag you want to publish to NPM'
+        default: 'experimental'
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  publish:
+    name: 'Publish'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: yarn
+      - run: ./scripts/pre-publish.sh --yes
+        env:
+          VERSION: '0.0.0-experimental.${{ github.sha }}'
+          DIST_TAG: ${{ github.event.inputs.dist-tag }}

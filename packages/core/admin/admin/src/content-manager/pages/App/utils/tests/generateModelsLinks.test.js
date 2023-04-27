@@ -119,7 +119,7 @@ describe('ADMIN | LeftMenu | utils', () => {
       ];
 
       const expected = {
-        collectionTypesSectionLinks: [
+        collectionTypeSectionLinks: [
           {
             isDisplayed: true,
             search: null,
@@ -140,7 +140,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             ],
           },
         ],
-        singleTypesSectionLinks: [
+        singleTypeSectionLinks: [
           {
             isDisplayed: true,
             kind: 'singleType',

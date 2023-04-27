@@ -35,7 +35,12 @@ module.exports = function createEventHub() {
     },
 
     unsubscribe(subscriber) {
-      subscribers.splice(subscribers.indexOf(subscriber), 1);
+      const subscriberIndex = subscribers.indexOf(subscriber);
+
+      // Only remove the subscriber if it exists
+      if (subscriberIndex >= 0) {
+        subscribers.splice(subscriberIndex, 1);
+      }
     },
 
     on(eventName, listener) {

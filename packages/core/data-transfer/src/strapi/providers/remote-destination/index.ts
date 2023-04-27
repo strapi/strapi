@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
-import { createDispatcher } from './utils';
+import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
 import type { client, server } from '../../../../types/remote/protocol';
@@ -47,31 +47,16 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   async initTransfer(): Promise<string> {
     const { strategy, restore } = this.options;
 
-    // Wait for the connection to be made to the server, then init the transfer
-    return new Promise<string>((resolve, reject) => {
-      this.ws
-        ?.once('open', async () => {
-          try {
-            const query = this.dispatcher?.dispatchCommand({
-              command: 'init',
-              params: { options: { strategy, restore }, transfer: 'push' },
-            });
-
-            const res = (await query) as server.Payload<server.InitMessage>;
-
-            if (!res?.transferID) {
-              throw new ProviderTransferError('Init failed, invalid response from the server');
-            }
-
-            resolve(res.transferID);
-          } catch (e: unknown) {
-            reject(e);
-          }
-        })
-        .once('error', (message) => {
-          reject(message);
-        });
+    const query = this.dispatcher?.dispatchCommand({
+      command: 'init',
+      params: { options: { strategy, restore }, transfer: 'push' },
     });
+
+    const res = (await query) as server.Payload<server.InitMessage>;
+    if (!res?.transferID) {
+      throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+    return res.transferID;
   }
 
   #startStepOnce(stage: client.TransferPushStep) {
@@ -202,16 +187,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
     const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${url.host}${url.pathname}${TRANSFER_PATH}`;
+    const wsUrl = `${wsProtocol}//${url.host}${trimTrailingSlash(
+      url.pathname
+    )}${TRANSFER_PATH}/push`;
+
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = new WebSocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = new WebSocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers });
     }
 
     // Invalid auth method provided
@@ -303,15 +291,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     const startAssetsTransferOnce = this.#startStepOnce('assets');
 
     const flush = async () => {
-      await this.#streamStep('assets', batch);
+      const streamError = await this.#streamStep('assets', batch);
       batch = [];
+      return streamError;
     };
 
     const safePush = async (chunk: client.TransferAssetFlow) => {
       batch.push(chunk);
 
       if (batchLength() >= batchSize) {
-        await flush();
+        const streamError = await flush();
+        if (streamError) {
+          throw streamError;
+        }
       }
     };
 
@@ -347,15 +339,25 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         const assetID = v4();
         const { filename, filepath, stats, stream } = asset;
 
-        await safePush({ action: 'start', assetID, data: { filename, filepath, stats } });
+        try {
+          await safePush({
+            action: 'start',
+            assetID,
+            data: { filename, filepath, stats },
+          });
 
-        for await (const chunk of stream) {
-          await safePush({ action: 'stream', assetID, data: chunk });
+          for await (const chunk of stream) {
+            await safePush({ action: 'stream', assetID, data: chunk });
+          }
+
+          await safePush({ action: 'end', assetID });
+
+          callback();
+        } catch (error) {
+          if (error instanceof Error) {
+            callback(error);
+          }
         }
-
-        await safePush({ action: 'end', assetID });
-
-        callback();
       },
     });
   }

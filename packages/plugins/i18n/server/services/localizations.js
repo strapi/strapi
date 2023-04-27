@@ -31,7 +31,7 @@ const assignDefaultLocaleToEntries = async (data) => {
  * @param {Object} options.model corresponding model
  */
 const syncLocalizations = async (entry, { model }) => {
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
 
     const updateLocalization = (id) => {
@@ -56,7 +56,7 @@ const syncLocalizations = async (entry, { model }) => {
 const syncNonLocalizedAttributes = async (entry, { model }) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
 
     if (isEmpty(nonLocalizedAttributes)) {

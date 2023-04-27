@@ -63,8 +63,8 @@ const Table = ({
                 condition: canUpdate,
               })}
             >
-              <Td>
-                <Typography textColor="neutral800" fontWeight="bold">
+              <Td maxWidth={pxToRem(250)}>
+                <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                   {token.name}
                 </Typography>
               </Td>

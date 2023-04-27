@@ -1,13 +1,16 @@
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size } from 'lodash';
+import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import set from 'lodash/set';
+import size from 'lodash/size';
 import {
   LoadingIndicatorPage,
   useTracking,
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
-  useAppInfos,
+  useAppInfo,
   useRBACProvider,
   useGuidedTour,
   useFetchClient,
@@ -71,7 +74,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const { autoReload } = useAppInfos();
+  const { autoReload } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();

@@ -32,6 +32,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
 .c6 {
@@ -66,7 +67,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   justify-content: space-between;
 }
 
-.c5 {
+.c4 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -89,15 +90,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   color: #666687;
 }
 
-.c4 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c4 > * + * {
-  margin-top: 4px;
-}
-
 .c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -108,6 +100,17 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c7 {
@@ -175,7 +178,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   outline: none;
 }
 
-.c8[aria-disabled='true'] {
+.c8[data-disabled] {
   cursor: not-allowed;
 }
 
@@ -219,34 +222,34 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
         <div
           class=""
         >
-          <div>
+          <div
+            class=""
+          >
             <div
-              class="c3 c4"
+              class="c3"
             >
               <label
-                class="c5"
+                class="c4 c5"
                 for="1"
               >
-                <div
-                  class="c6"
-                >
-                  Entries per page
-                </div>
+                Entries per page
               </label>
               <div
                 class="c6 c7"
               >
                 <button
                   aria-describedby="1-hint"
-                  aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="1 1-label 1-content"
+                  aria-required="false"
                   class="c8"
                   data-testid="pageSize-select"
                   id="1"
                   name="pageSize"
+                  role="combobox"
                   type="button"
+                  value="10"
                 />
                 <div
                   class="c9 c10"
@@ -309,34 +312,34 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
         <div
           class=""
         >
-          <div>
+          <div
+            class=""
+          >
             <div
-              class="c3 c4"
+              class="c3"
             >
               <label
-                class="c5"
+                class="c4 c5"
                 for="3"
               >
-                <div
-                  class="c6"
-                >
-                  Default sort order
-                </div>
+                Default sort order
               </label>
               <div
                 class="c6 c7"
               >
                 <button
                   aria-describedby="3-hint"
-                  aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="3 3-label 3-content"
+                  aria-required="false"
                   class="c8"
                   data-testid="sort-select"
                   id="3"
                   name="sort"
+                  role="combobox"
                   type="button"
+                  value="createdAt:DESC"
                 />
                 <div
                   class="c9 c10"

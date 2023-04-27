@@ -1,9 +1,27 @@
 'use strict';
 
-const createEventHub = require('../../../../../strapi/lib/services/event-hub');
+const { features } = require('@strapi/strapi/lib/utils/ee');
+const { register } = require('@strapi/provider-audit-logs-local');
+const { scheduleJob } = require('node-schedule');
 const createAuditLogsService = require('../audit-logs');
+const createEventHub = require('../../../../../strapi/lib/services/event-hub');
 
 jest.mock('../../../../server/register');
+
+jest.mock('@strapi/strapi/lib/utils/ee', () => ({
+  features: {
+    isEnabled: jest.fn(),
+    get: jest.fn(),
+  },
+}));
+
+jest.mock('@strapi/provider-audit-logs-local', () => ({
+  register: jest.fn(),
+}));
+
+jest.mock('node-schedule', () => ({
+  scheduleJob: jest.fn(),
+}));
 
 describe('Audit logs service', () => {
   afterEach(() => {
@@ -17,14 +35,10 @@ describe('Audit logs service', () => {
 
   describe('Init with audit logs disabled', () => {
     beforeAll(() => {
-      jest.mock('@strapi/strapi/lib/utils/ee', () => ({
-        features: {
-          isEnabled: () => false,
-        },
-      }));
+      features.isEnabled.mockReturnValue(false);
     });
 
-    it('should not register the audit logs service when registered', async () => {
+    it('should not register the audit logs service when is disabled by the user', async () => {
       const eeAdminRegister = require('../../register');
       const mockRegister = jest.fn();
 
@@ -32,83 +46,114 @@ describe('Audit logs service', () => {
         container: {
           register: mockRegister,
         },
+        config: {
+          get: () => false,
+        },
       };
 
       await eeAdminRegister({ strapi });
 
       expect(mockRegister).not.toHaveBeenCalledWith('audit-logs', expect.anything());
     });
+
+    it('should not subscribe to events when the license does not allow it', async () => {
+      const mockSubscribe = jest.fn();
+
+      const strapi = {
+        container: {
+          register: jest.fn(),
+        },
+        config: {
+          get(key) {
+            switch (key) {
+              case 'admin.auditLogs.enabled':
+                return true;
+              case 'admin.auditLogs.retentionDays':
+                return undefined;
+              default:
+                return null;
+            }
+          },
+        },
+        eventHub: {
+          ...createEventHub(),
+          subscribe: mockSubscribe,
+        },
+        hook: () => ({
+          register: jest.fn(),
+        }),
+      };
+
+      // Should not subscribe to events at first
+      const auditLogsService = createAuditLogsService(strapi);
+      await auditLogsService.register();
+      expect(mockSubscribe).not.toHaveBeenCalled();
+
+      // Should subscribe to events when license gets enabled
+      features.isEnabled.mockImplementationOnce(() => true);
+      await strapi.eventHub.emit('ee.enable');
+      expect(mockSubscribe).toHaveBeenCalled();
+
+      // Should unsubscribe to events when license gets disabled
+      mockSubscribe.mockClear();
+      features.isEnabled.mockImplementationOnce(() => false);
+      await strapi.eventHub.emit('ee.disable');
+      expect(mockSubscribe).not.toHaveBeenCalled();
+
+      // Should recreate the service when license updates
+      const destroySpy = jest.spyOn(auditLogsService, 'destroy');
+      const registerSpy = jest.spyOn(auditLogsService, 'register');
+      await strapi.eventHub.emit('ee.update');
+      expect(destroySpy).toHaveBeenCalled();
+      expect(registerSpy).toHaveBeenCalled();
+    });
   });
 
   describe('Init with audit logs enabled', () => {
     const mockRegister = jest.fn();
-    const mockAddContentType = jest.fn();
-    const mockEntityServiceCreate = jest.fn();
-    const mockEntityServiceFindPage = jest.fn();
-    const mockEntityServiceFindOne = jest.fn();
-    const mockEntityServiceDeleteMany = jest.fn();
-    const mockGet = jest.fn((name) => {
-      if (name === 'content-types') {
-        return {
-          add: mockAddContentType,
-        };
-      }
-    });
     const mockScheduleJob = jest.fn((rule, callback) => callback());
 
-    const strapi = {
-      admin: {
-        services: {
-          permission: {
-            actionProvider: { registerMany: jest.fn() },
-          },
-        },
-      },
-      container: {
-        register: mockRegister,
-        get: mockGet,
-      },
-      entityService: {
-        create: mockEntityServiceCreate,
-        findPage: mockEntityServiceFindPage,
-        findOne: mockEntityServiceFindOne,
-        deleteMany: mockEntityServiceDeleteMany,
-      },
-      eventHub: createEventHub(),
-      hook: () => ({ register: jest.fn() }),
-    };
-
+    // Audit logs Local Provider mocks
     const mockSaveEvent = jest.fn();
+    const mockFindOne = jest.fn();
     const mockFindMany = jest.fn();
     const mockDeleteExpiredEvents = jest.fn();
 
-    beforeAll(() => {
-      jest.mock('@strapi/strapi/lib/utils/ee', () => ({
-        features: {
-          // We only enabled audit logs
-          isEnabled: (feature) => feature === 'audit-logs',
-          get: () => ({ name: 'audit-logs', options: { retentionDays: 90 } }),
-        },
-      }));
+    let strapi = {};
 
-      jest.mock('@strapi/provider-audit-logs-local', () => ({
-        register: jest.fn().mockResolvedValue({
-          saveEvent: mockSaveEvent,
-          findMany: mockFindMany,
-          deleteExpiredEvents: mockDeleteExpiredEvents,
-        }),
-      }));
-      jest.mock('node-schedule', () => {
-        return {
-          scheduleJob: mockScheduleJob,
-        };
+    beforeAll(() => {
+      features.isEnabled.mockReturnValue(true);
+      register.mockReturnValue({
+        saveEvent: mockSaveEvent,
+        findOne: mockFindOne,
+        findMany: mockFindMany,
+        deleteExpiredEvents: mockDeleteExpiredEvents,
       });
+      scheduleJob.mockImplementation(mockScheduleJob);
+
+      strapi = {
+        admin: {
+          services: {
+            permission: {
+              actionProvider: { registerMany: jest.fn() },
+            },
+          },
+        },
+        container: {
+          register: mockRegister,
+        },
+        eventHub: createEventHub(),
+        hook: () => ({ register: jest.fn() }),
+        config: {
+          get: () => 90,
+        },
+      };
     });
 
     afterEach(() => {
       mockSaveEvent.mockClear();
       mockFindMany.mockClear();
-      mockEntityServiceCreate.mockClear();
+      mockScheduleJob.mockClear();
     });
 
     beforeEach(() => {
@@ -155,17 +200,6 @@ describe('Audit logs service', () => {
           userId: 1,
         })
       );
-
-      // The provider saves the event in the database
-      expect(mockEntityServiceCreate).toHaveBeenCalledTimes(1);
-      expect(mockEntityServiceCreate).toHaveBeenCalledWith('admin::audit-log', {
-        data: expect.objectContaining({
-          action: 'entry.create',
-          date: '1970-01-01T00:00:00.000Z',
-          payload: { meta: 'test' },
-          user: 1,
-        }),
-      });
     });
 
     it('ignores events that are not in the event map', async () => {
@@ -192,36 +226,28 @@ describe('Audit logs service', () => {
     it('should find many audit logs with the right params', async () => {
       const auditLogsService = createAuditLogsService(strapi);
       await auditLogsService.register();
-      mockEntityServiceFindPage.mockResolvedValueOnce({ results: [], pagination: {} });
+      mockFindMany.mockResolvedValueOnce({ results: [], pagination: {} });
 
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       const params = { page: 1, pageSize: 10, order: 'createdAt:DESC' };
       const result = await auditLogsService.findMany(params);
 
-      expect(mockEntityServiceFindPage).toHaveBeenCalledTimes(1);
-      expect(mockEntityServiceFindPage).toHaveBeenCalledWith('admin::audit-log', {
-        ...params,
-        populate: ['user'],
-        fields: ['action', 'date', 'payload'],
-      });
+      expect(mockFindMany).toHaveBeenCalledTimes(1);
+      expect(mockFindMany).toHaveBeenCalledWith(params);
       expect(result).toEqual({ results: [], pagination: {} });
     });
 
     it('should find one audit log with the right params', async () => {
       const auditLogsService = createAuditLogsService(strapi);
       await auditLogsService.register();
-      mockEntityServiceFindOne.mockResolvedValueOnce({ id: 1 });
+      mockFindOne.mockResolvedValueOnce({ id: 1, user: null });
 
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       const result = await auditLogsService.findOne(1);
 
-      expect(mockEntityServiceFindOne).toHaveBeenCalledTimes(1);
-      expect(mockEntityServiceFindOne).toHaveBeenCalledWith('admin::audit-log', 1, {
-        populate: ['user'],
-        fields: ['action', 'date', 'payload'],
-      });
+      expect(mockFindOne).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ id: 1, user: null });
     });
 
@@ -255,54 +281,6 @@ describe('Audit logs service', () => {
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       expect(mockSaveEvent).not.toHaveBeenCalled();
-    });
-
-    it('should use username if user has username when returning an event', async () => {
-      mockEntityServiceFindOne.mockResolvedValueOnce({
-        user: {
-          username: 'testUser',
-          firstname: 'John',
-          lastname: 'Doe',
-          email: 'john@doe.com',
-        },
-      });
-
-      const auditLogsService = createAuditLogsService(strapi);
-      await auditLogsService.register();
-      const event = await auditLogsService.findOne(1);
-      expect(event.user.displayName).toEqual('testUser');
-    });
-
-    it('should use firstname and lastname if user doesnt have username when returning an event', async () => {
-      mockEntityServiceFindOne.mockResolvedValueOnce({
-        user: {
-          username: null,
-          firstname: 'John',
-          lastname: 'Doe',
-          email: 'john@doe.com',
-        },
-      });
-
-      const auditLogsService = createAuditLogsService(strapi);
-      await auditLogsService.register();
-      const event = await auditLogsService.findOne(1);
-      expect(event.user.displayName).toEqual('John Doe');
-    });
-
-    it('should use email if username and firstname and lastname are not defined when returning an event', async () => {
-      mockEntityServiceFindOne.mockResolvedValueOnce({
-        user: {
-          username: null,
-          firstname: null,
-          lastname: null,
-          email: 'john@doe.com',
-        },
-      });
-
-      const auditLogsService = createAuditLogsService(strapi);
-      await auditLogsService.register();
-      const event = await auditLogsService.findOne(1);
-      expect(event.user.displayName).toEqual('john@doe.com');
     });
   });
 });

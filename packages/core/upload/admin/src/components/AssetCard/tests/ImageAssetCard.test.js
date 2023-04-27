@@ -55,6 +55,7 @@ describe('ImageAssetCard', () => {
       }
 
       .c14 {
+        background: #ffffff;
         padding: 8px;
         border-radius: 4px;
         border-color: #dcdce4;
@@ -173,15 +174,6 @@ describe('ImageAssetCard', () => {
         line-height: 1.45;
         text-transform: uppercase;
         color: #666687;
-      }
-
-      .c7 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c7 > * + * {
-        margin-left: 8px;
       }
 
       .c31 {
@@ -316,6 +308,15 @@ describe('ImageAssetCard', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c7 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c7 > * + * {
+        margin-left: 8px;
       }
 
       .c8 {
@@ -479,7 +480,7 @@ describe('ImageAssetCard', () => {
                 alt=""
                 aria-hidden="true"
                 class="c19"
-                src="http://somewhere.com/hello.png?width=40&height=40"
+                src="http://somewhere.com/hello.png"
               />
             </div>
           </div>

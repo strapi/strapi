@@ -1,26 +1,32 @@
-import { useReducer, useEffect } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useReducer, useEffect, useCallback } from 'react';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
+/**
+ * TODO: refactor this to not use the `useReducer` hook,
+ * it's not really necessary. Also use `useQuery`?
+ */
 const useModels = () => {
   const toggleNotification = useNotification();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    fetchModels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { get } = useFetchClient();
 
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     dispatch({
       type: 'GET_MODELS',
     });
 
     try {
-      const [{ data: components }, { data: contentTypes }] = await Promise.all(
-        ['components', 'content-types'].map((endPoint) =>
-          request(`/content-manager/${endPoint}`, { method: 'GET' })
-        )
+      const [
+        {
+          data: { data: components },
+        },
+        {
+          data: { data: contentTypes },
+        },
+      ] = await Promise.all(
+        ['components', 'content-types'].map((endPoint) => get(`/content-manager/${endPoint}`))
       );
 
       dispatch({
@@ -37,7 +43,11 @@ const useModels = () => {
         message: { id: 'notification.error' },
       });
     }
-  };
+  }, [toggleNotification, get]);
+
+  useEffect(() => {
+    fetchModels();
+  }, [fetchModels]);
 
   return {
     ...state,

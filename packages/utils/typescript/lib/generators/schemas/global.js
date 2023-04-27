@@ -36,17 +36,14 @@ const generateGlobalDefinition = (schemasDefinitions = []) => {
   const properties = schemasDefinitions.map(schemaDefinitionToPropertySignature);
 
   return factory.createModuleDeclaration(
-    undefined,
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
     factory.createIdentifier('global'),
     factory.createModuleBlock([
       factory.createModuleDeclaration(
         undefined,
-        undefined,
         factory.createIdentifier('Strapi'),
         factory.createModuleBlock([
           factory.createInterfaceDeclaration(
-            undefined,
             undefined,
             factory.createIdentifier('Schemas'),
             undefined,

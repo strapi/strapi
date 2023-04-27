@@ -44,11 +44,18 @@ function getPopulateForRelation(attribute, model, attributeName, { countMany, co
  * @returns {{populate: Object}}
  */
 function getPopulateForDZ(attribute, options, level) {
-  const populatedComponents = (attribute.components || []).map((componentUID) =>
-    getDeepPopulate(componentUID, options, level + 1)
+  // Use fragments to populate the dynamic zone components
+  const populatedComponents = (attribute.components || []).reduce(
+    (acc, componentUID) => ({
+      ...acc,
+      [componentUID]: {
+        populate: getDeepPopulate(componentUID, options, level + 1),
+      },
+    }),
+    {}
   );
 
-  return { populate: populatedComponents.reduce(merge, {}) };
+  return { on: populatedComponents };
 }
 
 /**

@@ -18,17 +18,6 @@ const sidebars = {
     'index',
     {
       type: 'category',
-      label: 'Admin',
-      items: [
-        {
-          type: 'doc',
-          label: 'Link Strapi Design System',
-          id: 'core/admin/link-strapi-design-system',
-        },
-      ],
-    },
-    {
-      type: 'category',
       label: 'Core',
       link: {
         type: 'generated-index',
@@ -38,7 +27,26 @@ const sidebars = {
         {
           type: 'category',
           label: 'Admin',
+          link: {
+            type: 'doc',
+            id: 'core/admin/intro',
+          },
           items: [
+            {
+              type: 'category',
+              label: 'Enterprise Edition',
+              link: {
+                type: 'doc',
+                id: 'core/admin/ee/intro',
+              },
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Review Workflows',
+                  id: 'core/admin/ee/review-workflows',
+                },
+              ],
+            },
             {
               type: 'doc',
               label: 'Link Strapi Design System',
@@ -60,11 +68,6 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
-                  label: 'useCallbackRef',
-                  id: 'core/content-manager/hooks/use-callback-ref',
-                },
-                {
-                  type: 'doc',
                   label: 'useDragAndDrop',
                   id: 'core/content-manager/hooks/use-drag-and-drop',
                 },
@@ -75,6 +78,11 @@ const sidebars = {
               label: 'Relations',
               id: 'core/content-manager/relations',
             },
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-manager/review-workflows',
+            },
           ],
         },
         {
@@ -84,7 +92,34 @@ const sidebars = {
             type: 'doc',
             id: 'core/content-type-builder/intro',
           },
-          items: ['example'],
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-type-builder/review-workflows',
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Database',
+          link: {
+            type: 'doc',
+            id: 'core/database/intro',
+          },
+          items: [
+            {
+              type: 'category',
+              label: 'Relations',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Reordering',
+                  id: 'core/database/relations/reordering',
+                },
+              ],
+            },
+          ],
         },
         {
           type: 'category',
@@ -96,14 +131,28 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
+                  label: 'useAPIErrorHandler',
+                  id: 'core/helper-plugin/hooks/use-api-error-handler',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/helper-plugin/hooks/use-callback-ref',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCollator',
+                  id: 'core/helper-plugin/hooks/use-collator',
+                },
+                {
+                  type: 'doc',
                   label: 'useFetchClient',
                   id: 'core/helper-plugin/hooks/use-fetch-client',
                 },
-
                 {
                   type: 'doc',
-                  label: 'useAPIErrorHandler',
-                  id: 'core/helper-plugin/hooks/use-api-error-handler',
+                  label: 'useFilter',
+                  id: 'core/helper-plugin/hooks/use-filter',
                 },
               ],
             },
@@ -142,6 +191,21 @@ const sidebars = {
         },
         {
           type: 'category',
+          label: 'Settings',
+          link: {
+            type: 'doc',
+            id: 'core/settings/intro',
+          },
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/settings/review-workflows',
+            },
+          ],
+        },
+        {
+          type: 'category',
           label: 'Utils',
           items: [
             {
@@ -164,15 +228,6 @@ const sidebars = {
       link: {
         type: 'doc',
         id: 'custom-fields',
-      },
-      items: [],
-    },
-    {
-      type: 'category',
-      label: 'How to install packages in a module',
-      link: {
-        type: 'doc',
-        id: 'how-to-install-packages',
       },
       items: [],
     },

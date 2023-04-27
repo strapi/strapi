@@ -3,10 +3,14 @@
 jest.mock('node-fetch', () => jest.fn(() => Promise.resolve()));
 
 const { get } = require('lodash/fp');
-const fetch = require('node-fetch');
 const metrics = require('../index');
 
+const fetch = jest.fn(() => Promise.resolve());
+
 describe('metrics', () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
   test('Initializes a middleware', () => {
     const use = jest.fn();
 
@@ -32,6 +36,7 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      fetch,
     });
 
     metricsInstance.register();
@@ -66,6 +71,7 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      fetch,
     });
 
     metricsInstance.register();
@@ -98,6 +104,7 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      fetch,
     });
 
     send('someEvent');
@@ -140,6 +147,7 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      fetch,
     });
 
     send('someEvent');

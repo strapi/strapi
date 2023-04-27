@@ -23,6 +23,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 }
 
 .c11 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -707,6 +708,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 }
 
 .c11 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
@@ -784,7 +786,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c27 {
+.c26 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -825,6 +827,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
 .c10 {
@@ -857,7 +860,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   color: #ffffff;
 }
 
-.c28 {
+.c27 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -868,15 +871,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
-}
-
-.c26 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c26 > * + * {
-  margin-top: 4px;
 }
 
 .c12 {
@@ -1032,6 +1026,17 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 .c36 svg > g,
 .c36 svg path {
   fill: #32324d;
+}
+
+.c28 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c22 {
@@ -1339,22 +1344,20 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                       <div
                         class="c24"
                       >
-                        <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class="c25 c26"
+                            class="c25"
                           >
                             <div
-                              class="c27"
+                              class="c26"
                             >
                               <label
-                                class="c9 c28"
+                                class="c9 c27 c28"
                                 for="34"
                               >
-                                <div
-                                  class="c27"
-                                >
-                                  URL
-                                </div>
+                                URL
                               </label>
                             </div>
                             <div
@@ -1386,7 +1389,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                         class="c8"
                       >
                         <div
-                          class="c27 c33"
+                          class="c26 c33"
                         >
                           <button
                             aria-disabled="false"
@@ -1401,7 +1404,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                           </button>
                         </div>
                         <div
-                          class="c27 c33"
+                          class="c26 c33"
                         >
                           <button
                             aria-disabled="false"

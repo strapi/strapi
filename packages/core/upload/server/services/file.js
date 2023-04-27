@@ -1,7 +1,8 @@
 'use strict';
 
+const { cloneDeep } = require('lodash/fp');
+const { mapAsync } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
-
 const { getService } = require('../utils');
 
 const getFolderPath = async (folderId) => {
@@ -22,7 +23,34 @@ const deleteByIds = async (ids = []) => {
   return filesToDelete;
 };
 
+const signFileUrls = async (file) => {
+  const { provider } = strapi.plugins.upload;
+  const { provider: providerConfig } = strapi.config.get('plugin.upload');
+  const isPrivate = await provider.isPrivate();
+
+  // Check file provider and if provider is private
+  if (file.provider !== providerConfig || !isPrivate) {
+    return file;
+  }
+
+  const signUrl = async (file) => {
+    const signedUrl = await provider.getSignedUrl(file);
+    file.url = signedUrl.url;
+  };
+
+  const signedFile = cloneDeep(file);
+
+  // Sign each file format
+  await signUrl(signedFile);
+  if (file.formats) {
+    await mapAsync(Object.values(signedFile.formats), signUrl);
+  }
+
+  return signedFile;
+};
+
 module.exports = {
   getFolderPath,
   deleteByIds,
+  signFileUrls,
 };

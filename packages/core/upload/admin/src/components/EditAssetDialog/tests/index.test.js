@@ -96,13 +96,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (toggleNotification = jest.fn()) =>
+const renderCompo = () =>
   render(
     <QueryClientProvider client={queryClient}>
       <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
-          <NotificationsProvider toggleNotification={toggleNotification}>
-            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+            <NotificationsProvider>
               <EditAssetDialog
                 asset={asset}
                 onClose={jest.fn()}
@@ -110,8 +110,8 @@ const renderCompo = (toggleNotification = jest.fn()) =>
                 canCopyLink
                 canDownload
               />
-            </IntlProvider>
-          </NotificationsProvider>
+            </NotificationsProvider>
+          </IntlProvider>
         </ThemeProvider>
       </TrackingProvider>
     </QueryClientProvider>,
@@ -146,18 +146,11 @@ describe('<EditAssetDialog />', () => {
     });
 
     it('copies the link and shows a notification when pressing "Copy link"', () => {
-      const toggleNotificationSpy = jest.fn();
-      renderCompo(toggleNotificationSpy);
+      renderCompo();
 
       fireEvent.click(screen.getByLabelText('Copy link'));
 
-      expect(toggleNotificationSpy).toHaveBeenCalledWith({
-        message: {
-          defaultMessage: 'Link copied into the clipboard',
-          id: 'notification.link-copied',
-        },
-        type: 'success',
-      });
+      expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument();
     });
 
     it('downloads the file when pressing "Download"', () => {
@@ -165,7 +158,7 @@ describe('<EditAssetDialog />', () => {
 
       fireEvent.click(screen.getByLabelText('Download'));
       expect(downloadFile).toHaveBeenCalledWith(
-        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?updated_at=2021-10-04T09:42:31.670Z',
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
         'Screenshot 2.png'
       );
     });

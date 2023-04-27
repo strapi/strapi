@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../../../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
@@ -45,7 +44,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                 })}
               </Typography>
               <BaseCheckbox
-                disabled={isFormDisabled || IS_DISABLED}
+                disabled={isFormDisabled}
                 onValueChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}

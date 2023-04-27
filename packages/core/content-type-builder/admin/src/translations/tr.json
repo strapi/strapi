@@ -113,7 +113,7 @@
   "menu.section.models.name": "Koleksiyon Tipleri",
   "menu.section.single-types.name": "Tekil Tipler",
   "modalForm.attribute.form.base.name.description": "Nitelik adında boşluk olamaz",
-  "modalForm.attribute.form.base.name.placeholder": "ör. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "ör. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "İliştirilmiş alan",
   "modalForm.attributes.select-component": "Bir bileşen seç",
   "modalForm.attributes.select-components": "Bileşenleri seç",
