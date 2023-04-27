@@ -1,8 +1,8 @@
 import execa from 'execa';
 
-export default async function hasYarn() {
+export default function hasYarn() {
   try {
-    const { exitCode } = await execa.commandSync('yarn --version', { shell: true });
+    const { exitCode } = execa.commandSync('yarn --version', { shell: true });
 
     if (exitCode === 0) return true;
   } catch (err) {

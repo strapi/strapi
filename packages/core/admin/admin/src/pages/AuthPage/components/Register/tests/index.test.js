@@ -27,8 +27,6 @@ const server = setupServer(
   rest.get('*/registration-info', async (req, res, ctx) => {
     const token = req.url.searchParams.get('registrationToken');
 
-    console.log('waat', token);
-
     if (token === 'error') {
       return res(ctx.status(401), ctx.json({}));
     }

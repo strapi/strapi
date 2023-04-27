@@ -116,7 +116,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
-    expect(getByText('1 stage')).toBeInTheDocument();
+    await waitFor(() => expect(getByText('1 stage')).toBeInTheDocument());
     expect(getByText('stage-1')).toBeInTheDocument();
   });
 
