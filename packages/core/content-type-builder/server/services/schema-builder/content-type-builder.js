@@ -101,7 +101,7 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', nameToCollectionName(infos.pluralName))
+        .set('collectionName', infos.collectionName || nameToCollectionName(infos.pluralName))
         .set('info', {
           singularName: infos.singularName,
           pluralName: infos.pluralName,
