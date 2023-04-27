@@ -12,11 +12,12 @@ const addSignedFileUrlsToEntityService = async () => {
   }
 
   const decorator = (service) => ({
-    wrapResult(result, { uid }) {
-      if (Array.isArray(result)) {
-        return Promise.all(result.map((entity) => signEntityMedia(entity, uid)));
+    async wrapResult(result, options) {
+      const wrappedResult = await service.wrapResult.call(this, result, options);
+      if (Array.isArray(wrappedResult)) {
+        return Promise.all(wrappedResult.map((entity) => signEntityMedia(entity, options.uid)));
       }
-      return signEntityMedia(result, uid);
+      return signEntityMedia(wrappedResult, options.uid);
     },
   });
 
