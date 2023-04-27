@@ -65,10 +65,9 @@ const createContentAPISanitizers = () => {
 
     const sanitizedQuery = cloneDeep(query);
 
-    // This is here since when you do a findMany on single types, it will become a findOne.
-    // To keep it a findMany, you give it the ignoreKind flag.
-    // This sensitization is here since potentially, if a decorator like i18n makes a mistake and returns two values, findOne will only return the first value.
-    // So this query.ignoreKind could return the second record, which is why we sanitize it.
+    // Some methods behave different if requesting a Content Type or Single Type (entityService findMany)
+    // In some cases, we want to ignore such behaviour, and we do so by using `ignoreKind` flag.
+    // This sanitization is here to avoid potential security issues of using `ignoreKind`, specially using decorators & extensions.
     if (ignoreKind) {
       delete sanitizedQuery.ignoreKind;
     }
