@@ -2,5 +2,5 @@
 
 module.exports = {
   preset: '../../../jest-preset.unit.js',
-  displayName: 'Users & Permissions plugin',
+  displayName: 'Github action check-pr-status',
 };
