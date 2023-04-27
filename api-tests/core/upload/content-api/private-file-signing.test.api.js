@@ -101,6 +101,25 @@ const mockProvider = (signUrl = true) => ({
   },
 });
 
+const createModel = async (name = 'name') => {
+  return strapi.entityService.create(modelUID, {
+    data: {
+      name,
+      media: singleMedia,
+      media_repeatable: repeatable,
+      compo_media: mediaEntry,
+      compo_media_repeatable: [mediaEntry, mediaEntry],
+      dynamicZone: [
+        {
+          __component: componentUID,
+          ...mediaEntry,
+        },
+      ],
+    },
+    populate,
+  });
+};
+
 const uploadImg = (fileName) => {
   return rq({
     method: 'POST',
@@ -114,6 +133,7 @@ const uploadImg = (fileName) => {
 let repeatable;
 let singleMedia;
 let mediaEntry = {};
+let model;
 
 describe('Upload Plugin url signing', () => {
   const responseExpectations = (result) => {
@@ -143,8 +163,6 @@ describe('Upload Plugin url signing', () => {
     }
   };
 
-  let entity;
-
   beforeAll(async () => {
     const localProviderPath = require.resolve('@strapi/provider-upload-local');
     jest.mock(localProviderPath, () => mockProvider(true));
@@ -165,6 +183,8 @@ describe('Upload Plugin url signing', () => {
       media: singleMedia,
       media_repeatable: repeatable,
     };
+
+    model = await createModel('model1');
   });
 
   afterAll(async () => {
@@ -172,32 +192,28 @@ describe('Upload Plugin url signing', () => {
     await builder.cleanup();
   });
 
-  test('returns signed media URLs on content creation', async () => {
-    entity = await strapi.entityService.create(modelUID, {
-      data: {
-        name: 'name',
-        media: singleMedia,
-        media_repeatable: repeatable,
-        compo_media: mediaEntry,
-        compo_media_repeatable: [mediaEntry, mediaEntry],
-        dynamicZone: [
-          {
-            __component: componentUID,
-            ...mediaEntry,
-          },
-        ],
-      },
-      populate,
+  describe('Returns signed media URLs on', () => {
+    test('entityService.create', async () => {
+      let entity = await createModel();
+      responseExpectations(entity);
     });
 
-    responseExpectations(entity);
-  });
+    test('entityService.findOne', async () => {
+      const entity = await strapi.entityService.findOne(modelUID, model.id, {
+        populate,
+      });
 
-  test('returns signed media URLs when we GET content', async () => {
-    const en = await strapi.entityService.findOne(modelUID, entity.id, {
-      populate,
+      responseExpectations(entity);
     });
 
-    responseExpectations(en);
+    test('entityService.findMany', async () => {
+      const entities = await strapi.entityService.findMany(modelUID, {
+        populate,
+      });
+
+      for (const entity of entities) {
+        responseExpectations(entity);
+      }
+    });
   });
 });
