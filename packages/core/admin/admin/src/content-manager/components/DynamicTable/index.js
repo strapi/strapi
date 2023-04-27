@@ -23,6 +23,7 @@ const DynamicTable = ({
   isLoading,
   onConfirmDelete,
   onConfirmDeleteAll,
+  onConfirmPublishAll,
   layout,
   rows,
 }) => {
@@ -105,6 +106,7 @@ const DynamicTable = ({
           showPublish={canPublish && hasDraftAndPublish}
           showDelete={canDelete}
           onConfirmDeleteAll={onConfirmDeleteAll}
+          onConfirmPublishAll={onConfirmPublishAll}
           selectedEntries={selectedEntries}
           clearSelectedEntries={clearSelectedEntries}
         />
@@ -149,6 +151,7 @@ DynamicTable.propTypes = {
   }).isRequired,
   onConfirmDelete: PropTypes.func.isRequired,
   onConfirmDeleteAll: PropTypes.func.isRequired,
+  onConfirmPublishAll: PropTypes.func.isRequired,
   rows: PropTypes.array.isRequired,
 };
 

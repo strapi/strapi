@@ -179,6 +179,11 @@ function ListView({
     [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
+  const handleConfirmPublishAllData = (ids) => {
+    // TODO make a request to the API and refetch the data
+    console.log('Publishing all data', ids);
+  };
+
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
@@ -334,8 +339,9 @@ function ListView({
               canDelete={canDelete}
               canPublish={canPublish}
               contentTypeName={headerLayoutTitle}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmDelete={handleConfirmDeleteData}
+              onConfirmDeleteAll={handleConfirmDeleteAllData}
+              onConfirmPublishAll={handleConfirmPublishAllData}
               isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling

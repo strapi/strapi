@@ -13,7 +13,11 @@ const injectionZones = {
   },
   contentManager: {
     editView: { informations: [], 'right-links': [] },
-    listView: { actions: [], deleteModalAdditionalInfos: [] },
+    listView: {
+      actions: [],
+      deleteModalAdditionalInfos: [],
+      publishModalAdditionalInfos: [],
+    },
   },
 };
 

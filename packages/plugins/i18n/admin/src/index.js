@@ -14,6 +14,7 @@ import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
 import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
+import PublishModalAdditionalInfos from './components/CMListViewInjectedComponents/PublishModalAdditionalInfos';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
@@ -80,6 +81,11 @@ export default {
     app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
       name: 'i18n-delete-bullets-in-modal',
       Component: DeleteModalAdditionalInfos,
+    });
+
+    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: PublishModalAdditionalInfos,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
