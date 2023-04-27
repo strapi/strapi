@@ -84,7 +84,7 @@ const populate = {
   },
 };
 
-const isPrivate = true;
+let isPrivate = true;
 
 const mockProvider = () => ({
   init() {
@@ -95,8 +95,12 @@ const mockProvider = () => ({
       getSignedUrl() {
         return { url: 'signedUrl' };
       },
-      uploadStream() {},
-      upload() {},
+      uploadStream(file) {
+        file.url = 'strapi.jpg';
+      },
+      upload(file) {
+        file.url = 'strapi.jpg';
+      },
       delete() {},
       checkFileSize() {},
     };
@@ -138,29 +142,29 @@ let mediaEntry = {};
 let model;
 
 describe('Upload Plugin url signing', () => {
-  const responseExpectations = (result) => {
-    expect(result.media.url).toEqual('signedUrl');
+  const responseExpectations = (result, expectedUrl) => {
+    expect(result.media.url).toEqual(expectedUrl);
 
     for (const media of result.media_repeatable) {
-      expect(media.url).toEqual('signedUrl');
+      expect(media.url).toEqual(expectedUrl);
     }
 
-    expect(result.compo_media.media.url).toEqual('signedUrl');
+    expect(result.compo_media.media.url).toEqual(expectedUrl);
     for (const media of result.compo_media.media_repeatable) {
-      expect(media.url).toEqual('signedUrl');
+      expect(media.url).toEqual(expectedUrl);
     }
 
     for (const component of result.compo_media_repeatable) {
-      expect(component.media.url).toEqual('signedUrl');
+      expect(component.media.url).toEqual(expectedUrl);
       for (const media of component.media_repeatable) {
-        expect(media.url).toEqual('signedUrl');
+        expect(media.url).toEqual(expectedUrl);
       }
     }
 
     for (const component of result.dynamicZone) {
-      expect(component.media.url).toEqual('signedUrl');
+      expect(component.media.url).toEqual(expectedUrl);
       for (const media of component.media_repeatable) {
-        expect(media.url).toEqual('signedUrl');
+        expect(media.url).toEqual(expectedUrl);
       }
     }
   };
@@ -177,7 +181,7 @@ describe('Upload Plugin url signing', () => {
 
     rq = await createContentAPIRequest({ strapi });
 
-    const imgRes = [await uploadImg('rec.jpg'), await uploadImg('strapi.jpg')];
+    const imgRes = [await uploadImg('strapi.jpg'), await uploadImg('strapi.jpg')];
 
     repeatable = imgRes.map((img) => img.body[0].id);
     singleMedia = imgRes[0].body[0].id;
@@ -197,7 +201,7 @@ describe('Upload Plugin url signing', () => {
   describe('Returns signed media URLs on', () => {
     test('entityService.create', async () => {
       let entity = await createModel();
-      responseExpectations(entity);
+      responseExpectations(entity, 'signedUrl');
     });
 
     test('entityService.findOne', async () => {
@@ -205,7 +209,7 @@ describe('Upload Plugin url signing', () => {
         populate,
       });
 
-      responseExpectations(entity);
+      responseExpectations(entity, 'signedUrl');
     });
 
     test('entityService.findMany', async () => {
@@ -214,7 +218,7 @@ describe('Upload Plugin url signing', () => {
       });
 
       for (const entity of entities) {
-        responseExpectations(entity);
+        responseExpectations(entity, 'signedUrl');
       }
     });
 
@@ -223,7 +227,7 @@ describe('Upload Plugin url signing', () => {
         populate,
       });
       for (const entity of entities.results) {
-        responseExpectations(entity);
+        responseExpectations(entity, 'signedUrl');
       }
     });
 
@@ -236,7 +240,7 @@ describe('Upload Plugin url signing', () => {
         populate,
       });
 
-      responseExpectations(entity);
+      responseExpectations(entity, 'signedUrl');
     });
 
     test('entityService.delete', async () => {
@@ -245,7 +249,66 @@ describe('Upload Plugin url signing', () => {
         populate,
       });
 
-      responseExpectations(entity);
+      responseExpectations(entity, 'signedUrl');
+    });
+  });
+
+  describe('Does not return signed media URLs on', () => {
+    beforeAll(async () => {
+      isPrivate = false;
+    });
+
+    test('entityService.create', async () => {
+      let entity = await createModel();
+      responseExpectations(entity, 'strapi.jpg');
+    });
+
+    test('entityService.findOne', async () => {
+      const entity = await strapi.entityService.findOne(modelUID, model.id, {
+        populate,
+      });
+
+      responseExpectations(entity, 'strapi.jpg');
+    });
+
+    test('entityService.findMany', async () => {
+      const entities = await strapi.entityService.findMany(modelUID, {
+        populate,
+      });
+
+      for (const entity of entities) {
+        responseExpectations(entity, 'strapi.jpg');
+      }
+    });
+
+    test('entityService.findPage', async () => {
+      const entities = await strapi.entityService.findPage(modelUID, {
+        populate,
+      });
+      for (const entity of entities.results) {
+        responseExpectations(entity, 'strapi.jpg');
+      }
+    });
+
+    test('entityService.update', async () => {
+      const model = await createModel();
+      const entity = await strapi.entityService.update(modelUID, model.id, {
+        data: {
+          name: 'model_updated',
+        },
+        populate,
+      });
+
+      responseExpectations(entity, 'strapi.jpg');
+    });
+
+    test('entityService.delete', async () => {
+      const model = await createModel();
+      const entity = await strapi.entityService.delete(modelUID, model.id, {
+        populate,
+      });
+
+      responseExpectations(entity, 'strapi.jpg');
     });
   });
 });
