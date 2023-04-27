@@ -71,7 +71,6 @@ describe('field sizes service', () => {
     const { setCustomFieldInputSizes, getAllFieldSizes } = createFieldSizesService({ strapi });
     setCustomFieldInputSizes();
     const fieldSizes = getAllFieldSizes();
-    console.log(fieldSizes);
 
     expect(fieldSizes).not.toHaveProperty('plugin::mycustomfields.color');
     expect(fieldSizes['plugin::mycustomfields.smallColor'].default).toBe(4);
