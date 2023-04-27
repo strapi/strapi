@@ -29,12 +29,10 @@
       "dependsOn": ["^build:ts"]
     },
     "test:unit": {
-      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"],
-      "dependsOn": ["build:ts"]
+      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"]
     },
     "test:front": {
-      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"],
-      "dependsOn": ["^build"]
+      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"]
     },
     "lint": {
       "inputs": [
