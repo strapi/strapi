@@ -12,7 +12,7 @@ import {
 } from '@strapi/design-system';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
-import Combobox from './Combobox';
+import KeySelect from './KeySelect';
 
 const HeadersInput = () => {
   const { formatMessage } = useIntl();
@@ -37,7 +37,7 @@ const HeadersInput = () => {
                 <React.Fragment key={i}>
                   <GridItem col={6}>
                     <Field
-                      as={Combobox}
+                      as={KeySelect}
                       name={`headers.${i}.key`}
                       aria-label={`row ${i + 1} key`}
                       label={formatMessage({
