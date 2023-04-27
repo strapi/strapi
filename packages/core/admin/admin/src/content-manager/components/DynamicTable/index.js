@@ -9,13 +9,14 @@ import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import TableRows from './TableRows';
-import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import BulkActionsBar from './BulkActionsBar';
 
 const DynamicTable = ({
   canCreate,
   canDelete,
+  canPublish,
   contentTypeName,
   action,
   isBulkable,
@@ -89,17 +90,25 @@ const DynamicTable = ({
 
   return (
     <Table
-      components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
+      components={{ ConfirmDialogDelete }}
       contentType={contentTypeName}
       action={action}
       isLoading={isLoading}
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
-      onConfirmDeleteAll={onConfirmDeleteAll}
       onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
-      withMainAction={canDelete && isBulkable}
+      withMainAction={(canDelete || canPublish) && isBulkable}
+      renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
+        <BulkActionsBar
+          showPublish={canPublish && hasDraftAndPublish}
+          showDelete={canDelete}
+          onConfirmDeleteAll={onConfirmDeleteAll}
+          selectedEntries={selectedEntries}
+          clearSelectedEntries={clearSelectedEntries}
+        />
+      )}
     >
       <TableRows
         canCreate={canCreate}
@@ -121,6 +130,7 @@ DynamicTable.defaultProps = {
 DynamicTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   action: PropTypes.node,
   isBulkable: PropTypes.bool.isRequired,
