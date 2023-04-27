@@ -59,37 +59,10 @@ async function addPersistTables({ strapi }, tableNames) {
 }
 
 /**
- * Remove tables name from the reserved tables in core store
- * @param {Object} ctx
- * @param {Strapi} ctx.strapi
- * @param {Array<string>} tableNames
- * @return {Promise<void>}
- */
-async function removePersistedTables({ strapi }, tableNames) {
-  const persistedTables = await getPersistedTables({ strapi });
-
-  // Get new tables to be persisted, remove tables if they already were persisted
-  const newPersistedTables = differenceWith(
-    (t1, t2) => t1.name === t2,
-    persistedTables,
-    tableNames
-  );
-
-  if (newPersistedTables.length === persistedTables.length) {
-    return;
-  }
-
-  await strapi.store.set({
-    type: 'core',
-    key: 'persisted_tables',
-    value: newPersistedTables,
-  });
-}
-
-/**
  * Get all reserved table names from the core store
  * @param {Object} ctx
  * @param {Strapi} ctx.strapi
+ * @param {RegExp} regex
  * @returns {Promise<string[]>}
  */
 
@@ -102,6 +75,20 @@ async function getPersistedTables({ strapi }) {
   return (persistedTables || []).map(transformTableName);
 }
 
+/**
+ * Set all reserved table names in the core store
+ * @param {Object} ctx
+ * @param {Strapi} ctx.strapi
+ * @param {Array<string|{ table: string; dependsOn?: Array<{ table: string;}> }>} tableNames
+ * @returns {Promise<void>}
+ */
+async function setPersistedTables({ strapi }, tableNames) {
+  await strapi.store.set({
+    type: 'core',
+    key: 'persisted_tables',
+    value: tableNames,
+  });
+}
 /**
  * Add all table names that start with a prefix to the reserved tables in
  * core store
@@ -123,8 +110,17 @@ const persistTablesWithPrefix = async (tableNamePrefix) => {
  */
 const removePersistedTablesWithSuffix = async (tableNameSuffix) => {
   const tableNameRegex = new RegExp(`.*${tableNameSuffix}$`);
-  const tableNames = await findTables({ strapi }, tableNameRegex);
-  await removePersistedTables({ strapi }, tableNames);
+  const persistedTables = await getPersistedTables({ strapi });
+
+  const filteredPersistedTables = persistedTables.filter((table) => {
+    return !tableNameRegex.test(table.name);
+  });
+
+  if (filteredPersistedTables.length === persistedTables.length) {
+    return;
+  }
+
+  await setPersistedTables({ strapi }, filteredPersistedTables);
 };
 
 /**
