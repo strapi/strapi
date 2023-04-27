@@ -215,5 +215,46 @@ describe('Upload Plugin url signing', () => {
         responseExpectations(entity);
       }
     });
+
+    test('entityService.findPage', async () => {
+      const entities = await strapi.entityService.findPage(modelUID, {
+        populate,
+      });
+      for (const entity of entities.results) {
+        responseExpectations(entity);
+      }
+    });
+
+    //   test('entityService.update', async () => {
+    //     const en = await strapi.entityService.findMany(modelUID, entity, {
+    //       populate,
+    //     });
+
+    //     responseExpectations(en);
+    //   });
+
+    //   test('entityService.delete', async () => {
+    //     const en = await strapi.entityService.findMany(modelUID, entity, {
+    //       populate,
+    //     });
+
+    //     responseExpectations(en);
+    //   });
+    // });
+
+    // test('entityService.load', async () => {
+    //   const en = await strapi.entityService.findMany(modelUID, entity, {
+    //     populate,
+    //   });
+
+    //   responseExpectations(en);
+    // });
+
+    // test('entityService.loadPages', async () => {
+    //   const en = await strapi.entityService.findMany(modelUID, entity, {
+    //     populate,
+    //   });
+
+    //   responseExpectations(en);
   });
 });
