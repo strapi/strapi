@@ -24,7 +24,7 @@ export default (layout) => {
     key: '__strapi_reviewWorkflows_stage_temp_key__',
     name: 'strapi_reviewWorkflows_stage',
     fieldSchema: {
-      type: 'custom',
+      type: 'relation',
     },
     metadatas: {
       label: formatMessage({
@@ -32,7 +32,8 @@ export default (layout) => {
         defaultMessage: 'Review stage',
       }),
       searchable: false,
-      sortable: false,
+      sortable: true,
+      mainField: 'name',
     },
     cellFormatter({ strapi_reviewWorkflows_stage }) {
       // if entities are created e.g. through lifecycle methods
