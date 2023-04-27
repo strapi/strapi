@@ -225,13 +225,17 @@ describe('Upload Plugin url signing', () => {
       }
     });
 
-    //   test('entityService.update', async () => {
-    //     const en = await strapi.entityService.findMany(modelUID, entity, {
-    //       populate,
-    //     });
+    test('entityService.update', async () => {
+      const model = await createModel();
+      const en = await strapi.entityService.update(modelUID, model.id, {
+        data: {
+          name: 'model_updated',
+        },
+        populate,
+      });
 
-    //     responseExpectations(en);
-    //   });
+      responseExpectations(en);
+    });
 
     //   test('entityService.delete', async () => {
     //     const en = await strapi.entityService.findMany(modelUID, entity, {
