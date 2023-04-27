@@ -18,17 +18,6 @@ const sidebars = {
     'index',
     {
       type: 'category',
-      label: 'Admin',
-      items: [
-        {
-          type: 'doc',
-          label: 'Link Strapi Design System',
-          id: 'core/admin/link-strapi-design-system',
-        },
-      ],
-    },
-    {
-      type: 'category',
       label: 'Core',
       link: {
         type: 'generated-index',
@@ -38,7 +27,26 @@ const sidebars = {
         {
           type: 'category',
           label: 'Admin',
+          link: {
+            type: 'doc',
+            id: 'core/admin/intro',
+          },
           items: [
+            {
+              type: 'category',
+              label: 'Enterprise Edition',
+              link: {
+                type: 'doc',
+                id: 'core/admin/ee/intro',
+              },
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Review Workflows',
+                  id: 'core/admin/ee/review-workflows',
+                },
+              ],
+            },
             {
               type: 'doc',
               label: 'Link Strapi Design System',
