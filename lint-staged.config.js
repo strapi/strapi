@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const fs = require('fs');
 const findUp = require('find-up');
@@ -13,7 +15,7 @@ function extractPackageName(pkgJsonPath) {
 function getLintCommand(files) {
   const affectedFolders = new Set();
 
-  for (let file of files) {
+  for (const file of files) {
     const r = findUp.sync('package.json', { cwd: file });
     const relPath = path.relative(root, r);
 
@@ -30,17 +32,19 @@ function getLintCommand(files) {
   return `nx run-many -t lint -p ${affectedPackages.join()} --parallel 5`;
 }
 
+function getCodeCommands(files) {
+  const lintCmd = getLintCommand(files);
+
+  const prettierCmd = `prettier --write ${files.join(' ')}`;
+
+  if (lintCmd) {
+    return [lintCmd, prettierCmd];
+  }
+
+  return [prettierCmd];
+}
+
 module.exports = {
-  '*.{js,ts}': (files) => {
-    const lintCmd = getLintCommand(files);
-
-    const prettierCmd = `prettier --write ${files.join(' ')}`;
-
-    if (lintCmd) {
-      return [lintCmd, prettierCmd];
-    }
-
-    return [prettierCmd];
-  },
+  '*.{js,ts}': getCodeCommands,
   '*.{md,css,scss,yaml,yml}': ['prettier --write'],
 };

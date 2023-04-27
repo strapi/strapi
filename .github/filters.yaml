@@ -9,5 +9,5 @@ frontend:
   - 'packages/**/package.json'
   - 'packages/**/admin/src/**'
   - 'packages/**/strapi-admin.js'
-  - 'pacakges/core/helper-plugin/**'
-  - 'pacakges/admin-test-utils/**'
+  - 'packages/core/helper-plugin/**'
+  - 'packages/admin-test-utils/**'
