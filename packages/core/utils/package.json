@@ -27,12 +27,20 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib",
-  "types": "./index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
+    "build": "run -T tsc",
+    "build:ts": "run build",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "lint": "run -T eslint ."
@@ -41,9 +49,16 @@
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.29.3",
     "http-errors": "1.8.1",
+    "koa": "2.13.4",
+    "koa-body": "4.2.0",
     "lodash": "4.17.21",
     "p-map": "4.0.0",
     "yup": "0.32.9"
+  },
+  "devDependencies": {
+    "@types/koa": "2.13.4",
+    "eslint-config-custom": "*",
+    "tsconfig": "*"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

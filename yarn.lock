@@ -7902,10 +7902,15 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@types/koa": 2.13.4
     date-fns: 2.29.3
+    eslint-config-custom: "*"
     http-errors: 1.8.1
+    koa: 2.13.4
+    koa-body: 4.2.0
     lodash: 4.17.21
     p-map: 4.0.0
+    tsconfig: "*"
     yup: 0.32.9
   languageName: unknown
   linkType: soft

@@ -1,3 +1,4 @@
 node_modules/
 .eslintrc.js
 index.d.ts
+jest.config.js
