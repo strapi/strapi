@@ -727,6 +727,9 @@ class TransferEngine<
 
   async transferAssets(): Promise<void> {
     const stage: TransferStage = 'assets';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createAssetsReadStream?.();
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
