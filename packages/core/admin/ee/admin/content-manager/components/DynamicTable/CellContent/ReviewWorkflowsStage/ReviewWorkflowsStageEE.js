@@ -1,15 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 
-export function ReviewWorkflowsStageEE({ name }) {
+export function ReviewWorkflowsStageEE({ color, name }) {
   return (
-    <Typography fontWeight="regular" textColor="neutral700">
-      {name}
-    </Typography>
+    <Flex alignItems="center" gap={2}>
+      <Box height={2} background={color} hasRadius width={2} />
+
+      <Typography fontWeight="regular" textColor="neutral700">
+        {name}
+      </Typography>
+    </Flex>
   );
 }
 
 ReviewWorkflowsStageEE.propTypes = {
+  color: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
 };
