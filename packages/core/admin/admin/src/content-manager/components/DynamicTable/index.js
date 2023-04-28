@@ -23,6 +23,7 @@ const DynamicTable = ({
   isLoading,
   onConfirmDelete,
   onConfirmDeleteAll,
+  handleBulkPublish,
   layout,
   rows,
 }) => {
@@ -107,6 +108,7 @@ const DynamicTable = ({
           onConfirmDeleteAll={onConfirmDeleteAll}
           selectedEntries={selectedEntries}
           clearSelectedEntries={clearSelectedEntries}
+          handleBulkPublish={handleBulkPublish}
         />
       )}
     >
@@ -150,6 +152,7 @@ DynamicTable.propTypes = {
   onConfirmDelete: PropTypes.func.isRequired,
   onConfirmDeleteAll: PropTypes.func.isRequired,
   rows: PropTypes.array.isRequired,
+  handleBulkPublish: PropTypes.func.isRequired,
 };
 
 export default DynamicTable;
