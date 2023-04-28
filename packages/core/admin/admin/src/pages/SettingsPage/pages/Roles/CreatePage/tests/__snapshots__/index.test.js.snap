@@ -541,10 +541,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
-.c37 {
-  height: 100vh;
-}
-
 .c4 {
   padding-right: 8px;
 }
@@ -613,6 +609,10 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c37 {
+  height: 100vh;
 }
 
 .c25 {

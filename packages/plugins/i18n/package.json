@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "4.9.2",
+  "version": "4.10.1",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -23,13 +23,17 @@
   "scripts": {
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "lint": "run -T eslint ."
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
-    "@strapi/helper-plugin": "4.9.2",
+    "@strapi/helper-plugin": "4.10.1",
     "@strapi/icons": "1.6.6",
-    "@strapi/utils": "4.9.2",
+    "@strapi/utils": "4.10.1",
     "formik": "2.2.9",
     "immer": "9.0.19",
     "lodash": "4.17.21",

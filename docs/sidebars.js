@@ -18,17 +18,6 @@ const sidebars = {
     'index',
     {
       type: 'category',
-      label: 'Admin',
-      items: [
-        {
-          type: 'doc',
-          label: 'Link Strapi Design System',
-          id: 'core/admin/link-strapi-design-system',
-        },
-      ],
-    },
-    {
-      type: 'category',
       label: 'Core',
       link: {
         type: 'generated-index',
@@ -38,7 +27,26 @@ const sidebars = {
         {
           type: 'category',
           label: 'Admin',
+          link: {
+            type: 'doc',
+            id: 'core/admin/intro',
+          },
           items: [
+            {
+              type: 'category',
+              label: 'Enterprise Edition',
+              link: {
+                type: 'doc',
+                id: 'core/admin/ee/intro',
+              },
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Review Workflows',
+                  id: 'core/admin/ee/review-workflows',
+                },
+              ],
+            },
             {
               type: 'doc',
               label: 'Link Strapi Design System',
@@ -60,11 +68,6 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
-                  label: 'useCallbackRef',
-                  id: 'core/content-manager/hooks/use-callback-ref',
-                },
-                {
-                  type: 'doc',
                   label: 'useDragAndDrop',
                   id: 'core/content-manager/hooks/use-drag-and-drop',
                 },
@@ -75,6 +78,11 @@ const sidebars = {
               label: 'Relations',
               id: 'core/content-manager/relations',
             },
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-manager/review-workflows',
+            },
           ],
         },
         {
@@ -84,7 +92,13 @@ const sidebars = {
             type: 'doc',
             id: 'core/content-type-builder/intro',
           },
-          items: ['example'],
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/content-type-builder/review-workflows',
+            },
+          ],
         },
         {
           type: 'category',
@@ -119,6 +133,11 @@ const sidebars = {
                   type: 'doc',
                   label: 'useAPIErrorHandler',
                   id: 'core/helper-plugin/hooks/use-api-error-handler',
+                },
+                {
+                  type: 'doc',
+                  label: 'useCallbackRef',
+                  id: 'core/helper-plugin/hooks/use-callback-ref',
                 },
                 {
                   type: 'doc',
@@ -167,6 +186,21 @@ const sidebars = {
                   id: 'core/permissions/frontend/using-permissions',
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Settings',
+          link: {
+            type: 'doc',
+            id: 'core/settings/intro',
+          },
+          items: [
+            {
+              type: 'doc',
+              label: 'Review Workflows',
+              id: 'core/settings/review-workflows',
             },
           ],
         },

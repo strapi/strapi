@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.9.2",
+  "version": "4.10.1",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -28,18 +28,24 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
-  "directories": {
-    "lib": "./lib"
-  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
-    "test": "echo \"no tests yet\"",
+    "build": "run -T tsc && run copy-files",
+    "build:ts": "run build",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
     "lint": "run -T eslint ."
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
     "chalk": "^4.1.2",
-    "execa": "^1.0.0",
+    "execa": "5.1.1",
     "fs-extra": "10.0.0",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
@@ -47,11 +53,13 @@
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
     "semver": "7.3.8",
-    "tar": "6.1.13",
-    "uuid": "^8.3.2"
+    "tar": "6.1.13"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
+  },
+  "devDependencies": {
+    "copyfiles": "2.4.1"
   }
 }

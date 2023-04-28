@@ -20,6 +20,19 @@ module.exports = async () => {
     await actionProvider.registerMany(actions.auditLogs);
   }
 
+  if (features.isEnabled('review-workflows')) {
+    await persistTablesWithPrefix('strapi_workflows');
+
+    const { bootstrap: rwBootstrap } = getService('review-workflows');
+
+    await rwBootstrap();
+    await actionProvider.registerMany(actions.reviewWorkflows);
+
+    // Decorate the entity service with review workflow logic
+    const { decorator } = getService('review-workflows-decorator');
+    strapi.entityService.decorate(decorator);
+  }
+
   await getService('seat-enforcement').seatEnforcementWorkflow();
 
   await executeCEBootstrap();

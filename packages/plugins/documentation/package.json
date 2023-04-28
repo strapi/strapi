@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.9.2",
+  "version": "4.10.1",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -21,17 +21,24 @@
     }
   ],
   "scripts": {
-    "lint": "run -T eslint ."
+    "lint": "run -T eslint .",
+    "test:unit": "jest --verbose",
+    "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
-    "@strapi/helper-plugin": "4.9.2",
+    "@strapi/helper-plugin": "4.10.1",
     "@strapi/icons": "1.6.6",
-    "@strapi/utils": "4.9.2",
+    "@strapi/utils": "4.10.1",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.2.9",
     "fs-extra": "10.0.0",
+    "immer": "9.0.19",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
@@ -55,6 +62,7 @@
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@testing-library/react": "12.1.4",
     "history": "^4.9.0",
     "msw": "1.0.1",

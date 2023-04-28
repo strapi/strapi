@@ -3,7 +3,9 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: sunday
+      time: '22:00'
     versioning-strategy: increase
     ignore:
       # Only allow patch as minor babel versions need to be upgraded all together
@@ -14,6 +16,7 @@ updates:
 
       - dependency-name: '*'
         update-types:
+          - 'version-update:semver-patch'
           - 'version-update:semver-major'
 
     labels:
@@ -22,7 +25,9 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+      day: sunday
+      time: '22:00'
     labels:
       - 'source: dependencies'
       - 'pr: chore'
