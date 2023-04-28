@@ -23,6 +23,10 @@
   "scripts": {
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "lint": "run -T eslint ."
   },
   "dependencies": {

@@ -132,8 +132,7 @@
     "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.3.8",
-    "statuses": "2.0.1",
-    "uuid": "^8.3.2"
+    "statuses": "2.0.1"
   },
   "devDependencies": {
     "supertest": "6.3.3",
