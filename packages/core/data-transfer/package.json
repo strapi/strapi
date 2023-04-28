@@ -51,7 +51,7 @@
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
     "uuid": "9.0.0",
-    "ws": "8.11.0"
+    "ws": "8.13.0"
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",
