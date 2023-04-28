@@ -11,5 +11,5 @@ module.exports = ({ command }) => {
     .command('build')
     .option('--no-optimization', 'Build the admin app without optimizing assets')
     .description('Build the strapi admin app')
-    .action(getLocalScript('build'));
+    .action(getLocalScript('build-command')); // build-command dir to avoid problems with 'build' being commonly ignored
 };
