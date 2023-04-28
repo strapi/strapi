@@ -21,6 +21,7 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
+  getYupInnerErrors,
 } from '@strapi/helper-plugin';
 
 import {
@@ -42,7 +43,7 @@ import { InjectionZone } from '../../../shared/components';
 
 import permissions from '../../../permissions';
 
-import { getRequestUrl, getTrad } from '../../utils';
+import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
@@ -201,6 +202,49 @@ function ListView({
     [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
+  /**
+   * @param {number[]} selectedEntries - Array of ids to publish
+   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
+   */
+  const validateEntriesToPublish = async (selectedEntries) => {
+    const validations = { validIds: [], errors: {} };
+    // Create the validation schema based on the contentType
+    const schema = createYupSchema(
+      contentType,
+      { components: layout.components },
+      { isDraft: false }
+    );
+    // Get the selected entries
+    const entries = data.filter((entry) => {
+      return selectedEntries.includes(entry.id);
+    });
+    // Validate each entry and map the unresolved promises
+    const validationPromises = entries.map((entry) =>
+      schema.validate(entry, { abortEarly: false })
+    );
+    // Resolve all the promises in one go
+    const resolvedPromises = await Promise.allSettled(validationPromises);
+    // Set the validations
+    resolvedPromises.forEach((promise) => {
+      if (promise.status === 'rejected') {
+        const entityId = promise.reason.value.id;
+        validations.errors[entityId] = getYupInnerErrors(promise.reason);
+      }
+
+      if (promise.status === 'fulfilled') {
+        validations.validIds.push(promise.value.id);
+      }
+    });
+
+    return validations;
+  };
+
+  const handleBulkPublish = async (selectedEntries) => {
+    const validations = await validateEntriesToPublish(selectedEntries);
+    // TODO: Remove log when we actually do something with the validations
+    console.log(validations);
+  };
+
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
@@ -342,6 +386,7 @@ function ListView({
               layout={layout}
               rows={data}
               action={getCreateAction({ variant: 'secondary' })}
+              handleBulkPublish={handleBulkPublish}
             />
             <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
           </>
