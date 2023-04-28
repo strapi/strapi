@@ -125,9 +125,9 @@ module.exports = ({ strapi }) => ({
     return this.mapEntitiesResponse(entities, uid);
   },
 
-  async findOneWithCreatorRolesAndCount(id, uid) {
+  async findOneWithCreatorRolesAndCount(id, uid, opts = {}) {
     const counterPopulate = getDeepPopulate(uid, { countMany: true, countOne: true });
-    const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
+    const params = { populate: addCreatedByRolesPopulate(opts.populate ?? counterPopulate) };
 
     return strapi.entityService
       .findOne(uid, id, params)

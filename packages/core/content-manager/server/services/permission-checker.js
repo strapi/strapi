@@ -75,8 +75,8 @@ const createPermissionChecker =
 
     return {
       // Permission utils
-      can,
-      cannot,
+      can, // check if you have the permission
+      cannot, // check if you don't have the permission
       // Sanitizers
       sanitizeOutput,
       sanitizeQuery,

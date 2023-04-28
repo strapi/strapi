@@ -104,6 +104,11 @@ module.exports = {
         ({ result }) => _.isBoolean(result) || _.isObject(result)
       );
 
+      // conditions: string[]
+      // resolveConditions: string[] => unknown[]
+      // removeInvalidConditions: unknown[] => Function[]
+      // evaluateConditions: Function[] => unknown[]
+      // removeInvalidResults: unknown[] => (boolean | object)[]
       const evaluatedConditions = await Promise.resolve(conditions)
         .then(resolveConditions)
         .then(removeInvalidConditions)
