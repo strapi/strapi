@@ -11,7 +11,7 @@ const fields = traverseFactory()
     return Promise.all(fields.map((field) => recurse(visitor, options, field)));
   })
   // Return wildcards as is
-  .intercept(eq('*'), constant('*'))
+  .intercept((value): value is string => eq('*', value), constant('*'))
   // Parse string values
   // Since we're parsing strings only, each value should be an attribute name (and it's value, undefined),
   // thus it shouldn't be possible to set a new value, and get should return the whole data if key === data

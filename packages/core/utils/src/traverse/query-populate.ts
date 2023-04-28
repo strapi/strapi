@@ -31,7 +31,7 @@ const populate = traverseFactory()
     return Promise.all(populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate)));
   })
   // Return wildcards as is
-  .intercept(eq('*'), constant('*'))
+  .intercept((value): value is string => eq('*', value), constant('*'))
   // Parse string values
   .parse(isString, () => {
     const tokenize = split('.');

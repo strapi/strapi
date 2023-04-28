@@ -8,9 +8,10 @@ import * as sanitizers from './sanitizers';
 import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
+import { Model } from '../types';
 
 const createContentAPISanitizers = () => {
-  const sanitizeInput = (data, schema, { auth } = {}) => {
+  const sanitizeInput = (data, schema: Model, { auth } = {}) => {
     if (isArray(data)) {
       return Promise.all(data.map((entry) => sanitizeInput(entry, schema, { auth })));
     }
@@ -35,7 +36,7 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(data);
   };
 
-  const sanitizeOutput = async (data, schema, { auth } = {}) => {
+  const sanitizeOutput = async (data, schema: Model, { auth } = {}) => {
     if (isArray(data)) {
       const res = new Array(data.length);
       for (let i = 0; i < data.length; i += 1) {
@@ -82,7 +83,7 @@ const createContentAPISanitizers = () => {
     return sanitizedQuery;
   };
 
-  const sanitizeFilters = (filters, schema, { auth } = {}) => {
+  const sanitizeFilters = (filters, schema: Model, { auth } = {}) => {
     if (isArray(filters)) {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
@@ -96,7 +97,7 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(filters);
   };
 
-  const sanitizeSort = (sort, schema, { auth } = {}) => {
+  const sanitizeSort = (sort, schema: Model, { auth } = {}) => {
     const transforms = [sanitizers.defaultSanitizeSort(schema)];
 
     if (auth) {
@@ -106,13 +107,13 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(sort);
   };
 
-  const sanitizeFields = (fields, schema) => {
+  const sanitizeFields = (fields, schema: Model) => {
     const transforms = [sanitizers.defaultSanitizeFields(schema)];
 
     return pipeAsync(...transforms)(fields);
   };
 
-  const sanitizePopulate = (populate, schema, { auth } = {}) => {
+  const sanitizePopulate = (populate, schema: Model, { auth } = {}) => {
     const transforms = [sanitizers.defaultSanitizePopulate(schema)];
 
     if (auth) {

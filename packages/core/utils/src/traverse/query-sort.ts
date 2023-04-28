@@ -23,7 +23,8 @@ const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every(isString);
 const isObjectArray = (value: unknown): value is object[] =>
   Array.isArray(value) && value.every(isObject);
-const isNestedSorts = (value: string) => isString(value) && value.split(',').length > 1;
+const isNestedSorts = (value: unknown): value is string =>
+  isString(value) && value.split(',').length > 1;
 
 const sort = traverseFactory()
   .intercept(
@@ -57,84 +58,78 @@ const sort = traverseFactory()
     }
   )
   // Parse string values
-  .parse(
-    (sort) => typeof sort === 'string',
-    () => {
-      const tokenize = pipe(split('.'), map(split(':')), flatten);
-      const recompose = (parts) => {
-        if (parts.length === 0) {
-          return undefined;
+  .parse(isString, () => {
+    const tokenize = pipe(split('.'), map(split(':')), flatten);
+    const recompose = (parts: string[]) => {
+      if (parts.length === 0) {
+        return undefined;
+      }
+
+      return parts.reduce((acc, part) => {
+        if (isEmpty(part)) {
+          return acc;
         }
 
-        return parts.reduce((acc, part) => {
-          if (isEmpty(part)) {
-            return acc;
-          }
+        if (acc === '') {
+          return part;
+        }
 
-          if (acc === '') {
-            return part;
-          }
+        return isSortOrder(part) ? `${acc}:${part}` : `${acc}.${part}`;
+      }, '');
+    };
 
-          return isSortOrder(part) ? `${acc}:${part}` : `${acc}.${part}`;
-        }, '');
-      };
-
-      return {
-        transform: trim,
-
-        remove(key, data) {
-          const [root] = tokenize(data);
-
-          return root === key ? undefined : data;
-        },
-
-        set(key, value, data) {
-          const [root] = tokenize(data);
-
-          if (root !== key) {
-            return data;
-          }
-
-          return isNil(value) ? root : `${root}.${value}`;
-        },
-
-        keys(data) {
-          return [first(tokenize(data))];
-        },
-
-        get(key, data) {
-          const [root, ...rest] = tokenize(data);
-
-          return key === root ? recompose(rest) : undefined;
-        },
-      };
-    }
-  )
-  // Parse object values
-  .parse(
-    (value) => typeof value === 'object',
-    () => ({
-      transform: cloneDeep,
+    return {
+      transform: trim,
 
       remove(key, data) {
-        const { [key]: ignored, ...rest } = data;
+        const [root] = tokenize(data);
 
-        return rest;
+        return root === key ? undefined : data;
       },
 
       set(key, value, data) {
-        return { ...data, [key]: value };
+        const [root] = tokenize(data);
+
+        if (root !== key) {
+          return data;
+        }
+
+        return isNil(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
-        return Object.keys(data);
+        return [first(tokenize(data))];
       },
 
       get(key, data) {
-        return data[key];
+        const [root, ...rest] = tokenize(data);
+
+        return key === root ? recompose(rest) : undefined;
       },
-    })
-  )
+    };
+  })
+  // Parse object values
+  .parse(isObject, () => ({
+    transform: cloneDeep,
+
+    remove(key, data) {
+      const { [key]: ignored, ...rest } = data;
+
+      return rest;
+    },
+
+    set(key, value, data) {
+      return { ...data, [key]: value };
+    },
+
+    keys(data) {
+      return Object.keys(data);
+    },
+
+    get(key, data) {
+      return data[key];
+    },
+  }))
   // Handle deep sort on relation
   .onRelation(async ({ key, value, attribute, visitor, path }, { set, recurse }) => {
     const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');

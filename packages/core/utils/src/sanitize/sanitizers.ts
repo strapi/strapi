@@ -98,7 +98,7 @@ const defaultSanitizeFields = curry((schema: Model, fields) => {
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
-      ({ key, attribute }, { remove }) => {
+      ({ key, attribute }: , { remove }) => {
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           remove(key);
         }

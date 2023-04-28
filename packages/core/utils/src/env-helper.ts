@@ -1,56 +1,60 @@
 import _ from 'lodash';
 
-function env(key, defaultValue) {
+function env<T>(key: string, defaultValue?: T): string | T | undefined {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
 
+function getKey(key: string) {
+  return process.env[key] ?? '';
+}
+
 const utils = {
-  int(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  int(key: string, defaultValue?: number): number {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    const value = process.env[key];
-    return parseInt(value, 10);
+    return parseInt(getKey(key), 10);
   },
 
-  float(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  float(key: string, defaultValue?: number): number {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    const value = process.env[key];
-    return parseFloat(value);
+    return parseFloat(getKey(key));
   },
 
-  bool(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  bool(key: string, defaultValue?: boolean): boolean {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    const value = process.env[key];
-    return value === 'true';
+    return getKey(key) === 'true';
   },
 
-  json(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  json(key: string, defaultValue?: object) {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    const value = process.env[key];
     try {
-      return JSON.parse(value);
+      return JSON.parse(getKey(key));
     } catch (error) {
-      throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
+      if (error instanceof Error) {
+        throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
+      }
+
+      throw error;
     }
   },
 
-  array(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  array(key: string, defaultValue?: string[]): string[] {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    let value = process.env[key];
+    let value = getKey(key);
 
     if (value.startsWith('[') && value.endsWith(']')) {
       value = value.substring(1, value.length - 1);
@@ -61,13 +65,12 @@ const utils = {
     });
   },
 
-  date(key, defaultValue) {
-    if (!_.has(process.env, key)) {
+  date(key: string, defaultValue?: Date): Date {
+    if (!_.has(process.env, key) && defaultValue) {
       return defaultValue;
     }
 
-    const value = process.env[key];
-    return new Date(value);
+    return new Date(getKey(key));
   },
 
   /**
@@ -77,7 +80,7 @@ const utils = {
    * @param {string|undefined} defaultValue
    * @returns {string|undefined}
    */
-  oneOf(key, expectedValues, defaultValue) {
+  oneOf(key: string, expectedValues?: unknown[], defaultValue?: unknown) {
     if (!expectedValues) {
       throw new Error(`env.oneOf requires expectedValues`);
     }

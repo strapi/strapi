@@ -1,8 +1,96 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
 import { isNil, pick } from 'lodash/fp';
+import { Attribute, Model, RelationalAttribute } from '../types';
+
+export interface Path {
+  raw: string | null;
+  attribute: string | null;
+}
+
+export interface TraverseOptions {
+  path?: Path;
+  schema: Model;
+}
+
+export interface VisitorOptions {
+  data: unknown;
+  value: unknown;
+  schema: Model;
+  key: string;
+  attribute: Attribute;
+  path: Path;
+}
+
+export interface Traverse {
+  (visitor: Visitor, options: TraverseOptions, data: unknown): Promise<unknown>;
+}
+export interface Visitor {
+  (visitorOptions: VisitorOptions, opts: Pick<TransformUtils, 'set' | 'remove'>): void;
+}
+
+interface Interceptor<T = unknown> {
+  predicate(data: unknown): data is T;
+  handler(
+    visitor: Visitor,
+    options: TraverseOptions,
+    data: T,
+    recurseOptions: { recurse: Traverse }
+  ): void;
+}
+
+interface ParseUtils<T> {
+  transform(data: T): unknown;
+  remove(key: string, data: T): unknown;
+  set(key: string, valeu: unknown, data: T): unknown;
+  keys(data: T): string[];
+  get(key: string, data: T): unknown;
+}
+
+interface Parser<T = unknown> {
+  predicate(data: unknown): data is T;
+  parser(data: T): ParseUtils<T>;
+}
+
+interface Ignore {
+  (ctx: Context): boolean;
+}
+
+interface AttributeHandler<AttributeType = Attribute> {
+  predicate(ctx: Context<AttributeType>): boolean;
+  handler(ctx: Context<AttributeType>, opts: Pick<TransformUtils, 'set' | 'recurse'>): void;
+}
+interface CommonHandler<AttributeType = Attribute> {
+  predicate(ctx: Context<AttributeType>): boolean;
+  handler(ctx: Context<AttributeType>, opts: Pick<TransformUtils, 'set' | 'recurse'>): void;
+}
+
+interface TransformUtils {
+  remove(key: string): void;
+  set(key: string, valeu: unknown): void;
+  recurse: Traverse;
+}
+
+interface Context<AttributeType = Attribute> {
+  key: string;
+  value: unknown;
+  attribute: AttributeType;
+  schema: Model;
+  path: Path;
+  data: unknown;
+  visitor: Visitor;
+}
+interface State {
+  parsers: Parser[];
+  interceptors: Interceptor[];
+  ignore: Ignore[];
+  handlers: {
+    attributes: AttributeHandler[];
+    common: CommonHandler[];
+  };
+}
 
 export default () => {
-  const state = {
+  const state: State = {
     parsers: [],
     interceptors: [],
     ignore: [],
@@ -12,7 +100,7 @@ export default () => {
     },
   };
 
-  const traverse = async (visitor, options, data) => {
+  const traverse: Traverse = async (visitor, options: TraverseOptions, data) => {
     const { path = { raw: null, attribute: null }, schema } = options ?? {};
 
     // interceptors
@@ -52,7 +140,7 @@ export default () => {
 
       // visitors
 
-      const visitorOptions = {
+      const visitorOptions: VisitorOptions = {
         key,
         value: utils.get(key, out),
         attribute,
@@ -61,7 +149,7 @@ export default () => {
         data: out,
       };
 
-      const transformUtils = {
+      const transformUtils: TransformUtils = {
         remove(key) {
           out = utils.remove(key, out);
         },
@@ -75,7 +163,7 @@ export default () => {
 
       const value = utils.get(key, out);
 
-      const createContext = () => ({
+      const createContext = (): Context => ({
         key,
         value,
         attribute,
@@ -112,44 +200,44 @@ export default () => {
   return {
     traverse,
 
-    intercept(predicate, handler) {
+    intercept<T>(predicate: Interceptor<T>['predicate'], handler: Interceptor<T>['handler']) {
       state.interceptors.push({ predicate, handler });
       return this;
     },
 
-    parse(predicate, parser) {
+    parse<T>(predicate: Parser<T>['predicate'], parser: Parser<T>['parser']) {
       state.parsers.push({ predicate, parser });
       return this;
     },
 
-    ignore(predicate) {
+    ignore(predicate: Ignore) {
       state.ignore.push(predicate);
       return this;
     },
 
-    on(predicate, handler) {
+    on(predicate: CommonHandler['predicate'], handler: CommonHandler['handler']) {
       state.handlers.common.push({ predicate, handler });
       return this;
     },
 
-    onAttribute(predicate, handler) {
+    onAttribute(predicate: AttributeHandler['predicate'], handler: AttributeHandler['handler']) {
       state.handlers.attributes.push({ predicate, handler });
       return this;
     },
 
-    onRelation(handler) {
+    onRelation(handler: AttributeHandler<RelationalAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'relation', handler);
     },
 
-    onMedia(handler) {
+    onMedia(handler: AttributeHandler<RelationalAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'media', handler);
     },
 
-    onComponent(handler) {
+    onComponent(handler: AttributeHandler<RelationalAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'component', handler);
     },
 
-    onDynamicZone(handler) {
+    onDynamicZone(handler: AttributeHandler<RelationalAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'dynamiczone', handler);
     },
   };

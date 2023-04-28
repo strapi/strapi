@@ -83,7 +83,8 @@ const validateYupSchema =
   async (body, errorMessage) => {
     try {
       const optionsWithDefaults = defaults(defaultValidationParam, options);
-      return await schema.validate(body, optionsWithDefaults);
+      const result = await schema.validate(body, optionsWithDefaults);
+      return result;
     } catch (e) {
       handleYupError(e, errorMessage);
     }

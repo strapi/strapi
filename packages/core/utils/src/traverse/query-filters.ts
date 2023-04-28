@@ -1,6 +1,8 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep } from 'lodash/fp';
+import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit, prop } from 'lodash/fp';
 
 import traverseFactory from './factory';
+
+import { VisitorOptions } from '../../traverse-entity';
 
 const filters = traverseFactory()
   .intercept(
@@ -33,9 +35,7 @@ const filters = traverseFactory()
       transform: cloneDeep,
 
       remove(key, data) {
-        const { [key]: ignored, ...rest } = data;
-
-        return rest;
+        return omit(key, data);
       },
 
       set(key, value, data) {
@@ -47,7 +47,7 @@ const filters = traverseFactory()
       },
 
       get(key, data) {
-        return data[key];
+        return prop(key, data);
       },
     })
   )

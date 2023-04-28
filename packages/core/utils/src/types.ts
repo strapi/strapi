@@ -19,6 +19,7 @@ export interface RelationalAttribute extends Attribute {
 export type Kind = 'singleType' | 'collectionType';
 
 export interface Model {
+  uid?: string;
   kind: Kind;
   info: {
     singularName: string;
