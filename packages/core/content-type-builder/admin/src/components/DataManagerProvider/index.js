@@ -10,7 +10,7 @@ import {
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
-  useAppInfos,
+  useAppInfo,
   useRBACProvider,
   useGuidedTour,
   useFetchClient,
@@ -74,7 +74,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const { autoReload } = useAppInfos();
+  const { autoReload } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();

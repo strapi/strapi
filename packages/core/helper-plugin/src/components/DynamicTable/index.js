@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
 import styled from 'styled-components';
 import useQueryParams from '../../hooks/useQueryParams';
-import useTracking from '../../hooks/useTracking';
+import { useTracking } from '../../features/Tracking';
 import ConfirmDialog from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';

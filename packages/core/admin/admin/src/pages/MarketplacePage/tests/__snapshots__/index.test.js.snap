@@ -912,19 +912,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   cursor: not-allowed;
 }
 
-.c96 {
-  margin-right: 24px;
-}
-
-.c96 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c98 {
-  word-break: break-all;
-}
-
 .c11 {
   background: #4945ff;
   padding-top: 8px;
@@ -1073,6 +1060,19 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c14 svg > g,
 .c14 svg path {
   fill: #32324d;
+}
+
+.c96 {
+  margin-right: 24px;
+}
+
+.c96 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c98 {
+  word-break: break-all;
 }
 
 .c69 {
