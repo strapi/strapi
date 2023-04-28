@@ -98,7 +98,7 @@
     "inquirer": "8.2.5",
     "jest": "29.0.3",
     "jest-circus": "29.0.3",
-    "jest-cli": "29.0.3",
+    "jest-cli": "29.5.0",
     "jest-environment-jsdom": "29.0.3",
     "jest-watch-typeahead": "2.2.2",
     "lerna": "6.5.1",
