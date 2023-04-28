@@ -7,6 +7,7 @@ const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
 
+const { checkRequirements } = require('@strapi/utils');
 const loadConfiguration = require('./core/app-configuration');
 
 const { createContainer } = require('./container');
@@ -487,6 +488,12 @@ class Strapi {
   }
 
   async load() {
+    try {
+      checkRequirements();
+    } catch (e) {
+      // Ignore for now, but we may want to prevent server startup if certain requirements are missing
+    }
+
     await this.register();
     await this.bootstrap();
 

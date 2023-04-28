@@ -1,20 +1,23 @@
-import { red, green, bold, yellow } from 'chalk';
-import semver from 'semver';
-import engines from '../resources/json/common/engines';
+'use strict';
 
-export default function checkRequirements() {
+const { red, green, bold, yellow } = require('chalk');
+const semver = require('semver');
+const packageJSON = require('../../../../package.json');
+
+module.exports = () => {
   const currentNodeVersion = process.versions.node;
+  const { engines } = packageJSON;
 
   // error if the node version isn't supported
   if (!semver.satisfies(currentNodeVersion, engines.node)) {
     console.error(red(`You are running ${bold(`Node.js ${currentNodeVersion}`)}`));
     console.error(`Strapi requires ${bold(green(`Node.js ${engines.node}`))}`);
     console.error('Please make sure to use the right version of Node.');
-    process.exit(1);
+    throw new Error('Invalid Node Version');
   }
 
   // warn if not using a LTS version
-  else if (semver.satisfies(currentNodeVersion, '15.x.x || 17.x.x || 19.x.x')) {
+  if (semver.satisfies(currentNodeVersion, '14.x.x' || '15.x.x' || '17.x.x || 19.x.x')) {
     console.warn(yellow(`You are running ${bold(`Node.js ${currentNodeVersion}`)}`));
     console.warn(
       `Strapi only supports ${bold(
@@ -22,4 +25,4 @@ export default function checkRequirements() {
       )}, other versions may not be compatible.`
     );
   }
-}
+};

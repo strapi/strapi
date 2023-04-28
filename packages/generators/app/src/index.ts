@@ -4,8 +4,8 @@ import os from 'node:os';
 import readline from 'node:readline';
 import crypto from 'crypto';
 import * as sentry from '@sentry/node';
+import utils from '@strapi/utils'; // TODO: can't import checkRequirements directly until utils is in typescript
 import hasYarn from './utils/has-yarn';
-import checkRequirements from './utils/check-requirements';
 import { trackError, captureException } from './utils/usage';
 import parseDatabaseArguments from './utils/parse-db-arguments';
 import generateNew from './generate-new';
@@ -21,7 +21,11 @@ sentry.init({
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {
-  checkRequirements();
+  try {
+    utils.checkRequirements();
+  } catch (e) {
+    process.exit(1);
+  }
 
   const rootPath = resolve(projectDirectory);
 
