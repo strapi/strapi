@@ -11,6 +11,8 @@ describe('Settings | Review Workflows | colors', () => {
         hex: expect.any(String),
         name: expect.any(String),
       });
+
+      expect(color.hex).toBe(color.hex.toLowerCase());
     });
   });
 
