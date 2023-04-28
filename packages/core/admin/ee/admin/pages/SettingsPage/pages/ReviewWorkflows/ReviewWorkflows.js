@@ -18,12 +18,24 @@ import { Check } from '@strapi/icons';
 
 import { Stages } from './components/Stages';
 import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE } from './constants';
+import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 import { setWorkflows } from './actions';
 import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
 import adminPermissions from '../../../../../../admin/src/permissions';
+import { StageDragPreview } from './components/StageDragPreview';
+import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+
+function renderDragLayerItem({ type, item }) {
+  switch (type) {
+    case DRAG_DROP_TYPES.STAGE:
+      return <StageDragPreview {...item} />;
+
+    default:
+      return null;
+  }
+}
 
 export function ReviewWorkflowsPage() {
   const { trackUsage } = useTracking();
@@ -135,6 +147,8 @@ export function ReviewWorkflowsPage() {
           })}
         />
         <Main tabIndex={-1}>
+          <DragLayer renderItem={renderDragLayerItem} />
+
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <HeaderLayout

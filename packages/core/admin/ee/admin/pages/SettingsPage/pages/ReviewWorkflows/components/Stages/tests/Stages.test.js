@@ -4,6 +4,8 @@ import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { FormikProvider, useFormik } from 'formik';
 import userEvent from '@testing-library/user-event';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
@@ -59,15 +61,17 @@ const ComponentFixture = (props) => {
   });
 
   return (
-    <Provider store={store}>
-      <FormikProvider value={formik}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Stages stages={STAGES_FIXTURE} {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </FormikProvider>
-    </Provider>
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <FormikProvider value={formik}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <Stages stages={STAGES_FIXTURE} {...props} />
+            </ThemeProvider>
+          </IntlProvider>
+        </FormikProvider>
+      </Provider>
+    </DndProvider>
   );
 };
 

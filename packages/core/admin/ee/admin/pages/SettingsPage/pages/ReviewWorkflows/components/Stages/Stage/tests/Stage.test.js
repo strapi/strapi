@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { FormikProvider, useFormik } from 'formik';
 import { Provider } from 'react-redux';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
@@ -40,15 +42,17 @@ const ComponentFixture = (props) => {
   });
 
   return (
-    <Provider store={store}>
-      <FormikProvider value={formik}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Stage {...STAGES_FIXTURE} {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </FormikProvider>
-    </Provider>
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <FormikProvider value={formik}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <Stage {...STAGES_FIXTURE} {...props} />
+            </ThemeProvider>
+          </IntlProvider>
+        </FormikProvider>
+      </Provider>
+    </DndProvider>
   );
 };
 
@@ -62,12 +66,13 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { getByRole, getByText, queryByRole } = setup();
+    const { container, getByRole, getByText, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
-    // open accordion
-    await user.click(getByRole('button'));
+    // open accordion; getByRole is not sufficient here, because the accordion
+    // does not have better identifiers
+    await user.click(container.querySelector('button[aria-expanded]'));
 
     expect(queryByRole('textbox')).toBeInTheDocument();
     expect(getByRole('textbox').value).toBe('something');

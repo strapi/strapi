@@ -5,6 +5,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGE_POSITION,
 } from '../../constants';
 
 const WORKFLOWS_FIXTURE = [
@@ -402,6 +403,114 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       expect.objectContaining({
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
+            isDirty: false,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: 1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-2' }),
+                expect.objectContaining({ name: 'stage-1' }),
+              ],
+            }),
+            isDirty: true,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION - does not update position if new index is smaller than 0', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: -1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-1' }),
+                expect.objectContaining({ name: 'stage-2' }),
+              ],
+            }),
+            isDirty: false,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION - does not update position if new index is greater than the amount of stages', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: 3 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-1' }),
+                expect.objectContaining({ name: 'stage-2' }),
+              ],
+            }),
             isDirty: false,
           }),
         }),
