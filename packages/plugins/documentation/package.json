@@ -22,7 +22,12 @@
   ],
   "scripts": {
     "lint": "run -T eslint .",
-    "test:unit": "jest --verbose"
+    "test:unit": "jest --verbose",
+    "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
     "@strapi/design-system": "1.6.6",
