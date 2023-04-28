@@ -30,7 +30,6 @@ describe('Audit logs service', () => {
 
   afterAll(() => {
     jest.resetAllMocks();
-    jest.useRealTimers();
   });
 
   describe('Init with audit logs disabled', () => {
@@ -187,7 +186,13 @@ describe('Audit logs service', () => {
       const auditLogsService = createAuditLogsService(strapi);
       await auditLogsService.register();
 
-      jest.useFakeTimers().setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+      // TODO: jest.useFakeTimers() is broken with Node 20 because it attempts to overwrite global.performance which is now read-only
+      // jest.useFakeTimers().setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+      const now = 0;
+      const nowDate = new Date(now);
+      const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      const dateSpy = jest.spyOn(global, 'Date').mockImplementation(() => nowDate);
+
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       // Sends the processed event to a provider
@@ -200,6 +205,9 @@ describe('Audit logs service', () => {
           userId: 1,
         })
       );
+
+      dateSpy.mockRestore();
+      nowSpy.mockRestore();
     });
 
     it('ignores events that are not in the event map', async () => {
