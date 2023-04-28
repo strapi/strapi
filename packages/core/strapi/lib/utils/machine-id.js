@@ -1,14 +1,14 @@
 'use strict';
 
 const { machineIdSync } = require('node-machine-id');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 module.exports = () => {
   try {
     const deviceId = machineIdSync();
     return deviceId;
   } catch (error) {
-    const deviceId = uuidv4();
+    const deviceId = randomUUID();
     return deviceId;
   }
 };
