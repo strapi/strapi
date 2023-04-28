@@ -1,9 +1,9 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
