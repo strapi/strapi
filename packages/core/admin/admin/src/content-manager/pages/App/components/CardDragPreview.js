@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Flex, Typography } from '@strapi/design-system';
 import { Pencil, Cross, Drag } from '@strapi/icons';
-import ellipsisCardTitle from '../utils/ellipsisCardTitle';
+import { pxToRem } from '@strapi/helper-plugin';
 
 const ActionBox = styled(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
@@ -14,9 +14,8 @@ const ActionBox = styled(Flex)`
 `;
 
 const DragButton = styled(ActionBox)`
-  padding: 0 ${({ theme }) => theme.spaces[3]};
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
-  cursor: all-scroll;
+  border-right: 1px solid
+    ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
 
   svg {
     width: ${12 / 16}rem;
@@ -25,11 +24,6 @@ const DragButton = styled(ActionBox)`
 `;
 
 const FieldContainer = styled(Flex)`
-  display: inline-flex;
-  max-height: ${32 / 16}rem;
-  opacity: ${({ transparent }) => (transparent ? 0 : 1)};
-  background-color: ${({ theme, isSibling }) =>
-    isSibling ? theme.colors.neutral100 : theme.colors.primary100};
   border: 1px solid
     ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
 
@@ -41,54 +35,60 @@ const FieldContainer = styled(Flex)`
       fill: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
     }
   }
-
-  ${Typography} {
-    color: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
-  }
-
-  ${DragButton} {
-    border-right: 1px solid
-      ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
-  }
 `;
 
-const CardPreview = ({ labelField, transparent, isSibling }) => {
-  const cardEllipsisTitle = ellipsisCardTitle(labelField);
+const TypographyMaxWidth = styled(Typography)`
+  max-width: ${72 / 16}rem;
+`;
 
+export function CardDragPreview({ labelField, transparent, isSibling }) {
   return (
     <FieldContainer
+      background={isSibling ? 'neutral100' : 'primary100'}
+      display="inline-flex"
+      gap={3}
       hasRadius
       justifyContent="space-between"
       transparent={transparent}
       isSibling={isSibling}
+      max-height={pxToRem(32)}
+      maxWidth="min-content"
+      opacity={transparent ? 0 : 1}
     >
       <Flex gap={3}>
-        <DragButton alignItems="center">
+        <DragButton alignItems="center" cursor="all-scroll" padding={3}>
           <Drag />
         </DragButton>
-        <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
+
+        <TypographyMaxWidth
+          textColor={isSibling ? undefined : 'primary600'}
+          fontWeight="bold"
+          ellipsis
+        >
+          {labelField}
+        </TypographyMaxWidth>
       </Flex>
-      <Flex paddingLeft={3}>
+
+      <Flex>
         <ActionBox alignItems="center">
           <Pencil />
         </ActionBox>
+
         <ActionBox alignItems="center">
           <Cross />
         </ActionBox>
       </Flex>
     </FieldContainer>
   );
-};
+}
 
-CardPreview.defaultProps = {
+CardDragPreview.defaultProps = {
   isSibling: false,
   transparent: false,
 };
 
-CardPreview.propTypes = {
+CardDragPreview.propTypes = {
   isSibling: PropTypes.bool,
   labelField: PropTypes.string.isRequired,
   transparent: PropTypes.bool,
 };
-
-export default CardPreview;
