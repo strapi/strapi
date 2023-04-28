@@ -101,14 +101,17 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', nameToCollectionName(infos.pluralName))
+        .set('collectionName', infos.collectionName || nameToCollectionName(infos.pluralName))
         .set('info', {
           singularName: infos.singularName,
           pluralName: infos.pluralName,
           displayName: infos.displayName,
           description: infos.description,
         })
-        .set('options', { draftAndPublish: infos.draftAndPublish || false })
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish || false,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
@@ -227,7 +230,10 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
-        .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish || false,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 

@@ -1,4 +1,4 @@
-import { fixtures } from '@strapi/admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils';
 import selectMenuLinks from '../selectors';
 
 describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | selectors', () => {

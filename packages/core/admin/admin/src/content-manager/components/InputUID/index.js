@@ -11,7 +11,7 @@ import { Flex, TextInput, Typography } from '@strapi/design-system';
 import { Refresh, CheckCircle, ExclamationMarkCircle, Loader } from '@strapi/icons';
 
 import { getRequestUrl } from '../../utils';
-import useDebounce from './useDebounce';
+import useDebounce from '../../../hooks/useDebounce';
 import UID_REGEX from './regex';
 import { FieldActionWrapper, TextValidation, LoadingWrapper } from './endActionStyle';
 

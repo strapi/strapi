@@ -35,18 +35,18 @@ const getRestrictRelationsTo = (contentType = {}) => {
  * @param {Object} contentType
  */
 const formatContentType = (contentType) => {
-  const { uid, kind, modelName, plugin, collectionName, info, options } = contentType;
+  const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {
     uid,
     plugin,
     apiID: modelName,
     schema: {
+      ...contentTypesUtils.getOptions(contentType),
       displayName: info.displayName,
       singularName: info.singularName,
       pluralName: info.pluralName,
       description: _.get(info, 'description', ''),
-      draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       pluginOptions: contentType.pluginOptions,
       kind: kind || 'collectionType',
       collectionName,

@@ -1,0 +1,49 @@
+---
+title: useCollator
+description: API reference for the useCollator hook in Strapi
+tags:
+  - hooks
+  - helper-plugin
+  - i18n
+---
+
+A custom hook that returns the [`Intl.Collator`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator) native API.
+Useful for searching & sorting strings that are localised. The implementation method has a unique cache store to avoid creating a new instance of the
+`Intl.Collator` for each call of the hook depending on the locale and options provided.
+
+Borrowed from [`react-aria`](https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/i18n/src/useCollator.ts).
+
+## Usage
+
+```js
+import { useIntl } from 'react-intl';
+import { useCollator } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const { locale } = useIntl();
+  const fruits = ['banana', 'apple', 'orange', 'kiwi'];
+
+  const formatter = useCollator(locale, { sensitivity: 'base' });
+
+  /**
+   * This would render the list of fruits in the following order:
+   * apple
+   * banana
+   * kiwi
+   * orange
+   */
+  return (
+    <div>
+      {fruits.sort(formatter.compare).map((fruit) => (
+        <h2 key={fruit}>{fruit}</h2>
+      ))}
+    </div>
+  );
+};
+```
+
+## Typescript
+
+```ts
+function useCollator(locale: string, options?: Intl.CollatorOptions): Intl.Collator;
+```

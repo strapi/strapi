@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "4.8.2",
+  "version": "4.10.1",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
@@ -20,13 +20,14 @@
     }
   ],
   "main": "./lib/index.js",
+  "types": "index.d.ts",
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "eslint .",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "lint": "run -T eslint .",
+    "test": "run -T jest",
+    "test:watch": "run -T jest --watch"
   },
   "dependencies": {
     "chalk": "4.1.2",
@@ -34,7 +35,7 @@
     "fs-extra": "10.0.1",
     "lodash": "4.17.21",
     "prettier": "2.8.4",
-    "typescript": "4.6.2"
+    "typescript": "5.0.4"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

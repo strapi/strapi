@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test';
 const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
+const { cleanTestApp, generateTestApp } = require('./test-app-generator');
 
 const databases = {
   postgres: {
@@ -25,6 +25,16 @@ const databases = {
   },
   mysql: {
     client: 'mysql',
+    connection: {
+      host: '127.0.0.1',
+      port: 3306,
+      database: 'strapi_test',
+      username: 'strapi',
+      password: 'strapi',
+    },
+  },
+  mysql2: {
+    client: 'mysql2',
     connection: {
       host: '127.0.0.1',
       port: 3306,
@@ -80,7 +90,7 @@ yargs
   })
   .command(
     '$0',
-    'run end to end tests',
+    'run API integration tests',
     (yarg) => {
       yarg.option('database', {
         alias: 'db',

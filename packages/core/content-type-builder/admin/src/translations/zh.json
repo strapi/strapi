@@ -135,7 +135,7 @@
   "menu.section.models.name": "集合型別",
   "menu.section.single-types.name": "單一型別",
   "modalForm.attribute.form.base.name.description": "欄位名稱不允許空白",
-  "modalForm.attribute.form.base.name.placeholder": "例如：Slug、SEO 網址、Canonical 網址",
+  "modalForm.attribute.form.base.name.placeholder": "例如：slug、seo網址、canonical網址",
   "modalForm.attribute.target-field": "關聯目標欄位",
   "modalForm.attributes.select-component": "選擇一個元件",
   "modalForm.attributes.select-components": "選擇多個元件",

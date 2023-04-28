@@ -4,21 +4,21 @@ import { useIntl } from 'react-intl';
 
 import { Select, Option } from '@strapi/design-system';
 
-const TokenTypeSelect = ({ errors, values, onChange, canEditInputs, options, label }) => {
+const TokenTypeSelect = ({ name, errors, values, onChange, canEditInputs, options, label }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Select
-      name="type"
+      name={name}
       label={formatMessage({
         id: label.id,
         defaultMessage: label.defaultMessage,
       })}
-      value={values?.type}
+      value={values && values[name]}
       error={
-        errors.type
+        errors[name]
           ? formatMessage(
-              errors.type?.id ? errors.type : { id: errors.type, defaultMessage: errors.type }
+              errors[name]?.id ? errors[name] : { id: errors[name], defaultMessage: errors[name] }
             )
           : null
       }
@@ -38,6 +38,7 @@ const TokenTypeSelect = ({ errors, values, onChange, canEditInputs, options, lab
 };
 
 TokenTypeSelect.propTypes = {
+  name: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.shape({
@@ -62,6 +63,7 @@ TokenTypeSelect.propTypes = {
 };
 
 TokenTypeSelect.defaultProps = {
+  name: 'type',
   errors: {},
   options: [],
 };

@@ -18,7 +18,11 @@ class MysqlDialect extends Dialect {
 
   configure() {
     this.db.config.connection.connection.supportBigNumbers = true;
-    this.db.config.connection.connection.bigNumberStrings = true;
+    // Only allow bigNumberStrings option set to be true if no connection option passed
+    // Otherwise bigNumberStrings option should be allowed to used from DB config
+    if (this.db.config.connection.connection.bigNumberStrings === undefined) {
+      this.db.config.connection.connection.bigNumberStrings = true;
+    }
     this.db.config.connection.connection.typeCast = (field, next) => {
       if (field.type === 'DECIMAL' || field.type === 'NEWDECIMAL') {
         const value = field.string();
