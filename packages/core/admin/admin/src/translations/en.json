@@ -794,6 +794,7 @@
   "content-manager.popUpWarning.bodyMessage.contentType.delete": "Are you sure to delete Content-Type?",
   "content-manager.popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete these entries?",
   "content-manager.popUpWarning.bodyMessage.contentType.publish.all": "Are you sure you want to publish these entries?",
+  "content-manager.popUpWarning.bodyMessage.contentType.unpublish.all": "Are you sure you want to unpublish these entries?",
   "content-manager.popUpWarning.warning.has-draft-relations.title": "Confirmation",
   "content-manager.popUpWarning.warning.publish-question": "Do you still want to publish?",
   "content-manager.popUpWarning.warning.unpublish": "If you don't publish this content, it will automatically turn into a Draft.",

@@ -17,6 +17,7 @@ const injectionZones = {
       actions: [],
       deleteModalAdditionalInfos: [],
       publishModalAdditionalInfos: [],
+      unpublishModalAdditionalInfos: [],
     },
   },
 };

@@ -13,6 +13,7 @@
   "Settings.list.actions.delete": "Delete a locale",
   "Settings.list.actions.deleteAdditionalInfos": "This will delete the active locale versions <em>(from Internationalization)</em>",
   "Settings.list.actions.publishAdditionalInfos": "This will publish only the active locale versions <em>(from Internationalization)</em>",
+  "Settings.list.actions.unpublishAdditionalInfos": "This will unpublish only the active locale versions <em>(from Internationalization)</em>",
   "Settings.list.actions.edit": "Edit a locale",
   "Settings.list.description": "Configure the settings for the Internationalization plugin",
   "Settings.list.empty.description": "This is not a usual behavior, meaning that you have eventually modified the database manually. Make sure to have at least one locale saved in your database in order to be able to use Strapi correctly.",

@@ -96,4 +96,16 @@ describe('BulkActionsBar', () => {
 
     expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
   });
+
+  it('should show unpublish modal if unpublish button is clicked', async () => {
+    const onConfirmUnpublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmUnpublishAll });
+
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
+      await user.click(screen.getByTestId('confirm-unpublish'));
+    });
+
+    expect(onConfirmUnpublishAll).toHaveBeenCalledWith([]);
+  });
 });

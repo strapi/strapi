@@ -5,12 +5,14 @@ import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
 import ConfirmDialogDeleteAll from '../ConfirmDialogDeleteAll';
 import ConfirmDialogPublishAll from '../ConfirmDialogPublishAll';
+import ConfirmDialogUnpublishAll from '../ConfirmDialogUnpublishAll';
 
 const BulkActionsBar = ({
   showPublish,
   showDelete,
   onConfirmDeleteAll,
   onConfirmPublishAll,
+  onConfirmUnpublishAll,
   selectedEntries,
   clearSelectedEntries,
 }) => {
@@ -20,6 +22,7 @@ const BulkActionsBar = ({
 
   // Bulk delete
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
+
   const handleToggleShowDeleteAllModal = () => {
     if (!showConfirmDeleteAll) {
       trackUsage('willBulkDeleteEntries');
@@ -43,6 +46,7 @@ const BulkActionsBar = ({
 
   // Bulk publish
   const [showConfirmPublishAll, setShowConfirmPublishAll] = useState(false);
+
   const handleToggleShowPublishAllModal = () => {
     if (!showConfirmPublishAll) {
       trackUsage('willBulkPublishEntries');
@@ -64,6 +68,29 @@ const BulkActionsBar = ({
     }
   };
 
+  // Bulk unpublish
+  const [showConfirmUnpublishAll, setShowConfirmUnpublishAll] = useState(false);
+
+  const handleToggleShowUnpublishAllModal = () => {
+    if (!showConfirmUnpublishAll) {
+      trackUsage('willBulkUnpublishEntries');
+    }
+    setShowConfirmUnpublishAll((prev) => !prev);
+  };
+
+  const handleConfirmUnpublishAll = async () => {
+    try {
+      setIsConfirmButtonLoading(true);
+      await onConfirmUnpublishAll(selectedEntries);
+      handleToggleShowUnpublishAllModal();
+      clearSelectedEntries();
+      setIsConfirmButtonLoading(false);
+    } catch (err) {
+      setIsConfirmButtonLoading(false);
+      handleToggleShowUnpublishAllModal();
+    }
+  };
+
   return (
     <>
       {showPublish && (
@@ -71,7 +98,7 @@ const BulkActionsBar = ({
           <Button variant="tertiary" onClick={handleToggleShowPublishAllModal}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
-          <Button variant="tertiary">
+          <Button variant="tertiary" onClick={handleToggleShowUnpublishAllModal}>
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogPublishAll
@@ -79,6 +106,12 @@ const BulkActionsBar = ({
             onToggleDialog={handleToggleShowPublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleConfirmPublishAll}
+          />
+          <ConfirmDialogUnpublishAll
+            isOpen={showConfirmUnpublishAll}
+            onToggleDialog={handleToggleShowUnpublishAllModal}
+            isConfirmButtonLoading={isConfirmButtonLoading}
+            onConfirm={handleConfirmUnpublishAll}
           />
         </>
       )}
@@ -104,6 +137,7 @@ BulkActionsBar.defaultProps = {
   showDelete: false,
   onConfirmDeleteAll() {},
   onConfirmPublishAll() {},
+  onConfirmUnpublishAll() {},
 };
 
 BulkActionsBar.propTypes = {
@@ -111,6 +145,7 @@ BulkActionsBar.propTypes = {
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
+  onConfirmUnpublishAll: PropTypes.func,
   selectedEntries: PropTypes.array.isRequired,
   clearSelectedEntries: PropTypes.func.isRequired,
 };
