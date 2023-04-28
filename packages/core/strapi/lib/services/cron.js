@@ -44,9 +44,13 @@ const createCronService = () => {
     },
     remove(name) {
       if (!name) throw new Error('You must provide a name to remove a cron job.');
-      const matchingJobsSpecs = jobsSpecs.filter(({ name: jobSpecName }) => jobSpecName === name);
+      const matchingJobsSpecs = jobsSpecs.filter(({ name: jobSpecName }, index) => {
+        if (jobSpecName === name) {
+          jobsSpecs.splice(index, 1);
+          return true;
+        }
+      });
       matchingJobsSpecs.forEach(({ job }) => job.cancel());
-      jobsSpecs = jobsSpecs.filter(({ name: jobSpecName }) => jobSpecName !== name);
       return this;
     },
     start() {
