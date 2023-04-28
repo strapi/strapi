@@ -118,10 +118,7 @@ const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject
    * Its implementation, configuration and behavior can change in future releases
    * @experimental
    */
-  const shouldGenerateTypeScriptTypes = strapiInstance.config.get(
-    'server.typescript.dev.generate',
-    false
-  );
+  const shouldGenerateTypeScriptTypes = strapiInstance.config.get('typescript.autogenerate', false);
 
   if (shouldGenerateTypeScriptTypes) {
     // This is run in an uncaught promise on purpose so that it doesn't block Strapi startup
