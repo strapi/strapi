@@ -22,7 +22,7 @@
     "uuid": "getstarted"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=14.9.1 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "license": "MIT"
