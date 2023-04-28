@@ -8,6 +8,8 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsPage from '..';
@@ -65,15 +67,17 @@ const ComponentFixture = () => {
   const store = configureStore([], [reducer]);
 
   return (
-    <QueryClientProvider client={client}>
-      <Provider store={store}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <ReviewWorkflowsPage />
-          </ThemeProvider>
-        </IntlProvider>
-      </Provider>
-    </QueryClientProvider>
+    <DndProvider backend={HTML5Backend}>
+      <QueryClientProvider client={client}>
+        <Provider store={store}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <ReviewWorkflowsPage />
+            </ThemeProvider>
+          </IntlProvider>
+        </Provider>
+      </QueryClientProvider>
+    </DndProvider>
   );
 };
 
