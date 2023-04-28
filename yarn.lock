@@ -7435,7 +7435,6 @@ __metadata:
     "@types/stream-json": 1.7.3
     "@types/tar": 6.1.4
     "@types/tar-stream": 2.2.2
-    "@types/uuid": 9.0.0
     "@types/ws": ^8.5.4
     chalk: 4.1.2
     fs-extra: 10.0.0
@@ -7449,7 +7448,6 @@ __metadata:
     tar: 6.1.13
     tar-stream: 2.2.0
     typescript: 5.0.4
-    uuid: 9.0.0
     ws: 8.13.0
   languageName: unknown
   linkType: soft
@@ -7531,7 +7529,6 @@ __metadata:
     ora: ^5.4.1
     semver: 7.3.8
     tar: 6.1.13
-    uuid: ^8.3.2
   languageName: unknown
   linkType: soft
 
@@ -8132,7 +8129,6 @@ __metadata:
     statuses: 2.0.1
     supertest: 6.3.3
     typescript: 5.0.4
-    uuid: ^8.3.2
   bin:
     strapi: ./bin/strapi.js
   languageName: unknown
@@ -9359,13 +9355,6 @@ __metadata:
   version: 0.0.3
   resolution: "@types/use-sync-external-store@npm:0.0.3"
   checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:9.0.0":
-  version: 9.0.0
-  resolution: "@types/uuid@npm:9.0.0"
-  checksum: 59ae56d9547c8758588659da2a2b4c97cce79c2aae1798c892bb29452ef08e87859dea2ec3a66bfa88d0d2153147520be2b1893be920f9f0bc9c53a3207ea6aa
   languageName: node
   linkType: hard
 
@@ -31880,21 +31869,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:9.0.0, uuid@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "uuid@npm:9.0.0"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
-  languageName: node
-  linkType: hard
-
 "uuid@npm:^3.3.2":
   version: 3.4.0
   resolution: "uuid@npm:3.4.0"
   bin:
     uuid: ./bin/uuid
   checksum: 58de2feed61c59060b40f8203c0e4ed7fd6f99d42534a499f1741218a1dd0c129f4aa1de797bcf822c8ea5da7e4137aa3673431a96dae729047f7aca7b27866f
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 

@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { v4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
 
@@ -336,7 +336,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
         hasStarted = true;
 
-        const assetID = v4();
+        const assetID = randomUUID();
         const { filename, filepath, stats, stream } = asset;
 
         try {

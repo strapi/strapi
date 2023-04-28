@@ -50,7 +50,6 @@
     "stream-json": "1.7.4",
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
-    "uuid": "9.0.0",
     "ws": "8.13.0"
   },
   "devDependencies": {
@@ -64,7 +63,6 @@
     "@types/stream-json": "1.7.3",
     "@types/tar": "6.1.4",
     "@types/tar-stream": "2.2.2",
-    "@types/uuid": "9.0.0",
     "@types/ws": "^8.5.4",
     "knex": "2.4.0",
     "koa": "2.13.4",
