@@ -7435,7 +7435,6 @@ __metadata:
     "@types/stream-json": 1.7.3
     "@types/tar": 6.1.4
     "@types/tar-stream": 2.2.2
-    "@types/uuid": 9.0.0
     "@types/ws": ^8.5.4
     chalk: 4.1.2
     fs-extra: 10.0.0
@@ -9357,13 +9356,6 @@ __metadata:
   version: 0.0.3
   resolution: "@types/use-sync-external-store@npm:0.0.3"
   checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
-  languageName: node
-  linkType: hard
-
-"@types/uuid@npm:9.0.0":
-  version: 9.0.0
-  resolution: "@types/uuid@npm:9.0.0"
-  checksum: 59ae56d9547c8758588659da2a2b4c97cce79c2aae1798c892bb29452ef08e87859dea2ec3a66bfa88d0d2153147520be2b1893be920f9f0bc9c53a3207ea6aa
   languageName: node
   linkType: hard
 
