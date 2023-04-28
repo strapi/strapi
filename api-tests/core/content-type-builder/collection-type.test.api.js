@@ -61,6 +61,7 @@ describe('Content Type Builder - Content types', () => {
     await modelsUtils.deleteContentTypes(modelsUIDs, { strapi });
 
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Collection Types', () => {
@@ -159,7 +160,7 @@ describe('Content Type Builder - Content types', () => {
     ])(`Cannot use %p that exists as another type's %p`, async (sourceField, matchField) => {
       const body = {
         contentType: {
-          displayName: 'Dog2',
+          displayName: 'Frogs Frogs Frogs',
           pluralName: 'safe-plural-name',
           singularName: 'safe-singular-name',
           collectionName: 'safe-collection-name',
