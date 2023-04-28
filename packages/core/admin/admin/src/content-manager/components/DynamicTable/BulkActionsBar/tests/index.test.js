@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
@@ -77,9 +77,23 @@ describe('BulkActionsBar', () => {
       onConfirmDeleteAll: mockConfirmDeleteAll,
     });
 
-    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-    await user.click(screen.getByRole('button', { name: /confirm/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+    });
 
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([]);
+  });
+
+  it('should show publish modal if publish button is clicked', async () => {
+    const onConfirmPublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmPublishAll });
+
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
+      await user.click(screen.getByTestId('confirm-publish'));
+    });
+
+    expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
   });
 });

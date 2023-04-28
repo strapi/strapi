@@ -103,12 +103,14 @@ BulkActionsBar.defaultProps = {
   showPublish: false,
   showDelete: false,
   onConfirmDeleteAll() {},
+  onConfirmPublishAll() {},
 };
 
 BulkActionsBar.propTypes = {
   showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
+  onConfirmPublishAll: PropTypes.func,
   selectedEntries: PropTypes.array.isRequired,
   clearSelectedEntries: PropTypes.func.isRequired,
 };
