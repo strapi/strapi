@@ -817,6 +817,8 @@
   "content-manager.success.record.save": "Saved",
   "content-manager.success.record.unpublish": "Unpublished",
   "content-manager.utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",
+  "content-manager.listView.validation.errors.title": "Action required",
+  "content-manager.listView.validation.errors.message": "Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)",
   "dark": "Dark",
   "form.button.continue": "Continue",
   "form.button.done": "Done",

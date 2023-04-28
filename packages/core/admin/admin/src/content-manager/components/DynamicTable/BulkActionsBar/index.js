@@ -240,10 +240,10 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmUnpublishAll = async () => {
+  const handleConfirmUnpublishAll = () => {
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmUnpublishAll(selectedEntries);
+      onConfirmUnpublishAll(selectedEntries);
       clearSelectedEntries();
       setIsConfirmButtonLoading(false);
     } catch (err) {

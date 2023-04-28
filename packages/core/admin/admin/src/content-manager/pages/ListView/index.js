@@ -36,6 +36,7 @@ import {
 } from '@strapi/design-system';
 
 import { ArrowLeft, Plus, Cog } from '@strapi/icons';
+import { useMutation } from 'react-query';
 
 import DynamicTable from '../../components/DynamicTable';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -101,6 +102,14 @@ function ListView({
   const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
+
+  const bulkAction = async ({ query, input }) => {
+    const { data } = await post(query, { ...input });
+
+    return data;
+  };
+
+  const bulkPublishMutation = useMutation(bulkAction);
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -180,21 +189,6 @@ function ListView({
     [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
-  const handleConfirmPublishAllData = async (selectedEntries) => {
-    const validations = await validateEntriesToPublish(selectedEntries);
-    console.log('Validations', validations);
-
-    if (validations.errors.length > 0) {
-      // TODO make a request to the API and refetch the data
-      console.info('Publishing all data', selectedEntries);
-    }
-  };
-
-  const handleConfirmUnpublishAllData = (ids) => {
-    // TODO make a request to the API and refetch the data
-    console.info('Unpublishing all data', ids);
-  };
-
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
@@ -252,6 +246,76 @@ function ListView({
     });
 
     return validations;
+  };
+
+  const handleConfirmPublishAllData = async (selectedEntries) => {
+    const validations = await validateEntriesToPublish(selectedEntries);
+
+    if (Object.values(validations.errors).length) {
+      toggleNotification({
+        type: 'warning',
+        title: {
+          id: 'content-manager.listView.validation.errors.title',
+          defaultMessage: 'Action required',
+        },
+        message: {
+          id: 'content-manager.listView.validation.errors.message',
+          defaultMessage:
+            'Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)',
+        },
+      });
+
+      return;
+    }
+
+    bulkPublishMutation.mutate(
+      {
+        query: `/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`,
+        input: { ids: selectedEntries },
+      },
+      {
+        onSuccess() {
+          fetchData(`/content-manager/collection-types/${slug}${params}`);
+          toggleNotification({
+            type: 'success',
+            message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+          });
+        },
+        onError(error) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        },
+      }
+    );
+  };
+
+  const handleConfirmUnpublishAllData = (selectedEntries) => {
+    bulkPublishMutation.mutate(
+      {
+        query: `/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`,
+        input: { ids: selectedEntries },
+      },
+      {
+        onSuccess() {
+          fetchData(`/content-manager/collection-types/${slug}${params}`);
+          toggleNotification({
+            type: 'success',
+            message: {
+              id: 'content-manager.success.record.unpublish',
+              defaultMessage: 'Unpublished',
+            },
+          });
+        },
+        onError(error) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -417,6 +481,7 @@ ListView.propTypes = {
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
+      uid: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
       info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
