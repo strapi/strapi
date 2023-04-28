@@ -20646,19 +20646,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-jsdom@npm:29.0.3":
-  version: 29.0.3
-  resolution: "jest-environment-jsdom@npm:29.0.3"
+"jest-environment-jsdom@npm:29.5.0":
+  version: 29.5.0
+  resolution: "jest-environment-jsdom@npm:29.5.0"
   dependencies:
-    "@jest/environment": ^29.0.3
-    "@jest/fake-timers": ^29.0.3
-    "@jest/types": ^29.0.3
+    "@jest/environment": ^29.5.0
+    "@jest/fake-timers": ^29.5.0
+    "@jest/types": ^29.5.0
     "@types/jsdom": ^20.0.0
     "@types/node": "*"
-    jest-mock: ^29.0.3
-    jest-util: ^29.0.3
+    jest-mock: ^29.5.0
+    jest-util: ^29.5.0
     jsdom: ^20.0.0
-  checksum: fee4f06b61fd0a402cbbf770d6a4cee70ea2b93a9bd776830d16d4b8dcf488943b7d7b2779301e977747bb7ef3ce1e6265725b6296236803385bb7a212ca6290
+  peerDependencies:
+    canvas: ^2.5.0
+  peerDependenciesMeta:
+    canvas:
+      optional: true
+  checksum: 3df7fc85275711f20b483ac8cd8c04500704ed0f69791eb55c574b38f5a39470f03d775cf20c1025bc1884916ac0573aa2fa4db1bb74225bc7fdd95ba97ad0da
   languageName: node
   linkType: hard
 
@@ -29676,7 +29681,7 @@ __metadata:
     jest: 29.0.3
     jest-circus: 29.0.3
     jest-cli: 29.5.0
-    jest-environment-jsdom: 29.0.3
+    jest-environment-jsdom: 29.5.0
     jest-watch-typeahead: 2.2.2
     lerna: 6.5.1
     lint-staged: 13.0.3
