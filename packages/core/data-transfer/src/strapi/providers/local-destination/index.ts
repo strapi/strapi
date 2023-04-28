@@ -162,7 +162,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       // Create a .gitkeep file to ensure the directory is not empty
       await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
     } catch (err) {
-      throw new ProviderTransferError('The backup folder for the assets could not be created.');
+      throw new ProviderTransferError(
+        'The backup folder for the assets could not be created inside the public directory.'
+      );
     }
 
     return new Writable({
