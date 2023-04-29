@@ -3,7 +3,7 @@ import { isArray, isObject, reject } from 'lodash/fp';
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
 
-const OPTIONAL_CONTENT_TYPES = ['audit-log'] as const;
+const OPTIONAL_CONTENT_TYPES = ['audit-log', 'workflow', 'workflow-stage'] as const;
 
 const isAttributeIgnorable = (diff: Diff) => {
   return (
