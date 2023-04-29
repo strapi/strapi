@@ -3,7 +3,7 @@
 const { STAGE_DEFAULT_COLOR } = require('../constants/workflows');
 
 async function migrateReviewWorkflowStagesColor({ oldContentTypes, contentTypes }) {
-  // Check if stages table name has a color attribute
+  // Look for CT's color attribute
   const hadColor = !!oldContentTypes?.['admin::workflow-stage']?.attributes?.color;
   const hasColor = !!contentTypes['admin::workflow-stage']?.attributes?.color;
 
