@@ -59,31 +59,15 @@ export function ReviewWorkflowsPage() {
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflowId, stages }) => {
-      try {
-        const {
-          data: { data },
-        } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
-          data: stages,
-        });
+      const {
+        data: { data },
+      } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
+        data: stages,
+      });
 
-        return data;
-      } catch (error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      }
-
-      return null;
+      return data;
     },
     {
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-
       onSuccess() {
         toggleNotification({
           type: 'success',
@@ -93,8 +77,19 @@ export function ReviewWorkflowsPage() {
     }
   );
 
-  const updateWorkflowStages = (workflowId, stages) => {
-    return mutateAsync({ workflowId, stages });
+  const updateWorkflowStages = async (workflowId, stages) => {
+    try {
+      const res = await mutateAsync({ workflowId, stages });
+
+      return res;
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+
+      return null;
+    }
   };
 
   const submitForm = async () => {
