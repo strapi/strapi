@@ -1,5 +1,7 @@
 'use strict';
 
+const { STAGE_DEFAULT_COLOR } = require('../../constants/workflows');
+
 module.exports = {
   schema: {
     collectionName: 'strapi_workflows_stages',
@@ -27,7 +29,7 @@ module.exports = {
       color: {
         type: 'string',
         configurable: false,
-        default: '#4945FF',
+        default: STAGE_DEFAULT_COLOR,
       },
       workflow: {
         type: 'relation',
