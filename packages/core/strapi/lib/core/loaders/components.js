@@ -23,9 +23,17 @@ module.exports = async (strapi) => {
         );
       }
 
+      const uid = `${category}.${key}`;
+
+      // TODO: Most of this should go into core/strapi/lib/core/domain/component/index.js
       const definition = {
         schema: Object.assign(schema, {
           __schema__: _.cloneDeep(schema),
+          uid,
+          category,
+          modelType: 'component',
+          modelName: key,
+          globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
           info: Object.assign(schema.info, {
             singularName: key,
           }),

@@ -1,22 +1,7 @@
 'use strict';
 
-const upperFirst = require('lodash/upperFirst');
 const cloneDeep = require('lodash/cloneDeep');
-const camelCase = require('lodash/camelCase');
-const startCase = require('lodash/startCase');
 const { validateComponentDefinition } = require('./validator');
-
-/** @param {string} uid */
-function getCategoryFromUid(uid) {
-  let category = uid;
-  if (category.includes('::')) {
-    category = category.split('::')[1];
-  }
-  if (category.includes('.')) {
-    category = category.split('.')[0];
-  }
-  return startCase(category);
-}
 
 const createComponent = (uid, definition = {}) => {
   try {
@@ -27,13 +12,7 @@ const createComponent = (uid, definition = {}) => {
 
   const { schema } = cloneDeep(definition);
 
-  return Object.assign(schema, {
-    uid,
-    modelType: 'component',
-    modelName: schema.info.singularName,
-    category: getCategoryFromUid(uid),
-    globalId: schema.globalId || upperFirst(camelCase(`component_${uid}`)),
-  });
+  return schema;
 };
 
 module.exports = {
