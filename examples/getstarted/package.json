@@ -24,7 +24,7 @@
     "@strapi/provider-upload-cloudinary": "4.10.1",
     "@strapi/strapi": "4.10.1",
     "@vscode/sqlite3": "5.1.2",
-    "better-sqlite3": "8.0.1",
+    "better-sqlite3": "8.3.0",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "mysql2": "3.2.0",

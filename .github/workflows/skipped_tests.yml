@@ -11,12 +11,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      nonDoc: ${{ steps.filter.outputs.nonDoc }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: .github/filters.yaml
+
   lint:
     name: 'lint (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [18]
     steps:
       - run: echo "Skipped"
 
@@ -33,6 +49,16 @@ jobs:
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [lint]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - run: echo "Skipped"
+
+  build:
+    name: 'build (node: ${{ matrix.node }})'
+    needs: [changes, lint, unit_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
