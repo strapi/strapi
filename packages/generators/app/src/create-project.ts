@@ -9,6 +9,7 @@ import _ from 'lodash';
 import stopProcess from './utils/stop-process';
 import { trackUsage, captureStderr } from './utils/usage';
 import mergeTemplate from './utils/merge-template.js';
+import tryGitInit from './utils/git';
 
 import packageJSON from './resources/json/common/package.json';
 import { createDatabaseConfig, generateDbEnvariables } from './resources/templates/database';
@@ -183,6 +184,12 @@ export default async function createProject(
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
+
+  // Init git
+  if (await tryGitInit(rootPath)) {
+    console.log('Initialized a git repository.');
+    console.log();
+  }
 
   console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);
