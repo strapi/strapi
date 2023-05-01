@@ -1,10 +1,19 @@
 ########################################################################################
 # "yarn install" composite action for yarn 3/4+ and "nodeLinker: node-modules"         #
 #--------------------------------------------------------------------------------------#
-# Requirement @setup/node should be run before                                         #
-# References:                                                                          #
+# Requirement: @setup/node should be run before                                        #
+#                                                                                      #
+# Usage in workflows steps:                                                            #
+#                                                                                      #
+#      - name: 📥 Monorepo install                                                     #
+#        uses: ./.github/actions/yarn-nm-install                                       #
+#        with:                                                                         #
+#          enable-corepack: false # (default)                                          #
+#          cache-install-state: true # (default)                                       #
+#          cache-node-modules: true # (default, set false if slower action/cache)      #
+#                                                                                      #
+# Reference:                                                                           #
 #   - latest: https://gist.github.com/belgattitude/042f9caf10d029badbde6cf9d43e400a    #
-#   - bench: https://gist.github.com/belgattitude/0ecd26155b47e7be1be6163ecfbb0f0b     #
 ########################################################################################
 
 name: 'Monorepo install (yarn)'
