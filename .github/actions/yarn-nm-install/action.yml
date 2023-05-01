@@ -1,0 +1,61 @@
+########################################################################################
+# "yarn install" composite action for yarn 3/4+ and "nodeLinker: node-modules"         #
+#--------------------------------------------------------------------------------------#
+# References:                                                                          #
+#   - bench: https://gist.github.com/belgattitude/0ecd26155b47e7be1be6163ecfbb0f0b     #
+########################################################################################
+
+name: 'Monorepo install (yarn)'
+description: 'Run yarn install with node_modules linker and cache enabled'
+inputs:
+  enable-corepack:
+    description: 'Enable corepack'
+    required: false
+    default: 'false'
+  cache-install-state:
+    description: 'Cache yarn install state (invalidated on lock changes)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ⚙️ Enable Corepack
+      if: ${{ inputs.enable-corepack }} == 'true'
+      shell: bash
+      run: corepack enable
+
+    - name: ⚙️ Expose yarn config as "$GITHUB_OUTPUT"
+      id: yarn-config
+      shell: bash
+      run: |
+        echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+    - name: ♻️ Restore yarn cache
+      uses: actions/cache@v3
+      id: yarn-download-cache
+      with:
+        path: ${{ steps.yarn-config.outputs.CACHE_FOLDER }}
+        key: yarn-download-cache-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          yarn-download-cache-
+
+    - name: ♻️ Restore yarn install state
+      if: inputs.cache-install-state == 'true'
+      id: yarn-install-state-cache
+      uses: actions/cache@v3
+      with:
+        path: .yarn/ci-cache/
+        key: ${{ runner.os }}-yarn-install-state-cache-${{ hashFiles('yarn.lock', '.yarnrc.yml') }}
+
+    - name: 📥 Install dependencies
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        # Overrides/align yarnrc.yml options (v3, v4) for a CI context
+        YARN_ENABLE_GLOBAL_CACHE: 'false' # Use local cache folder to keep downloaded archives
+        YARN_NM_MODE: 'hardlinks-local'   # Hardlinks-(local|global) reduces io / node_modules size
+        YARN_INSTALL_STATE_PATH: .yarn/ci-cache/install-state.gz # Very small speedup when lock does not change
+        # Other environment variables
+        HUSKY: '0' # By default do not run HUSKY install
