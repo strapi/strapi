@@ -16,6 +16,10 @@ inputs:
     description: 'Cache yarn install state (invalidated on lock changes)'
     required: false
     default: 'true'
+  cache-node-modules:
+    description: 'Cache node_modules (invalidated on lock changes)'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
