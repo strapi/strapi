@@ -30,8 +30,7 @@ const createSettingsSchema = (schema) => {
       searchable: yup.boolean().required(),
       // should be reset when the type changes
       mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
-      // should be reset when the type changes
-      defaultSortBy: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      defaultSortBy: yup.string().default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
