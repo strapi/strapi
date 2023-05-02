@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Flex, Typography } from '@strapi/design-system';
 
 export function OptionColor({ children, ...props }) {
   const { color } = props.data;
@@ -9,7 +9,7 @@ export function OptionColor({ children, ...props }) {
   return (
     <components.Option {...props}>
       <Flex alignItems="center" gap={2}>
-        <Box height={2} background={color} hasRadius width={2} />
+        <Flex height={2} background={color} hasRadius shrink={0} width={2} />
 
         <Typography textColor="neutral800" ellipsis>
           {children}
