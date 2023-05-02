@@ -78,7 +78,7 @@ const DynamicTable = ({
     // a future iteration we need to find a better pattern.
 
     // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
+    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout, { formatMessage });
 
     if (reviewWorkflowColumn) {
       formattedHeaders.push(reviewWorkflowColumn);

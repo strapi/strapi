@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { useMutation } from 'react-query';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
@@ -18,6 +16,7 @@ import { useIntl } from 'react-intl';
 import {
   Box,
   Divider,
+  Flex,
   Layout,
   HeaderLayout,
   ContentLayout,
@@ -25,6 +24,8 @@ import {
   Button,
 } from '@strapi/design-system';
 import { Check, ArrowLeft } from '@strapi/icons';
+
+import getReviewWorkflowSortOption from 'ee_else_ce/content-manager/pages/ListSettingsView/utils/getReviewWorkflowSortOption';
 
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
@@ -83,8 +84,13 @@ const ListSettingsView = ({ layout, slug }) => {
   };
 
   const handleConfirm = async () => {
-    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutate(body);
+    const { layouts, settings, metadatas } = modifiedData;
+
+    submitMutation.mutate({
+      layouts,
+      metadatas,
+      settings,
+    });
   };
 
   const handleAddField = (item) => {
@@ -170,9 +176,17 @@ const ListSettingsView = ({ layout, slug }) => {
     .map(([name]) => name)
     .sort();
 
-  const sortOptions = Object.entries(attributes)
+  const sortOptionsAttributes = Object.entries(attributes)
     .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
-    .map(([name]) => name);
+    .map(([name]) => ({
+      value: name,
+      label: layout.metadatas[name].list.label,
+    }));
+
+  const sortOptions = [...sortOptionsAttributes, getReviewWorkflowSortOption({ formatMessage })]
+    // in CE the review workflow selection returns a falsy value
+    .filter(Boolean)
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const move = (originalIndex, atIndex) => {
     dispatch({
@@ -215,8 +229,10 @@ const ListSettingsView = ({ layout, slug }) => {
             )}
           />
           <ContentLayout>
-            <Box
+            <Flex
+              alignItems="stretch"
               background="neutral0"
+              direction="column"
               hasRadius
               shadow="tableShadow"
               paddingTop={6}
@@ -229,9 +245,11 @@ const ListSettingsView = ({ layout, slug }) => {
                 onChange={handleChange}
                 sortOptions={sortOptions}
               />
-              <Box paddingTop={6} paddingBottom={6}>
+
+              <Box paddingBottom={6} paddingTop={6}>
                 <Divider />
               </Box>
+
               <SortDisplayedFields
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
@@ -241,32 +259,33 @@ const ListSettingsView = ({ layout, slug }) => {
                 onRemoveField={handleRemoveField}
                 metadatas={modifiedData.metadatas}
               />
-            </Box>
+            </Flex>
           </ContentLayout>
-          <ConfirmDialog
-            bodyText={{
-              id: getTrad('popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
         </form>
-        {isModalFormOpen && (
-          <EditFieldForm
-            attributes={attributes}
-            fieldForm={fieldForm}
-            fieldToEdit={fieldToEdit}
-            onChangeEditLabel={handleChangeEditLabel}
-            onCloseModal={handleCloseModal}
-            onSubmit={handleSubmitFieldEdit}
-            type={get(attributes, [fieldToEdit, 'type'], 'text')}
-          />
-        )}
+
+        <EditFieldForm
+          attributes={attributes}
+          fieldForm={fieldForm}
+          fieldToEdit={fieldToEdit}
+          isOpen={isModalFormOpen}
+          onChangeEditLabel={handleChangeEditLabel}
+          onCloseModal={handleCloseModal}
+          onSubmit={handleSubmitFieldEdit}
+          type={attributes[fieldToEdit]?.type ?? 'text'}
+        />
+
+        <ConfirmDialog
+          bodyText={{
+            id: getTrad('popUpWarning.warning.updateAllSettings'),
+            defaultMessage: 'This will modify all your settings',
+          }}
+          iconRightButton={<Check />}
+          isConfirmButtonLoading={isSubmittingForm}
+          isOpen={showWarningSubmit}
+          onToggleDialog={toggleWarningSubmit}
+          onConfirm={handleConfirm}
+          variantRightButton="success-light"
+        />
       </Main>
     </Layout>
   );

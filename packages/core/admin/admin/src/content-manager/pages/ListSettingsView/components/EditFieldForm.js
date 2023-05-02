@@ -31,6 +31,7 @@ const EditFieldForm = ({
   attributes,
   fieldForm,
   fieldToEdit,
+  isOpen,
   onCloseModal,
   onChangeEditLabel,
   onSubmit,
@@ -38,8 +39,11 @@ const EditFieldForm = ({
 }) => {
   const { formatMessage } = useIntl();
 
-  const relationType = attributes[fieldToEdit].relationType;
+  if (!isOpen) {
+    return null;
+  }
 
+  const relationType = attributes[fieldToEdit].relationType;
   let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
 
   if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
@@ -47,7 +51,7 @@ const EditFieldForm = ({
   }
 
   return (
-    <ModalLayout onClose={onCloseModal} labelledBy="title">
+    <ModalLayout onClose={onCloseModal} labelledBy="title" isOpen={isOpen}>
       <form onSubmit={onSubmit}>
         <ModalHeader>
           <HeaderContainer>
@@ -135,6 +139,7 @@ EditFieldForm.propTypes = {
     sortable: PropTypes.bool,
   }).isRequired,
   fieldToEdit: PropTypes.string.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   onChangeEditLabel: PropTypes.func.isRequired,
   onCloseModal: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
