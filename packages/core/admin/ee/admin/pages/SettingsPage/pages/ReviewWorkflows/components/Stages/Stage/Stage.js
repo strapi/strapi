@@ -172,6 +172,9 @@ export function Stage({
     ),
     color: hex,
   }));
+  // TODO: the .toUpperCase() conversion can be removed once the hex code is normalized in
+  // the admin API
+  const colorValue = colorOptions.find(({ value }) => value === colorField.value.toUpperCase());
 
   return (
     <Box ref={composedRef}>
@@ -275,7 +278,19 @@ export function Stage({
                         colorField.onChange({ target: { value } });
                         dispatch(updateStage(id, { color: value }));
                       }}
-                      value={colorOptions.find(({ value }) => value === colorField.value)}
+                      // If no color was found in all the valid theme colors it means a user
+                      // has set a custom value e.g. through the content API. In that case we
+                      // display the custom color and a "Custom" label.
+                      value={
+                        colorValue ?? {
+                          value: colorField.value,
+                          label: formatMessage({
+                            id: 'Settings.review-workflows.stage.color.name.custom',
+                            defaultMessage: 'Custom',
+                          }),
+                          color: colorField.value,
+                        }
+                      }
                     />
 
                     <FieldError />

@@ -282,7 +282,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test("It should assign a default color to stages if they don't have one", async () => {
       await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}/stages`, {
         body: {
-          data: [defaultStage, { id: secondStage.id, name: 'new_name', color: '#000000' }],
+          data: [defaultStage, { id: secondStage.id, name: secondStage.name, color: '#000000' }],
         },
       });
 
