@@ -22,14 +22,12 @@ const ConfirmDialogUnpublishAll = ({
       icon={<ExclamationMarkCircle />}
       dialogBody={
         <Flex direction="column" alignItems="stretch" gap={2}>
-          <Flex justifyContent="center">
-            <Typography id="confirm-description">
-              {formatMessage({
-                id: getTrad('popUpWarning.bodyMessage.contentType.unpublish.all'),
-                defaultMessage: 'Are you sure you want to unpublish these entries?',
-              })}
-            </Typography>
-          </Flex>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: getTrad('popUpWarning.bodyMessage.contentType.unpublish.all'),
+              defaultMessage: 'Are you sure you want to unpublish these entries?',
+            })}
+          </Typography>
           <Flex>
             <InjectionZoneList area="contentManager.listView.unpublishModalAdditionalInfos" />
           </Flex>

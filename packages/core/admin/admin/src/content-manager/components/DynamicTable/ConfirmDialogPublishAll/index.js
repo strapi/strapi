@@ -17,17 +17,13 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
       icon={<ExclamationMarkCircle />}
       dialogBody={
         <Flex direction="column" alignItems="stretch" gap={2}>
-          <Flex justifyContent="center">
-            <Typography id="confirm-description">
-              {formatMessage({
-                id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
-                defaultMessage: 'Are you sure you want to publish these entries?',
-              })}
-            </Typography>
-          </Flex>
-          <Flex>
-            <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
-          </Flex>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
+              defaultMessage: 'Are you sure you want to publish these entries?',
+            })}
+          </Typography>
+          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
         </Flex>
       }
       endAction={
