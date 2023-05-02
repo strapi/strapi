@@ -61,6 +61,27 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c21 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .c1 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -156,39 +177,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c12 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c21 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c14 {
   position: relative;
   outline: none;
 }
 
-.c14 svg {
+.c14 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c14 > svg > g,
+.c14 > svg path {
   fill: #ffffff;
 }
 
@@ -473,7 +473,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c3 c4 c5"
