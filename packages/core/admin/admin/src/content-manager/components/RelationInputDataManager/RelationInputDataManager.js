@@ -74,7 +74,6 @@ export const RelationInputDataManager = ({
               initialDataPath: ['initialData', ...initialDataPath],
               modifiedDataPath: ['modifiedData', ...nameSplit],
               value,
-              modifiedDataOnly: isCloningEntry,
             },
           });
         },
@@ -304,7 +303,7 @@ export const RelationInputDataManager = ({
       })} ${totalRelations > 0 ? `(${totalRelations})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
-        !isCreatingEntry
+        !isCreatingEntry || isCloningEntry
           ? formatMessage({
               id: getTrad('relation.loadMore'),
               defaultMessage: 'Load More',
