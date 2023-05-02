@@ -38,7 +38,6 @@ const ConfirmDialogUnpublishAll = ({
           onClick={onConfirm}
           variant="secondary"
           startIcon={<Check />}
-          data-testid="confirm-unpublish"
           loading={isConfirmButtonLoading}
         >
           {formatMessage({

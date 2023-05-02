@@ -31,7 +31,6 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
           onClick={onConfirm}
           variant="secondary"
           startIcon={<Check />}
-          data-testid="confirm-publish"
           loading={isConfirmButtonLoading}
         >
           {formatMessage({

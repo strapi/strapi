@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
@@ -91,7 +91,9 @@ describe('BulkActionsBar', () => {
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
-      await user.click(screen.getByTestId('confirm-publish'));
+      await user.click(
+        within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
+      );
     });
 
     expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
@@ -103,7 +105,9 @@ describe('BulkActionsBar', () => {
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
-      await user.click(screen.getByTestId('confirm-unpublish'));
+      await user.click(
+        within(screen.getByRole('dialog')).getByRole('button', { name: /\bunpublish\b/i })
+      );
     });
 
     expect(onConfirmUnpublishAll).toHaveBeenCalledWith([]);
