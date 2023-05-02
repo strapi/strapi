@@ -39,6 +39,7 @@ Adds one or more cron tasks to the service.
 - Each key of the `tasks` object is the name of the task.
 - Each value of the `tasks` object can be either a function, or an object with two properties: `task` and `options`.
 - If the value is a function, it is used as the task to be executed when the cron expression is met.
+  - The key will be considered as the cron expression
 - If the value is an object, its `task` property is used as the task function, and its `options` property is used as the cron expression options.
 
 #### Example
@@ -56,6 +57,7 @@ cron.add({
     task,
     options: '*/5 * * * *', // Executes every 5 minutes.
   },
+  '*/1 * * * *': () => console.log('A minute has passed.'),
 });
 ```
 
