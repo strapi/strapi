@@ -1,4 +1,4 @@
-import { fixtures } from '@strapi/admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils';
 import addLocaleToSingleTypesLinks from '../addLocaleToSingleTypesLinks';
 
 describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {

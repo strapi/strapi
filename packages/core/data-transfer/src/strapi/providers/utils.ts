@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../types/remote/protocol';
@@ -28,7 +28,7 @@ export const createDispatcher = (ws: WebSocket) => {
     }
 
     return new Promise<U | null>((resolve, reject) => {
-      const uuid = v4();
+      const uuid = randomUUID();
       const payload = { ...message, uuid };
 
       if (options.attachTransfer) {
