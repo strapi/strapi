@@ -47,6 +47,10 @@ describe('Upload plugin bootstrap function', () => {
             weeklyMetrics: {
               registerCron() {},
             },
+            extensions: {
+              contentManager: { entityManager: { addSignedFileUrlsToAdmin: jest.fn() } },
+              core: { entityService: { addSignedFileUrlsToEntityService: jest.fn() } },
+            },
           },
         },
       },
