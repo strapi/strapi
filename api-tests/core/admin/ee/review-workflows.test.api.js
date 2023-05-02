@@ -80,10 +80,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   beforeAll(async () => {
     await builder.addContentTypes([model]).build();
+    strapi = await createStrapiInstance();
+
     // eslint-disable-next-line node/no-extraneous-require
     hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflows');
-
-    strapi = await createStrapiInstance();
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
 
