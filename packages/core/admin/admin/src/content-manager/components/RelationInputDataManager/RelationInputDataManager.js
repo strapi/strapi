@@ -92,7 +92,7 @@ export const RelationInputDataManager = ({
           ...defaultParams,
           // eslint-disable-next-line no-nested-ternary
           entityId:
-            isCreatingEntry && !isCloningEntry
+            isCreatingEntry || isCloningEntry
               ? undefined
               : isComponentRelation
               ? componentId
