@@ -9,7 +9,7 @@ import { useAllowedAttributes } from './hooks/useAllowedAttributes';
 
 export function AttributeFilter({ layout, slug }) {
   const { contentType } = layout;
-  const { metadatas } = contentType;
+  const { attributes, metadatas } = contentType;
 
   const { formatMessage } = useIntl();
   const [isVisible, setIsVisible] = useState(false);
@@ -17,7 +17,7 @@ export function AttributeFilter({ layout, slug }) {
   const { trackUsage } = useTracking();
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const displayedFilters = allowedAttributes.sort().map((name) => {
-    const { type, enum: options } = contentType.attributes[name];
+    const { type, enum: options } = attributes[name];
     const { mainField, label } = metadatas[name].list;
 
     return {
