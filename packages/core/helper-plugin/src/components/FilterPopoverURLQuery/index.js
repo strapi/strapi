@@ -18,7 +18,8 @@ import getFilterList from './utils/getFilterList';
 const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  // WHY
+  //const { trackUsage } = useTracking();
   const defaultFieldSchema = { fieldSchema: { type: 'string' } };
   const [modifiedData, setModifiedData] = useState({
     name: displayedFilters[0]?.name || '',
@@ -73,7 +74,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
       const type = foundAttribute.fieldSchema.type;
 
       if (foundAttribute.trackedEvent) {
-        trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
+        //trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
       }
 
       if (type === 'relation') {
