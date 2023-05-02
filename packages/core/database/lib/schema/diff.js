@@ -365,7 +365,7 @@ module.exports = (db) => {
         const dependencies = persistedTables
           .filter((table) => {
             const dependsOn = table?.dependsOn;
-            if (_.isNil(dependsOn) || !_.isArray(dependsOn)) return;
+            if (!_.isArray(dependsOn)) return;
             return dependsOn.some((table) => table.name === srcTable.name);
           })
           .map((dependsOnTable) => {
