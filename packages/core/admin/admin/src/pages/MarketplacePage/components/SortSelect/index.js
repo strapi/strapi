@@ -80,7 +80,10 @@ const SortSelect = ({ sortQuery, handleSelectChange }) => {
         onChange={(sortName) => {
           handleSelectChange({ sort: sortName });
         }}
-        label="Sort by"
+        label={formatMessage({
+          id: 'admin.pages.MarketPlacePage.sort.label',
+          defaultMessage: 'Sort by',
+        })}
       >
         {Object.entries(sortTypes).map(([sortName, messages]) => {
           return (
