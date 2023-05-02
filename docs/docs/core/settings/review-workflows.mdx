@@ -1,0 +1,77 @@
+---
+title: Review Workflows
+slug: /settings/review-workflows
+description: Guide for review workflows in settings.
+tags:
+  - settings
+  - review-workflows
+---
+
+## Summary
+
+The settings page for review workflows is where users can add and edit stages in any workflow. A stage is a step within
+each workflow. It is only **accessible in enterprise mode** and if the read permission `admin::review-workflows.read` is set to `true`.
+
+Upon mount the settings page injects itself into the global redux store under the namespace `settings_review-workflows`. Redux is
+then used for all state management updates on the settings page. `Formik` is used to render and validate the list of stages. It
+is integrated with redux, so that all input components are controlled components.
+
+### Form submission
+
+The form the wraps workflow stages submits all stages at once, because we expect the number of stages per workflow to be
+rather small. Because of this we can simply re-order stages by sending a different order. Every stage that sends a corresponding `id`
+attribute will be re-ordered and not created. Stages without an `id` property will be created in the database on submission.
+
+### Stage deletion
+
+In case a stage is deleted, all **entities which are connected to that stage are moved to the previous stage**. Because a stage deletion
+might have big effects on the database, a confirmation is shown when a stage is up for deletion.
+
+Changes are only applied if the user hits "Save". It is not possible to remove all stages from a workflow (neither in the UI nor the API).
+
+### Hooks
+
+#### `useReviewWorkflows(workflowId?: number)`
+
+This hook allows to fetch either one (if `workflowId` is passed) or all workflows at once. By default all stages are populated. The
+hooks returns a react-query result. This hook is used to fetch a workflow on the settings page and the content-manager edit view.
+
+The API returns an `array` of workflows. In the first iteration only one workflow is supported, but this is subject to change soon.
+
+### Data shapes
+
+```ts
+type Stage {
+    id: int
+    name: string // max-length: 255 characters
+    createdAt: Date
+    updatedAt: Date
+}
+
+type Worklow {
+    id: int,
+    stages: Stage[]
+    createdAt: Date
+    updatedAt: Date
+}
+```
+
+### Endpoints
+
+#### `GET /admin/review-workflows/workflows/`
+
+Returns a list of all workflows. Stages can be populated using `?populate=stages`.
+
+#### `PUT /admin/review-workflows/workflows/`
+
+Update workflow stages.
+
+##### Payload
+
+```ts
+{
+  data: Stage[]
+}
+```
+
+**Note**: All stages need to be submitted. Stages without an `id` attribute will be created. The order of stages is persisted in the database.

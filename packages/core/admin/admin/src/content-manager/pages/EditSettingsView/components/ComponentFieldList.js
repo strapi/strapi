@@ -5,7 +5,7 @@ import { Box, Flex, Typography, Grid, GridItem } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import useLayoutDnd from '../../../hooks/useLayoutDnd';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import getTrad from '../../../utils/getTrad';
 
 const ComponentFieldList = ({ componentUid }) => {

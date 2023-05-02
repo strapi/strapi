@@ -96,8 +96,15 @@ const createRepository = (uid, db) => {
       return db.entityManager.attachRelations(uid, id, data);
     },
 
-    updateRelations(id, data) {
-      return db.entityManager.updateRelations(uid, id, data);
+    async updateRelations(id, data) {
+      const trx = await db.transaction();
+      try {
+        await db.entityManager.updateRelations(uid, id, data, { transaction: trx.get() });
+        return trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
     },
 
     deleteRelations(id) {

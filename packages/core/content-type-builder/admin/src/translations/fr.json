@@ -43,7 +43,7 @@
   "form.button.cancel": "Annuler",
   "form.button.configure-view": "Configurer la vue",
   "from": "de",
-  "modalForm.attribute.form.base.name.placeholder": "ex : Slug, URL SEO, URL Canonique",
+  "modalForm.attribute.form.base.name.placeholder": "ex : slug, urlSeo, urlCanonique",
   "modalForm.attribute.target-field": "Champ associé",
   "modalForm.singleType.header-create": "Créer un single type",
   "modalForm.sub-header.chooseAttribute.collectionType": "Selectionnez un champ pour votre collection",

@@ -373,7 +373,7 @@ class TransferEngine<
       const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
 
       if (schemaDiffs.length) {
-        diffs[key] = schemaDiffs;
+        diffs[key] = schemaDiffs as Diff<Schema>[];
       }
     });
 
@@ -727,6 +727,9 @@ class TransferEngine<
 
   async transferAssets(): Promise<void> {
     const stage: TransferStage = 'assets';
+    if (this.shouldSkipStage(stage)) {
+      return;
+    }
 
     const source = await this.sourceProvider.createAssetsReadStream?.();
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
