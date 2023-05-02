@@ -1,10 +1,9 @@
-import get from 'lodash/get';
 import { useRBACProvider, findMatchingPermissions } from '@strapi/helper-plugin';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
 
-const useAllowedAttributes = (contentType, slug) => {
+export function useAllowedAttributes(contentType, slug) {
   const { allPermissions } = useRBACProvider();
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
@@ -14,29 +13,24 @@ const useAllowedAttributes = (contentType, slug) => {
     },
   ]);
 
-  const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
-  const attributesArray = Object.keys(get(contentType, ['attributes']), {});
-  const allowedAttributes = attributesArray
-    .filter((attr) => {
-      const current = get(contentType, ['attributes', attr], {});
+  const readPermissionForAttr = readPermissionsForSlug?.[0]?.properties?.fields ?? [];
 
-      if (!current.type) {
+  return Object.entries(contentType.attributes)
+    .filter(([name, attribute]) => {
+      if (!attribute.type) {
         return false;
       }
 
-      if (NOT_ALLOWED_FILTERS.includes(current.type)) {
+      if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
         return false;
       }
 
-      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
+      // this allows filtering by createdAt and updatedAt. Both are not part of RBAC.
+      if (!readPermissionForAttr.includes(name) && name !== 'id' && !TIMESTAMPS.includes(name)) {
         return false;
       }
 
       return true;
     })
-    .sort();
-
-  return allowedAttributes;
-};
-
-export default useAllowedAttributes;
+    .map(([name]) => name);
+}

@@ -37,7 +37,7 @@ import {
 import { ArrowLeft, Plus, Cog } from '@strapi/icons';
 
 import DynamicTable from '../../components/DynamicTable';
-import AttributeFilter from '../../components/AttributeFilter';
+import { AttributeFilter } from '../../components/AttributeFilter';
 import { InjectionZone } from '../../../shared/components';
 
 import permissions from '../../../permissions';
@@ -75,7 +75,6 @@ function ListView({
   const { total } = pagination;
   const { contentType } = layout;
   const {
-    metadatas,
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
 
@@ -318,9 +317,7 @@ function ListView({
                   trackedEvent="didSearch"
                 />
               )}
-              {isFilterable && (
-                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
-              )}
+              {isFilterable && <AttributeFilter layout={layout} slug={slug} />}
             </>
           }
         />

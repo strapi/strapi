@@ -1,38 +1,76 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import useAllowedAttributes from './hooks/useAllowedAttributes';
-import Filters from './Filters';
+import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
+import { Box, Button } from '@strapi/design-system';
+import { Filter } from '@strapi/icons';
 
-const AttributeFilter = ({ contentType, slug, metadatas }) => {
+import { useAllowedAttributes } from './hooks/useAllowedAttributes';
+
+export function AttributeFilter({ layout, slug }) {
+  const { contentType } = layout;
+  const { metadatas } = contentType;
+
   const { formatMessage } = useIntl();
+  const [isVisible, setIsVisible] = useState(false);
+  const buttonRef = useRef();
+  const { trackUsage } = useTracking();
   const allowedAttributes = useAllowedAttributes(contentType, slug);
-  const displayedFilters = allowedAttributes.map((name) => {
-    const attribute = contentType.attributes[name];
-    const { type, enum: options } = attribute;
-
-    const trackedEvent = {
-      name: 'didFilterEntries',
-      properties: { useRelation: type === 'relation' },
-    };
-
+  const displayedFilters = allowedAttributes.sort().map((name) => {
+    const { type, enum: options } = contentType.attributes[name];
     const { mainField, label } = metadatas[name].list;
 
     return {
       name,
-      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
+      metadatas: { label },
       fieldSchema: { type, options, mainField },
-      trackedEvent,
+      trackedEvent: {
+        name: 'didFilterEntries',
+        properties: { useRelation: type === 'relation' },
+      },
     };
   });
 
-  return <Filters displayedFilters={displayedFilters} />;
-};
+  const handleToggle = () => {
+    if (!isVisible) {
+      trackUsage('willFilterEntries');
+    }
+
+    setIsVisible((prev) => !prev);
+  };
+
+  return (
+    <>
+      <Box paddingTop={1} paddingBottom={1}>
+        <Button
+          variant="tertiary"
+          ref={buttonRef}
+          startIcon={<Filter />}
+          onClick={handleToggle}
+          size="S"
+        >
+          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+
+        <FilterPopoverURLQuery
+          displayedFilters={displayedFilters}
+          isVisible={isVisible}
+          onToggle={handleToggle}
+          source={buttonRef}
+        />
+      </Box>
+
+      <FilterListURLQuery filtersSchema={displayedFilters} />
+    </>
+  );
+}
 
 AttributeFilter.propTypes = {
-  contentType: PropTypes.object.isRequired,
-  metadatas: PropTypes.object.isRequired,
+  layout: PropTypes.shape({
+    contentType: PropTypes.shape({
+      attributes: PropTypes.object,
+      metadatas: PropTypes.object,
+    }),
+  }).isRequired,
   slug: PropTypes.string.isRequired,
 };
-
-export default AttributeFilter;
