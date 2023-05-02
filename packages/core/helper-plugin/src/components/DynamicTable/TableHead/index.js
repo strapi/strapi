@@ -26,7 +26,6 @@ const TableHead = ({
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
-
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
 
   return (
@@ -45,54 +44,67 @@ const TableHead = ({
             />
           </Th>
         )}
-        {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
-          const isSorted = sortBy === name;
-          const isUp = sortOrder === 'ASC';
+        {headers.map(
+          ({ fieldSchema, name, metadatas: { sortable: isSortable, label, mainField } }) => {
+            let isSorted = sortBy === name;
+            const isUp = sortOrder === 'ASC';
 
-          const sortLabel = formatMessage(
-            { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-            { label }
-          );
-
-          const handleClickSort = (shouldAllowClick = true) => {
-            if (isSortable && shouldAllowClick) {
-              const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
-              const nextSort = `${name}:${nextSortOrder}`;
-
-              setQuery({
-                sort: nextSort,
-              });
+            // relations always have to be sorted by their main field instead of only the
+            // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
+            if (fieldSchema?.type === 'relation' && mainField) {
+              isSorted = sortBy === `${name}[${mainField}]`;
             }
-          };
 
-          return (
-            <Th
-              key={name}
-              action={
-                isSorted && (
-                  <IconButton
-                    label={sortLabel}
-                    onClick={handleClickSort}
-                    icon={isSorted && <SortIcon isUp={isUp} />}
-                    noBorder
-                  />
-                )
+            const sortLabel = formatMessage(
+              { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+              { label }
+            );
+
+            const handleClickSort = (shouldAllowClick = true) => {
+              if (isSortable && shouldAllowClick) {
+                let nextSort = name;
+
+                // relations always have to be sorted by their main field instead of only the
+                // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
+                if (fieldSchema?.type === 'relation' && mainField) {
+                  nextSort = `${name}[${mainField}]`;
+                }
+
+                setQuery({
+                  sort: `${nextSort}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
+                });
               }
-            >
-              <Tooltip label={isSortable ? sortLabel : label}>
-                <Typography
-                  textColor="neutral600"
-                  as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={label}
-                  onClick={() => handleClickSort(!isSorted)}
-                  variant="sigma"
-                >
-                  {label}
-                </Typography>
-              </Tooltip>
-            </Th>
-          );
-        })}
+            };
+
+            return (
+              <Th
+                key={name}
+                action={
+                  isSorted && (
+                    <IconButton
+                      label={sortLabel}
+                      onClick={handleClickSort}
+                      icon={isSorted && <SortIcon isUp={isUp} />}
+                      noBorder
+                    />
+                  )
+                }
+              >
+                <Tooltip label={isSortable ? sortLabel : label}>
+                  <Typography
+                    textColor="neutral600"
+                    as={!isSorted && isSortable ? 'button' : 'span'}
+                    label={label}
+                    onClick={() => handleClickSort(!isSorted)}
+                    variant="sigma"
+                  >
+                    {label}
+                  </Typography>
+                </Tooltip>
+              </Th>
+            );
+          }
+        )}
 
         {withBulkActions && (
           <Th>
