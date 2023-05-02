@@ -221,9 +221,15 @@ const sidebars = {
           ],
         },
         {
-          type: 'doc',
-          label: 'Entity service',
-          id: 'core/entity-service',
+          type: 'category',
+          label: 'Strapi',
+          items: [
+            {
+              type: 'doc',
+              label: 'Entity service',
+              id: 'core/strapi/entity-service',
+            },
+          ],
         },
       ],
     },
