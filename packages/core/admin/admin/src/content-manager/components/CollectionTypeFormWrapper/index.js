@@ -236,7 +236,15 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
+      /**
+       * If we're cloning we want to post directly to this endpoint
+       * so that the relations even if they're not listed in the EditView
+       * are correctly attached to the entry.
+       */
+      const endPoint =
+        typeof origin !== 'undefined'
+          ? `${getRequestUrl(`collection-types/${slug}/clone/${origin}`)}${rawQuery}`
+          : `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
@@ -271,6 +279,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       }
     },
     [
+      origin,
       cleanReceivedData,
       displayErrors,
       replace,
