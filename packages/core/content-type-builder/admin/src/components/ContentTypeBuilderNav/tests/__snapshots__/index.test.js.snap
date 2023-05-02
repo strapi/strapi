@@ -20,6 +20,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-bottom: 56px;
 }
 
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
 .c37 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -33,16 +39,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c41 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c40 path {
-  fill: #666687;
 }
 
 .c38 {
@@ -91,6 +87,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
+}
+
+.c40 path {
+  fill: #666687;
 }
 
 .c51 {
@@ -352,13 +352,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c8 svg {
+.c8 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c8 svg > g,
-.c8 svg path {
+.c8 > svg > g,
+.c8 > svg path {
   fill: #ffffff;
 }
 
