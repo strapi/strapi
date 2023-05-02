@@ -1,14 +1,11 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system';
 
 import ReviewWorkflowsStage from '.';
 import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
 import { STAGE_COLOR_DEFAULT } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 
-export default (layout) => {
-  const { formatMessage } = useIntl();
-
+export default (layout, { formatMessage }) => {
   // TODO: As soon as the feature was enabled in EE mode, the BE currently does not have a way to send
   // `false` once a user is in CE mode again. We shouldn't have to perform the window.strapi.isEE check here
   // and it is meant to be in interim solution until we find a better one.

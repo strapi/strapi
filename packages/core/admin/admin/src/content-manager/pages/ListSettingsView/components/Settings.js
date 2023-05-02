@@ -15,7 +15,7 @@ import { getTrad } from '../../../utils';
 
 const Settings = ({ modifiedData, onChange, sortOptions }) => {
   const { formatMessage } = useIntl();
-  const { settings, metadatas } = modifiedData;
+  const { settings } = modifiedData;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -127,9 +127,9 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             name="settings.defaultSortBy"
             value={modifiedData.settings.defaultSortBy || ''}
           >
-            {sortOptions.map((sortBy) => (
-              <Option key={sortBy} value={sortBy}>
-                {metadatas[sortBy].list.label || sortBy}
+            {sortOptions.map(({ value, label }) => (
+              <Option key={value} value={value}>
+                {label}
               </Option>
             ))}
           </Select>
@@ -164,7 +164,12 @@ Settings.defaultProps = {
 Settings.propTypes = {
   modifiedData: PropTypes.object,
   onChange: PropTypes.func.isRequired,
-  sortOptions: PropTypes.array,
+  sortOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string,
+      label: PropTypes.string,
+    }).isRequired
+  ),
 };
 
 export default Settings;

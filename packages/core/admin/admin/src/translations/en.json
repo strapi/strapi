@@ -714,6 +714,7 @@
   "content-manager.containers.SettingPage.relations": "Related fields",
   "content-manager.containers.SettingPage.settings": "Settings",
   "content-manager.containers.SettingPage.view": "View",
+  "content-manager.containers.SettingPage.defaultSortOrder.reviewWorkflows": "Review Stage",
   "content-manager.containers.SettingViewModel.pluginHeader.title": "Content Manager — {name}",
   "content-manager.containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
   "content-manager.containers.SettingsPage.Block.contentType.title": "Collection Types",
