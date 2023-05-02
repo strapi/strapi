@@ -89,11 +89,6 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
     expect(nextAction).toEqual({
       type: 'ContentManager/CrudReducer/INIT_FORM',
       rawQuery: '?plugins[i18n][relatedEntityId]=1',
-      data: {
-        name: 'test',
-        localizations: ['test'],
-        common: 'test',
-      },
     });
   });
 });

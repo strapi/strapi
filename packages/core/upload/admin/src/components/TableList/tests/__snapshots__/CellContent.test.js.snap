@@ -210,6 +210,14 @@ exports[`TableList | CellContent should render image cell type when element type
   height: 32px;
 }
 
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #0c75af;
+  text-transform: uppercase;
+}
+
 .c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -226,14 +234,6 @@ exports[`TableList | CellContent should render image cell type when element type
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #0c75af;
-  text-transform: uppercase;
 }
 
 .c2 span {
@@ -366,6 +366,14 @@ exports[`TableList | CellContent should render image cell type when element type
   height: 1rem;
 }
 
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #0c75af;
+  text-transform: uppercase;
+}
+
 .c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -382,14 +390,6 @@ exports[`TableList | CellContent should render image cell type when element type
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #0c75af;
-  text-transform: uppercase;
 }
 
 .c5 path {

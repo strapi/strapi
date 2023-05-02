@@ -1,6 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -13,19 +26,6 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c11 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c4 {
@@ -364,6 +364,19 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 `;
 
 exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
 .c0 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -376,19 +389,6 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c7 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
 }
 
 .c4 {

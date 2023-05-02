@@ -5,7 +5,7 @@ const { Command } = require('commander');
 const strapiCommands = {
   'admin/create-user': require('./actions/admin/create-user/command'),
   'admin/reset-user-password': require('./actions/admin/reset-user-password/command'),
-  build: require('./actions/build/command'),
+  build: require('./actions/build-command/command'), // in 'build-command' to avoid problems with 'build' being commonly ignored
   'configuration/dump': require('./actions/configuration/dump/command'),
   'configuration/restore': require('./actions/configuration/restore/command'),
   console: require('./actions/console/command'),

@@ -35,6 +35,13 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 100%;
 }
 
+.c21 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+  position: absolute;
+}
+
 .c15 {
   background: #ffffff;
   padding: 8px;
@@ -50,13 +57,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
-}
-
-.c21 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-  position: absolute;
 }
 
 .c24 {
@@ -135,6 +135,66 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 
 .c53 {
   padding-top: 24px;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c36 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c38 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c48 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c0 {
@@ -269,66 +329,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   flex-direction: row;
 }
 
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c36 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c38 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c48 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c54 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c46 path {
   fill: #4945ff;
 }
@@ -338,13 +338,13 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   outline: none;
 }
 
-.c16 svg {
+.c16 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c16 > svg > g,
+.c16 > svg path {
   fill: #ffffff;
 }
 
@@ -719,7 +719,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c21 c22"
@@ -734,7 +734,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c21 c22"
@@ -749,7 +749,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c24 c10 c25"
@@ -1010,6 +1010,13 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 100%;
 }
 
+.c21 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+  position: absolute;
+}
+
 .c15 {
   background: #ffffff;
   padding: 8px;
@@ -1025,13 +1032,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
-}
-
-.c21 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-  position: absolute;
 }
 
 .c24 {
@@ -1084,6 +1084,53 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c38 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c36 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
 }
 
 .c0 {
@@ -1185,65 +1232,18 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: row;
 }
 
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c38 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c36 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
 .c16 {
   position: relative;
   outline: none;
 }
 
-.c16 svg {
+.c16 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c16 > svg > g,
+.c16 > svg path {
   fill: #ffffff;
 }
 
@@ -1413,6 +1413,13 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .c43 {
   border: none;
   border-radius: 4px;
@@ -1472,13 +1479,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 .c42:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
 }
 
 .c40 {
@@ -1669,7 +1669,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c21 c22"
@@ -1684,7 +1684,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c21 c22"
@@ -1699,7 +1699,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c24 c10 c25"
@@ -1946,6 +1946,23 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   padding-left: 16px;
 }
 
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
 .c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -1998,35 +2015,18 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   justify-content: center;
 }
 
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
 .c15 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c15 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c15 > svg > g,
+.c15 > svg path {
   fill: #ffffff;
 }
 
