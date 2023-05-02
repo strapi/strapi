@@ -10,7 +10,7 @@ import {
   GenericInput,
   SettingsPageTitle,
   auth,
-  useAppInfos,
+  useAppInfo,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -46,7 +46,7 @@ const EditPage = ({ canUpdate }) => {
     params: { id },
   } = useRouteMatch('/settings/users/:id');
   const { push } = useHistory();
-  const { setUserDisplayName } = useAppInfos();
+  const { setUserDisplayName } = useAppInfo();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();

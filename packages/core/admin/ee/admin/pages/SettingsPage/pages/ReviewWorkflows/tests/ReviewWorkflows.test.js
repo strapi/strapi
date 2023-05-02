@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
@@ -8,6 +8,8 @@ import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsPage from '..';
@@ -65,15 +67,17 @@ const ComponentFixture = () => {
   const store = configureStore([], [reducer]);
 
   return (
-    <QueryClientProvider client={client}>
-      <Provider store={store}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <ReviewWorkflowsPage />
-          </ThemeProvider>
-        </IntlProvider>
-      </Provider>
-    </QueryClientProvider>
+    <DndProvider backend={HTML5Backend}>
+      <QueryClientProvider client={client}>
+        <Provider store={store}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <ReviewWorkflowsPage />
+            </ThemeProvider>
+          </IntlProvider>
+        </Provider>
+      </QueryClientProvider>
+    </DndProvider>
   );
 };
 
@@ -111,10 +115,12 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
 
-  test('display stages', () => {
-    const { getByText } = setup();
+  test('display stages', async () => {
+    const { getByText, queryByText } = setup();
 
-    expect(getByText('1 stage')).toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
+
+    await waitFor(() => expect(getByText('1 stage')).toBeInTheDocument());
     expect(getByText('stage-1')).toBeInTheDocument();
   });
 
@@ -128,7 +134,9 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Save button is enabled after a stage has been added', async () => {
-    const { user, getByText, getByRole } = setup();
+    const { user, getByText, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -144,7 +152,9 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
   test('Successful Stage update', async () => {
     const toggleNotification = useNotification();
-    const { user, getByRole } = setup();
+    const { user, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -169,7 +179,9 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   test('Stage update with error', async () => {
     SHOULD_ERROR = true;
     const toggleNotification = useNotification();
-    const { user, getByRole } = setup();
+    const { user, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -191,14 +203,18 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     });
   });
 
-  test('Does not show a delete button if only stage is left', () => {
-    const { queryByRole } = setup();
+  test('Does not show a delete button if only stage is left', async () => {
+    const { queryByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     expect(queryByRole('button', { name: /delete stage/i })).not.toBeInTheDocument();
   });
 
   test('Show confirmation dialog when a stage was deleted', async () => {
-    const { user, getByRole, getAllByRole } = setup();
+    const { user, getByRole, getAllByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {

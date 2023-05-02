@@ -4,12 +4,16 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { FormikProvider, useFormik } from 'formik';
 import { Provider } from 'react-redux';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import configureStore from '../../../../../../../../../../admin/src/core/store/configureStore';
 import { Stage } from '../Stage';
 import { reducer } from '../../../../reducer';
+
+import { STAGE_COLOR_DEFAULT } from '../../../../constants';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -18,8 +22,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const STAGES_FIXTURE = {
   id: 1,
-  name: 'stage-1',
-  index: 1,
+  index: 0,
 };
 
 const ComponentFixture = (props) => {
@@ -30,6 +33,7 @@ const ComponentFixture = (props) => {
     initialValues: {
       stages: [
         {
+          color: STAGE_COLOR_DEFAULT,
           name: 'something',
         },
       ],
@@ -38,15 +42,17 @@ const ComponentFixture = (props) => {
   });
 
   return (
-    <Provider store={store}>
-      <FormikProvider value={formik}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Stage {...STAGES_FIXTURE} {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </FormikProvider>
-    </Provider>
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <FormikProvider value={formik}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <Stage {...STAGES_FIXTURE} {...props} />
+            </ThemeProvider>
+          </IntlProvider>
+        </FormikProvider>
+      </Provider>
+    </DndProvider>
   );
 };
 
@@ -60,15 +66,20 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { getByRole, queryByRole } = setup();
+    const { container, getByRole, getByText, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
-    await user.click(getByRole('button'));
+    // open accordion; getByRole is not sufficient here, because the accordion
+    // does not have better identifiers
+    await user.click(container.querySelector('button[aria-expanded]'));
 
     expect(queryByRole('textbox')).toBeInTheDocument();
-    expect(getByRole('textbox').value).toBe(STAGES_FIXTURE.name);
-    expect(getByRole('textbox').getAttribute('name')).toBe('stages.1.name');
+    expect(getByRole('textbox').value).toBe('something');
+    expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
+
+    expect(getByText(/blue/i)).toBeInTheDocument();
+
     expect(
       queryByRole('button', {
         name: /delete stage/i,

@@ -13,7 +13,7 @@ import {
   useNotification,
   TrackingProvider,
   prefixFileUrlWithBackendUrl,
-  useAppInfos,
+  useAppInfo,
   useFetchClient,
 } from '@strapi/helper-plugin';
 import { SkipToContent } from '@strapi/design-system';
@@ -39,7 +39,7 @@ function App() {
     isLoading: true,
     hasAdmin: false,
   });
-  const appInfo = useAppInfos();
+  const appInfo = useAppInfo();
   const { get, post } = useFetchClient();
 
   const authRoutes = useMemo(() => {

@@ -120,13 +120,7 @@ const toTypeLiteral = (data) => {
 
     return [
       ...acc,
-      factory.createPropertyDeclaration(
-        undefined,
-        undefined,
-        identifier,
-        undefined,
-        toTypeLiteral(value)
-      ),
+      factory.createPropertyDeclaration(undefined, identifier, undefined, toTypeLiteral(value)),
     ];
   }, []);
 

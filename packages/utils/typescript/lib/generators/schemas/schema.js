@@ -69,7 +69,6 @@ const generateSchemaDefinition = (schema) => {
 
   // Generate the schema's interface declaration
   const schemaType = factory.createInterfaceDeclaration(
-    undefined,
     [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
     factory.createIdentifier(interfaceName),
     undefined,

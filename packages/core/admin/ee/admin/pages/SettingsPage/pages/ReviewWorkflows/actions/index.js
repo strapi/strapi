@@ -3,6 +3,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGE_POSITION,
 } from '../constants';
 
 export function setWorkflows({ status, data }) {
@@ -37,6 +38,16 @@ export function updateStage(stageId, payload) {
     payload: {
       stageId,
       ...payload,
+    },
+  };
+}
+
+export function updateStagePosition(oldIndex, newIndex) {
+  return {
+    type: ACTION_UPDATE_STAGE_POSITION,
+    payload: {
+      newIndex,
+      oldIndex,
     },
   };
 }

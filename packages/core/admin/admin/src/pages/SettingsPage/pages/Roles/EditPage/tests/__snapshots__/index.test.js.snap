@@ -548,10 +548,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
-.c37 {
-  height: 100vh;
-}
-
 .c4 {
   padding-right: 8px;
 }
@@ -620,6 +616,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c37 {
+  height: 100vh;
 }
 
 @media (max-width:68.75rem) {
