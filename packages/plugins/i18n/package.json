@@ -23,6 +23,10 @@
   "scripts": {
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "lint": "run -T eslint ."
   },
   "dependencies": {
@@ -35,7 +39,7 @@
     "lodash": "4.17.21",
     "prop-types": "^15.7.2",
     "qs": "6.11.1",
-    "react-intl": "6.3.2",
+    "react-intl": "6.4.1",
     "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",

@@ -119,7 +119,7 @@ module.exports = ({ strapi }) => {
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
-      strapi.hook('strapi::content-types.beforeSync').register(persistStagesJoinTables({ strapi }));
+      strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
     },
   };
 };
