@@ -19,16 +19,16 @@ const BulkActionsBar = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
+  const [dialogToOpen, setDialogToOpen] = useState(null);
 
   // Bulk delete
-  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
-
   const handleToggleShowDeleteAllModal = () => {
-    if (!showConfirmDeleteAll) {
+    if (dialogToOpen === 'delete') {
+      setDialogToOpen(null);
+    } else {
+      setDialogToOpen('delete');
       trackUsage('willBulkDeleteEntries');
     }
-
-    setShowConfirmDeleteAll((prev) => !prev);
   };
 
   const handleConfirmDeleteAll = async () => {
@@ -45,14 +45,13 @@ const BulkActionsBar = ({
   };
 
   // Bulk publish
-  const [showConfirmPublishAll, setShowConfirmPublishAll] = useState(false);
-
   const handleToggleShowPublishAllModal = () => {
-    if (!showConfirmPublishAll) {
+    if (dialogToOpen === 'publish') {
+      setDialogToOpen(null);
+    } else {
+      setDialogToOpen('publish');
       trackUsage('willBulkPublishEntries');
     }
-
-    setShowConfirmPublishAll((prev) => !prev);
   };
 
   const handleConfirmPublishAll = async () => {
@@ -69,13 +68,13 @@ const BulkActionsBar = ({
   };
 
   // Bulk unpublish
-  const [showConfirmUnpublishAll, setShowConfirmUnpublishAll] = useState(false);
-
   const handleToggleShowUnpublishAllModal = () => {
-    if (!showConfirmUnpublishAll) {
+    if (dialogToOpen === 'unpublish') {
+      setDialogToOpen(null);
+    } else {
+      setDialogToOpen('unpublish');
       trackUsage('willBulkUnpublishEntries');
     }
-    setShowConfirmUnpublishAll((prev) => !prev);
   };
 
   const handleConfirmUnpublishAll = async () => {
@@ -102,13 +101,13 @@ const BulkActionsBar = ({
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogPublishAll
-            isOpen={showConfirmPublishAll}
+            isOpen={dialogToOpen === 'publish'}
             onToggleDialog={handleToggleShowPublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleConfirmPublishAll}
           />
           <ConfirmDialogUnpublishAll
-            isOpen={showConfirmUnpublishAll}
+            isOpen={dialogToOpen === 'unpublish'}
             onToggleDialog={handleToggleShowUnpublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleConfirmUnpublishAll}
@@ -121,7 +120,7 @@ const BulkActionsBar = ({
             {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
           </Button>
           <ConfirmDialogDeleteAll
-            isOpen={showConfirmDeleteAll}
+            isOpen={dialogToOpen === 'delete'}
             onToggleDialog={handleToggleShowDeleteAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleConfirmDeleteAll}
