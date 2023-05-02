@@ -18,7 +18,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useAppInfos: jest.fn(() => ({ setUserDisplayName: jest.fn() })),
+  useAppInfo: jest.fn(() => ({ setUserDisplayName: jest.fn() })),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));

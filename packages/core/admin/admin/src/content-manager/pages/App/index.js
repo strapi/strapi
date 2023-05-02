@@ -12,7 +12,7 @@ import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';
 import getTrad from '../../utils/getTrad';
-import DragLayer from '../../components/DragLayer';
+import { DragLayer } from '../../../components/DragLayer';
 import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
@@ -22,7 +22,44 @@ import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import LeftMenu from './LeftMenu';
 import useContentManagerInitData from './useContentManagerInitData';
 
+import ItemTypes from '../../utils/ItemTypes';
+
+import { CardDragPreview } from './components/CardDragPreview';
+import { ComponentDragPreview } from './components/ComponentDragPreview';
+import { RelationDragPreview } from './components/RelationDragPreview';
+
 const cmPermissions = permissions.contentManager;
+
+function renderDraglayerItem({ type, item }) {
+  if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
+    return <CardDragPreview labelField={item.labelField} />;
+  }
+
+  /**
+   * Because a user may have multiple relations / dynamic zones / repeable fields in the same content type,
+   * we append the fieldName for the item type to make them unique, however, we then want to extract that
+   * first type to apply the correct preview.
+   */
+  const [actualType] = type.split('_');
+
+  switch (actualType) {
+    case ItemTypes.COMPONENT:
+    case ItemTypes.DYNAMIC_ZONE:
+      return <ComponentDragPreview displayedValue={item.displayedValue} />;
+
+    case ItemTypes.RELATION:
+      return (
+        <RelationDragPreview
+          displayedValue={item.displayedValue}
+          status={item.status}
+          width={item.width}
+        />
+      );
+
+    default:
+      return null;
+  }
+}
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
@@ -85,7 +122,7 @@ const App = () => {
 
   return (
     <Layout sideNav={<LeftMenu />}>
-      <DragLayer />
+      <DragLayer renderItem={renderDraglayerItem} />
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
           <Route path="/content-manager/components/:uid/configurations/edit">
