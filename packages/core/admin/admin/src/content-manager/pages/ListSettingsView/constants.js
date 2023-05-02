@@ -1,4 +1,4 @@
-export const EXCLUDED_SORT_OPTIONS = [
+export const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
   'media',
   'richtext',
   'dynamiczone',
