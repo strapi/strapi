@@ -1,49 +1,9 @@
 import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfos';
 
-// Contexts
-export { default as AppInfosContext } from './contexts/AppInfosContext';
-export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
-export { default as NotificationsContext } from './contexts/NotificationsContext';
-export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
+/* -------------------------------------------------------------------------------------------------
+ * Components
+ * -----------------------------------------------------------------------------------------------*/
 
-export { default as RBACProviderContext } from './contexts/RBACProviderContext';
-export { default as TrackingContext } from './contexts/TrackingContext';
-
-// Hooks
-export { default as useGuidedTour } from './hooks/useGuidedTour';
-export { default as useAppInfos } from './hooks/useAppInfos';
-export { default as useQuery } from './hooks/useQuery';
-export { default as useLibrary } from './hooks/useLibrary';
-export { default as useCustomFields } from './hooks/useCustomFields';
-export { default as useNotification } from './hooks/useNotification';
-export { default as useStrapiApp } from './hooks/useStrapiApp';
-export { default as useTracking } from './hooks/useTracking';
-export { useSelectionState } from './hooks/useSelectionState';
-export * from './hooks/useAPIErrorHandler';
-export { useFilter } from './hooks/useFilter';
-export { useCollator } from './hooks/useCollator';
-
-export { default as useQueryParams } from './hooks/useQueryParams';
-export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
-export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
-export { default as useRBACProvider } from './hooks/useRBACProvider';
-export { default as useRBAC } from './hooks/useRBAC';
-export { default as usePersistentState } from './hooks/usePersistentState';
-export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
-export { default as useLockScroll } from './hooks/useLockScroll';
-export { default as useFetchClient } from './hooks/useFetchClient';
-
-// Providers
-export { default as GuidedTourProvider } from './providers/GuidedTourProvider';
-export { default as LibraryProvider } from './providers/LibraryProvider';
-export { default as CustomFieldsProvider } from './providers/CustomFieldsProvider';
-export { default as NotificationsProvider } from './providers/NotificationsProvider';
-export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
-export { default as TrackingProvider } from './providers/TrackingProvider';
-
-// Utils
-
-// New components
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
 export { default as ConfirmDialog } from './components/ConfirmDialog';
@@ -73,17 +33,59 @@ export { default as ReactSelect } from './components/ReactSelect';
 export { default as Link } from './components/Link';
 export { default as LinkButton } from './components/LinkButton';
 
-// New icons
-export { default as SortIcon } from './icons/SortIcon';
-export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
+/* -------------------------------------------------------------------------------------------------
+ * Content Manager
+ * -----------------------------------------------------------------------------------------------*/
 
-// content-manager
 export { default as ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
 export { default as useCMEditViewDataManager } from './content-manager/hooks/useCMEditViewDataManager';
 export { getType };
 export { getOtherInfos };
 
-// Utils
+/* -------------------------------------------------------------------------------------------------
+ * Features
+ * -----------------------------------------------------------------------------------------------*/
+
+export * from './features/AppInfo';
+export * from './features/AutoReloadOverlayBlocker';
+export * from './features/CustomFields';
+export * from './features/GuidedTour';
+export * from './features/Library';
+export * from './features/OverlayBlocker';
+export * from './features/Notifications';
+export * from './features/RBAC';
+export * from './features/StrapiApp';
+export * from './features/Tracking';
+
+/* -------------------------------------------------------------------------------------------------
+ * Hooks
+ * -----------------------------------------------------------------------------------------------*/
+
+export { default as useQuery } from './hooks/useQuery';
+export { useSelectionState } from './hooks/useSelectionState';
+export * from './hooks/useAPIErrorHandler';
+export { useFilter } from './hooks/useFilter';
+export { useCollator } from './hooks/useCollator';
+export { useCallbackRef } from './hooks/useCallbackRef';
+
+export { default as useQueryParams } from './hooks/useQueryParams';
+export { default as useRBAC } from './hooks/useRBAC';
+export { default as usePersistentState } from './hooks/usePersistentState';
+export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
+export { default as useLockScroll } from './hooks/useLockScroll';
+export { default as useFetchClient } from './hooks/useFetchClient';
+
+/* -------------------------------------------------------------------------------------------------
+ * Icons
+ * -----------------------------------------------------------------------------------------------*/
+
+export { default as SortIcon } from './icons/SortIcon';
+export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
+
+/* -------------------------------------------------------------------------------------------------
+ * Utils
+ * -----------------------------------------------------------------------------------------------*/
+
 export { default as auth } from './utils/auth';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';

@@ -32,7 +32,7 @@ import reducer, { initialState } from './reducer';
 import init from './init';
 import DisplayedFields from './components/DisplayedFields';
 import ModalForm from './components/FormModal';
-import LayoutDndProvider from '../../components/LayoutDndProvider';
+import { LayoutDndProvider } from './components/LayoutDndProvider';
 import { unformatLayout } from './utils/layout';
 import putCMSettingsEV from './utils/api';
 import { selectFieldSizes } from '../App/selectors';

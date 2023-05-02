@@ -1731,19 +1731,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   opacity: 1;
 }
 
-.c22 {
-  margin-right: 24px;
-}
-
-.c22 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c25 {
-  word-break: break-all;
-}
-
 .c4 {
   padding-right: 8px;
 }
@@ -1812,6 +1799,19 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c22 {
+  margin-right: 24px;
+}
+
+.c22 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c25 {
+  word-break: break-all;
 }
 
 @media (max-width:68.75rem) {

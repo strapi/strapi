@@ -2498,19 +2498,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   opacity: 1;
 }
 
-.c23 {
-  margin-right: 24px;
-}
-
-.c23 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c26 {
-  word-break: break-all;
-}
-
 .c4 {
   padding-right: 8px;
 }
@@ -2579,6 +2566,19 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+}
+
+.c23 {
+  margin-right: 24px;
+}
+
+.c23 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c26 {
+  word-break: break-all;
 }
 
 @media (max-width:68.75rem) {

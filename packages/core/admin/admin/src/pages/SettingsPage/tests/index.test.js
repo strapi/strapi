@@ -12,7 +12,7 @@ import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
   useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
-  useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false })),
+  useAppInfo: jest.fn(() => ({ shouldUpdateStrapi: false })),
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
