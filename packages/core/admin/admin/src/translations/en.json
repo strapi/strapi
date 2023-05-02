@@ -759,7 +759,7 @@
   "content-manager.form.Input.filters": "Enable filters",
   "content-manager.form.Input.hint.character.unit": "{maxValue, plural, one { character} other { characters}}",
   "content-manager.form.Input.hint.minMaxDivider": " / ",
-  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. (min: {min})}}{divider}{max, select, undefined {} other {max. (max: {max})}}{unit}{br}{description}",
+  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}",
   "content-manager.form.Input.label": "Label",
   "content-manager.form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
   "content-manager.form.Input.pageEntries": "Entries per page",
