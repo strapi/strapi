@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter, Button } from '@strapi/design-system';
+import { Button, Dialog, DialogBody, DialogFooter, Flex } from '@strapi/design-system';
+import { ExclamationMarkCircle } from '@strapi/icons';
 
-const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, icon, dialogBody, endAction }) => {
+const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -17,7 +18,11 @@ const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, icon, dialogBody, end
       describedBy="confirm-description"
       isOpen={isOpen}
     >
-      <DialogBody icon={icon}>{dialogBody}</DialogBody>
+      <DialogBody icon={<ExclamationMarkCircle />}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          {dialogBody}
+        </Flex>
+      </DialogBody>
       <DialogFooter
         startAction={
           <Button onClick={onToggleDialog} variant="tertiary">
@@ -36,7 +41,6 @@ const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, icon, dialogBody, end
 ConfirmBulkActionDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggleDialog: PropTypes.func.isRequired,
-  icon: PropTypes.node.isRequired,
   dialogBody: PropTypes.node.isRequired,
   endAction: PropTypes.node.isRequired,
 };

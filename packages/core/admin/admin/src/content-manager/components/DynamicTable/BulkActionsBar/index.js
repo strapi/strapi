@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Flex, Typography } from '@strapi/design-system';
-import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { Button, Typography } from '@strapi/design-system';
+import { Check, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
@@ -22,9 +22,8 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
     <ConfirmBulkActionDialog
       isOpen={isOpen}
       onToggleDialog={onToggleDialog}
-      icon={<ExclamationMarkCircle />}
       dialogBody={
-        <Flex direction="column" alignItems="stretch" gap={2}>
+        <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
@@ -32,7 +31,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
             })}
           </Typography>
           <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
-        </Flex>
+        </>
       }
       endAction={
         <Button
@@ -65,19 +64,16 @@ const ConfirmDialogUnpublishAll = ({
     <ConfirmBulkActionDialog
       isOpen={isOpen}
       onToggleDialog={onToggleDialog}
-      icon={<ExclamationMarkCircle />}
       dialogBody={
-        <Flex direction="column" alignItems="stretch" gap={2}>
+        <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: getTrad('popUpWarning.bodyMessage.contentType.unpublish.all'),
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
-          <Flex>
-            <InjectionZoneList area="contentManager.listView.unpublishModalAdditionalInfos" />
-          </Flex>
-        </Flex>
+          <InjectionZoneList area="contentManager.listView.unpublishModalAdditionalInfos" />
+        </>
       }
       endAction={
         <Button
@@ -105,9 +101,8 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
     <ConfirmBulkActionDialog
       isOpen={isOpen}
       onToggleDialog={onToggleDialog}
-      icon={<ExclamationMarkCircle />}
       dialogBody={
-        <Flex direction="column" alignItems="stretch" gap={2}>
+        <>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: getTrad('popUpWarning.bodyMessage.contentType.delete.all'),
@@ -115,7 +110,7 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
             })}
           </Typography>
           <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-        </Flex>
+        </>
       }
       endAction={
         <Button
