@@ -200,13 +200,12 @@ const BulkActionsBar = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(selectedEntries);
-      handleToggleShowDeleteAllModal();
       clearSelectedEntries();
       setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
-      handleToggleShowDeleteAllModal();
     }
+    handleToggleShowDeleteAllModal();
   };
 
   // Bulk publish
@@ -223,13 +222,12 @@ const BulkActionsBar = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmPublishAll(selectedEntries);
-      handleToggleShowPublishAllModal();
       clearSelectedEntries();
       setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
-      handleToggleShowPublishAllModal();
     }
+    handleToggleShowPublishAllModal();
   };
 
   // Bulk unpublish
@@ -246,13 +244,12 @@ const BulkActionsBar = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmUnpublishAll(selectedEntries);
-      handleToggleShowUnpublishAllModal();
       clearSelectedEntries();
       setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
-      handleToggleShowUnpublishAllModal();
     }
+    handleToggleShowUnpublishAllModal();
   };
 
   return (
