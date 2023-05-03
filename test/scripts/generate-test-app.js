@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'test';
 
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
+const { cleanTestApp, generateTestApp, runTestApp } = require('../helpers/test-app');
 
 const databases = {
   postgres: {
@@ -40,6 +40,10 @@ const main = async (database, appPath, opts) => {
   try {
     await cleanTestApp(appPath);
     await generateTestApp({ appPath, database, template: opts.template });
+
+    if (opts.run) {
+      await runTestApp(appPath);
+    }
   } catch (error) {
     console.error(error);
     process.exit(1);
