@@ -45,11 +45,12 @@ function Stages({ stages }) {
             return (
               <Box key={`stage-${id}`} as="li">
                 <Stage
-                  {...stage}
                   id={id}
                   index={index}
                   canDelete={stages.length > 1}
                   isOpen={!stage.id}
+                  canReorder={stages.length > 1}
+                  stagesCount={stages.length}
                 />
               </Box>
             );

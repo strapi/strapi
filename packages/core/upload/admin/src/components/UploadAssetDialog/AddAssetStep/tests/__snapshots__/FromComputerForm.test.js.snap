@@ -56,6 +56,20 @@ exports[`FromComputerForm snapshots the component 1`] = `
   padding-left: 20px;
 }
 
+.c9 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #666687;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -121,32 +135,18 @@ exports[`FromComputerForm snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #666687;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c15 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c15 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c15 > svg > g,
+.c15 > svg path {
   fill: #ffffff;
 }
 

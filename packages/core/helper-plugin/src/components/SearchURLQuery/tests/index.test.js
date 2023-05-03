@@ -77,13 +77,13 @@ describe('<SearchURLQuery />', () => {
         outline: none;
       }
 
-      .c2 svg {
+      .c2 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c2 svg > g,
-      .c2 svg path {
+      .c2 > svg > g,
+      .c2 > svg path {
         fill: #ffffff;
       }
 
@@ -223,6 +223,13 @@ describe('<SearchURLQuery />', () => {
         padding-left: 12px;
       }
 
+      .c2 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -253,13 +260,6 @@ describe('<SearchURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c1 {
