@@ -1,12 +1,52 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Typography } from '@strapi/design-system';
-import { Check, Trash } from '@strapi/icons';
+import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
+import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useTracking } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
-import ConfirmBulkActionDialog from '../ConfirmBulkActionDialog';
+
+const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Dialog
+      onClose={onToggleDialog}
+      title={formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      })}
+      labelledBy="confirmation"
+      describedBy="confirm-description"
+      isOpen={isOpen}
+    >
+      <DialogBody icon={<ExclamationMarkCircle />}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          {dialogBody}
+        </Flex>
+      </DialogBody>
+      <DialogFooter
+        startAction={
+          <Button onClick={onToggleDialog} variant="tertiary">
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'Cancel',
+            })}
+          </Button>
+        }
+        endAction={endAction}
+      />
+    </Dialog>
+  );
+};
+
+ConfirmBulkActionDialog.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onToggleDialog: PropTypes.func.isRequired,
+  dialogBody: PropTypes.node.isRequired,
+  endAction: PropTypes.node.isRequired,
+};
 
 const confirmDialogsPropTypes = {
   isConfirmButtonLoading: PropTypes.bool.isRequired,
