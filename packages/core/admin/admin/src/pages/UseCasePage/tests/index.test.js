@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -86,16 +87,17 @@ describe('Admin | UseCasePage', () => {
         width: 15.625rem;
       }
 
-      .c28 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c30 {
+      .c24 {
+        background: #ffffff;
+        padding-right: 12px;
         padding-left: 12px;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        cursor: default;
       }
 
-      .c33 {
+      .c32 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -107,12 +109,56 @@ describe('Admin | UseCasePage', () => {
         cursor: pointer;
       }
 
-      .c38 {
+      .c37 {
         padding-top: 16px;
       }
 
-      .c39 {
+      .c38 {
         background: transparent;
+      }
+
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c18 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c28 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #666687;
+      }
+
+      .c35 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c40 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
       }
 
       .c0 {
@@ -206,7 +252,7 @@ describe('Admin | UseCasePage', () => {
         gap: 4px;
       }
 
-      .c26 {
+      .c25 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -218,13 +264,44 @@ describe('Admin | UseCasePage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        gap: 16px;
         -webkit-box-pack: justify;
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
       }
 
-      .c34 {
+      .c27 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 16px;
+      }
+
+      .c30 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 12px;
+      }
+
+      .c33 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -243,7 +320,7 @@ describe('Admin | UseCasePage', () => {
         justify-content: center;
       }
 
-      .c37 {
+      .c36 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -261,69 +338,25 @@ describe('Admin | UseCasePage', () => {
         justify-content: center;
       }
 
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c18 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c29 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #666687;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c41 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c40 {
+      .c39 {
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c40[aria-disabled='true'] {
+      .c39[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c40[aria-disabled='true'] svg path {
+      .c39[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c40 svg path {
+      .c39 svg path {
         fill: #4945ff;
       }
 
-      .c40:after {
+      .c39:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -338,11 +371,11 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid transparent;
       }
 
-      .c40:focus-visible {
+      .c39:focus-visible {
         outline: none;
       }
 
-      .c40:focus-visible:after {
+      .c39:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -358,13 +391,13 @@ describe('Admin | UseCasePage', () => {
         outline: none;
       }
 
-      .c4 svg {
+      .c4 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c4 svg > g,
-      .c4 svg path {
+      .c4 > svg > g,
+      .c4 > svg path {
         fill: #ffffff;
       }
 
@@ -402,7 +435,7 @@ describe('Admin | UseCasePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c42 {
+      .c41 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -464,48 +497,48 @@ describe('Admin | UseCasePage', () => {
         fill: #8e8ea9;
       }
 
-      .c35 {
+      .c34 {
         height: 2.5rem;
       }
 
-      .c35[aria-disabled='true'] {
+      .c34[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c35[aria-disabled='true'] .c6 {
+      .c34[aria-disabled='true'] .c6 {
         color: #666687;
       }
 
-      .c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+      .c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c35[aria-disabled='true']:active {
+      .c34[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c35[aria-disabled='true']:active .c6 {
+      .c34[aria-disabled='true']:active .c6 {
         color: #666687;
       }
 
-      .c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+      .c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c35:hover {
+      .c34:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c35:active {
+      .c34:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c35 svg > g,
-      .c35 svg path {
+      .c34 svg > g,
+      .c34 svg path {
         fill: #ffffff;
       }
 
@@ -518,56 +551,6 @@ describe('Admin | UseCasePage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c24 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-        min-height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c24:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c31 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c31 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c31 svg path {
-        fill: #666687;
-      }
-
-      .c32 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        background: none;
-        border: none;
-      }
-
-      .c32 svg {
-        width: 0.375rem;
       }
 
       .c9 {
@@ -586,27 +569,52 @@ describe('Admin | UseCasePage', () => {
         width: 6px;
       }
 
-      .c25 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
+      .c26 {
+        border: 1px solid #dcdce4;
+        min-height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
       }
 
-      .c25:focus {
+      .c26[aria-disabled='true'] {
+        color: #666687;
+      }
+
+      .c26:focus-visible {
         outline: none;
       }
 
-      .c25[data-disabled] {
-        cursor: not-allowed;
+      .c26:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c27 {
-        width: 100%;
+      .c31 > svg {
+        width: 0.375rem;
+      }
+
+      .c31 > svg > path {
+        fill: #666687;
+      }
+
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        gap: 4px;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+      }
+
+      .c42[data-state='checked'] .c6 {
+        font-weight: bold;
+        color: #4945ff;
       }
 
       .c11:focus-visible {
@@ -726,74 +734,64 @@ describe('Admin | UseCasePage', () => {
                           What type of work do you do?
                         </label>
                         <div
-                          class="c8 c24"
+                          aria-autocomplete="none"
+                          aria-controls="radix-0"
+                          aria-describedby="usecase-hint usecase-error"
+                          aria-expanded="false"
+                          aria-label="What type of work do you do?"
+                          class="c24 c25 c26"
+                          data-state="closed"
+                          dir="ltr"
+                          id="usecase"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
-                          <button
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="usecase usecase-label usecase-content"
-                            aria-required="false"
-                            class="c25"
-                            data-testid="usecase"
-                            id="usecase"
-                            role="combobox"
-                            type="button"
-                          />
-                          <div
-                            class="c26 c27"
+                          <span
+                            class="c27"
                           >
-                            <div
-                              class="c8"
+                            <span
+                              class="c6 c28"
                             >
-                              <div
-                                class="c28"
-                              >
-                                <span
-                                  class="c6 c29"
-                                  id="usecase-content"
-                                >
-                                  Select...
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              class="c8"
+                              <span
+                                class="c29"
+                              />
+                            </span>
+                          </span>
+                          <span
+                            class="c30"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c31"
                             >
-                              <button
-                                aria-hidden="true"
-                                class="c30 c31 c32"
-                                tabindex="-1"
-                                title="Carret Down Button"
-                                type="button"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
                     <button
                       aria-disabled="true"
-                      class="c33 c34 c4 c35"
+                      class="c32 c33 c4 c34"
                       disabled=""
                       type="submit"
                     >
                       <span
-                        class="c6 c36"
+                        class="c6 c35"
                       >
                         Finish
                       </span>
@@ -802,18 +800,18 @@ describe('Admin | UseCasePage', () => {
                 </form>
               </div>
               <div
-                class="c37"
+                class="c36"
               >
                 <div
-                  class="c38"
+                  class="c37"
                 >
                   <button
                     aria-disabled="false"
-                    class="c39 c3 c40"
+                    class="c38 c3 c39"
                     type="button"
                   >
                     <span
-                      class="c6 c41"
+                      class="c6 c40"
                     >
                       Skip this question
                     </span>
@@ -824,7 +822,7 @@ describe('Admin | UseCasePage', () => {
           </div>
         </div>
         <div
-          class="c42"
+          class="c41"
         >
           <p
             aria-live="polite"
@@ -850,27 +848,27 @@ describe('Admin | UseCasePage', () => {
   });
 
   it('should not show Other input if select value is not Other', async () => {
-    const { container, queryByTestId } = render(App);
+    const { queryByTestId } = render(App);
+    const user = userEvent.setup();
 
-    const selectInput = screen.getByTestId('usecase');
+    const selectInput = screen.getByRole('combobox', { name: 'What type of work do you do?' });
 
-    fireEvent.mouseDown(selectInput);
-    await waitFor(() => container.querySelector('[role="listbox"]'));
+    await user.click(selectInput);
 
-    fireEvent.click(document.querySelector('[data-strapi-value="front_end_developer"]'));
+    await user.click(screen.getByRole('option', { name: 'Front-end developer' }));
 
     expect(queryByTestId('other')).not.toBeInTheDocument();
   });
 
   it('should show Other input if select value is Other', async () => {
-    const { container, queryByTestId } = render(App);
+    const { queryByTestId } = render(App);
+    const user = userEvent.setup();
 
-    const selectInput = screen.getByTestId('usecase');
+    const selectInput = screen.getByRole('combobox', { name: 'What type of work do you do?' });
 
-    fireEvent.mouseDown(selectInput);
-    await waitFor(() => container.querySelector('[role="listbox"]'));
+    await user.click(selectInput);
 
-    fireEvent.click(document.querySelector('[data-strapi-value="other"]'));
+    await user.click(screen.getByRole('option', { name: 'Other' }));
 
     expect(queryByTestId('other')).toBeInTheDocument();
   });

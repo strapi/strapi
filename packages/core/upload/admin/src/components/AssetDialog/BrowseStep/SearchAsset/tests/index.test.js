@@ -64,13 +64,13 @@ describe('<SearchURLQuery />', () => {
         outline: none;
       }
 
-      .c2 svg {
+      .c2 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c2 svg > g,
-      .c2 svg path {
+      .c2 > svg > g,
+      .c2 > svg path {
         fill: #ffffff;
       }
 

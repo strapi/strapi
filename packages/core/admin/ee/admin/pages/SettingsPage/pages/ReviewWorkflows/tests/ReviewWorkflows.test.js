@@ -157,7 +157,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     });
 
     await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
+      fireEvent.click(getByRole('button', { name: /save/i }));
     });
 
     expect(toggleNotification).toBeCalledWith({
@@ -182,7 +182,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     });
 
     await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
+      fireEvent.click(getByRole('button', { name: /save/i }));
     });
 
     expect(toggleNotification).toBeCalledWith({
@@ -213,7 +213,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     await user.click(deleteButtons[0]);
 
     await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
+      fireEvent.click(getByRole('button', { name: /save/i }));
     });
 
     expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument();

@@ -52,6 +52,26 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   cursor: pointer;
 }
 
+.c11 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.22;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
 .c1 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -100,38 +120,18 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   gap: 8px;
 }
 
-.c11 {
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c20 {
   position: relative;
   outline: none;
 }
 
-.c20 svg {
+.c20 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c20 svg > g,
-.c20 svg path {
+.c20 > svg > g,
+.c20 > svg path {
   fill: #ffffff;
 }
 
@@ -361,7 +361,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c3 c4"

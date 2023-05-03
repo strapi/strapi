@@ -1,0 +1,598 @@
+---
+title: Strapi (WIP)
+slug: /api/Strapi
+tags:
+- class
+- public
+- global
+
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+import Type from '@site/docs/api/components/type';
+
+# Strapi
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The Strapi class is the main object used in Strapi projects.
+An instance of Strapi class is available as a global in any Strapi project: `global.strapi`.
+
+## Class: Strapi
+
+### `new Strapi(opts)`
+
+- `opts`: <Type>Object</Type> Options that can be used on Strapi startup
+  - `autoReload`: <Type>Boolean</Type> **Default:** true
+    - If false, deactivate auto reload
+    - If you modify any file in your Strapi project, it reloads your nodejs app
+    - If any content-type is changed, it will reload the nodejs app
+  - `serveAdminPanel`: <Type>Boolean</Type> **Default:** true
+    - Should the admin panel be loaded and serve as a web client
+    - The admin panel build will not be delivered if false
+  - `appDir`: <Type>String</Type>  **Default:** `process.cwd()`
+    - The directory relative or absolute path where Strapi will write every file (schemas, generated APIs, controllers or services)
+  - `distDir`: <Type>String</Type>  **Default:** appDir value
+    - The directory relative or absolute path where Strapi will read configurations, schemas and any compiled code
+
+Instances of the Strapi class can be created using the new keyword.
+
+```javascript
+const strapiInstance = new Strapi();
+```
+
+### `strapi.container`
+- [<Type>Container</Type>](./container)
+
+The container provides a simple and efficient way to register and manage resources, making it easy to access and use them throughout the application.
+By registering a registry with the container, it can be easily retrieved by other parts of the application, making it a powerful tool for organizing and reusing code across the entire codebase.
+
+See [Container](./container).
+
+### `strapi.dirs`
+- <Type>Object</Type>
+
+Stored paths of file system.
+
+- `dirs.dist`: <Type>[StrapiPathObject](#strapipathobject)</Type>
+  - Build folder
+- `dirs.app`: <Type>[StrapiPathObject](#strapipathobject)</Type>
+  - Sources folder
+- `dirs.static`: <Type>Object</Type> Define path to directories involving web client display
+  - `public`:  <Type>String</Type> Path to the folder to serve publicly (like files, images, etc..)
+
+#### StrapiPathObject
+- <Type>Object</Type>
+
+A set of paths to specific Strapi project parts.
+
+- `root`: <Type>String</Type> Root path
+- `src`: <Type>String</Type> Sources route path to project files
+- `api`:  <Type>String</Type> Path to the folder containing project developers' API files (content-types, controllers, services, routes, etc..)
+- `components`:  <Type>String</Type> Path to the folder containing project developers' components
+- `policies`:  <Type>String</Type> Path to the folder where the Strapi project developers' policies are stored
+  - A set of functions that check the state of the data and prevent the access to the API accordingly
+- `middlewares`:  <Type>String</Type> Path to the folder where the Strapi project developers' middlewares are stored
+  - A set of function that wrap around routes and requests
+- `config`:  <Type>String</Type> Path to the folder containing project developers' config files
+
+### `strapi.isLoaded`
+- <Type>Boolean</Type>
+
+  - `true`: Everything (all `register` and `bootstrap` functions available in your strapi project) has been loaded
+  - `false`: There is something loading
+
+Note: `register` functions are called before the `bootstrap` functions.
+
+### `strapi.reload()`
+
+Reload the app.
+
+This function defines itself at the construction of the Strapi class.
+
+### `strapi.server`
+- [<Type>StrapiServer</Type>](./strapi-server)
+
+Strapi server object.
+
+### `strapi.fs`
+- [<Type>StrapiFS</Type>](StrapiFS)
+
+Wrapper around [FS NodeJS module](https://nodejs.org/docs/latest-v18.x/api/fs.html).
+
+### `strapi.eventHub`
+- [<Type>EventHub</Type>](EventHub)
+
+The `strapi.eventHub` object is used to manipulate events within a Strapi project. It is an instance of the built-in EventEmitter class from Node.js, which provides a simple way to emit and listen for events.
+
+The `strapi.eventHub` object is created using the `createEventHub()` function in the [EventHub](EventHub) module of the Strapi core. This function returns a new instance of the EventHub class, which extends the EventEmitter class and adds some additional functionality specific to Strapi.
+
+
+#### Examples:
+
+```javascript
+// Listen for a 'user.updated' event and log the data
+strapi.eventHub.on('user.updated', (data) => {
+console.log(`User ${data.id} has been updated`);
+});
+
+// Emit a 'user.created' event with some data
+strapi.eventHub.emit('user.created', { username: 'johndoe', email: 'johndoe@example.com' });
+```
+In this example, we are emitting a `user.created` event with some data attached to it, and then listening for a user.updated event and logging the data. These events can be used to trigger actions within the Strapi application or to communicate with external systems.
+
+For more information on how to use the EventEmitter class and its methods, see the [Node.js documentation](ttps://nodejs.org/docs/latest-v18.x/api/events.html#class-eventemitter).
+
+### `strapi.startupLogger`
+- [<Type>StartupLogger</Type>](StartupLogger)
+
+Object containing predefined logger functions. Used for Strapi startup. (do not use as a logger elsewhere)
+
+### `strapi.log`
+- [<Type>Winston</Type>](https://github.com/winstonjs/winston#creating-your-own-logger)
+
+A logger provided by Strapi that uses the Winston logging library. It is the result of calling the `winston.createLogger()` function with the configuration defined by the user of the Strapi application.
+
+The logger provides various methods for logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. The logging level can be set via the configuration to control which messages are logged.
+
+#### Examples
+```javascript
+// Log an error message
+strapi.log.error('Failed to start server', { error: err });
+
+// Log a warning message
+strapi.log.warn('Server is running in development mode');
+
+// Log an informational message
+strapi.log.info(`Server started on port ${PORT}`);
+
+// Log a verbose message
+strapi.log.verbose('Application state', { user: currentUser });
+
+// Log a debug message
+strapi.log.debug('API request received', { method: req.method, path: req.path });
+
+// Log a silly message
+strapi.log.silly('Entered loop', { count: i });
+```
+In these examples, we are logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. We are also passing in metadata as an object in the second parameter of each logging method.
+
+The messages logged by strapi.log will be output according to the logging configuration set by the user of the Strapi application. This configuration determines which messages are logged and where they are logged (e.g. console, file, etc.).
+
+### `strapi.cron`
+- [<Type>CronService</Type>](Cron)
+
+Module to schedule cron jobs for Strapi project. It is an instance of a custom Cron object.
+
+### `strapi.telemetry`
+- [<Type>TelemetryService</Type>](Telemetry)
+
+The `strapi.telemetry` property provides access to the telemetry service instance. This service collects anonymous usage data about your Strapi application to help the Strapi team improve the product.
+
+By default, the telemetry service is enabled, but you can disable it by setting the telemetryDisabled property to true in your application's package.json file, or by setting the `STRAPI_TELEMETRY_DISABLED` environment variable to true. You can also disable telemetry programmatically by setting the isDisabled property of the `strapi.telemetry` instance to true.
+
+### `strapi.requestContext`
+- <Type>Object</Type> Context Storage
+
+  - `run(store, cb)`: <Type>Function</Type>
+    - `store`: <Type>Any</Type> Value that should be retrieved
+    - `cb`: <Type>Function</Type> Callback
+  - `get()` <Type>Function</Type>
+
+The request context stores the ctx object from KoaJS on each request. This allows users to have access to the context from anywhere through the Strapi instance.
+
+### `strapi.customFields`
+- <Type>Object</Type>
+
+  - `register(customField)`: <Type>Function</Type> Register a new custom field
+
+This property is a shortcut to `strapi.container.get('custom-fields').add(customField)`.
+
+#### Examples
+```javascript
+  strapi.customFields.register({
+    name: 'color',
+    plugin: 'color-picker',
+    type: 'string',
+  });
+```
+
+### `strapi.config`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('config')`.
+
+See the [config container](#config).
+
+### `strapi.services`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('services').getAll()`.
+
+See the [services' container](#services).
+
+### `strapi.service(uid)`
+- `uid`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('services').get(uid)`.
+
+See the [services' container](#services).
+
+### `strapi.controllers`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('controllers').getAll()`.
+
+See the [controllers' container](#controllers).
+
+### `strapi.controller(uid)`
+- `uid`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('controllers').get(uid)`.
+
+See the [controllers' container](#controllers).
+
+### `strapi.contentTypes`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('content-types').getAll()`.
+
+See the [content-types' container](#content-types).
+
+### `strapi.contentType(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('content-types').get(name)`.
+
+See the [content-types' container](#content-types).
+
+### `strapi.policies`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('policies').getAll()`.
+
+See the [policies' container](#policies).
+
+### `strapi.policy(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('policies').get(name)`.
+
+See the [policies' container](#policies).
+
+### `strapi.middlewares`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('middlewares').getAll()`.
+
+See the [middlewares container](#middlewares).
+
+### `strapi.middleware(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('middlewares').get(name)`.
+
+See the [middlewares container](#middlewares).
+
+### `strapi.plugins`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('plugins').getAll()`.
+
+See the [plugins' container](#plugins).
+
+### `strapi.plugin(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('plugins').get(name)`.
+
+See the [plugins' container](#plugins).
+
+### `strapi.hooks`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('hooks').getAll()`.
+
+See the [hooks' container](#hooks).
+
+### `strapi.hook(name)`
+- `name`: <Type>String</Type>
+
+Shortcut to `strapi.container.get('hooks').get(name)`.
+
+See the [hooks' container](#hooks).
+
+### `strapi.api`
+- <Type>Object[]</Type>
+
+Shortcut to `strapi.container.get('apis').getAll()`.
+
+See the [apis container](#apis).
+
+### `strapi.auth`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('auth')`.
+
+See the [auth' container](#auth).
+
+### `strapi.contentAPI`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('content-api')`.
+
+See the [content-api container](#content-api).
+
+### `strapi.sanitizers`
+- <Type>Object</Type>
+
+Shortcut to `strapi.container.get('sanitizers')`.
+
+See the [sanitizers' container](#sanitizers).
+
+### `strapi.start()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.destroy()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.sendStartupTelemetry()`
+
+:::info
+TODO
+:::
+
+### `strapi.openAdmin({ isInitialized })`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.postListen()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.listen()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.stopWithError()`
+
+:::info
+TODO
+:::
+
+### `strapi.stop(exitCode)`
+
+:::info
+TODO
+:::
+
+### `strapi.loadAdmin()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadPlugins()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadPolicies()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadAPIs()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadComponents()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadMiddlewares()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadApp()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.loadSanitizers()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.registerInternalHooks()`
+
+:::info
+TODO
+:::
+
+### `strapi.register()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.bootstrap()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.load()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.startWebhooks()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.reload()`
+
+:::info
+TODO
+:::
+
+### `strapi.runLifecyclesFunctions()`
+- Returns: Promise
+
+:::info
+TODO
+:::
+
+### `strapi.getModel(uid)`
+- `uid`: <Type>String</Type>
+
+:::info
+TODO
+:::
+
+### `strapi.query(uid)`
+- `uid`: <Type>String</Type>
+
+:::info
+TODO
+:::
+
+## Strapi containers
+
+The strapi containers are accessible via `strapi.container.get('name-of-the-container')`.
+
+### `config`
+- <Type>Object</Type>
+
+  - `get(path, defaultValue)`: <Type>Function</Type>
+    - `path`: <Type>String</Type>
+    - `defaultValue`: <Type>Any</Type>
+    - Returns: <Type>Any</Type> - The value located at `path` or, if undefined, `defaultValue`.
+  - `set(path, value)`: <Type>Function</Type>
+    - `path`: <Type>String</Type> - Where the value should be stored
+    - `value`: <Type>Any</Type>
+  - `has(path)`: <Type>Function</Type>
+    - `path`: <Type>String</Type>
+    - Returns: <Type>Boolean</Type> - Does the `path` match a value stored in the config container.
+  - `launchedAt`: <Type>Number</Type>  **Default:** `Date.now()`
+    Date in milliseconds when the server has started
+  - `serveAdminPanel`: <Type>Boolean</Type> **Default:** `true`
+    See [Strapi constructor](#new-strapiopts) options
+  - `autoReload`: <Type>Boolean</Type> **Default:** `false`
+    See [Strapi constructor](#new-strapiopts) options
+  - `environment`: <Type>String</Type> - process.env.NODE_ENV
+  - `uuid`: <Type>String</Type> - string extracted from `package.json` located in `strapi.uuid`
+  - `packageJsonStrapi`: <Type>Object</Type> - object extracted from `package.json` located in `strapi` (except uuid)
+  - `info`: <Type>Object</Type>
+    - everything stored in the `package.json`
+    - `strapi`: <Type>String</Type> - Current version of Strapi
+
+Every file stored under the `config` folder will be injected in this config container object.
+
+### `services`
+
+:::info
+TODO
+:::
+
+### `controllers`
+
+:::info
+TODO
+:::
+
+### `content-types`
+
+:::info
+TODO
+:::
+
+### `policies`
+
+:::info
+TODO
+:::
+
+### `plugins`
+
+:::info
+TODO
+:::
+
+### `hooks`
+
+:::info
+TODO
+:::
+
+### `apis`
+
+:::info
+TODO
+:::
+
+### `auth`
+
+:::info
+TODO
+:::
+
+### `content-api`
+
+:::info
+TODO
+:::
+
+### `sanitizers`
+
+:::info
+TODO
+:::
+
