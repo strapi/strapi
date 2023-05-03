@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { getFetchClient } from '@strapi/helper-plugin';
 import checkLatestStrapiVersion from './checkLatestStrapiVersion';
 import packageJSON from '../../../../../package.json';
@@ -11,8 +10,12 @@ const fetchStrapiLatestRelease = async (toggleNotification) => {
   try {
     const {
       data: { tag_name },
-    } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
-
+    } = await get('https://api.github.com/repos/strapi/strapi/releases/latest', {
+      headers: {
+        Authorization: ''
+      }
+    });
+    
     const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
     if (shouldUpdateStrapi && showUpdateNotif) {
