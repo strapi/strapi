@@ -1,8 +1,9 @@
 ---
 title: Entity Service
 tags:
-  - Strapi Service
-  - Entity Service
+  - strapi
+  - service
+  - entity-service
 ---
 
 # Entity Service
