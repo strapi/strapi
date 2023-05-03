@@ -1,0 +1,117 @@
+---
+title: Strapi server (WIP)
+slug: /api/strapi-server
+tags:
+- module
+- public
+
+toc_min_heading_level: 2
+toc_max_heading_level: 5
+---
+import Type from '@site/docs/api/components/type';
+
+# Strapi Server
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The Strapi server module permits to generate a Strapi http server.
+
+## Module: Strapi server
+
+### `createServer(strapi)`
+
+- `strapi`: [<Type>Strapi</Type>](Strapi)
+- Returns: <Type>StrapiServer</Type>
+
+```javascript
+const server = createServer(strapi);
+
+server.listRoutes();
+```
+
+### `StrapiServer.app`
+
+- [<Type>KoaJS</Type>](https://devdocs.io/koa/index)
+
+Strapi projects are using KoaJS to run the NodeJS server.
+
+### `StrapiServer.router`
+
+- [<Type>@koa/router</Type>](https://github.com/ZijianHe/koa-router#router-)
+
+Strapi projects are using a dependency of KoaJS called @koa/router.
+
+### `StrapiServer.httpServer`
+
+- [<Type>http.Server</Type>](https://nodejs.org/docs/latest-v18.x/api/http.html)
+
+The Strapi's HTTP server.
+
+### `StrapiServer.api(name)`
+
+- `name`: <Type>String</Type>
+- Returns: [<Type>StrapiAPIs</Type>](#strapiapis)
+
+Getter for apis available in Strapi
+
+### `StrapiServer.use(...args)`
+
+- [<Type>KoaApp.use</Type>](https://devdocs.io/koa/index#appusefunction)
+
+Shortcut for Koa `app.use(...args)` method.
+
+### `StrapiServer.routes(routes)`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.mount()`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.initRouting()`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.initMiddlewares()`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.listRoutes()`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.listen(...args)`
+
+:::info
+TODO
+:::
+
+### `StrapiServer.destroy()`
+
+:::info
+TODO
+:::
+
+### `StrapiAPIs`
+- <Type>Object</Type>
+
+- `content-api`: [<Type>API</Type>](API)
+  - API used by external requesters
+- `admin`: [<Type>API</Type>](API)
+  - API used by admin panel
+
+Strapi APIs is a map of all APIs available inside the Strapi project.

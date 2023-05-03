@@ -4,7 +4,7 @@ import { rest } from 'msw';
 const handlers = [
   rest.get('*/getInfos', (req, res, ctx) => {
     return res(
-      ctx.delay(1000),
+      ctx.delay(100),
       ctx.status(200),
       ctx.json({
         currentVersion: '1.0.0',

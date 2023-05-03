@@ -87,6 +87,55 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   padding-top: 8px;
 }
 
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c13 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
+.c29 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #006096;
+}
+
+.c37 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4945ff;
+}
+
+.c40 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #2f6846;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c1 {
   -webkit-align-items: end;
   -webkit-box-align: end;
@@ -190,59 +239,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   justify-content: center;
 }
 
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c13 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c29 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #006096;
-}
-
-.c37 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #4945ff;
-}
-
-.c40 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #2f6846;
-}
-
-.c42 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c36 path {
-  fill: #666687;
-}
-
 .c12 {
   border: none;
   position: relative;
@@ -291,18 +287,22 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
+.c36 path {
+  fill: #666687;
+}
+
 .c23 {
   position: relative;
   outline: none;
 }
 
-.c23 svg {
+.c23 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c23 svg > g,
-.c23 svg path {
+.c23 > svg > g,
+.c23 > svg path {
   fill: #ffffff;
 }
 

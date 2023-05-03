@@ -1,12 +1,12 @@
 import { useEffect, useReducer } from 'react';
-import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfos } from '@strapi/helper-plugin';
+import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import init from './init';
 
 const useSettingsMenu = (noCheck = false) => {
   const { allPermissions: permissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfos();
+  const { shouldUpdateStrapi } = useAppInfo();
   const { settings } = useStrapiApp();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
