@@ -180,6 +180,21 @@ function ListView({
     [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
+  const handleConfirmPublishAllData = async (selectedEntries) => {
+    const validations = await validateEntriesToPublish(selectedEntries);
+    console.log('Validations', validations);
+
+    if (validations.errors.length > 0) {
+      // TODO make a request to the API and refetch the data
+      console.info('Publishing all data', selectedEntries);
+    }
+  };
+
+  const handleConfirmUnpublishAllData = (ids) => {
+    // TODO make a request to the API and refetch the data
+    console.info('Unpublishing all data', ids);
+  };
+
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
@@ -237,12 +252,6 @@ function ListView({
     });
 
     return validations;
-  };
-
-  const handleBulkPublish = async (selectedEntries) => {
-    const validations = await validateEntriesToPublish(selectedEntries);
-    // TODO: Remove log when we actually do something with the validations
-    console.log(validations);
   };
 
   useEffect(() => {
@@ -378,15 +387,16 @@ function ListView({
               canDelete={canDelete}
               canPublish={canPublish}
               contentTypeName={headerLayoutTitle}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmDelete={handleConfirmDeleteData}
+              onConfirmDeleteAll={handleConfirmDeleteAllData}
+              onConfirmPublishAll={handleConfirmPublishAllData}
+              onConfirmUnpublishAll={handleConfirmUnpublishAllData}
               isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
               layout={layout}
               rows={data}
               action={getCreateAction({ variant: 'secondary' })}
-              handleBulkPublish={handleBulkPublish}
             />
             <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
           </>

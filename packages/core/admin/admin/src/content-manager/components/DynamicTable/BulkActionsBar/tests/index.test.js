@@ -1,6 +1,6 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
@@ -17,11 +17,12 @@ jest.mock('../../../../../shared/hooks', () => ({
   useInjectionZone: () => [],
 }));
 
+const user = userEvent.setup();
+
 describe('BulkActionsBar', () => {
   const requiredProps = {
     selectedEntries: [],
     clearSelectedEntries: jest.fn(),
-    handleBulkPublish: jest.fn(),
   };
 
   const TestComponent = (props) => (
@@ -60,12 +61,10 @@ describe('BulkActionsBar', () => {
     expect(screen.queryByRole('button', { name: /\bDelete\b/ })).not.toBeInTheDocument();
   });
 
-  it('should show delete modal if delete button is clicked', () => {
+  it('should show delete modal if delete button is clicked', async () => {
     setup({ showDelete: true });
 
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-    });
+    await userEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
   });
@@ -79,10 +78,38 @@ describe('BulkActionsBar', () => {
     });
 
     await act(async () => {
-      await fireEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+      await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
     });
 
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([]);
+  });
+
+  it('should show publish modal if publish button is clicked', async () => {
+    const onConfirmPublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmPublishAll });
+
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
+      await user.click(
+        within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
+      );
+    });
+
+    expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
+  });
+
+  it('should show unpublish modal if unpublish button is clicked', async () => {
+    const onConfirmUnpublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmUnpublishAll });
+
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
+      await user.click(
+        within(screen.getByRole('dialog')).getByRole('button', { name: /\bunpublish\b/i })
+      );
+    });
+
+    expect(onConfirmUnpublishAll).toHaveBeenCalledWith([]);
   });
 });
