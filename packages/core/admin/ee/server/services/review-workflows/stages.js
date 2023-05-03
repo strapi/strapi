@@ -44,6 +44,18 @@ module.exports = ({ strapi }) => {
       return stages;
     },
 
+    async create(stage, { fields }) {
+      const params = { select: fields };
+      const newStage = await strapi.entityService.create(STAGE_MODEL_UID, {
+        data: stage,
+        ...params,
+      });
+
+      metrics.sendDidCreateStage();
+
+      return newStage;
+    },
+
     async update(stageId, stageData) {
       const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
         data: stageData,

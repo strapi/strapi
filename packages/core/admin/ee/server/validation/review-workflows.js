@@ -22,6 +22,10 @@ const validateUpdateStageOnEntity = yup
   .required();
 
 module.exports = {
+  validateStage: validateYupSchema(stageObject, {
+    strict: false,
+    stripUnknown: true,
+  }),
   validateUpdateStages: validateYupSchema(validateUpdateStagesSchema, {
     strict: false,
     stripUnknown: true,

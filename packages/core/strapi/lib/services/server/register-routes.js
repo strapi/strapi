@@ -31,17 +31,29 @@ module.exports = (strapi) => {
  * @param {import('../../').Strapi} strapi
  */
 const registerAdminRoutes = (strapi) => {
-  const generateRouteScope = createRouteScopeGenerator(`admin::`);
+  const adminRoutes = strapi.admin.routes;
+  const generateAdminRouteScope = createRouteScopeGenerator(`admin::`);
 
-  _.forEach(strapi.admin.routes, (router) => {
+  const buildRoutesFromRouter = (router, apiName = '') => {
+    if (Array.isArray(router)) {
+      return _.forEach(router, (routerItem) => buildRoutesFromRouter(routerItem, apiName));
+    }
     router.type = router.type || 'admin';
-    router.prefix = router.prefix || `/admin`;
+    router.prefix = router.prefix ?? `/admin`;
     router.routes.forEach((route) => {
-      generateRouteScope(route);
+      if (router.type === 'content-api') {
+        const generateContentAPIRouteScope = createRouteScopeGenerator(`api::${apiName}`);
+        generateContentAPIRouteScope(route);
+      } else {
+        generateAdminRouteScope(route);
+      }
       route.info = { pluginName: 'admin' };
     });
     strapi.server.routes(router);
-  });
+  };
+  for (const adminApiName of Object.keys(adminRoutes)) {
+    buildRoutesFromRouter(adminRoutes[adminApiName], adminApiName);
+  }
 };
 
 /**
