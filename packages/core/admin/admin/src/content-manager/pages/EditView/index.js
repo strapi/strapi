@@ -8,19 +8,18 @@ import {
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { ContentLayout, Box, Grid, GridItem, Main, Flex } from '@strapi/design-system';
+import { ContentLayout, Box, Flex, Grid, GridItem, Main } from '@strapi/design-system';
 import { Pencil, Layer } from '@strapi/icons';
+import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
-
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import { getTrad } from '../../utils';
 import useLazyComponents from '../../hooks/useLazyComponents';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
-import Information from './Information';
 import Header from './Header';
 import { getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
@@ -77,7 +76,6 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
         isCreatingEntry,
         isLoadingForData,
         onDelete,
-        onDeleteSucceeded,
         onPost,
         onPublish,
         onDraftRelationCheck,
@@ -180,7 +178,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         paddingTop={6}
                         shadow="tableShadow"
                       >
-                        <Information />
+                        <InformationBox />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
                       <Box as="aside" aria-labelledby="links">
@@ -221,12 +219,8 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                             </LinkButton>
                           </CheckPermissions>
 
-                          {allowedActions.canDelete && (
-                            <DeleteLink
-                              isCreatingEntry={isCreatingEntry}
-                              onDelete={onDelete}
-                              onDeleteSucceeded={onDeleteSucceeded}
-                            />
+                          {allowedActions.canDelete && !isCreatingEntry && (
+                            <DeleteLink onDelete={onDelete} />
                           )}
                         </Flex>
                       </Box>

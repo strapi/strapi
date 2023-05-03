@@ -135,6 +135,47 @@ describe('Admin | containers | ListView', () => {
         padding-left: 12px;
       }
 
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c16 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c31 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c35 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #32324d;
+      }
+
+      .c36 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c54 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+      }
+
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -200,59 +241,18 @@ describe('Admin | containers | ListView', () => {
         justify-content: center;
       }
 
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c16 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c31 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c35 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #32324d;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c54 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-      }
-
       .c44 {
         position: relative;
         outline: none;
       }
 
-      .c44 svg {
+      .c44 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c44 svg > g,
-      .c44 svg path {
+      .c44 > svg > g,
+      .c44 > svg path {
         fill: #ffffff;
       }
 
@@ -617,13 +617,13 @@ describe('Admin | containers | ListView', () => {
         outline: none;
       }
 
-      .c11 svg {
+      .c11 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c11 svg > g,
-      .c11 svg path {
+      .c11 > svg > g,
+      .c11 > svg path {
         fill: #ffffff;
       }
 

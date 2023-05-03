@@ -35,7 +35,7 @@ const LanguageProvider = ({ children, localeNames, messages }) => {
 
   return (
     <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
-      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames} messages={appMessages}>
+      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames}>
         {children}
       </LocalesProvider>
     </IntlProvider>

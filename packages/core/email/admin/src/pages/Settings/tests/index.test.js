@@ -73,13 +73,14 @@ describe('Email | Pages | Settings', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c25 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c27 {
+      .c22 {
+        background: #eaeaef;
+        padding-right: 12px;
         padding-left: 12px;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        cursor: default;
       }
 
       .c33 {
@@ -91,6 +92,56 @@ describe('Email | Pages | Settings', () => {
         border-color: #4945ff;
         border: 1px solid #4945ff;
         cursor: pointer;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c7 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c13 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c26 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #666687;
+      }
+
+      .c37 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
       }
 
       .c2 {
@@ -170,6 +221,55 @@ describe('Email | Pages | Settings', () => {
         gap: 4px;
       }
 
+      .c23 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 16px;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c25 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 16px;
+      }
+
+      .c28 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 12px;
+      }
+
       .c34 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -185,68 +285,18 @@ describe('Email | Pages | Settings', () => {
         gap: 8px;
       }
 
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c7 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c13 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #666687;
-      }
-
-      .c37 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
       .c35 {
         position: relative;
         outline: none;
       }
 
-      .c35 svg {
+      .c35 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c35 svg > g,
-      .c35 svg path {
+      .c35 > svg > g,
+      .c35 > svg path {
         fill: #ffffff;
       }
 
@@ -465,16 +515,9 @@ describe('Email | Pages | Settings', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c22 {
-        position: relative;
+      .c24 {
         border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
         min-height: 2.5rem;
-        color: #666687;
-        background: #eaeaef;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -483,62 +526,41 @@ describe('Email | Pages | Settings', () => {
         transition-duration: 0.2s;
       }
 
-      .c22:focus-within {
+      .c24[aria-disabled='true'] {
+        color: #666687;
+      }
+
+      .c24:focus-visible {
+        outline: none;
+      }
+
+      .c24:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c28 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
+      .c29 > svg {
+        width: 0.375rem;
       }
 
-      .c28 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c28 svg path {
+      .c29 > svg > path {
         fill: #666687;
       }
 
-      .c29 {
+      .c27 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        background: none;
-        border: none;
-        cursor: not-allowed;
+        gap: 4px;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
       }
 
-      .c29 svg {
-        width: 0.375rem;
-      }
-
-      .c23 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c23:focus {
-        outline: none;
-      }
-
-      .c23[data-disabled] {
-        cursor: not-allowed;
-      }
-
-      .c24 {
-        width: 100%;
+      .c38[data-state='checked'] .c5 {
+        font-weight: bold;
+        color: #4945ff;
       }
 
       .c16 {
@@ -764,69 +786,54 @@ describe('Email | Pages | Settings', () => {
                               Email provider
                             </label>
                             <div
-                              class="c4 c22"
-                              disabled=""
+                              aria-autocomplete="none"
+                              aria-controls="radix-0"
+                              aria-describedby="11-hint 11-error"
+                              aria-disabled="true"
+                              aria-expanded="false"
+                              aria-label="Email provider"
+                              class="c22 c23 c24"
+                              data-disabled=""
+                              data-state="closed"
+                              dir="ltr"
+                              id="11"
+                              overflow="hidden"
+                              role="combobox"
                             >
-                              <button
-                                aria-expanded="false"
-                                aria-haspopup="listbox"
-                                aria-labelledby="11 11-label 11-content"
-                                aria-required="false"
-                                class="c23"
-                                data-disabled=""
-                                disabled=""
-                                id="11"
-                                name="email-provider"
-                                role="combobox"
-                                type="button"
-                                value=""
-                              />
-                              <div
-                                class="c2 c24"
+                              <span
+                                class="c25"
                               >
-                                <div
-                                  class="c4"
+                                <span
+                                  class="c5 c26"
                                 >
-                                  <div
-                                    class="c25"
-                                  >
-                                    <span
-                                      class="c5 c26"
-                                      id="11-content"
-                                    >
-                                      Select...
-                                    </span>
-                                  </div>
-                                </div>
-                                <div
-                                  class="c4"
+                                  <span
+                                    class="c27"
+                                  />
+                                </span>
+                              </span>
+                              <span
+                                class="c28"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="c29"
                                 >
-                                  
-                                  <button
-                                    aria-hidden="true"
-                                    class="c27 c28 c29"
-                                    disabled=""
-                                    tabindex="-1"
-                                    title="Carret Down Button"
-                                    type="button"
+                                  <svg
+                                    fill="none"
+                                    height="1rem"
+                                    viewBox="0 0 14 8"
+                                    width="1rem"
+                                    xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <svg
-                                      fill="none"
-                                      height="1rem"
-                                      viewBox="0 0 14 8"
-                                      width="1rem"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        clip-rule="evenodd"
-                                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                        fill="#32324D"
-                                        fill-rule="evenodd"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              </div>
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              </span>
                             </div>
                           </div>
                         </div>

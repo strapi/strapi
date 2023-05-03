@@ -134,7 +134,7 @@
   "menu.section.models.name": "Tipos de Coleção",
   "menu.section.single-types.name": "Tipos Únicos",
   "modalForm.attribute.form.base.name.description": "Nenhum espaço é permitido para o nome do atributo",
-  "modalForm.attribute.form.base.name.placeholder": "por exemplo. Slug, URL de SEO, URL canônica",
+  "modalForm.attribute.form.base.name.placeholder": "por exemplo. slug, urlDeSeo, urlCanônica",
   "modalForm.attribute.target-field": "Campo anexado",
   "modalForm.attributes.select-component": "Selecione um componente",
   "modalForm.attributes.select-components": "Selecione os componentes",

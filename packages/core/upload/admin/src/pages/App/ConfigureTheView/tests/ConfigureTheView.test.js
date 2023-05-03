@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render as renderRTL, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TrackingProvider } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
@@ -20,23 +21,25 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => jest.fn()),
 }));
 
-const renderConfigure = (
+const render = (
   config = {
     pageSize: pageSizes[0],
     sort: sortOptions[0].value,
   }
-) =>
-  renderTL(
-    <IntlProvider locale="en" messages={{}}>
-      <TrackingProvider>
-        <ThemeProvider theme={lightTheme}>
-          <MemoryRouter>
-            <ConfigureTheView config={config} />
-          </MemoryRouter>
-        </ThemeProvider>
-      </TrackingProvider>
-    </IntlProvider>
-  );
+) => ({
+  user: userEvent.setup(),
+  ...renderRTL(<ConfigureTheView config={config} />, {
+    wrapper: ({ children }) => (
+      <IntlProvider locale="en" messages={{}}>
+        <TrackingProvider>
+          <ThemeProvider theme={lightTheme}>
+            <MemoryRouter>{children}</MemoryRouter>
+          </ThemeProvider>
+        </TrackingProvider>
+      </IntlProvider>
+    ),
+  }),
+});
 
 describe('Upload - Configure', () => {
   beforeEach(() => {
@@ -44,30 +47,26 @@ describe('Upload - Configure', () => {
   });
 
   describe('initial render', () => {
-    it('renders and matches the snapshot', async () => {
-      const { container } = renderConfigure();
+    it('renders and matches the snapshot', () => {
+      const { container, getByRole, getByText } = render();
 
-      await waitFor(() => {
-        expect(screen.getByRole('main')).toHaveFocus();
-        expect(screen.getByText('Configure the view - Media Library')).toBeInTheDocument();
-      });
+      expect(getByRole('main')).toHaveFocus();
+      expect(getByText('Configure the view - Media Library')).toBeInTheDocument();
 
       expect(container).toMatchSnapshot();
     });
   });
 
   describe('save', () => {
-    it('save renders and is initially disabled', async () => {
-      renderConfigure();
+    it('save renders and is initially disabled', () => {
+      const { getByText, getByRole } = render();
 
-      await waitFor(() => {
-        expect(screen.getByText('Configure the view - Media Library')).toBeInTheDocument();
-        expect(
-          screen.getByRole('button', {
-            name: 'Save',
-          })
-        ).toHaveAttribute('disabled');
-      });
+      expect(getByText('Configure the view - Media Library')).toBeInTheDocument();
+      expect(
+        getByRole('button', {
+          name: 'Save',
+        })
+      ).toHaveAttribute('disabled');
     });
   });
 
@@ -75,30 +74,42 @@ describe('Upload - Configure', () => {
     const testPageSize = pageSizes[1];
 
     it('modify settings', async () => {
-      renderConfigure();
+      const { user, getByRole, getByText } = render();
 
-      fireEvent.mouseDown(screen.getByTestId('pageSize-select'));
-      fireEvent.click(screen.getByTestId(`pageSize-option-${testPageSize}`));
+      expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('10');
 
-      const saveButton = screen.getByRole('button', {
-        name: 'Save',
-      });
+      await user.click(getByRole('combobox', { name: 'Entries per page' }));
+      await user.click(getByRole('option', { name: testPageSize.toString() }));
+
+      expect(getByRole('combobox', { name: 'Entries per page' })).toHaveTextContent('20');
+
+      expect(
+        getByRole('button', {
+          name: 'Save',
+        })
+      ).toBeEnabled();
+
+      /**
+       * using `userEvent.click` does not fire the submit event for the form :(
+       * see – https://github.com/testing-library/user-event/issues/1075
+       * see – https://github.com/testing-library/user-event/issues/1002
+       */
+      fireEvent.click(
+        getByRole('button', {
+          name: 'Save',
+        })
+      );
+
       await waitFor(() => {
-        expect(saveButton).toBeEnabled();
+        expect(getByText('This will modify all your settings')).toBeInTheDocument();
       });
 
-      fireEvent.click(saveButton);
-      await waitFor(() => {
-        expect(screen.getByText('This will modify all your settings')).toBeInTheDocument();
-      });
+      await user.click(getByText('Confirm'));
 
-      fireEvent.click(document.getElementById('confirm-delete'));
-      await waitFor(() => {
-        expect(mutateAsync).toHaveBeenCalledTimes(1);
-        expect(mutateAsync).toHaveBeenCalledWith({
-          pageSize: testPageSize,
-          sort: 'createdAt:DESC',
-        });
+      expect(mutateAsync).toHaveBeenCalledTimes(1);
+      expect(mutateAsync).toHaveBeenCalledWith({
+        pageSize: testPageSize,
+        sort: 'createdAt:DESC',
       });
     });
   });

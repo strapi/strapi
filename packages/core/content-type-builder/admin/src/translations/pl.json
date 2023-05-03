@@ -134,7 +134,7 @@
   "menu.section.models.name": "Kolekcje",
   "menu.section.single-types.name": "Pojedyncze typy",
   "modalForm.attribute.form.base.name.description": "Spacja nie jest dozwolona dla nazwy",
-  "modalForm.attribute.form.base.name.placeholder": "np. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "np. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Dołączone pole",
   "modalForm.attributes.select-component": "Wybierz komponent",
   "modalForm.attributes.select-components": "Wybierz komponenty",

@@ -1,0 +1,685 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 > * + * {
+  margin-left: 4px;
+}
+
+.c7 {
+  line-height: revert;
+}
+
+.c2 {
+  padding: 12px;
+  border-radius: 4px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c2:focus-visible {
+  outline: none;
+}
+
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c9 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c9:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  color: #32324d;
+}
+
+.c5:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c10 {
+  color: #271fe0;
+  background: #ffffff;
+}
+
+.c10:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c3 {
+  font-size: 0.7rem;
+}
+
+.c3 svg path {
+  fill: #666687;
+}
+
+.c3:focus svg path,
+.c3:hover svg path {
+  fill: #4a4a6a;
+}
+
+.c8 {
+  color: #32324d;
+}
+
+<nav
+  aria-label="pagination"
+  class=""
+>
+  <ul
+    class="c0 c1"
+  >
+    <li>
+      <a
+        aria-current="page"
+        aria-disabled="false"
+        class="c2 c3 active"
+        href="/test?page=4&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to previous page
+        </div>
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="1rem"
+          viewBox="0 0 10 16"
+          width="1rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
+            fill="#32324D"
+          />
+        </svg>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c5 active"
+        href="/test?page=1&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 1
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          1
+        </span>
+      </a>
+    </li>
+    <li>
+      <div
+        class="c2 c8"
+      >
+        <div
+          class="c4"
+        >
+          And 4 other links
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          …
+        </span>
+      </div>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c5 active"
+        href="/test?page=4&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 4
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          4
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c9 c10 active"
+        href="/test?page=5&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 5
+        </div>
+        <span
+          aria-hidden="true"
+          class="c11 c7"
+        >
+          5
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c5 active"
+        href="/test?page=6&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 6
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          6
+        </span>
+      </a>
+    </li>
+    <li>
+      <div
+        class="c2 c8"
+      >
+        <div
+          class="c4"
+        >
+          And 8 other links
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          …
+        </span>
+      </div>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c5 active"
+        href="/test?page=10&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 10
+        </div>
+        <span
+          aria-hidden="true"
+          class="c6 c7"
+        >
+          10
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        aria-disabled="false"
+        class="c2 c3 active"
+        href="/test?page=6&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to next page
+        </div>
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="1rem"
+          viewBox="0 0 10 16"
+          width="1rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
+            fill="#32324D"
+          />
+        </svg>
+      </a>
+    </li>
+  </ul>
+</nav>
+`;
+
+exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 > * + * {
+  margin-left: 4px;
+}
+
+.c8 {
+  line-height: revert;
+}
+
+.c2 {
+  padding: 12px;
+  border-radius: 4px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c2:focus-visible {
+  outline: none;
+}
+
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c5:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c5:focus-visible {
+  outline: none;
+}
+
+.c5:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c6 {
+  color: #271fe0;
+  background: #ffffff;
+}
+
+.c6:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c9 {
+  color: #32324d;
+}
+
+.c9:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c3 {
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.c3 svg path {
+  fill: #c0c0cf;
+}
+
+.c3:focus svg path,
+.c3:hover svg path {
+  fill: #c0c0cf;
+}
+
+.c11 {
+  font-size: 0.7rem;
+}
+
+.c11 svg path {
+  fill: #666687;
+}
+
+.c11:focus svg path,
+.c11:hover svg path {
+  fill: #4a4a6a;
+}
+
+<nav
+  aria-label="pagination"
+  class=""
+>
+  <ul
+    class="c0 c1"
+  >
+    <li>
+      <a
+        aria-current="page"
+        aria-disabled="true"
+        class="c2 c3 active"
+        href="/test"
+        tabindex="-1"
+      >
+        <div
+          class="c4"
+        >
+          Go to previous page
+        </div>
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="1rem"
+          viewBox="0 0 10 16"
+          width="1rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
+            fill="#32324D"
+          />
+        </svg>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c5 c6 active"
+        href="/test?page=1&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 1
+        </div>
+        <span
+          aria-hidden="true"
+          class="c7 c8"
+        >
+          1
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c9 active"
+        href="/test?page=2&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 2
+        </div>
+        <span
+          aria-hidden="true"
+          class="c10 c8"
+        >
+          2
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c9 active"
+        href="/test?page=3&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 3
+        </div>
+        <span
+          aria-hidden="true"
+          class="c10 c8"
+        >
+          3
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        class="c2 c9 active"
+        href="/test?page=4&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to page 4
+        </div>
+        <span
+          aria-hidden="true"
+          class="c10 c8"
+        >
+          4
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        aria-current="page"
+        aria-disabled="false"
+        class="c2 c11 active"
+        href="/test?page=2&pageSize=10&sort=firstname"
+      >
+        <div
+          class="c4"
+        >
+          Go to next page
+        </div>
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="1rem"
+          viewBox="0 0 10 16"
+          width="1rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
+            fill="#32324D"
+          />
+        </svg>
+      </a>
+    </li>
+  </ul>
+</nav>
+`;

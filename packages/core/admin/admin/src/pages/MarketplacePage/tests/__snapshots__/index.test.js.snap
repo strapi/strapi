@@ -39,13 +39,14 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding-left: 12px;
 }
 
-.c44 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c46 {
+.c41 {
+  background: #ffffff;
+  padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
 }
 
 .c49 {
@@ -81,7 +82,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border-radius: 4px;
 }
 
-.c99 {
+.c100 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
@@ -155,6 +156,92 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding-left: 8px;
 }
 
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c45 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c98 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c73 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c66 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c71 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c82 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #328048;
+}
+
 .c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -203,6 +290,70 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 }
 
 .c40 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c42 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.c47 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c97 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -285,92 +436,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   justify-content: space-between;
 }
 
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c24 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c26 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c45 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c54 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c97 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c73 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c66 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c71 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c82 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #328048;
-}
-
 .c63 path {
   fill: #666687;
 }
@@ -388,13 +453,13 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   outline: none;
 }
 
-.c51 svg {
+.c51 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c51 svg > g,
-.c51 svg path {
+.c51 > svg > g,
+.c51 > svg path {
   fill: #ffffff;
 }
 
@@ -624,13 +689,8 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c41 {
-  position: relative;
+.c43 {
   border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
   min-height: 2rem;
   outline: none;
   box-shadow: 0;
@@ -640,61 +700,41 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   transition-duration: 0.2s;
 }
 
-.c41:focus-within {
+.c43[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c43:focus-visible {
+  outline: none;
+}
+
+.c43:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c47 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
+.c48 > svg {
+  width: 0.375rem;
 }
 
-.c47 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c47 svg path {
+.c48 > svg > path {
   fill: #666687;
 }
 
-.c48 {
+.c46 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: none;
-  border: none;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-.c48 svg {
-  width: 0.375rem;
-}
-
-.c42 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c42:focus {
-  outline: none;
-}
-
-.c42[data-disabled] {
-  cursor: not-allowed;
-}
-
-.c43 {
-  width: 100%;
+.c101[data-state='checked'] .c8 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
 .c68 {
@@ -912,19 +952,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   cursor: not-allowed;
 }
 
-.c96 {
-  margin-right: 24px;
-}
-
-.c96 svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.c98 {
-  word-break: break-all;
-}
-
 .c11 {
   background: #4945ff;
   padding-top: 8px;
@@ -934,6 +961,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border-radius: 4px;
   border-color: #4945ff;
   border: 1px solid #4945ff;
+}
+
+.c10 {
+  cursor: pointer;
 }
 
 .c17 {
@@ -972,22 +1003,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   flex-direction: row;
 }
 
-.c10 {
-  cursor: pointer;
-}
-
 .c13 {
   position: relative;
   outline: none;
 }
 
-.c13 svg {
+.c13 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c13 svg > g,
-.c13 svg path {
+.c13 > svg > g,
+.c13 > svg path {
   fill: #ffffff;
 }
 
@@ -1075,6 +1102,19 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   fill: #32324d;
 }
 
+.c96 {
+  margin-right: 24px;
+}
+
+.c96 svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.c99 {
+  word-break: break-all;
+}
+
 .c69 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
@@ -1094,6 +1134,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 
 .c39 span {
   font-size: 0.75rem;
+}
+
+.c39 label {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c53 {
@@ -1145,7 +1197,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 c11 c12 c13 c14"
+              class="c10 sc-DtmNo c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1309,64 +1361,62 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <div
                   class="c40"
                 >
-                  <div
-                    class="c7 c41"
+                  <label
+                    class="c8 c30 c31"
+                    for="sort-by-select"
                   >
-                    <button
-                      aria-expanded="false"
-                      aria-haspopup="listbox"
-                      aria-labelledby="sort-by-select sort-by-select-label sort-by-select-content"
-                      aria-required="false"
-                      class="c42"
-                      id="sort-by-select"
-                      role="combobox"
-                      type="button"
-                      value="name:asc"
-                    />
-                    <div
-                      class="c5 c43"
+                    Sort by
+                  </label>
+                  <div
+                    aria-autocomplete="none"
+                    aria-controls="radix-0"
+                    aria-describedby="sort-by-select-hint sort-by-select-error"
+                    aria-expanded="false"
+                    aria-label="Sort by"
+                    class="c41 c42 c43"
+                    data-state="closed"
+                    dir="ltr"
+                    id="sort-by-select"
+                    overflow="hidden"
+                    role="combobox"
+                    tabindex="0"
+                  >
+                    <span
+                      class="c44"
                     >
-                      <div
-                        class="c7"
+                      <span
+                        class="c8 c45"
                       >
-                        <div
-                          class="c44"
+                        <span
+                          class="c46"
                         >
-                          <span
-                            class="c8 c45"
-                            id="sort-by-select-content"
-                          >
-                            Sort by alphabetical order
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        class="c7"
+                          Sort by alphabetical order
+                        </span>
+                      </span>
+                    </span>
+                    <span
+                      class="c47"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="c48"
                       >
-                        <button
-                          aria-hidden="true"
-                          class="c46 c47 c48"
-                          tabindex="-1"
-                          title="Carret Down Button"
-                          type="button"
+                        <svg
+                          fill="none"
+                          height="1rem"
+                          viewBox="0 0 14 8"
+                          width="1rem"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <svg
-                            fill="none"
-                            height="1rem"
-                            viewBox="0 0 14 8"
-                            width="1rem"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              clip-rule="evenodd"
-                              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                              fill="#32324D"
-                              fill-rule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                          <path
+                            clip-rule="evenodd"
+                            d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                            fill="#32324D"
+                            fill-rule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1540,7 +1590,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Comments"
-                          class="c10 c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-comments"
                           target="_self"
                         >
@@ -1708,7 +1758,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Config Sync"
-                          class="c10 c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                           target="_self"
                         >
@@ -1861,7 +1911,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Content Versioning"
-                          class="c10 c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                           target="_self"
                         >
@@ -2068,7 +2118,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Documentation"
-                          class="c10 c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                           target="_self"
                         >
@@ -2203,7 +2253,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Transformer"
-                          class="c10 c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                           target="_self"
                         >
@@ -2294,65 +2344,59 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <div
                   class="c40"
                 >
+                  <label
+                    class="c8 c30 c31"
+                    for="7"
+                  />
                   <div
-                    class="c7 c41"
+                    aria-autocomplete="none"
+                    aria-controls="radix-5"
+                    aria-describedby="7-hint 7-error"
+                    aria-expanded="false"
+                    class="c41 c42 c43"
+                    data-state="closed"
+                    dir="ltr"
+                    id="7"
+                    overflow="hidden"
+                    role="combobox"
+                    tabindex="0"
                   >
-                    <button
-                      aria-expanded="false"
-                      aria-haspopup="listbox"
-                      aria-label="Entries per page"
-                      aria-labelledby="7 7-label 7-content"
-                      aria-required="false"
-                      class="c42"
-                      id="7"
-                      role="combobox"
-                      type="button"
-                      value="24"
-                    />
-                    <div
-                      class="c5 c43"
+                    <span
+                      class="c44"
                     >
-                      <div
-                        class="c7"
+                      <span
+                        class="c8 c45"
                       >
-                        <div
-                          class="c44"
+                        <span
+                          class="c46"
                         >
-                          <span
-                            class="c8 c45"
-                            id="7-content"
-                          >
-                            24
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        class="c7"
+                          24
+                        </span>
+                      </span>
+                    </span>
+                    <span
+                      class="c47"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="c48"
                       >
-                        <button
-                          aria-hidden="true"
-                          class="c46 c47 c48"
-                          tabindex="-1"
-                          title="Carret Down Button"
-                          type="button"
+                        <svg
+                          fill="none"
+                          height="1rem"
+                          viewBox="0 0 14 8"
+                          width="1rem"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          <svg
-                            fill="none"
-                            height="1rem"
-                            viewBox="0 0 14 8"
-                            width="1rem"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              clip-rule="evenodd"
-                              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                              fill="#32324D"
-                              fill-rule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                          <path
+                            clip-rule="evenodd"
+                            d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                            fill="#32324D"
+                            fill-rule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -2544,18 +2588,18 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 </svg>
               </div>
               <div
-                class="c40"
+                class="c97"
               >
                 <div
                   class="c7"
                 >
                   <span
-                    class="c8 c97 c98"
+                    class="c8 c98 c99"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c99 c63"
+                    class="c100 c63"
                     fill="none"
                     height="1rem"
                     viewBox="0 0 24 24"

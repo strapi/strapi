@@ -1,0 +1,531 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericInput json renders and matches the snapshot 1`] = `
+.c3 {
+  font-size: 0.875rem;
+  border-radius: 4px;
+  max-height: 31.5rem;
+  min-height: 15.75rem;
+}
+
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c4 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c5 {
+  line-height: 1.25;
+}
+
+.c5 .cm-editor {
+  background-color: #32324d;
+  width: 100%;
+  outline: none;
+}
+
+.c5 .cm-scroller {
+  border: 1px solid #dcdce4;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c5 .cm-scroller:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c5 .cm-editor,
+.c5 .cm-scroller {
+  border-radius: 4px;
+}
+
+.c5 .cm-gutters,
+.c5 .cm-activeLineGutter {
+  background-color: #4a4a6a;
+}
+
+<div>
+  <div
+    class=""
+  >
+    <div
+      class="c0"
+    >
+      <label
+        class="c1 c2"
+        for="0"
+      >
+        Default label
+      </label>
+      <div
+        class="c3 c4 c5"
+        font-size="2"
+      >
+        <div
+          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ19 ͼo"
+        >
+          <div
+            aria-live="polite"
+            style="position: fixed; top: -10000px;"
+          />
+          <div
+            class="cm-scroller"
+            tabindex="-1"
+          >
+            <div
+              aria-hidden="true"
+              class="cm-gutters"
+              style="min-height: 14px; position: sticky;"
+            >
+              <div
+                class="cm-gutter cm-lineNumbers"
+              >
+                <div
+                  class="cm-gutterElement"
+                  style="height: 0px; visibility: hidden; pointer-events: none;"
+                >
+                  9
+                </div>
+                <div
+                  class="cm-gutterElement cm-activeLineGutter"
+                  style="height: 14px;"
+                >
+                  1
+                </div>
+              </div>
+              <div
+                class="cm-gutter cm-foldGutter"
+              >
+                <div
+                  class="cm-gutterElement"
+                  style="height: 0px; visibility: hidden; pointer-events: none;"
+                >
+                  <span
+                    title="Unfold line"
+                  >
+                    ›
+                  </span>
+                </div>
+                <div
+                  class="cm-gutterElement cm-activeLineGutter"
+                  style="height: 14px;"
+                />
+              </div>
+            </div>
+            <div
+              aria-autocomplete="list"
+              aria-multiline="true"
+              autocapitalize="off"
+              autocorrect="off"
+              class="cm-content"
+              contenteditable="true"
+              data-language="json"
+              role="textbox"
+              spellcheck="false"
+              style="tab-size: 4"
+              translate="no"
+            >
+              <div
+                class="cm-activeLine cm-line"
+              >
+                <br />
+              </div>
+            </div>
+            <div
+              aria-hidden="true"
+              class="cm-layer cm-layer-above cm-cursorLayer"
+              style="z-index: 150; animation-duration: 1200ms;"
+            />
+            <div
+              aria-hidden="true"
+              class="cm-layer cm-selectionLayer"
+              style="z-index: -2;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c6"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`GenericInput number renders and matches the snapshot 1`] = `
+.c8 {
+  padding-right: 12px;
+  padding-left: 8px;
+}
+
+.c10 {
+  color: #8e8ea9;
+}
+
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c11 path {
+  fill: #8e8ea9;
+}
+
+.c13 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c4 {
+  line-height: 0;
+}
+
+.c7 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 0;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c7::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c7::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c7:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c7::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c7[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c7:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c6 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c6:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  height: 1rem;
+  -webkit-align-items: flex-end;
+  -webkit-box-align: flex-end;
+  -ms-flex-align: flex-end;
+  align-items: flex-end;
+  -webkit-transform: translateY(-2px);
+  -ms-transform: translateY(-2px);
+  transform: translateY(-2px);
+}
+
+.c9 svg {
+  display: block;
+  height: 0.25rem;
+  -webkit-transform: rotateX(180deg);
+  -ms-transform: rotateX(180deg);
+  transform: rotateX(180deg);
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  height: 1rem;
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  -webkit-transform: translateY(2px);
+  -ms-transform: translateY(2px);
+  transform: translateY(2px);
+}
+
+.c12 svg {
+  display: block;
+  height: 0.25rem;
+}
+
+<div>
+  <div
+    class=""
+  >
+    <div
+      class="c0"
+    >
+      <label
+        class="c1 c2"
+        for="number"
+      >
+        Default label
+        <span
+          class="c3 c4"
+        >
+          *
+        </span>
+      </label>
+      <div
+        class="c5 c6"
+      >
+        <input
+          aria-disabled="false"
+          aria-invalid="false"
+          aria-required="true"
+          class="c7"
+          id="number"
+          name="number"
+          placeholder="Default placeholder"
+          type="text"
+          value=""
+        />
+        <div
+          class="c8"
+        >
+          <button
+            aria-hidden="true"
+            class="c9"
+            data-testid="ArrowUp"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              class="c10 c11"
+              fill="none"
+              height="1rem"
+              viewBox="0 0 14 8"
+              width="1rem"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                fill="#32324D"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            aria-hidden="true"
+            class="c12"
+            data-testid="ArrowDown"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              class="c10 c11"
+              fill="none"
+              height="1rem"
+              viewBox="0 0 14 8"
+              width="1rem"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                fill="#32324D"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c13"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
