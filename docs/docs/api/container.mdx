@@ -1,0 +1,102 @@
+---
+title: Container
+slug: /api/container
+tags:
+- module
+- public
+
+toc_min_heading_level: 2
+toc_max_heading_level: 5
+---
+import Type from '@site/docs/api/components/type';
+
+# Container
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The container module permits to generate containers.
+
+## Module: container
+
+### `createContainer(strapi)`
+
+- `strapi`: <Type>Strapi</Type> [See Strapi class documentation](Strapi.mdx)
+- Returns: <Type>Container</Type>
+
+```javascript
+const container = createContainer(strapi);
+
+container.register('config', {
+    get: (configName) => {},
+    set: (configName, value) => {}
+});
+
+const dbConfig = container.get('config').get('database');
+```
+
+### `container.register(name, resolver)`
+
+- `name`: <Type>String</Type> UID of the content
+- `resolver`: <Type>Function</Type> | <Type>Any</Type>
+  - As a function, the function will be executed when the first get method is called on this content. The result of this function will define the content of this UID.
+  - `resolver(context, args)`
+    - `context`: <Type>{ Strapi }</Type> [See Strapi class documentation](Strapi.mdx)
+    - `args`: <Type>Any</Type> Anything to be used by the resolver function
+  - As anything else, this value will be resolved when getting this specified content through its UID.
+
+Register a new content to be accessed inside the container. If the name is already used, it will throw an error.
+
+```javascript
+const container = createContainer(strapi);
+
+container.register('config', ({ strapi }, args) => {});
+// or
+container.register('services', {});
+```
+
+### `container.get(name, args)`
+
+- `name`: <Type>String</Type> UID of the content
+- `args`: <Type>Any</Type> Value that will be passed to the resolver (if function)
+
+Get the value stored for a specific `name`.
+
+```javascript
+const container = createContainer(strapi);
+
+container.register('config', { db: 'sqlite' });
+
+const config = container.get('config');
+// config.db === 'sqlite'
+```
+
+⚠️ If the **resolver**, used in the [register function](#containerregistername-resolver), is a **function**, the value will be the result of this resolver function with `args` as parameter on the first call to `get`.
+
+Please pay attention that the resolver result value isn't awaited. So if resolver returns a promise, the value stored will be a promise.
+
+```javascript
+const container = createContainer(strapi);
+
+container.register('boolean', (bool) => bool);
+
+// First call - The value is resolved through the resolver above "(bool) => bool"
+container.get('boolean', true);
+// true
+
+// Any further call will use the previously set value
+container.get('boolean');
+// true
+
+// Even if we try to push a new value
+container.get('boolean', false);
+// true
+```
+### `container.extend()`
+
+:::info
+  To be developed
+:::
