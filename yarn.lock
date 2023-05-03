@@ -8608,6 +8608,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/utils@npm:4.10.1":
+  version: 4.10.1
+  resolution: "@strapi/utils@npm:4.10.1"
+  dependencies:
+    "@sindresorhus/slugify": 1.1.0
+    date-fns: 2.29.3
+    http-errors: 1.8.1
+    lodash: 4.17.21
+    p-map: 4.0.0
+    yup: 0.32.9
+  checksum: 2f80dff575455ca9a061f0648fb32a5ebeef265a6b966d91872cf22e29f7210bf5c51856cc36247cce7c659533be75d4e30dd225cb16f035e8d5aeeabc374a1d
+  languageName: node
+  linkType: hard
+
 "@stylelint/postcss-css-in-js@npm:^0.37.2":
   version: 0.37.3
   resolution: "@stylelint/postcss-css-in-js@npm:0.37.3"
