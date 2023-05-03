@@ -11,6 +11,8 @@ import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
+import { OptionColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/Stages/Stage/components/OptionColor';
+import { SingleValueColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/Stages/Stage/components/SingleValueColor';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
@@ -113,6 +115,8 @@ export function InformationBoxEE() {
             <ReactSelect
               components={{
                 LoadingIndicator: () => <Loader small />,
+                Option: OptionColor,
+                SingleValue: SingleValueColor,
               }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
@@ -122,9 +126,19 @@ export function InformationBoxEE() {
               name={ATTRIBUTE_NAME}
               onChange={handleStageChange}
               options={
-                workflow ? workflow.stages.map(({ id, name }) => ({ value: id, label: name })) : []
+                workflow
+                  ? workflow.stages.map(({ id, color, name }) => ({
+                      value: id,
+                      label: name,
+                      color,
+                    }))
+                  : []
               }
-              value={{ value: activeWorkflowStage?.id, label: activeWorkflowStage?.name }}
+              value={{
+                value: activeWorkflowStage?.id,
+                label: activeWorkflowStage?.name,
+                color: activeWorkflowStage?.color,
+              }}
             />
 
             <FieldError />

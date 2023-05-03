@@ -4,6 +4,7 @@ import { Typography } from '@strapi/design-system';
 
 import ReviewWorkflowsStage from '.';
 import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
+import { STAGE_COLOR_DEFAULT } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 
 export default (layout) => {
   const { formatMessage } = useIntl();
@@ -24,7 +25,7 @@ export default (layout) => {
     key: '__strapi_reviewWorkflows_stage_temp_key__',
     name: 'strapi_reviewWorkflows_stage',
     fieldSchema: {
-      type: 'custom',
+      type: 'relation',
     },
     metadatas: {
       label: formatMessage({
@@ -32,7 +33,8 @@ export default (layout) => {
         defaultMessage: 'Review stage',
       }),
       searchable: false,
-      sortable: false,
+      sortable: true,
+      mainField: 'name',
     },
     cellFormatter({ strapi_reviewWorkflows_stage }) {
       // if entities are created e.g. through lifecycle methods
@@ -41,7 +43,9 @@ export default (layout) => {
         return <Typography textColor="neutral800">-</Typography>;
       }
 
-      return <ReviewWorkflowsStage name={strapi_reviewWorkflows_stage.name} />;
+      const { color, name } = strapi_reviewWorkflows_stage;
+
+      return <ReviewWorkflowsStage color={color ?? STAGE_COLOR_DEFAULT} name={name} />;
     },
   };
 };
