@@ -256,6 +256,8 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const getQueryFields = (fields = []) => {
+    const nonVisibleAttributes = getNonVisibleAttributes(schema);
+
     return uniq([
       ...fields,
       ...STATIC_FIELDS,
@@ -263,6 +265,7 @@ module.exports = ({ action, ability, model }) => {
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
       PUBLISHED_AT_ATTRIBUTE,
+      ...nonVisibleAttributes,
     ]);
   };
 
