@@ -2,7 +2,7 @@
 
 const { pick, isEqual } = require('lodash/fp');
 
-const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./utils');
+const { readLicense, verifyLicense, fetchLicense, LicenseCheckError } = require('./utils/license');
 const { shiftCronExpression } = require('../lib/utils/cron');
 
 const ONE_MINUTE = 1000 * 60;
