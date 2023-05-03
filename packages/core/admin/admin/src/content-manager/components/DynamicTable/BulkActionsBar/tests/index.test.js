@@ -117,7 +117,7 @@ describe('BulkActionsBar', () => {
       );
     });
 
-    expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
+    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2]);
   });
 
   it('should show unpublish modal if unpublish button is clicked', async () => {
@@ -131,6 +131,6 @@ describe('BulkActionsBar', () => {
       );
     });
 
-    expect(onConfirmUnpublishAll).toHaveBeenCalledWith([]);
+    expect(onConfirmUnpublishAll).toHaveBeenCalledWith([1, 2]);
   });
 });

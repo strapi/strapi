@@ -5,9 +5,10 @@ import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { useTracking } from '@strapi/helper-plugin';
-import { listViewDomain } from '../../../pages/ListView/selectors';
+import { useSelector } from 'react-redux';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
+import { listViewDomain } from '../../../pages/ListView/selectors';
 
 const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
   const { formatMessage } = useIntl();
@@ -191,9 +192,9 @@ const BulkActionsBar = ({
   const [dialogToOpen, setDialogToOpen] = useState(null);
 
   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
-  const showPublishButton =
+  const publishButtonIsShown =
     showPublish && selectedEntriesObjects.some((entry) => !entry.publishedAt);
-  const showUnpublishButton =
+  const unpublishButtonIsShown =
     showPublish && selectedEntriesObjects.some((entry) => entry.publishedAt);
 
   const toggleDeleteModal = () => {
@@ -242,7 +243,7 @@ const BulkActionsBar = ({
 
   return (
     <>
-      {showPublishButton && (
+      {publishButtonIsShown && (
         <>
           <Button variant="tertiary" onClick={togglePublishModal}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -255,7 +256,7 @@ const BulkActionsBar = ({
           />
         </>
       )}
-      {showUnpublishButton && (
+      {unpublishButtonIsShown && (
         <>
           <Button variant="tertiary" onClick={toggleUnpublishModal}>
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
