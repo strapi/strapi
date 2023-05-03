@@ -12255,6 +12255,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"better-sqlite3@npm:8.0.1":
+  version: 8.0.1
+  resolution: "better-sqlite3@npm:8.0.1"
+  dependencies:
+    bindings: ^1.5.0
+    node-gyp: latest
+    prebuild-install: ^7.1.0
+  checksum: 533b2cc32bd54e2a943a4f63e079f8cc8945879b7a0ebd2085b948824ea067792f6f903ab75ba75d7cafc5f8f973354cdf9a042fa6216e077925d07a8df1bead
+  languageName: node
+  linkType: hard
+
 "better-sqlite3@npm:8.3.0":
   version: 8.3.0
   resolution: "better-sqlite3@npm:8.3.0"
@@ -26666,6 +26677,19 @@ __metadata:
   checksum: fd65d3eb29978e0e7a755158625e8922a66ca9d599b7c24ddf920822b261d81c51a5964ef8e0e5ed9b2b12dc64541c5949b6a898d965e107f43261964e8c29a0
   languageName: node
   linkType: hard
+
+"playwright@workspace:test-apps/playwright":
+  version: 0.0.0-use.local
+  resolution: "playwright@workspace:test-apps/playwright"
+  dependencies:
+    "@strapi/plugin-documentation": 4.10.1
+    "@strapi/plugin-graphql": 4.10.1
+    "@strapi/plugin-i18n": 4.10.1
+    "@strapi/plugin-users-permissions": 4.10.1
+    "@strapi/strapi": 4.10.1
+    better-sqlite3: 8.0.1
+  languageName: unknown
+  linkType: soft
 
 "plop@npm:2.7.6":
   version: 2.7.6
