@@ -281,6 +281,7 @@ function ListView({
         },
         onError(error) {
           handleError();
+
           toggleNotification({
             type: 'warning',
             message: formatAPIError(error),
@@ -312,6 +313,7 @@ function ListView({
         },
         onError(error) {
           handleError();
+
           toggleNotification({
             type: 'warning',
             message: formatAPIError(error),
