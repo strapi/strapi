@@ -10,14 +10,19 @@ const apiTokens = require('./api-tokens');
 const contentApi = require('./content-api');
 const transfer = require('./transfer');
 
-module.exports = [
-  ...admin,
-  ...authentication,
-  ...permissions,
-  ...users,
-  ...roles,
-  ...webhooks,
-  ...apiTokens,
-  ...contentApi,
-  ...transfer,
-];
+module.exports = {
+  admin: {
+    type: 'admin',
+    routes: [
+      ...admin,
+      ...authentication,
+      ...permissions,
+      ...users,
+      ...roles,
+      ...webhooks,
+      ...apiTokens,
+      ...contentApi,
+      ...transfer,
+    ],
+  },
+};
