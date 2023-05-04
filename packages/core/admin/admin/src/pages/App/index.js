@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import axios from 'axios';
 import {
   LoadingIndicatorPage,
   auth,
@@ -100,10 +99,7 @@ function App() {
           setTelemetryProperties(properties);
 
           try {
-            /**
-             * TODO: remove this call to `axios`
-             */
-            await axios.post('https://analytics.strapi.io/api/v2/track', {
+            await post('https://analytics.strapi.io/api/v2/track', {
               // This event is anonymous
               event: 'didInitializeAdministration',
               userId: '',
