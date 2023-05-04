@@ -228,20 +228,10 @@ const BulkActionsBar = ({
     handleToggleShowDeleteAllModal();
   };
 
-  /**
-   *
-   * @param {'publish' | 'unpublish'} actionType - The bulk action to perform
-   */
-  const handleBulkAction = (actionType) => {
-    if (actionType !== 'publish' && actionType !== 'unpublish') {
-      throw new Error('The actionType must be either publish or unpublish');
-    }
-
-    const mutateActionType = actionType === 'publish' ? onConfirmPublishAll : onConfirmUnpublishAll;
-
+  const handleBulkPublish = () => {
     setIsConfirmButtonLoading(true);
 
-    mutateActionType(selectedEntries, {
+    onConfirmPublishAll(selectedEntries, {
       handleSuccess() {
         clearSelectedEntries();
         setIsConfirmButtonLoading(false);
@@ -250,6 +240,22 @@ const BulkActionsBar = ({
       handleError() {
         setIsConfirmButtonLoading(false);
         handleToggleShowPublishAllModal();
+      },
+    });
+  };
+
+  const handlBulkUnpublish = () => {
+    setIsConfirmButtonLoading(true);
+
+    onConfirmUnpublishAll(selectedEntries, {
+      handleSuccess() {
+        clearSelectedEntries();
+        setIsConfirmButtonLoading(false);
+        handleToggleShowUnpublishAllModal();
+      },
+      handleError() {
+        setIsConfirmButtonLoading(false);
+        handleToggleShowUnpublishAllModal();
       },
     });
   };
@@ -268,13 +274,13 @@ const BulkActionsBar = ({
             isOpen={dialogToOpen === 'publish'}
             onToggleDialog={handleToggleShowPublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={() => handleBulkAction('publish')}
+            onConfirm={handleBulkPublish}
           />
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
             onToggleDialog={handleToggleShowUnpublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={() => handleBulkAction('unpublish')}
+            onConfirm={handlBulkUnpublish}
           />
         </>
       )}
