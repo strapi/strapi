@@ -237,10 +237,11 @@ const BulkActionsBar = ({
       throw new Error('The actionType must be either publish or unpublish');
     }
 
-    const publish = actionType === 'publish' ? onConfirmPublishAll : onConfirmUnpublishAll;
+    const mutateActionType = actionType === 'publish' ? onConfirmPublishAll : onConfirmUnpublishAll;
 
     setIsConfirmButtonLoading(true);
-    publish(selectedEntries, {
+
+    mutateActionType(selectedEntries, {
       handleSuccess() {
         clearSelectedEntries();
         setIsConfirmButtonLoading(false);
