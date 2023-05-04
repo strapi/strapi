@@ -7,7 +7,10 @@ import { getStageColorByHex } from '../../../../../utils/colors';
 
 export function SingleValueColor({ children, ...props }) {
   const { color } = props.data;
-  const { themeColorName } = getStageColorByHex(color);
+  // in case an entity was not assigned to a stage (which displays an error)
+  // there is no color to display and we have to make sure the component does
+  // not crash
+  const { themeColorName } = color ? getStageColorByHex(color) : {};
 
   return (
     <components.SingleValue {...props}>
