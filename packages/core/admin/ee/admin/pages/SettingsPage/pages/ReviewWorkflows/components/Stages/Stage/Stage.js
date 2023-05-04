@@ -200,7 +200,7 @@ export function Stage({
             title={nameField.value}
             togglePosition="left"
             action={
-              <>
+              <Flex>
                 {canDelete && (
                   <IconButton
                     background="transparent"
@@ -231,7 +231,7 @@ export function Stage({
                 >
                   <Drag />
                 </IconButton>
-              </>
+              </Flex>
             }
           />
           <AccordionContent padding={6} background="neutral0" hasRadius>
