@@ -42,7 +42,6 @@ const PasswordInput = styled(TextInput)`
 `;
 
 const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => {
-  console.log('Register');
   const toggleNotification = useNotification();
   const { push } = useHistory();
   const [passwordShown, setPasswordShown] = useState(false);
