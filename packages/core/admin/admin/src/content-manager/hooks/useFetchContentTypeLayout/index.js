@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
-import axios from 'axios';
 import { useFetchClient } from '@strapi/helper-plugin';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
 import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
-import { getRequestUrl } from '../../utils';
 
 const useFetchContentTypeLayout = (contentTypeUID) => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);
@@ -15,7 +13,7 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
   const { get } = useFetchClient();
 
   const getData = useCallback(
-    async (uid, source) => {
+    async (uid) => {
       if (layouts[uid]) {
         dispatch({ type: 'SET_LAYOUT_FROM_STATE', uid });
 
@@ -24,21 +22,17 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
       dispatch({ type: 'GET_DATA' });
 
       try {
-        const endPoint = getRequestUrl(`content-types/${uid}/configuration`);
+        const endPoint = `/content-manager/content-types/${uid}/configuration`;
 
         const {
           data: { data },
-        } = await get(endPoint, { cancelToken: source.token });
+        } = await get(endPoint);
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data: formatLayouts(data, schemas),
         });
       } catch (error) {
-        if (axios.isCancel(error)) {
-          return;
-        }
-
         if (isMounted.current) {
           console.error(error);
         }
@@ -58,13 +52,10 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
   }, []);
 
   useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    getData(contentTypeUID, source);
+    getData(contentTypeUID);
 
     return () => {
-      source.cancel('Operation canceled by the user.');
+      console.error('Operation canceled by the user.');
     };
   }, [contentTypeUID, getData]);
 
