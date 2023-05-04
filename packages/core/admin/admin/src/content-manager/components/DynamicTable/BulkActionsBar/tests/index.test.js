@@ -86,7 +86,8 @@ describe('BulkActionsBar', () => {
   });
 
   it('should show publish modal if publish button is clicked', async () => {
-    setup({ showPublish: true });
+    const onConfirmPublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmPublishAll });
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
@@ -95,11 +96,12 @@ describe('BulkActionsBar', () => {
       );
     });
 
-    expect(screen.getByText(/Are you sure you want to publish these entries?/)).toBeVisible();
+    expect(onConfirmPublishAll).toHaveBeenCalledWith([]);
   });
 
   it('should show unpublish modal if unpublish button is clicked', async () => {
-    setup({ showPublish: true });
+    const onConfirmUnpublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmUnpublishAll });
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
@@ -108,6 +110,6 @@ describe('BulkActionsBar', () => {
       );
     });
 
-    expect(screen.getByText(/Are you sure you want to unpublish these entries?/)).toBeVisible();
+    expect(onConfirmUnpublishAll).toHaveBeenCalledWith([]);
   });
 });

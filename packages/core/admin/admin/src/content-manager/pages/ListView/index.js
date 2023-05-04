@@ -104,7 +104,49 @@ function ListView({
   const { post, del } = fetchClient;
 
   // Bulk publish mutation passing the fetchClient's url and data arguments
-  const bulkPublishMutation = useMutation(({ url, data }) => post(url, data));
+  const bulkPublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+        });
+
+        fetchData(`/content-manager/collection-types/${slug}${params}`);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+  const bulkUnpublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          },
+        });
+
+        fetchData(`/content-manager/collection-types/${slug}${params}`);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -243,7 +285,7 @@ function ListView({
     return validations;
   };
 
-  const handleConfirmPublishAllData = async (selectedEntries, { handleSuccess, handleError }) => {
+  const handleConfirmPublishAllData = async (selectedEntries) => {
     const validations = await validateEntriesToPublish(selectedEntries);
 
     if (Object.values(validations.errors).length) {
@@ -260,67 +302,14 @@ function ListView({
         },
       });
 
-      return;
+      throw new Error('Validation error');
     }
 
-    bulkPublishMutation.mutate(
-      {
-        url: `/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`,
-        data: { ids: selectedEntries },
-      },
-      {
-        onSuccess() {
-          handleSuccess();
-
-          toggleNotification({
-            type: 'success',
-            message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
-          });
-
-          fetchData(`/content-manager/collection-types/${slug}${params}`);
-        },
-        onError(error) {
-          handleError();
-
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(error),
-          });
-        },
-      }
-    );
+    return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
   };
 
-  const handleConfirmUnpublishAllData = (selectedEntries, { handleSuccess, handleError }) => {
-    bulkPublishMutation.mutate(
-      {
-        url: `/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`,
-        data: { ids: selectedEntries },
-      },
-      {
-        onSuccess() {
-          handleSuccess();
-
-          toggleNotification({
-            type: 'success',
-            message: {
-              id: 'content-manager.success.record.unpublish',
-              defaultMessage: 'Unpublished',
-            },
-          });
-
-          fetchData(`/content-manager/collection-types/${slug}${params}`);
-        },
-        onError(error) {
-          handleError();
-
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(error),
-          });
-        },
-      }
-    );
+  const handleConfirmUnpublishAllData = (selectedEntries) => {
+    return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
   };
 
   useEffect(() => {
