@@ -98,19 +98,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
     requests.contentAPI = await createContentAPIRequest({ strapi });
-
-    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
-      data: { name: 'Stage' },
-    });
-    secondStage = await strapi.query(STAGE_MODEL_UID).create({
-      data: { name: 'Stage 2' },
-    });
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
-      data: {
-        uid: 'workflow',
-        stages: [defaultStage.id, secondStage.id],
-      },
-    });
   });
 
   afterAll(async () => {
@@ -119,16 +106,32 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   beforeEach(async () => {
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).update({
-      where: { id: testWorkflow.id },
+    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage' },
+    });
+    secondStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage 2' },
+    });
+    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
       data: {
-        uid: 'workflow',
         stages: [defaultStage.id, secondStage.id],
       },
     });
     await updateContentType(productUID, {
       components: [],
       contentType: model,
+    });
+  });
+
+  afterEach(async () => {
+    await strapi.query(STAGE_MODEL_UID).delete({
+      where: { id: defaultStage.id },
+    });
+    await strapi.query(STAGE_MODEL_UID).delete({
+      where: { id: secondStage.id },
+    });
+    await strapi.query(WORKFLOW_MODEL_UID).delete({
+      where: { id: testWorkflow.id },
     });
   });
 
