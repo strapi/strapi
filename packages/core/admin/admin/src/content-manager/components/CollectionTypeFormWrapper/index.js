@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
 import get from 'lodash/get';
 import {
   useTracking,
@@ -135,21 +134,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   }, [dispatch]);
 
   useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    const fetchData = async (source) => {
+    const fetchData = async () => {
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL);
 
         dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
       } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
@@ -181,13 +173,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     }
 
     if (requestURL) {
-      fetchData(source);
+      fetchData();
     } else {
       init();
     }
 
     return () => {
-      source.cancel('Operation canceled by the user.');
+      console.error('Operation canceled by the user.');
     };
   }, [
     fetchClient,

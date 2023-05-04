@@ -13,7 +13,6 @@ import {
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import {
   getData,
@@ -98,27 +97,18 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   // Check if creation mode or editing mode
   useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    const fetchData = async (source) => {
+    const fetchData = async () => {
       dispatch(getData());
 
       setIsCreatingEntry(true);
 
       try {
-        const { data } = await fetchClient.get(getRequestUrl(`${slug}${searchToSend}`), {
-          cancelToken: source.token,
-        });
+        const { data } = await fetchClient.get(getRequestUrl(`${slug}${searchToSend}`));
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
         setIsCreatingEntry(false);
       } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-
         const responseStatus = get(err, 'response.status', null);
 
         // Creating a single type
@@ -137,9 +127,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       }
     };
 
-    fetchData(source);
+    fetchData();
 
-    return () => source.cancel('Operation canceled by the user.');
+    return () => console.error('Operation canceled by the user.');
   }, [
     fetchClient,
     cleanReceivedData,
