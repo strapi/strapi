@@ -184,7 +184,7 @@ module.exports = {
   async bulkPublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { query, body } = ctx.request;
+    const { body } = ctx.request;
     const { ids } = body;
 
     await validateBulkActionInput(body);
@@ -196,24 +196,27 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.publish(query);
+    const entityPromises = ids.map((id) => entityManager.findOneWithCreatorRoles(id, model));
+    const entities = await Promise.all(entityPromises);
 
-    const idsWhereClause = { id: { $in: ids } };
-    const params = {
-      ...permissionQuery,
-      filters: {
-        $and: [idsWhereClause].concat(permissionQuery.filters || []),
-      },
-    };
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
 
-    const { count } = await entityManager.publishMany(params, model);
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.publishMany(entities, model);
     ctx.body = { count };
   },
 
   async bulkUnpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { query, body } = ctx.request;
+    const { body } = ctx.request;
     const { ids } = body;
 
     await validateBulkActionInput(body);
@@ -225,17 +228,20 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(query);
+    const entityPromises = ids.map((id) => entityManager.findOneWithCreatorRoles(id, model));
+    const entities = await Promise.all(entityPromises);
 
-    const idsWhereClause = { id: { $in: ids } };
-    const params = {
-      ...permissionQuery,
-      filters: {
-        $and: [idsWhereClause].concat(permissionQuery.filters || []),
-      },
-    };
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
 
-    const { count } = await entityManager.unpublishMany(params, model);
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.unpublishMany(entities, model);
     ctx.body = { count };
   },
 

@@ -17,11 +17,11 @@ describe('Content-Manager', () => {
     beforeEach(() => {
       global.strapi = {
         entityService: {
+          findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
           update: jest.fn().mockReturnValue({ id: 1, publishedAt: new Date() }),
         },
         db: {
           query: jest.fn(() => ({
-            findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
             updateMany: queryUpdateMock,
           })),
         },
@@ -55,13 +55,16 @@ describe('Content-Manager', () => {
 
     test('Publish many content-types', async () => {
       const uid = 'api::test.test';
-      const params = { filters: { $and: [1, 2] } };
+      const entities = [
+        { id: 1, publishedAt: null },
+        { id: 2, publishedAt: null },
+      ];
 
-      await entityManager.publishMany(params, uid);
+      await entityManager.publishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toBeCalledWith({
+      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
         where: {
-          $and: [1, 2],
+          id: { $in: [1, 2] },
         },
         data: { publishedAt: expect.any(Date) },
       });
@@ -74,11 +77,11 @@ describe('Content-Manager', () => {
       global.strapi = {
         db: {
           query: jest.fn(() => ({
-            findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
             updateMany: queryUpdateMock,
           })),
         },
         entityService: {
+          findMany: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
           update: jest.fn().mockReturnValue({ id: 1, publishedAt: null }),
         },
         eventHub: { emit: jest.fn(), sanitizeEntity: (entity) => entity },
@@ -107,13 +110,16 @@ describe('Content-Manager', () => {
 
     test('Unpublish many content-types', async () => {
       const uid = 'api::test.test';
-      const params = { filters: { $and: [1, 2] } };
+      const entities = [
+        { id: 1, publishedAt: new Date() },
+        { id: 2, publishedAt: new Date() },
+      ];
 
-      await entityManager.unpublishMany(params, uid);
+      await entityManager.unpublishMany(entities, uid);
 
-      expect(strapi.db.query().updateMany).toBeCalledWith({
+      expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
         where: {
-          $and: [1, 2],
+          id: { $in: [1, 2] },
         },
         data: { publishedAt: null },
       });

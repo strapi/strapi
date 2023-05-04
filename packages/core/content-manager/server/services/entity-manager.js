@@ -3,7 +3,6 @@
 const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { mapAsync } = require('@strapi/utils');
-const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
@@ -267,41 +266,44 @@ module.exports = ({ strapi }) => ({
     return mappedEntity;
   },
 
-  async publishMany(opts, uid) {
-    const params = {
-      ...opts,
-      data: {
-        [PUBLISHED_AT_ATTRIBUTE]: new Date(),
-      },
-    };
-
-    const query = transformParamsToQuery(uid, params);
-    const entitiesToUpdate = await strapi.db.query(uid).findMany(query);
-    // No entities to update, return early
-    if (!entitiesToUpdate.length) {
+  async publishMany(entities, uid) {
+    if (!entities.length) {
       return null;
     }
 
     // Validate entities before publishing, throw if invalid
     await Promise.all(
-      entitiesToUpdate.map((entityToUpdate) =>
-        strapi.entityValidator.validateEntityCreation(
+      entities.map((entityToUpdate) => {
+        if (entityToUpdate[PUBLISHED_AT_ATTRIBUTE]) {
+          throw new ApplicationError('already.published');
+        }
+
+        return strapi.entityValidator.validateEntityCreation(
           strapi.getModel(uid),
           entityToUpdate,
           {
             isDraft: true,
           },
           entityToUpdate
-        )
-      )
+        );
+      })
     );
-    // Everything is valid, publish
-    const publishedEntitiesCount = await strapi.db
-      .query(uid)
-      .updateMany({ ...query, data: params.data });
 
+    const where = { id: { $in: entities.map((entity) => entity.id) } };
+    const data = {
+      [PUBLISHED_AT_ATTRIBUTE]: new Date(),
+    };
+    const populate = isRelationsPopulateEnabled(uid)
+      ? getDeepPopulate(uid, {})
+      : getDeepPopulate(uid, { countMany: true, countOne: true });
+
+    // Everything is valid, publish
+    const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
+      where,
+      data,
+    });
     // Get the updated entities since updateMany only returns the count
-    const publishedEntities = await strapi.db.query(uid).findMany(query);
+    const publishedEntities = await strapi.entityService.findMany(uid, { where, populate });
     // Emit the publish event for all updated entities
     await Promise.all(publishedEntities.map((entity) => emitEvent(ENTRY_PUBLISH, entity, uid)));
 
@@ -309,28 +311,32 @@ module.exports = ({ strapi }) => ({
     return publishedEntitiesCount;
   },
 
-  async unpublishMany(opts, uid) {
-    const params = {
-      ...opts,
-      data: {
-        [PUBLISHED_AT_ATTRIBUTE]: null,
-      },
-    };
-
-    const query = transformParamsToQuery(uid, params);
-    const entitiesToUpdate = await strapi.db.query(uid).findMany(query);
-    // No entities to update, return early
-    if (!entitiesToUpdate.length) {
+  async unpublishMany(entities, uid) {
+    if (!entities.length) {
       return null;
     }
 
-    // No need to validate, unpublish
-    const unpublishedEntitiesCount = await strapi.db
-      .query(uid)
-      .updateMany({ ...query, data: params.data });
+    entities.forEach((entity) => {
+      if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
+        throw new ApplicationError('already.draft');
+      }
+    });
 
+    const where = { id: { $in: entities.map((entity) => entity.id) } };
+    const data = {
+      [PUBLISHED_AT_ATTRIBUTE]: null,
+    };
+    const populate = isRelationsPopulateEnabled(uid)
+      ? getDeepPopulate(uid, {})
+      : getDeepPopulate(uid, { countMany: true, countOne: true });
+
+    // No need to validate, unpublish
+    const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
+      where,
+      data,
+    });
     // Get the updated entities since updateMany only returns the count
-    const unpublishedEntities = await strapi.db.query(uid).findMany(query);
+    const unpublishedEntities = await strapi.entityService.findMany(uid, { where, populate });
     // Emit the unpublish event for all updated entities
     await Promise.all(unpublishedEntities.map((entity) => emitEvent(ENTRY_UNPUBLISH, entity, uid)));
 
