@@ -23,10 +23,17 @@ exports[`DateTimePicker snapshots the component 1`] = `
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
 }
 
-.c26 {
+.c20 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c27 {
   background: transparent;
   border-radius: 4px;
   cursor: pointer;
@@ -45,7 +52,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
   color: #666687;
 }
 
-.c23 {
+.c24 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -140,21 +147,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c20 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-}
-
 .c21 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -167,9 +159,10 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 12px;
 }
 
-.c25 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -181,7 +174,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  gap: 12px;
 }
 
 .c14 {
@@ -286,16 +278,16 @@ exports[`DateTimePicker snapshots the component 1`] = `
   fill: #8e8ea9;
 }
 
-.c27 {
+.c28 {
   border: none;
 }
 
-.c27 svg {
+.c28 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c27 svg path {
+.c28 svg path {
   fill: #666687;
 }
 
@@ -323,15 +315,21 @@ exports[`DateTimePicker snapshots the component 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c28 > svg {
+.c29 > svg {
   width: 0.375rem;
 }
 
-.c28 > svg > path {
+.c29 > svg > path {
   fill: #666687;
 }
 
-.c24 {
+.c25 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -342,17 +340,17 @@ exports[`DateTimePicker snapshots the component 1`] = `
   flex-wrap: wrap;
 }
 
-.c29[data-state='checked'] .c1 {
+.c30[data-state='checked'] .c1 {
   font-weight: bold;
   color: #4945ff;
 }
 
-.c22 > svg {
+.c23 > svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c22 > svg path {
+.c23 > svg path {
   fill: #8e8ea9;
 }
 
@@ -482,14 +480,14 @@ exports[`DateTimePicker snapshots the component 1`] = `
             tabindex="0"
           >
             <span
-              class="c20"
+              class="c20 c21"
             >
               <span
                 aria-hidden="true"
                 class=""
               >
                 <span
-                  class="c21 c22"
+                  class="c22 c23"
                 >
                   <svg
                     fill="none"
@@ -508,22 +506,22 @@ exports[`DateTimePicker snapshots the component 1`] = `
                 </span>
               </span>
               <span
-                class="c1 c23"
+                class="c1 c24 c25"
               >
                 <span
-                  class="c24"
+                  class="c26"
                 >
                   10:00
                 </span>
               </span>
             </span>
             <span
-              class="c25"
+              class="c21"
             >
               <button
                 aria-disabled="false"
                 aria-label="clear time"
-                class="c26 c27"
+                class="c27 c28"
                 role="button"
                 tabindex="0"
                 title="clear time"
@@ -543,7 +541,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
               </button>
               <span
                 aria-hidden="true"
-                class="c28"
+                class="c29"
               >
                 <svg
                   fill="none"

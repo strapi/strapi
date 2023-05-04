@@ -66,7 +66,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
+}
+
+.c41 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .c9 {
@@ -125,7 +132,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #666687;
 }
 
-.c42 {
+.c43 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -249,22 +256,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   justify-content: space-between;
 }
 
-.c41 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.c44 {
+.c42 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -420,15 +412,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c45 > svg {
+.c46 > svg {
   width: 0.375rem;
 }
 
-.c45 > svg > path {
+.c46 > svg > path {
   fill: #666687;
 }
 
-.c43 {
+.c44 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c45 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -439,7 +437,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   flex-wrap: wrap;
 }
 
-.c46[data-state='checked'] .c8 {
+.c47[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -747,24 +745,24 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         tabindex="0"
                       >
                         <span
-                          class="c41"
+                          class="c41 c42"
                         >
                           <span
-                            class="c8 c42"
+                            class="c8 c43 c44"
                           >
                             <span
-                              class="c43"
+                              class="c45"
                             >
                               Editor
                             </span>
                           </span>
                         </span>
                         <span
-                          class="c44"
+                          class="c42"
                         >
                           <span
                             aria-hidden="true"
-                            class="c45"
+                            class="c46"
                           >
                             <svg
                               fill="none"

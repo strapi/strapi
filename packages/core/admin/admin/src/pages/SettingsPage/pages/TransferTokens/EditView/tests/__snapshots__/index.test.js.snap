@@ -50,7 +50,14 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
+}
+
+.c35 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .c9 {
@@ -91,7 +98,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #d02b20;
 }
 
-.c36 {
+.c37 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -101,7 +108,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #666687;
 }
 
-.c40 {
+.c41 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -218,22 +225,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   justify-content: space-between;
 }
 
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.c38 {
+.c36 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -297,7 +289,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c41 {
+.c42 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -454,15 +446,21 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c39 > svg {
+.c40 > svg {
   width: 0.375rem;
 }
 
-.c39 > svg > path {
+.c40 > svg > path {
   fill: #666687;
 }
 
-.c37 {
+.c38 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c39 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -473,7 +471,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-wrap: wrap;
 }
 
-.c42[data-state='checked'] .c8 {
+.c43[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -901,13 +899,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           tabindex="0"
                         >
                           <span
-                            class="c35"
+                            class="c35 c36"
                           >
                             <span
-                              class="c8 c36"
+                              class="c8 c37 c38"
                             >
                               <span
-                                class="c37"
+                                class="c39"
                               >
                                 <span>
                                   Select
@@ -916,11 +914,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c38"
+                            class="c36"
                           >
                             <span
                               aria-hidden="true"
-                              class="c39"
+                              class="c40"
                             >
                               <svg
                                 fill="none"
@@ -942,7 +940,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c8 c40"
+                      class="c8 c41"
                     />
                   </div>
                 </div>
@@ -986,13 +984,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           tabindex="0"
                         >
                           <span
-                            class="c35"
+                            class="c35 c36"
                           >
                             <span
-                              class="c8 c36"
+                              class="c8 c37 c38"
                             >
                               <span
-                                class="c37"
+                                class="c39"
                               >
                                 <span>
                                   Select
@@ -1001,11 +999,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c38"
+                            class="c36"
                           >
                             <span
                               aria-hidden="true"
-                              class="c39"
+                              class="c40"
                             >
                               <svg
                                 fill="none"
@@ -1036,7 +1034,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c41"
+    class="c42"
   >
     <p
       aria-live="polite"
@@ -1123,16 +1121,24 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
 }
 
-.c48 {
+.c42 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c49 {
   background: #ffffff;
   padding-right: 12px;
   padding-left: 12px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
 }
 
@@ -1187,7 +1193,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #d02b20;
 }
 
-.c43 {
+.c44 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -1197,7 +1203,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #666687;
 }
 
-.c47 {
+.c48 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -1314,22 +1320,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   justify-content: space-between;
 }
 
-.c42 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.c45 {
+.c43 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1393,7 +1384,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c49 {
+.c50 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1405,11 +1396,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c50[aria-disabled='true'] .c8 {
+.c51[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c50[aria-disabled='true']:active .c8 {
+.c51[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
@@ -1607,15 +1598,21 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c46 > svg {
+.c47 > svg {
   width: 0.375rem;
 }
 
-.c46 > svg > path {
+.c47 > svg > path {
   fill: #666687;
 }
 
-.c44 {
+.c45 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c46 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1626,7 +1623,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-wrap: wrap;
 }
 
-.c51[data-state='checked'] .c8 {
+.c52[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -2138,13 +2135,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           role="combobox"
                         >
                           <span
-                            class="c42"
+                            class="c42 c43"
                           >
                             <span
-                              class="c8 c43"
+                              class="c8 c44 c45"
                             >
                               <span
-                                class="c44"
+                                class="c46"
                               >
                                 <span>
                                   Select
@@ -2153,11 +2150,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c45"
+                            class="c43"
                           >
                             <span
                               aria-hidden="true"
-                              class="c46"
+                              class="c47"
                             >
                               <svg
                                 fill="none"
@@ -2179,7 +2176,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c8 c47"
+                      class="c8 c48"
                     >
                       Expiration date: Unlimited
                     </span>
@@ -2216,7 +2213,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           aria-expanded="false"
                           aria-label="Token type"
                           aria-required="true"
-                          class="c48 c40 c41"
+                          class="c49 c40 c41"
                           data-state="closed"
                           dir="ltr"
                           id="16"
@@ -2225,13 +2222,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           tabindex="0"
                         >
                           <span
-                            class="c42"
+                            class="c42 c43"
                           >
                             <span
-                              class="c8 c43"
+                              class="c8 c44 c45"
                             >
                               <span
-                                class="c44"
+                                class="c46"
                               >
                                 <span>
                                   Select
@@ -2240,11 +2237,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c45"
+                            class="c43"
                           >
                             <span
                               aria-hidden="true"
-                              class="c46"
+                              class="c47"
                             >
                               <svg
                                 fill="none"
@@ -2275,7 +2272,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c49"
+    class="c50"
   >
     <p
       aria-live="polite"

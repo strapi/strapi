@@ -60,10 +60,17 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  width: 100%;
   cursor: default;
 }
 
-.c44 {
+.c40 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c45 {
   background: transparent;
   border-radius: 4px;
   cursor: pointer;
@@ -109,7 +116,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c41 {
+.c42 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -119,7 +126,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c47 {
+.c48 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -254,22 +261,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c40 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-}
-
-.c43 {
+.c41 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -515,16 +507,16 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   padding: 0;
 }
 
-.c45 {
+.c46 {
   border: none;
 }
 
-.c45 svg {
+.c46 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c45 svg path {
+.c46 svg path {
   fill: #666687;
 }
 
@@ -552,15 +544,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c46 > svg {
+.c47 > svg {
   width: 0.375rem;
 }
 
-.c46 > svg > path {
+.c47 > svg > path {
   fill: #666687;
 }
 
-.c42 {
+.c43 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c44 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -571,7 +569,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   flex-wrap: wrap;
 }
 
-.c48[data-state='checked'] .c5 {
+.c49[data-state='checked'] .c5 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -1159,22 +1157,22 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           tabindex="0"
                         >
                           <span
-                            class="c40"
+                            class="c40 c41"
                           >
                             <span
-                              class="c5 c41"
+                              class="c5 c42 c43"
                             >
                               <span
-                                class="c42"
+                                class="c44"
                               />
                             </span>
                           </span>
                           <span
-                            class="c43"
+                            class="c41"
                           >
                             <button
                               aria-label="Clear the interface language selected"
-                              class="c44 c45"
+                              class="c45 c46"
                               role="button"
                               tabindex="0"
                               title="Clear the interface language selected"
@@ -1194,7 +1192,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             </button>
                             <span
                               aria-hidden="true"
-                              class="c46"
+                              class="c47"
                             >
                               <svg
                                 fill="none"
@@ -1214,7 +1212,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </span>
                         </div>
                         <p
-                          class="c5 c47"
+                          class="c5 c48"
                           id="7-hint"
                         >
                           This will only display your own interface in the chosen language.
@@ -1256,24 +1254,24 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           tabindex="0"
                         >
                           <span
-                            class="c40"
+                            class="c40 c41"
                           >
                             <span
-                              class="c5 c41"
+                              class="c5 c42 c43"
                             >
                               <span
-                                class="c42"
+                                class="c44"
                               >
                                 Light mode
                               </span>
                             </span>
                           </span>
                           <span
-                            class="c43"
+                            class="c41"
                           >
                             <span
                               aria-hidden="true"
-                              class="c46"
+                              class="c47"
                             >
                               <svg
                                 fill="none"
@@ -1293,7 +1291,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           </span>
                         </div>
                         <p
-                          class="c5 c47"
+                          class="c5 c48"
                           id="9-hint"
                         >
                           Displays your interface in the chosen mode.

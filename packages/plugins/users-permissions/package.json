@@ -29,9 +29,9 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.7.2",
+    "@strapi/design-system": "1.7.3",
     "@strapi/helper-plugin": "4.10.2",
-    "@strapi/icons": "1.7.2",
+    "@strapi/icons": "1.7.3",
     "@strapi/utils": "4.10.2",
     "bcryptjs": "2.4.3",
     "formik": "2.2.9",
