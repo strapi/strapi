@@ -326,6 +326,7 @@
   "Users.components.List.empty": "There is no users...",
   "Users.components.List.empty.withFilters": "There is no users with the applied filters...",
   "Users.components.List.empty.withSearch": "There is no users corresponding to the search ({search})...",
+  "admin.pages.MarketPlacePage.sort.label": "Sort by",
   "admin.pages.MarketPlacePage.filters.categories": "Categories",
   "admin.pages.MarketPlacePage.filters.categoriesSelected": "{count, plural, =0 {No categories} one {# category} other {# categories}} selected",
   "admin.pages.MarketPlacePage.filters.collections": "Collections",
