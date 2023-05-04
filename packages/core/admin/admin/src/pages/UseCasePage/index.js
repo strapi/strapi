@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { parse } from 'qs';
-import { pxToRem, useNotification, auth } from '@strapi/helper-plugin';
+import { pxToRem, useFetchClient, useNotification, auth } from '@strapi/helper-plugin';
 import {
   Main,
   Flex,
@@ -77,22 +76,21 @@ const UseCasePage = () => {
   const { firstname, email } = auth.getUserInfo();
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
+  const { post } = useFetchClient();
 
-  const handleSubmit = (skipPersona) => {
+  const handleSubmit = async (event, skipPersona) => {
+    event.preventDefault();
     try {
-      axios({
-        method: 'POST',
-        url: 'https://analytics.strapi.io/register',
-        data: {
-          email,
-          username: firstname,
-          firstAdmin: Boolean(!hasAdmin),
-          persona: {
-            role: skipPersona ? undefined : role,
-            otherRole: skipPersona ? undefined : otherRole,
-          },
+      const dataToSend = {
+        email,
+        username: firstname,
+        firstAdmin: Boolean(!hasAdmin),
+        persona: {
+          role: skipPersona ? undefined : role,
+          otherRole: skipPersona ? undefined : otherRole,
         },
-      });
+      };
+      await post('https://analytics.strapi.io/register', dataToSend);
 
       toggleNotification({
         type: 'success',
@@ -111,7 +109,7 @@ const UseCasePage = () => {
     <UnauthenticatedLayout>
       <Main labelledBy="usecase-title">
         <LayoutContent>
-          <form onSubmit={() => handleSubmit(false)}>
+          <form onSubmit={(e) => handleSubmit(e, false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
