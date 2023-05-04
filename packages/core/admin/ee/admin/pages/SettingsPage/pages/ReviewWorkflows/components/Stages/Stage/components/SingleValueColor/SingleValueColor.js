@@ -9,7 +9,14 @@ export function SingleValueColor({ children, ...props }) {
   return (
     <components.SingleValue {...props}>
       <Flex alignItems="center" gap={2}>
-        <Flex height={2} background={color} hasRadius shrink={0} width={2} />
+        <Flex
+          height={2}
+          background={color}
+          borderColor="neutral150"
+          hasRadius
+          shrink={0}
+          width={2}
+        />
 
         <Typography textColor="neutral800" ellipsis>
           {children}

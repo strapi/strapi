@@ -6,7 +6,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 export function ReviewWorkflowsStageEE({ color, name }) {
   return (
     <Flex alignItems="center" gap={2} maxWidth={pxToRem(300)}>
-      <Box height={2} background={color} hasRadius shrink={0} width={2} />
+      <Box height={2} background={color} borderColor="neutral150" hasRadius shrink={0} width={2} />
 
       <Typography fontWeight="regular" textColor="neutral700" ellipsis>
         {name}
