@@ -4,7 +4,7 @@ const { sanitize } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 
-function sanitizeOuput({ strapi }, data, ctx) {
+function sanitizeOutput({ strapi }, data, ctx) {
   const schema = strapi.getModel(WORKFLOW_MODEL_UID);
   const { auth } = ctx.state;
 
@@ -30,7 +30,7 @@ module.exports = {
     });
 
     ctx.body = {
-      data: await sanitizeOuput({ strapi }, data, ctx),
+      data: await sanitizeOutput({ strapi }, data, ctx),
     };
   },
   /**
@@ -45,7 +45,7 @@ module.exports = {
     const data = await workflowService.findById(id, { populate: params.populate });
 
     ctx.body = {
-      data: await sanitizeOuput({ strapi }, data, ctx),
+      data: await sanitizeOutput({ strapi }, data, ctx),
     };
   },
 };
