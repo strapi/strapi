@@ -63,7 +63,10 @@ export function InformationBoxEE() {
       onSuccess() {
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: {
+            id: 'content-manager.reviewWorkflows.stage.notification.saved',
+            defaultMessage: 'Success: Review stage updated',
+          },
         });
       },
     }
