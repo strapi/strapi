@@ -216,7 +216,7 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmDeleteAll = async () => {
+  const handleBulkDelete = async () => {
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(selectedEntries);
@@ -293,7 +293,7 @@ const BulkActionsBar = ({
             isOpen={dialogToOpen === 'delete'}
             onToggleDialog={handleToggleShowDeleteAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmDeleteAll}
+            onConfirm={handleBulkDelete}
           />
         </>
       )}
