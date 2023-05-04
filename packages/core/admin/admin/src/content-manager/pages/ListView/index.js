@@ -103,13 +103,8 @@ function ListView({
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
-  const bulkAction = async ({ query, input }) => {
-    const { data } = await post(query, { ...input });
-
-    return data;
-  };
-
-  const bulkPublishMutation = useMutation(bulkAction);
+  // Bulk publish mutation passing the fetchClient's url and data arguments
+  const bulkPublishMutation = useMutation(({ url, data }) => post(url, data));
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -248,7 +243,7 @@ function ListView({
     return validations;
   };
 
-  const handleConfirmPublishAllData = async (selectedEntries) => {
+  const handleConfirmPublishAllData = async (selectedEntries, { handleSuccess, handleError }) => {
     const validations = await validateEntriesToPublish(selectedEntries);
 
     if (Object.values(validations.errors).length) {
@@ -270,18 +265,22 @@ function ListView({
 
     bulkPublishMutation.mutate(
       {
-        query: `/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`,
-        input: { ids: selectedEntries },
+        url: `/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`,
+        data: { ids: selectedEntries },
       },
       {
         onSuccess() {
-          fetchData(`/content-manager/collection-types/${slug}${params}`);
+          handleSuccess();
+
           toggleNotification({
             type: 'success',
             message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
           });
+
+          fetchData(`/content-manager/collection-types/${slug}${params}`);
         },
         onError(error) {
+          handleError();
           toggleNotification({
             type: 'warning',
             message: formatAPIError(error),
@@ -291,15 +290,16 @@ function ListView({
     );
   };
 
-  const handleConfirmUnpublishAllData = (selectedEntries) => {
+  const handleConfirmUnpublishAllData = (selectedEntries, { handleSuccess, handleError }) => {
     bulkPublishMutation.mutate(
       {
-        query: `/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`,
-        input: { ids: selectedEntries },
+        url: `/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`,
+        data: { ids: selectedEntries },
       },
       {
         onSuccess() {
-          fetchData(`/content-manager/collection-types/${slug}${params}`);
+          handleSuccess();
+
           toggleNotification({
             type: 'success',
             message: {
@@ -307,8 +307,11 @@ function ListView({
               defaultMessage: 'Unpublished',
             },
           });
+
+          fetchData(`/content-manager/collection-types/${slug}${params}`);
         },
         onError(error) {
+          handleError();
           toggleNotification({
             type: 'warning',
             message: formatAPIError(error),

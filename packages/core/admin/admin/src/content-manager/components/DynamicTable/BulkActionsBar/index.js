@@ -196,18 +196,6 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmDeleteAll = async () => {
-    try {
-      setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(selectedEntries);
-      clearSelectedEntries();
-      setIsConfirmButtonLoading(false);
-    } catch (err) {
-      setIsConfirmButtonLoading(false);
-    }
-    handleToggleShowDeleteAllModal();
-  };
-
   // Bulk publish
   const handleToggleShowPublishAllModal = () => {
     if (dialogToOpen === 'publish') {
@@ -216,18 +204,6 @@ const BulkActionsBar = ({
       setDialogToOpen('publish');
       trackUsage('willBulkPublishEntries');
     }
-  };
-
-  const handleConfirmPublishAll = async () => {
-    try {
-      setIsConfirmButtonLoading(true);
-      await onConfirmPublishAll(selectedEntries);
-      clearSelectedEntries();
-      setIsConfirmButtonLoading(false);
-    } catch (err) {
-      setIsConfirmButtonLoading(false);
-    }
-    handleToggleShowPublishAllModal();
   };
 
   // Bulk unpublish
@@ -240,16 +216,41 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmUnpublishAll = () => {
+  const handleConfirmDeleteAll = async () => {
     try {
       setIsConfirmButtonLoading(true);
-      onConfirmUnpublishAll(selectedEntries);
+      await onConfirmDeleteAll(selectedEntries);
       clearSelectedEntries();
       setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
     }
-    handleToggleShowUnpublishAllModal();
+    handleToggleShowDeleteAllModal();
+  };
+
+  /**
+   *
+   * @param {'publish' | 'unpublish'} actionType - The bulk action to perform
+   */
+  const handleBulkAction = (actionType) => {
+    if (actionType !== 'publish' && actionType !== 'unpublish') {
+      throw new Error('The actionType must be either publish or unpublish');
+    }
+
+    const publish = actionType === 'publish' ? onConfirmPublishAll : onConfirmUnpublishAll;
+
+    setIsConfirmButtonLoading(true);
+    publish(selectedEntries, {
+      handleSuccess() {
+        clearSelectedEntries();
+        setIsConfirmButtonLoading(false);
+        handleToggleShowPublishAllModal();
+      },
+      handleError() {
+        setIsConfirmButtonLoading(false);
+        handleToggleShowPublishAllModal();
+      },
+    });
   };
 
   return (
@@ -266,13 +267,13 @@ const BulkActionsBar = ({
             isOpen={dialogToOpen === 'publish'}
             onToggleDialog={handleToggleShowPublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmPublishAll}
+            onConfirm={() => handleBulkAction('publish')}
           />
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
             onToggleDialog={handleToggleShowUnpublishAllModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmUnpublishAll}
+            onConfirm={() => handleBulkAction('unpublish')}
           />
         </>
       )}
