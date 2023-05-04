@@ -1,7 +1,24 @@
 'use strict';
 
+const { sanitize } = require('@strapi/utils');
+
 const { getService } = require('../../../../utils');
 const { validateUpdateStages, validateStage } = require('../../../../validation/review-workflows');
+const { STAGE_MODEL_UID } = require('../../../../constants/workflows');
+
+function sanitizeOutput({ strapi }, data, ctx) {
+  const schema = strapi.getModel(STAGE_MODEL_UID);
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.output(data, schema, { auth });
+}
+
+function sanitizeQuery({ strapi }, data, ctx) {
+  const schema = strapi.getModel(STAGE_MODEL_UID);
+  const { auth } = ctx.state;
+
+  return sanitize.contentAPI.query(data, schema, { auth });
+}
 
 module.exports = {
   /**
@@ -10,7 +27,7 @@ module.exports = {
    */
   async findById(ctx) {
     const { id, workflow_id: workflowId } = ctx.params;
-    const { populate } = ctx.query;
+    const { populate } = await sanitizeQuery({ strapi }, ctx.query, ctx);
     const stagesService = getService('stages');
 
     const data = await stagesService.findById(id, {
@@ -19,7 +36,7 @@ module.exports = {
     });
 
     ctx.body = {
-      data,
+      data: await sanitizeOutput({ strapi }, data, ctx),
     };
   },
 
@@ -41,7 +58,7 @@ module.exports = {
       populate: ['stages'],
     });
 
-    ctx.body = { data };
+    ctx.body = { data: await sanitizeOutput({ strapi }, data, ctx) };
   },
 
   /**
@@ -60,7 +77,7 @@ module.exports = {
 
     const data = await stagesService.update(stageId, stageValidated);
 
-    ctx.body = { data };
+    ctx.body = { data: await sanitizeOutput({ strapi }, data, ctx) };
   },
 
   /**
@@ -82,6 +99,6 @@ module.exports = {
       { fields: ['id', 'name', 'color'] }
     );
 
-    ctx.body = { data };
+    ctx.body = { data: await sanitizeOutput({ strapi }, data, ctx) };
   },
 };
