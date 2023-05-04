@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const { EsbuildPlugin } = require('esbuild-loader');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const packageJson = require('./package.json');
@@ -20,7 +20,7 @@ const baseConfig = {
   optimization: {
     minimize: process.env.NODE_ENV === 'production',
     minimizer: [
-      new ESBuildMinifyPlugin({
+      new EsbuildPlugin({
         target: browserslistToEsbuild(),
       }),
     ],

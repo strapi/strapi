@@ -69,7 +69,7 @@
     "@testing-library/user-event": "14.4.3",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "^2.21.0",
+    "esbuild-loader": "^3.0.0",
     "history": "^4.9.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
