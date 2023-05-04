@@ -37,7 +37,9 @@ module.exports = {
 
     const stagesValidated = await validateUpdateStages(stages);
 
-    const data = await stagesService.replaceWorkflowStages(workflowId, stagesValidated);
+    const data = await stagesService.replaceWorkflowStages(workflowId, stagesValidated, {
+      populate: ['stages'],
+    });
 
     ctx.body = { data };
   },
