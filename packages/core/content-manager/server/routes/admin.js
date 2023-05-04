@@ -334,7 +334,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            config: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
@@ -350,7 +350,7 @@ module.exports = {
           'admin::isAuthenticatedAdmin',
           {
             name: 'plugin::content-manager.hasPermissions',
-            config: { actions: ['plugin::content-manager.explorer.delete'] },
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
           },
         ],
       },
