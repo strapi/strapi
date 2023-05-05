@@ -12,12 +12,12 @@ const loadConfigFile = require('../../app-configuration/load-config-file');
  * @return {Promise<{}>}
  */
 const getUserPluginsConfig = async () => {
-  const globalUserConfigPath = join(strapi.dirs.dist.config, 'plugins.js');
+  const globalUserConfigPath = join(strapi.dirs.dist.config, 'plugins.{js,ts}');
   const currentEnvUserConfigPath = join(
     strapi.dirs.dist.config,
     'env',
     process.env.NODE_ENV,
-    'plugins.js'
+    'plugins.{js,ts}'
   );
   let config = {};
 
