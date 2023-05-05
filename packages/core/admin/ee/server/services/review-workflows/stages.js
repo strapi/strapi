@@ -44,6 +44,18 @@ module.exports = ({ strapi }) => {
       return stages;
     },
 
+    async create(stage, { fields }) {
+      const params = { select: fields };
+      const newStage = await strapi.entityService.create(STAGE_MODEL_UID, {
+        data: stage,
+        ...params,
+      });
+
+      metrics.sendDidCreateStage();
+
+      return newStage;
+    },
+
     async update(stageId, stageData) {
       const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
         data: stageData,
@@ -66,7 +78,7 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
-    async replaceWorkflowStages(workflowId, stages) {
+    async replaceWorkflowStages(workflowId, stages, opts = {}) {
       const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
 
       const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
@@ -108,9 +120,13 @@ module.exports = ({ strapi }) => {
           return this.delete(stage.id);
         });
 
-        return workflowsService.update(workflowId, {
-          stages: stagesIds,
-        });
+        return workflowsService.update(
+          workflowId,
+          {
+            stages: stagesIds,
+          },
+          opts
+        );
       });
     },
 

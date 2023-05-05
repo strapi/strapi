@@ -3,7 +3,7 @@
 const { mapAsync } = require('@strapi/utils');
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest, createRequest } = require('api-tests/request');
+const { createAuthRequest, createRequest, createContentAPIRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
 const { describeOnCondition } = require('api-tests/utils');
 
@@ -38,6 +38,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   const requests = {
     public: null,
     admin: null,
+    contentAPI: null,
   };
   let strapi;
   let hasRW;
@@ -85,6 +86,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     await strapi.destroy();
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
+    requests.contentAPI = await createContentAPIRequest({ strapi });
   };
 
   beforeAll(async () => {
@@ -95,19 +97,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     hasRW = require('@strapi/strapi/lib/utils/ee').features.isEnabled('review-workflows');
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
-
-    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
-      data: { name: 'Stage' },
-    });
-    secondStage = await strapi.query(STAGE_MODEL_UID).create({
-      data: { name: 'Stage 2' },
-    });
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
-      data: {
-        uid: 'workflow',
-        stages: [defaultStage.id, secondStage.id],
-      },
-    });
+    requests.contentAPI = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -116,16 +106,32 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   beforeEach(async () => {
-    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).update({
-      where: { id: testWorkflow.id },
+    defaultStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage' },
+    });
+    secondStage = await strapi.query(STAGE_MODEL_UID).create({
+      data: { name: 'Stage 2' },
+    });
+    testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
       data: {
-        uid: 'workflow',
         stages: [defaultStage.id, secondStage.id],
       },
     });
     await updateContentType(productUID, {
       components: [],
       contentType: model,
+    });
+  });
+
+  afterEach(async () => {
+    await strapi.query(STAGE_MODEL_UID).delete({
+      where: { id: defaultStage.id },
+    });
+    await strapi.query(STAGE_MODEL_UID).delete({
+      where: { id: secondStage.id },
+    });
+    await strapi.query(WORKFLOW_MODEL_UID).delete({
+      where: { id: testWorkflow.id },
     });
   });
 
@@ -550,6 +556,196 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       for (const entry of productsAfter.results) {
         expect(entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStage.name);
       }
+    });
+  });
+
+  describe('Content-API - Get workflows', () => {
+    test('It should return a list of workflows', async () => {
+      const res = await requests.contentAPI.get('/strapi-workflows');
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.length).toBeGreaterThan(0);
+      expect(res.body.data[0]).toMatchObject({ id: expect.any(Number) });
+      expect(res.body.data[0]).toEqual(expect.not.objectContaining({ stages: expect.anything() }));
+    });
+    test('It should return a list of workflows with stages', async () => {
+      const res = await requests.contentAPI.get('/strapi-workflows?populate=stages');
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.length).toBeGreaterThan(0);
+      expect(res.body.data[0]).toMatchObject({ id: expect.any(Number) });
+      expect(res.body.data[0]).toEqual(
+        expect.objectContaining({
+          stages: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(Number),
+              name: expect.any(String),
+              color: expect.any(String),
+            }),
+          ]),
+        })
+      );
+    });
+  });
+  describe('Content-API - Get one workflow', () => {
+    test('It should return a workflow', async () => {
+      const res = await requests.contentAPI.get(`/strapi-workflows/${testWorkflow.id}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(testWorkflow.id);
+      expect(res.body.data.stages).toBeUndefined();
+    });
+    test('It should return a workflow with stages', async () => {
+      const res = await requests.contentAPI.get(
+        `/strapi-workflows/${testWorkflow.id}?populate=stages`
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(testWorkflow.id);
+      expect(res.body.data.stages).toBeDefined();
+      expect(res.body.data.stages).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            color: expect.any(String),
+          }),
+        ])
+      );
+    });
+  });
+  describe('Content-API - Get one stage', () => {
+    test('It should return a stage', async () => {
+      const res = await requests.contentAPI.get(
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(defaultStage.id);
+      expect(res.body.data.workflow).toBeUndefined();
+    });
+    test('It should return a stage with a workflow', async () => {
+      const res = await requests.contentAPI.get(
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}?populate=workflow`
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(defaultStage.id);
+      expect(res.body.data.workflow).toBeDefined();
+      expect(res.body.data.workflow).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+        })
+      );
+    });
+  });
+  describe('Content-API - Update a stage', () => {
+    test('It should update a stage', async () => {
+      const res = await requests.contentAPI.put(
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
+        {
+          body: {
+            data: {
+              name: 'New name',
+            },
+          },
+        }
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(defaultStage.id);
+      expect(res.body.data.name).toEqual('New name');
+    });
+    test('It should fail updating a stage without a name', async () => {
+      const res = await requests.contentAPI.put(
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
+        {
+          body: {
+            data: {
+              unknown: 'New name',
+            },
+          },
+        }
+      );
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.error.name).toEqual('ValidationError');
+      expect(res.body.error.message).toEqual('name is a required field');
+    });
+  });
+  describe('Content-API - Replace stages for a workflow', () => {
+    test('It should replace stages for a workflow', async () => {
+      const res = await requests.contentAPI.put(
+        `/strapi-workflows/${testWorkflow.id}/stages?populate=stages`,
+        {
+          body: {
+            data: [
+              {
+                id: defaultStage.id,
+                name: 'New name',
+              },
+            ],
+          },
+        }
+      );
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(testWorkflow.id);
+      expect(res.body.data.stages).toBeDefined();
+      expect(res.body.data.stages).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            name: expect.any(String),
+            color: expect.any(String),
+          }),
+        ])
+      );
+    });
+    test('It should fail replacing stages for a workflow without stages', async () => {
+      const res = await requests.contentAPI.put(`/strapi-workflows/${testWorkflow.id}/stages`, {
+        body: {
+          data: [],
+        },
+      });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.error.name).toEqual('ApplicationError');
+      expect(res.body.error.message).toEqual('At least one stage must remain in the workflow.');
+    });
+  });
+  describe('Content-API - Create a stage', () => {
+    test('It should create a stage', async () => {
+      const res = await requests.contentAPI.post(`/strapi-workflows/${testWorkflow.id}/stages`, {
+        body: {
+          data: {
+            name: 'Last',
+          },
+        },
+      });
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.id).toEqual(expect.any(Number));
+      expect(res.body.data.name).toEqual('Last');
+
+      const {
+        body: { data: workflow },
+      } = await requests.contentAPI.get(`/strapi-workflows/${testWorkflow.id}?populate=stages`);
+      expect(workflow.stages).toBeDefined();
+      expect(workflow.stages[workflow.stages.length - 1]).toMatchObject(res.body.data);
+    });
+    test('It should fail creating a stage without a name', async () => {
+      const res = await requests.contentAPI.post(`/strapi-workflows/${testWorkflow.id}/stages`, {
+        body: {
+          data: {
+            unknown: 'New name',
+          },
+        },
+      });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBeDefined();
+      expect(res.body.error.name).toEqual('ValidationError');
+      expect(res.body.error.message).toEqual('name is a required field');
     });
   });
 });

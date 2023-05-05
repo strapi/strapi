@@ -177,9 +177,13 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.update).toBeCalled();
       expect(entityServiceMock.delete).not.toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: updateStages.map((stage) => stage.id),
-      });
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(
+        workflowMock.id,
+        {
+          stages: updateStages.map((stage) => stage.id),
+        },
+        {}
+      );
     });
     test('Should delete a stage contained in the workflow', async () => {
       const selectedIndexes = [0, 2, 3];
@@ -194,9 +198,13 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.delete).toBeCalled();
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: selectedIndexes.map((index) => workflowMock.stages[index].id),
-      });
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(
+        workflowMock.id,
+        {
+          stages: selectedIndexes.map((index) => workflowMock.stages[index].id),
+        },
+        {}
+      );
     });
 
     test('Should move entities in a deleted stage to the previous stage', async () => {
@@ -213,9 +221,13 @@ describe('Review workflows - Stages service', () => {
       });
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [workflowMock.stages[0].id, workflowMock.stages[1].id, workflowMock.stages[2].id],
-      });
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(
+        workflowMock.id,
+        {
+          stages: [workflowMock.stages[0].id, workflowMock.stages[1].id, workflowMock.stages[2].id],
+        },
+        {}
+      );
     });
 
     test('When deleting all stages, all entities should be moved to the new stage', async () => {
@@ -237,9 +249,13 @@ describe('Review workflows - Stages service', () => {
       }
 
       expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [newStageID],
-      });
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(
+        workflowMock.id,
+        {
+          stages: [newStageID],
+        },
+        {}
+      );
 
       mockUpdateEntitiesStage.mockRestore();
     });
@@ -257,14 +273,18 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.update).toBeCalled();
       expect(entityServiceMock.delete).toBeCalled();
       expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
-        stages: [
-          workflowMock.stages[0].id,
-          workflowMock.stages[1].id,
-          expect.any(Number),
-          expect.any(Number),
-        ],
-      });
+      expect(servicesMock['admin::workflows'].update).toBeCalledWith(
+        workflowMock.id,
+        {
+          stages: [
+            workflowMock.stages[0].id,
+            workflowMock.stages[1].id,
+            expect.any(Number),
+            expect.any(Number),
+          ],
+        },
+        {}
+      );
     });
   });
 });
