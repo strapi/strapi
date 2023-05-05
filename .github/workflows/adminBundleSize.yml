@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: 18
 
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
       - uses: preactjs/compressed-size-action@v2
         with:
           pattern: '**/build/**/*.{js,css,html,svg}'
