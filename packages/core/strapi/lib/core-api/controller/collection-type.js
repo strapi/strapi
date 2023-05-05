@@ -57,7 +57,7 @@ const createCollectionTypeController = ({ contentType }) => {
 
       const entity = await strapi
         .service(uid)
-        .create({ query: sanitizedQuery, data: sanitizedInputData, files });
+        .create({ ...sanitizedQuery, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
@@ -81,7 +81,7 @@ const createCollectionTypeController = ({ contentType }) => {
 
       const entity = await strapi
         .service(uid)
-        .update(id, { query: sanitizedQuery, data: sanitizedInputData, files });
+        .update(id, { ...sanitizedQuery, data: sanitizedInputData, files });
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
       return this.transformResponse(sanitizedEntity);
