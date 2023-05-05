@@ -103,7 +103,6 @@ function ListView({
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
-  // Bulk publish mutation passing the fetchClient's url and data arguments
   const bulkPublishMutation = useMutation(
     (data) =>
       post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),

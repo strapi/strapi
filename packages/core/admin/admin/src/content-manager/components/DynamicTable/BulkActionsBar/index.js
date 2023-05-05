@@ -232,7 +232,8 @@ const BulkActionsBar = ({
       await onConfirmPublishAll(selectedEntries);
       clearSelectedEntries();
     } catch (err) {
-      // the notification is handle in handleConfirmPublishAllData
+      // The notification is handle in content-manager/pages/ListView/index.js
+      // bulkPublishMutation onError callback
     } finally {
       setIsConfirmButtonLoading(false);
       togglePublishModal();
@@ -246,7 +247,8 @@ const BulkActionsBar = ({
       await onConfirmUnpublishAll(selectedEntries);
       clearSelectedEntries();
     } catch (err) {
-      // the notification is handle in handleConfirmUnpublishAllData
+      // The error is handled in content-manager/pages/ListView/index.js
+      // bulkUnpublishMutation onError callback
     } finally {
       setIsConfirmButtonLoading(false);
       toggleUnpublishModal();
