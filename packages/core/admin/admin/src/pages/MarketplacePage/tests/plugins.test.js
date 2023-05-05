@@ -20,9 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
-  pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {

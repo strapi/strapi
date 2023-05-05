@@ -18,7 +18,6 @@ import { reducer } from '../reducer';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn().mockReturnValue(jest.fn()),
-  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
   // eslint-disable-next-line react/prop-types
   CheckPagePermissions({ children }) {
     return children;

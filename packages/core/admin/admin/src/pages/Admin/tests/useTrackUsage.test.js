@@ -9,10 +9,6 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(() => 'init'),
 }));
 
-jest.mock('@strapi/helper-plugin', () => ({
-  useTracking: jest.fn(() => ({ trackUsage: trackUsageMock })),
-}));
-
 describe('Admin | pages | Admin | useTrackUsage', () => {
   it('should call the trackUsage method on mount with didAccessAuthenticatedAdministration', () => {
     const { rerender } = renderHook(() => useTrackUsage());

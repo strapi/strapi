@@ -17,7 +17,6 @@ jest.mock('react-redux', () => ({
 jest.mock('@strapi/helper-plugin', () => ({
   LoadingIndicatorPage: () => <div>Loading</div>,
   useStrapiApp: jest.fn(() => ({ menu: [] })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   NotFound: () => <div>not found</div>,
   CheckPagePermissions: ({ children }) => children,
   useGuidedTour: jest.fn(() => ({
