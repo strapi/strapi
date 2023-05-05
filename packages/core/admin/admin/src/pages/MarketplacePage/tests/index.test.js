@@ -17,6 +17,7 @@ jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
