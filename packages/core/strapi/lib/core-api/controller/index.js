@@ -20,26 +20,19 @@ const createController = ({ contentType }) => {
 
     async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
-      console.log(data)
-      const abc = await sanitize.contentAPI.output(data, contentType, { auth });
-      console.log(abc)
-      return abc
+
+      return await sanitize.contentAPI.output(data, contentType, { auth });
     },
 
     async sanitizeInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
-      console.log(data)
-      const abc = await sanitize.contentAPI.input(data, contentType, { auth });
-      console.log(abc)
-      return abc
+
+      return await sanitize.contentAPI.input(data, contentType, { auth });
     },
 
     async sanitizeQuery(ctx) {
       const auth = getAuthFromKoaContext(ctx);
-      console.log(ctx.query)
-      const abc = await sanitize.contentAPI.query(ctx.query, contentType, { auth });
-      console.log(abc)
-      return abc
+      return await sanitize.contentAPI.query(ctx.query, contentType, { auth });
     },
   };
 
