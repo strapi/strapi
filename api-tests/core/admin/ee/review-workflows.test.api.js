@@ -561,7 +561,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   describe('Content-API - Get workflows', () => {
     test('It should return a list of workflows', async () => {
-      const res = await requests.contentAPI.get('/strapi_workflows');
+      const res = await requests.contentAPI.get('/strapi-workflows');
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.length).toBeGreaterThan(0);
@@ -569,7 +569,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(res.body.data[0]).toEqual(expect.not.objectContaining({ stages: expect.anything() }));
     });
     test('It should return a list of workflows with stages', async () => {
-      const res = await requests.contentAPI.get('/strapi_workflows?populate=stages');
+      const res = await requests.contentAPI.get('/strapi-workflows?populate=stages');
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.length).toBeGreaterThan(0);
@@ -589,7 +589,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
   describe('Content-API - Get one workflow', () => {
     test('It should return a workflow', async () => {
-      const res = await requests.contentAPI.get(`/strapi_workflows/${testWorkflow.id}`);
+      const res = await requests.contentAPI.get(`/strapi-workflows/${testWorkflow.id}`);
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.id).toEqual(testWorkflow.id);
@@ -597,7 +597,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     test('It should return a workflow with stages', async () => {
       const res = await requests.contentAPI.get(
-        `/strapi_workflows/${testWorkflow.id}?populate=stages`
+        `/strapi-workflows/${testWorkflow.id}?populate=stages`
       );
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
@@ -617,7 +617,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Content-API - Get one stage', () => {
     test('It should return a stage', async () => {
       const res = await requests.contentAPI.get(
-        `/strapi_workflows/${testWorkflow.id}/stages/${defaultStage.id}`
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`
       );
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
@@ -626,7 +626,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     test('It should return a stage with a workflow', async () => {
       const res = await requests.contentAPI.get(
-        `/strapi_workflows/${testWorkflow.id}/stages/${defaultStage.id}?populate=workflow`
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}?populate=workflow`
       );
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
@@ -642,7 +642,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Content-API - Update a stage', () => {
     test('It should update a stage', async () => {
       const res = await requests.contentAPI.put(
-        `/strapi_workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
         {
           body: {
             data: {
@@ -658,7 +658,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     test('It should fail updating a stage without a name', async () => {
       const res = await requests.contentAPI.put(
-        `/strapi_workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
+        `/strapi-workflows/${testWorkflow.id}/stages/${defaultStage.id}`,
         {
           body: {
             data: {
@@ -676,7 +676,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Content-API - Replace stages for a workflow', () => {
     test('It should replace stages for a workflow', async () => {
       const res = await requests.contentAPI.put(
-        `/strapi_workflows/${testWorkflow.id}/stages?populate=stages`,
+        `/strapi-workflows/${testWorkflow.id}/stages?populate=stages`,
         {
           body: {
             data: [
@@ -703,7 +703,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       );
     });
     test('It should fail replacing stages for a workflow without stages', async () => {
-      const res = await requests.contentAPI.put(`/strapi_workflows/${testWorkflow.id}/stages`, {
+      const res = await requests.contentAPI.put(`/strapi-workflows/${testWorkflow.id}/stages`, {
         body: {
           data: [],
         },
@@ -716,7 +716,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
   describe('Content-API - Create a stage', () => {
     test('It should create a stage', async () => {
-      const res = await requests.contentAPI.post(`/strapi_workflows/${testWorkflow.id}/stages`, {
+      const res = await requests.contentAPI.post(`/strapi-workflows/${testWorkflow.id}/stages`, {
         body: {
           data: {
             name: 'Last',
@@ -730,12 +730,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       const {
         body: { data: workflow },
-      } = await requests.contentAPI.get(`/strapi_workflows/${testWorkflow.id}?populate=stages`);
+      } = await requests.contentAPI.get(`/strapi-workflows/${testWorkflow.id}?populate=stages`);
       expect(workflow.stages).toBeDefined();
       expect(workflow.stages[workflow.stages.length - 1]).toMatchObject(res.body.data);
     });
     test('It should fail creating a stage without a name', async () => {
-      const res = await requests.contentAPI.post(`/strapi_workflows/${testWorkflow.id}/stages`, {
+      const res = await requests.contentAPI.post(`/strapi-workflows/${testWorkflow.id}/stages`, {
         body: {
           data: {
             unknown: 'New name',

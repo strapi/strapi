@@ -2,7 +2,7 @@
 
 const { enableFeatureMiddleware } = require('./utils');
 
-const CONTENT_API_PREFIX = 'strapi_workflows';
+const CONTENT_API_PREFIX = 'strapi-workflows';
 
 module.exports = [
   {
