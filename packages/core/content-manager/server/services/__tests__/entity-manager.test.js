@@ -51,6 +51,13 @@ describe('Content-Manager', () => {
         data: { publishedAt: expect.any(Date) },
         populate: {},
       });
+      expect(strapi.eventHub.emit).toBeCalledWith('entry.publish', {
+        model: fakeModel.modelName,
+        entry: {
+          id: 1,
+          publishedAt: expect.any(Date),
+        },
+      });
     });
 
     test('Publish many content-types', async () => {
@@ -60,6 +67,11 @@ describe('Content-Manager', () => {
         { id: 2, publishedAt: null },
       ];
 
+      strapi.entityService.findMany.mockResolvedValueOnce([
+        { id: 1, publishedAt: new Date() },
+        { id: 2, publishedAt: new Date() },
+      ]);
+
       await entityManager.publishMany(entities, uid);
 
       expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
@@ -68,6 +80,17 @@ describe('Content-Manager', () => {
         },
         data: { publishedAt: expect.any(Date) },
       });
+
+      expect(strapi.eventHub.emit.mock.calls).toEqual([
+        [
+          'entry.publish',
+          { model: fakeModel.modelName, entry: { id: 1, publishedAt: expect.any(Date) } },
+        ],
+        [
+          'entry.publish',
+          { model: fakeModel.modelName, entry: { id: 2, publishedAt: expect.any(Date) } },
+        ],
+      ]);
     });
   });
 
@@ -106,6 +129,13 @@ describe('Content-Manager', () => {
         data: { publishedAt: null },
         populate: {},
       });
+      expect(strapi.eventHub.emit).toBeCalledWith('entry.unpublish', {
+        model: fakeModel.modelName,
+        entry: {
+          id: 1,
+          publishedAt: null,
+        },
+      });
     });
 
     test('Unpublish many content-types', async () => {
@@ -115,6 +145,11 @@ describe('Content-Manager', () => {
         { id: 2, publishedAt: new Date() },
       ];
 
+      strapi.entityService.findMany.mockResolvedValueOnce([
+        { id: 1, publishedAt: null },
+        { id: 2, publishedAt: null },
+      ]);
+
       await entityManager.unpublishMany(entities, uid);
 
       expect(strapi.db.query().updateMany).toHaveBeenCalledWith({
@@ -123,6 +158,10 @@ describe('Content-Manager', () => {
         },
         data: { publishedAt: null },
       });
+      expect(strapi.eventHub.emit.mock.calls).toEqual([
+        ['entry.unpublish', { model: fakeModel.modelName, entry: { id: 1, publishedAt: null } }],
+        ['entry.unpublish', { model: fakeModel.modelName, entry: { id: 2, publishedAt: null } }],
+      ]);
     });
   });
 });
