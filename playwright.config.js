@@ -95,7 +95,7 @@ const config = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd test-apps/playwright && yarn start',
+    command: 'node test/scripts/run-e2e-tests.js',
     port: 1337,
     timeout: 30 * 1000,
     reuseExistingServer: !process.env.CI,
