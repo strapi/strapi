@@ -7,7 +7,6 @@ import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { stringify } from 'qs';
-import axios from 'axios';
 
 import {
   NoPermissions,
@@ -106,15 +105,13 @@ function ListView({
   const requestUrlRef = useRef('');
 
   const fetchData = useCallback(
-    async (endPoint, source) => {
+    async (endPoint) => {
       getData();
 
       try {
-        const opts = source ? { cancelToken: source.token } : null;
-
         const {
           data: { results, pagination: paginationResult },
-        } = await fetchClient.get(endPoint, opts);
+        } = await fetchClient.get(endPoint);
 
         notifyStatus(
           formatMessage(
@@ -130,10 +127,6 @@ function ListView({
 
         getDataSucceeded(paginationResult, results);
       } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-
         const resStatus = err?.response?.status ?? null;
 
         if (resStatus === 403) {
@@ -201,20 +194,17 @@ function ListView({
   );
 
   useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
     const shouldSendRequest = canRead;
     const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
+      fetchData(requestUrl);
     }
 
     return () => {
       requestUrlRef.current = slug;
 
-      source.cancel('Operation canceled by the user.');
+      console.error('Operation canceled by the user.');
     };
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
