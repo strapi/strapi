@@ -35,6 +35,7 @@ const defaultSanitizeOutput = async (schema, entity) => {
   );
 };
 
+// TODO: remove fields that don't exist on the schema
 const defaultSanitizeFilters = curry((schema, filters) => {
   return pipeAsync(
     // Remove dynamic zones from filters
