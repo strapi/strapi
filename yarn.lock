@@ -7724,7 +7724,6 @@ __metadata:
     "@testing-library/react": 12.1.4
     "@testing-library/react-hooks": 8.0.1
     "@testing-library/user-event": 14.4.3
-    axios: 1.3.4
     babel-loader: ^9.1.2
     babel-plugin-styled-components: 2.0.2
     bcryptjs: 2.4.3
