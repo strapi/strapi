@@ -1,7 +1,7 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
-import { isEmpty, uniq, last, isNumber } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
@@ -9,6 +9,7 @@ import type {
   IAsset,
   IDestinationProvider,
   IEntity,
+  ILink,
   IMetadata,
   ISourceProvider,
   ITransferEngine,
@@ -591,6 +592,8 @@ class TransferEngine<
     }
   }
 
+  #schemaDiffs: Record<string, Diff[]> = {};
+
   async integrityCheck() {
     try {
       const sourceMetadata = await this.sourceProvider.getMetadata();
@@ -610,10 +613,20 @@ class TransferEngine<
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        this.#panic(error);
-      }
+      if (error instanceof TransferEngineValidationError) {
+        this.#schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
+        // TODO: implement a confirmation callback to confirm or reject the error
+        Object.entries(this.#schemaDiffs).forEach(([uid, diffs]) => {
+          for (const diff of diffs) {
+            this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
+            // await new Promise((resolve, reject) => {
+            //   this.confirm('Continue with diffs ?', resolve, reject);
+            // });
+          }
+        });
+        return;
+      }
       throw error;
     }
   }
@@ -707,7 +720,35 @@ class TransferEngine<
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = this.#createStageTransformStream(stage).pipe(
+      new Transform({
+        objectMode: true,
+        transform: async (entity: IEntity, _encoding, callback) => {
+          const schemas = await this.destinationProvider.getSchemas?.();
+
+          if (!schemas) {
+            return callback(null, entity);
+          }
+
+          const availableContentTypes = Object.entries(schemas)
+            .filter(([, schema]) => schema.modelType === 'contentType')
+            .map(([uid]) => uid);
+
+          // If the type of the transferred entity doesn't exist in the destination, then discard it
+          if (!availableContentTypes.includes(entity.type)) {
+            return callback(null, undefined);
+          }
+
+          const { type, data } = entity;
+          const attributes = (schemas[type] as Record<string, unknown>).attributes as object;
+
+          const attributesToRemove = difference(Object.keys(data), Object.keys(attributes));
+          const updatedEntity = set('data', omit(attributesToRemove, data), entity);
+
+          callback(null, updatedEntity);
+        },
+      })
+    );
     const tracker = this.#progressTracker(stage, { key: (value: IEntity) => value.type });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
@@ -719,7 +760,31 @@ class TransferEngine<
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = this.#createStageTransformStream(stage).pipe(
+      new Transform({
+        objectMode: true,
+        transform: async (link: ILink, _encoding, callback) => {
+          const schemas = await this.destinationProvider.getSchemas?.();
+
+          if (!schemas) {
+            return callback(null, link);
+          }
+
+          const availableContentTypes = Object.entries(schemas)
+            .filter(([, schema]) => schema.modelType === 'contentType')
+            .map(([uid]) => uid);
+
+          const isValidType = (uid: string) => availableContentTypes.includes(uid);
+
+          if (!isValidType(link.left.type) || !isValidType(link.right.type)) {
+            return callback(null, undefined); // ignore the link
+          }
+
+          callback(null, link);
+        },
+      })
+    );
+
     const tracker = this.#progressTracker(stage);
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
