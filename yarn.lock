@@ -8457,7 +8457,7 @@ __metadata:
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
     "@types/jest": 29.2.0
-    aws-sdk: 2.1351.0
+    aws-sdk: 2.1372.0
     eslint-config-custom: 4.10.2
     lodash: 4.17.21
     tsconfig: 4.10.2
@@ -11700,9 +11700,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1351.0":
-  version: 2.1351.0
-  resolution: "aws-sdk@npm:2.1351.0"
+"aws-sdk@npm:2.1372.0":
+  version: 2.1372.0
+  resolution: "aws-sdk@npm:2.1372.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -11713,8 +11713,8 @@ __metadata:
     url: 0.10.3
     util: ^0.12.4
     uuid: 8.0.0
-    xml2js: 0.4.19
-  checksum: e0ff895e40e10ca79cd9af6706a6f0a731112812caea7a08cffcb0ab9d21146100ad8795c29f441f7c5fa19f42f50824d75da98e43f0e1ed52f13d5d4bb5fb2e
+    xml2js: 0.5.0
+  checksum: da064626d434f792adf74861534ab3fc15757ba9352f735f6703deacebf1b982c057d5db434ac00fc5d364aee1c82de684572e205228f5014ca468e05e312d97
   languageName: node
   linkType: hard
 
@@ -33412,13 +33412,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml2js@npm:0.4.19":
-  version: 0.4.19
-  resolution: "xml2js@npm:0.4.19"
+"xml2js@npm:0.5.0":
+  version: 0.5.0
+  resolution: "xml2js@npm:0.5.0"
   dependencies:
     sax: ">=0.6.0"
-    xmlbuilder: ~9.0.1
-  checksum: ca8b2fee430d450a18947786bfd7cd1a353ee00fc6fd550acbc8a8e65f1b4df5e9786fcb2990c1a5514ecd554d445fb74e1d716b3a4fcfffc10554aeb5db482b
+    xmlbuilder: ~11.0.0
+  checksum: 1aa71d62e5bc2d89138e3929b9ea46459157727759cbc62ef99484b778641c0cd21fb637696c052d901a22f82d092a3e740a16b4ce218e81ac59b933535124ea
   languageName: node
   linkType: hard
 
@@ -33436,13 +33436,6 @@ __metadata:
   version: 11.0.1
   resolution: "xmlbuilder@npm:11.0.1"
   checksum: 7152695e16f1a9976658215abab27e55d08b1b97bca901d58b048d2b6e106b5af31efccbdecf9b07af37c8377d8e7e821b494af10b3a68b0ff4ae60331b415b0
-  languageName: node
-  linkType: hard
-
-"xmlbuilder@npm:~9.0.1":
-  version: 9.0.7
-  resolution: "xmlbuilder@npm:9.0.7"
-  checksum: 8193bb323806a002764f013bea0c6e9ff2dc26fd29109408761b16b59a8ad2214c2abe8e691755fd8b525586e3a0e1efeb92335947d7b0899032b779f1705a53
   languageName: node
   linkType: hard
 
