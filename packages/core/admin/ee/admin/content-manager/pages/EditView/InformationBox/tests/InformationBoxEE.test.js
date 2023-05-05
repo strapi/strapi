@@ -12,6 +12,7 @@ import { InformationBoxEE } from '../InformationBoxEE';
 const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 const STAGE_FIXTURE = {
   id: 1,
+  color: 'red',
   name: 'Stage 1',
   worklow: 1,
 };
