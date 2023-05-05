@@ -53,12 +53,10 @@ const main = async (database, appPath, opts) => {
 // eslint-disable-next-line no-unused-expressions
 yargs
   .command(
-    '$0 [appName]',
-    'Create test app',
+    '$0 [databaseName]',
+    'Generate test app',
     (yarg) => {
-      yarg.option('database', {
-        alias: 'db',
-        describe: 'Database',
+      yarg.positional('databaseName', {
         choices: Object.keys(databases),
         default: 'sqlite',
       });
@@ -76,22 +74,24 @@ yargs
       });
     },
     (argv) => {
-      const { database, run, appPath = 'test-apps/base', template } = argv;
+      const { databaseName, run, appPath = 'test-apps/base', template } = argv;
+
+      if (databaseName) {
+        return main(databases[databaseName], appPath, { run, template });
+      }
 
       return main(
-        argv.dbclient
-          ? {
-              client: argv.dbclient,
-              connection: {
-                host: argv.dbhost,
-                port: argv.dbport,
-                database: argv.dbname,
-                username: argv.dbusername,
-                password: argv.dbpassword,
-                filename: argv.dbfile,
-              },
-            }
-          : databases[database],
+        {
+          client: argv.dbclient,
+          connection: {
+            host: argv.dbhost,
+            port: argv.dbport,
+            database: argv.dbname,
+            username: argv.dbusername,
+            password: argv.dbpassword,
+            filename: argv.dbfile,
+          },
+        },
         appPath,
         { run, template }
       );

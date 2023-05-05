@@ -63,14 +63,14 @@
     "test:unit": "jest --config jest.config.js",
     "test:unit:watch": "run test:unit --watch",
     "test:api": "node test/api.js",
-    "test:generate-app": "node test/create-test-app.js",
+    "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
-    "@playwright/test": "1.27.1",
+    "@playwright/test": "1.33.0",
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.1.2",
     "@swc/cli": "0.1.62",
