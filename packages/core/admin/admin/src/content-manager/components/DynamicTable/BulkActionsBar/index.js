@@ -217,41 +217,41 @@ const BulkActionsBar = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(selectedEntries);
-      clearSelectedEntries();
-      setIsConfirmButtonLoading(false);
     } catch (err) {
+      // The error is handled in content-manager/pages/ListView/index.js
+      // handleConfirmDeleteAllData catch block
+    } finally {
       setIsConfirmButtonLoading(false);
+      toggleDeleteModal();
+      clearSelectedEntries();
     }
-    toggleDeleteModal();
   };
 
   const handleBulkPublish = async () => {
-    setIsConfirmButtonLoading(true);
-
     try {
+      setIsConfirmButtonLoading(true);
       await onConfirmPublishAll(selectedEntries);
-      clearSelectedEntries();
-    } catch (err) {
-      // The notification is handle in content-manager/pages/ListView/index.js
+    } catch (error) {
+      // The error is handled in content-manager/pages/ListView/index.js
       // bulkPublishMutation onError callback
     } finally {
       setIsConfirmButtonLoading(false);
       togglePublishModal();
+      clearSelectedEntries();
     }
   };
 
   const handleBulkUnpublish = async () => {
-    setIsConfirmButtonLoading(true);
-
     try {
+      setIsConfirmButtonLoading(true);
       await onConfirmUnpublishAll(selectedEntries);
-      clearSelectedEntries();
-    } catch (err) {
+    } catch (error) {
       // The error is handled in content-manager/pages/ListView/index.js
       // bulkUnpublishMutation onError callback
     } finally {
       setIsConfirmButtonLoading(false);
       toggleUnpublishModal();
+      clearSelectedEntries();
     }
   };
 
