@@ -72,7 +72,6 @@ describe('Core API - Basic + compo', () => {
         },
       ],
     };
-    console.log("Before create")
     const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-compos',
@@ -83,7 +82,6 @@ describe('Core API - Basic + compo', () => {
         populate: ['compo'],
       },
     });
-    console.log("After create")
     expect(statusCode).toBe(200);
 
     expect(body.data).toMatchObject({

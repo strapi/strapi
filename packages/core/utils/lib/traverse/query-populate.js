@@ -9,10 +9,10 @@ const {
   split,
   isObject,
   trim,
-  isNil,
   cloneDeep,
   join,
   first,
+  isEmpty
 } = require('lodash/fp');
 
 const traverseFactory = require('./factory');
@@ -51,8 +51,7 @@ const populate = traverseFactory()
         if (root !== key) {
           return data;
         }
-
-        return isNil(value) ? root : `${root}.${value}`;
+        return isEmpty(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
