@@ -656,18 +656,17 @@ class TransferEngine<
           source: this.sourceProvider,
           destination: this.destinationProvider,
         };
+
+        Object.entries(context.diffs).forEach(([uid, diffs]) => {
+          for (const diff of diffs) {
+            this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
+          }
+        });
+
         await runMiddleware(context, this.#handlers.schemaDiff);
 
         if (Object.keys(context.diffs).length) {
-          console.log('DIFFS REMAINING', context.diffs);
-          Object.entries(context.diffs).forEach(([uid, diffs]) => {
-            for (const diff of diffs) {
-              this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
-              this.#panic(
-                new TransferEngineInitializationError('Unresolved differences in schema')
-              );
-            }
-          });
+          this.#panic(new TransferEngineInitializationError('Unresolved differences in schema'));
         }
         return;
       }
