@@ -25,7 +25,7 @@ module.exports =
         max: 5,
         prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
         handler() {
-          ctx.redirect(
+          return ctx.redirect(
             `${strapi.config.server.url}${
               strapi.config.get('plugin.documentation.x-strapi-config').path
             }${'?error=ToManyTries'}`
