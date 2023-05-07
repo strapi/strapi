@@ -17,7 +17,7 @@ const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('DynamicTable | ReviewWorkflowsStage', () => {
   test('render stage name', () => {
-    const { getByText } = setup({ name: 'reviewed' });
+    const { getByText } = setup({ color: 'red', name: 'reviewed' });
 
     expect(getByText('reviewed')).toBeInTheDocument();
   });

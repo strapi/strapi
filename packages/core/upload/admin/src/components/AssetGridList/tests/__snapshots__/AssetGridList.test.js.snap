@@ -64,6 +64,33 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   height: 10.25rem;
 }
 
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c28 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c32 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
 .c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -126,33 +153,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c28 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c32 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #ffffff;
 }
 
 .c26 {

@@ -162,19 +162,16 @@ describe('GenericInput', () => {
       const user = userEvent.setup();
       const { getByRole } = setupDatetimePicker();
 
-      const btnDate = getByRole('textbox', { name: 'datetime picker' });
-
-      await user.click(btnDate);
-      const numberDayBtn = await getByRole('button', { name: /15/ });
+      await user.click(getByRole('textbox', { name: 'datetime picker' }));
       await act(async () => {
-        await user.click(numberDayBtn);
+        await user.click(getByRole('button', { name: /15/ }));
       });
 
       const today = new Date();
       const month = today.getMonth() + 1;
       const year = today.getFullYear();
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
-      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('00:00');
+      expect(getByRole('combobox')).toHaveTextContent('00:00');
     });
 
     test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
@@ -188,7 +185,7 @@ describe('GenericInput', () => {
       await user.click(getByRole('button', { name: /clear date/i }));
 
       expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
-      expect(getByRole('combobox', { name: /datetime picker/i })).toHaveValue('');
+      expect(getByRole('combobox')).not.toHaveValue();
     });
   });
 });

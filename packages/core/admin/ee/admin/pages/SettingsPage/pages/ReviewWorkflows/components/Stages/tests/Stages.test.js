@@ -4,13 +4,15 @@ import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { FormikProvider, useFormik } from 'formik';
 import userEvent from '@testing-library/user-event';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import { Stages } from '../Stages';
 import { reducer } from '../../../reducer';
-import { ACTION_SET_WORKFLOWS } from '../../../constants';
+import { ACTION_SET_WORKFLOWS, STAGE_COLOR_DEFAULT } from '../../../constants';
 import * as actions from '../../../actions';
 
 // without mocking actions as ESM it is impossible to spy on named exports
@@ -27,11 +29,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 const STAGES_FIXTURE = [
   {
     id: 1,
+    color: STAGE_COLOR_DEFAULT,
     name: 'stage-1',
   },
 
   {
     id: 2,
+    color: STAGE_COLOR_DEFAULT,
     name: 'stage-2',
   },
 ];
@@ -57,15 +61,17 @@ const ComponentFixture = (props) => {
   });
 
   return (
-    <Provider store={store}>
-      <FormikProvider value={formik}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <Stages stages={STAGES_FIXTURE} {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </FormikProvider>
-    </Provider>
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <FormikProvider value={formik}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <Stages stages={STAGES_FIXTURE} {...props} />
+            </ThemeProvider>
+          </IntlProvider>
+        </FormikProvider>
+      </Provider>
+    </DndProvider>
   );
 };
 

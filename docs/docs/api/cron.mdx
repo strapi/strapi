@@ -1,0 +1,195 @@
+---
+title: Cron Service
+slug: /api/Cron
+tags:
+- module
+- public
+
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+import Type from '@site/docs/api/components/type';
+
+# Cron
+
+:::info
+
+Current state: **Stable**
+
+:::
+
+The Strapi Cron Service provides a way to add, remove, start, and stop cron jobs in a Strapi application.
+
+
+## Module: Cron Service
+
+### createCronService()
+
+The `createCronService()` function returns an object that provides methods to manage cron jobs.
+
+## Methods
+
+### `cron.add(tasks)`
+
+- `tasks`: <Type>Object</Type>
+- Returns: `this`
+
+Adds one or more cron tasks to the service.
+
+- Each key of the `tasks` object is the name of the task.
+- Each value of the `tasks` object can be either a function, or an object with two properties: `task` and `options`.
+- If the value is a function, it is used as the task to be executed when the cron expression is met.
+  - The key will be considered as the cron expression
+- If the value is an object, its `task` property is used as the task function, and its `options` property is used as the cron expression options.
+
+#### Example
+```javascript
+const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
+
+const cron = createCronService();
+
+const task = () => {
+  console.log('Task executed!');
+};
+
+cron.add({
+  myTask: {
+    task,
+    options: '*/5 * * * *', // Executes every 5 minutes.
+  },
+  '*/1 * * * *': () => console.log('A minute has passed.'),
+});
+```
+
+### `cron.remove(name)`
+
+- `name`: <Type>String</Type>
+- Returns: `this`
+
+Removes a cron task from the service.
+
+- The `name` parameter is the name of the task to remove.
+
+#### Example
+```javascript
+const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
+
+const cron = createCronService();
+
+const task = () => {
+  console.log('Task executed!');
+};
+
+cron.add({
+  myTask: {
+    task,
+    options: '*/5 * * * *', // Executes every 5 minutes.
+  },
+});
+
+cron.remove('myTask');
+```
+
+### `cron.start()`
+
+- Returns: `this`
+
+Starts the cron service.
+
+- Schedules all the cron jobs.
+
+#### Example
+```javascript
+const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
+
+const cron = createCronService();
+
+const task = () => {
+  console.log('Task executed!');
+};
+
+cron.add({
+  myTask: {
+    task,
+    options: '*/5 * * * *', // Executes every 5 minutes.
+  },
+});
+
+cron.start();
+```
+
+### `cron.stop()`
+
+- Returns: `this`
+
+Stops the cron service.
+
+- Cancels all the scheduled jobs.
+
+#### Example
+```javascript
+const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
+
+const cron = createCronService();
+
+const task = () => {
+  console.log('Task executed!');
+};
+
+cron.add({
+  myTask: {
+    task,
+    options: '*/5 * * * *', // Executes every 5 minutes.
+  },
+});
+
+// Start the scheduled cron jobs
+cron.start();
+// Stops the cron jobs
+cron.stop();
+```
+
+### `cron.destroy()`
+
+- Returns: `this`
+
+Destroys the cron service.
+
+- Calls the `stop()` method.
+- Clears the list of cron jobs.
+
+#### Example
+```javascript
+const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
+
+const cron = createCronService();
+
+const task = () => {
+  console.log('Task executed!');
+};
+
+cron.add({
+  myTask: {
+    task,
+    options: '*/5 * * * *', // Executes every 5 minutes.
+  },
+});
+
+// Start the scheduled cron jobs
+cron.start();
+// Stops the cron jobs and remove all scheduled tasks
+cron.destroy();
+```
+
+## Properties
+
+### `cron.jobs`
+- <Type>Array</Type>
+
+  - <Type>Object</Type>
+
+    - `job`: [<Type>Job</Type>](https://github.com/node-schedule/node-schedule) - Job object by node-schedule
+    - `options`: <Type>String</Type> - String representing the recurrence of the job ( like '*/5 * * * *' )
+    - `name`: <Type>String</Type> - The name of the task associated to the job
+
+An array of the cron jobs added to the service.

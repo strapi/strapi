@@ -10,6 +10,18 @@ const SelectWrapper = styled(Box)`
   span {
     font-size: ${({ theme }) => theme.fontSizes[1]};
   }
+
+  /* Hide the label, every input needs a label. */
+  label {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
 `;
 
 const SortSelect = ({ sortQuery, handleSelectChange }) => {
@@ -68,6 +80,10 @@ const SortSelect = ({ sortQuery, handleSelectChange }) => {
         onChange={(sortName) => {
           handleSelectChange({ sort: sortName });
         }}
+        label={formatMessage({
+          id: 'admin.pages.MarketPlacePage.sort.label',
+          defaultMessage: 'Sort by',
+        })}
       >
         {Object.entries(sortTypes).map(([sortName, messages]) => {
           return (

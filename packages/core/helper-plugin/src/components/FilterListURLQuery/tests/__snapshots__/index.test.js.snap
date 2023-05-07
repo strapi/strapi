@@ -17,6 +17,13 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   height: 2rem;
 }
 
+.c4 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -30,13 +37,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c6 {
