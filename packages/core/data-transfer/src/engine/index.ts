@@ -27,7 +27,11 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 import { filter, map } from '../utils/stream';
 
-import { TransferEngineError, TransferEngineValidationError } from './errors';
+import {
+  TransferEngineError,
+  TransferEngineInitializationError,
+  TransferEngineValidationError,
+} from './errors';
 import {
   createDiagnosticReporter,
   IDiagnosticReporter,
@@ -76,6 +80,27 @@ export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
 type SchemaMap = Record<string, Schema>;
 
+type SchemaDiffHandlerContext = {
+  diffs: Record<string, Diff[]>;
+  source: ISourceProvider;
+  destination: IDestinationProvider;
+};
+type SchemaDiffHandler = (data: SchemaDiffHandlerContext, next: SchemaDiffHandler) => void;
+
+// TODO: clean this up
+type Next = (context: any) => void | Promise<void>;
+type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
+async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promise<void> {
+  if (!middlewares.length) {
+    return;
+  }
+
+  const cb = middlewares[0];
+  await cb(context, async (newContext) => {
+    await runMiddleware(newContext, middlewares.slice(1));
+  });
+}
+
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -98,6 +123,16 @@ class TransferEngine<
   };
 
   diagnostics: IDiagnosticReporter;
+
+  #handlers: {
+    schemaDiff: SchemaDiffHandler[];
+  } = {
+    schemaDiff: [],
+  };
+
+  onSchemaDiff(handler: SchemaDiffHandler) {
+    this.#handlers?.schemaDiff?.push(handler);
+  }
 
   // Save the currently open stream so that we can access it at any time
   #currentStream?: Writable;
@@ -616,15 +651,24 @@ class TransferEngine<
       if (error instanceof TransferEngineValidationError) {
         this.#schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
-        // TODO: implement a confirmation callback to confirm or reject the error
-        Object.entries(this.#schemaDiffs).forEach(([uid, diffs]) => {
-          for (const diff of diffs) {
-            this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
-            // await new Promise((resolve, reject) => {
-            //   this.confirm('Continue with diffs ?', resolve, reject);
-            // });
-          }
-        });
+        const context = {
+          diffs: this.#schemaDiffs,
+          source: this.sourceProvider,
+          destination: this.destinationProvider,
+        };
+        await runMiddleware(context, this.#handlers.schemaDiff);
+
+        if (Object.keys(context.diffs).length) {
+          console.log('DIFFS REMAINING', context.diffs);
+          Object.entries(context.diffs).forEach(([uid, diffs]) => {
+            for (const diff of diffs) {
+              this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
+              this.#panic(
+                new TransferEngineInitializationError('Unresolved differences in schema')
+              );
+            }
+          });
+        }
         return;
       }
       throw error;

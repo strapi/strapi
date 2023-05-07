@@ -11,6 +11,7 @@ const {
 } = require('@strapi/data-transfer');
 
 const { isObject } = require('lodash/fp');
+const inquirer = require('inquirer');
 
 const {
   buildTransferTable,
@@ -110,6 +111,24 @@ module.exports = async (opts) => {
   const progress = engine.progress.stream;
 
   const { updateLoader } = loadersFactory();
+
+  engine.onSchemaDiff(async (context, next) => {
+    // TODO: work with "force"
+    // TODO: yes/no prompt should look like commander prompt
+    const answers = await inquirer.prompt([
+      {
+        type: 'confirm',
+        message: 'Are you sure you want to continue?',
+        name: 'confirmSchemaDiff',
+      },
+    ]);
+    if (answers.confirmSchemaDiff) {
+      // diffs have been resolved by user
+      context.diffs = [];
+    }
+
+    return next(context);
+  });
 
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
