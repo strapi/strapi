@@ -49,7 +49,7 @@ const createComponents = async (uid, data) => {
         const components = await mapAsync(
           componentValue,
           (value) => createComponent(componentUID, value),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
+          { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
         );
 
         componentBody[attributeName] = components.map(({ id }) => {
@@ -97,7 +97,7 @@ const createComponents = async (uid, data) => {
       componentBody[attributeName] = await mapAsync(
         dynamiczoneValues,
         createDynamicZoneComponents,
-        { concurrency: isDialectMySQL() ? 1 : Infinity }
+        { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
       );
 
       continue;
@@ -151,7 +151,7 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         const components = await mapAsync(
           componentValue,
           (value) => updateOrCreateComponent(componentUID, value),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
+          { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
         );
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
@@ -200,7 +200,7 @@ const updateComponents = async (uid, entityToUpdate, data) => {
             },
           };
         },
-        { concurrency: isDialectMySQL() ? 1 : Infinity }
+        { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
       );
 
       continue;
@@ -305,7 +305,7 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
         const { component: componentUID } = attribute;
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await mapAsync(_.castArray(value), (subValue) => deleteComponent(componentUID, subValue), {
-          concurrency: isDialectMySQL() ? 1 : Infinity,
+          concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
         });
       } else {
         // delete dynamic zone components
@@ -313,7 +313,7 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
         await mapAsync(
           _.castArray(value),
           (subValue) => deleteComponent(subValue.__component, subValue),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
+          { concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity }
         );
       }
 

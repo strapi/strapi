@@ -71,6 +71,13 @@ describe('Admin | containers | ProvidersPage', () => {
         min-width: 0;
       }
 
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -119,13 +126,6 @@ describe('Admin | containers | ProvidersPage', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c11 {
