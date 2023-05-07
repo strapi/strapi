@@ -113,7 +113,8 @@ module.exports = {
       });
       const $ = cheerio.load(filledLayout);
 
-      $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
+      $('.error_password').text(error !== 'password' ? '' : 'Wrong password...');
+      $('.error_toManyRetries').text(error !== 'ToManyTries' ? '' : 'To Many retries...');
 
       try {
         const layoutPath = path.resolve(

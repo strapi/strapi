@@ -32,4 +32,7 @@ module.exports = {
       bearerAuth: [],
     },
   ],
+  rateLimit: {
+    enabled: true
+  }
 };

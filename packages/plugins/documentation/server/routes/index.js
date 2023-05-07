@@ -35,6 +35,9 @@ module.exports = [
     handler: 'documentation.login',
     config: {
       auth: false,
+      middlewares: [
+        "plugin::documentation.rateLimit"
+      ],
     },
   },
   {

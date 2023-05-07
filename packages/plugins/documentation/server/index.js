@@ -4,6 +4,7 @@ const bootstrap = require('./bootstrap');
 const services = require('./services');
 const routes = require('./routes');
 const controllers = require('./controllers');
+const middlewares = require('./middlewares');
 const register = require('./register');
 const config = require('./config');
 
@@ -14,4 +15,5 @@ module.exports = () => ({
   controllers,
   register,
   services,
+  middlewares,
 });
