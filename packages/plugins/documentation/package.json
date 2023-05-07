@@ -40,6 +40,7 @@
     "fs-extra": "10.0.0",
     "immer": "9.0.19",
     "koa-static": "^5.0.0",
+    "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
     "pluralize": "8.0.0",
