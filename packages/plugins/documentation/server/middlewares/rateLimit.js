@@ -1,4 +1,5 @@
 'use strict';
+
 const { has } = require('lodash/fp');
 
 module.exports =
@@ -29,7 +30,6 @@ module.exports =
               strapi.config.get('plugin.documentation.x-strapi-config').path
             }${'?error=ToManyTries'}`
           );
-          return 
         },
         ...rateLimitConfig,
         ...config,
