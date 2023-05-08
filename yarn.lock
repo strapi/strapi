@@ -18361,7 +18361,7 @@ __metadata:
     better-sqlite3: 8.3.0
     lodash: 4.17.21
     mysql: 2.18.1
-    mysql2: 3.2.0
+    mysql2: 3.3.0
     passport-google-oauth2: 0.2.0
     pg: 8.8.0
     react: ^17.0.2
@@ -23416,6 +23416,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^8.0.0":
+  version: 8.0.5
+  resolution: "lru-cache@npm:8.0.5"
+  checksum: 87d72196d8f46e8299c4ab576ed2ec8a07e3cbef517dc9874399c0b2470bd9bf62aacec3b67f84ed6d74aaa1ef31636d048edf996f76248fd17db72bfb631609
+  languageName: node
+  linkType: hard
+
 "lru_map@npm:^0.3.3":
   version: 0.3.3
   resolution: "lru_map@npm:0.3.3"
@@ -24535,19 +24542,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:3.2.0":
-  version: 3.2.0
-  resolution: "mysql2@npm:3.2.0"
+"mysql2@npm:3.3.0":
+  version: 3.3.0
+  resolution: "mysql2@npm:3.3.0"
   dependencies:
     denque: ^2.1.0
     generate-function: ^2.3.1
     iconv-lite: ^0.6.3
     long: ^5.2.1
-    lru-cache: ^7.14.1
+    lru-cache: ^8.0.0
     named-placeholders: ^1.1.3
     seq-queue: ^0.0.5
     sqlstring: ^2.3.2
-  checksum: 7885d3b4f575e7321754de14bb4fadb80d4705d5b00f8b645d760ae7a0f3170ac6d4fe6e7b9307e698fe84c3ee047d7c2652f01b95c9393f56eace993f2952ab
+  checksum: a3418ab9371d5d329438eb91ecbac45f32fa8cc1b2d64773dd79a2989ad73979826492e44ac948008030177c5aba2b18b990553bd7c4f279dcbadfd345424a4f
   languageName: node
   linkType: hard
 
