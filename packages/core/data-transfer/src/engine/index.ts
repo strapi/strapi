@@ -5,6 +5,7 @@ import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp'
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
 
+import chalk from 'chalk';
 import type {
   IAsset,
   IDestinationProvider,
@@ -567,7 +568,11 @@ class TransferEngine<
 
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
-    this.#currentStream?.destroy(new TransferEngineError('fatal', 'Transfer aborted.'));
+    const err = new TransferEngineError('fatal', 'Transfer aborted.');
+    if (!this.#currentStream) {
+      throw err;
+    }
+    this.#currentStream?.destroy(err);
   }
 
   async init(): Promise<void> {
@@ -659,11 +664,61 @@ class TransferEngine<
           destination: this.destinationProvider,
         };
 
+        let workflowsStatus;
+        const source = 'Schema Integrity';
+
         Object.entries(context.diffs).forEach(([uid, diffs]) => {
           for (const diff of diffs) {
-            this.#reportWarning(`${diff.path.join('.')} for ${uid}`, 'Schema Integrity Check');
+            const path = `${uid}.${diff.path.join('.')}`;
+            const endPath = diff.path[diff.path.length - 1];
+
+            // Catch known features
+            // TODO: can this be moved outside of the engine?
+            if (
+              uid === 'admin::workflow' ||
+              uid === 'admin::workflow-stage' ||
+              endPath.startsWith('strapi_reviewWorkflows_')
+            ) {
+              workflowsStatus = diff.kind;
+            }
+            // handle generic cases
+            else if (diff.kind === 'added') {
+              this.#reportWarning(
+                chalk.red(`${chalk.bold(path)} does not exist on destination`),
+                source
+              );
+            } else if (diff.kind === 'deleted') {
+              this.#reportWarning(
+                chalk.red(`${chalk.bold(path)} does not exist on source`),
+                source
+              );
+            } else if (diff.kind === 'modified') {
+              this.#reportWarning(
+                chalk.red(`${chalk.bold(path)} has a different data type`),
+                source
+              );
+            }
           }
         });
+
+        // output the known feature warnings
+        if (workflowsStatus === 'added') {
+          this.#reportWarning(
+            chalk.red(`Review workflows feature does not exist on destination`),
+            source
+          );
+        } else if (workflowsStatus === 'deleted') {
+          this.#reportWarning(
+            chalk.red(`Review workflows feature does not exist on source`),
+            source
+          );
+        } else if (workflowsStatus === 'modified') {
+          this.#panic(
+            new TransferEngineInitializationError(
+              'Unresolved differences in schema [review workflows]'
+            )
+          );
+        }
 
         await runMiddleware(context, this.#handlers.schemaDiff);
 

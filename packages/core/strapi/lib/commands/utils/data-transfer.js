@@ -113,6 +113,15 @@ const abortTransfer = async ({ engine, strapi }) => {
   return true;
 };
 
+const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUIT']) => {
+  signals.forEach((signal) => {
+    // We specifically remove ALL listeners because we have to clear the one added in Strapi bootstrap that has a process.exit
+    // TODO: Ideally Strapi bootstrap would not add that listener, and then this could be more flexible and add/remove only what it needs to
+    process.removeAllListeners(signal);
+    process.on(signal, handler);
+  });
+};
+
 const createStrapiInstance = async (opts = {}) => {
   try {
     const appContext = await strapi.compile();
@@ -271,4 +280,5 @@ module.exports = {
   validateExcludeOnly,
   formatDiagnostic,
   abortTransfer,
+  setSignalHandler,
 };
