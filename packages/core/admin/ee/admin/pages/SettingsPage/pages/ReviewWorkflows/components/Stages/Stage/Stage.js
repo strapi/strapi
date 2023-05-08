@@ -20,6 +20,7 @@ import {
 } from '@strapi/design-system';
 import { ReactSelect, useTracking } from '@strapi/helper-plugin';
 import { Drag, Trash } from '@strapi/icons';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import { deleteStage, updateStagePosition, updateStage } from '../../../actions';
 import { getAvailableStageColors } from '../../../utils/colors';
@@ -144,9 +145,8 @@ export function Stage({
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
   const [nameField, nameMeta] = useField(`stages.${index}.name`);
   const [colorField, colorMeta] = useField(`stages.${index}.color`);
-  const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef] = useDragAndDrop(
-    canReorder,
-    {
+  const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef, dragPreviewRef] =
+    useDragAndDrop(canReorder, {
       index,
       item: {
         name: nameField.value,
@@ -156,8 +156,7 @@ export function Stage({
       onMoveItem: handleMoveStage,
       onCancel: handleCancelDragStage,
       type: DRAG_DROP_TYPES.STAGE,
-    }
-  );
+    });
 
   const composedRef = composeRefs(stageRef, dropRef);
 
@@ -175,6 +174,10 @@ export function Stage({
   // TODO: the .toUpperCase() conversion can be removed once the hex code is normalized in
   // the admin API
   const colorValue = colorOptions.find(({ value }) => value === colorField.value.toUpperCase());
+
+  React.useEffect(() => {
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef, index]);
 
   return (
     <Box ref={composedRef}>
@@ -200,7 +203,7 @@ export function Stage({
             title={nameField.value}
             togglePosition="left"
             action={
-              <>
+              <Flex>
                 {canDelete && (
                   <IconButton
                     background="transparent"
@@ -231,7 +234,7 @@ export function Stage({
                 >
                   <Drag />
                 </IconButton>
-              </>
+              </Flex>
             }
           />
           <AccordionContent padding={6} background="neutral0" hasRadius>

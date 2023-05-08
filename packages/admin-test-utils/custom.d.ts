@@ -10,6 +10,7 @@ declare global {
         isEnabled: (featureName?: string) => boolean;
       };
       projectType: string;
+      telemetryDisabled: boolean;
     };
   }
 }

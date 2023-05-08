@@ -34,6 +34,10 @@ const setup = (props) =>
   });
 
 describe('useTracking', () => {
+  beforeAll(() => {
+    window.strapi.telemetryDisabled = false;
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
