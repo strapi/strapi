@@ -26,8 +26,8 @@ interface CustomFieldServerOptions {
    * Settings for the input size in the Admin UI
    */
   inputSize?: {
-    default?: 4 | 6 | 8 | 12;
-    isResizable?: boolean;
+    default: 4 | 6 | 8 | 12;
+    isResizable: boolean;
   };
 }
 
