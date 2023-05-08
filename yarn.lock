@@ -20990,34 +20990,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-circus@npm:29.0.3, jest-circus@npm:^29.0.3":
-  version: 29.0.3
-  resolution: "jest-circus@npm:29.0.3"
-  dependencies:
-    "@jest/environment": ^29.0.3
-    "@jest/expect": ^29.0.3
-    "@jest/test-result": ^29.0.3
-    "@jest/types": ^29.0.3
-    "@types/node": "*"
-    chalk: ^4.0.0
-    co: ^4.6.0
-    dedent: ^0.7.0
-    is-generator-fn: ^2.0.0
-    jest-each: ^29.0.3
-    jest-matcher-utils: ^29.0.3
-    jest-message-util: ^29.0.3
-    jest-runtime: ^29.0.3
-    jest-snapshot: ^29.0.3
-    jest-util: ^29.0.3
-    p-limit: ^3.1.0
-    pretty-format: ^29.0.3
-    slash: ^3.0.0
-    stack-utils: ^2.0.3
-  checksum: 6ba495d4fb68ebb59f269b59029837f55009793d632ba2f29300992de80f7e3a37e619ea4e88676982cf74128416265a5929b3f9b77142fbf27c1dd0d6b6f98c
-  languageName: node
-  linkType: hard
-
-"jest-circus@npm:^29.5.0":
+"jest-circus@npm:29.5.0, jest-circus@npm:^29.5.0":
   version: 29.5.0
   resolution: "jest-circus@npm:29.5.0"
   dependencies:
@@ -21042,6 +21015,33 @@ __metadata:
     slash: ^3.0.0
     stack-utils: ^2.0.3
   checksum: 44ff5d06acedae6de6c866e20e3b61f83e29ab94cf9f960826e7e667de49c12dd9ab9dffd7fa3b7d1f9688a8b5bfb1ebebadbea69d9ed0d3f66af4a0ff8c2b27
+  languageName: node
+  linkType: hard
+
+"jest-circus@npm:^29.0.3":
+  version: 29.0.3
+  resolution: "jest-circus@npm:29.0.3"
+  dependencies:
+    "@jest/environment": ^29.0.3
+    "@jest/expect": ^29.0.3
+    "@jest/test-result": ^29.0.3
+    "@jest/types": ^29.0.3
+    "@types/node": "*"
+    chalk: ^4.0.0
+    co: ^4.6.0
+    dedent: ^0.7.0
+    is-generator-fn: ^2.0.0
+    jest-each: ^29.0.3
+    jest-matcher-utils: ^29.0.3
+    jest-message-util: ^29.0.3
+    jest-runtime: ^29.0.3
+    jest-snapshot: ^29.0.3
+    jest-util: ^29.0.3
+    p-limit: ^3.1.0
+    pretty-format: ^29.0.3
+    slash: ^3.0.0
+    stack-utils: ^2.0.3
+  checksum: 6ba495d4fb68ebb59f269b59029837f55009793d632ba2f29300992de80f7e3a37e619ea4e88676982cf74128416265a5929b3f9b77142fbf27c1dd0d6b6f98c
   languageName: node
   linkType: hard
 
@@ -30397,7 +30397,7 @@ __metadata:
     husky: 8.0.2
     inquirer: 8.2.5
     jest: 29.0.3
-    jest-circus: 29.0.3
+    jest-circus: 29.5.0
     jest-cli: 29.5.0
     jest-environment-jsdom: 29.0.3
     jest-watch-typeahead: 2.2.2
