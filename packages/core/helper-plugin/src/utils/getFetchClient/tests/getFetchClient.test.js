@@ -1,5 +1,7 @@
 import auth from '../../auth';
 import getFetchClient from '../index';
+import { checkUrl } from '../index';
+import isAbsoluteUrl from '../../isAbsoluteUrl';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
@@ -20,5 +22,22 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
       const { headers } = err.config;
       expect(headers.Authorization).toContain(`Bearer ${token}`);
     }
+  });
+});
+
+describe('HELPER-PLUGIN | utils | getFetchClient | checkUrl', () => {
+  it('should return an absolute url if it is passed', () => {
+    const cleanedUrl = checkUrl('http://example.com');
+    expect(isAbsoluteUrl(cleanedUrl)).toBeTruthy();
+  });
+
+  it('should return a relative url with prepending slash if it is passed', () => {
+    const cleanedUrl = checkUrl('/relative');
+    expect(cleanedUrl).toBe('/relative');
+  });
+
+  it('should return a relative url adding a prepending slash if it is missing', () => {
+    const cleanedUrl = checkUrl('relative');
+    expect(cleanedUrl).toBe('/relative');
   });
 });
