@@ -14,9 +14,18 @@ const addSignedFileUrlsToEntityService = async () => {
   const decorator = (service) => ({
     async wrapResult(result, options) {
       const wrappedResult = await service.wrapResult.call(this, result, options);
+
+      // Load returns only the attribute of the entity, not the entity itself,
+      if (options.action === 'load') {
+        const entity = { [options.field]: result };
+        const signedEntity = await signEntityMedia(entity, options.uid);
+        return signedEntity[options.field];
+      }
+
       if (Array.isArray(wrappedResult)) {
         return Promise.all(wrappedResult.map((entity) => signEntityMedia(entity, options.uid)));
       }
+
       return signEntityMedia(wrappedResult, options.uid);
     },
   });
