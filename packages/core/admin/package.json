@@ -46,7 +46,7 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/runtime": "^7.20.13",
     "@casl/ability": "^5.4.3",
-    "@fingerprintjs/fingerprintjs": "3.3.6",
+    "@fingerprintjs/fingerprintjs": "3.4.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.10",
     "@strapi/babel-plugin-switch-ee-ce": "4.10.2",
     "@strapi/data-transfer": "4.10.2",
