@@ -81,6 +81,18 @@ export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
 type SchemaMap = Record<string, Schema>;
 
+// Error resolving handler middleware for the transfer engine
+type Next = (context: any) => void | Promise<void>;
+type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
+async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promise<void> {
+  if (!middlewares.length) {
+    return;
+  }
+  const cb = middlewares[0];
+  await cb(context, async (newContext) => {
+    await runMiddleware(newContext, middlewares.slice(1));
+  });
+}
 type SchemaDiffHandlerContext = {
   diffs: Record<string, Diff[]>;
   source: ISourceProvider;
@@ -88,20 +100,9 @@ type SchemaDiffHandlerContext = {
 };
 type SchemaDiffHandler = (data: SchemaDiffHandlerContext, next: SchemaDiffHandler) => void;
 
-// TODO: clean this up
-type Next = (context: any) => void | Promise<void>;
-type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
-async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promise<void> {
-  if (!middlewares.length) {
-    return;
-  }
-
-  const cb = middlewares[0];
-  await cb(context, async (newContext) => {
-    await runMiddleware(newContext, middlewares.slice(1));
-  });
-}
-
+/**
+ * Transfer Engine Class
+ */
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -414,7 +415,6 @@ class TransferEngine<
       }
     });
 
-    // TODO: make these messages friendlier, especially for internal strapi features like review workflows
     if (!isEmpty(diffs)) {
       const formattedDiffs = Object.entries(diffs)
         .map(([uid, ctDiffs]) => {
@@ -426,11 +426,11 @@ class TransferEngine<
               const path = diff.path.join('.');
 
               if (diff.kind === 'added') {
-                return `${path} exists in destination schema but not in source schema and the data will not be transfered.`;
+                return `${path} exists in destination schema but not in source schema and the data will not be transferred.`;
               }
 
               if (diff.kind === 'deleted') {
-                return `${path} exists in source schema but not in destination schema and the data will not be transfered.`;
+                return `${path} exists in source schema but not in destination schema and the data will not be transferred.`;
               }
 
               if (diff.kind === 'modified') {
