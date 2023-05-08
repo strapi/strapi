@@ -8016,16 +8016,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/icons@npm:1.6.5":
-  version: 1.6.5
-  resolution: "@strapi/icons@npm:1.6.5"
-  peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 4299d1390bd9452566280157c3f6c27a9eca25e166df3e7cc39b2617692d9d1160e5e430e75da8bfa05b81ad4ecfa5d5554a482598fd09bf630ba8cf95b949be
-  languageName: node
-  linkType: hard
-
 "@strapi/icons@npm:1.7.3":
   version: 1.7.3
   resolution: "@strapi/icons@npm:1.7.3"
@@ -8277,7 +8267,7 @@ __metadata:
     "@sentry/node": 6.19.7
     "@strapi/design-system": 1.7.3
     "@strapi/helper-plugin": 4.10.2
-    "@strapi/icons": 1.6.5
+    "@strapi/icons": 1.7.3
     react: ^17.0.2
     react-dom: ^17.0.2
     react-router-dom: 5.3.4
