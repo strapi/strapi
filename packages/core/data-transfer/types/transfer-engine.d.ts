@@ -8,7 +8,7 @@ export type TransferFilterPreset = 'content' | 'files' | 'config';
 type SchemaMap = Record<string, Schema>;
 
 // Error resolving handler middleware for the transfer engine
-export type Next = (context: any) => void | Promise<void>;
+export type Next<T> = (context: T) => void | Promise<void>;
 export type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
 
 export type SchemaDiffHandlerContext = {

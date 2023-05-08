@@ -84,7 +84,7 @@ async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promi
     return;
   }
   const cb = middlewares[0];
-  await cb(context, async (newContext) => {
+  await cb(context, async (newContext: T) => {
     await runMiddleware(newContext, middlewares.slice(1));
   });
 }
@@ -712,7 +712,7 @@ class TransferEngine<
           );
         }
 
-        await runMiddleware(context, this.#handlers.schemaDiff);
+        await runMiddleware<typeof context>(context, this.#handlers.schemaDiff);
 
         if (Object.keys(context.diffs).length) {
           this.#panic(new TransferEngineInitializationError('Unresolved differences in schema'));
