@@ -22,6 +22,9 @@ import type {
   IProvider,
   TransferFilters,
   TransferFilterPreset,
+  SchemaDiffHandler,
+  SchemaMap,
+  Middleware,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -76,14 +79,6 @@ export const TransferGroupPresets: TransferGroupFilter = {
   },
 };
 
-export const DEFAULT_VERSION_STRATEGY = 'ignore';
-export const DEFAULT_SCHEMA_STRATEGY = 'strict';
-
-type SchemaMap = Record<string, Schema>;
-
-// Error resolving handler middleware for the transfer engine
-type Next = (context: any) => void | Promise<void>;
-type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
 async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promise<void> {
   if (!middlewares.length) {
     return;
@@ -93,12 +88,9 @@ async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promi
     await runMiddleware(newContext, middlewares.slice(1));
   });
 }
-type SchemaDiffHandlerContext = {
-  diffs: Record<string, Diff[]>;
-  source: ISourceProvider;
-  destination: IDestinationProvider;
-};
-type SchemaDiffHandler = (data: SchemaDiffHandlerContext, next: SchemaDiffHandler) => void;
+
+export const DEFAULT_VERSION_STRATEGY = 'ignore';
+export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
 /**
  * Transfer Engine Class

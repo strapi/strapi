@@ -5,6 +5,19 @@ import type { DiagnosticReporter } from '../src/engine/diagnostic';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';
 
+type SchemaMap = Record<string, Schema>;
+
+// Error resolving handler middleware for the transfer engine
+export type Next = (context: any) => void | Promise<void>;
+export type Middleware<T> = (context: T, next: Next) => Promise<void> | void;
+
+export type SchemaDiffHandlerContext = {
+  diffs: Record<string, Diff[]>;
+  source: ISourceProvider;
+  destination: IDestinationProvider;
+};
+export type SchemaDiffHandler = (data: SchemaDiffHandlerContext, next: SchemaDiffHandler) => void;
+
 /**
  * Defines the capabilities and properties of the transfer engine
  */
