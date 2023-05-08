@@ -625,8 +625,6 @@ class TransferEngine<
     }
   }
 
-  #schemaDiffs: Record<string, Diff[]> = {};
-
   async integrityCheck() {
     const sourceMetadata = await this.sourceProvider.getMetadata();
     const destinationMetadata = await this.destinationProvider.getMetadata();
@@ -648,10 +646,10 @@ class TransferEngine<
     } catch (error) {
       // if this is a schema matching error
       if (error instanceof TransferEngineValidationError && error.details?.details?.diffs) {
-        this.#schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
+        const schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
         const context = {
-          diffs: this.#schemaDiffs,
+          diffs: schemaDiffs,
           source: this.sourceProvider,
           destination: this.destinationProvider,
         };
