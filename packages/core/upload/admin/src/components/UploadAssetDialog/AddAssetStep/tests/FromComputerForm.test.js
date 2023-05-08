@@ -5,11 +5,6 @@ import { TrackingProvider } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import { FromComputerForm } from '../FromComputerForm';
 
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  get: jest.fn(),
-}));
-
 describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
