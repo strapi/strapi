@@ -115,10 +115,14 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 
 .c63 {
   color: #666687;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .c65 {
   color: #f29d41;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .c68 {
@@ -1114,6 +1118,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 }
 
 .c70 {
+  width: 0.75rem;
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);

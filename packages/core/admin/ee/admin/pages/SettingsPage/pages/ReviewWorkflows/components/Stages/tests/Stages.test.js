@@ -21,11 +21,6 @@ jest.mock('../../../actions', () => ({
   ...jest.requireActual('../../../actions'),
 }));
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
-}));
-
 const STAGES_FIXTURE = [
   {
     id: 1,
