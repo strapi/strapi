@@ -137,6 +137,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
+
     const fetchData = async (source) => {
       dispatch(getData());
 

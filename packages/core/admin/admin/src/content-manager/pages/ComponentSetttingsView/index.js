@@ -2,6 +2,7 @@ import React, { memo, useEffect, useMemo, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import { useSelector, shallowEqual } from 'react-redux';
+import axios from 'axios';
 import { mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import permissions from '../../../permissions';
@@ -19,23 +20,31 @@ const ComponentSettingsView = () => {
   const { get } = useFetchClient();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+  
+    const fetchData = async (source) => {
       try {
         dispatch(getData());
 
         const {
           data: { data },
-        } = await get(`/content-manager/components/${uid}/configuration`);
+        } = await get(`/content-manager/components/${uid}/configuration`, {
+          cancelToken: source.token,
+        });
         dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
         console.error(err);
       }
     };
 
-    fetchData();
+    fetchData(source);
 
     return () => {
-      console.error('Operation canceled by the user.');
+      source.cancel('Operation canceled by the user.');
     };
   }, [uid, schemas, get]);
 

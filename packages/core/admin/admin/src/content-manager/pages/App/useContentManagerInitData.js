@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNotifyAT } from '@strapi/design-system';
+import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getTrad } from '../../utils';
@@ -21,6 +22,8 @@ const useContentManagerInitData = () => {
   const fetchDataRef = useRef();
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
@@ -33,7 +36,7 @@ const useContentManagerInitData = () => {
         data: {
           data: { components, contentTypes: models, fieldSizes },
         },
-      } = await get('/content-manager/init');
+      } = await get('/content-manager/init', { cancelToken: source.token });
       notifyStatus(
         formatMessage({
           id: getTrad('App.schemas.data-loaded'),
@@ -69,6 +72,9 @@ const useContentManagerInitData = () => {
 
       dispatch(actionToDispatch);
     } catch (err) {
+      if (axios.isCancel(err)) {
+        return;
+      }
       console.error(err);
 
       toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
@@ -81,6 +87,7 @@ const useContentManagerInitData = () => {
     fetchDataRef.current();
 
     return () => {
+      source.cancel('Operation canceled by the user.');
       dispatch(resetInitData());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

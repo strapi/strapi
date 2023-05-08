@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
+import axios from 'axios';
 import { useFetchClient } from '@strapi/helper-plugin';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
@@ -13,7 +14,7 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
   const { get } = useFetchClient();
 
   const getData = useCallback(
-    async (uid) => {
+    async (uid, source) => {
       if (layouts[uid]) {
         dispatch({ type: 'SET_LAYOUT_FROM_STATE', uid });
 
@@ -26,13 +27,16 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
 
         const {
           data: { data },
-        } = await get(endPoint);
+        } = await get(endPoint, { cancelToken: source.token });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data: formatLayouts(data, schemas),
         });
       } catch (error) {
+        if (axios.isCancel(error)) {
+          return;
+        }
         if (isMounted.current) {
           console.error(error);
         }
@@ -52,10 +56,13 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
   }, []);
 
   useEffect(() => {
-    getData(contentTypeUID);
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+
+    getData(contentTypeUID, source);
 
     return () => {
-      console.error('Operation canceled by the user.');
+      source.cancel('Operation canceled by the user.');
     };
   }, [contentTypeUID, getData]);
 

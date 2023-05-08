@@ -1,4 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
+import axios from 'axios';
 import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
@@ -34,6 +35,17 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     initialState,
     init
   );
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
+
+  useEffect(() => {
+    // Cancel request on unmount
+    return () => {
+      source.cancel('Component unmounted');
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { post } = useFetchClient();
 
   // Reset the state on navigation change
@@ -75,7 +87,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const forgotPasswordRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
-      await post(requestURL, body);
+      await post(requestURL, body, { cancelToken: source.token });
 
       push('/auth/forgot-password-success');
     } catch (err) {
@@ -93,7 +105,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await post(requestURL, omit(body, fieldsToOmit));
+      } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
       
       if (user.preferedLanguage) {
         changeLocale(user.preferedLanguage);
@@ -136,7 +148,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await post(requestURL, omit(body, fieldsToOmit));
+      } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
@@ -187,7 +199,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await post(requestURL, { ...body, resetPasswordToken: query.get('code') });
+      } = await post(requestURL, { ...body, resetPasswordToken: query.get('code') }, { cancelToken: source.token });
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
