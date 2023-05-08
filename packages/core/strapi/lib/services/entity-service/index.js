@@ -304,7 +304,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       .query(uid)
       .load(entity, field, transformLoadParamsToQuery(uid, field, params));
 
-    return this.wrapResult(loadedEntity, { uid, action: 'load' });
+    return this.wrapResult(loadedEntity, { uid, field, action: 'load' });
   },
 
   async loadPages(uid, entity, field, params = {}, pagination = {}) {
@@ -325,7 +325,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     return {
       ...loadedPage,
-      results: await this.wrapResult(loadedPage.results, { uid, action: 'load' }),
+      results: await this.wrapResult(loadedPage.results, { uid, field, action: 'load' }),
     };
   },
 });
