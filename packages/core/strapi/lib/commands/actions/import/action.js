@@ -11,7 +11,6 @@ const {
 } = require('@strapi/data-transfer');
 
 const { isObject } = require('lodash/fp');
-const inquirer = require('inquirer');
 
 const {
   buildTransferTable,
@@ -24,6 +23,7 @@ const {
   getTransferTelemetryPayload,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
+const { confirmMessage } = require('../../utils/commander');
 
 /**
  * @typedef {import('@strapi/data-transfer/src/file/providers').ILocalFileSourceProviderOptions} ILocalFileSourceProviderOptions
@@ -113,18 +113,16 @@ module.exports = async (opts) => {
   const { updateLoader } = loadersFactory();
 
   engine.onSchemaDiff(async (context, next) => {
-    // TODO: work with "force"
-    // TODO: yes/no prompt should look like commander prompt
-    const answers = await inquirer.prompt([
+    const confirmed = await confirmMessage(
+      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
       {
-        type: 'confirm',
-        message: 'Are you sure you want to continue?',
-        name: 'confirmSchemaDiff',
-      },
-    ]);
-    if (answers.confirmSchemaDiff) {
-      // diffs have been resolved by user
+        force: opts.force,
+      }
+    );
+
+    if (confirmed) {
       context.diffs = [];
+      return next(context);
     }
 
     return next(context);

@@ -413,6 +413,7 @@ class TransferEngine<
       }
     });
 
+    // TODO: make these messages friendlier, especially for internal strapi features like review workflows
     if (!isEmpty(diffs)) {
       const formattedDiffs = Object.entries(diffs)
         .map(([uid, ctDiffs]) => {
@@ -424,11 +425,11 @@ class TransferEngine<
               const path = diff.path.join('.');
 
               if (diff.kind === 'added') {
-                return `${path} exists in destination schema but not in source schema`;
+                return `${path} exists in destination schema but not in source schema and the data will not be transfered.`;
               }
 
               if (diff.kind === 'deleted') {
-                return `${path} exists in source schema but not in destination schema`;
+                return `${path} exists in source schema but not in destination schema and the data will not be transfered.`;
               }
 
               if (diff.kind === 'modified') {
@@ -630,25 +631,26 @@ class TransferEngine<
   #schemaDiffs: Record<string, Diff[]> = {};
 
   async integrityCheck() {
+    const sourceMetadata = await this.sourceProvider.getMetadata();
+    const destinationMetadata = await this.destinationProvider.getMetadata();
+
+    if (sourceMetadata && destinationMetadata) {
+      this.#assertStrapiVersionIntegrity(
+        sourceMetadata?.strapi?.version,
+        destinationMetadata?.strapi?.version
+      );
+    }
+
+    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+
     try {
-      const sourceMetadata = await this.sourceProvider.getMetadata();
-      const destinationMetadata = await this.destinationProvider.getMetadata();
-
-      if (sourceMetadata && destinationMetadata) {
-        this.#assertStrapiVersionIntegrity(
-          sourceMetadata?.strapi?.version,
-          destinationMetadata?.strapi?.version
-        );
-      }
-
-      const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-      const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
-
       if (sourceSchemas && destinationSchemas) {
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
       }
     } catch (error) {
-      if (error instanceof TransferEngineValidationError) {
+      // if this is a schema matching error
+      if (error instanceof TransferEngineValidationError && error.details?.details?.diffs) {
         this.#schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
         const context = {
@@ -670,6 +672,7 @@ class TransferEngine<
         }
         return;
       }
+
       throw error;
     }
   }

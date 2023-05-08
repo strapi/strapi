@@ -24,6 +24,7 @@ const {
   getTransferTelemetryPayload,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
+const { confirmMessage } = require('../../utils/commander');
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -145,6 +146,22 @@ module.exports = async (opts) => {
   const progress = engine.progress.stream;
 
   const { updateLoader } = loadersFactory();
+
+  engine.onSchemaDiff(async (context, next) => {
+    const confirmed = await confirmMessage(
+      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
+      {
+        force: opts.force,
+      }
+    );
+
+    if (confirmed) {
+      context.diffs = [];
+      return next(context);
+    }
+
+    return next(context);
+  });
 
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
