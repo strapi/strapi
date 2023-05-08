@@ -142,12 +142,19 @@ let mediaEntry = {};
 let model;
 
 describe('Upload Plugin url signing', () => {
-  const responseExpectations = (result, expectedUrl) => {
-    expect(result.media.url).toEqual(expectedUrl);
+  const expectMedia = (media, expectedUrl) => {
+    expect(media.url).toEqual(expectedUrl);
+  };
 
-    for (const media of result.media_repeatable) {
-      expect(media.url).toEqual(expectedUrl);
+  const expectRepeatable = (repeatable, expectedUrl) => {
+    for (const media of repeatable) {
+      expectMedia(media, expectedUrl);
     }
+  };
+
+  const responseExpectations = (result, expectedUrl) => {
+    expectMedia(result.media, expectedUrl);
+    expectRepeatable(result.media_repeatable, expectedUrl);
 
     expect(result.compo_media.media.url).toEqual(expectedUrl);
     for (const media of result.compo_media.media_repeatable) {
@@ -251,6 +258,17 @@ describe('Upload Plugin url signing', () => {
 
       responseExpectations(entity, 'signedUrl');
     });
+
+    test('entityService.load', async () => {
+      const model = await createModel();
+      const media_repeatable = await strapi.entityService.load(
+        modelUID,
+        { id: model.id },
+        'media_repeatable'
+      );
+
+      expectRepeatable(media_repeatable, 'signedUrl');
+    });
   });
 
   describe('Does not return signed media URLs on', () => {
@@ -309,6 +327,17 @@ describe('Upload Plugin url signing', () => {
       });
 
       responseExpectations(entity, 'strapi.jpg');
+    });
+
+    test('entityService.load', async () => {
+      const model = await createModel();
+      const media_repeatable = await strapi.entityService.load(
+        modelUID,
+        { id: model.id },
+        'media_repeatable'
+      );
+
+      expectRepeatable(media_repeatable, 'strapi.jpg');
     });
   });
 });
