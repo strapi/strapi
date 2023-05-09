@@ -138,7 +138,7 @@ const nameIsAvailable = (isEdition) => {
 
   return {
     name: 'nameAlreadyUsed',
-    message: 'Content Type name `${value}` is already being used.',
+    message: 'contentType: name `${value}` is already being used by another content type.',
     test(value) {
       // don't check on edition
       if (isEdition) return true;
@@ -158,7 +158,7 @@ const nameIsNotExistingCollectionName = (isEdition) => {
 
   return {
     name: 'nameAlreadyUsed',
-    message: 'Content Type name `${value}` is already being used by another content type.',
+    message: 'contentType: name `${value}` is already being used by another content type.',
     test(value) {
       // don't check on edition
       if (isEdition) return true;

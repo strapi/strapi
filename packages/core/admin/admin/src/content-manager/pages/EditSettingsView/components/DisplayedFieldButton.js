@@ -7,7 +7,7 @@ import { Flex, Box, GridItem } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { ItemTypes } from '../../../utils';
 import FieldButtonContent from './FieldButtonContent';
-import { useLayoutDnd } from '../../../hooks';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 const Wrapper = styled(Flex)`
   position: relative;
