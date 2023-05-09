@@ -57,6 +57,7 @@ window.strapi = {
     isEnabled: () => false,
   },
   projectType: 'Community',
+  telemetryDisabled: true,
 };
 
 /* -------------------------------------------------------------------------------------------------

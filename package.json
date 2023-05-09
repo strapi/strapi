@@ -101,7 +101,7 @@
     "jest-environment-jsdom": "29.0.3",
     "jest-watch-typeahead": "2.2.2",
     "lerna": "6.5.1",
-    "lint-staged": "13.0.3",
+    "lint-staged": "13.2.2",
     "lodash": "4.17.21",
     "nx": "15.8.3",
     "plop": "2.7.6",

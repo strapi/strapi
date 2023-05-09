@@ -149,7 +149,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
             return (
               <Form noValidate>
                 <Main>
-                  <Flex direction="column" alignItems="stretch" gap={3}>
+                  <Flex direction="column" alignItems="center" gap={3}>
                     <Logo />
 
                     <Typography as="h1" variant="alpha" textAlign="center">

@@ -4,8 +4,8 @@ import { EOL } from 'os';
 import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
+import * as utils from '../utils';
 
-import chalk from 'chalk';
 import type {
   IAsset,
   IDestinationProvider,
@@ -108,6 +108,8 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
+  #ignoredDiffs: Record<string, utils.json.Diff[]> = {};
+
   // Progress of the current stage
   progress: {
     // metrics on the progress such as size and record count
@@ -147,8 +149,8 @@ class TransferEngine<
   /**
    * Report a fatal error and throw it
    */
-  #panic(error: Error) {
-    this.#reportError(error, 'fatal');
+  panic(error: Error) {
+    this.reportError(error, 'fatal');
 
     throw error;
   }
@@ -156,7 +158,7 @@ class TransferEngine<
   /**
    * Report an error diagnostic
    */
-  #reportError(error: Error, severity: ErrorDiagnosticSeverity) {
+  reportError(error: Error, severity: ErrorDiagnosticSeverity) {
     this.diagnostics.report({
       kind: 'error',
       details: {
@@ -172,7 +174,7 @@ class TransferEngine<
   /**
    * Report a warning diagnostic
    */
-  #reportWarning(message: string, origin?: string) {
+  reportWarning(message: string, origin?: string) {
     this.diagnostics.report({
       kind: 'warning',
       details: { createdAt: new Date(), message, origin },
@@ -182,7 +184,7 @@ class TransferEngine<
   /**
    * Report an info diagnostic
    */
-  #reportInfo(message: string, params?: unknown) {
+  reportInfo(message: string, params?: unknown) {
     this.diagnostics.report({
       kind: 'info',
       details: { createdAt: new Date(), message, params },
@@ -517,7 +519,7 @@ class TransferEngine<
 
       results.forEach((state) => {
         if (state.status === 'rejected') {
-          this.#reportWarning(state.reason, `transfer(${stage})`);
+          this.reportWarning(state.reason, `transfer(${stage})`);
         }
       });
 
@@ -544,7 +546,7 @@ class TransferEngine<
         .on('error', (e) => {
           updateEndTime();
           this.#emitStageUpdate('error', stage);
-          this.#reportError(e, 'error');
+          this.reportError(e, 'error');
           destination.destroy(e);
           reject(e);
         })
@@ -591,7 +593,7 @@ class TransferEngine<
 
     results.forEach((result) => {
       if (result.status === 'rejected') {
-        this.#panic(result.reason);
+        this.panic(result.reason);
       }
     });
   }
@@ -607,7 +609,7 @@ class TransferEngine<
 
     results.forEach((result) => {
       if (result.status === 'rejected') {
-        this.#panic(result.reason);
+        this.panic(result.reason);
       }
     });
   }
@@ -644,77 +646,26 @@ class TransferEngine<
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
       }
     } catch (error) {
-      // if this is a schema matching error
+      // if this is a schema matching error, allow handlers to resolve it
       if (error instanceof TransferEngineValidationError && error.details?.details?.diffs) {
         const schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
         const context = {
+          ignoreDiffs: {},
           diffs: schemaDiffs,
           source: this.sourceProvider,
           destination: this.destinationProvider,
         };
 
-        let workflowsStatus;
-        const source = 'Schema Integrity';
-
-        Object.entries(context.diffs).forEach(([uid, diffs]) => {
-          for (const diff of diffs) {
-            const path = `${uid}.${diff.path.join('.')}`;
-            const endPath = diff.path[diff.path.length - 1];
-
-            // Catch known features
-            // TODO: can this be moved outside of the engine?
-            if (
-              uid === 'admin::workflow' ||
-              uid === 'admin::workflow-stage' ||
-              endPath.startsWith('strapi_reviewWorkflows_')
-            ) {
-              workflowsStatus = diff.kind;
-            }
-            // handle generic cases
-            else if (diff.kind === 'added') {
-              this.#reportWarning(
-                chalk.red(`${chalk.bold(path)} does not exist on destination`),
-                source
-              );
-            } else if (diff.kind === 'deleted') {
-              this.#reportWarning(
-                chalk.red(`${chalk.bold(path)} does not exist on source`),
-                source
-              );
-            } else if (diff.kind === 'modified') {
-              this.#reportWarning(
-                chalk.red(`${chalk.bold(path)} has a different data type`),
-                source
-              );
-            }
-          }
-        });
-
-        // output the known feature warnings
-        if (workflowsStatus === 'added') {
-          this.#reportWarning(
-            chalk.red(`Review workflows feature does not exist on destination`),
-            source
-          );
-        } else if (workflowsStatus === 'deleted') {
-          this.#reportWarning(
-            chalk.red(`Review workflows feature does not exist on source`),
-            source
-          );
-        } else if (workflowsStatus === 'modified') {
-          this.#panic(
-            new TransferEngineInitializationError(
-              'Unresolved differences in schema [review workflows]'
-            )
-          );
-        }
-
         await runMiddleware<typeof context>(context, this.#handlers.schemaDiff);
 
-        if (Object.keys(context.diffs).length) {
-          this.#panic(new TransferEngineInitializationError('Unresolved differences in schema'));
+        this.#ignoredDiffs = context.ignoreDiffs;
+
+        // if there are any remaining diffs that weren't ignored
+        if (utils.json.diff(context.diffs, this.#ignoredDiffs).length) {
+          this.panic(new TransferEngineInitializationError('Unresolved differences in schema'));
         }
+
         return;
       }
 
@@ -756,7 +707,7 @@ class TransferEngine<
         e instanceof Error &&
         (!lastDiagnostic || lastDiagnostic.kind !== 'error' || lastDiagnostic.details.error !== e)
       ) {
-        this.#reportError(e, (e as DataTransferError).severity || 'fatal');
+        this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
       // Rollback the destination provider if an exception is thrown during the transfer
@@ -780,9 +731,9 @@ class TransferEngine<
       } catch (error) {
         // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
-          this.#panic(error);
+          this.panic(error);
         } else {
-          this.#panic(
+          this.panic(
             new Error(`Unknwon error when executing "beforeTransfer" on the ${origin} provider`)
           );
         }
@@ -821,6 +772,7 @@ class TransferEngine<
             return callback(null, entity);
           }
 
+          // TODO: this would be safer if we only ignored things in ignoredDiffs, otherwise continue and let an error be thrown
           const availableContentTypes = Object.entries(schemas)
             .filter(([, schema]) => schema.modelType === 'contentType')
             .map(([uid]) => uid);
@@ -861,6 +813,7 @@ class TransferEngine<
             return callback(null, link);
           }
 
+          // TODO: this would be safer if we only ignored things in ignoredDiffs, otherwise continue and let an error be thrown
           const availableContentTypes = Object.entries(schemas)
             .filter(([, schema]) => schema.modelType === 'contentType')
             .map(([uid]) => uid);
