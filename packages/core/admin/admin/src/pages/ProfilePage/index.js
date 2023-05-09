@@ -495,7 +495,7 @@ const ProfilePage = () => {
                                 id: 'Settings.profile.form.section.experience.clear.select',
                                 defaultMessage: 'Clear the interface language selected',
                               })}
-                              value={values.preferedLanguage || ''}
+                              value={values.preferedLanguage}
                               onChange={(e) => {
                                 handleChange({
                                   target: { name: 'preferedLanguage', value: e },
