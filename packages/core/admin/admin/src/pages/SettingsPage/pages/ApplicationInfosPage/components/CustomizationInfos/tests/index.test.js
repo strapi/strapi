@@ -24,9 +24,6 @@ const PROJECT_SETTINGS_DATA_FIXTURES = {
   },
 };
 
-jest.mock('@strapi/helper-plugin', () => ({
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
 jest.mock('../../../../../../../hooks', () => ({
   useConfigurations: jest.fn(() => ({
     logos: {

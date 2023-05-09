@@ -37,6 +37,13 @@ describe('<PaginationURLQuery />', () => {
     } = render(makeApp(history, 1));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -49,13 +56,6 @@ describe('<PaginationURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c4 {

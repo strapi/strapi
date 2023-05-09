@@ -95,7 +95,7 @@ const redirectWithAuth = (ctx) => {
     params: { provider },
   } = ctx;
   const redirectUrls = utils.getPrefixedRedirectUrls();
-  const domain = strapi.config.get('server.admin.auth.domain');
+  const domain = strapi.config.get('admin.auth.domain');
   const { user } = ctx.state;
 
   const jwt = getService('token').createJwtToken(user);

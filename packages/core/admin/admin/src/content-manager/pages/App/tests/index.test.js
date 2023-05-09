@@ -163,10 +163,6 @@ describe('Content manager | App | main', () => {
         overflow-x: hidden;
       }
 
-      .c36 {
-        height: 100vh;
-      }
-
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -362,13 +358,13 @@ describe('Content manager | App | main', () => {
         outline: none;
       }
 
-      .c8 svg {
+      .c8 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c8 > svg > g,
+      .c8 > svg path {
         fill: #ffffff;
       }
 
@@ -529,6 +525,10 @@ describe('Content manager | App | main', () => {
 
       .c19 svg path {
         fill: #8e8ea9;
+      }
+
+      .c36 {
+        height: 100vh;
       }
 
       <div

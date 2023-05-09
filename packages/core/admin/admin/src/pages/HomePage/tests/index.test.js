@@ -3,15 +3,14 @@ import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfos: jest.fn(() => ({ communityEdition: true })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useAppInfo: jest.fn(() => ({ communityEdition: true })),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: false,
     guidedTourState: {
@@ -93,7 +92,7 @@ describe('Homepage', () => {
   });
 
   test('should display support link for EE edition', () => {
-    useAppInfos.mockImplementation(() => ({ communityEdition: false }));
+    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
     const { getByRole } = render(App);
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(

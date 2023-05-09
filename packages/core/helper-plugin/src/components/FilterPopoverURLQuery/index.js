@@ -6,11 +6,12 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Button, Flex, Box, Popover, FocusTrap, Select, Option } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
-import useTracking from '../../hooks/useTracking';
+import { useTracking } from '../../features/Tracking';
 import DefaultInputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
@@ -116,9 +117,9 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
           <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
-            <Box>
+            <SelectContainers direction="column" alignItems="stretch" gap={1}>
               <Select
-                aria-label={formatMessage({
+                label={formatMessage({
                   id: 'app.utils.select-field',
                   defaultMessage: 'Select field',
                 })}
@@ -135,10 +136,8 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                   );
                 })}
               </Select>
-            </Box>
-            <Box>
               <Select
-                aria-label={formatMessage({
+                label={formatMessage({
                   id: 'app.utils.select-filter',
                   defaultMessage: 'Select filter',
                 })}
@@ -155,7 +154,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
                   );
                 })}
               </Select>
-            </Box>
+            </SelectContainers>
             {operator !== '$null' && operator !== '$notNull' && (
               <Box>
                 <Inputs
@@ -202,3 +201,17 @@ FilterPopoverURLQuery.propTypes = {
 };
 
 export default FilterPopoverURLQuery;
+
+const SelectContainers = styled(Flex)`
+  /* Hide the label, every input needs a label. */
+  label {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+`;
