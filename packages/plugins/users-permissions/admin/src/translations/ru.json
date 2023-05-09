@@ -35,7 +35,7 @@
   "PopUpForm.Email.options.from.email.label": "Электронная почта отправителя",
   "PopUpForm.Email.options.from.email.placeholder": "kai@doe.com",
   "PopUpForm.Email.options.from.name.label": "Имя отправителя",
-  "PopUpForm.Email.options.from.name.placeholder": "Paul Bid",
+  "PopUpForm.Email.options.from.name.placeholder": "Kai Doe",
   "PopUpForm.Email.options.message.label": "Сообщение",
   "PopUpForm.Email.options.object.label": "Тема",
   "PopUpForm.Email.options.object.placeholder": "Пожалуйста, подтвердите свой адрес электронной почты для %APP_NAME%",
