@@ -11,7 +11,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => ({
     toggleNotification: jest.fn(),
   })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const ASSET_FIXTURES = [
