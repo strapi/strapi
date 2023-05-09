@@ -1,7 +1,5 @@
 import auth from '../../auth';
 import getFetchClient from '../index';
-import { checkUrl } from '../index';
-import isAbsoluteUrl from '../../isAbsoluteUrl';
 
 const token = 'coolToken';
 auth.getToken = jest.fn().mockReturnValue(token);
@@ -14,30 +12,23 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
     expect(response).toHaveProperty('put');
     expect(response).toHaveProperty('del');
   });
-  it('should contain the headers config values and the data when we try to reach an unknown API', async () => {
+  it('should contain the headers config values and the data when we try to reach an unknown API and the passed URL', async () => {
     const response = getFetchClient();
     try {
       await response.get('/test');
     } catch (err) {
-      const { headers } = err.config;
+      const { headers, url } = err.config;
       expect(headers.Authorization).toContain(`Bearer ${token}`);
+      expect(url).toBe('/test');
     }
   });
-});
-
-describe('HELPER-PLUGIN | utils | getFetchClient | checkUrl', () => {
-  it('should return an absolute url if it is passed', () => {
-    const cleanedUrl = checkUrl('http://example.com');
-    expect(isAbsoluteUrl(cleanedUrl)).toBeTruthy();
-  });
-
-  it('should return a relative url with prepending slash if it is passed', () => {
-    const cleanedUrl = checkUrl('/relative');
-    expect(cleanedUrl).toBe('/relative');
-  });
-
-  it('should return a relative url adding a prepending slash if it is missing', () => {
-    const cleanedUrl = checkUrl('relative');
-    expect(cleanedUrl).toBe('/relative');
+  it('should contain the normalized URL when we try to reach an unknown API with an URL without prepending slash', async () => {
+    const response = getFetchClient();
+    try {
+      await response.get('test');
+    } catch (err) {
+      const { url } = err.config;
+      expect(url).toBe('/test');
+    }
   });
 });

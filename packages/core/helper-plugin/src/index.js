@@ -107,5 +107,3 @@ export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 
 export { default as getFetchClient } from './utils/getFetchClient';
-export { default as isAbsoluteUrl } from './utils/isAbsoluteUrl';
-export { default as addPrependingSlash } from './utils/addPrependingSlash';
