@@ -187,6 +187,7 @@ const forms = {
           })
         : pluralNames;
 
+      // return the array of collection names not all normalized
       const collectionNames = Object.values(contentTypes).map((contentType) => {
         return get(contentType, ['schema', 'collectionName'], '');
       });
