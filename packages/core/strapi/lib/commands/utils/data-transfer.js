@@ -12,9 +12,11 @@ const {
   createLogger,
 } = require('@strapi/logger');
 const ora = require('ora');
+const { TransferEngineInitializationError } = require('@strapi/data-transfer/dist/engine/errors');
+const { merge } = require('lodash/fp');
 const { readableBytes, exitWith } = require('./helpers');
 const strapi = require('../../index');
-const { getParseListWithChoices, parseInteger } = require('./commander');
+const { getParseListWithChoices, parseInteger, confirmMessage } = require('./commander');
 
 const exitMessageText = (process, error = false) => {
   const processCapitalized = process[0].toUpperCase() + process.slice(1);
@@ -266,6 +268,79 @@ const getTransferTelemetryPayload = (engine) => {
   };
 };
 
+/**
+ * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
+ */
+const getDiffHandler = (engine, { force }) => {
+  return async (context, next) => {
+    // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
+    setSignalHandler(async () => {
+      await abortTransfer({ engine, strapi });
+      exitWith(1, exitMessageText('import', true));
+    });
+
+    let workflowsStatus;
+    const source = 'Schema Integrity';
+
+    Object.entries(context.diffs).forEach(([uid, diffs]) => {
+      for (const diff of diffs) {
+        const path = `${uid}.${diff.path.join('.')}`;
+        const endPath = diff.path[diff.path.length - 1];
+
+        // Catch known features
+        if (
+          uid === 'admin::workflow' ||
+          uid === 'admin::workflow-stage' ||
+          endPath.startsWith('strapi_reviewWorkflows_')
+        ) {
+          workflowsStatus = diff.kind;
+        }
+        // handle generic cases
+        else if (diff.kind === 'added') {
+          engine.reportWarning(
+            chalk.red(`${chalk.bold(path)} does not exist on destination`),
+            source
+          );
+        } else if (diff.kind === 'deleted') {
+          engine.reportWarning(chalk.red(`${chalk.bold(path)} does not exist on source`), source);
+        } else if (diff.kind === 'modified') {
+          engine.reportWarning(chalk.red(`${chalk.bold(path)} has a different data type`), source);
+        }
+      }
+    });
+
+    // output the known feature warnings
+    if (workflowsStatus === 'added') {
+      engine.reportWarning(
+        chalk.red(`Review workflows feature does not exist on destination`),
+        source
+      );
+    } else if (workflowsStatus === 'deleted') {
+      engine.reportWarning(chalk.red(`Review workflows feature does not exist on source`), source);
+    } else if (workflowsStatus === 'modified') {
+      engine.panic(
+        new TransferEngineInitializationError('Unresolved differences in schema [review workflows]')
+      );
+    }
+
+    const confirmed = await confirmMessage(
+      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
+      {
+        force,
+      }
+    );
+
+    // reset handler back to normal
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
+
+    if (confirmed) {
+      context.ignoreDiffs = merge(context.diffs, context.ignoredDiffs);
+    }
+
+    return next(context);
+  };
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
@@ -281,4 +356,5 @@ module.exports = {
   formatDiagnostic,
   abortTransfer,
   setSignalHandler,
+  getDiffHandler,
 };

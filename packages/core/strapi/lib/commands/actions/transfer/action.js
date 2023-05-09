@@ -23,9 +23,9 @@ const {
   abortTransfer,
   getTransferTelemetryPayload,
   setSignalHandler,
+  getDiffHandler,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
-const { confirmMessage } = require('../../utils/commander');
 
 /**
  * @typedef TransferCommandOptions Options given to the CLI transfer command
@@ -148,30 +148,7 @@ module.exports = async (opts) => {
 
   const { updateLoader } = loadersFactory();
 
-  engine.onSchemaDiff(async (context, next) => {
-    // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
-    setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi });
-      exitWith(1, exitMessageText('transfer', true));
-    });
-
-    const confirmed = await confirmMessage(
-      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
-      {
-        force: opts.force,
-      }
-    );
-
-    // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi }));
-
-    if (confirmed) {
-      context.diffs = [];
-      return next(context);
-    }
-
-    return next(context);
-  });
+  engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force }));
 
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
