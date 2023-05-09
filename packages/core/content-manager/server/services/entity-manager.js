@@ -274,10 +274,6 @@ module.exports = ({ strapi }) => ({
     // Validate entities before publishing, throw if invalid
     await Promise.all(
       entities.map((entityToUpdate) => {
-        if (entityToUpdate[PUBLISHED_AT_ATTRIBUTE]) {
-          throw new ApplicationError('already.published');
-        }
-
         return strapi.entityValidator.validateEntityCreation(
           strapi.getModel(uid),
           entityToUpdate,
@@ -289,7 +285,11 @@ module.exports = ({ strapi }) => ({
       })
     );
 
-    const where = { id: { $in: entities.map((entity) => entity.id) } };
+    // Only publish entities without a published_at date
+    const entitiesToPublish = entities
+      .filter((entity) => !entity[PUBLISHED_AT_ATTRIBUTE])
+      .map((entity) => entity.id);
+    const where = { id: { $in: entitiesToPublish } };
     const data = {
       [PUBLISHED_AT_ATTRIBUTE]: new Date(),
     };
@@ -315,14 +315,9 @@ module.exports = ({ strapi }) => ({
     if (!entities.length) {
       return null;
     }
-
-    entities.forEach((entity) => {
-      if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
-        throw new ApplicationError('already.draft');
-      }
-    });
-
-    const where = { id: { $in: entities.map((entity) => entity.id) } };
+    // Unpublish everything regardles of publish draft state
+    const entitiesToUnpublish = entities.map((entity) => entity.id);
+    const where = { id: { $in: entitiesToUnpublish } };
     const data = {
       [PUBLISHED_AT_ATTRIBUTE]: null,
     };
