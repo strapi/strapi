@@ -32,6 +32,7 @@ const createTransferEngine = jest.fn(() => {
       on: jest.fn().mockReturnThis(),
       onDiagnostic: jest.fn().mockReturnThis(),
     },
+    onSchemaDiff: jest.fn(),
   };
 });
 
@@ -81,6 +82,8 @@ describe('Import', () => {
       };
     }),
     exitMessageText: jest.fn(),
+    getDiffHandler: jest.fn(),
+    setSignalHandler: jest.fn(),
   };
   jest.mock(
     '../../../utils/data-transfer.js',
