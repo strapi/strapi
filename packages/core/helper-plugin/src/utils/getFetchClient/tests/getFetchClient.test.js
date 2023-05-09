@@ -31,4 +31,13 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
       expect(url).toBe('/test');
     }
   });
+  it('should contain the URL passed when we try to reach an unknown API with a full URL', async () => {
+    const response = getFetchClient();
+    try {
+      await response.get('https://test.com');
+    } catch (err) {
+      const { url } = err.config;
+      expect(url).toBe('https://test.com');
+    }
+  });
 });

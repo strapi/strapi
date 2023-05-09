@@ -2,8 +2,10 @@ import instance from '../fetchClient';
 
 const addPrependingSlash = (url) => (typeof url === 'string' && url.charAt(0) !== '/') ? `/${url}` : url;
 
+const isFullUrl = (url) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
+
 // check if the url has a prepending slash, if not it adds the slash
-const normalizeUrl = (url) => addPrependingSlash(url);
+const normalizeUrl = (url) => isFullUrl(url) ? url : addPrependingSlash(url);
 
 const getFetchClient = (defaultOptions = {}) => {
   instance.defaults.baseURL = window.strapi.backendURL;
