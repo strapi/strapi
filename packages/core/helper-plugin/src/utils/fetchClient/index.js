@@ -3,7 +3,7 @@ import auth from '../auth';
 
 export const reqInterceptor = async (config) => {
   config.headers = {
-    Authorization: config.headers.Authorization !== undefined ? config.headers.Authorization : `Bearer ${auth.getToken()}`,
+    Authorization: `Bearer ${auth.getToken()}`,
   };
 
   return config;

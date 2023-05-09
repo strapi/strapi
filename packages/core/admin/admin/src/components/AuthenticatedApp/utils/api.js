@@ -8,13 +8,8 @@ const { get } = getFetchClient();
 
 const fetchStrapiLatestRelease = async (toggleNotification) => {
   try {
-    const {
-      data: { tag_name },
-    } = await get('https://api.github.com/repos/strapi/strapi/releases/latest', {
-      headers: {
-        Authorization: ''
-      }
-    });
+    const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
+    const { tag_name } = await res.json();
     
     const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
