@@ -136,7 +136,7 @@
     "typescript": "5.0.4",
     "webpack": "^5.82.0",
     "webpack-cli": "^5.1.0",
-    "webpack-dev-server": "^4.13.1",
+    "webpack-dev-server": "^4.15.0",
     "webpackbar": "^5.0.2",
     "yup": "^0.32.9"
   },
