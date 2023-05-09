@@ -44,6 +44,9 @@ const SettingsPage = lazy(() =>
 );
 
 // Simple hook easier for testing
+/**
+ * TODO: remove this, it's bad.
+ */
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
