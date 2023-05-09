@@ -73,10 +73,11 @@ const UseCasePage = () => {
   const { formatMessage } = useIntl();
   const [role, setRole] = useState();
   const [otherRole, setOtherRole] = useState('');
+  const { post } = useFetchClient();
+
   const { firstname, email } = auth.getUserInfo();
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
-  const { post } = useFetchClient();
 
   const handleSubmit = async (event, skipPersona) => {
     event.preventDefault();
