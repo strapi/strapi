@@ -19,7 +19,6 @@ jest.mock('@strapi/helper-plugin', () => {
     ...jest.requireActual('@strapi/helper-plugin'),
     useNotification: mockUseNotification,
     useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-    useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   };
 });
 
@@ -163,6 +162,63 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-right: 32px;
         padding-bottom: 24px;
         padding-left: 32px;
+      }
+
+      .c7 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c18 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c35 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c45 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c46 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #4a4a6a;
       }
 
       .c3 {
@@ -323,63 +379,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         justify-content: center;
       }
 
-      .c7 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c13 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c18 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c35 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c45 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c46 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #4a4a6a;
-      }
-
       .c37 {
         border: 1px solid #f6f6f9;
       }
@@ -398,10 +397,6 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c37:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
         background: #d9d8ff;
-      }
-
-      .c50 path {
-        fill: #666687;
       }
 
       .c43 {
@@ -452,6 +447,10 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c50 path {
+        fill: #666687;
+      }
+
       .c44 {
         text-align: left;
       }
@@ -483,13 +482,13 @@ describe('Admin | containers | RoleCreatePage', () => {
         outline: none;
       }
 
-      .c10 svg {
+      .c10 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c10 svg > g,
-      .c10 svg path {
+      .c10 > svg > g,
+      .c10 > svg path {
         fill: #ffffff;
       }
 

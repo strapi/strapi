@@ -67,13 +67,13 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       placeholder={placeholder}
       multi
       startIcon={startIcon}
-      value={value}
+      value={value.map((v) => v.toString())}
       withTags
       required
     >
       {(data || []).map((role) => {
         return (
-          <Option key={role.id} value={role.id}>
+          <Option key={role.id} value={role.id.toString()}>
             {formatMessage({
               id: `global.${role.code}`,
               defaultMessage: role.name,

@@ -3,20 +3,12 @@ import PropTypes from 'prop-types';
 import { Box, Flex, Button, Typography, Table as TableCompo } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
-import styled from 'styled-components';
+
 import useQueryParams from '../../hooks/useQueryParams';
 import { useTracking } from '../../features/Tracking';
 import ConfirmDialog from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';
-
-const BlockActions = styled(Flex)`
-  & > * + * {
-    margin-left: ${({ theme }) => theme.spaces[2]};
-  }
-
-  margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
-`;
 
 const Table = ({
   action,
@@ -133,7 +125,7 @@ const Table = ({
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between">
-              <BlockActions>
+              <Flex gap={3}>
                 <Typography variant="epsilon" textColor="neutral600">
                   {formatMessage(
                     {
@@ -151,7 +143,7 @@ const Table = ({
                 >
                   {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
                 </Button>
-              </BlockActions>
+              </Flex>
             </Flex>
           </Box>
         </Box>

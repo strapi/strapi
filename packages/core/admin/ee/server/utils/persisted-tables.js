@@ -124,6 +124,9 @@ const persistTablesWithPrefix = async (tableNamePrefix) => {
 const removePersistedTablesWithSuffix = async (tableNameSuffix) => {
   const tableNameRegex = new RegExp(`.*${tableNameSuffix}$`);
   const tableNames = await findTables({ strapi }, tableNameRegex);
+  if (!tableNames.length) {
+    return;
+  }
   await removePersistedTables({ strapi }, tableNames);
 };
 
