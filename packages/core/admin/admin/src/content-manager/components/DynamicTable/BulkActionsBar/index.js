@@ -5,7 +5,6 @@ import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { useTracking } from '@strapi/helper-plugin';
-import { useSelector } from 'react-redux';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
 import { listViewDomain } from '../../../pages/ListView/selectors';
