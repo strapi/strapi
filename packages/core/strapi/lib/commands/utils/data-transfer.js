@@ -271,12 +271,12 @@ const getTransferTelemetryPayload = (engine) => {
 /**
  * Get a transfer engine schema diff handler that confirms with the user before bypassing a schema check
  */
-const getDiffHandler = (engine, { force }) => {
+const getDiffHandler = (engine, { force, action }) => {
   return async (context, next) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
       await abortTransfer({ engine, strapi });
-      exitWith(1, exitMessageText('import', true));
+      exitWith(1, exitMessageText(action, true));
     });
 
     let workflowsStatus;

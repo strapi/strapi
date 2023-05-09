@@ -148,7 +148,7 @@ module.exports = async (opts) => {
 
   const { updateLoader } = loadersFactory();
 
-  engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force }));
+  engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
 
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
