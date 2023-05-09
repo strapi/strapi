@@ -213,62 +213,22 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleBulkDelete = async () => {
-    let result = null;
-
+  const handleBulkAction = async (confirmAction, toggleModal) => {
     try {
       setIsConfirmButtonLoading(true);
-      result = await onConfirmDeleteAll(selectedEntries);
-    } catch (err) {
-      // The error is handled in content-manager/pages/ListView/index.js
-      // handleConfirmDeleteAllData catch block
-    } finally {
+      await confirmAction(selectedEntries);
       setIsConfirmButtonLoading(false);
-      toggleDeleteModal();
-    }
-
-    if (result) {
+      toggleModal();
       clearSelectedEntries();
-    }
-  };
-
-  const handleBulkPublish = async () => {
-    let result = null;
-
-    try {
-      setIsConfirmButtonLoading(true);
-      result = await onConfirmPublishAll(selectedEntries);
     } catch (error) {
-      // The error is handled in content-manager/pages/ListView/index.js
-      // bulkPublishMutation onError callback
-    } finally {
       setIsConfirmButtonLoading(false);
-      togglePublishModal();
-    }
-
-    if (result) {
-      clearSelectedEntries();
+      toggleModal();
     }
   };
 
-  const handleBulkUnpublish = async () => {
-    let result = null;
-
-    try {
-      setIsConfirmButtonLoading(true);
-      await onConfirmUnpublishAll(selectedEntries);
-    } catch (error) {
-      // The error is handled in content-manager/pages/ListView/index.js
-      // bulkUnpublishMutation onError callback
-    } finally {
-      setIsConfirmButtonLoading(false);
-      toggleUnpublishModal();
-    }
-
-    if (result) {
-      clearSelectedEntries();
-    }
-  };
+  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteModal);
+  const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishModal);
+  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishModal);
 
   return (
     <>
