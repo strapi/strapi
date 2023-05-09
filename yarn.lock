@@ -3182,12 +3182,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fingerprintjs/fingerprintjs@npm:3.3.6":
-  version: 3.3.6
-  resolution: "@fingerprintjs/fingerprintjs@npm:3.3.6"
+"@fingerprintjs/fingerprintjs@npm:3.4.1":
+  version: 3.4.1
+  resolution: "@fingerprintjs/fingerprintjs@npm:3.4.1"
   dependencies:
-    tslib: ^2.0.1
-  checksum: 2609d1decef8a35d12424803026dfd6f3b424c6540cfbcd5d62a7e28ed3dcd89ed8accd753f6eafdefeb58d5e923cd81c8abf7ee0ddb3ea95f9d216512b318de
+    tslib: ^2.4.1
+  checksum: 20db8cd1ed42c0f237eebf59c731c45dc1929ed6bbc62bfaf887bddce2bdb261dec077c7ecf94995bd3ae8a0e9f317b01281c230baa1b73f2f0d7466f0d8f180
   languageName: node
   linkType: hard
 
@@ -7709,7 +7709,7 @@ __metadata:
     "@babel/preset-react": ^7.18.6
     "@babel/runtime": ^7.20.13
     "@casl/ability": ^5.4.3
-    "@fingerprintjs/fingerprintjs": 3.3.6
+    "@fingerprintjs/fingerprintjs": 3.4.1
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.10
     "@strapi/babel-plugin-switch-ee-ce": 4.10.2
     "@strapi/data-transfer": 4.10.2
@@ -31839,6 +31839,13 @@ __metadata:
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.4.1":
+  version: 2.5.0
+  resolution: "tslib@npm:2.5.0"
+  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
   languageName: node
   linkType: hard
 
