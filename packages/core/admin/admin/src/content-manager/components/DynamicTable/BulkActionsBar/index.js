@@ -186,8 +186,7 @@ const BulkActionsBar = ({
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [dialogToOpen, setDialogToOpen] = useState(null);
 
-  // Bulk delete
-  const handleToggleShowDeleteAllModal = () => {
+  const toggleDeleteModal = () => {
     if (dialogToOpen === 'delete') {
       setDialogToOpen(null);
     } else {
@@ -196,20 +195,7 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmDeleteAll = async () => {
-    try {
-      setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(selectedEntries);
-      clearSelectedEntries();
-      setIsConfirmButtonLoading(false);
-    } catch (err) {
-      setIsConfirmButtonLoading(false);
-    }
-    handleToggleShowDeleteAllModal();
-  };
-
-  // Bulk publish
-  const handleToggleShowPublishAllModal = () => {
+  const togglePublishModal = () => {
     if (dialogToOpen === 'publish') {
       setDialogToOpen(null);
     } else {
@@ -218,20 +204,7 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmPublishAll = async () => {
-    try {
-      setIsConfirmButtonLoading(true);
-      await onConfirmPublishAll(selectedEntries);
-      clearSelectedEntries();
-      setIsConfirmButtonLoading(false);
-    } catch (err) {
-      setIsConfirmButtonLoading(false);
-    }
-    handleToggleShowPublishAllModal();
-  };
-
-  // Bulk unpublish
-  const handleToggleShowUnpublishAllModal = () => {
+  const toggleUnpublishModal = () => {
     if (dialogToOpen === 'unpublish') {
       setDialogToOpen(null);
     } else {
@@ -240,52 +213,57 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleConfirmUnpublishAll = async () => {
+  const handleBulkAction = async (confirmAction, toggleModal) => {
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmUnpublishAll(selectedEntries);
+      await confirmAction(selectedEntries);
+      setIsConfirmButtonLoading(false);
+      toggleModal();
       clearSelectedEntries();
+    } catch (error) {
       setIsConfirmButtonLoading(false);
-    } catch (err) {
-      setIsConfirmButtonLoading(false);
+      toggleModal();
     }
-    handleToggleShowUnpublishAllModal();
   };
+
+  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteModal);
+  const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishModal);
+  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishModal);
 
   return (
     <>
       {showPublish && (
         <>
-          <Button variant="tertiary" onClick={handleToggleShowPublishAllModal}>
+          <Button variant="tertiary" onClick={togglePublishModal}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
-          <Button variant="tertiary" onClick={handleToggleShowUnpublishAllModal}>
+          <Button variant="tertiary" onClick={toggleUnpublishModal}>
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
-            onToggleDialog={handleToggleShowPublishAllModal}
+            onToggleDialog={togglePublishModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmPublishAll}
+            onConfirm={handleBulkPublish}
           />
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
-            onToggleDialog={handleToggleShowUnpublishAllModal}
+            onToggleDialog={toggleUnpublishModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmUnpublishAll}
+            onConfirm={handleBulkUnpublish}
           />
         </>
       )}
       {showDelete && (
         <>
-          <Button variant="danger-light" onClick={handleToggleShowDeleteAllModal}>
+          <Button variant="danger-light" onClick={toggleDeleteModal}>
             {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
           </Button>
           <ConfirmDialogDeleteAll
             isOpen={dialogToOpen === 'delete'}
-            onToggleDialog={handleToggleShowDeleteAllModal}
+            onToggleDialog={toggleDeleteModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleConfirmDeleteAll}
+            onConfirm={handleBulkDelete}
           />
         </>
       )}
