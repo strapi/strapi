@@ -334,7 +334,7 @@ const getDiffHandler = (engine, { force }) => {
     setSignalHandler(() => abortTransfer({ engine, strapi }));
 
     if (confirmed) {
-      context.ignoreDiffs = merge(context.diffs, context.ignoredDiffs);
+      context.ignoredDiffs = merge(context.diffs, context.ignoredDiffs);
     }
 
     return next(context);

@@ -23,6 +23,7 @@ import type {
   TransferFilters,
   TransferFilterPreset,
   SchemaDiffHandler,
+  SchemaDiffHandlerContext,
   SchemaMap,
 } from '../../types';
 import type { Diff } from '../utils/json';
@@ -30,11 +31,7 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 import { filter, map } from '../utils/stream';
 
-import {
-  TransferEngineError,
-  TransferEngineInitializationError,
-  TransferEngineValidationError,
-} from './errors';
+import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
   createDiagnosticReporter,
   IDiagnosticReporter,
@@ -97,8 +94,6 @@ class TransferEngine<
   options: ITransferEngineOptions;
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
-
-  #ignoredDiffs: Record<string, utils.json.Diff[]> = {};
 
   // Progress of the current stage
   progress: {
@@ -556,7 +551,7 @@ class TransferEngine<
     if (!this.#currentStream) {
       throw err;
     }
-    this.#currentStream?.destroy(err);
+    this.#currentStream.destroy(err);
   }
 
   async init(): Promise<void> {
@@ -640,20 +635,29 @@ class TransferEngine<
       if (error instanceof TransferEngineValidationError && error.details?.details?.diffs) {
         const schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
 
-        const context = {
-          ignoreDiffs: {},
+        const context: SchemaDiffHandlerContext = {
+          ignoredDiffs: {},
           diffs: schemaDiffs,
           source: this.sourceProvider,
           destination: this.destinationProvider,
         };
 
-        await runMiddleware<typeof context>(context, this.#handlers.schemaDiff);
+        // if we don't have any handlers, throw the original error
+        if (isEmpty(this.#handlers.schemaDiff)) {
+          throw error;
+        }
 
-        this.#ignoredDiffs = context.ignoreDiffs;
+        await runMiddleware<SchemaDiffHandlerContext>(context, this.#handlers.schemaDiff);
 
         // if there are any remaining diffs that weren't ignored
-        if (utils.json.diff(context.diffs, this.#ignoredDiffs).length) {
-          this.panic(new TransferEngineInitializationError('Unresolved differences in schema'));
+        const unresolvedDiffs = utils.json.diff(context.diffs, context.ignoredDiffs);
+        if (unresolvedDiffs.length) {
+          this.panic(
+            new TransferEngineValidationError('Unresolved differences in schema', {
+              check: 'schema.changes',
+              unresolvedDiffs,
+            })
+          );
         }
 
         return;
