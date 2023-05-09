@@ -24,7 +24,6 @@ import type {
   TransferFilterPreset,
   SchemaDiffHandler,
   SchemaMap,
-  Middleware,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -42,6 +41,7 @@ import {
   ErrorDiagnosticSeverity,
 } from './diagnostic';
 import { DataTransferError } from '../errors';
+import { runMiddleware } from '../utils/middleware';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -78,16 +78,6 @@ export const TransferGroupPresets: TransferGroupFilter = {
     configuration: true,
   },
 };
-
-async function runMiddleware<T>(context: T, middlewares: Middleware<T>[]): Promise<void> {
-  if (!middlewares.length) {
-    return;
-  }
-  const cb = middlewares[0];
-  await cb(context, async (newContext: T) => {
-    await runMiddleware(newContext, middlewares.slice(1));
-  });
-}
 
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
