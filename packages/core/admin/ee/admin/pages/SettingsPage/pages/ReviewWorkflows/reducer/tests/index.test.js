@@ -14,12 +14,13 @@ const WORKFLOWS_FIXTURE = [
     stages: [
       {
         id: 1,
-        color: 'red',
+        color: '#4945FF',
         name: 'stage-1',
       },
 
       {
         id: 2,
+        color: '#4945FF',
         name: 'stage-2',
       },
     ],
@@ -353,7 +354,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   id: 1,
-                  color: 'red',
+                  color: '#4945FF',
                   name: 'stage-1-modified',
                 },
               ]),

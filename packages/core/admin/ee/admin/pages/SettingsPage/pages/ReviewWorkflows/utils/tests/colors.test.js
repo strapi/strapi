@@ -22,6 +22,11 @@ describe('Settings | Review Workflows | colors', () => {
       themeColorName: 'primary600',
     });
 
+    expect(getStageColorByHex('#4945FF')).toStrictEqual({
+      name: 'Blue',
+      themeColorName: 'primary600',
+    });
+
     expect(getStageColorByHex('random')).toStrictEqual(null);
     expect(getStageColorByHex()).toStrictEqual(null);
   });
