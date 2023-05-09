@@ -11,9 +11,9 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import configureStore from '../../../../../../../admin/src/core/store/configureStore';
-import ReviewWorkflowsPage from '..';
-import { reducer } from '../reducer';
+import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
+import ReviewWorkflowsEditView from '..';
+import { reducer } from '../../../reducer';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -71,7 +71,7 @@ const ComponentFixture = () => {
         <Provider store={store}>
           <IntlProvider locale="en" messages={{}}>
             <ThemeProvider theme={lightTheme}>
-              <ReviewWorkflowsPage />
+              <ReviewWorkflowsEditView />
             </ThemeProvider>
           </IntlProvider>
         </Provider>
@@ -87,7 +87,7 @@ const setup = (props) => {
   };
 };
 
-describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
+describe('Admin | Settings | Review Workflow | ReviewWorkflowsEditView', () => {
   beforeAll(() => {
     server.listen();
   });

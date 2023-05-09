@@ -16,16 +16,16 @@ import {
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
-import { Stages } from './components/Stages';
-import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
-import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflows } from './actions';
-import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../admin/src/permissions';
-import { StageDragPreview } from './components/StageDragPreview';
-import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+import { Stages } from '../../components/Stages';
+import { reducer, initialState } from '../../reducer';
+import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from '../../constants';
+import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
+import { setWorkflows } from '../../actions';
+import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
+import adminPermissions from '../../../../../../../../admin/src/permissions';
+import { StageDragPreview } from '../../components/StageDragPreview';
+import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 
 function renderDragLayerItem({ type, item }) {
   switch (type) {
@@ -37,7 +37,7 @@ function renderDragLayerItem({ type, item }) {
   }
 }
 
-export function ReviewWorkflowsPage() {
+export function ReviewWorkflowsEditView() {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
