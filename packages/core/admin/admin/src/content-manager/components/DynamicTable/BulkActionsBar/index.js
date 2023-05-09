@@ -214,34 +214,46 @@ const BulkActionsBar = ({
   };
 
   const handleBulkDelete = async () => {
+    let result = null;
+
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(selectedEntries);
+      result = await onConfirmDeleteAll(selectedEntries);
     } catch (err) {
       // The error is handled in content-manager/pages/ListView/index.js
       // handleConfirmDeleteAllData catch block
     } finally {
       setIsConfirmButtonLoading(false);
       toggleDeleteModal();
+    }
+
+    if (result) {
       clearSelectedEntries();
     }
   };
 
   const handleBulkPublish = async () => {
+    let result = null;
+
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmPublishAll(selectedEntries);
+      result = await onConfirmPublishAll(selectedEntries);
     } catch (error) {
       // The error is handled in content-manager/pages/ListView/index.js
       // bulkPublishMutation onError callback
     } finally {
       setIsConfirmButtonLoading(false);
       togglePublishModal();
+    }
+
+    if (result) {
       clearSelectedEntries();
     }
   };
 
   const handleBulkUnpublish = async () => {
+    let result = null;
+
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmUnpublishAll(selectedEntries);
@@ -251,6 +263,9 @@ const BulkActionsBar = ({
     } finally {
       setIsConfirmButtonLoading(false);
       toggleUnpublishModal();
+    }
+
+    if (result) {
       clearSelectedEntries();
     }
   };

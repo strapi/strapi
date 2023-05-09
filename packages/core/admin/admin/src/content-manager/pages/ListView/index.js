@@ -208,15 +208,20 @@ function ListView({
   const handleConfirmDeleteAllData = useCallback(
     async (ids) => {
       try {
-        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
-          ids,
-        });
+        const deleteResult = await post(
+          getRequestUrl(`collection-types/${slug}/actions/bulkDelete`),
+          {
+            ids,
+          }
+        );
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
         fetchData(requestUrl);
         trackUsageRef.current('didBulkDeleteEntries');
+
+        return deleteResult;
       } catch (err) {
-        toggleNotification({
+        return toggleNotification({
           type: 'warning',
           message: formatAPIError(err),
         });
