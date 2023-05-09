@@ -95,7 +95,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
     expect(crudReducer(state, action)).toEqual(expected);
   });
 
-  it('should handle the SUBMIt_SUCCEEDED action correctly', () => {
+  it('should handle the SUBMIT_SUCCEEDED action correctly', () => {
     const action = { type: SUBMIT_SUCCEEDED, data: 'test' };
 
     const expected = produce(state, (draft) => {

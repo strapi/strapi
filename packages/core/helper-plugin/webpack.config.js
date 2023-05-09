@@ -48,10 +48,6 @@ const baseConfig = {
       },
     ],
   },
-  resolve: {
-    extensions: ['*', '.js'],
-    cacheWithContext: false,
-  },
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',

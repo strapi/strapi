@@ -1,0 +1,38 @@
+---
+title: Review Workflows
+slug: /content-type-builder/review-workflows
+description: Guide for review workflows in the content-type-builder.
+tags:
+  - content-type-builder
+  - review-workflows
+---
+
+## Summary
+
+By **default review workflows are disabled on all content-types** and users have to enable one workflow
+per content-type. This can be achieved in the "Advanced Settings" Tab of the edit content-type
+modal.
+
+Similar to draft & publish review-workflows registers a new input component type called `toggle-review-workflows`
+which is used to render the checkbox component.
+
+**Note**: *Ideally the code should have been placed in the `ee` folder to be
+under the enterprise license, but neither the content-type-builder nor the babel-plugin to transpile the ee code had support for this.*
+
+## Endpoints
+
+### `PUT /content-type-builder/content-types/[content-type-uid]`
+
+Toggle review workflows for the content-type.
+
+#### Payload
+
+```ts
+{
+  components: [],
+  contentType: {
+    attributes: {},
+    reviewWorkflows: boolean
+  }
+}
+```

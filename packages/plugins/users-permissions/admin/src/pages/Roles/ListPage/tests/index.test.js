@@ -123,6 +123,33 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         padding-bottom: 24px;
       }
 
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c34 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+      }
+
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -241,33 +268,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
-      .c9 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c15 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c34 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-      }
-
       .c26 path {
         fill: #32324d;
       }
@@ -277,13 +277,13 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         outline: none;
       }
 
-      .c12 svg {
+      .c12 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c12 svg > g,
-      .c12 svg path {
+      .c12 > svg > g,
+      .c12 > svg path {
         fill: #ffffff;
       }
 
