@@ -77,8 +77,8 @@
     "rimraf": "3.0.2",
     "styled-components": "5.3.3",
     "typescript": "5.0.4",
-    "webpack": "^5.76.0",
-    "webpack-cli": "^5.0.1"
+    "webpack": "^5.82.0",
+    "webpack-cli": "^5.1.0"
   },
   "peerDependencies": {
     "@strapi/design-system": "^1.7.3",

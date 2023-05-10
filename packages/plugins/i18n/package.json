@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@testing-library/react": "12.1.4",
-    "msw": "1.0.1",
+    "msw": "1.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",
