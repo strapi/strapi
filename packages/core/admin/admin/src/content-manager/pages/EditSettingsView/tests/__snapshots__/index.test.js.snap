@@ -2604,20 +2604,20 @@ exports[`EditSettingsView should add field 1`] = `
                     >
                       <label
                         class="c9 c24 c25"
-                        for="12"
+                        for="13"
                       >
                         Entry title
                       </label>
                       <div
                         aria-autocomplete="none"
                         aria-controls="radix-3"
-                        aria-describedby="12-hint 12-error"
+                        aria-describedby="13-hint 13-error"
                         aria-expanded="false"
                         aria-label="Entry title"
                         class="c26 c27 c28"
                         data-state="closed"
                         dir="ltr"
-                        id="12"
+                        id="13"
                         overflow="hidden"
                         role="combobox"
                         tabindex="0"
@@ -2661,7 +2661,7 @@ exports[`EditSettingsView should add field 1`] = `
                       </div>
                       <p
                         class="c9 c35"
-                        id="12-hint"
+                        id="13-hint"
                       >
                         Set the display field of your entry
                       </p>
@@ -2824,7 +2824,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="13"
+                                      aria-labelledby="14"
                                       class="c59 c60 c13 c61 c62"
                                       tabindex="0"
                                       type="button"
@@ -2855,7 +2855,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="14"
+                                      aria-labelledby="15"
                                       class="c59 c60 c13 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
@@ -2963,7 +2963,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="15"
+                                      aria-labelledby="16"
                                       class="c59 c60 c13 c61 c62"
                                       tabindex="0"
                                       type="button"
@@ -2994,7 +2994,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <span>
                                     <button
                                       aria-disabled="false"
-                                      aria-labelledby="16"
+                                      aria-labelledby="17"
                                       class="c59 c60 c13 c61 c62"
                                       data-testid="delete-field"
                                       tabindex="0"
