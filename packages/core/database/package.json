@@ -33,7 +33,7 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/utils": "4.10.2",
+    "@strapi/utils": "4.10.4",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
