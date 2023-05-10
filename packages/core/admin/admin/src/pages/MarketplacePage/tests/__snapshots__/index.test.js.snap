@@ -126,7 +126,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 }
 
 .c68 {
-  background: #dcdce4;
+  background: #eaeaef;
 }
 
 .c71 {
@@ -1200,7 +1200,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 sc-dwFVFH c11 c12 c13 c14"
+              class="c10 sc-DtmNo c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1593,7 +1593,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Comments"
-                          class="c10 sc-dwFVFH c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-comments"
                           target="_self"
                         >
@@ -1720,7 +1720,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="1"
+                                  aria-describedby="2"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1761,7 +1761,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Config Sync"
-                          class="c10 sc-dwFVFH c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                           target="_self"
                         >
@@ -1790,7 +1790,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="2"
+                            aria-describedby="3"
                             class=""
                             tabindex="0"
                           >
@@ -1914,7 +1914,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Content Versioning"
-                          class="c10 sc-dwFVFH c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                           target="_self"
                         >
@@ -1943,7 +1943,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="3"
+                            aria-describedby="4"
                             class=""
                             tabindex="0"
                           >
@@ -2090,7 +2090,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="4"
+                                  aria-describedby="5"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2121,7 +2121,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Documentation"
-                          class="c10 sc-dwFVFH c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                           target="_self"
                         >
@@ -2256,7 +2256,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Transformer"
-                          class="c10 sc-dwFVFH c11 c12 c13 c14"
+                          class="c10 sc-DtmNo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                           target="_self"
                         >
@@ -2285,7 +2285,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="5"
+                            aria-describedby="6"
                             class=""
                             tabindex="0"
                           >
@@ -2349,17 +2349,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 >
                   <label
                     class="c8 c30 c31"
-                    for="7"
+                    for="8"
                   />
                   <div
                     aria-autocomplete="none"
                     aria-controls="radix-5"
-                    aria-describedby="7-hint 7-error"
+                    aria-describedby="8-hint 8-error"
                     aria-expanded="false"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
-                    id="7"
+                    id="8"
                     overflow="hidden"
                     role="combobox"
                     tabindex="0"
