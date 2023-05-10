@@ -1360,10 +1360,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c5 c54 c37"
                       >
                         <button
-                          aria-controls="accordion-content-8"
+                          aria-controls="accordion-content-10"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-8"
+                          aria-labelledby="accordion-label-10"
                           class="c5 c55 c11 c56 c57"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -1373,7 +1373,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c9 c59"
-                              id="accordion-label-8"
+                              id="accordion-label-10"
                             >
                               Address
                             </span>
@@ -1419,10 +1419,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c5 c54 c37"
                       >
                         <button
-                          aria-controls="accordion-content-9"
+                          aria-controls="accordion-content-11"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-9"
+                          aria-labelledby="accordion-label-11"
                           class="c5 c55 c11 c56 c57"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -1432,7 +1432,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c9 c59"
-                              id="accordion-label-9"
+                              id="accordion-label-11"
                             >
                               Category
                             </span>
@@ -2786,7 +2786,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         >
                           <label
                             class="c9 c31 c32"
-                            for="12"
+                            for="14"
                           >
                             Name
                             <span
@@ -2803,7 +2803,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="true"
                               class="c36"
-                              id="12"
+                              id="14"
                               name="name"
                               value="My super token"
                             />
@@ -2833,7 +2833,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <label
                               class="c9 c31 c32"
-                              for="14"
+                              for="16"
                             >
                               Description
                             </label>
@@ -2845,7 +2845,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-invalid="false"
                               aria-required="false"
                               class="c39"
-                              id="14"
+                              id="16"
                               name="description"
                             >
                               This describe my super token
@@ -2870,7 +2870,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <label
                           class="c9 c31 c32"
-                          for="16"
+                          for="18"
                         >
                           Token duration
                           <span
@@ -2882,7 +2882,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <div
                           aria-autocomplete="none"
                           aria-controls="radix-9"
-                          aria-describedby="16-hint 16-error"
+                          aria-describedby="18-hint 18-error"
                           aria-disabled="true"
                           aria-expanded="false"
                           aria-label="Token duration"
@@ -2891,7 +2891,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           data-disabled=""
                           data-state="closed"
                           dir="ltr"
-                          id="16"
+                          id="18"
                           overflow="hidden"
                           role="combobox"
                         >
@@ -2957,7 +2957,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <label
                           class="c9 c31 c32"
-                          for="18"
+                          for="20"
                         >
                           Token type
                           <span
@@ -2969,7 +2969,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         <div
                           aria-autocomplete="none"
                           aria-controls="radix-10"
-                          aria-describedby="18-hint 18-error"
+                          aria-describedby="20-hint 20-error"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-label="Token type"
@@ -2977,7 +2977,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           class="c5 c50 c41 c42"
                           data-state="closed"
                           dir="ltr"
-                          id="18"
+                          id="20"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -3064,10 +3064,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c5 c62 c44"
                       >
                         <button
-                          aria-controls="accordion-content-19"
+                          aria-controls="accordion-content-23"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-19"
+                          aria-labelledby="accordion-label-23"
                           class="c5 c63 c11 c64 c65"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -3077,7 +3077,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c9 c67"
-                              id="accordion-label-19"
+                              id="accordion-label-23"
                             >
                               Address
                             </span>
@@ -3123,10 +3123,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         class="c5 c62 c44"
                       >
                         <button
-                          aria-controls="accordion-content-20"
+                          aria-controls="accordion-content-24"
                           aria-disabled="false"
                           aria-expanded="false"
-                          aria-labelledby="accordion-label-20"
+                          aria-labelledby="accordion-label-24"
                           class="c5 c63 c11 c64 c65"
                           data-strapi-accordion-toggle="true"
                           type="button"
@@ -3136,7 +3136,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <span
                               class="c9 c67"
-                              id="accordion-label-20"
+                              id="accordion-label-24"
                             >
                               Category
                             </span>

@@ -2025,7 +2025,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         >
                           <label
                             class="c8 c30 c31"
-                            for="10"
+                            for="12"
                           >
                             Name
                             <span
@@ -2042,7 +2042,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="true"
                               class="c35"
-                              id="10"
+                              id="12"
                               name="name"
                               value="My super token"
                             />
@@ -2072,7 +2072,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           >
                             <label
                               class="c8 c30 c31"
-                              for="12"
+                              for="14"
                             >
                               Description
                             </label>
@@ -2084,7 +2084,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="false"
                               class="c38"
-                              id="12"
+                              id="14"
                               name="description"
                             >
                               This describe my super token
@@ -2109,7 +2109,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for="14"
+                          for="16"
                         >
                           Token duration
                           <span
@@ -2121,7 +2121,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         <div
                           aria-autocomplete="none"
                           aria-controls="radix-9"
-                          aria-describedby="14-hint 14-error"
+                          aria-describedby="16-hint 16-error"
                           aria-disabled="true"
                           aria-expanded="false"
                           aria-label="Token duration"
@@ -2130,7 +2130,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           data-disabled=""
                           data-state="closed"
                           dir="ltr"
-                          id="14"
+                          id="16"
                           overflow="hidden"
                           role="combobox"
                         >
@@ -2196,7 +2196,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for="16"
+                          for="18"
                         >
                           Token type
                           <span
@@ -2208,7 +2208,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         <div
                           aria-autocomplete="none"
                           aria-controls="radix-10"
-                          aria-describedby="16-hint 16-error"
+                          aria-describedby="18-hint 18-error"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-label="Token type"
@@ -2216,7 +2216,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                           class="c49 c40 c41"
                           data-state="closed"
                           dir="ltr"
-                          id="16"
+                          id="18"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
