@@ -6,7 +6,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
-const { hasProhibitedCloningFields } = require('./utils/clone');
+const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
 
 module.exports = {
   async find(ctx) {
@@ -157,8 +157,14 @@ module.exports = {
     const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
+    const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(
+      pickWritables,
+      pickPermittedFields,
+      setCreator,
+      excludeNotCreatable
+    );
 
     const sanitizedBody = await sanitizeFn(body);
 
