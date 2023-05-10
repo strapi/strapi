@@ -8,7 +8,6 @@ import { TableList } from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useQueryParams: jest.fn(() => [{ query: {} }]),
 }));
 
