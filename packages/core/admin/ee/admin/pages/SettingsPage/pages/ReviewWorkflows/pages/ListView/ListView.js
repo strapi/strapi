@@ -9,6 +9,7 @@ import {
   Flex,
   HeaderLayout,
   Layout,
+  Loader,
   Main,
   Table,
   Thead,
@@ -50,7 +51,7 @@ export function ReviewWorkflowsListView() {
   const { push } = useHistory();
   const { workflows: workflowsData } = useReviewWorkflows();
   const dispatch = useDispatch();
-  const workflows = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const { status, serverState } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
@@ -81,6 +82,15 @@ export function ReviewWorkflowsListView() {
           />
 
           <ContentLayout>
+            {status === 'loading' && (
+              <Loader>
+                {formatMessage({
+                  id: 'Settings.review-workflows.page.list.isLoading',
+                  defaultMessage: 'Workflows are loading',
+                })}
+              </Loader>
+            )}
+
             <Table colCount={3} rowCount={1}>
               <Thead>
                 <Tr>
@@ -112,8 +122,11 @@ export function ReviewWorkflowsListView() {
               </Thead>
 
               <Tbody>
-                {workflows?.serverState?.workflows.map((workflow) => (
-                  <Tr onClick={() => push(`/settings/review-workflows/${workflow.id}`)}>
+                {serverState?.workflows.map((workflow) => (
+                  <Tr
+                    onClick={() => push(`/settings/review-workflows/${workflow.id}`)}
+                    key={`workflow-${workflow.id}`}
+                  >
                     <Td width={pxToRem(250)}>
                       <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                         {formatMessage({

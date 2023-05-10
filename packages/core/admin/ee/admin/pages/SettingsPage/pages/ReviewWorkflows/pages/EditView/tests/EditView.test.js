@@ -87,7 +87,7 @@ const setup = (props) => {
   };
 };
 
-describe('Admin | Settings | Review Workflow | ReviewWorkflowsEditView', () => {
+describe('Admin | Settings | Review Workflow | EditView', () => {
   beforeAll(() => {
     server.listen();
   });
