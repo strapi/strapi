@@ -2,6 +2,7 @@ import instance from '../fetchClient';
 
 const addPrependingSlash = (url) => (typeof url === 'string' && url.charAt(0) !== '/') ? `/${url}` : url;
 
+//This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
 const isFullUrl = (url) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
 
 // check if the url has a prepending slash, if not it adds the slash

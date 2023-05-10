@@ -82,7 +82,7 @@ const UseCasePage = () => {
   const handleSubmit = async (event, skipPersona) => {
     event.preventDefault();
     try {
-      const dataToSend = {
+      await post('https://analytics.strapi.io/register', {
         email,
         username: firstname,
         firstAdmin: Boolean(!hasAdmin),
@@ -90,8 +90,7 @@ const UseCasePage = () => {
           role: skipPersona ? undefined : role,
           otherRole: skipPersona ? undefined : otherRole,
         },
-      };
-      await post('https://analytics.strapi.io/register', dataToSend);
+      });
 
       toggleNotification({
         type: 'success',
