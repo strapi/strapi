@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { useTracking } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
+import { listViewDomain } from '../../../pages/ListView/selectors';
 
 const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
   const { formatMessage } = useIntl();
@@ -183,8 +185,17 @@ const BulkActionsBar = ({
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { data } = useSelector(listViewDomain());
+
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [dialogToOpen, setDialogToOpen] = useState(null);
+
+  // Filters for Bulk actions
+  const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
+  const publishButtonIsShown =
+    showPublish && selectedEntriesObjects.some((entry) => !entry.publishedAt);
+  const unpublishButtonIsShown =
+    showPublish && selectedEntriesObjects.some((entry) => entry.publishedAt);
 
   const toggleDeleteModal = () => {
     if (dialogToOpen === 'delete') {
@@ -232,13 +243,10 @@ const BulkActionsBar = ({
 
   return (
     <>
-      {showPublish && (
+      {publishButtonIsShown && (
         <>
           <Button variant="tertiary" onClick={togglePublishModal}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-          </Button>
-          <Button variant="tertiary" onClick={toggleUnpublishModal}>
-            {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
@@ -246,6 +254,13 @@ const BulkActionsBar = ({
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkPublish}
           />
+        </>
+      )}
+      {unpublishButtonIsShown && (
+        <>
+          <Button variant="tertiary" onClick={toggleUnpublishModal}>
+            {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
+          </Button>
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
             onToggleDialog={toggleUnpublishModal}
