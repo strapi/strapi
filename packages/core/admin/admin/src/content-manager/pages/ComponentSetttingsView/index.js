@@ -22,7 +22,6 @@ const ComponentSettingsView = () => {
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
-  
     const fetchData = async (source) => {
       try {
         dispatch(getData());

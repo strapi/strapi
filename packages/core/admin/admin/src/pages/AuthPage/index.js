@@ -143,7 +143,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       trackUsage('willCreateFirstAdmin');
-      
       const {
         data: {
           data: { token, user },

@@ -23,11 +23,9 @@ const useFetchContentTypeLayout = (contentTypeUID) => {
       dispatch({ type: 'GET_DATA' });
 
       try {
-        const endPoint = `/content-manager/content-types/${uid}/configuration`;
-
         const {
           data: { data },
-        } = await get(endPoint, { cancelToken: source.token });
+        } = await get( `/content-manager/content-types/${uid}/configuration`, { cancelToken: source.token });
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',

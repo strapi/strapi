@@ -17,7 +17,7 @@ export const urlsToAssets = async (urls) => {
         const loadedFile = new File([res.data], getFilenameFromURL(res.config.url), {
           type: res.headers['content-type'],
         });
-        
+                
         return {
           name: loadedFile.name,
           url: res.config.url,
