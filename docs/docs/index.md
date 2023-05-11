@@ -11,7 +11,7 @@ This documentation site is a constant WIP so please, continue to add and improve
 
 ## Guides
 
-This is where you'll probably want to start off. We have our contributing guides & code of conduct which are very important to read. There's also useful guides on common situations whilst developing such as ["Working with the Design System"](/guides/working-with-the-design-system). Or more high level guides such as best practices for frontend development (coming soon).
+This is where you'll probably want to start off. We have our contributing guides & code of conduct which are very important to read. There are also useful guides on common situations whilst developing such as ["Working with the Design System"](/guides/working-with-the-design-system) and higher-level guides such as best practices for frontend development (coming soon).
 
 ## Docs
 
