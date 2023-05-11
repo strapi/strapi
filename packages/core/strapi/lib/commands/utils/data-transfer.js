@@ -284,11 +284,7 @@ const getDiffHandler = (engine, { force, action }) => {
 
     Object.entries(context.diffs).forEach(([uid, diffs]) => {
       for (const diff of diffs) {
-        let path = `${uid}.${diff.path.join('.')}`;
-        if (path.endsWith('.')) {
-          // remove trailing periods
-          path = path.slice(0, -1);
-        }
+        const path = [uid].concat(diff.path).join('.');
         const endPath = diff.path[diff.path.length - 1];
 
         // Catch known features
