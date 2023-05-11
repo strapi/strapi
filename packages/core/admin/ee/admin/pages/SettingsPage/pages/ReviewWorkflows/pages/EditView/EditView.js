@@ -7,6 +7,7 @@ import { useMutation } from 'react-query';
 import {
   CheckPagePermissions,
   ConfirmDialog,
+  Link,
   SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
@@ -14,7 +15,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { ArrowLeft, Check } from '@strapi/icons';
 
 import { Stages } from '../../components/Stages';
 import { reducer, initialState } from '../../reducer';
@@ -147,6 +148,14 @@ export function ReviewWorkflowsEditView() {
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <HeaderLayout
+                navigationAction={
+                  <Link startIcon={<ArrowLeft />} to="/settings/review-workflows">
+                    {formatMessage({
+                      id: 'global.back',
+                      defaultMessage: 'Back',
+                    })}
+                  </Link>
+                }
                 primaryAction={
                   <Button
                     startIcon={<Check />}
