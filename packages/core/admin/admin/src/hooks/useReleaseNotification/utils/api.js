@@ -3,10 +3,14 @@ import packageJSON from '../../../../../package.json';
 const strapiVersion = packageJSON.version;
 const fetchStrapiLatestRelease = async () => {
   try {
-    const { tag_name } = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest').then(res => res.json()).catch(() => {});
-    
-    return tag_name;
+    const res = await fetch('https://api.github.com/repos/strapi/strapi/releases/latest');
 
+    if (!res.ok) {
+      throw new Error('Failed to fetch latest Strapi version.');
+    }
+    const { tag_name } = await res.json();
+
+    return tag_name;
   } catch (err) {
     // Don't throw an error
     return strapiVersion;

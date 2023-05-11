@@ -35,7 +35,7 @@ global.Image = class extends Image {
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   getFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({ 
+    get: jest.fn().mockResolvedValue({
       data: new Blob(['my-image'], { type: 'image/png' }),
       headers: {
         'content-type': 'image/png',

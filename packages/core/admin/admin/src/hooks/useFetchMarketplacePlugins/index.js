@@ -1,24 +1,30 @@
 import { useQuery } from 'react-query';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import qs from 'qs';
 
 const MARKETPLACE_API_URL = 'https://market-api.strapi.io';
 
-const useFetchMarketplacePlugins = (notifyLoad, params) => {
-  const toggleNotification = useNotification();
-  const { get } = useFetchClient();
+const fetchMarketplacePlugins = async (params = {}) => {
+  try {
+    const queryString = qs.stringify(qs.parse(params));
+    const res = await fetch(`${MARKETPLACE_API_URL}/plugins?${queryString}`);
 
-  const fetchMarketplacePlugins = async (params = {}) => {
-    const { data } = await get(`${MARKETPLACE_API_URL}/plugins`, {
-      params,
-      paramsSerializer: {
-        encode: qs.parse,
-        serialize: qs.stringify,
-      },
-    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch marketplace plugins.');
+    }
+
+    const data = await res.json();
 
     return data;
-  };
+  } catch (error) {
+    console.error(error);
+  }
+
+  return null;
+};
+
+const useFetchMarketplacePlugins = (notifyLoad, params) => {
+  const toggleNotification = useNotification();
 
   return useQuery(['list-marketplace-plugins', params], () => fetchMarketplacePlugins(params), {
     onSuccess() {

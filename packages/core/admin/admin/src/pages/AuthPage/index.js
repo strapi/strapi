@@ -106,7 +106,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           data: { token, user },
         },
       } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
-      
+
       if (user.preferedLanguage) {
         changeLocale(user.preferedLanguage);
       }
@@ -198,7 +198,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await post(requestURL, { ...body, resetPasswordToken: query.get('code') }, { cancelToken: source.token });
+      } = await post(
+        requestURL,
+        { ...body, resetPasswordToken: query.get('code') },
+        { cancelToken: source.token }
+      );
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
