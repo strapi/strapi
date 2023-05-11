@@ -10219,16 +10219,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/sqlite3@npm:5.1.2":
-  version: 5.1.2
-  resolution: "@vscode/sqlite3@npm:5.1.2"
-  dependencies:
-    node-addon-api: ^4.2.0
-    node-gyp: latest
-  checksum: d3f43cc9582b46841906193500c40dcf448bb85954c8d6260e9fbd524f440a298a6d589a28a89f1c331ce0ebc831ebf814fb3cbcb0061498aa6932161f88dec5
-  languageName: node
-  linkType: hard
-
 "@webassemblyjs/ast@npm:1.11.1":
   version: 1.11.1
   resolution: "@webassemblyjs/ast@npm:1.11.1"
@@ -18352,7 +18342,6 @@ __metadata:
     "@strapi/provider-upload-aws-s3": 4.10.5
     "@strapi/provider-upload-cloudinary": 4.10.5
     "@strapi/strapi": 4.10.5
-    "@vscode/sqlite3": 5.1.2
     better-sqlite3: 8.3.0
     lodash: 4.17.21
     mysql: 2.18.1
