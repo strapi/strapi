@@ -2,7 +2,7 @@
 title: Introduction
 ---
 
-Hello & welcome to the documentation of the Strapi Monorepo! Here you'll find both technical and conceptual documentation on the codebase.
+Hello & welcome to the contributor documentation of the Strapi Monorepo! Here you'll find both technical and conceptual documentation on the codebase.
 
 Generally speaking the documentation structure is as follows:
 
