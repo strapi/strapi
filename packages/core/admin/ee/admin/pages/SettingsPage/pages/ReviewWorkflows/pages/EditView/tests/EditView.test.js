@@ -62,27 +62,25 @@ const client = new QueryClient({
   },
 });
 
-const ComponentFixture = () => {
-  const store = configureStore([], [reducer]);
-
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <QueryClientProvider client={client}>
-        <Provider store={store}>
-          <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>
-              <ReviewWorkflowsEditView />
-            </ThemeProvider>
-          </IntlProvider>
-        </Provider>
-      </QueryClientProvider>
-    </DndProvider>
-  );
-};
-
 const setup = (props) => {
   return {
-    ...render(<ComponentFixture {...props} />),
+    ...render(<ReviewWorkflowsEditView {...props} />, {
+      wrapper({ children }) {
+        const store = configureStore([], [reducer]);
+
+        return (
+          <DndProvider backend={HTML5Backend}>
+            <QueryClientProvider client={client}>
+              <Provider store={store}>
+                <IntlProvider locale="en" messages={{}}>
+                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                </IntlProvider>
+              </Provider>
+            </QueryClientProvider>
+          </DndProvider>
+        );
+      },
+    }),
     user: userEvent.setup(),
   };
 };

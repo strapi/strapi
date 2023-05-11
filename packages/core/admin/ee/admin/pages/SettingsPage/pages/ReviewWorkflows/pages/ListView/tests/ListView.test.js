@@ -49,27 +49,25 @@ const client = new QueryClient({
   },
 });
 
-const ComponentFixture = () => {
-  const store = configureStore([], [reducer]);
-
-  return (
-    <MemoryRouter>
-      <QueryClientProvider client={client}>
-        <Provider store={store}>
-          <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>
-              <ReviewWorkflowsListView />
-            </ThemeProvider>
-          </IntlProvider>
-        </Provider>
-      </QueryClientProvider>
-    </MemoryRouter>
-  );
-};
-
 const setup = (props) => {
   return {
-    ...render(<ComponentFixture {...props} />),
+    ...render(<ReviewWorkflowsListView {...props} />, {
+      wrapper({ children }) {
+        const store = configureStore([], [reducer]);
+
+        return (
+          <MemoryRouter>
+            <QueryClientProvider client={client}>
+              <Provider store={store}>
+                <IntlProvider locale="en" messages={{}}>
+                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                </IntlProvider>
+              </Provider>
+            </QueryClientProvider>
+          </MemoryRouter>
+        );
+      },
+    }),
     user: userEvent.setup(),
   };
 };
