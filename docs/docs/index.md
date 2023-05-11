@@ -15,7 +15,7 @@ This is where you'll probably want to start off. We have our contributing guides
 
 ## Docs
 
-Within the docs section we have a multitude of both technical and conceptual documentation diving deep into particular parts of the Strapi monorepo that may not make as much sense just reading the code like ["Relations reordering in the database"](/docs/core/database/relations/reordering). There's also usage documentation for various pieces of code such as the [useDragAndDrop](/docs/core/content-manager/hooks/use-drag-and-drop) hook.
+Within the docs section we have a multitude of both technical and conceptual documentation diving deep into particular parts of the Strapi monorepo that may not make as much sense as just reading the code, like ["Relations reordering in the database"](/docs/core/database/relations/reordering). There's also usage documentation for various pieces of code such as the [useDragAndDrop](/docs/core/content-manager/hooks/use-drag-and-drop) hook.
 
 ## API Reference
 
