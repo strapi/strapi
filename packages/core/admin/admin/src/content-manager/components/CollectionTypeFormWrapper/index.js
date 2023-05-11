@@ -242,7 +242,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
        * are correctly attached to the entry.
        */
       const endPoint =
-        typeof origin !== 'undefined'
+        typeof origin === 'string'
           ? `${getRequestUrl(`collection-types/${slug}/clone/${origin}`)}${rawQuery}`
           : `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
       try {
