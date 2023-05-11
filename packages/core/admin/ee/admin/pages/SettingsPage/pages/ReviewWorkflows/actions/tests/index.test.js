@@ -1,19 +1,19 @@
-import { setWorkflows, deleteStage, updateStage, addStage } from '..';
+import { setWorkflow, deleteStage, updateStage, addStage } from '..';
 
 import {
-  ACTION_SET_WORKFLOWS,
+  ACTION_SET_WORKFLOW,
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
 } from '../../constants';
 
 describe('Admin | Settings | Review Workflow | actions', () => {
-  test('setWorkflows()', () => {
-    expect(setWorkflows({ status: 'loading', data: null, something: 'else' })).toStrictEqual({
-      type: ACTION_SET_WORKFLOWS,
+  test('setWorkflow()', () => {
+    expect(setWorkflow({ status: 'loading', data: null, something: 'else' })).toStrictEqual({
+      type: ACTION_SET_WORKFLOW,
       payload: {
         status: 'loading',
-        workflows: null,
+        workflow: null,
       },
     });
   });

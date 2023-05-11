@@ -12,7 +12,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import { Stages } from '../Stages';
 import { reducer } from '../../../reducer';
-import { ACTION_SET_WORKFLOWS, STAGE_COLOR_DEFAULT } from '../../../constants';
+import { ACTION_SET_WORKFLOW, STAGE_COLOR_DEFAULT } from '../../../constants';
 import * as actions from '../../../actions';
 
 // without mocking actions as ESM it is impossible to spy on named exports
@@ -45,7 +45,7 @@ const WORKFLOWS_FIXTURE = [
 const ComponentFixture = (props) => {
   const store = configureStore([], [reducer]);
 
-  store.dispatch({ type: ACTION_SET_WORKFLOWS, payload: { workflows: WORKFLOWS_FIXTURE } });
+  store.dispatch({ type: ACTION_SET_WORKFLOW, payload: { workflows: WORKFLOWS_FIXTURE } });
 
   const formik = useFormik({
     enableReinitialize: true,
