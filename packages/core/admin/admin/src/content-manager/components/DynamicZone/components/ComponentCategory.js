@@ -38,7 +38,7 @@ export const ComponentCategory = ({
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { displayName } }) => (
+            {components.map(({ componentUid, info: { displayName, icon } }) => (
               <ComponentBox
                 key={componentUid}
                 as="button"
@@ -52,7 +52,7 @@ export const ComponentCategory = ({
                 borderColor="neutral200"
               >
                 <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
-                  <ComponentIcon />
+                  <ComponentIcon icon={icon} />
 
                   <Typography variant="pi" fontWeight="bold" textColor="neutral600">
                     {formatMessage({ id: displayName, defaultMessage: displayName })}

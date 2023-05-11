@@ -1,4 +1,5 @@
 import React from 'react';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -25,6 +26,12 @@ const CustomLink = styled(Flex)`
     > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
     }
   }
 `;
@@ -49,7 +56,7 @@ const DynamicZoneList = ({ components }) => {
           as={Link}
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
-          <ComponentIcon />
+          <ComponentIcon icon={get(componentLayouts, [componentUid, 'info', 'icon'], '')} />
 
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">

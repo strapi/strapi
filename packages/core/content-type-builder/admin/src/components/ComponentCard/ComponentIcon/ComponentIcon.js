@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Flex, Icon } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 
 const Wrapper = styled(Flex)`
@@ -34,7 +34,7 @@ export function ComponentIcon({ isActive, icon }) {
       background={isActive ? 'primary200' : 'neutral200'}
       justifyContent="center"
     >
-      <Icon as={ComponentIcon} />
+      <ComponentIcon />
     </Wrapper>
   );
 }
