@@ -124,7 +124,7 @@ export function ReviewWorkflowsListView() {
               <Tbody>
                 {serverState?.workflows.map((workflow) => (
                   <Tr
-                    onClick={() => push(`/settings/review-workflows/${workflow.id}`)}
+                    onRowClick={() => push(`/settings/review-workflows/${workflow.id}`)}
                     key={`workflow-${workflow.id}`}
                   >
                     <Td width={pxToRem(250)}>
