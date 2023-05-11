@@ -297,12 +297,12 @@ const getDiffHandler = (engine, { force, action }) => {
         }
         // handle generic cases
         else if (diff.kind === 'added') {
+          engine.reportWarning(chalk.red(`${chalk.bold(path)} does not exist on source`), source);
+        } else if (diff.kind === 'deleted') {
           engine.reportWarning(
             chalk.red(`${chalk.bold(path)} does not exist on destination`),
             source
           );
-        } else if (diff.kind === 'deleted') {
-          engine.reportWarning(chalk.red(`${chalk.bold(path)} does not exist on source`), source);
         } else if (diff.kind === 'modified') {
           engine.reportWarning(chalk.red(`${chalk.bold(path)} has a different data type`), source);
         }
@@ -311,12 +311,12 @@ const getDiffHandler = (engine, { force, action }) => {
 
     // output the known feature warnings
     if (workflowsStatus === 'added') {
+      engine.reportWarning(chalk.red(`Review workflows feature does not exist on source`), source);
+    } else if (workflowsStatus === 'deleted') {
       engine.reportWarning(
         chalk.red(`Review workflows feature does not exist on destination`),
         source
       );
-    } else if (workflowsStatus === 'deleted') {
-      engine.reportWarning(chalk.red(`Review workflows feature does not exist on source`), source);
     } else if (workflowsStatus === 'modified') {
       engine.panic(
         new TransferEngineInitializationError('Unresolved differences in schema [review workflows]')
