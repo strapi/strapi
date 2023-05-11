@@ -23,4 +23,4 @@ An advanced deep dive into some of the core driving classes of Strapi with expla
 
 ## RFCs
 
-A growing section we intend to populate over time with public facing RFCs once approve as a record. These assist in understanding the design direction of features and code to understand the contextual "whys" that may not be apparent.
+A growing section we intend to populate over time with public-facing RFCs once approved to maintain as a record. These assist in understanding the design direction of features and code to understand the contextual "whys" that may not be apparent.
