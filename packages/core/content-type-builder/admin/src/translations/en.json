@@ -197,5 +197,7 @@
   "table.button.no-fields": "Add new field",
   "table.content.create-first-content-type": "Create your first Collection-Type",
   "table.content.no-fields.collection-type": "Add your first field to this Collection-Type",
-  "table.content.no-fields.component": "Add your first field to this component"
+  "table.content.no-fields.component": "Add your first field to this component",
+  "IconPicker.search.placeholder": "Search for an icon",
+  "IconPicker.search.clear.label": "Clearing the icon search"
 }
