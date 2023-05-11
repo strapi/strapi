@@ -59,6 +59,12 @@ const ComponentBox = styled(Flex)`
     > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
     }
   }
 `;
@@ -66,7 +72,7 @@ const ComponentBox = styled(Flex)`
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
-    schema: { displayName },
+    schema: { icon, displayName },
   } = get(modifiedData, ['components', component], { schema: {} });
 
   const onClose = (e) => {
@@ -88,7 +94,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       type="button"
       onClick={onClick}
     >
-      <ComponentIcon isActive={isActive} />
+      <ComponentIcon icon={icon} isActive={isActive} />
 
       <Box marginTop={1} maxWidth="100%">
         <Typography variant="pi" fontWeight="bold" ellipsis>
