@@ -6,11 +6,6 @@ import { NotificationsProvider } from '@strapi/helper-plugin';
 
 import DeleteButton from '../index';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
-
 function ComponentToTest(props) {
   return (
     <IntlProvider locale="en" messages={{}}>

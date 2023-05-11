@@ -10,7 +10,6 @@ import { SingleSignOn } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn().mockImplementation(() => jest.fn()),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
   useRBAC: jest.fn(),

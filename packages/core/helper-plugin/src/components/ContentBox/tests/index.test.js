@@ -34,6 +34,19 @@ describe('ContentBox', () => {
         border-radius: 4px;
       }
 
+      .c5 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 500;
+        color: #32324d;
+      }
+
+      .c7 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -61,19 +74,6 @@ describe('ContentBox', () => {
         -ms-flex-direction: column;
         flex-direction: column;
         gap: 4px;
-      }
-
-      .c5 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 500;
-        color: #32324d;
-      }
-
-      .c7 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
       }
 
       .c3 {

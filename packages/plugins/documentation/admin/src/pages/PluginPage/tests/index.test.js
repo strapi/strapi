@@ -126,6 +126,40 @@ describe('Plugin | Documentation | PluginPage', () => {
         cursor: pointer;
       }
 
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c27 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c31 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -209,52 +243,18 @@ describe('Plugin | Documentation | PluginPage', () => {
         justify-content: center;
       }
 
-      .c9 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c15 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c27 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c31 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c12 {
         position: relative;
         outline: none;
       }
 
-      .c12 svg {
+      .c12 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c12 svg > g,
-      .c12 svg path {
+      .c12 > svg > g,
+      .c12 > svg path {
         fill: #ffffff;
       }
 

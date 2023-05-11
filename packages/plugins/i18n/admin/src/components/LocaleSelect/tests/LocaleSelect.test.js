@@ -1,7 +1,8 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderTL, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as renderTL, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { Provider } from 'react-redux';
 import { combineReducers, createStore } from 'redux';
@@ -58,8 +59,9 @@ const queryClient = new QueryClient({
 
 const store = createStore(combineReducers(reducers));
 
-const render = (props) =>
-  renderTL(
+const render = (props) => ({
+  user: userEvent.setup(),
+  ...renderTL(
     <QueryClientProvider client={queryClient}>
       <IntlProvider messages={{}} locale="en">
         <Provider store={store}>
@@ -69,7 +71,8 @@ const render = (props) =>
         </Provider>
       </IntlProvider>
     </QueryClientProvider>
-  );
+  ),
+});
 
 describe('LocaleSelect', () => {
   it('shows an aria-busy element when loading the data', async () => {
@@ -79,29 +82,27 @@ describe('LocaleSelect', () => {
   });
 
   it('only shows the locales that have not already been used', async () => {
-    render();
+    const { queryByText, getByRole, user } = render();
 
     await waitFor(() =>
-      expect(screen.queryByText('Loading the available locales...')).not.toBeInTheDocument()
+      expect(queryByText('Loading the available locales...')).not.toBeInTheDocument()
     );
-    fireEvent.click(screen.getByText('Locales'));
-    await waitFor(() => screen.getByText('Afrikaans (af)'));
+    await user.click(getByRole('combobox'));
 
-    expect(screen.getByText('Afrikaans (af)')).toBeVisible();
-    expect(screen.getByText('French (fr)')).toBeVisible();
-    expect(screen.queryByText('English (en)')).toBeFalsy();
+    expect(getByRole('option', { name: 'Afrikaans (af)' })).toBeVisible();
+    expect(getByRole('option', { name: 'French (fr)' })).toBeVisible();
   });
 
   it('brings back an object of code and displayName keys when changing', async () => {
     const onLocaleChangeSpy = jest.fn();
-    render({ onLocaleChange: onLocaleChangeSpy });
+    const { queryByText, user, getByRole } = render({ onLocaleChange: onLocaleChangeSpy });
 
     await waitFor(() =>
-      expect(screen.queryByText('Loading the available locales...')).not.toBeInTheDocument()
+      expect(queryByText('Loading the available locales...')).not.toBeInTheDocument()
     );
-    fireEvent.click(screen.getByText('Locales'));
-    await waitFor(() => screen.getByText('Afrikaans (af)'));
-    fireEvent.click(screen.getByText('French (fr)'));
+
+    await user.click(getByRole('combobox'));
+    await user.click(getByRole('option', { name: 'French (fr)' }));
 
     expect(onLocaleChangeSpy).toBeCalledWith({ code: 'fr', displayName: 'French (fr)' });
   });

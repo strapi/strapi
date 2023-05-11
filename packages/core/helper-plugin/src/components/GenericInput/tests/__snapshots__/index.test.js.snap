@@ -8,6 +8,13 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   min-height: 15.75rem;
 }
 
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -35,13 +42,6 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c6 {
@@ -120,7 +120,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
         font-size="2"
       >
         <div
-          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ1a ͼo"
+          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ19 ͼo"
         >
           <div
             aria-live="polite"
@@ -239,6 +239,19 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   color: #8e8ea9;
 }
 
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
 .c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -270,19 +283,6 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-}
-
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
 }
 
 .c11 path {

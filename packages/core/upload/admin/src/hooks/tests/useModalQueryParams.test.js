@@ -8,11 +8,6 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import useModalQueryParams from '../useModalQueryParams';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
-
 const refetchQueriesMock = jest.fn();
 
 jest.mock('react-query', () => ({
