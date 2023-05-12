@@ -180,6 +180,45 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
+  describe('Create workflow', () => {
+    test('You can create a workflow', async () => {
+      const res = await requests.admin.post('/admin/review-workflows/workflows', {
+        body: {
+          name: 'testWorkflow',
+        },
+      });
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({
+          name: 'testWorkflow',
+        });
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+    test('You can create a workflow with stages', async () => {
+      const res = await requests.admin.post('/admin/review-workflows/workflows?populate=stages', {
+        body: {
+          name: 'testWorkflow',
+          stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+        },
+      });
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({
+          name: 'testWorkflow',
+          stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+        });
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+  });
+
   describe('Get workflow stages', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
@@ -527,8 +566,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  //FIXME Flaky test
-  describe.skip('Deleting a stage when content already exists', () => {
+  describe('Deleting a stage when content already exists', () => {
     test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
       const products = await findAll(productUID);
 
