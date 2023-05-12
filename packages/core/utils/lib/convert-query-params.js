@@ -29,6 +29,7 @@ const {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } = require('./content-types');
+const { isOperator } = require('./operators');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -378,7 +379,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   return query;
 };
 
-  // TODO: ensure field is valid in content types (will probably have to check strapi.contentTypes since it can be a string.path)
+// TODO: ensure field is valid in content types (will probably have to check strapi.contentTypes since it can be a string.path)
 const convertFieldsQueryParams = (fields, depth = 0) => {
   if (depth === 0 && fields === '*') {
     return undefined;
@@ -396,11 +397,6 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   }
 
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
-};
-
-// TODO: this is temporary as a POC, get operators from @strapi/database (will likely require refactoring)
-const isOperator = (key) => {
-  return key.startsWith('$');
 };
 
 const isValidSchemaAttribute = (key, schema) => {
@@ -459,7 +455,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
     const attribute = get(key, schema?.attributes);
-    const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
+    const validKey = isOperator(key, true) || isValidSchemaAttribute(key, schema);
 
     if (!validKey) {
       removeOperator(key);
