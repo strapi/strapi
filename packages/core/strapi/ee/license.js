@@ -4,7 +4,7 @@ const fs = require('fs');
 const { join } = require('path');
 const crypto = require('crypto');
 
-const machineId = require('../../lib/utils/machine-id');
+const machineId = require('../lib/utils/machine-id');
 
 const DEFAULT_FEATURES = {
   bronze: [],
