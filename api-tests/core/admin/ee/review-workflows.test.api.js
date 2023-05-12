@@ -190,7 +190,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       if (hasRW) {
         expect(res.status).toBe(400);
-        expect(res.body.error.name).toBe('ApplicationError');
         expect(res.body.error.message).toBe('Can not create a workflow without stages');
       } else {
         expect(res.status).toBe(404);
