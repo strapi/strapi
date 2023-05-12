@@ -19,15 +19,12 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
   // Check if there is nothing about review-workflow in DB
   // If any, the feature has already been initialized with a workflow and stages
   if (wfCount === 0 && stagesCount === 0) {
-    const stages = await stagesService.createMany(defaultStages, { fields: ['id'] });
     const workflow = {
       ...defaultWorkflow,
-      stages: {
-        connect: stages.map((stage) => stage.id),
-      },
+      stages: defaultStages,
     };
 
-    await workflowsService.create(workflow);
+    await workflowsService.create({ data: workflow });
     // If there is any manually activated RW on content-types, we want to migrate the related entities
     await enableReviewWorkflow({ strapi })({ contentTypes: strapi.contentTypes });
   }
