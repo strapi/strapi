@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Flex, Icon, Typography, Searchbar, IconButton, Popover } from '@strapi/design-system';
+import React, { useState, useRef } from 'react';
+import { Box, Flex, Icon, Typography, Searchbar, IconButton } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { inputFocusStyle } from '@strapi/design-system';
@@ -70,29 +70,12 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
 
   return (
     <Box>
-      <Flex justifyContent="space-between">
+      <Flex justifyContent="space-between" padding={1}>
         <Typography variant="pi" fontWeight="bold" textColor="neutral800" as="label">
           {formatMessage(intlLabel)}
         </Typography>
-        <Flex>
-          <IconButton
-            ref={searchIconRef}
-            onClick={toggleSearch}
-            aria-label="Edit"
-            icon={<SearchIcon />}
-            noBorder
-          />
-          {value && (
-            <IconButton
-              onClick={removeIconSelected}
-              aria-label="Remove Icon"
-              icon={<TrashIcon />}
-              noBorder
-            />
-          )}
-        </Flex>
-        {showSearch && (
-          <Popover placement="left" source={searchIconRef}>
+        <Flex gap={1}>
+          {showSearch ? (
             <Searchbar
               name="searchbar"
               size="S"
@@ -118,8 +101,24 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
                 defaultMessage: 'Search for an icon',
               })}
             </Searchbar>
-          </Popover>
-        )}
+          ) : (
+            <IconButton
+              ref={searchIconRef}
+              onClick={toggleSearch}
+              aria-label="Edit"
+              icon={<SearchIcon />}
+              noBorder
+            />
+          )}
+          {value && (
+            <IconButton
+              onClick={removeIconSelected}
+              aria-label="Remove Icon"
+              icon={<TrashIcon />}
+              noBorder
+            />
+          )}
+        </Flex>
       </Flex>
       <IconPickerWrapper
         padding={1}
