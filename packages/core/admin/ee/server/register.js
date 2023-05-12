@@ -4,6 +4,7 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCERegister = require('../../server/register');
 const migrateAuditLogsTable = require('./migrations/audit-logs-table');
 const migrateReviewWorkflowStagesColor = require('./migrations/review-workflows-stages-color');
+const migrateReviewWorkflowName = require('./migrations/review-workflows-workflow-name');
 const createAuditLogsService = require('./services/audit-logs');
 const reviewWorkflowsMiddlewares = require('./middlewares/review-workflows');
 const { getService } = require('./utils');
@@ -19,6 +20,7 @@ module.exports = async ({ strapi }) => {
   }
   if (features.isEnabled('review-workflows')) {
     strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowStagesColor);
+    strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowName);
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);

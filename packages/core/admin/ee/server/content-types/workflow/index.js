@@ -20,6 +20,11 @@ module.exports = {
       },
     },
     attributes: {
+      name: {
+        type: 'string',
+        required: true,
+        unique: true,
+      },
       stages: {
         type: 'relation',
         target: 'admin::workflow-stage',
