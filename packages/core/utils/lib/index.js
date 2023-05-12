@@ -43,6 +43,7 @@ const importDefault = require('./import-default');
 const template = require('./template');
 const file = require('./file');
 const traverse = require('./traverse');
+const operators = require('./operators');
 
 module.exports = {
   yup,
@@ -93,4 +94,5 @@ module.exports = {
   importDefault,
   file,
   traverse,
+  operators,
 };
