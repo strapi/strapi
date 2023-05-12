@@ -1,6 +1,8 @@
 'use strict';
 
+const { set } = require('lodash/fp');
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
+const { getService } = require('../../utils');
 
 module.exports = ({ strapi }) => ({
   find(opts) {
@@ -11,8 +13,19 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, opts);
   },
 
-  create(workflowData) {
-    return strapi.entityService.create(WORKFLOW_MODEL_UID, { data: workflowData });
+  async create(opts) {
+    let createOpts = opts;
+
+    // Create stages if provided
+    if (opts.data.stages) {
+      const stageIds = await getService('stages', { strapi })
+        .replaceStages([], opts.data.stages)
+        .then((stages) => stages.map((stage) => stage.id));
+
+      createOpts = set('data.stages', stageIds, opts);
+    }
+
+    return strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
   },
 
   count() {
