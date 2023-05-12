@@ -374,7 +374,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-:r2:"
+              aria-controls="radix-:r3:"
               aria-describedby=":r0:-hint :r0:-error"
               aria-expanded="false"
               class="c7 c8 c9"

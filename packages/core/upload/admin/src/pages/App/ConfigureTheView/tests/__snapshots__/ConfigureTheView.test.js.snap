@@ -604,7 +604,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r2:"
+                          aria-controls="radix-:r3:"
                           aria-describedby=":r0:-hint :r0:-error"
                           aria-expanded="false"
                           aria-label="Entries per page"
@@ -677,20 +677,20 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       >
                         <label
                           class="c11 c24 c25"
-                          for=":r3:"
+                          for=":r4:"
                         >
                           Default sort order
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r5:"
-                          aria-describedby=":r3:-hint :r3:-error"
+                          aria-controls="radix-:r7:"
+                          aria-describedby=":r4:-hint :r4:-error"
                           aria-expanded="false"
                           aria-label="Default sort order"
                           class="c26 c27 c28"
                           data-state="closed"
                           dir="ltr"
-                          id=":r3:"
+                          id=":r4:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -734,7 +734,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c11 c35"
-                          id=":r3:-hint"
+                          id=":r4:-hint"
                         >
                           Note: You can override this value in the media library.
                         </p>

@@ -1142,7 +1142,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:rg:"
+                          aria-controls="radix-:rh:"
                           aria-describedby=":re:-hint :re:-error"
                           aria-expanded="false"
                           aria-label="Interface language"
@@ -1233,20 +1233,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for=":rh:"
+                          for=":ri:"
                         >
                           Interface mode
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:rj:"
-                          aria-describedby=":rh:-hint :rh:-error"
+                          aria-controls="radix-:rl:"
+                          aria-describedby=":ri:-hint :ri:-error"
                           aria-expanded="false"
                           aria-label="Interface mode"
                           class="c37 c38 c39"
                           data-state="closed"
                           dir="ltr"
-                          id=":rh:"
+                          id=":ri:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1290,7 +1290,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c48"
-                          id=":rh:-hint"
+                          id=":ri:-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>

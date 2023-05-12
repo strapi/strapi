@@ -1385,7 +1385,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     />
                     <div
                       aria-autocomplete="none"
-                      aria-controls="radix-:rk:"
+                      aria-controls="radix-:rl:"
                       aria-describedby=":ri:-hint :ri:-error"
                       aria-expanded="false"
                       class="c49 c50 c51"

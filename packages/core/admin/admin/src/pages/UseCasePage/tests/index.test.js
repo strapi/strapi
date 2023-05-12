@@ -733,7 +733,7 @@ describe('Admin | UseCasePage', () => {
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r3:"
+                          aria-controls="radix-:r4:"
                           aria-describedby="usecase-hint usecase-error"
                           aria-expanded="false"
                           aria-label="What type of work do you do?"

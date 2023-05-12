@@ -731,7 +731,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </label>
                       <div
                         aria-autocomplete="none"
-                        aria-controls="radix-:r4:"
+                        aria-controls="radix-:r5:"
                         aria-describedby=":r2:-hint :r2:-error"
                         aria-disabled="false"
                         aria-expanded="false"

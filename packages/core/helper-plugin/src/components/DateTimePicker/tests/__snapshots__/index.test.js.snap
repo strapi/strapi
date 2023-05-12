@@ -466,7 +466,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
           />
           <div
             aria-autocomplete="none"
-            aria-controls="radix-:r7:"
+            aria-controls="radix-:r8:"
             aria-describedby=":r0:-hint :r0:-error"
             aria-disabled="false"
             aria-expanded="false"

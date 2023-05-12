@@ -228,7 +228,7 @@ describe('<PageSizeURLQuery />', () => {
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-:r2:"
+              aria-controls="radix-:r3:"
               aria-describedby=":r0:-hint :r0:-error"
               aria-expanded="false"
               class="c5 c6 c7"
