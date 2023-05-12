@@ -58,7 +58,7 @@ const OPERATORS_LOWERCASE = Object.fromEntries(
 
 const isOperatorOfType = (type, key, ignoreCase = false) => {
   if (ignoreCase) {
-    return OPERATORS_LOWERCASE[type]?.includes(key.toLowerCase());
+    return OPERATORS_LOWERCASE[type]?.includes(key.toLowerCase()) ?? false;
   }
   return OPERATORS[type]?.includes(key);
 };
