@@ -1,5 +1,5 @@
 import { Service, GenericService } from '../core-api/service';
-import { Controller, GenericController } from '../core-api/controller';
+import { CollectionTypeController, Controller, GenericController } from '../core-api/controller';
 import { Middleware } from '../middlewares';
 import { Policy } from '../core/registries/policies';
 import { Strapi } from './core/strapi';
@@ -50,10 +50,10 @@ type ControllerCallback<T extends GenericController = GenericController> = (para
 type ServiceCallback<T extends GenericService = GenericService> = (params: { strapi: Strapi }) => T;
 
 export function createCoreRouter(uid: string, cfg?: RouterConfig = {}): () => Router;
-export function createCoreController<T extends GenericController = GenericController>(
+export function createCoreController<T extends Partial<CollectionTypeController>>(
   uid: string,
   cfg?: ControllerCallback<T> | T = {}
-): () => T & Controller;
+): () => Required<T> & Controller;
 export function createCoreService<T extends GenericService = GenericService>(
   uid: string,
   cfg?: ServiceCallback<T> | T = {}
