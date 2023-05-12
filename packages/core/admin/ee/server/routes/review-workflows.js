@@ -7,6 +7,23 @@ module.exports = {
   routes: [
     // Review workflow
     {
+      method: 'POST',
+      path: '/review-workflows/workflows',
+      handler: 'workflows.create',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::review-workflows.create'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/review-workflows/workflows',
       handler: 'workflows.find',
