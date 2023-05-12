@@ -7,10 +7,10 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfo, TrackingProvider } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import 'whatwg-fetch';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
-import 'whatwg-fetch';
 
 const toggleNotification = jest.fn();
 

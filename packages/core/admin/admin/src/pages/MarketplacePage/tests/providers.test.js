@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import 'whatwg-fetch';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
 
@@ -11,7 +12,6 @@ import { createMemoryHistory } from 'history';
 
 import MarketPlacePage from '../index';
 import server from './server';
-import 'whatwg-fetch';
 
 // Increase the jest timeout to accommodate long running tests
 jest.setTimeout(50000);
