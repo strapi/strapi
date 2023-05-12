@@ -16,7 +16,7 @@ module.exports = ({ strapi }) => ({
 
   async create(opts) {
     if (!opts.data.stages) {
-      throw ApplicationError('Can not create a workflow without stages');
+      throw new ApplicationError('Can not create a workflow without stages');
     }
 
     const stageIds = await getService('stages', { strapi })
