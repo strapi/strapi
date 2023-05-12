@@ -23,6 +23,11 @@ const validateUpdateStageOnEntity = yup
 
 const validateWorkflowCreateSchema = yup.object().shape({
   name: yup.string().max(255).required(),
+  stages: yup.array().of(stageObject).min(1, 'Can not create a workflow without stages').required(),
+});
+
+const validateWorkflowUpdateSchema = yup.object().shape({
+  name: yup.string().max(255),
   stages: yup.array().of(stageObject),
 });
 
@@ -33,4 +38,5 @@ module.exports = {
     stripUnknown: true,
   }),
   validateUpdateStageOnEntity: validateYupSchema(validateUpdateStageOnEntity),
+  validateWorkflowUpdate: validateYupSchema(validateWorkflowUpdateSchema),
 };
