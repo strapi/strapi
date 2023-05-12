@@ -8,10 +8,8 @@ const { map } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
-const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
-  const workflowsService = getService('workflows', { strapi });
   const metrics = getService('review-workflows-metrics', { strapi });
 
   return {
@@ -109,55 +107,6 @@ module.exports = ({ strapi }) => {
         });
 
         return toStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
-      });
-    },
-
-    // TODO: remove this method when the old workflow replace method is removed
-    async replaceWorkflowStages(workflowId, stages) {
-      const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
-
-      const { created, updated, deleted } = getDiffBetweenStages(workflow.stages, stages);
-
-      assertAtLeastOneStageRemain(workflow.stages, { created, deleted });
-
-      return strapi.db.transaction(async ({ trx }) => {
-        // Create the new stages
-        const createdStages = await this.createMany(created, { fields: ['id'] });
-        // Put all the newly created stages ids
-        const createdStagesIds = map('id', createdStages);
-        const stagesIds = stages.map((stage) => stage.id ?? createdStagesIds.shift());
-        const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
-
-        // Update the workflow stages
-        await mapAsync(updated, (stage) => this.update(stage.id, stage));
-
-        // Delete the stages that are not in the new stages list
-        await mapAsync(deleted, async (stage) => {
-          // Find the nearest stage in the workflow and newly created stages
-          // that is not deleted, prioritizing the previous stages
-          const nearestStage = findNearestMatchingStage(
-            [...workflow.stages, ...createdStages],
-            workflow.stages.findIndex((s) => s.id === stage.id),
-            (targetStage) => {
-              return !deleted.find((s) => s.id === targetStage.id);
-            }
-          );
-
-          // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypes, (contentTypeUID) => {
-            this.updateEntitiesStage(contentTypeUID, {
-              fromStageId: stage.id,
-              toStageId: nearestStage.id,
-              trx,
-            });
-          });
-
-          return this.delete(stage.id);
-        });
-
-        return workflowsService.update(workflowId, {
-          stages: stagesIds,
-        });
       });
     },
 
