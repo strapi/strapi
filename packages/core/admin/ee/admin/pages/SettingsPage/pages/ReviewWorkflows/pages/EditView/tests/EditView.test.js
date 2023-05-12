@@ -10,6 +10,7 @@ import { useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { MemoryRouter } from 'react-router-dom';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsEditView from '..';
@@ -69,15 +70,17 @@ const setup = (props) => {
         const store = configureStore([], [reducer]);
 
         return (
-          <DndProvider backend={HTML5Backend}>
-            <QueryClientProvider client={client}>
-              <Provider store={store}>
-                <IntlProvider locale="en" messages={{}}>
-                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-                </IntlProvider>
-              </Provider>
-            </QueryClientProvider>
-          </DndProvider>
+          <MemoryRouter>
+            <DndProvider backend={HTML5Backend}>
+              <QueryClientProvider client={client}>
+                <Provider store={store}>
+                  <IntlProvider locale="en" messages={{}}>
+                    <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                  </IntlProvider>
+                </Provider>
+              </QueryClientProvider>
+            </DndProvider>
+          </MemoryRouter>
         );
       },
     }),
@@ -106,8 +109,10 @@ describe('Admin | Settings | Review Workflow | EditView', () => {
     expect(getByText('Workflow is loading')).toBeInTheDocument();
   });
 
-  test('loading state is not present', () => {
+  test('loading state is not present', async () => {
     const { queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
