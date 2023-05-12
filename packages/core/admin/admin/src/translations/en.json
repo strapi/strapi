@@ -299,6 +299,7 @@
   "Settings.webhooks.list.empty.title": "There are no webhooks yet",
   "Settings.webhooks.list.th.actions": "actions",
   "Settings.webhooks.list.th.status": "status",
+  "Settings.webhooks.list.loading.success": "Webhooks have been loaded",
   "Settings.webhooks.singular": "webhook",
   "Settings.webhooks.title": "Webhooks",
   "Settings.webhooks.to.delete": "{webhooksToDeleteLength, plural, one {# asset} other {# assets}} selected",
