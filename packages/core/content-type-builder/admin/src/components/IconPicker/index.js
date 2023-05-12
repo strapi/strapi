@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Flex, Icon, Typography, Searchbar, IconButton } from '@strapi/design-system';
+import React, { useState, useRef, useEffect } from 'react';
+import { Box, Flex, Icon, Typography, Searchbar, IconButton, Popover } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { inputFocusStyle } from '@strapi/design-system';
@@ -44,8 +44,10 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const [search, setSearch] = useState('');
   const allIcons = Object.keys(Icons);
   const [icons, setIcons] = useState(allIcons);
+  const searchIconRef = useRef(null);
 
   const SearchIcon = Icons['Search'];
+  const TrashIcon = Icons['Trash'];
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
@@ -57,9 +59,13 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   };
 
   const onClearSearch = () => {
+    toggleSearch();
     setSearch('');
     setIcons(allIcons);
-    setShowSearch(false);
+  };
+
+  const removeIconSelected = () => {
+    onChange({ target: { name, value: '' } });
   };
 
   return (
@@ -68,29 +74,51 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
         <Typography variant="pi" fontWeight="bold" textColor="neutral800" as="label">
           {formatMessage(intlLabel)}
         </Typography>
-        {showSearch ? (
-          <Searchbar
-            name="searchbar"
-            size="S"
-            placeholder={formatMessage({
-              id: getTrad('ComponentIconPicker.search.placeholder'),
-              defaultMessage: 'Search for an icon',
-            })}
-            onBlur={() => {
-              if (!search) {
-                toggleSearch();
-              }
-            }}
-            onChange={onChangeSearch}
-            value={search}
-            onClear={onClearSearch}
-            clearLabel={formatMessage({
-              id: getTrad('IconPicker.search.clear.label'),
-              defaultMessage: 'Clearing the icon search',
-            })}
+        <Flex>
+          <IconButton
+            ref={searchIconRef}
+            onClick={toggleSearch}
+            aria-label="Edit"
+            icon={<SearchIcon />}
+            noBorder
           />
-        ) : (
-          <IconButton onClick={toggleSearch} aria-label="Edit" icon={<SearchIcon />} noBorder />
+          {value && (
+            <IconButton
+              onClick={removeIconSelected}
+              aria-label="Remove Icon"
+              icon={<TrashIcon />}
+              noBorder
+            />
+          )}
+        </Flex>
+        {showSearch && (
+          <Popover placement="left" source={searchIconRef}>
+            <Searchbar
+              name="searchbar"
+              size="S"
+              placeholder={formatMessage({
+                id: getTrad('ComponentIconPicker.search.placeholder'),
+                defaultMessage: 'Search for an icon',
+              })}
+              onBlur={() => {
+                if (!search) {
+                  toggleSearch();
+                }
+              }}
+              onChange={onChangeSearch}
+              value={search}
+              onClear={onClearSearch}
+              clearLabel={formatMessage({
+                id: getTrad('IconPicker.search.clear.label'),
+                defaultMessage: 'Clearing the icon search',
+              })}
+            >
+              {formatMessage({
+                id: getTrad('ComponentIconPicker.search.placeholder'),
+                defaultMessage: 'Search for an icon',
+              })}
+            </Searchbar>
+          </Popover>
         )}
       </Flex>
       <IconPickerWrapper
