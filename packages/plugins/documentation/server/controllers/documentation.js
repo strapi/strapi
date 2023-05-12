@@ -98,6 +98,63 @@ module.exports = {
     }
   },
 
+  async json(ctx, next) {
+    try {
+      /**
+       * We don't expose the specs using koa-static or something else due to security reasons.
+       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
+       */
+      const { major, minor, patch } = ctx.params;
+      const version =
+        major && minor && patch
+          ? `${major}.${minor}.${patch}`
+          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
+
+      const openAPISpecsPath = path.join(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'documentation',
+        version,
+        'full_documentation.json'
+      );
+
+      try {
+        const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+
+        try {
+          const layoutPath = path.resolve(
+            strapi.dirs.app.extensions,
+            'documentation',
+            'public',
+            'swagger.json'
+          );
+          await fs.ensureFile(layoutPath);
+          await fs.writeFile(layoutPath, documentation);
+
+          // Serve the file.
+          ctx.url = path.basename(`${ctx.url}/swagger.json`);
+
+          try {
+            const staticFolder = path.resolve(
+              strapi.dirs.app.extensions,
+              'documentation',
+              'public'
+            );
+            return koaStatic(staticFolder)(ctx, next);
+          } catch (e) {
+            strapi.log.error(e);
+          }
+        } catch (e) {
+          strapi.log.error(e);
+        }
+      } catch (e) {
+        strapi.log.error(e);
+      }
+    } catch (e) {
+      strapi.log.error(e);
+    }
+  },
+
   async loginView(ctx, next) {
     // lazy require cheerio
     const cheerio = require('cheerio');
