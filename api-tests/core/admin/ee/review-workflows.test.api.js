@@ -181,7 +181,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Create workflow', () => {
-    test('You can create a workflow', async () => {
+    test('You can not create a workflow without stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows', {
         body: {
           name: 'testWorkflow',
@@ -189,10 +189,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
 
       if (hasRW) {
-        expect(res.status).toBe(200);
-        expect(res.body.data).toMatchObject({
-          name: 'testWorkflow',
-        });
+        expect(res.status).toBe(400);
+        expect(res.body.error.name).toBe('ApplicationError');
+        expect(res.body.error.message).toBe('Can not create a workflow without stages');
       } else {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
