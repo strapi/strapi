@@ -37,7 +37,7 @@
     "formik": "2.2.9",
     "immer": "9.0.19",
     "lodash": "4.17.21",
-    "prop-types": "^15.7.2",
+    "prop-types": "^15.8.1",
     "qs": "6.11.1",
     "react-intl": "6.4.1",
     "react-query": "3.39.2",
@@ -52,7 +52,7 @@
     "styled-components": "5.3.3"
   },
   "devDependencies": {
-    "@testing-library/react": "13.4.0",
+    "@testing-library/react": "14.0.0",
     "msw": "1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

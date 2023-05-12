@@ -29,7 +29,7 @@
     "mysql2": "3.3.0",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
-    "react": "^17.0.2",
+    "react": "^18.2.0",
     "react-intl": "6.4.1",
     "sqlite3": "5.1.2"
   },

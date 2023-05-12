@@ -7730,8 +7730,8 @@ __metadata:
     "@strapi/provider-audit-logs-local": 4.10.5
     "@strapi/typescript-utils": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.20.0
-    "@testing-library/react": 13.4.0
+    "@testing-library/dom": 9.2.0
+    "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     babel-loader: ^9.1.2
@@ -7758,7 +7758,6 @@ __metadata:
     glob: 8.0.3
     highlight.js: ^10.4.1
     history: ^4.9.0
-    hoist-non-react-statics: ^3.3.0
     html-loader: ^4.2.0
     html-webpack-plugin: 5.5.0
     immer: 9.0.19
@@ -7786,7 +7785,7 @@ __metadata:
     p-map: 4.0.0
     passport-local: 1.0.0
     pluralize: 8.0.0
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-copy-to-clipboard: ^5.1.0
@@ -7987,7 +7986,7 @@ __metadata:
     "@storybook/react": ^6.5.16
     "@strapi/design-system": 1.7.5
     "@strapi/icons": 1.7.5
-    "@testing-library/react": 13.4.0
+    "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     browserslist-to-esbuild: 1.2.0
@@ -7998,7 +7997,7 @@ __metadata:
     history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -8060,8 +8059,8 @@ __metadata:
     "@strapi/design-system": 1.7.5
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
-    "@testing-library/react": 13.4.0
-    prop-types: ^15.7.2
+    "@testing-library/react": 14.0.0
+    prop-types: ^15.8.1
     react: ^18.2.0
     react-colorful: 5.6.1
     react-dom: ^18.2.0
@@ -8098,13 +8097,13 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 13.4.0
+    "@testing-library/react": 14.0.0
     fs-extra: 10.0.0
     history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
     pluralize: ^8.0.0
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -8133,7 +8132,7 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 13.4.0
+    "@testing-library/react": 14.0.0
     bcryptjs: 2.4.3
     cheerio: ^1.0.0-rc.12
     formik: 2.2.9
@@ -8177,10 +8176,10 @@ __metadata:
     "@strapi/icons": 1.7.5
     "@strapi/provider-email-sendmail": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 13.4.0
+    "@testing-library/react": 14.0.0
     lodash: 4.17.21
     msw: 1.2.1
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
     react-intl: 6.4.1
@@ -8240,12 +8239,12 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/react": 13.4.0
+    "@testing-library/react": 14.0.0
     formik: 2.2.9
     immer: 9.0.19
     lodash: 4.17.21
     msw: 1.2.1
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -8294,8 +8293,8 @@ __metadata:
     "@strapi/icons": 1.7.5
     "@strapi/provider-upload-local": 4.10.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.20.0
-    "@testing-library/react": 13.4.0
+    "@testing-library/dom": 9.2.0
+    "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     axios: 1.3.4
     byte-size: 7.0.1
@@ -8309,7 +8308,7 @@ __metadata:
     lodash: 4.17.21
     mime-types: 2.1.35
     msw: 1.2.1
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     qs: 6.11.1
     react: ^18.2.0
     react-copy-to-clipboard: ^5.1.0
@@ -8340,8 +8339,8 @@ __metadata:
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
     "@strapi/utils": 4.10.5
-    "@testing-library/dom": 8.20.0
-    "@testing-library/react": 13.4.0
+    "@testing-library/dom": 9.2.0
+    "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     bcryptjs: 2.4.3
     formik: 2.2.9
@@ -8354,7 +8353,7 @@ __metadata:
     koa2-ratelimit: ^1.1.2
     lodash: 4.17.21
     msw: 1.2.1
-    prop-types: ^15.7.2
+    prop-types: ^15.8.1
     purest: 4.0.2
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -8789,9 +8788,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:8.20.0, @testing-library/dom@npm:^8.5.0":
-  version: 8.20.0
-  resolution: "@testing-library/dom@npm:8.20.0"
+"@testing-library/dom@npm:9.2.0, @testing-library/dom@npm:^9.0.0":
+  version: 9.2.0
+  resolution: "@testing-library/dom@npm:9.2.0"
   dependencies:
     "@babel/code-frame": ^7.10.4
     "@babel/runtime": ^7.12.5
@@ -8799,9 +8798,9 @@ __metadata:
     aria-query: ^5.0.0
     chalk: ^4.1.0
     dom-accessibility-api: ^0.5.9
-    lz-string: ^1.4.4
+    lz-string: ^1.5.0
     pretty-format: ^27.0.2
-  checksum: 1e599129a2fe91959ce80900a0a4897232b89e2a8e22c1f5950c36d39c97629ea86b4986b60b173b5525a05de33fde1e35836ea597b03de78cc51b122835c6f0
+  checksum: b145f43cd06ff083012cf2503aff6ccba97ff80715fcb106fe64af690f5536557bf24d37b97e8d685bbe3803d7f71d685ce71426cb1b9e250c3611e4372dcfa9
   languageName: node
   linkType: hard
 
@@ -8822,17 +8821,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:13.4.0":
-  version: 13.4.0
-  resolution: "@testing-library/react@npm:13.4.0"
+"@testing-library/react@npm:14.0.0":
+  version: 14.0.0
+  resolution: "@testing-library/react@npm:14.0.0"
   dependencies:
     "@babel/runtime": ^7.12.5
-    "@testing-library/dom": ^8.5.0
+    "@testing-library/dom": ^9.0.0
     "@types/react-dom": ^18.0.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 51ec548c1fdb1271089a5c63e0908f0166f2c7fcd9cacd3108ebbe0ce64cb4351812d885892020dc37608418cfb15698514856502b3cab0e5cc58d6cc1bd4a3e
+  checksum: 4a54c8f56cc4a39b50803205f84f06280bb76521d6d5d4b3b36651d760c7c7752ef142d857d52aaf4fad4848ed7a8be49afc793a5dda105955d2f8bef24901ac
   languageName: node
   linkType: hard
 
@@ -18314,7 +18313,7 @@ __metadata:
     mysql2: 3.3.0
     passport-google-oauth2: 0.2.0
     pg: 8.8.0
-    react: ^17.0.2
+    react: ^18.2.0
     react-intl: 6.4.1
     sqlite3: 5.1.2
   languageName: unknown
@@ -23394,12 +23393,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lz-string@npm:^1.4.4":
-  version: 1.4.4
-  resolution: "lz-string@npm:1.4.4"
+"lz-string@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "lz-string@npm:1.5.0"
   bin:
     lz-string: bin/bin.js
-  checksum: 54e31238a61a84d8f664d9860a9fba7310c5b97a52c444f80543069bc084815eff40b8d4474ae1d93992fdf6c252dca37cf27f6adbeb4dbc3df2f3ac773d0e61
+  checksum: 1ee98b4580246fd90dd54da6e346fb1caefcf05f677c686d9af237a157fdea3fd7c83a4bc58f858cd5b10a34d27afe0fdcbd0505a47e0590726a873dc8b8f65d
   languageName: node
   linkType: hard
 
@@ -28079,16 +28078,6 @@ __metadata:
     react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: a19f43b9015fb84e16db983617dac618a8b298881d2ca96ffc2fb00534afd958ee57a00fd0017733b56f8c34dd84e5be59337877aed3c66329ed3b84e8d018ba
-  languageName: node
-  linkType: hard
-
-"react@npm:^17.0.2":
-  version: 17.0.2
-  resolution: "react@npm:17.0.2"
-  dependencies:
-    loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
   languageName: node
   linkType: hard
 

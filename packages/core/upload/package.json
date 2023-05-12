@@ -41,7 +41,7 @@
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
-    "prop-types": "^15.7.2",
+    "prop-types": "^15.8.1",
     "qs": "6.11.1",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dnd": "15.1.2",
@@ -54,8 +54,8 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.20.0",
-    "@testing-library/react": "13.4.0",
+    "@testing-library/dom": "9.2.0",
+    "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "msw": "1.2.1",
     "react": "^18.2.0",

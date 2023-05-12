@@ -42,7 +42,7 @@
     "koa": "^2.13.4",
     "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
-    "prop-types": "^15.7.2",
+    "prop-types": "^15.8.1",
     "purest": "4.0.2",
     "react-intl": "6.4.1",
     "react-query": "3.39.2",
@@ -51,8 +51,8 @@
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.20.0",
-    "@testing-library/react": "13.4.0",
+    "@testing-library/dom": "9.2.0",
+    "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "history": "^4.9.0",
     "msw": "1.2.1",

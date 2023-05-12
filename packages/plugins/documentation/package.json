@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@testing-library/react": "13.4.0",
+    "@testing-library/react": "14.0.0",
     "history": "^4.9.0",
     "msw": "1.2.1",
     "react": "^18.2.0",
