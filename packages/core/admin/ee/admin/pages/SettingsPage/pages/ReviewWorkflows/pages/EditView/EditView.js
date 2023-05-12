@@ -7,6 +7,7 @@ import { useMutation } from 'react-query';
 import {
   CheckPagePermissions,
   ConfirmDialog,
+  Link,
   SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
@@ -14,18 +15,18 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { ArrowLeft, Check } from '@strapi/icons';
 
-import { Stages } from './components/Stages';
-import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
-import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflows } from './actions';
-import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../admin/src/permissions';
-import { StageDragPreview } from './components/StageDragPreview';
-import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+import { Stages } from '../../components/Stages';
+import { reducer, initialState } from '../../reducer';
+import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from '../../constants';
+import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
+import { setWorkflows } from '../../actions';
+import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
+import adminPermissions from '../../../../../../../../admin/src/permissions';
+import { StageDragPreview } from '../../components/StageDragPreview';
+import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 
 function renderDragLayerItem({ type, item }) {
   switch (type) {
@@ -37,7 +38,7 @@ function renderDragLayerItem({ type, item }) {
   }
 }
 
-export function ReviewWorkflowsPage() {
+export function ReviewWorkflowsEditView() {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
@@ -147,6 +148,14 @@ export function ReviewWorkflowsPage() {
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <HeaderLayout
+                navigationAction={
+                  <Link startIcon={<ArrowLeft />} to="/settings/review-workflows">
+                    {formatMessage({
+                      id: 'global.back',
+                      defaultMessage: 'Back',
+                    })}
+                  </Link>
+                }
                 primaryAction={
                   <Button
                     startIcon={<Check />}

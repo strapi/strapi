@@ -10,10 +10,11 @@ import { useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { MemoryRouter } from 'react-router-dom';
 
-import configureStore from '../../../../../../../admin/src/core/store/configureStore';
-import ReviewWorkflowsPage from '..';
-import { reducer } from '../reducer';
+import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
+import ReviewWorkflowsEditView from '..';
+import { reducer } from '../../../reducer';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -62,32 +63,32 @@ const client = new QueryClient({
   },
 });
 
-const ComponentFixture = () => {
-  const store = configureStore([], [reducer]);
-
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <QueryClientProvider client={client}>
-        <Provider store={store}>
-          <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>
-              <ReviewWorkflowsPage />
-            </ThemeProvider>
-          </IntlProvider>
-        </Provider>
-      </QueryClientProvider>
-    </DndProvider>
-  );
-};
-
 const setup = (props) => {
   return {
-    ...render(<ComponentFixture {...props} />),
+    ...render(<ReviewWorkflowsEditView {...props} />, {
+      wrapper({ children }) {
+        const store = configureStore([], [reducer]);
+
+        return (
+          <MemoryRouter>
+            <DndProvider backend={HTML5Backend}>
+              <QueryClientProvider client={client}>
+                <Provider store={store}>
+                  <IntlProvider locale="en" messages={{}}>
+                    <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                  </IntlProvider>
+                </Provider>
+              </QueryClientProvider>
+            </DndProvider>
+          </MemoryRouter>
+        );
+      },
+    }),
     user: userEvent.setup(),
   };
 };
 
-describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
+describe('Admin | Settings | Review Workflow | EditView', () => {
   beforeAll(() => {
     server.listen();
   });
@@ -108,8 +109,10 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(getByText('Workflow is loading')).toBeInTheDocument();
   });
 
-  test('loading state is not present', () => {
+  test('loading state is not present', async () => {
     const { queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
