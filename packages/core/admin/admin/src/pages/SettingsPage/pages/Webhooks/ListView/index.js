@@ -88,7 +88,7 @@ const ListView = () => {
   const { isLoading: webhooksLoading } = useQuery(QUERY_KEY, fetchWebHooks);
   const loading = RBACLoading || webhooksLoading;
 
-  const { mutateAsync: handleConfirmDeleteOne } = useMutation(async () => {
+  const { mutateAsync: deleteOne } = useMutation(async () => {
     try {
       await del(`/admin/webhooks/${webhookToDelete}`);
 
@@ -110,7 +110,7 @@ const ListView = () => {
     setShowModal(false);
   });
 
-  const { mutateAsync: handleConfirmDeleteAll } = useMutation(async () => {
+  const { mutateAsync: deleteSelected } = useMutation(async () => {
     const body = {
       ids: webhooksToDelete,
     };
@@ -131,33 +131,13 @@ const ListView = () => {
     setShowModal(false);
   });
 
-  const handleToggleModal = () => {
-    setShowModal((prev) => !prev);
-  };
-
-  const handleConfirmDelete = () => {
-    if (webhookToDelete) {
-      handleConfirmDeleteOne();
-    } else {
-      handleConfirmDeleteAll();
-    }
-  };
-
-  const handleDeleteClick = (id) => {
-    setShowModal(true);
-
-    if (id !== 'all') {
-      setWebhookToDelete(id);
-    }
-  };
-
-  const handleEnabledChange = async (value, id) => {
+  const { mutateAsync: enabledChange } = useMutation(async ({ enabled, id }) => {
     const webhookIndex = getWebhookIndex(id);
     const initialWebhookProps = webhooks[webhookIndex];
 
     const body = {
       ...initialWebhookProps,
-      isEnabled: value,
+      isEnabled: enabled,
     };
 
     delete body.id;
@@ -167,7 +147,7 @@ const ListView = () => {
 
       setWebhooks((prevWebhooks) =>
         prevWebhooks.map((webhook) =>
-          webhook.id === id ? { ...webhook, isEnabled: value } : webhook
+          webhook.id === id ? { ...webhook, isEnabled: enabled } : webhook
         )
       );
     } catch (err) {
@@ -175,6 +155,26 @@ const ListView = () => {
         type: 'warning',
         message: { id: 'notification.error' },
       });
+    }
+  });
+
+  const handleToggleModal = () => {
+    setShowModal((prev) => !prev);
+  };
+
+  const handleConfirmDelete = () => {
+    if (webhookToDelete) {
+      deleteOne();
+    } else {
+      deleteSelected();
+    }
+  };
+
+  const handleDeleteClick = (id) => {
+    setShowModal(true);
+
+    if (id !== 'all') {
+      setWebhookToDelete(id);
     }
   };
 
@@ -353,7 +353,9 @@ const ListView = () => {
                             defaultMessage: 'Status',
                           })}`}
                           selected={webhook.isEnabled}
-                          onChange={() => handleEnabledChange(!webhook.isEnabled, webhook.id)}
+                          onChange={() =>
+                            enabledChange({ enabled: !webhook.isEnabled, id: webhook.id })
+                          }
                           visibleLabels
                         />
                       </Flex>
