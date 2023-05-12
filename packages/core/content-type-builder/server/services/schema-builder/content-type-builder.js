@@ -184,9 +184,9 @@ module.exports = function createComponentBuilder() {
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
           const oldTargetAttributeName = oldAttribute.inversedBy || oldAttribute.mappedBy;
-
+          const newTargetAttributeName = newAttribute.targetAttribute || newAttribute.inversedBy || newAttribute.mappedBy;
           const sameRelation = oldAttribute.relation === newAttribute.relation;
-          const targetAttributeHasChanged = oldTargetAttributeName !== newAttribute.targetAttribute || newAttribute.inversedBy || newAttribute.mappedBy;
+          const targetAttributeHasChanged = oldTargetAttributeName !== newTargetAttributeName
 
           if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
