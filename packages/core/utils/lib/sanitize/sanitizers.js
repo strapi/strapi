@@ -36,7 +36,6 @@ const defaultSanitizeOutput = async (schema, entity) => {
   );
 };
 
-// TODO: remove fields that don't exist on the schema
 const defaultSanitizeFilters = curry((schema, filters) => {
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
