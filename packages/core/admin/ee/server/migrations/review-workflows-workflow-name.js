@@ -1,6 +1,7 @@
 'use strict';
 
 const { WORKFLOW_MODEL_UID } = require('../constants/workflows');
+const defaultWorkflow = require('../constants/default-workflow.json');
 
 async function migrateReviewWorkflowName({ oldContentTypes, contentTypes }) {
   // Look for RW name attribute
@@ -11,7 +12,7 @@ async function migrateReviewWorkflowName({ oldContentTypes, contentTypes }) {
   if (!hadName && hasName) {
     await strapi.query(WORKFLOW_MODEL_UID).updateMany({
       data: {
-        name: 'Default',
+        name: defaultWorkflow.name,
       },
     });
   }
