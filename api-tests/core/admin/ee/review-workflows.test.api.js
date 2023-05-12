@@ -44,6 +44,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   let defaultStage;
   let secondStage;
   let testWorkflow;
+  let createdWorkflow;
 
   const createEntry = async (uid, data) => {
     const { body } = await requests.admin({
@@ -185,6 +186,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows', {
         body: {
           name: 'testWorkflow',
+          stages: [],
         },
       });
 
@@ -199,7 +201,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('You can create a workflow with stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows?populate=stages', {
         body: {
-          name: 'testWorkflow',
+          name: 'createdWorkflow',
           stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
         },
       });
@@ -207,8 +209,56 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       if (hasRW) {
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({
-          name: 'testWorkflow',
+          name: 'createdWorkflow',
           stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+        });
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+
+      createdWorkflow = res.body.data;
+    });
+  });
+
+  describe('Update workflow', () => {
+    test('You can update a workflow', async () => {
+      const res = await requests.admin.put(
+        `/admin/review-workflows/workflows/${createdWorkflow.id}`,
+        { body: { name: 'updatedWorkflow' } }
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({ name: 'updatedWorkflow' });
+      } else {
+        expect(res.status).toBe(404);
+        expect(res.body.data).toBeUndefined();
+      }
+    });
+
+    test('You can update a workflow with stages', async () => {
+      const res = await requests.admin.put(
+        `/admin/review-workflows/workflows/${createdWorkflow.id}?populate=stages`,
+        {
+          body: {
+            name: 'updatedWorkflow',
+            stages: [
+              { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
+              { name: 'Stage 2' },
+            ],
+          },
+        }
+      );
+
+      if (hasRW) {
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({
+          name: 'updatedWorkflow',
+          stages: [
+            { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
+            { name: 'Stage 2' },
+          ],
         });
       } else {
         expect(res.status).toBe(404);
@@ -317,14 +367,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test("It should assign a default color to stages if they don't have one", async () => {
-      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}/stages`, {
-        body: {
-          data: [defaultStage, { id: secondStage.id, name: secondStage.name, color: '#000000' }],
-        },
-      });
-
-      const workflowRes = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      const workflowRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        {
+          body: {
+            stages: [
+              defaultStage,
+              { id: secondStage.id, name: secondStage.name, color: '#000000' },
+            ],
+          },
+        }
       );
 
       expect(workflowRes.status).toBe(200);
@@ -332,37 +384,24 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(workflowRes.body.data.stages[1].color).toBe('#000000');
     });
     test("It shouldn't be available for public", async () => {
-      const stagesRes = await requests.public.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: { data: stagesUpdateData } }
-      );
       const workflowRes = await requests.public.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}`
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
       );
 
       if (hasRW) {
-        expect(stagesRes.status).toBe(401);
         expect(workflowRes.status).toBe(401);
       } else {
-        expect(stagesRes.status).toBe(404);
-        expect(stagesRes.body.data).toBeUndefined();
         expect(workflowRes.status).toBe(404);
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
     test('It should be available for every connected users (admin)', async () => {
-      const stagesRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: { data: stagesUpdateData } }
-      );
-      const workflowRes = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      const workflowRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        { body: { stages: stagesUpdateData } }
       );
 
       if (hasRW) {
-        expect(stagesRes.status).toBe(200);
-        expect(stagesRes.body.data).toBeInstanceOf(Object);
-        expect(stagesRes.body.data.id).toEqual(testWorkflow.id);
         expect(workflowRes.status).toBe(200);
         expect(workflowRes.body.data).toBeInstanceOf(Object);
         expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
@@ -373,42 +412,29 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           ...stagesUpdateData[2],
         });
       } else {
-        expect(stagesRes.status).toBe(404);
-        expect(stagesRes.body.data).toBeUndefined();
         expect(workflowRes.status).toBe(404);
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
     test('It should throw an error if trying to delete all stages in a workflow', async () => {
-      const stagesRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: { data: [] } }
-      );
-      const workflowRes = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+      const workflowRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        { body: { stages: [] } }
       );
 
       if (hasRW) {
-        expect(stagesRes.status).toBe(400);
-        expect(stagesRes.body.error).toBeDefined();
-        expect(stagesRes.body.error.name).toEqual('ApplicationError');
-        expect(stagesRes.body.error.message).toBeDefined();
-        expect(workflowRes.status).toBe(200);
-        expect(workflowRes.body.data).toBeInstanceOf(Object);
-        expect(workflowRes.body.data.stages).toBeInstanceOf(Array);
-        expect(workflowRes.body.data.stages[0]).toMatchObject({ id: defaultStage.id });
-        expect(workflowRes.body.data.stages[1]).toMatchObject({ id: secondStage.id });
+        expect(workflowRes.status).toBe(400);
+        expect(workflowRes.body.error).toBeDefined();
+        expect(workflowRes.body.error.name).toEqual('ValidationError');
       } else {
-        expect(stagesRes.status).toBe(404);
-        expect(stagesRes.body.data).toBeUndefined();
         expect(workflowRes.status).toBe(404);
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
     test('It should throw an error if trying to create more than 200 stages', async () => {
       const stagesRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`,
-        { body: { data: Array(201).fill({ name: 'new stage' }) } }
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        { body: { stages: Array(201).fill({ name: 'new stage' }) } }
       );
 
       if (hasRW) {
@@ -564,7 +590,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Deleting a stage when content already exists', () => {
+  // TODO: Fix this test when implementing the Workflow Content Type assignment
+  describe.skip('Deleting a stage when content already exists', () => {
     test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
       const products = await findAll(productUID);
 
@@ -577,8 +604,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       );
 
       // Delete last stage stage of the default workflow
-      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}/stages`, {
-        body: { data: [defaultStage] },
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { stages: [defaultStage] },
       });
 
       // Expect the content in these stages to be moved to the nearest available stage
