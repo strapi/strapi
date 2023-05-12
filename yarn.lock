@@ -7811,6 +7811,7 @@ __metadata:
     webpack-cli: ^5.1.0
     webpack-dev-server: ^4.15.0
     webpackbar: ^5.0.2
+    whatwg-fetch: 3.6.2
     yup: ^0.32.9
   peerDependencies:
     "@strapi/strapi": ^4.3.4
@@ -33309,6 +33310,13 @@ __metadata:
   dependencies:
     iconv-lite: 0.6.3
   checksum: 7087810c410aa9b689cbd6af8773341a53cdc1f3aae2a882c163bd5522ec8ca4cdfc269aef417a5792f411807d5d77d50df4c24e3abb00bb60192858a40cc675
+  languageName: node
+  linkType: hard
+
+"whatwg-fetch@npm:3.6.2":
+  version: 3.6.2
+  resolution: "whatwg-fetch@npm:3.6.2"
+  checksum: ee976b7249e7791edb0d0a62cd806b29006ad7ec3a3d89145921ad8c00a3a67e4be8f3fb3ec6bc7b58498724fd568d11aeeeea1f7827e7e1e5eae6c8a275afed
   languageName: node
   linkType: hard
 

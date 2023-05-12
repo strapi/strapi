@@ -1,8 +1,7 @@
 import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 import qs from 'qs';
-
-const MARKETPLACE_API_URL = 'https://market-api.strapi.io';
+import { MARKETPLACE_API_URL } from '../constants';
 
 const fetchMarketplaceProviders = async (params = {}) => {
   try {

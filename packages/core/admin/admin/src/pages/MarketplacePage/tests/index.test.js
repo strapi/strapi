@@ -10,6 +10,7 @@ import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
+import 'whatwg-fetch';
 
 const toggleNotification = jest.fn();
 
