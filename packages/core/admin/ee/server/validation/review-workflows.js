@@ -23,7 +23,6 @@ const validateUpdateStageOnEntity = yup
 
 const validateWorkflowCreateSchema = yup.object().shape({
   name: yup.string().max(255).required(),
-  default: yup.boolean().default(false),
   stages: yup.array().of(stageObject),
 });
 
