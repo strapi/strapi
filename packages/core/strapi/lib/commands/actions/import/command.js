@@ -9,7 +9,7 @@ const {
   throttleOption,
   validateExcludeOnly,
 } = require('../../utils/data-transfer');
-const { confirmMessage, forceOption } = require('../../utils/commander');
+const { getCommanderConfirmMessage, forceOption } = require('../../utils/commander');
 const { getLocalScript, exitWith } = require('../../utils/helpers');
 
 /**
@@ -88,7 +88,7 @@ module.exports = ({ command }) => {
     })
     .hook(
       'preAction',
-      confirmMessage(
+      getCommanderConfirmMessage(
         'The import will delete all assets and data in your database. Are you sure you want to proceed?',
         { failMessage: 'Import process aborted' }
       )

@@ -69,6 +69,7 @@ describe('NotFoundPage', () => {
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
+        text-align: center;
       }
 
       .c2 {
@@ -104,6 +105,10 @@ describe('NotFoundPage', () => {
       }
 
       .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -111,11 +116,6 @@ describe('NotFoundPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
       }
 
       .c10 svg {
