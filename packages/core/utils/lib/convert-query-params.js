@@ -410,15 +410,11 @@ const isValidSchemaAttribute = (key, schema) => {
 
   // case insensitive check if the attribute exists in the schema
   const findAttribute = key.toLowerCase();
-  if (
+  return (
     Object.keys(schema.attributes)
       .map((attributeName) => attributeName.toLowerCase())
       .includes(findAttribute)
-  ) {
-    return true;
-  }
-
-  return false;
+  );
 };
 
 const convertFiltersQueryParams = (filters, schema) => {
