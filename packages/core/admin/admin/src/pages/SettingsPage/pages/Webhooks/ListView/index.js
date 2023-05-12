@@ -121,6 +121,7 @@ const ListView = () => {
       setWebhooks((prevWebhooks) =>
         prevWebhooks.filter((webhook) => !webhooksToDelete.includes(webhook.id))
       );
+      setWebhooksToDelete([]);
     } catch (err) {
       toggleNotification({
         type: 'warning',
