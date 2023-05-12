@@ -123,6 +123,7 @@ describe('Content type validator', () => {
           {
             uid: 'edit',
             displayName: 'test',
+            icon: 'Calendar',
             category: 'test',
             attributes: {
               title: {
@@ -134,6 +135,7 @@ describe('Content type validator', () => {
           {
             tmpUID: 'random',
             displayName: 'test2',
+            icon: 'Calendar',
             category: 'test',
             attributes: {
               title: {

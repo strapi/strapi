@@ -39,6 +39,7 @@ export function ComponentIcon({ showBackground = true, size = 'M', icon }) {
       justifyContent="center"
       size={size}
       showBackground={showBackground}
+      data-testid={icon ? 'component-card-icon' : 'component-card-icon-default'}
     >
       <ComponentIcon />
     </Wrapper>

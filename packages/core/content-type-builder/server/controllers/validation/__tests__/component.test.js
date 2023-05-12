@@ -28,6 +28,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
+          icon: 'Calendar',
           attributes: {
             title: {
               type: 'string',
@@ -49,6 +50,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
+          icon: 'Calendar',
           attributes: {
             title: {
               type: 'string',
@@ -72,6 +74,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
+          icon: 'Calendar',
           attributes: {
             title: {
               type: 'string',
