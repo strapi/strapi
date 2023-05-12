@@ -19,6 +19,7 @@ const {
   removeDynamicZones,
   removeMorphToRelations,
 } = require('./visitors');
+const { isOperator } = require('../operators');
 
 const sanitizePasswords = (schema) => async (entity) => {
   return traverseEntity(removePassword, { schema }, entity);
@@ -38,6 +39,17 @@ const defaultSanitizeOutput = async (schema, entity) => {
 // TODO: remove fields that don't exist on the schema
 const defaultSanitizeFilters = curry((schema, filters) => {
   return pipeAsync(
+    // Remove keys that are not attributes or valid operators
+    traverseQueryFilters(
+      ({ key, attribute }, { remove }) => {
+        const isAttribute = !!attribute;
+
+        if (!isAttribute && !isOperator(key)) {
+          remove(key);
+        }
+      },
+      { schema }
+    ),
     // Remove dynamic zones from filters
     traverseQueryFilters(removeDynamicZones, { schema }),
     // Remove morpTo relations from filters
