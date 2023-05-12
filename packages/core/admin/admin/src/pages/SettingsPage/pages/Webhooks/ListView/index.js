@@ -1,13 +1,9 @@
 /* eslint-disable no-nested-ternary */
-/**
- *
- * ListView
- *
- */
-
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+import { useQuery, useMutation } from 'react-query';
+
 import {
   useFetchClient,
   useRBAC,
@@ -45,25 +41,22 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Plus, Pencil, Trash, EmptyDocuments } from '@strapi/icons';
-import reducer, { initialState } from './reducer';
 import adminPermissions from '../../../../../permissions';
 
 const ListView = () => {
-  const {
-    isLoading,
-    allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useRBAC(adminPermissions.settings.webhooks);
-  const toggleNotification = useNotification();
-  const isMounted = useRef(true);
-  const { formatMessage } = useIntl();
+  const [webhooks, setWebhooks] = useState([]);
+  const [webhookToDelete, setWebhookToDelete] = useState(null);
+  const [webhooksToDelete, setWebhooksToDelete] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [{ webhooks, webhooksToDelete, webhookToDelete, loadingWebhooks }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
-  const { notifyStatus } = useNotifyAT();
 
+  const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const {
+    isLoading: RBACLoading,
+    allowedActions: { canCreate, canUpdate, canDelete },
+  } = useRBAC(adminPermissions.settings.webhooks);
   const { get, del, post, put } = useFetchClient();
+  const { notifyStatus } = useNotifyAT();
 
   useFocusWhenNavigate();
   const { push } = useHistory();
@@ -72,53 +65,70 @@ const ListView = () => {
   const webhooksToDeleteLength = webhooksToDelete.length;
   const getWebhookIndex = (id) => webhooks.findIndex((webhook) => webhook.id === id);
 
-  useEffect(() => {
-    isMounted.current = true;
+  const fetchWebHooks = async () => {
+    try {
+      const {
+        data: { data },
+      } = await get('/admin/webhooks');
 
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+      setWebhooks(data);
+      notifyStatus('webhooks have been loaded');
 
-  /**
-   * TODO: refactor this, but actually refactor
-   * the whole component. Needs some love.
-   */
-  useEffect(() => {
-    const fetchWebHooks = async () => {
-      try {
-        const {
-          data: { data },
-        } = await get('/admin/webhooks');
+      return data;
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
-        if (isMounted.current) {
-          dispatch({
-            type: 'GET_DATA_SUCCEEDED',
-            data,
-          });
-          notifyStatus('webhooks have been loaded');
-        }
-      } catch (err) {
-        console.log(err);
-
-        if (isMounted.current) {
-          if (err.code !== 20) {
-            toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.error' },
-            });
-          }
-          dispatch({
-            type: 'TOGGLE_LOADING',
-          });
-        }
-      }
-    };
-
-    if (canRead) {
-      fetchWebHooks();
+      return null;
     }
-  }, [canRead, get, notifyStatus, toggleNotification]);
+  };
+  const QUERY_KEY = 'webhooks';
+  const { isLoading: webhooksLoading } = useQuery(QUERY_KEY, fetchWebHooks);
+  const loading = RBACLoading || webhooksLoading;
+
+  const { mutateAsync: handleConfirmDeleteOne } = useMutation(async () => {
+    try {
+      await del(`/admin/webhooks/${webhookToDelete}`);
+
+      const webhookIndex = getWebhookIndex(webhookToDelete);
+
+      if (webhookIndex !== -1) {
+        setWebhooks((prev) => {
+          prev.splice(webhookIndex, 1);
+
+          return [...prev];
+        });
+      }
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
+    setShowModal(false);
+  });
+
+  const { mutateAsync: handleConfirmDeleteAll } = useMutation(async () => {
+    const body = {
+      ids: webhooksToDelete,
+    };
+
+    try {
+      await post('/admin/webhooks/batch-delete', body);
+
+      setWebhooks((prevWebhooks) =>
+        prevWebhooks.filter((webhook) => !webhooksToDelete.includes(webhook.id))
+      );
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
+    setShowModal(false);
+  });
 
   const handleToggleModal = () => {
     setShowModal((prev) => !prev);
@@ -132,69 +142,17 @@ const ListView = () => {
     }
   };
 
-  const handleConfirmDeleteOne = async () => {
-    try {
-      await del(`/admin/webhooks/${webhookToDelete}`);
-
-      dispatch({
-        type: 'WEBHOOK_DELETED',
-        index: getWebhookIndex(webhookToDelete),
-      });
-    } catch (err) {
-      /**
-       * TODO: especially this.
-       */
-      if (err.code !== 20) {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
-    }
-    setShowModal(false);
-  };
-
-  const handleConfirmDeleteAll = async () => {
-    const body = {
-      ids: webhooksToDelete,
-    };
-
-    try {
-      await post('/admin/webhooks/batch-delete', body);
-
-      if (isMounted.current) {
-        dispatch({
-          type: 'WEBHOOKS_DELETED',
-        });
-      }
-    } catch (err) {
-      if (isMounted.current) {
-        if (err.code !== 20) {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      }
-    }
-    setShowModal(false);
-  };
-
   const handleDeleteClick = (id) => {
     setShowModal(true);
 
     if (id !== 'all') {
-      dispatch({
-        type: 'SET_WEBHOOK_TO_DELETE',
-        id,
-      });
+      setWebhookToDelete(id);
     }
   };
 
   const handleEnabledChange = async (value, id) => {
     const webhookIndex = getWebhookIndex(id);
     const initialWebhookProps = webhooks[webhookIndex];
-    const keys = [webhookIndex, 'isEnabled'];
 
     const body = {
       ...initialWebhookProps,
@@ -204,44 +162,28 @@ const ListView = () => {
     delete body.id;
 
     try {
-      dispatch({
-        type: 'SET_WEBHOOK_ENABLED',
-        keys,
-        value,
-      });
-
       await put(`/admin/webhooks/${id}`, body);
-    } catch (err) {
-      if (isMounted.current) {
-        dispatch({
-          type: 'SET_WEBHOOK_ENABLED',
-          keys,
-          value: !value,
-        });
 
-        if (err.code !== 20) {
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      }
+      setWebhooks((prevWebhooks) =>
+        prevWebhooks.map((webhook) =>
+          webhook.id === id ? { ...webhook, isEnabled: value } : webhook
+        )
+      );
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
-  const handleSelectAllCheckbox = () => {
-    dispatch({
-      type: 'SET_ALL_WEBHOOKS_TO_DELETE',
-    });
-  };
+  const handleSelectAllCheckbox = (value) =>
+    value ? setWebhooksToDelete(webhooks.map((webhook) => webhook.id)) : setWebhooksToDelete([]);
 
-  const handleSelectOneCheckbox = (value, id) => {
-    dispatch({
-      type: 'SET_WEBHOOKS_TO_DELETE',
-      value,
-      id,
-    });
-  };
+  const handleSelectOneCheckbox = (value, id) =>
+    value
+      ? setWebhooksToDelete((prev) => [...prev, id])
+      : setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
 
   const handleGoTo = (to) => {
     push(`${pathname}/${to}`);
@@ -250,7 +192,7 @@ const ListView = () => {
   return (
     <Layout>
       <SettingsPageTitle name="Webhooks" />
-      <Main aria-busy={isLoading || loadingWebhooks}>
+      <Main aria-busy={loading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
@@ -259,7 +201,7 @@ const ListView = () => {
           })}
           primaryAction={
             canCreate &&
-            !loadingWebhooks && (
+            !loading && (
               <LinkButton startIcon={<Plus />} variant="default" to={`${pathname}/create`} size="S">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
@@ -299,7 +241,7 @@ const ListView = () => {
           />
         )}
         <ContentLayout>
-          {isLoading || loadingWebhooks ? (
+          {loading ? (
             <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
               <LoadingIndicatorPage />
             </Box>
