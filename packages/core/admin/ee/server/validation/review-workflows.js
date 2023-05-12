@@ -21,7 +21,14 @@ const validateUpdateStageOnEntity = yup
   })
   .required();
 
+const validateWorkflowCreateSchema = yup.object().shape({
+  name: yup.string().max(255).required(),
+  default: yup.boolean().default(false),
+  stages: yup.array().of(stageObject),
+});
+
 module.exports = {
+  validateWorkflowCreate: validateYupSchema(validateWorkflowCreateSchema),
   validateUpdateStages: validateYupSchema(validateUpdateStagesSchema, {
     strict: false,
     stripUnknown: true,
