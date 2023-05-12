@@ -60,7 +60,7 @@ const isOperatorOfType = (type, key, ignoreCase = false) => {
   if (ignoreCase) {
     return OPERATORS_LOWERCASE[type]?.includes(key.toLowerCase()) ?? false;
   }
-  return OPERATORS[type]?.includes(key);
+  return OPERATORS[type]?.includes(key) ?? false;
 };
 
 const isOperator = (key, ignoreCase = false) => {
