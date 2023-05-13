@@ -128,7 +128,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres
+        image: postgres:alpine
         # Provide the password for postgres
         env:
           POSTGRES_USER: strapi
