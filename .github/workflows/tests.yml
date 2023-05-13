@@ -134,6 +134,7 @@ jobs:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
           POSTGRES_DB: strapi_test
+          POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en'
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
