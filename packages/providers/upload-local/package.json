@@ -47,7 +47,7 @@
     "fs-extra": "10.0.0"
   },
   "devDependencies": {
-    "@types/jest": "29.2.0",
+    "@types/jest": "29.5.1",
     "eslint-config-custom": "4.10.5",
     "tsconfig": "4.10.5"
   },
