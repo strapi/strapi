@@ -34,7 +34,8 @@ module.exports = {
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/environment'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
-  testEnvironment: 'jsdom',
+  testEnvironment: '@happy-dom/jest-environment',
+  // testEnvironment: 'jsdom',
   transform: {
     '^.+\\.js$': [
       '@swc/jest',
