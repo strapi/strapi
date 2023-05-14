@@ -8,11 +8,11 @@ import {
   Typography,
   lightTheme,
 } from '@strapi/design-system';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
-import TrackingProvider from '../../../providers/TrackingProvider';
+import { TrackingProvider } from '../../../features/Tracking';
 import Table from '../index';
 
 const TableRows = ({
@@ -64,24 +64,24 @@ const TableRows = ({
   );
 };
 
+const Wrapper = ({ children }) => (
+  <MemoryRouter>
+    <TrackingProvider value={{ uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7' }}>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={{}} textComponent="span">
+          {children}
+        </IntlProvider>
+      </ThemeProvider>
+    </TrackingProvider>
+  </MemoryRouter>
+);
+
 const renderTable = (headers, rows, allowRangeSelection = true, withMainAction = true) =>
   render(
-    <MemoryRouter>
-      <TrackingProvider value={{ uuid: '2479d6d7-2497-478d-8a34-a9e8ce45f8a7' }}>
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}} textComponent="span">
-            <Table
-              headers={headers}
-              contentType="users"
-              rows={rows}
-              withMainAction={withMainAction}
-            >
-              <TableRows headers={headers} rows={rows} allowRangeSelection={allowRangeSelection} />
-            </Table>
-          </IntlProvider>
-        </ThemeProvider>
-      </TrackingProvider>
-    </MemoryRouter>
+    <Table headers={headers} contentType="users" rows={rows} withMainAction={withMainAction}>
+      <TableRows headers={headers} rows={rows} allowRangeSelection={allowRangeSelection} />
+    </Table>,
+    { wrapper: Wrapper }
   );
 
 describe('DynamicTable', () => {
@@ -104,37 +104,42 @@ describe('DynamicTable', () => {
   ];
 
   const rows = [
-    { id: 1, firstname: 'soup', lastname: 'soup', email: 'soup@strapi.io' },
+    { id: 1, firstname: 'soup', lastname: 'bowl', email: 'soup@strapi.io' },
     { id: 2, firstname: 'm', lastname: 'frachet', email: 'm@strapi.io' },
     { id: 3, firstname: 'hicham', lastname: 'ELBSI', email: 'helbsi@strapi.io' },
     { id: 4, firstname: 'john', lastname: 'doe', email: 'doe@strapi.io' },
     { id: 5, firstname: 'mary', lastname: 'jane', email: 'jane@strapi.io' },
   ];
 
-  it('Performs single row item selection/deselection', async () => {
-    const { container } = renderTable(headers, rows);
+  it('renders table content correctly', () => {
+    renderTable(headers, rows);
+    headers.forEach((header) => {
+      expect(screen.getByLabelText(header.metadatas.label)).toBeVisible();
+    });
 
-    expect(container).toMatchSnapshot();
+    rows.forEach((row) => {
+      expect(screen.getByText(row.firstname)).toBeVisible();
+      expect(screen.getByText(row.lastname)).toBeVisible();
+      expect(screen.getByText(row.email)).toBeVisible();
+    });
+  });
+
+  it('Performs single row item selection/deselection', async () => {
+    renderTable(headers, rows);
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes).toHaveLength(6);
 
-    checkboxes.map((box) => expect(box).not.toHaveClass('selected'));
+    checkboxes.map((box) => expect(box).not.toBeChecked());
 
     fireEvent.click(checkboxes[1]);
     fireEvent.click(checkboxes[2]);
-
-    await waitFor(() => {
-      expect(checkboxes[1]).toHaveClass('selected');
-      expect(checkboxes[2]).toHaveClass('selected');
-    });
+    expect(checkboxes[1]).toBeChecked();
+    expect(checkboxes[2]).toBeChecked();
 
     fireEvent.click(checkboxes[1]);
     fireEvent.click(checkboxes[2]);
-
-    await waitFor(() => {
-      expect(checkboxes[1]).not.toHaveClass('selected');
-      expect(checkboxes[2]).not.toHaveClass('selected');
-    });
+    expect(checkboxes[1]).not.toBeChecked();
+    expect(checkboxes[2]).not.toBeChecked();
   });
 
   it('Performs range selection/deselection', async () => {
@@ -143,20 +148,16 @@ describe('DynamicTable', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes).toHaveLength(6);
 
-    checkboxes.forEach((box) => expect(box).not.toHaveClass('selected'));
+    checkboxes.forEach((box) => expect(box).not.toBeChecked());
 
     fireEvent.click(checkboxes[1]);
     fireEvent.click(checkboxes[5], { shiftKey: true });
 
-    await waitFor(() => {
-      checkboxes.slice(1, 6).forEach((box) => expect(box).toHaveClass('selected'));
-    });
+    checkboxes.slice(1, 6).forEach((box) => expect(box).toBeChecked());
 
     fireEvent.click(checkboxes[1], { shiftKey: true });
-    await waitFor(() => {
-      checkboxes.slice(2, 6).forEach((box) => expect(box).not.toHaveClass('selected'));
-      expect(checkboxes[1]).toHaveClass('selected');
-    });
+    checkboxes.slice(2, 6).forEach((box) => expect(box).not.toBeChecked());
+    expect(checkboxes[1]).toBeChecked();
   });
 
   it('Perform selection/deselection without range support', async () => {
@@ -165,22 +166,17 @@ describe('DynamicTable', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes).toHaveLength(6);
 
-    checkboxes.forEach((box) => expect(box).not.toHaveClass('selected'));
+    checkboxes.forEach((box) => expect(box).not.toBeChecked());
+
+    fireEvent.click(checkboxes[1]);
+    fireEvent.click(checkboxes[2]);
+    expect(checkboxes[1]).toBeChecked();
+    expect(checkboxes[2]).toBeChecked();
 
     fireEvent.click(checkboxes[1]);
     fireEvent.click(checkboxes[2]);
 
-    await waitFor(() => {
-      expect(checkboxes[1]).toHaveClass('selected');
-      expect(checkboxes[2]).toHaveClass('selected');
-    });
-
-    fireEvent.click(checkboxes[1]);
-    fireEvent.click(checkboxes[2]);
-
-    await waitFor(() => {
-      expect(checkboxes[1]).not.toHaveClass('selected');
-      expect(checkboxes[2]).not.toHaveClass('selected');
-    });
+    expect(checkboxes[1]).not.toBeChecked();
+    expect(checkboxes[2]).not.toBeChecked();
   });
 });
