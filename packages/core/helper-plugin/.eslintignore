@@ -1,4 +1,5 @@
 node_modules/
 .eslintrc.js
 build/
-lib/src/utils/**
+# TODO: we should fix this.
+src/utils/**

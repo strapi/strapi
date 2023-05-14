@@ -5,7 +5,7 @@ on:
     paths:
       - '**/admin/src/**.js'
       - '**/ee/admin/**.js'
-      - '**/helper-plugin/lib/src/**.js'
+      - '**/helper-plugin/src/**.js'
       - '**/translations/**.json'
 
       # Might be too broad, but it runs the action even if a
@@ -27,8 +27,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          path: '**/node_modules'
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
 
       - uses: preactjs/compressed-size-action@v2
         with:

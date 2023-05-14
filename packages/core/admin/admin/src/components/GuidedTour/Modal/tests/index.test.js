@@ -117,6 +117,42 @@ describe('<GuidedTourModal />', () => {
         cursor: pointer;
       }
 
+      .c15 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #4945ff;
+      }
+
+      .c19 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c20 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c24 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c28 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -244,54 +280,18 @@ describe('<GuidedTourModal />', () => {
         gap: 8px;
       }
 
-      .c15 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #4945ff;
-      }
-
-      .c19 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c20 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c24 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c28 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
       .c8 {
         position: relative;
         outline: none;
       }
 
-      .c8 svg {
+      .c8 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c8 > svg > g,
+      .c8 > svg path {
         fill: #ffffff;
       }
 
@@ -487,7 +487,7 @@ describe('<GuidedTourModal />', () => {
           </div>
         </div>
         <div
-          data-react-portal="true"
+          class=""
         >
           <div
             class="c1 c2 c3"

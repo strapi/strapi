@@ -4,6 +4,7 @@ module.exports = {
   preset: '../../../jest-preset.unit.js',
   testMatch: ['**/__tests__/**/*.test.ts'],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.ts$': ['@swc/jest'],
   },
+  displayName: 'Core data-transfer',
 };

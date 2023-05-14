@@ -22,12 +22,6 @@ class PostgresDialect extends Dialect {
       'text',
       (v) => v
     );
-    // Don't parse JSONB automatically
-    this.db.connection.client.driver.types.setTypeParser(
-      this.db.connection.client.driver.types.builtins.JSONB,
-      'text',
-      (v) => v
-    );
     this.db.connection.client.driver.types.setTypeParser(
       this.db.connection.client.driver.types.builtins.NUMERIC,
       'text',

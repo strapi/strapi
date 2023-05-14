@@ -1,27 +1,32 @@
-import { setContentTypeLinks } from '../actions';
+import { setInitData } from '../actions';
 
 describe('Content Manager | App | actions', () => {
-  it('should format the setContentTypeLinks action', () => {
-    const authorizedCtLinks = [{ title: 'addresses', uid: 'address' }];
-    const authorizedStLinks = [{ title: 'Home page', uid: 'homepage' }];
-    const models = [
+  it('should format the setInitData action', () => {
+    const authorizedCollectionTypeLinks = [{ title: 'addresses', uid: 'address' }];
+    const authorizedSingleTypeLinks = [{ title: 'Home page', uid: 'homepage' }];
+    const contentTypeSchemas = [
       { kind: 'singleType', uid: 'homepage' },
       { kind: 'collectionType', uid: 'address' },
     ];
     const components = [];
 
     const expected = {
-      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
+      type: 'ContentManager/App/SET_INIT_DATA',
       data: {
-        authorizedCtLinks,
-        authorizedStLinks,
-        contentTypeSchemas: models,
+        authorizedCollectionTypeLinks,
+        authorizedSingleTypeLinks,
+        contentTypeSchemas,
         components,
       },
     };
 
-    expect(setContentTypeLinks(authorizedCtLinks, authorizedStLinks, models, components)).toEqual(
-      expected
-    );
+    expect(
+      setInitData({
+        authorizedCollectionTypeLinks,
+        authorizedSingleTypeLinks,
+        contentTypeSchemas,
+        components,
+      })
+    ).toEqual(expected);
   });
 });

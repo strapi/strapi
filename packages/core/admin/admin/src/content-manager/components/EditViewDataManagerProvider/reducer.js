@@ -186,11 +186,15 @@ const reducer = (state, action) =>
         const newRelations = [...modifiedDataRelations];
 
         if (action.type === 'REORDER_RELATION') {
-          const [newKey] = generateNKeysBetween(
-            modifiedDataRelations[newIndex - 1]?.__temp_key__,
-            modifiedDataRelations[newIndex]?.__temp_key__,
-            1
-          );
+          const startKey =
+            oldIndex > newIndex
+              ? modifiedDataRelations[newIndex - 1]?.__temp_key__
+              : modifiedDataRelations[newIndex]?.__temp_key__;
+          const endKey =
+            oldIndex > newIndex
+              ? modifiedDataRelations[newIndex]?.__temp_key__
+              : modifiedDataRelations[newIndex + 1]?.__temp_key__;
+          const [newKey] = generateNKeysBetween(startKey, endKey, 1);
 
           newRelations.splice(oldIndex, 1);
           newRelations.splice(newIndex, 0, { ...currentItem, __temp_key__: newKey });

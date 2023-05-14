@@ -51,21 +51,28 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  inTransaction() {
+    return !!transactionCtx.get();
+  }
+
   async transaction(cb) {
     const notNestedTransaction = !transactionCtx.get();
     const trx = notNestedTransaction ? await this.connection.transaction() : transactionCtx.get();
 
     async function commit() {
       if (notNestedTransaction) {
+        transactionCtx.clear();
         await trx.commit();
       }
     }
 
     async function rollback() {
       if (notNestedTransaction) {
+        transactionCtx.clear();
         await trx.rollback();
       }
     }
+
     if (!cb) {
       return {
         commit,

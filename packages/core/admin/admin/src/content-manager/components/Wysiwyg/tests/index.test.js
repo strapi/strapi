@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render, waitFor, fireEvent, screen } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Wysiwyg from '../index';
 
@@ -9,6 +10,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useLibrary: () => ({ components: {} }),
 }));
 
+/**
+ * TODO: these should be in the JEST setup.
+ */
 document.createRange = () => {
   const range = new Range();
   range.getBoundingClientRect = jest.fn();
@@ -19,62 +23,60 @@ document.createRange = () => {
 
   return range;
 };
+
 window.focus = jest.fn();
 
+const render = ({ onChange = jest.fn(), ...restProps } = {}) => ({
+  user: userEvent.setup(),
+  ...renderRTL(
+    <Wysiwyg
+      name="rich-text"
+      intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
+      onChange={onChange}
+      disabled={false}
+      {...restProps}
+    />,
+    {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider messages={{}} locale="en">
+            {children}
+          </IntlProvider>
+        </ThemeProvider>
+      ),
+    }
+  ),
+});
+
 describe('Wysiwyg render and actions buttons', () => {
-  let renderedContainer;
-  let getContainerByText;
-  let containerQueryByText;
-  let returnedValue;
-
-  beforeEach(() => {
-    const onChange = jest.fn((e) => {
-      returnedValue = e.target.value;
-    });
-
-    const { container, getByText, queryByText } = render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider messages={{}} locale="en">
-          <Wysiwyg
-            name="rich-text"
-            intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
-            onChange={onChange}
-            disabled={false}
-          />
-        </IntlProvider>
-      </ThemeProvider>
-    );
-    renderedContainer = container;
-    getContainerByText = getByText;
-    containerQueryByText = queryByText;
-  });
-
   it('should render the Wysiwyg', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
+    const { getByText } = render();
 
-    expect(getContainerByText('hello world')).toBeInTheDocument();
-    expect(renderedContainer.firstChild).toMatchSnapshot();
+    expect(getByText('hello world')).toBeInTheDocument();
   });
 
   it('should render bold markdown when clicking the bold button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#Bold'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('**Bold**')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'Bold' }));
+
+    expect(getByText('**Bold**')).toBeInTheDocument();
   });
 
   it('should render italic markdown when clicking the italic button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#Italic'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('_Italic_')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'Italic' }));
+
+    expect(getByText('_Italic_')).toBeInTheDocument();
   });
 
   it('should render underline markdown when clicking the underline button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#Underline'));
+    const { user, getByText, getByRole } = render();
 
-    const hasUnderlineMarkdown = getContainerByText((content, node) => {
+    await user.click(getByRole('button', { name: 'Underline' }));
+
+    const hasUnderlineMarkdown = getByText((content, node) => {
       const hasText = (node) => node.textContent === '<u>Underline</u>';
       const nodeHasText = hasText(node);
       const childrenDontHaveText = Array.from(node.children).every((child) => !hasText(child));
@@ -86,325 +88,217 @@ describe('Wysiwyg render and actions buttons', () => {
   });
 
   it('should render strikethrough markdown when clicking the strikethrough button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('Strikethrough'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('~~Strikethrough~~')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'Strikethrough' }));
+
+    expect(getByText('~~Strikethrough~~')).toBeInTheDocument();
   });
 
   it('should render bullet list markdown when clicking the bullet list button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('BulletList'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('-')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'BulletList' }));
+
+    expect(getByText('-')).toBeInTheDocument();
   });
 
   it('should render number list markdown when clicking the number list button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('NumberList'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('1.')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'NumberList' }));
+
+    expect(getByText('1.')).toBeInTheDocument();
   });
 
   it('should render code markdown when clicking the code button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('Code'));
+    const onChange = jest.fn();
+    const { user, getByRole } = render({ onChange });
+
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'Code' }));
 
     const expected = `
 \`\`\`
 Code
 \`\`\``;
 
-    expect(returnedValue).toEqual(expected);
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      target: {
+        name: 'rich-text',
+        type: 'wysiwyg',
+        value: expected,
+      },
+    });
   });
 
   // it('should render image markdown when clicking the image button', async () => {
-  //   await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
+  //
   //   fireEvent.click(renderedContainer.querySelector('#more'));
   //   fireEvent.click(document.getElementById('Image'));
   //   fireEvent.click(document.getElementById('media-library'));
   //   fireEvent.click(document.getElementById('insert-button'));
 
-  //   expect(getContainerByText('[sunset](http://localhost:3000/sunsetimage)')).toBeInTheDocument();
+  //   expect(getByText('[sunset](http://localhost:3000/sunsetimage)')).toBeInTheDocument();
   // });
 
   it('should render link markdown when clicking the link button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('Link'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('[Link](link)')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'Link' }));
+
+    expect(getByText('[Link](link)')).toBeInTheDocument();
   });
 
   it('should render quote markdown when clicking the quote button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-    fireEvent.click(document.getElementById('Quote'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('>Quote')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'More' }));
+    await user.click(getByRole('button', { name: 'Quote' }));
+
+    expect(getByText('>Quote')).toBeInTheDocument();
   });
 
   it('should render h1 markdown when clicking the h1 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h1'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('#')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h1' }));
+
+    expect(getByText('#')).toBeInTheDocument();
   });
 
   it('should render h2 markdown when clicking the h2 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h2'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('##')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h2' }));
+
+    expect(getByText('##')).toBeInTheDocument();
   });
 
   it('should render h3 markdown when clicking the h3 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h3'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('###')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h3' }));
+
+    expect(getByText('###')).toBeInTheDocument();
   });
 
   it('should render h4 markdown when clicking the h4 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h4'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('####')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h4' }));
+
+    expect(getByText('####')).toBeInTheDocument();
   });
 
   it('should render h5 markdown when clicking the h5 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h5'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('#####')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h5' }));
+
+    expect(getByText('#####')).toBeInTheDocument();
   });
 
   it('should render h6 markdown when clicking the h6 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h6'));
+    const { user, getByText, getByRole } = render();
 
-    expect(getContainerByText('######')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h6' }));
+
+    expect(getByText('######')).toBeInTheDocument();
   });
 
   it('should render h1 markdown when clicking the h4 button then clicking on the h1 button', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h1'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h4'));
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    fireEvent.click(getContainerByText('h1'));
+    const { user, getByText, getByRole, queryByText } = render();
 
-    expect(containerQueryByText('####')).not.toBeInTheDocument();
-    expect(getContainerByText('#')).toBeInTheDocument();
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h1' }));
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h4' }));
+    await user.click(getByRole('combobox', { name: 'Add a title' }));
+    await user.click(getByRole('option', { name: 'h1' }));
+
+    expect(queryByText('####')).not.toBeInTheDocument();
+    expect(getByText('#')).toBeInTheDocument();
   });
 
   // PREVIEW MODE TESTS
 
   it('should disable bold button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#Bold'));
+    const { user, getByRole } = render();
 
-    expect(containerQueryByText('**Bold**')).not.toBeInTheDocument();
+    await user.click(getByRole('button', { name: /Preview/ }));
+    expect(getByRole('button', { name: 'Bold' })).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('should disable italic button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#Italic'));
+    const { user, getByRole } = render();
 
-    expect(containerQueryByText('_Italic_')).not.toBeInTheDocument();
+    await user.click(getByRole('button', { name: /Preview/ }));
+    expect(getByRole('button', { name: 'Italic' })).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('should disable underline button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#Underline'));
+    const { user, getByRole } = render();
 
-    const hasUnderlineMarkdown = containerQueryByText((content, node) => {
-      const hasText = (node) => node.textContent === '<u>Underline</u>';
-      const nodeHasText = hasText(node);
-      const childrenDontHaveText = Array.from(node.children).every((child) => !hasText(child));
+    await user.click(getByRole('button', { name: /Preview/ }));
 
-      return nodeHasText && childrenDontHaveText;
-    });
-
-    expect(hasUnderlineMarkdown).not.toBeInTheDocument();
+    expect(getByRole('button', { name: 'Underline' })).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('should disable strikethrough button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
+  it('should disabled the more button when editor is on preview mode', async () => {
+    const { user, getByRole } = render();
 
-    expect(document.getElementById('Strikethrough')).not.toBeInTheDocument();
-  });
-
-  it('should disable bullet list button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('BulletList')).not.toBeInTheDocument();
-  });
-
-  it('should disable number list button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('NumbertList')).not.toBeInTheDocument();
-  });
-
-  it('should disable code button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('BulletList')).not.toBeInTheDocument();
-  });
-
-  it('should disable image button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('Image')).not.toBeInTheDocument();
-  });
-
-  it('should disable link button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('Link')).not.toBeInTheDocument();
-  });
-
-  it('should disable quote button when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
-    fireEvent.click(renderedContainer.querySelector('#more'));
-
-    expect(document.getElementById('Quote')).not.toBeInTheDocument();
+    await user.click(getByRole('button', { name: /Preview/ }));
+    expect(getByRole('button', { name: 'More' })).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('should disable titles buttons when editor is on preview mode', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    fireEvent.click(renderedContainer.querySelector('#preview'));
+    const { user, getByRole } = render();
 
-    fireEvent.mouseDown(renderedContainer.querySelector('#selectTitle'));
-    expect(document.getElementById('h1')).not.toBeInTheDocument();
-    expect(document.getElementById('h2')).not.toBeInTheDocument();
-    expect(document.getElementById('h2')).not.toBeInTheDocument();
-    expect(document.getElementById('h3')).not.toBeInTheDocument();
-    expect(document.getElementById('h4')).not.toBeInTheDocument();
-    expect(document.getElementById('h5')).not.toBeInTheDocument();
-    expect(document.getElementById('h6')).not.toBeInTheDocument();
+    await user.click(getByRole('button', { name: /Preview/ }));
+
+    expect(getByRole('combobox', { name: 'Add a title' })).toHaveAttribute('aria-disabled', 'true');
   });
 });
-
-describe('Wysiwyg render actions with initial value', () => {
-  let renderedContainer;
-  let returnedValue = 'hello world';
-
-  beforeEach(() => {
-    const onChange = jest.fn((e) => {
-      returnedValue += e.target.value;
-    });
-
-    const { container } = render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider messages={{}} locale="en">
-          <Wysiwyg
-            intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
-            name="rich-text"
-            onChange={onChange}
-          />
-        </IntlProvider>
-      </ThemeProvider>
-    );
-    renderedContainer = container;
-  });
-
-  it('should add markdown with initial value', async () => {
-    await waitFor(() => renderedContainer.querySelector('.CodeMirror-cursor'));
-    expect(returnedValue).toEqual('hello world');
-    const expected = `${returnedValue}**Bold**`;
-    fireEvent.click(renderedContainer.querySelector('#Bold'));
-
-    expect(returnedValue).toEqual(expected);
-  });
-});
-
-function setup() {
-  return render(
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider messages={{}} locale="en">
-        <Wysiwyg
-          intlLabel={{ id: 'hello world', defaultMessage: 'hello world' }}
-          name="rich-text"
-          onChange={jest.fn()}
-        />
-      </IntlProvider>
-    </ThemeProvider>
-  );
-}
 
 // FIXME
 describe.skip('Wysiwyg expand mode', () => {
   it('should open wysiwyg expand portal when clicking on expand button', async () => {
-    const { container, getByTestId } = setup();
-
-    await waitFor(() => container.querySelector('.CodeMirror-cursor'));
-
-    screen.logTestingPlaygroundURL();
+    const { getByTestId } = render();
 
     expect(getByTestId('wysiwyg-expand')).not.toBeInTheDocument();
 
-    fireEvent.click(container.querySelector('#expand'));
+    // await user.click(container.querySelector('#expand'));
+
     expect(getByTestId('wysiwyg-expand')).toBeInTheDocument();
   });
 
   it('should close wysiwyg expand portal when clicking on collapse button', async () => {
-    const { container, getByText, getByTestId } = setup();
+    const { getByTestId } = render();
 
-    await waitFor(() => container.querySelector('.CodeMirror-cursor'));
-
-    fireEvent.click(container.querySelector('#expand'));
-    fireEvent.click(getByText('Collapse'));
+    // fireEvent.click(container.querySelector('#expand'));
+    // fireEvent.click(getByText('Collapse'));
 
     expect(getByTestId('wysiwyg-expand')).not.toBeInTheDocument();
   });
 });
 
-// FIXME
 describe('Wysiwyg error state', () => {
   it('should show error message', async () => {
-    const { container, getByText } = render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider messages={{}} locale="en">
-          <Wysiwyg
-            intlLabel={{ id: 'richtext', defaultMessage: 'richtext' }}
-            name="rich-text"
-            onChange={jest.fn()}
-            error="This is a required field"
-          />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    const { getByText } = render({
+      error: 'This is a required field',
+    });
 
-    await waitFor(() => container.querySelector('.CodeMirror-cursor'));
     expect(getByText('This is a required field')).toBeInTheDocument();
   });
 });

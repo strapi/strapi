@@ -121,6 +121,28 @@ describe('Given I have some relations in the database', () => {
       ]);
     });
   });
+
+  describe('When you connect a relation before one with null order', () => {
+    test('Then it replaces null order values to 1 and properly reorders relations', () => {
+      const orderer = relationsOrderer(
+        [
+          { id: 2, order: null },
+          { id: 3, order: null },
+        ],
+        'id',
+        'order'
+      );
+
+      orderer.connect([{ id: 4, position: { before: 3 } }, { id: 5 }]);
+
+      expect(orderer.get()).toMatchObject([
+        { id: 2, order: 1 },
+        { id: 4, order: 0.5 },
+        { id: 3, order: 1 },
+        { id: 5, order: 1.5 },
+      ]);
+    });
+  });
 });
 
 describe('Given there are no relations in the database', () => {

@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import zip from 'zlib';
 import tar from 'tar';
 import path from 'path';
-import { keyBy } from 'lodash/fp';
+import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
@@ -15,6 +15,7 @@ import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
+import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
 
@@ -72,7 +73,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
     try {
       // Read the metadata to ensure the file can be parsed
-      this.#metadata = await this.getMetadata();
+      await this.#loadMetadata();
+      // TODO: we might also need to read the schema.jsonl files & implements a custom stream-check
     } catch (e) {
       if (this.options?.encryption?.enabled) {
         throw new ProviderInitializationError(
@@ -81,17 +83,31 @@ class LocalFileSourceProvider implements ISourceProvider {
       }
       throw new ProviderInitializationError(`File '${filePath}' is not a valid Strapi data file.`);
     }
+
+    if (!this.#metadata) {
+      throw new ProviderInitializationError('Could not load metadata from Strapi data file.');
+    }
   }
 
-  getMetadata() {
-    // TODO: need to read the file & extract the metadata json file
-    // => we might also need to read the schema.jsonl files & implements a custom stream-check
+  async #loadMetadata() {
     const backupStream = this.#getBackupStream();
-    return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
+    this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
+  }
+
+  async getMetadata() {
+    if (!this.#metadata) {
+      await this.#loadMetadata();
+    }
+
+    return this.#metadata ?? null;
   }
 
   async getSchemas() {
     const schemas = await collect<Schema>(this.createSchemasReadStream());
+
+    if (isEmpty(schemas)) {
+      throw new ProviderInitializationError('Could not load schemas from Strapi data file.');
+    }
 
     return keyBy('uid', schemas);
   }
@@ -121,20 +137,21 @@ class LocalFileSourceProvider implements ISourceProvider {
       [
         inStream,
         new tar.Parse({
+          // find only files in the assets/uploads folder
           filter(filePath, entry) {
             if (entry.type !== 'File') {
               return false;
             }
-
-            const parts = filePath.split('/');
-            return parts[0] === 'assets' && parts[1] === 'uploads';
+            return isFilePathInDirname('assets/uploads', filePath);
           },
           onentry(entry) {
             const { path: filePath, size = 0 } = entry;
-            const file = path.basename(filePath);
+            const normalizedPath = unknownPathToPosix(filePath);
+            const file = path.basename(normalizedPath);
+
             const asset: IAsset = {
               filename: file,
-              filepath: filePath,
+              filepath: normalizedPath,
               stats: { size },
               stream: entry as unknown as Readable,
             };
@@ -170,6 +187,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     return chain(streams);
   }
 
+  // `directory` must be posix formatted path
   #streamJsonlDirectory(directory: string) {
     const inStream = this.#getBackupStream();
 
@@ -184,14 +202,7 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
 
-            const parts = path.relative('.', filePath).split('/');
-
-            // TODO: this method is limiting us from having additional subdirectories and is requiring us to remove any "./" prefixes (the path.relative line above)
-            if (parts.length !== 2) {
-              return false;
-            }
-
-            return parts[0] === directory;
+            return isFilePathInDirname(directory, filePath);
           },
 
           async onentry(entry) {
@@ -249,7 +260,11 @@ class LocalFileSourceProvider implements ISourceProvider {
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
             filter(entryPath, entry) {
-              return !path.relative(filePath, entryPath).length && entry.type === 'File';
+              if (entry.type !== 'File') {
+                return false;
+              }
+
+              return isPathEquivalent(entryPath, filePath);
             },
 
             async onentry(entry) {

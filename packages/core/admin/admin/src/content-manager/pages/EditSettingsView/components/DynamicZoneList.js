@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Box, Flex, Typography } from '@strapi/design-system';
 
 import { ComponentIcon } from '../../../components/ComponentIcon';
-import useLayoutDnd from '../../../hooks/useLayoutDnd';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 const CustomLink = styled(Flex)`
   text-decoration: none;

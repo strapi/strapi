@@ -2,9 +2,10 @@ import produce from 'immer';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
-
 import { arrayMoveItem } from '../../utils';
-import { formatLayout, getDefaultInputSize, getFieldSize, setFieldSize } from './utils/layout';
+import { formatLayout, getFieldSize, setFieldSize } from './utils/layout';
+
+const DEFAULT_FIELD_SIZE = 6;
 
 const initialState = {
   fieldForm: {},
@@ -29,9 +30,14 @@ const reducer = (state = initialState, action) =>
       }
       case 'ON_ADD_FIELD': {
         const newState = cloneDeep(state);
-        const size = getDefaultInputSize(
-          get(newState, ['modifiedData', 'attributes', action.name, 'type'], '')
-        );
+        const attribute = get(newState, ['modifiedData', 'attributes', action.name], {});
+
+        // Get the default size, checking custom fields first, then the type and generic defaults
+        const size =
+          action.fieldSizes[attribute?.customField]?.default ??
+          action.fieldSizes[attribute?.type]?.default ??
+          DEFAULT_FIELD_SIZE;
+
         const listSize = get(newState, layoutPathEdit, []).length;
         const actualRowContentPath = [...layoutPathEdit, listSize - 1, 'rowContent'];
         const rowContentToSet = get(newState, actualRowContentPath, []);
@@ -149,8 +155,7 @@ const reducer = (state = initialState, action) =>
         draftState.metaToEdit = action.name;
         draftState.metaForm = {
           metadata: get(state, ['modifiedData', 'metadatas', action.name, 'edit'], {}),
-          size:
-            getFieldSize(action.name, state.modifiedData?.layouts?.edit) ?? getDefaultInputSize(),
+          size: getFieldSize(action.name, state.modifiedData?.layouts?.edit) ?? DEFAULT_FIELD_SIZE,
         };
 
         break;

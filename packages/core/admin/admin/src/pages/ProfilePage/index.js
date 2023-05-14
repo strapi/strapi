@@ -4,7 +4,7 @@ import {
   Form,
   GenericInput,
   LoadingIndicatorPage,
-  useAppInfos,
+  useAppInfo,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -65,7 +65,7 @@ const ProfilePage = () => {
   const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
   const [currentPasswordShown, setCurrentPasswordShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
-  const { setUserDisplayName } = useAppInfos();
+  const { setUserDisplayName } = useAppInfo();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();

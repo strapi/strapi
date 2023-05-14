@@ -1,0 +1,28 @@
+name: 'Remove dist-tag from NPM'
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: 'The tag you want to remove from NPM'
+        required: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  publish:
+    name: 'Publish'
+    runs-on: ubuntu-latest
+    if: github.repository == 'strapi/strapi'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: yarn
+      - run: ./scripts/remove-dist-tag
+        env:
+          DIST_TAG: ${{ github.event.inputs.dist-tag }}

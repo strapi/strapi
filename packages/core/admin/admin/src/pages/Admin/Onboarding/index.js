@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import {
   Box,
   Button,
@@ -78,7 +78,7 @@ const Onboarding = () => {
   const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfos();
+  const { communityEdition } = useAppInfo();
 
   const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);

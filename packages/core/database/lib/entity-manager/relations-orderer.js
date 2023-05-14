@@ -135,7 +135,7 @@ const relationsOrderer = (initArr, idColumn, orderColumn, strict) => {
   const computedRelations = _.castArray(initArr || []).map((r) => ({
     init: true,
     id: r[idColumn],
-    order: r[orderColumn],
+    order: r[orderColumn] || 1,
   }));
 
   const maxOrder = _.maxBy('order', computedRelations)?.order || 0;

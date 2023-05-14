@@ -115,7 +115,7 @@
   "form.button.single-type.description": "Indicato per entità uniche come home page, chi siamo, ecc...",
   "from": "da",
   "modalForm.attribute.form.base.name.description": "Spazi non ammessi per il nome dell'attributo",
-  "modalForm.attribute.form.base.name.placeholder": "Es: Slug, URL SEO, URL Canonico",
+  "modalForm.attribute.form.base.name.placeholder": "Es: slug, urlSeo, urlCanonico",
   "modalForm.attribute.target-field": "Campo collegato",
   "modalForm.attributes.select-component": "Seleziona un componente",
   "modalForm.attributes.select-components": "Seleziona i componenti",

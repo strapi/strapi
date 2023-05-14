@@ -98,6 +98,47 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   bottom: 4px;
 }
 
+.c4 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c48 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
 .c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -224,47 +265,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   justify-content: center;
 }
 
-.c4 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c48 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c54 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #ffffff;
-}
-
 .c46 {
   border-radius: 4px;
   height: 1.5rem;
@@ -275,13 +275,13 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   outline: none;
 }
 
-.c7 svg {
+.c7 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c7 svg > g,
-.c7 svg path {
+.c7 > svg > g,
+.c7 > svg path {
   fill: #ffffff;
 }
 

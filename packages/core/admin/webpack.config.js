@@ -9,6 +9,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const browserslist = require('browserslist');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const alias = require('./webpack.alias');
@@ -52,7 +53,10 @@ module.exports = ({
 
   const excludeRegex = createPluginsExcludePath(pluginsPath);
 
-  const buildTarget = browserslistToEsbuild();
+  // Ensure we use the config in this directory, even if run with a different
+  // working directory
+  const browserslistConfig = browserslist.loadConfig({ path: __dirname });
+  const buildTarget = browserslistToEsbuild(browserslistConfig);
 
   return {
     mode: isProduction ? 'production' : 'development',

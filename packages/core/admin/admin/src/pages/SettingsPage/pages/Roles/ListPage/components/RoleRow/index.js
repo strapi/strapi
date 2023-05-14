@@ -4,8 +4,9 @@ import { Box, Flex, Td, Tr, Typography, IconButton } from '@strapi/design-system
 import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-const RoleRow = ({ id, name, description, usersCount, icons, rowIndex }) => {
+const RoleRow = ({ id, name, description, usersCount, icons, rowIndex, canUpdate }) => {
   const { formatMessage } = useIntl();
+  const [, editObject] = icons;
 
   const usersCountText = formatMessage(
     {
@@ -19,9 +20,11 @@ const RoleRow = ({ id, name, description, usersCount, icons, rowIndex }) => {
     <Tr
       aria-rowindex={rowIndex}
       key={id}
-      {...onRowClick({
-        fn: icons[1].onClick,
-      })}
+      {...(canUpdate
+        ? onRowClick({
+            fn: editObject.onClick,
+          })
+        : {})}
     >
       <Td maxWidth={pxToRem(130)}>
         <Typography ellipsis textColor="neutral800">
@@ -58,6 +61,11 @@ RoleRow.propTypes = {
   usersCount: PropTypes.number.isRequired,
   icons: PropTypes.array.isRequired,
   rowIndex: PropTypes.number.isRequired,
+  canUpdate: PropTypes.bool,
+};
+
+RoleRow.defaultProps = {
+  canUpdate: false,
 };
 
 export default RoleRow;

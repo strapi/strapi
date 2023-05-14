@@ -1,5 +1,5 @@
-import { useEffect, useReducer, useRef } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import init from './init';
 import pluginId from '../../pluginId';
@@ -12,28 +12,17 @@ const useRolesList = (shouldFetchData = true) => {
   const toggleNotification = useNotification();
 
   const isMounted = useRef(true);
-  const abortController = new AbortController();
-  const { signal } = abortController;
+  const fetchClient = useFetchClient();
 
-  useEffect(() => {
-    if (shouldFetchData) {
-      fetchRolesList();
-    }
-
-    return () => {
-      abortController.abort();
-      isMounted.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldFetchData]);
-
-  const fetchRolesList = async () => {
+  const fetchRolesList = useCallback(async () => {
     try {
       dispatch({
         type: 'GET_DATA',
       });
 
-      const { roles } = await request(`/${pluginId}/roles`, { method: 'GET', signal });
+      const {
+        data: { roles },
+      } = await fetchClient.get(`/${pluginId}/roles`);
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
@@ -55,7 +44,17 @@ const useRolesList = (shouldFetchData = true) => {
         }
       }
     }
-  };
+  }, [fetchClient, toggleNotification]);
+
+  useEffect(() => {
+    if (shouldFetchData) {
+      fetchRolesList();
+    }
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [shouldFetchData, fetchRolesList]);
 
   return { roles, isLoading, getData: fetchRolesList };
 };

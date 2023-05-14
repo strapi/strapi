@@ -1,19 +1,18 @@
 import axios from 'axios';
+import qs from 'qs';
 
 const MARKETPLACE_API_URL = 'https://market-api.strapi.io';
 
 const fetchMarketplacePlugins = async (params = {}) => {
-  const { data: response } = await axios.get(`${MARKETPLACE_API_URL}/plugins`, {
+  const { data } = await axios.get(`${MARKETPLACE_API_URL}/plugins`, {
     params,
+    paramsSerializer: {
+      encode: qs.parse,
+      serialize: qs.stringify,
+    },
   });
 
-  // Only keep v4 plugins
-  const filteredResponse = {
-    ...response,
-    data: response.data.filter((plugin) => plugin.attributes.strapiCompatibility === 'v4'),
-  };
-
-  return filteredResponse;
+  return data;
 };
 
 export { fetchMarketplacePlugins };

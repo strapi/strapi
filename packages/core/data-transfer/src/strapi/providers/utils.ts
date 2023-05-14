@@ -1,8 +1,8 @@
-import { v4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../types/remote/protocol';
-import { ProviderError } from '../../errors/providers';
+import { ProviderError, ProviderTransferError } from '../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -28,7 +28,7 @@ export const createDispatcher = (ws: WebSocket) => {
     }
 
     return new Promise<U | null>((resolve, reject) => {
-      const uuid = v4();
+      const uuid = randomUUID();
       const payload = { ...message, uuid };
 
       if (options.attachTransfer) {
@@ -117,6 +117,29 @@ export const createDispatcher = (ws: WebSocket) => {
     dispatchTransferAction,
     dispatchTransferStep,
   };
+};
+
+type WebsocketParams = ConstructorParameters<typeof WebSocket>;
+type Address = WebsocketParams[0];
+type Options = WebsocketParams[2];
+
+export const connectToWebsocket = (address: Address, options?: Options): Promise<WebSocket> => {
+  return new Promise((resolve, reject) => {
+    const server = new WebSocket(address, options);
+    server.once('open', () => {
+      resolve(server);
+    });
+
+    server.once('error', (err) => {
+      reject(
+        new ProviderTransferError(err.message, {
+          details: {
+            error: err.message,
+          },
+        })
+      );
+    });
+  });
 };
 
 export const trimTrailingSlash = (input: string): string => {

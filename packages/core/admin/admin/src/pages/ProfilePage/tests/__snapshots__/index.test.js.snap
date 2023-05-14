@@ -53,13 +53,83 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   border-style: none;
 }
 
-.c40 {
-  padding-right: 16px;
-  padding-left: 16px;
+.c37 {
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
 }
 
-.c43 {
-  padding-left: 12px;
+.c40 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c45 {
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c17 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c21 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c35 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c42 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c48 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c2 {
@@ -172,60 +242,38 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   justify-content: unset;
 }
 
-.c6 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c11 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c17 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c21 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c35 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
+.c38 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
 .c41 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c45 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .c9 {
@@ -233,13 +281,13 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c9 svg {
+.c9 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c9 svg > g,
-.c9 svg path {
+.c9 > svg > g,
+.c9 > svg path {
   fill: #ffffff;
 }
 
@@ -459,13 +507,21 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   padding: 0;
 }
 
-.c37 {
-  position: relative;
+.c46 {
+  border: none;
+}
+
+.c46 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c46 svg path {
+  fill: #666687;
+}
+
+.c39 {
   border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
   min-height: 2.5rem;
   outline: none;
   box-shadow: 0;
@@ -475,25 +531,31 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c37:focus-within {
+.c39[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c39:focus-visible {
+  outline: none;
+}
+
+.c39:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c42 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
+.c47 > svg {
+  width: 0.375rem;
 }
 
-.c42 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c42 svg path {
+.c47 > svg > path {
   fill: #666687;
+}
+
+.c43 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .c44 {
@@ -501,35 +563,15 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: none;
-  border: none;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-.c44 svg {
-  width: 0.375rem;
-}
-
-.c38 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c38:focus {
-  outline: none;
-}
-
-.c38[data-disabled] {
-  cursor: not-allowed;
-}
-
-.c39 {
-  width: 100%;
+.c49[data-state='checked'] .c5 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
 .c18 {
@@ -1101,87 +1143,76 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           Interface language
                         </label>
                         <div
-                          class="c4 c37"
+                          aria-autocomplete="none"
+                          aria-controls="radix-0"
+                          aria-describedby="7-hint 7-error"
+                          aria-expanded="false"
+                          aria-label="Interface language"
+                          class="c37 c38 c39"
+                          data-state="closed"
+                          dir="ltr"
+                          id="7"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
-                          <button
-                            aria-describedby="7-hint"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="7 7-label 7-content"
-                            aria-required="false"
-                            class="c38"
-                            id="7"
-                            role="combobox"
-                            type="button"
-                            value="en"
-                          />
-                          <div
-                            class="c2 c39"
+                          <span
+                            class="c40 c41"
                           >
-                            <div
-                              class="c4"
+                            <span
+                              class="c5 c42 c43"
                             >
-                              <div
-                                class="c40"
-                              >
-                                <span
-                                  class="c5 c41"
-                                  id="7-content"
-                                >
-                                  Select
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              class="c4"
+                              <span
+                                class="c44"
+                              />
+                            </span>
+                          </span>
+                          <span
+                            class="c41"
+                          >
+                            <button
+                              aria-label="Clear the interface language selected"
+                              class="c45 c46"
+                              role="button"
+                              tabindex="0"
+                              title="Clear the interface language selected"
                             >
-                              <button
-                                aria-disabled="false"
-                                aria-label="Clear the interface language selected"
-                                class="c42"
-                                title="Clear the interface language selected"
-                                type="button"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 24 24"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </button>
-                              <button
-                                aria-hidden="true"
-                                class="c43 c42 c44"
-                                tabindex="-1"
-                                title="Carret Down Button"
-                                type="button"
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                            <span
+                              aria-hidden="true"
+                              class="c47"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
                         </div>
                         <p
-                          class="c5 c45"
+                          class="c5 c48"
                           id="7-hint"
                         >
                           This will only display your own interface in the chosen language.
@@ -1209,67 +1240,58 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           Interface mode
                         </label>
                         <div
-                          class="c4 c37"
+                          aria-autocomplete="none"
+                          aria-controls="radix-1"
+                          aria-describedby="9-hint 9-error"
+                          aria-expanded="false"
+                          aria-label="Interface mode"
+                          class="c37 c38 c39"
+                          data-state="closed"
+                          dir="ltr"
+                          id="9"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
-                          <button
-                            aria-describedby="9-hint"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="9 9-label 9-content"
-                            aria-required="false"
-                            class="c38"
-                            id="9"
-                            role="combobox"
-                            type="button"
-                            value="light"
-                          />
-                          <div
-                            class="c2 c39"
+                          <span
+                            class="c40 c41"
                           >
-                            <div
-                              class="c4"
+                            <span
+                              class="c5 c42 c43"
                             >
-                              <div
-                                class="c40"
+                              <span
+                                class="c44"
                               >
-                                <span
-                                  class="c5 c41"
-                                  id="9-content"
-                                >
-                                  Light mode
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              class="c4"
+                                Light mode
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c41"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c47"
                             >
-                              <button
-                                aria-hidden="true"
-                                class="c43 c42 c44"
-                                tabindex="-1"
-                                title="Carret Down Button"
-                                type="button"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
                         </div>
                         <p
-                          class="c5 c45"
+                          class="c5 c48"
                           id="9-hint"
                         >
                           Displays your interface in the chosen mode.

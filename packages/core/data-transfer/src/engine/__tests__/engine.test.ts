@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { posix, win32 } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Schema } from '@strapi/strapi';
@@ -20,90 +20,8 @@ import {
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
 
-const getEntitiesMockSourceStream = (
-  data: Iterable<IEntity<'foo' | 'bar'>> = [
-    { id: 1, type: 'foo', data: { foo: 'bar' } },
-    { id: 2, type: 'bar', data: { bar: 'foo' } },
-  ]
-) => getMockSourceStream(data);
-
-const getLinksMockSourceStream = (
-  data: Iterable<ILink> = [
-    {
-      kind: 'relation.basic',
-      relation: 'oneToOne',
-      left: { type: 'foo', ref: 1, field: 'foo' },
-      right: { type: 'bar', ref: 2, field: 'bar' },
-    },
-    {
-      kind: 'relation.basic',
-      relation: 'oneToMany',
-      left: { type: 'foo', ref: 1, field: 'foos' },
-      right: { type: 'bar', ref: 2, field: 'bar' },
-    },
-  ]
-) => getMockSourceStream(data);
-
-const getAssetsMockSourceStream = (
-  data: Iterable<IAsset> = [
-    {
-      filename: 'foo.jpg',
-      filepath: join(__dirname, 'foo.jpg'),
-      stats: { size: 24 },
-      stream: Readable.from([1, 2, 3]),
-    },
-    {
-      filename: 'bar.jpg',
-      filepath: join(__dirname, 'bar.jpg'),
-      stats: { size: 48 },
-      stream: Readable.from([4, 5, 6, 7, 8, 9]),
-    },
-  ]
-) => getMockSourceStream(data);
-
-const getConfigurationMockSourceStream = (
-  data: Iterable<unknown> = [
-    { key: 'foo', value: 'alice' },
-    { key: 'bar', value: 'bob' },
-  ]
-) => getMockSourceStream(data);
-
-const getSchemasMockSourceStream = (
-  data: Iterable<Schema> = [
-    {
-      info: { displayName: 'foo' },
-      modelType: 'contentType',
-      attributes: { foo: { type: 'string' } },
-    },
-    {
-      info: { displayName: 'bar' },
-      modelType: 'contentType',
-      attributes: { bar: { type: 'integer' } },
-    },
-  ]
-) => getMockSourceStream(data);
-
-const getMockDestinationStream = () => {
-  const stream = new Writable({
-    objectMode: true,
-    write(chunk, encoding, callback) {
-      callback();
-    },
-  });
-  return stream;
-};
-
-extendExpectForDataTransferTests();
-
-const metadata = {
-  createdAt: '2022-11-23T09:26:43.463Z',
-  strapi: {
-    version: '1.2.3',
-  },
-};
-
-const schemas = [
-  {
+const schemas = {
+  'admin::permission': {
     collectionName: 'admin_permissions',
     info: {
       name: 'Permission',
@@ -159,7 +77,7 @@ const schemas = [
     plugin: 'admin',
     globalId: 'AdminPermission',
   },
-  {
+  'api::homepage.homepage': {
     collectionName: 'homepages',
     info: { displayName: 'Homepage', singularName: 'homepage', pluralName: 'homepages' },
     options: { draftAndPublish: true },
@@ -225,7 +143,105 @@ const schemas = [
     uid: 'api::homepage.homepage',
     globalId: 'Homepage',
   },
-];
+};
+
+const getEntitiesMockSourceStream = (
+  data: Iterable<IEntity<'foo' | 'bar' | 'admin::permission' | 'api::homepage.homepage'>> = [
+    { id: 1, type: 'foo', data: { foo: 'bar' } },
+    { id: 2, type: 'bar', data: { bar: 'foo' } },
+    { id: 1, type: 'admin::permission', data: { foo: 'bar' } },
+    { id: 2, type: 'api::homepage.homepage', data: { bar: 'foo' } },
+  ]
+) => getMockSourceStream(data);
+
+const getLinksMockSourceStream = (
+  data: Iterable<ILink> = [
+    {
+      kind: 'relation.basic',
+      relation: 'oneToOne',
+      left: { type: 'foo', ref: 1, field: 'foo' },
+      right: { type: 'bar', ref: 2, field: 'bar' },
+    },
+    {
+      kind: 'relation.basic',
+      relation: 'oneToMany',
+      left: { type: 'foo', ref: 1, field: 'foos' },
+      right: { type: 'bar', ref: 2, field: 'bar' },
+    },
+  ]
+) => getMockSourceStream(data);
+
+const getAssetsMockSourceStream = (
+  data: Iterable<IAsset> = [
+    {
+      filename: 'foo.jpg',
+      filepath: posix.join(__dirname, 'foo.jpg'), // test a file with a posix path
+      stats: { size: 24 },
+      stream: Readable.from([1, 2, 3]),
+    },
+    {
+      filename: 'bar.jpg',
+      filepath: win32.join(__dirname, 'bar.jpg'), // test a file with a win32 path
+      stats: { size: 48 },
+      stream: Readable.from([4, 5, 6, 7, 8, 9]),
+    },
+  ]
+) => getMockSourceStream(data);
+
+const getConfigurationMockSourceStream = (
+  data: Iterable<unknown> = [
+    { key: 'foo', value: 'alice' },
+    { key: 'bar', value: 'bob' },
+  ]
+) => getMockSourceStream(data);
+
+const getSchemasMockSourceStream = (
+  data: Iterable<Schema> = [
+    {
+      info: { displayName: 'foo' },
+      modelType: 'contentType',
+      attributes: { foo: { type: 'string' } },
+    },
+    {
+      info: { displayName: 'bar' },
+      modelType: 'contentType',
+      attributes: { bar: { type: 'integer' } },
+    },
+    {
+      info: { displayName: 'Homepage' },
+      modelType: 'contentType',
+      attributes: {
+        action: { type: 'string' },
+      },
+    },
+    {
+      info: { displayName: 'Permission' },
+      modelType: 'contentType',
+      attributes: {
+        action: { type: 'string' },
+      },
+    },
+  ]
+) => getMockSourceStream(data);
+
+const getMockDestinationStream = () => {
+  const stream = new Writable({
+    objectMode: true,
+    write(chunk, encoding, callback) {
+      callback();
+    },
+  });
+  return stream;
+};
+
+extendExpectForDataTransferTests();
+
+const metadata = {
+  createdAt: '2022-11-23T09:26:43.463Z',
+  strapi: {
+    version: '1.2.3',
+  },
+};
 
 const createSource = (streamData?: {
   assets?: IAsset[];
@@ -493,7 +509,7 @@ describe('Transfer engine', () => {
         } as unknown as ITransferEngineOptions;
         test('source with source schema missing in destination fails', async () => {
           const source = createSource();
-          source.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          source.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
           const engine = createTransferEngine(source, completeDestination, engineOptions);
           expect(
             (async () => {
@@ -503,7 +519,7 @@ describe('Transfer engine', () => {
         });
         test('source with destination schema missing in source fails', async () => {
           const destination = createDestination();
-          destination.getSchemas = jest.fn().mockResolvedValue([...schemas, { foo: 'bar' }]);
+          destination.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
           const engine = createTransferEngine(completeSource, destination, engineOptions);
           expect(
             (async () => {
@@ -515,8 +531,8 @@ describe('Transfer engine', () => {
           const destination = createDestination();
           const fakeSchema = cloneDeep(schemas);
 
-          if (fakeSchema[0].attributes.action) {
-            fakeSchema[0].attributes.action.minLength = 2;
+          if (fakeSchema['admin::permission'].attributes.action) {
+            fakeSchema['admin::permission'].attributes.action.minLength = 2;
           }
 
           destination.getSchemas = jest.fn().mockResolvedValue(fakeSchema);

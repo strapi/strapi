@@ -13,7 +13,7 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
         ariaLabel={label}
         name="datetimepicker"
         onChange={(date) => {
-          const formattedDate = new Date(date).toISOString();
+          const formattedDate = date ? new Date(date).toISOString() : '';
 
           onChange(formattedDate);
         }}
