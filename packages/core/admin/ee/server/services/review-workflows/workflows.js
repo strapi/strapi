@@ -32,7 +32,17 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.count(WORKFLOW_MODEL_UID);
   },
 
-  update(id, workflowData) {
-    return strapi.entityService.update(WORKFLOW_MODEL_UID, id, { data: workflowData });
+  async update(workflow, opts) {
+    let updateOpts = opts;
+
+    if (opts.data.stages) {
+      const stageIds = await getService('stages', { strapi })
+        .replaceStages(workflow.stages, opts.data.stages)
+        .then((stages) => stages.map((stage) => stage.id));
+
+      updateOpts = set('data.stages', stageIds, opts);
+    }
+
+    return strapi.entityService.update(WORKFLOW_MODEL_UID, workflow.id, updateOpts);
   },
 });
