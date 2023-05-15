@@ -68,7 +68,7 @@
     "codemirror5": "npm:codemirror@^5.65.11",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.3",
-    "date-fns": "2.29.3",
+    "date-fns": "2.30.0",
     "dotenv": "8.5.1",
     "esbuild-loader": "^2.21.0",
     "execa": "^1.0.0",
