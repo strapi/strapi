@@ -1,4 +1,8 @@
 export * from './attributes';
 export * from './schemas';
 export * from './strapi';
-export * from './common';
+
+export * as Common from './common';
+export * as Namespace from './namespace';
+export * as UID from './uid';
+export * as Registry from './registry';
