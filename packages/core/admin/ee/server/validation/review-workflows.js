@@ -23,7 +23,11 @@ const validateUpdateStageOnEntity = yup
 
 const validateWorkflowCreateSchema = yup.object().shape({
   name: yup.string().max(255).required(),
-  stages: yup.array().of(stageObject).min(1, 'Can not create a workflow without stages').required(),
+  stages: yup
+    .array()
+    .of(stageObject)
+    .min(1, 'Can not create a workflow without stages')
+    .required('Can not create a workflow without stages'),
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
