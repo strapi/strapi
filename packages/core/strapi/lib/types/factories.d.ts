@@ -62,12 +62,12 @@ type ControllerCallback<T extends GenericController = GenericController> = (para
 }) => T;
 type ServiceCallback<T extends GenericService = GenericService> = (params: { strapi: Strapi }) => T;
 
-export function createCoreRouter<T extends SchemaUID>(
+export declare function createCoreRouter<T extends SchemaUID>(
   uid: T,
   cfg?: RouterConfig<GetBaseConfig<T>> = {}
 ): () => Router;
 
-export function createCoreController<
+export declare function createCoreController<
   T extends SchemaUID,
   S extends Partial<GetBaseSchemaController<T>>
 >(
@@ -75,10 +75,10 @@ export function createCoreController<
   cfg?: ControllerCallback<S> | S
 ): () => Required<S & GetBaseSchemaController<GetBaseConfig<T>>>;
 
-export function createCoreService<T extends SchemaUID, S extends Partial<GetBaseSchemaService<T>>>(
-  uid: T,
-  cfg?: ServiceCallback<S> | S
-): () => Required<S & GetBaseSchemaService<T>>;
+export declare function createCoreService<
+  T extends SchemaUID,
+  S extends Partial<GetBaseSchemaService<T>>
+>(uid: T, cfg?: ServiceCallback<S> | S): () => Required<S & GetBaseSchemaService<T>>;
 
 type GetBaseSchemaController<T extends SchemaUID> = IsCollectionType<
   T,
