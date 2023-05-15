@@ -42,6 +42,7 @@ type CollectionTypeRouterConfig = {
 
 type RouterConfig<T> = {
   prefix?: string;
+  // TODO Refactor when we have a controller registry
   only?: string[];
   except?: string[];
   config: T;
