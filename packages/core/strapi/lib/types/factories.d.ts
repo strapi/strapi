@@ -40,7 +40,7 @@ type CollectionTypeRouterConfig = {
   delete?: HandlerConfig;
 };
 
-type RouterConfig<T> = {
+type RouterConfig<T = SingleTypeRouterConfig | CollectionTypeRouterConfig> = {
   prefix?: string;
   // TODO Refactor when we have a controller registry
   only?: string[];
