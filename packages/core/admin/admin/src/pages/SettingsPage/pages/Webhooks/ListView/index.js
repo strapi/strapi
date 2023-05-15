@@ -138,13 +138,13 @@ const ListView = () => {
     setShowModal(false);
   });
 
-  const enabledMutation = useMutation(async ({ enabled, id }) => {
+  const enabledMutation = useMutation(async ({ isEnabled, id }) => {
     const webhookIndex = getWebhookIndex(id);
     const initialWebhookProps = webhooks[webhookIndex];
 
     const body = {
       ...initialWebhookProps,
-      isEnabled: enabled,
+      isEnabled,
     };
     delete body.id;
 
@@ -152,9 +152,7 @@ const ListView = () => {
       await put(`/admin/webhooks/${id}`, body);
 
       setWebhooks((prevWebhooks) =>
-        prevWebhooks.map((webhook) =>
-          webhook.id === id ? { ...webhook, isEnabled: enabled } : webhook
-        )
+        prevWebhooks.map((webhook) => (webhook.id === id ? { ...webhook, isEnabled } : webhook))
       );
     } catch (error) {
       toggleNotification({
@@ -168,7 +166,7 @@ const ListView = () => {
     setShowModal((prev) => !prev);
   };
 
-  const handleConfirmDelete = async () => deleteMutation.mutateAsync({ webhookToDelete });
+  const handleConfirmDelete = async () => deleteMutation.mutateAsync();
 
   const handleDeleteClick = (id) => {
     setShowModal(true);
@@ -355,7 +353,7 @@ const ListView = () => {
                           selected={webhook.isEnabled}
                           onChange={async () =>
                             enabledMutation.mutateAsync({
-                              enabled: !webhook.isEnabled,
+                              isEnabled: !webhook.isEnabled,
                               id: webhook.id,
                             })
                           }
