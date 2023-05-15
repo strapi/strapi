@@ -1,6 +1,5 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../../../utils');
 const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
 

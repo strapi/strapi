@@ -1,7 +1,7 @@
 'use strict';
 
 const { set } = require('lodash/fp');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
@@ -16,7 +16,7 @@ module.exports = ({ strapi }) => ({
 
   async create(opts) {
     if (!opts.data.stages || opts.data.stages.length === 0) {
-      throw new ApplicationError('Can not create a workflow without stages');
+      throw new ValidationError('Can not create a workflow without stages');
     }
 
     return strapi.db.transaction(async () => {
