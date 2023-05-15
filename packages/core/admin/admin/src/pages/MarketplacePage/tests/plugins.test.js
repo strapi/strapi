@@ -349,7 +349,7 @@ describe('Marketplace page - plugins tab', () => {
     expect(history.location.search).toBe('?page=1');
   });
 
-  it.only('only filters in the plugins tab', async () => {
+  it('only filters in the plugins tab', async () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
@@ -365,11 +365,11 @@ describe('Marketplace page - plugins tab', () => {
 
     await user.click(screen.getByRole('tab', { name: /providers/i }));
 
-    // const providerCards = screen.getAllByTestId('npm-package-card');
-    // expect(providerCards.length).toBe(9);
+    const providerCards = screen.getAllByTestId('npm-package-card');
+    expect(providerCards.length).toBe(9);
 
-    // await user.click(screen.getByRole('tab', { name: /plugins/i }));
-    // expect(collectionCards.length).toBe(2);
+    await user.click(screen.getByRole('tab', { name: /plugins/i }));
+    expect(collectionCards.length).toBe(2);
   });
 
   it('shows the correct options on sort select', async () => {
