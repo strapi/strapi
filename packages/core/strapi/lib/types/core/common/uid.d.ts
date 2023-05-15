@@ -12,28 +12,28 @@ import type {
   ExtractNamespaceScope,
   ExtractNamespaceOrigin,
 } from './namespace';
-import type { AddSuffix } from '../../utils';
+import type { Suffix } from '../../utils';
 
-type AddStringSuffix<T extends string> = AddSuffix<T, string>;
+type StringSuffix<T extends string> = Suffix<T, string>;
 
 /**
  * Template for services' unique identifier
  */
-export type BaseServiceUID = AddStringSuffix<
+export type BaseServiceUID = StringSuffix<
   WithSeparator<AdminNamespace> | WithSeparator<ApiNamespace> | WithSeparator<PluginNamespace>
 >;
 
 /**
  * Template for controllers' unique identifier
  */
-export type BaseControllerUID = AddStringSuffix<
+export type BaseControllerUID = StringSuffix<
   WithSeparator<AdminNamespace> | WithSeparator<ApiNamespace> | WithSeparator<PluginNamespace>
 >;
 
 /**
  * Template for policies' unique identifier
  */
-export type BasePolicyUID = AddStringSuffix<
+export type BasePolicyUID = StringSuffix<
   | WithSeparator<AdminNamespace>
   | WithSeparator<StrapiNamespace>
   | WithSeparator<GlobalNamespace>
@@ -44,7 +44,7 @@ export type BasePolicyUID = AddStringSuffix<
 /**
  * Template for middlewares' unique identifier
  */
-export type BaseMiddlewareUID = AddStringSuffix<
+export type BaseMiddlewareUID = StringSuffix<
   | WithSeparator<AdminNamespace>
   | WithSeparator<StrapiNamespace>
   | WithSeparator<GlobalNamespace>
@@ -55,7 +55,7 @@ export type BaseMiddlewareUID = AddStringSuffix<
 /**
  * Template for content-types' unique identifier
  */
-export type BaseContentTypeUID = AddStringSuffix<
+export type BaseContentTypeUID = StringSuffix<
   | WithSeparator<AdminNamespace>
   | WithSeparator<StrapiNamespace>
   | WithSeparator<ApiNamespace>
@@ -132,7 +132,7 @@ export type ParseUID<U extends UID> = ResolveUIDNamespace<U> extends infer B ext
  * type T = AssertUIDNamespace<'api::foo.bar', PluginNamespace>
  * // ^ never
  */
-export type AssertUIDNamespace<U extends UID, N extends Namespace> = U extends AddStringSuffix<
+export type AssertUIDNamespace<U extends UID, N extends Namespace> = U extends StringSuffix<
   WithSeparator<N>
 >
   ? N
