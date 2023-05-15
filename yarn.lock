@@ -3422,14 +3422,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:^8.12.0":
-  version: 8.12.0
-  resolution: "@graphql-tools/utils@npm:8.12.0"
+"@graphql-tools/utils@npm:^8.13.1":
+  version: 8.13.1
+  resolution: "@graphql-tools/utils@npm:8.13.1"
   dependencies:
     tslib: ^2.4.0
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 24edc6ba3bcfa9a4c1d1d37117c3f96d847beed9638325083c32c6ec9674729dc89fc8cc389d317ae5d9dba22e91443bd9788f1dc8de91a1b6f1e592112bd48f
+  checksum: ff04fdeb29e9ac596ea53386cd5b23cd741bb14c1997c6b0ba3c34ca165bd82b528a355e8c8e2ba726eb39e833ba9cbb0851ba0addb8c6d367089a1145bf9a49
   languageName: node
   linkType: hard
 
@@ -8204,7 +8204,7 @@ __metadata:
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
     "@graphql-tools/schema": 8.5.1
-    "@graphql-tools/utils": ^8.12.0
+    "@graphql-tools/utils": ^8.13.1
     "@strapi/design-system": 1.7.5
     "@strapi/helper-plugin": 4.10.5
     "@strapi/icons": 1.7.5
