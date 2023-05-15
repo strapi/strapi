@@ -29,7 +29,7 @@ export type Split<T extends string, S extends Literal> = T extends `${infer A}${
   : [T];
 
 /**
- * Aggregate the given typle into a string, separated by the given `S` literal
+ * Aggregate the given tuple into a string, separated by the given `S` literal
  */
 export type Join<T extends unknown[], S extends Literal> = T extends [
   infer F extends Literal,
