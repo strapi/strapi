@@ -76,7 +76,7 @@ jobs:
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
       - name: Run tests
-        run: yarn nx affected --target=test:unit --nx-ignore-cycles --runInBand
+        run: yarn nx affected --target=test:unit --nx-ignore-cycles -- --runInBand
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
