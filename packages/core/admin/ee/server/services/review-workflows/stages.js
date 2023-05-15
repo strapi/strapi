@@ -64,10 +64,11 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
-    async replaceStages(fromStages, toStages) {
-      const { created, updated, deleted } = getDiffBetweenStages(fromStages, toStages);
+    // TODO : improve contentTypesToUpdate name
+    async replaceStages(srcStages, destStages, contentTypesToUpdate) {
+      const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
-      assertAtLeastOneStageRemain(fromStages || [], { created, deleted });
+      assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
 
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
@@ -75,9 +76,6 @@ module.exports = ({ strapi }) => {
         const createdStages = await this.createMany(created, { fields: ['id'] });
         // Put all the newly created stages ids
         const createdStagesIds = map('id', createdStages);
-        // TODO: Find content types assigned to the workflow
-        // const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
-        const contentTypes = [];
 
         // Update the workflow stages
         await mapAsync(updated, (stage) => this.update(stage.id, stage));
@@ -87,15 +85,15 @@ module.exports = ({ strapi }) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            [...fromStages, ...createdStages],
-            fromStages.findIndex((s) => s.id === stage.id),
+            [...srcStages, ...createdStages],
+            srcStages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
             }
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypes, (contentTypeUID) => {
+          await mapAsync(contentTypesToUpdate, (contentTypeUID) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
@@ -106,7 +104,7 @@ module.exports = ({ strapi }) => {
           return this.delete(stage.id);
         });
 
-        return toStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
+        return destStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
       });
     },
 
@@ -137,42 +135,63 @@ module.exports = ({ strapi }) => {
 
     /**
      * Updates the stage of all entities of a content type that are in a specific stage
-     * @param {string} contentTypeUID
+     * @param {string} uid
      * @param {number} fromStageId
      * @param {number} toStageId
      * @param {KnexTransaction} trx
      * @returns
      */
-    async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId, trx = null }) {
-      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
+    async updateEntitiesStage(uid, { fromStageId, toStageId }) {
+      const { attributes, tableName } = strapi.db.metadata.get(uid);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
-      const selectStatement = strapi.db
-        .getConnection()
-        .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
-        .from(`${tableName} as t1`)
-        .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
-        .where(`t2.${invJoinColumn}`, fromStageId)
-        .toSQL();
+      return strapi.db.transaction(async ({ trx }) => {
+        const selectStatement = strapi.db
+          .getConnection()
+          .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
+          .from(`${tableName} as t1`)
+          .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
+          .where(`t2.${invJoinColumn}`, fromStageId)
+          .toSQL();
 
-      // Insert rows for all entries of the content type that do not have a
-      // default stage
-      const query = strapi.db
-        .getConnection(joinTable.name)
-        .insert(
-          strapi.db.connection.raw(
-            `(${joinColumn}, ${invJoinColumn})  ${selectStatement.sql}`,
-            selectStatement.bindings
+        // Insert rows for all entries of the content type that have the specified stage
+        return strapi.db
+          .getConnection(joinTable.name)
+          .insert(
+            strapi.db.connection.raw(
+              `(${joinColumn}, ${invJoinColumn})  ${selectStatement.sql}`,
+              selectStatement.bindings
+            )
           )
-        );
+          .transacting(trx);
+      });
+    },
 
-      if (trx) {
-        query.transacting(trx);
-      }
+    async updateAllEntitiesStage(uid, { toStageId }) {
+      const { attributes } = strapi.db.metadata.get(uid);
+      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+      const invJoinColumn = joinTable.inverseJoinColumn.name;
 
-      return query;
+      // Move all entries to the specified stage
+      return strapi.db.transaction(async ({ trx }) =>
+        strapi.db
+          .getConnection()
+          .from(joinTable.name)
+          .update({ [invJoinColumn]: toStageId })
+          .transacting(trx)
+      );
+    },
+
+    async deleteAllEntitiesStage(uid) {
+      const { attributes } = strapi.db.metadata.get(uid);
+      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
+
+      // Delete all stage links for the content type
+      return strapi.db.transaction(async ({ trx }) =>
+        strapi.db.getConnection().from(joinTable.name).delete().transacting(trx)
+      );
     },
   };
 };
