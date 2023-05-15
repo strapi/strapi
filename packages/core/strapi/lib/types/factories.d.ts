@@ -1,8 +1,20 @@
-import { Service, GenericService } from '../core-api/service';
-import { CollectionTypeController, Controller, GenericController } from '../core-api/controller';
+import {
+  Service,
+  GenericService,
+  CollectionTypeService,
+  SingleTypeService,
+} from '../core-api/service';
+import {
+  CollectionTypeController,
+  SingleTypeController,
+  Controller,
+  GenericController,
+} from '../core-api/controller';
 import { Middleware } from '../middlewares';
 import { Policy } from '../core/registries/policies';
 import { Strapi } from './core/strapi';
+import { SchemaUID } from './utils';
+import { GenericService } from '../core-api/service/index';
 
 type ControllerConfig<T extends Controller = Controller> = T;
 
@@ -50,11 +62,22 @@ type ControllerCallback<T extends GenericController = GenericController> = (para
 type ServiceCallback<T extends GenericService = GenericService> = (params: { strapi: Strapi }) => T;
 
 export function createCoreRouter(uid: string, cfg?: RouterConfig = {}): () => Router;
-export function createCoreController<T extends Partial<CollectionTypeController>>(
-  uid: string,
-  cfg?: ControllerCallback<T> | T = {}
-): () => Required<T> & Controller;
-export function createCoreService<T extends GenericService = GenericService>(
-  uid: string,
-  cfg?: ServiceCallback<T> | T = {}
-): () => T;
+
+export function createCoreController<
+  T extends SchemaUID,
+  S extends Partial<GetBaseSchemaController<T>>
+>(uid: T, cfg?: ControllerCallback<S> | S): () => Required<S & GetBaseSchemaController<T>>;
+
+export function createCoreService<T extends SchemaUID, S extends Partial<GetBaseSchemaService<T>>>(
+  uid: T,
+  cfg?: ServiceCallback<S> | S
+): () => Required<S & GetBaseSchemaService<T>>;
+
+type GetBaseSchemaController<T extends SchemaUID> =
+  Strapi.Schemas[T]['kind'] extends 'collectionType'
+    ? CollectionTypeController & GenericController
+    : SingleTypeController & GenericController;
+
+type GetBaseSchemaService<T extends SchemaUID> = Strapi.Schemas[T]['kind'] extends 'collectionType'
+  ? CollectionTypeService & GenericService
+  : SingleTypeService & GenericService;
