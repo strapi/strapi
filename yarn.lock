@@ -7694,6 +7694,7 @@ __metadata:
     jest-styled-components: 7.1.1
     redux: ^4.2.1
     tsconfig: 4.10.5
+    whatwg-fetch: 3.6.2
   peerDependencies:
     redux: ^4.2.1
   languageName: unknown
@@ -7811,7 +7812,6 @@ __metadata:
     webpack-cli: ^5.1.0
     webpack-dev-server: ^4.15.0
     webpackbar: ^5.0.2
-    whatwg-fetch: 3.6.2
     yup: ^0.32.9
   peerDependencies:
     "@strapi/strapi": ^4.3.4

@@ -12,7 +12,9 @@ const fetchMarketplacePlugins = async (params = {}) => {
       throw new Error('Failed to fetch marketplace plugins.');
     }
 
-    return await res.json();
+    const data = await res.json();
+
+    return data;
   } catch (error) {
     console.error(error);
   }

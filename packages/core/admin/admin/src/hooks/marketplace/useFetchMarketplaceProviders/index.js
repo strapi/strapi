@@ -12,7 +12,9 @@ const fetchMarketplaceProviders = async (params = {}) => {
       throw new Error('Failed to fetch marketplace providers.');
     }
 
-    return await res.json();;
+    const data = await res.json();
+
+    return data;
   } catch (error) {
     console.error(error);
   }
