@@ -12,11 +12,6 @@ import SearchAsset from '../index';
 
 const handleChange = jest.fn();
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
-
 const makeApp = (queryValue) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en">
@@ -64,13 +59,13 @@ describe('<SearchURLQuery />', () => {
         outline: none;
       }
 
-      .c2 svg {
+      .c2 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c2 svg > g,
-      .c2 svg path {
+      .c2 > svg > g,
+      .c2 > svg path {
         fill: #ffffff;
       }
 

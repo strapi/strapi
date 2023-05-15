@@ -94,7 +94,7 @@ function persistStagesJoinTables({ strapi }) {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
-      return { name: joinTableName, dependsOn: { name: tableName } };
+      return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
     const joinTablesToPersist = pipe([

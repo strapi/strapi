@@ -32,7 +32,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const makeApp = () => {

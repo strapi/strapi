@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import readline from 'node:readline';
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 import * as sentry from '@sentry/node';
 import hasYarn from './utils/has-yarn';
 import checkRequirements from './utils/check-requirements';
@@ -44,7 +43,7 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
       template: options.template,
       starter: options.starter,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuidv4(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + crypto.randomUUID(),
     docker: process.env.DOCKER === 'true',
     deviceId: machineID(),
     tmpPath,
