@@ -79,15 +79,24 @@ export function createCoreService<T extends SchemaUID, S extends Partial<GetBase
   cfg?: ServiceCallback<S> | S
 ): () => Required<S & GetBaseSchemaService<T>>;
 
-type GetBaseSchemaController<T extends SchemaUID> =
-  Strapi.Schemas[T]['kind'] extends 'collectionType'
-    ? CollectionTypeController & GenericController
-    : SingleTypeController & GenericController;
+type GetBaseSchemaController<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeController,
+  SingleTypeController
+> &
+  GenericController;
 
-type GetBaseSchemaService<T extends SchemaUID> = Strapi.Schemas[T]['kind'] extends 'collectionType'
-  ? CollectionTypeService & GenericService
-  : SingleTypeService & GenericService;
+type GetBaseSchemaService<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeService,
+  SingleTypeService
+> &
+  GenericService;
 
-type GetBaseConfig<T extends SchemaUID> = Strapi.Schemas[T]['kind'] extends 'collectionType'
-  ? CollectionTypeRouterConfig
-  : SingleTypeRouterConfig;
+type GetBaseConfig<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeRouterConfig,
+  SingleTypeRouterConfig
+>;
+
+type IsCollectionType<T, Y, N> = Strapi.Schemas[T]['kind'] extends 'collectionType' ? Y : N;
