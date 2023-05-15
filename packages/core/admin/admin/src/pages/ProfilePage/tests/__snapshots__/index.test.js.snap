@@ -629,7 +629,9 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
     action="#"
     novalidate=""
   >
-    <div>
+    <div
+      style="height: 0px;"
+    >
       <div
         class="c1"
         data-strapi-header="true"

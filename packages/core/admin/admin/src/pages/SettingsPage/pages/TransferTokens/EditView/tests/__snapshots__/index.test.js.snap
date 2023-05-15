@@ -821,7 +821,9 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
       action="#"
       novalidate=""
     >
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1"
           data-strapi-header="true"

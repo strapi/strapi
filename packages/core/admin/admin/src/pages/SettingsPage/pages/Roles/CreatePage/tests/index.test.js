@@ -5,45 +5,18 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { Router, Switch, Route } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import Theme from '../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
+import { MemoryRouter, Switch, Route } from 'react-router-dom';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 
 import { CreatePage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
 }));
-
-const makeApp = (history) => (
-  <IntlProvider
-    messages={{ 'Settings.roles.form.created': 'Created' }}
-    textComponent="span"
-    locale="en"
-    defaultLocale="en"
-  >
-    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-      <Theme>
-        <Router history={history}>
-          <Switch>
-            <Route path="/settings/roles/duplicate/:id">
-              <CreatePage />
-            </Route>
-            <Route path="/settings/roles/new">
-              <CreatePage />
-            </Route>
-          </Switch>
-        </Router>
-      </Theme>
-    </ThemeToggleProvider>
-  </IntlProvider>
-);
 
 describe('<CreatePage />', () => {
   beforeAll(() => {
@@ -56,11 +29,23 @@ describe('<CreatePage />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const { container } = render(App);
-
-    act(() => history.push('/settings/roles/new'));
+    const { container } = render(<CreatePage />, {
+      wrapper({ children }) {
+        return (
+          <IntlProvider locale="en">
+            <ThemeProvider theme={lightTheme}>
+              <NotificationsProvider>
+                <MemoryRouter initialEntries={['/settings/roles/new']}>
+                  <Switch>
+                    <Route path="/settings/roles/new">{children}</Route>
+                  </Switch>
+                </MemoryRouter>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        );
+      },
+    });
 
     expect(container).toMatchSnapshot();
   });

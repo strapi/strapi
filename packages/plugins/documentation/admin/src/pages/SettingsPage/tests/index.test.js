@@ -489,7 +489,9 @@ describe('Plugin | Documentation | SettingsPage', () => {
           action="#"
           novalidate=""
         >
-          <div>
+          <div
+            style="height: 0px;"
+          >
             <div
               class="c1"
               data-strapi-header="true"

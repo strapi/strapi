@@ -108,7 +108,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     expect(getByRole('button', { name: /let's start/i })).toBeInTheDocument();
   });
 
-  it.only('Serialize the form and normalize input values', async () => {
+  it('Serialize the form and normalize input values', async () => {
     const spy = jest.fn();
     const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
 
@@ -118,19 +118,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     await user.type(getByLabelText(/^Password/i), ' secret ');
     await user.type(getByLabelText(/Confirm Password/i), ' secret ');
 
-    await user.click(getByRole('button', { name: /let's start/i }));
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
 
-    expect(spy).toHaveBeenCalledWith(
-      {
-        firstname: 'First name',
-        lastname: 'Last name',
-        email: 'test@strapi.io',
-        news: false,
-        registrationToken: undefined,
-        confirmPassword: ' secret ',
-        password: ' secret ',
-      },
-      expect.any(Object)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        {
+          firstname: 'First name',
+          lastname: 'Last name',
+          email: 'test@strapi.io',
+          news: false,
+          registrationToken: undefined,
+          confirmPassword: ' secret ',
+          password: ' secret ',
+        },
+        expect.any(Object)
+      )
     );
   });
 

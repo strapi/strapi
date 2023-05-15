@@ -2601,7 +2601,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
       action="#"
       novalidate=""
     >
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1"
           data-strapi-header="true"

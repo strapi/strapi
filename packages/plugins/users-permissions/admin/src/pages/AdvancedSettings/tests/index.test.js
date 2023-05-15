@@ -764,7 +764,9 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
           action="#"
           novalidate=""
         >
-          <div>
+          <div
+            style="height: 0px;"
+          >
             <div
               class="c1"
               data-strapi-header="true"

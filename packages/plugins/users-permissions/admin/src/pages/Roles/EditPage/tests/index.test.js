@@ -879,7 +879,9 @@ describe('Admin | containers | RoleEditPage', () => {
           action="#"
           novalidate=""
         >
-          <div>
+          <div
+            style="height: 0px;"
+          >
             <div
               class="c1"
               data-strapi-header="true"
