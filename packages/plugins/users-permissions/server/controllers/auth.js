@@ -9,6 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
+const { concat, compact } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const {
@@ -278,7 +279,7 @@ module.exports = {
     const params = {
       ..._.pick(
         ctx.request.body,
-        register?.allowedFields ? register?.allowedFields : ['username', 'email', 'password']
+        compact(concat(['username', 'email', 'password'], register?.allowedFields))
       ),
       provider: 'local',
     };
