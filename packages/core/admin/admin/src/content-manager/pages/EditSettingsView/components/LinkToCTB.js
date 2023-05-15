@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { Pencil } from '@strapi/icons';
 import getTrad from '../../../utils/getTrad';
-import useLayoutDnd from '../../../hooks/useLayoutDnd';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 
 const permissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 

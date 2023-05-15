@@ -20,9 +20,18 @@ const isAllowedFieldSize = (type, size) => {
   return size <= MAX_ROW_SIZE;
 };
 
-const getDefaultFieldSize = (type) => {
+const getDefaultFieldSize = (attribute) => {
+  // Check if it's a custom field with a custom size
+  if (attribute.customField) {
+    const customField = strapi.container.get('custom-fields').get(attribute.customField);
+    if (customField.inputSize) {
+      return customField.inputSize.default;
+    }
+  }
+
+  // Get the default size for the field type
   const { getFieldSize } = getService('field-sizes');
-  return getFieldSize(type).default;
+  return getFieldSize(attribute.type).default;
 };
 
 async function createDefaultLayouts(schema) {
@@ -127,7 +136,7 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
   for (const key of keysToAppend) {
     const attribute = schema.attributes[key];
 
-    const attributeSize = getDefaultFieldSize(attribute.type);
+    const attributeSize = getDefaultFieldSize(attribute);
     const currenRowSize = rowSize(layout[currentRowIndex]);
 
     if (currenRowSize + attributeSize > MAX_ROW_SIZE) {

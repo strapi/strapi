@@ -13,6 +13,7 @@ window.strapi = {
   features: {
     SSO: 'sso',
     AUDIT_LOGS: 'audit-logs',
+    REVIEW_WORKFLOWS: 'review-workflows',
   },
   projectType: 'Community',
 };

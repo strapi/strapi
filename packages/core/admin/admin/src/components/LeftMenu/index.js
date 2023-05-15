@@ -18,7 +18,7 @@ import { Write, Exit } from '@strapi/icons';
 import {
   auth,
   usePersistentState,
-  useAppInfos,
+  useAppInfo,
   useTracking,
   getFetchClient,
 } from '@strapi/helper-plugin';
@@ -59,7 +59,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
     logos: { menu },
   } = useConfigurations();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
-  const { userDisplayName } = useAppInfos();
+  const { userDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();

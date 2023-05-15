@@ -1,8 +1,12 @@
-import { v4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
 import type { client, server } from '../../../types/remote/protocol';
-import { ProviderError, ProviderTransferError } from '../../errors/providers';
+import {
+  ProviderError,
+  ProviderTransferError,
+  ProviderInitializationError,
+} from '../../errors/providers';
 
 interface IDispatcherState {
   transfer?: { kind: client.TransferKind; id: string };
@@ -28,7 +32,7 @@ export const createDispatcher = (ws: WebSocket) => {
     }
 
     return new Promise<U | null>((resolve, reject) => {
-      const uuid = v4();
+      const uuid = randomUUID();
       const payload = { ...message, uuid };
 
       if (options.attachTransfer) {
@@ -128,6 +132,38 @@ export const connectToWebsocket = (address: Address, options?: Options): Promise
     const server = new WebSocket(address, options);
     server.once('open', () => {
       resolve(server);
+    });
+
+    server.on('unexpected-response', (_req, res) => {
+      if (res.statusCode === 401) {
+        return reject(
+          new ProviderInitializationError(
+            'Failed to initialize the connection: Authentication Error'
+          )
+        );
+      }
+
+      if (res.statusCode === 403) {
+        return reject(
+          new ProviderInitializationError(
+            'Failed to initialize the connection: Authorization Error'
+          )
+        );
+      }
+
+      if (res.statusCode === 404) {
+        return reject(
+          new ProviderInitializationError(
+            'Failed to initialize the connection: Data transfer is not enabled on the remote host'
+          )
+        );
+      }
+
+      return reject(
+        new ProviderInitializationError(
+          `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
+        )
+      );
     });
 
     server.once('error', (err) => {

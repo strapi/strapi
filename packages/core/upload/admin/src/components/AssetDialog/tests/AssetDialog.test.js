@@ -15,7 +15,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');

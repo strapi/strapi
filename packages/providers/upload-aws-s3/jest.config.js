@@ -5,4 +5,5 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
+  displayName: 'S3 upload provider',
 };

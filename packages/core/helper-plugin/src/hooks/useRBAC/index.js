@@ -4,7 +4,7 @@ import hasPermissions from '../../utils/hasPermissions';
 import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';
 import init from './init';
-import useRBACProvider from '../useRBACProvider';
+import { useRBACProvider } from '../../features/RBAC';
 
 const useRBAC = (pluginPermissions, permissions) => {
   const abortController = new AbortController();

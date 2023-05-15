@@ -1,0 +1,43 @@
+---
+title: useCallbackRef
+description: API reference for the useCallbackRef hook
+tags:
+  - hooks
+  - refs
+  - callbacks
+  - effects
+---
+
+A custom hook that converts a callback to a ref to avoid triggering re-renders when passed as a
+prop or avoid re-executing effects when passed as a dependency. Helpful for working with `modifiedData`
+or `initialData` in the content-manager.
+
+Borrowed from [`@radix-ui/react-use-callback-ref`](https://www.npmjs.com/package/@radix-ui/react-use-callback-ref).
+
+## Usage
+
+```jsx
+import { useCallbackRef } from 'path/to/hooks';
+
+const MyComponent = ({ callbackFromSomewhere }) => {
+  const mySafeCallback = useCallbackRef(callbackFromSomewhere);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      mySafeCallback(event);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mySafeCallback]);
+
+  return <div>{children}</div>;
+};
+```
+
+## Typescript
+
+```ts
+function useCallbackRef<T extends (...args: any[]) => any>(callback: T | undefined): T;
+```

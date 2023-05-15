@@ -44,6 +44,19 @@ describe('<DraftAndPublishBadge />', () => {
         padding-left: 12px;
       }
 
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #2f6846;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #2f6846;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -56,19 +69,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #2f6846;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #2f6846;
       }
 
       .c2 {
@@ -144,6 +144,19 @@ describe('<DraftAndPublishBadge />', () => {
         padding-left: 12px;
       }
 
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #006096;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #006096;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -156,19 +169,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #006096;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #006096;
       }
 
       .c2 {

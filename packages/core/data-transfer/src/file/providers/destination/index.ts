@@ -249,7 +249,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return new Writable({
       objectMode: true,
       write(data: IAsset, _encoding, callback) {
-        const entryPath = path.join('assets', 'uploads', data.filename);
+        // always write tar files with posix paths so we have a standard format for paths regardless of system
+        const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
         const entry = archiveStream.entry({
           name: entryPath,

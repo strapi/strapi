@@ -10,7 +10,7 @@ const crypto = require('crypto');
  */
 const generateAdminUserHash = (strapi) => {
   const ctx = strapi?.requestContext?.get();
-  if (!ctx?.state?.user) {
+  if (!ctx?.state?.user?.email) {
     return '';
   }
   return crypto.createHash('sha256').update(ctx.state.user.email).digest('hex');

@@ -65,6 +65,11 @@ describe('<UploadProgress />', () => {
         height: 8px;
       }
 
+      .c9 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -107,11 +112,6 @@ describe('<UploadProgress />', () => {
         -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
-      }
-
-      .c9 {
-        font-size: 0.75rem;
-        line-height: 1.33;
       }
 
       .c6:before {
