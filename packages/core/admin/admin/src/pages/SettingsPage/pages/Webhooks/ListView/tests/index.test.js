@@ -1,11 +1,13 @@
 import React from 'react';
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
@@ -116,5 +118,58 @@ describe('Admin | containers | ListView', () => {
     fireEvent.click(container.querySelector('#delete-1'));
 
     expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+  });
+
+  it('should delete all webhooks', async () => {
+    const user = userEvent.setup();
+
+    useRBAC.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
+    }));
+
+    useNotification.mockImplementation(() => jest.fn());
+
+    const { container, getByText, getByRole } = render(App);
+    await waitFor(() => {
+      screen.getByText('http:://strapi.io');
+    });
+
+    fireEvent.click(container.querySelector('#select-all'));
+    fireEvent.click(container.querySelector('#delete-selected'));
+
+    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /confirm/i }));
+    });
+
+    expect(getByText('No webhooks found')).toBeInTheDocument();
+  });
+
+  it('should delete a single webhook', async () => {
+    const user = userEvent.setup();
+
+    useRBAC.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
+    }));
+
+    useNotification.mockImplementation(() => jest.fn());
+
+    const { container, getByText, getByRole, queryByText } = render(App);
+    await waitFor(() => {
+      screen.getByText('http:://strapi.io');
+    });
+    fireEvent.click(container.querySelector('#delete-1'));
+
+    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /confirm/i }));
+    });
+
+    expect(queryByText('http:://strapi.io')).toBeNull();
+    expect(getByText('http://me.io')).toBeInTheDocument();
   });
 });

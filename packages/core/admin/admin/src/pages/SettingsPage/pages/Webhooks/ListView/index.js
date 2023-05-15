@@ -225,6 +225,7 @@ const ListView = () => {
                   )}
                 </Typography>
                 <Button
+                  id="delete-selected"
                   onClick={() => handleDeleteClick('all')}
                   startIcon={<Trash />}
                   size="L"
@@ -261,6 +262,7 @@ const ListView = () => {
                 <Tr>
                   <Th>
                     <BaseCheckbox
+                      id="select-all"
                       aria-label={formatMessage({
                         id: 'global.select-all-entries',
                         defaultMessage: 'Select all entries',
