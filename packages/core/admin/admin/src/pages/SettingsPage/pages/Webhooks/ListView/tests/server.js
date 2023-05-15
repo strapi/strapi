@@ -34,6 +34,19 @@ const handlers = [
       })
     );
   }),
+  rest.put('*/webhooks/:id', (req, res, ctx) => {
+    const { id } = req.params;
+    const { isEnabled } = req.body;
+
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: initialWebHooks.map((webhook) =>
+          webhook.id === Number(id) ? { ...webhook, isEnabled } : webhook
+        ),
+      })
+    );
+  }),
 ];
 
 const server = setupServer(...handlers);

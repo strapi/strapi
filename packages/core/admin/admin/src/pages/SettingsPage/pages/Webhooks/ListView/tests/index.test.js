@@ -172,4 +172,26 @@ describe('Admin | containers | ListView', () => {
     expect(queryByText('http:://strapi.io')).toBeNull();
     expect(getByText('http://me.io')).toBeInTheDocument();
   });
+
+  it('should disable a webhook', async () => {
+    const user = userEvent.setup();
+
+    useRBAC.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
+    }));
+
+    useNotification.mockImplementation(() => jest.fn());
+
+    const { container } = render(App);
+    await waitFor(() => {
+      screen.getByText('http:://strapi.io');
+    });
+
+    await act(async () => {
+      await user.click(container.querySelector('#enable-1'));
+    });
+
+    expect(container.querySelector('#enable-1')).toHaveAttribute('aria-checked', 'false');
+  });
 });

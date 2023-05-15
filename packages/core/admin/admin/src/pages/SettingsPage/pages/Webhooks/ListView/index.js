@@ -340,6 +340,7 @@ const ListView = () => {
                     <Td>
                       <Flex {...stopPropagation}>
                         <Switch
+                          id={`enable-${webhook.id}`}
                           onLabel={formatMessage({
                             id: 'global.enabled',
                             defaultMessage: 'Enabled',
