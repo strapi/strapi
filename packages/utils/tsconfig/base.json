@@ -4,6 +4,7 @@
   "compilerOptions": {
     "declaration": true,
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   }
 }

@@ -113,7 +113,7 @@
   "form.button.single-type.description": "ที่ดีที่สุดสำหรับอินสแตนซ์เดี่ยวเช่น เกี่ยวกับเรา, โฮมเพจ, เป็นต้น",
   "from": "จาก",
   "modalForm.attribute.form.base.name.description": "ไม่มีพื้นที่ว่างที่อนุญาตให้ใช้สำหรับชื่อของแอ็ตทริบิวต์",
-  "modalForm.attribute.form.base.name.placeholder": "เช่น Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "เช่น slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "ฟิลด์ที่แนบ",
   "modalForm.attributes.select-component": "เลือกคอมโพเนนต์",
   "modalForm.attributes.select-components": "เลือกคอมโพเนนต์",

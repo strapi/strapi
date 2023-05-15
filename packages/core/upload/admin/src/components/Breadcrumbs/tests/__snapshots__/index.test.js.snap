@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
-.c16 {
+.c15 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -21,15 +21,17 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 .c7 {
   background: #4945ff;
   padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding-top: 4px;
+  padding-right: 12px;
+  padding-bottom: 4px;
+  padding-left: 12px;
   border-radius: 4px;
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
 }
 
-.c14 {
+.c13 {
   padding-top: 4px;
   padding-right: 8px;
   padding-bottom: 4px;
@@ -49,7 +51,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   color: #ffffff;
 }
 
-.c15 {
+.c14 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
@@ -124,13 +126,13 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   outline: none;
 }
 
-.c9 svg {
+.c9 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c9 svg > g,
-.c9 svg path {
+.c9 > svg > g,
+.c9 > svg path {
   fill: #ffffff;
 }
 
@@ -218,22 +220,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   fill: #8e8ea9;
 }
 
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c13 svg {
-  height: 4px;
-  width: 6px;
-}
-
 .c11 {
   padding: 4px 12px;
 }
@@ -275,16 +261,19 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       <li
         class="c2"
       >
-        <div>
-          <button
-            aria-controls="0"
-            aria-disabled="false"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-label="Get more ascendants folders"
-            class="c7 c8 c9 c10 c11"
-            label="..."
-            type="button"
+        <button
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="Get more ascendants folders"
+          class="c7 c8 c9 c10 c11 sc-hRMWxn c10"
+          data-state="closed"
+          id="radix-0"
+          label="..."
+          type="button"
+        >
+          <span
+            class="c5 c12"
           >
             <span
               class="c5 c12"
@@ -295,28 +284,24 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
               aria-hidden="true"
               class="c0"
             >
-              <span
-                class="c13"
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="0.25rem"
+                viewBox="0 0 14 8"
+                width="0.375rem"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  aria-hidden="true"
-                  fill="none"
-                  height="1rem"
-                  viewBox="0 0 14 8"
-                  width="1rem"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    clip-rule="evenodd"
-                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                    fill="#32324D"
-                    fill-rule="evenodd"
-                  />
-                </svg>
-              </span>
+                <path
+                  clip-rule="evenodd"
+                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                  fill="#32324D"
+                  fill-rule="evenodd"
+                />
+              </svg>
             </div>
-          </button>
-        </div>
+          </span>
+        </button>
         <div
           aria-hidden="true"
           class="c4"
@@ -353,11 +338,11 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
         class="c2"
       >
         <div
-          class="c14"
+          class="c13"
         >
           <span
             aria-current="true"
-            class="c5 c15"
+            class="c5 c14"
           >
             current folder
           </span>
@@ -366,7 +351,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
     </ol>
   </nav>
   <div
-    class="c16"
+    class="c15"
   >
     <p
       aria-live="polite"

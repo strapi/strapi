@@ -116,7 +116,7 @@
   "form.button.single-type.description": "Лучше всего подходит для одного экземпляра, например, о нас, домашняя страница и т.д.",
   "from": "из",
   "modalForm.attribute.form.base.name.description": "Пробелы в имени атрибута недопустимы",
-  "modalForm.attribute.form.base.name.placeholder": "e.g. Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "e.g. slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Добавленные поля",
   "modalForm.attributes.select-component": "Выбор компонента",
   "modalForm.attributes.select-components": "Выбор компонентов",

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
 
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useEditFolder } from '../useEditFolder';
 
 const FOLDER_CREATE_FIXTURE = {
@@ -53,11 +54,13 @@ function ComponentFixture({ children }) {
     <Router>
       <Route>
         <QueryClientProvider client={client}>
-          <NotificationsProvider toggleNotification={() => jest.fn()}>
-            <IntlProvider locale="en" messages={{}}>
-              {children}
-            </IntlProvider>
-          </NotificationsProvider>
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </NotificationsProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </Route>
     </Router>

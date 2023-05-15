@@ -125,7 +125,7 @@
   "from": "from",
   "listView.headerLayout.description": "콘텐츠 구조를 만듭니다.",
   "modalForm.attribute.form.base.name.description": "속성 이름에는 공백을 사용할 수 없습니다.",
-  "modalForm.attribute.form.base.name.placeholder": "예: Slug, SEO URL, 표준 URL",
+  "modalForm.attribute.form.base.name.placeholder": "예: slug, seoUrl, 표준Url",
   "modalForm.attribute.target-field": "Attached field",
   "modalForm.attributes.select-component": "컴포넌트 선택",
   "modalForm.attributes.select-components": "컴포넌트 여러개 선택",

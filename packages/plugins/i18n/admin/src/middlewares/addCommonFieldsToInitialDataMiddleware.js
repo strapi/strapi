@@ -3,7 +3,7 @@ import merge from 'lodash/merge';
 import cloneDeep from 'lodash/cloneDeep';
 import { parse } from 'qs';
 import {
-  request,
+  getFetchClient,
   formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
 } from '@strapi/helper-plugin';
@@ -44,10 +44,10 @@ const addCommonFieldsToInitialDataMiddleware =
       const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
       try {
-        const requestURL = `/${pluginId}/content-manager/actions/get-non-localized-fields`;
-        const body = { model: currentLayout.contentType.uid, id: relatedEntityId, locale };
-
-        const data = await request(requestURL, { method: 'POST', body });
+        const { data } = await getFetchClient().post(
+          `/${pluginId}/content-manager/actions/get-non-localized-fields`,
+          { model: currentLayout.contentType.uid, id: relatedEntityId, locale }
+        );
 
         const { nonLocalizedFields, localizations } = data;
 

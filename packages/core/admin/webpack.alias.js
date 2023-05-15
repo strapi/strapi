@@ -25,7 +25,6 @@ const aliasExactMatch = [
   'react-intl',
   'react-query',
   'react-redux',
-  'react-router',
   'react-router-dom',
   'react-window',
   'react-select',

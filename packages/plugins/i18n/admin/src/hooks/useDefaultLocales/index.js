@@ -1,32 +1,18 @@
 import { useQuery } from 'react-query';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
-
-const fetchDefaultLocalesList = async (toggleNotification) => {
-  try {
-    const data = await request('/i18n/iso-locales', {
-      method: 'GET',
-    });
-
-    return data;
-  } catch (e) {
-    toggleNotification({
-      type: 'warning',
-      message: { id: 'notification.error' },
-    });
-
-    return [];
-  }
-};
 
 const useDefaultLocales = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
-  const { isLoading, data } = useQuery('default-locales', () =>
-    fetchDefaultLocalesList(toggleNotification).then((data) => {
+  const { get } = useFetchClient();
+  const { isLoading, data } = useQuery(['plugin-i18n', 'locales'], async () => {
+    try {
+      const { data } = await get('/i18n/iso-locales');
+
       notifyStatus(
         formatMessage({
           id: getTrad('Settings.locales.modal.locales.loaded'),
@@ -35,8 +21,15 @@ const useDefaultLocales = () => {
       );
 
       return data;
-    })
-  );
+    } catch (e) {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+
+      return [];
+    }
+  });
 
   return { defaultLocales: data, isLoading };
 };

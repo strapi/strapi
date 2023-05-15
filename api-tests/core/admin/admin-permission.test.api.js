@@ -374,6 +374,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "options",
                 },
                 {
+                  "action": "admin::review-workflows.read",
+                  "category": "review workflows",
+                  "displayName": "Read",
+                  "subCategory": "options",
+                },
+                {
                   "action": "admin::roles.create",
                   "category": "users and roles",
                   "displayName": "Create",

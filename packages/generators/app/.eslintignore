@@ -1,3 +1,4 @@
 node_modules/
 .eslintrc.js
-lib/resources/files/
+src/resources/files/
+dist/

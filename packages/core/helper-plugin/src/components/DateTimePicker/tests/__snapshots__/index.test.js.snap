@@ -1,0 +1,578 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DateTimePicker snapshots the component 1`] = `
+.c7 {
+  padding-right: 8px;
+  padding-left: 12px;
+}
+
+.c10 {
+  padding-right: 12px;
+  padding-left: 8px;
+}
+
+.c11 {
+  background: transparent;
+  border-style: none;
+}
+
+.c17 {
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
+}
+
+.c20 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c27 {
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c24 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c12 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: unset;
+  -webkit-justify-content: unset;
+  -ms-flex-pack: unset;
+  justify-content: unset;
+}
+
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c21 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c14 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c9 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c9::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c9::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c9:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c9::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c9[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c9:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c6 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c6:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c13 {
+  font-size: 1.6rem;
+  padding: 0;
+}
+
+.c15 {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c15 path {
+  fill: #666687;
+}
+
+.c8 > path {
+  fill: #8e8ea9;
+}
+
+.c28 {
+  border: none;
+}
+
+.c28 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c28 svg path {
+  fill: #666687;
+}
+
+.c19 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c19[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c19:focus-visible {
+  outline: none;
+}
+
+.c19:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c29 > svg {
+  width: 0.375rem;
+}
+
+.c29 > svg > path {
+  fill: #666687;
+}
+
+.c25 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c26 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c30[data-state='checked'] .c1 {
+  font-weight: bold;
+  color: #4945ff;
+}
+
+.c23 > svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+.c23 > svg path {
+  fill: #8e8ea9;
+}
+
+<div
+  aria-labelledby="6"
+  class=""
+  role="group"
+>
+  <div
+    class="c0"
+  >
+    <label
+      class="c1 c2 c3"
+      for="6"
+    >
+      Date time picker
+    </label>
+    <div
+      class="c4"
+    >
+      <div
+        class=""
+      >
+        <div>
+          <div
+            class=""
+          >
+            <div
+              class="c0"
+            >
+              <div
+                class="c5 c6"
+              >
+                <div
+                  class="c7"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="c8"
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M3.869 2.99V0h2.9v2.99h10.463V0h2.9v2.99h.629c2.768 0 3.203.498 3.239 2.926V21c0 2.124-.191 3-2.802 3H2.818C.208 24 0 23.363 0 20.785V6.21c.035-2.049.233-3.22 3.001-3.22h.868ZM2.32 20.369c0 .811.245.865.776.865h17.905c.53 0 .68-.012.68-.825V8.233c-.015-.627-.219-.737-.631-.737H2.907c-.413 0-.592.09-.587.573v12.3Z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <input
+                  aria-autocomplete="none"
+                  aria-describedby="6-hint"
+                  aria-disabled="false"
+                  aria-invalid="false"
+                  aria-label="Date time picker"
+                  aria-required="false"
+                  class="c9"
+                  id="6"
+                  type="text"
+                  value="10/13/2021"
+                />
+                <div
+                  class="c10"
+                >
+                  <button
+                    class="c11 c12 c13"
+                    type="button"
+                  >
+                    <span
+                      class="c14"
+                    >
+                      clear date
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="c15"
+                      fill="none"
+                      focusable="false"
+                      height="1rem"
+                      viewBox="0 0 24 24"
+                      width="1rem"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <p
+                class="c1 c16"
+                id="6-hint"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class=""
+      >
+        <div
+          class="c0"
+        >
+          <label
+            class="c1 c2 c3"
+            for="6"
+          />
+          <div
+            aria-autocomplete="none"
+            aria-controls="radix-0"
+            aria-describedby="6-hint 6-error"
+            aria-disabled="false"
+            aria-expanded="false"
+            aria-required="false"
+            class="c17 c18 c19"
+            data-state="closed"
+            dir="ltr"
+            id="6"
+            overflow="hidden"
+            role="combobox"
+            tabindex="0"
+          >
+            <span
+              class="c20 c21"
+            >
+              <span
+                aria-hidden="true"
+                class=""
+              >
+                <span
+                  class="c22 c23"
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M0 12C0 5.37 5.364 0 11.994 0S24 5.37 24 12s-5.376 12-12.006 12S0 18.63 0 12Zm2.4 0c0 5.304 4.296 9.6 9.6 9.6 5.304 0 9.6-4.296 9.6-9.6 0-5.304-4.296-9.6-9.6-9.6A9.597 9.597 0 0 0 2.4 12Zm8.4-6h1.8v6.3l5.4 3.204-.906 1.476L10.8 13.2V6Z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </span>
+              <span
+                class="c1 c24 c25"
+              >
+                <span
+                  class="c26"
+                >
+                  10:00
+                </span>
+              </span>
+            </span>
+            <span
+              class="c21"
+            >
+              <button
+                aria-disabled="false"
+                aria-label="clear time"
+                class="c27 c28"
+                role="button"
+                tabindex="0"
+                title="clear time"
+              >
+                <svg
+                  fill="none"
+                  height="1rem"
+                  viewBox="0 0 24 24"
+                  width="1rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                    fill="#212134"
+                  />
+                </svg>
+              </button>
+              <span
+                aria-hidden="true"
+                class="c29"
+              >
+                <svg
+                  fill="none"
+                  height="1rem"
+                  viewBox="0 0 14 8"
+                  width="1rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                    fill="#32324D"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <p
+            class="c1 c16"
+            id="6-hint"
+          />
+        </div>
+      </div>
+    </div>
+    <p
+      class="c1 c16"
+      id="6-hint"
+    >
+      This is a super description
+    </p>
+  </div>
+</div>
+`;

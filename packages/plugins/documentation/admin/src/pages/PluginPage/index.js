@@ -14,6 +14,7 @@ import {
   stopPropagation,
   EmptyStateLayout,
   useFocusWhenNavigate,
+  AnErrorOccurred,
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import {
@@ -31,6 +32,7 @@ import {
   Th,
   Tbody,
   Td,
+  Box,
 } from '@strapi/design-system';
 
 import { Trash, Eye as Show, Refresh as Reload } from '@strapi/icons';
@@ -43,7 +45,7 @@ import useReactQuery from '../utils/useReactQuery';
 const PluginPage = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { data, isLoading, deleteMutation, regenerateDocMutation } = useReactQuery();
+  const { data, isLoading, isError, deleteMutation, regenerateDocMutation } = useReactQuery();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState();
@@ -80,6 +82,18 @@ const PluginPage = () => {
     id: getTrad('plugin.name'),
     defaultMessage: 'Documentation',
   });
+
+  if (isError) {
+    return (
+      <Layout>
+        <ContentLayout>
+          <Box paddingTop={8}>
+            <AnErrorOccurred />
+          </Box>
+        </ContentLayout>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

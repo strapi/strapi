@@ -43,9 +43,7 @@ const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, on
             })}
           </Button>
         </Flex>
-        <Box maxWidth={pxToRem(180)}>
-          <ImageCardAsset asset={asset} />
-        </Box>
+        <Box maxWidth={pxToRem(180)}>{asset.url ? <ImageCardAsset asset={asset} /> : null}</Box>
       </Box>
       <ModalFooter
         startActions={

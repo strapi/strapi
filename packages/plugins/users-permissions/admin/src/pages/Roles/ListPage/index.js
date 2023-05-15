@@ -28,11 +28,12 @@ import {
   useQueryParams,
   EmptyStateLayout,
   ConfirmDialog,
+  useFilter,
+  useCollator,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import matchSorter from 'match-sorter';
 
 import { fetchData, deleteData } from './utils/api';
 import { getTrad } from '../../../utils';
@@ -42,7 +43,7 @@ import TableBody from './components/TableBody';
 
 const RoleListPage = () => {
   const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { push } = useHistory();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
@@ -76,6 +77,17 @@ const RoleListPage = () => {
   } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), {
     initialData: {},
     enabled: canRead,
+  });
+
+  const { includes } = useFilter(locale, {
+    sensitivity: 'base',
+  });
+
+  /**
+   * @type {Intl.Collator}
+   */
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
   });
 
   const isLoading = isLoadingForData || isFetching;
@@ -118,7 +130,12 @@ const RoleListPage = () => {
     setIsConfirmButtonLoading(false);
   };
 
-  const sortedRoles = matchSorter(roles || [], _q, { keys: ['name', 'description'] });
+  const sortedRoles = (roles || [])
+    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
+    .sort(
+      (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
+    );
+
   const emptyContent = _q && !sortedRoles.length ? 'search' : 'roles';
 
   const colCount = 4;
