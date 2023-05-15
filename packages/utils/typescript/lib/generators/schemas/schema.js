@@ -55,7 +55,7 @@ const generateSchemaDefinition = (schema) => {
   addImport(parentType);
 
   // Properties whose values can be mapped to a literal type expression
-  const literalPropertiesDefinitions = ['info', 'options', 'pluginOptions']
+  const literalPropertiesDefinitions = ['collectionName', 'info', 'options', 'pluginOptions']
     // Ignore non-existent or empty declarations
     .filter((key) => !isEmpty(schema[key]))
     // Generate literal definition for each property
