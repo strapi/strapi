@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require("path");
 module.exports = {
   setupFilesAfterEnv: [__dirname + '/test/unit.setup.js'],
   modulePathIgnorePatterns: ['.cache', 'dist'],
