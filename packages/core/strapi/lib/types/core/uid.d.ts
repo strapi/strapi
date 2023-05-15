@@ -137,14 +137,14 @@ export type Select<U extends Any, P extends keyof Parse<U>> = Pick<Parse<U>, P>;
  * Extract the namespace literal from a given UID.
  *
  * @example
- * type T = ResolveUIDNamespace<'admin::foo'>
- * // ^ AdminNamespace
+ * type T = AssertNamespaceIs<'admin::foo'>
+ * // ^ Namespace.Admin
  * @example
- * type T = ResolveUIDNamespace<'api::foo.bar'>
- * // ^ ApiNamespace
+ * type T = AssertNamespaceIs<'api::foo.bar'>
+ * // ^ Namespace.API
  * @example
- * type T = ResolveUIDNamespace<'admin::foo' | 'api::foo.bar'>
- * // ^ AdminNamespace | ApiNamespace
+ * type T = AssertNamespaceIs<'admin::foo' | 'api::foo.bar'>
+ * // ^ Namespace.Admin | Namespace.API
  */
 export type ExtractNamespace<U extends Any> =
   | AssertNamespaceIs<U, Namespace.Global>
