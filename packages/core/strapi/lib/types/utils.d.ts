@@ -4,6 +4,29 @@
  *
  * */
 
+export type Literal = string | number | bigint | boolean;
+
+export type Contains<S extends Literal> = `${string}${S}${string}`;
+export type NonEmpty<T extends string> = T extends '' ? never : T;
+
+export type Split<T extends string, S extends Literal> = T extends `${infer A}${S}${infer B}`
+  ? [A, ...Split<B, S>]
+  : T extends ''
+  ? []
+  : [T];
+
+export type Join<T extends unknown[], S extends Literal> = T extends [
+  infer F extends Literal,
+  ...infer R
+]
+  ? R['length'] extends 0
+    ? F
+    : `${F}${S}${Join<R, S>}`
+  : never;
+
+export type AddSuffix<T extends string, S extends Literal> = `${T}${S}`;
+export type AddPrefix<T extends string, S extends Literal> = `${S}${T}`;
+
 /**
  *
  * Extract the array values into an union type

@@ -77,7 +77,22 @@ export type WithSeparator<N extends Namespace> = AddSuffix<N, GetNamespaceSepara
 /**
  * Represents namespaces composed of an origin and a name, separated by colons
  */
-export type ScopedNamespace = `${string}${ColonsSeparator}${string}`;
+export type ScopedNamespace<O extends string = string, S extends string = string> = Namespace &
+  `${O}${ColonsSeparator}${S}`;
+
+/**
+ * Extract the scope from the given scoped namespace
+ */
+export type ExtractNamespaceScope<T> = T extends `${string}${ColonsSeparator}${infer S}`
+  ? S
+  : never;
+
+/**
+ * Extract the origin from the given scoped namespace
+ */
+export type ExtractNamespaceOrigin<T> = T extends `${infer S}${ColonsSeparator}${string}`
+  ? S
+  : never;
 
 /**
  * Separators used to join the different parts of a namespace (e.g. building a uid)

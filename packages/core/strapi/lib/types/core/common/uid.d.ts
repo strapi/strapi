@@ -8,8 +8,11 @@ import type {
   Namespace,
   Separator,
   GlobalNamespace,
+  ScopedNamespace,
+  ExtractNamespaceScope,
+  ExtractNamespaceOrigin,
 } from './namespace';
-import type { AddSuffix, Literal } from '../../utils';
+import type { AddSuffix } from '../../utils';
 
 type AddStringSuffix<T extends string> = AddSuffix<T, string>;
 
@@ -83,10 +86,12 @@ export type UID =
  * The separator type is automatically inferred from the given namespace
  */
 export interface ParsedUID<N extends Namespace = Namespace, E extends string = string> {
+  raw: `${N}${GetNamespaceSeparator<N>}${E}`;
   namespace: N;
+  origin: N extends ScopedNamespace ? ExtractNamespaceOrigin<N> : N;
+  scope: N extends ScopedNamespace ? ExtractNamespaceScope<N> : never;
   separator: GetNamespaceSeparator<N>;
   name: E;
-  raw: `${N}${GetNamespaceSeparator<N>}${E}`;
 }
 
 /**
@@ -132,6 +137,11 @@ export type AssertUIDNamespace<U extends UID, N extends Namespace> = U extends A
 >
   ? N
   : never;
+
+/**
+ * Get parsed properties from a given raw UID
+ */
+export type ExtractFromUID<U extends UID, P extends keyof ParsedUID> = ParseUID<U>[P];
 
 /**
  * Extract the namespace literal from a given UID.
