@@ -174,9 +174,11 @@ module.exports = ({ strapi }) => {
         .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
         .from(`${tableName} as t1`)
         .leftJoin(`${joinTable.name} as t2`, `t1.id`, `t2.${joinColumn}`)
+        // FIXME POC fromStageId will not be always the same value (null, and other stage id in other worfklows)
         .where(`t2.${invJoinColumn}`, fromStageId)
         .toSQL();
 
+      // FIXME POC Need to update previously inserted rows for switching between workflows
       // Insert rows for all entries of the content type that do not have a
       // default stage
       const query = strapi.db

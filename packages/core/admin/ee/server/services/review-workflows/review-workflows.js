@@ -44,6 +44,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       type: 'relation',
       relation: 'oneToOne',
       target: 'admin::workflow-stage',
+      hidden: true,
     });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
@@ -108,17 +109,34 @@ function persistStagesJoinTables({ strapi }) {
   };
 }
 
+async function updateMappedContentTypes({ workflowsService, stagesService, strapi }) {
+  const workflows = await workflowsService.find({ populate: 'stages' });
+
+  for (const workflow of workflows) {
+    const contentTypeUIDs = workflow.mappedContentTypes ?? [];
+
+    for (const contentTypeUID of contentTypeUIDs) {
+      await stagesService.updateEntitiesStage(contentTypeUID, {
+        fromStageId: null,
+        toStageId: workflow.stages[0].id,
+      });
+      strapi.db.metadata.hideRelation(contentTypeUID, ENTITY_STAGE_ATTRIBUTE, false);
+    }
+  }
+}
+
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
 
   return {
     async bootstrap() {
+      await updateMappedContentTypes({ workflowsService, stagesService, strapi });
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
-      strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
+      // strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
       strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
     },
   };

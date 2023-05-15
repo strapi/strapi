@@ -123,7 +123,6 @@ module.exports = [
         handler: 'content-api-workflows.find',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
       {
@@ -132,7 +131,6 @@ module.exports = [
         handler: 'content-api-workflows.findById',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
       {
@@ -141,7 +139,6 @@ module.exports = [
         handler: 'content-api-stages.findById',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
       {
@@ -150,7 +147,6 @@ module.exports = [
         handler: 'content-api-stages.updateOne',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
       {
@@ -159,7 +155,6 @@ module.exports = [
         handler: 'content-api-stages.replace',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
       {
@@ -168,7 +163,6 @@ module.exports = [
         handler: 'content-api-stages.create',
         config: {
           middlewares: [enableFeatureMiddleware('review-workflows')],
-          policies: [],
         },
       },
     ],

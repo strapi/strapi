@@ -1,6 +1,6 @@
 'use strict';
 
-const { get, keys, pickBy, pipe } = require('lodash/fp');
+const { keys, pipe, pickBy } = require('lodash/fp');
 const { WORKFLOW_MODEL_UID } = require('../constants/workflows');
 
 /**
@@ -21,8 +21,11 @@ const getDefaultWorkflow = async ({ strapi }) =>
   strapi.query(WORKFLOW_MODEL_UID).findOne({ populate: ['stages'] });
 
 const getContentTypeUIDsWithActivatedReviewWorkflows = pipe([
+  // FIXME POC every content-type have RW activated
   // Pick only content-types with reviewWorkflows options set to true
-  pickBy(get('options.reviewWorkflows')),
+  // pickBy(get('options.reviewWorkflows')),
+  // Shouldn't pick content-type that begins with strapi_
+  pickBy(({ collectionName }) => !collectionName.startsWith('strapi_')),
   // Get UIDs
   keys,
 ]);

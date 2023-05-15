@@ -28,6 +28,17 @@ services:
     ports:
       - '3306:3306'
 
+  app:
+    container_name: strapi-app
+    image: node:18
+    volumes:
+      - /Users/nathanpichon/WebstormProjects/strapi/examples/getstarted:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - '2000:1337'
+    command: >
+      sh -c "npm install && npm run build && npm run develop"
+
 volumes:
   pgdata:
   mysqldata:

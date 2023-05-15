@@ -30,6 +30,9 @@ const createJoin = (ctx, { alias, refAlias, attributeName, attribute }) => {
   if (attribute.type !== 'relation') {
     throw new Error(`Cannot join on non relational field ${attributeName}`);
   }
+  if (attribute.hidden === true) {
+    return alias;
+  }
 
   const targetMeta = db.metadata.get(attribute.target);
 

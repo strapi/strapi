@@ -618,6 +618,9 @@ const applyPopulate = async (results, populate, ctx) => {
     const attribute = meta.attributes[attributeName];
     const targetMeta = db.metadata.get(attribute.target);
 
+    // FIXME POC -> Need a cleaner way to reject this attribute from being populated
+    if (attribute.hidden) continue;
+
     const populateValue = {
       filters: qb.state.filters,
       ...pickPopulateParams(populate[attributeName]),

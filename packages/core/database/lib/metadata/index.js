@@ -10,6 +10,23 @@ class Metadata extends Map {
     return this.set(meta.uid, meta);
   }
 
+  // FIXME POC - to be discussed
+  // Might not be the right place to put this logic?
+  hideRelation(modelUID, attributeKey, hidden = true) {
+    const meta = this.get(modelUID);
+
+    if (!meta) {
+      return;
+    }
+
+    for (const [key, value] of Object.entries(meta.attributes)) {
+      if (key === attributeKey && value.type === 'relation') {
+        value.hidden = hidden;
+      }
+    }
+    return this.set(meta.uid, meta);
+  }
+
   /**
    * Validate the DB metadata, throwing an error if a duplicate DB table name is detected
    */
@@ -26,6 +43,61 @@ class Metadata extends Map {
   }
 }
 
+const getMetadataFromContentType = (model) => ({
+  singularName: model.singularName,
+  uid: model.uid,
+  tableName: model.tableName,
+  attributes: {
+    id: {
+      type: 'increments',
+    },
+    ...model.attributes,
+  },
+  lifecycles: model.lifecycles || {},
+  indexes: model.indexes || [],
+});
+
+const enhanceMetadataModel = (metaModel, metadataMap) => {
+  if (hasComponentsOrDz(metaModel)) {
+    const compoLinkModelMeta = createCompoLinkModelMeta(metaModel);
+    metaModel.componentLink = compoLinkModelMeta;
+    metadataMap.add(compoLinkModelMeta);
+  }
+
+  for (const [attributeName, attribute] of Object.entries(metaModel.attributes)) {
+    try {
+      if (types.isComponent(attribute.type)) {
+        createComponent(attributeName, attribute, metaModel, metadataMap);
+        continue;
+      }
+
+      if (types.isDynamicZone(attribute.type)) {
+        createDynamicZone(attributeName, attribute, metaModel, metadataMap);
+        continue;
+      }
+
+      if (types.isRelation(attribute.type)) {
+        createRelation(attributeName, attribute, metaModel, metadataMap);
+        continue;
+      }
+
+      createAttribute(attributeName, attribute, metaModel, metadataMap);
+    } catch (error) {
+      console.log(error);
+      throw new Error(
+        `Error on attribute ${attributeName} in model ${metaModel.singularName}(${metaModel.uid}): ${error.message}`
+      );
+    }
+  }
+};
+
+const assignColumnNameAttribute = (metaModel) => {
+  metaModel.columnToAttribute = Object.keys(metaModel.attributes).reduce((acc, key) => {
+    const attribute = metaModel.attributes[key];
+    return Object.assign(acc, { [attribute.columnName || key]: key });
+  }, {});
+};
+
 // TODO: check if there isn't an attribute with an id already
 /**
  * Create Metadata from models configurations
@@ -37,63 +109,16 @@ const createMetadata = (models = []) => {
 
   // init pass
   for (const model of _.cloneDeep(models)) {
-    metadata.add({
-      singularName: model.singularName,
-      uid: model.uid,
-      tableName: model.tableName,
-      attributes: {
-        id: {
-          type: 'increments',
-        },
-        ...model.attributes,
-      },
-      lifecycles: model.lifecycles || {},
-      indexes: model.indexes || [],
-    });
+    metadata.add(getMetadataFromContentType(model));
   }
 
   // build compos / relations
   for (const meta of metadata.values()) {
-    if (hasComponentsOrDz(meta)) {
-      const compoLinkModelMeta = createCompoLinkModelMeta(meta);
-      meta.componentLink = compoLinkModelMeta;
-      metadata.add(compoLinkModelMeta);
-    }
-
-    for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
-      try {
-        if (types.isComponent(attribute.type)) {
-          createComponent(attributeName, attribute, meta, metadata);
-          continue;
-        }
-
-        if (types.isDynamicZone(attribute.type)) {
-          createDynamicZone(attributeName, attribute, meta, metadata);
-          continue;
-        }
-
-        if (types.isRelation(attribute.type)) {
-          createRelation(attributeName, attribute, meta, metadata);
-          continue;
-        }
-
-        createAttribute(attributeName, attribute, meta, metadata);
-      } catch (error) {
-        console.log(error);
-        throw new Error(
-          `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
-        );
-      }
-    }
+    enhanceMetadataModel(meta, metadata);
   }
 
   for (const meta of metadata.values()) {
-    const columnToAttribute = Object.keys(meta.attributes).reduce((acc, key) => {
-      const attribute = meta.attributes[key];
-      return Object.assign(acc, { [attribute.columnName || key]: key });
-    }, {});
-
-    meta.columnToAttribute = columnToAttribute;
+    assignColumnNameAttribute(meta);
   }
 
   metadata.validate();
