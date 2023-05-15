@@ -3,7 +3,7 @@
 const { set, forEach, pipe, map } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
-const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
+const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
@@ -44,8 +44,9 @@ function extendReviewWorkflowContentTypes({ strapi }) {
     });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
+
   pipe([
-    getContentTypeUIDsWithActivatedReviewWorkflows,
+    getVisibleContentTypesUID,
     // Iterate over UIDs to extend the content-type
     forEach(extendContentType),
   ])(strapi.contentTypes);
@@ -78,7 +79,7 @@ function enableReviewWorkflow({ strapi }) {
     };
 
     return pipe([
-      getContentTypeUIDsWithActivatedReviewWorkflows,
+      getVisibleContentTypesUID,
       // Iterate over UIDs to extend the content-type
       (contentTypesUIDs) => mapAsync(contentTypesUIDs, updateEntitiesStage),
     ])(contentTypes);
@@ -94,10 +95,9 @@ function persistStagesJoinTables({ strapi }) {
       return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
-    const joinTablesToPersist = pipe([
-      getContentTypeUIDsWithActivatedReviewWorkflows,
-      map(getStageTableToPersist),
-    ])(contentTypes);
+    const joinTablesToPersist = pipe([getVisibleContentTypesUID, map(getStageTableToPersist)])(
+      contentTypes
+    );
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
     await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
