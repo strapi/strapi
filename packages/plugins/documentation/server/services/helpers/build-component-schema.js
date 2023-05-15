@@ -38,6 +38,15 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   const hasLocalizationPath = routeInfo.routes.filter((route) =>
     isLocalizedPath(route.path)
   ).length;
+  // Filter the attributes that were set as 'private' in the Admin Panel
+  const privateAttributes = Object.entries(attributes).reduce((acc, attribute) => {
+    const [attributeKey, attributeValue] = attribute;
+      if (attributeValue.private) {
+        acc.push(attributeKey);
+      }
+    return acc;
+  }, []);
+  const publicAttributes = _.omit(attributes, [...privateAttributes]);
   // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     const attributesToOmit = [
@@ -49,7 +58,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       'createdBy',
       'localizations',
     ];
-    const attributesForRequest = _.omit(attributes, attributesToOmit);
+    const attributesForRequest = _.omit(publicAttributes, attributesToOmit);
 
     // Get a list of required attribute names
     const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
@@ -103,7 +112,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         type: 'object',
         properties: {
           id: { type: 'number' },
-          ...cleanSchemaAttributes(attributes, { addComponentSchema }),
+          ...cleanSchemaAttributes(publicAttributes, { addComponentSchema }),
         },
       },
     };
@@ -121,7 +130,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           id: { type: 'number' },
           attributes: {
             type: 'object',
-            properties: cleanSchemaAttributes(attributes, {
+            properties: cleanSchemaAttributes(publicAttributes, {
               addComponentSchema,
               componentSchemaRefName: `#/components/schemas/${pascalCase(
                 uniqueName
@@ -136,7 +145,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           id: { type: 'number' },
           attributes: {
             type: 'object',
-            properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
+            properties: cleanSchemaAttributes(publicAttributes, { addComponentSchema }),
           },
         },
       },
@@ -175,7 +184,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         id: { type: 'number' },
         attributes: {
           type: 'object',
-          properties: cleanSchemaAttributes(attributes, {
+          properties: cleanSchemaAttributes(publicAttributes, {
             addComponentSchema,
             componentSchemaRefName: `#/components/schemas/${pascalCase(
               uniqueName
@@ -190,7 +199,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         id: { type: 'number' },
         attributes: {
           type: 'object',
-          properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
+          properties: cleanSchemaAttributes(publicAttributes, { addComponentSchema }),
         },
       },
     },
