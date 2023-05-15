@@ -2,19 +2,11 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Link } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Box,
-  Button,
-  Flex,
-  TextInput,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
+import { Button, Flex, TextInput } from '@strapi/design-system';
 import { Field, FormikProvider, useFormik } from 'formik';
-
 import { useIntl } from 'react-intl';
+
+import * as Layout from './Layout';
 import EventInput from '../EventInput';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
@@ -50,7 +42,7 @@ const WebhookForm = ({
   return (
     <FormikProvider value={formik}>
       <Form onSubmit={formik.handleSubmit}>
-        <HeaderLayout
+        <Layout.Header
           primaryAction={
             <Flex gap={2}>
               <Button
@@ -93,9 +85,9 @@ const WebhookForm = ({
             </Link>
           }
         />
-        <ContentLayout>
-          <Flex direction="column" alignItems="stretch" gap={4}>
-            {showTriggerResponse && (
+        <Layout.Root
+          triggerContainer={
+            showTriggerResponse && (
               <div className="trigger-wrapper">
                 <TriggerContainer
                   isPending={isTriggering}
@@ -103,41 +95,38 @@ const WebhookForm = ({
                   onCancel={() => setShowTriggerResponse(false)}
                 />
               </div>
-            )}
-            <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-              <Flex direction="column" alignItems="stretch" gap={6}>
-                <Grid gap={6}>
-                  <GridItem col={6}>
-                    <Field
-                      as={TextInput}
-                      name="name"
-                      error={formik.errors.name && formatMessage({ id: formik.errors.name })}
-                      label={formatMessage({
-                        id: 'global.name',
-                        defaultMessage: 'Name',
-                      })}
-                      required
-                    />
-                  </GridItem>
-                  <GridItem col={12}>
-                    <Field
-                      as={TextInput}
-                      name="url"
-                      error={formik.errors.url && formatMessage({ id: formik.errors.url })}
-                      label={formatMessage({
-                        id: 'Settings.roles.form.input.url',
-                        defaultMessage: 'Url',
-                      })}
-                      required
-                    />
-                  </GridItem>
-                </Grid>
-                <HeadersInput />
-                <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
-              </Flex>
-            </Box>
-          </Flex>
-        </ContentLayout>
+            )
+          }
+        >
+          <Layout.Fields
+            name={
+              <Field
+                as={TextInput}
+                name="name"
+                error={formik.errors.name && formatMessage({ id: formik.errors.name })}
+                label={formatMessage({
+                  id: 'global.name',
+                  defaultMessage: 'Name',
+                })}
+                required
+              />
+            }
+            url={
+              <Field
+                as={TextInput}
+                name="url"
+                error={formik.errors.url && formatMessage({ id: formik.errors.url })}
+                label={formatMessage({
+                  id: 'Settings.roles.form.input.url',
+                  defaultMessage: 'Url',
+                })}
+                required
+              />
+            }
+          />
+          <HeadersInput />
+          <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
+        </Layout.Root>
       </Form>
     </FormikProvider>
   );
