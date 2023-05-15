@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
+const { getVisibleContentTypesUID } = require('../utils/review-workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
@@ -19,7 +20,12 @@ const validateAssignedContentTypes = yup.array().of(
   yup.string().test({
     name: 'content-type-exists',
     message: (value) => `Content type ${value.originalValue} does not exist`,
-    test: (uid) => strapi.getModel(uid),
+    test(uid) {
+      const model = strapi.getModel(uid);
+      if (!model) return false;
+      // It's not a valid  content type if it's not visible in the content manager
+      return getVisibleContentTypesUID({ [uid]: model }).includes(uid);
+    },
   })
 );
 
