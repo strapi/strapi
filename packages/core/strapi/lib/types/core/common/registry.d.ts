@@ -39,19 +39,19 @@ export type RegistryKeysBy<R, U extends UID = UID> = Extract<keyof R, U>;
  *   'plugin::foo.bar': unknown;
  * }
  *
- * type T = keyof Query<Registry, { namespace: ApiNamespace }>;
+ * type T = keyof RegistryQuery<Registry, { namespace: ApiNamespace }>;
  * // ^ "api::foo.bar" | "api::foo.baz" | "api::bar.foo"
  *
- * type T = keyof Query<Registry, { name: 'bar' }>;
+ * type T = keyof RegistryQuery<Registry, { name: 'bar' }>;
  * // ^ "admin::bar" | "api::foo.bar" | "plugin::foo.bar"
  *
- * type T = keyof Query<Registry, { separator: '.' }>;
+ * type T = keyof RegistryQuery<Registry, { separator: '.' }>;
  * // ^ "api::foo.bar" | "api::foo.baz" | "api::bar.foo" | 'plugin::foo.bar"
  *
- * type T = keyof Query<Registry, { namespace: PluginNamespace | AdminNamespace }>;
+ * type T = keyof RegistryQuery<Registry, { namespace: PluginNamespace | AdminNamespace }>;
  * // ^ "plugin::foo.bar" | "admin::foo" | "admin::bar"
  *
- * type T = keyof Query<Registry, { namespace: ApiNamespace; name: Contains<'b'> }>;
+ * type T = keyof RegistryQuery<Registry, { namespace: ApiNamespace; name: Contains<'b'> }>;
  * // ^ "api::foo.bar" | "api::foo.baz"
  */
 export type RegistryQuery<T, Q extends Partial<ParsedUID>, U extends UID = UID> = {
