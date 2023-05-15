@@ -236,7 +236,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+        sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -342,7 +342,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+        sqlite_pkg: ['better-sqlite3', 'sqlite3']
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
