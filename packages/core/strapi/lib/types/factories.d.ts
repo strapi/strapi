@@ -42,8 +42,8 @@ type CollectionTypeRouterConfig = {
 
 type RouterConfig<T> = {
   prefix?: string;
-  only?: Array<keyof T>;
-  except?: Array<keyof T>;
+  only?: string[];
+  except?: string[];
   config: T;
 };
 
