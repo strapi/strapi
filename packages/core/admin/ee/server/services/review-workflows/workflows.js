@@ -28,9 +28,9 @@ module.exports = ({ strapi }) => ({
       const createOpts = set('data.stages', stageIds, opts);
 
       // Update (un)assigned Content Types
-      if (opts.data.assignedContentTypes) {
+      if (opts.data.contentTypes) {
         await getService('assigned-content-types').create({
-          assigned: opts.data.assignedContentTypes,
+          assigned: opts.data.contentTypes,
           defaultStage: { id: stageIds[0] },
         });
       }
@@ -51,17 +51,17 @@ module.exports = ({ strapi }) => ({
         opts.data.stages.forEach((stage) => this.assertStageBelongsToWorkflow(stage.id, workflow));
 
         updatedStageIds = await stageService
-          .replaceStages(workflow.stages, opts.data.stages, workflow.assignedContentTypes)
+          .replaceStages(workflow.stages, opts.data.stages, workflow.contentTypes)
           .then((stages) => stages.map((stage) => stage.id));
 
         updateOpts = set('data.stages', updatedStageIds, opts);
       }
 
       // Update (un)assigned Content Types
-      if (opts.data.assignedContentTypes) {
+      if (opts.data.contentTypes) {
         await getService('assigned-content-types').update({
-          srcAssigned: workflow.assignedContentTypes,
-          destAssigned: opts.data.assignedContentTypes,
+          srcAssigned: workflow.contentTypes,
+          destAssigned: opts.data.contentTypes,
           defaultStage: updatedStageIds.length ? { id: updatedStageIds[0] } : workflow.stages[0],
         });
       }

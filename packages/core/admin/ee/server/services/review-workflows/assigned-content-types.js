@@ -40,7 +40,7 @@ module.exports = () => ({
   /**
    * Swapping involves:
    *  - Updating entity stages of the content type
-   *  - Updating the assignedContentTypes of the previous workflow
+   *  - Updating the contentTypes of the previous workflow
    * @param {Workflow} srcWorkflow
    * @param {Workflow.Stage} stage
    * @param {string} uid
@@ -51,7 +51,7 @@ module.exports = () => ({
     // Update assignedContentTypes of the previous workflow
     await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
       data: {
-        assignedContentTypes: srcWorkflow.assignedContentTypes.filter((ct) => ct !== uid),
+        contentTypes: srcWorkflow.contentTypes.filter((ct) => ct !== uid),
       },
     });
   },
@@ -67,7 +67,7 @@ module.exports = () => ({
     // TODO: Improve filter
     const workflows = await getService('workflows').find({
       ...opts,
-      filters: { assignedContentTypes: { $contains: [uid] } },
+      filters: { contentTypes: { $contains: [uid] } },
     });
     return workflows.length > 0 ? workflows[0] : null;
   },

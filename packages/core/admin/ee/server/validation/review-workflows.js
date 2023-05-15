@@ -16,7 +16,7 @@ const validateUpdateStageOnEntity = yup
   })
   .required();
 
-const validateAssignedContentTypes = yup.array().of(
+const validateContentTypes = yup.array().of(
   yup.string().test({
     name: 'content-type-exists',
     message: (value) => `Content type ${value.originalValue} does not exist`,
@@ -37,7 +37,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
-  assignedContentTypes: validateAssignedContentTypes,
+  contentTypes: validateContentTypes,
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
@@ -47,7 +47,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
     .of(stageObject)
     .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
-  assignedContentTypes: validateAssignedContentTypes,
+  contentTypes: validateContentTypes,
 });
 
 module.exports = {
