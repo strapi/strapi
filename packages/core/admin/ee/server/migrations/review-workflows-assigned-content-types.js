@@ -11,18 +11,22 @@ async function migrateReviewWorkflowsAssignedContentTypes({ oldContentTypes, con
     !!contentTypes?.[WORKFLOW_MODEL_UID]?.attributes?.assignedContentTypes;
 
   if (!hadAssignedContentTypes && hasAssignedContentTypes) {
-    // If RW was enabled on CT, assign the default workflow.
-    const reviewWorkflowContentTypes = pipe([pickBy(get('options.reviewWorkflows')), keys])(
+    // Initialize assignedContentTypes with an empty array and assign only to one
+    // workflow the Content Types which were using Review Workflow before.
+    await strapi.query(WORKFLOW_MODEL_UID).updateMany({ data: { assignedContentTypes: [] } });
+
+    // Find Content Types which were using Review Workflow before
+    const assignedContentTypes = pipe([pickBy(get('options.reviewWorkflows')), keys])(
       oldContentTypes
     );
 
-    // Before this release there was only one workflow,
-    // so it is safe to assign the default workflow to all content types.
-    await strapi.query(WORKFLOW_MODEL_UID).updateMany({
-      data: {
-        assignedContentTypes: reviewWorkflowContentTypes.length ? reviewWorkflowContentTypes : [],
-      },
-    });
+    if (assignedContentTypes.length) {
+      // Update only one workflow with the assignedContentTypes
+      // Before this release there was only one workflow, so this operation is safe.
+      await strapi
+        .query(WORKFLOW_MODEL_UID)
+        .update({ where: { id: { $notNull: true } }, data: { assignedContentTypes } });
+    }
   }
 }
 
