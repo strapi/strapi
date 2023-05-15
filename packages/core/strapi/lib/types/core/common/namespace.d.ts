@@ -1,4 +1,4 @@
-import type { AddSuffix, NonEmpty } from '../../utils';
+import type { Suffix, NonEmpty } from '../../utils';
 
 /**
  * Namespace for admin resources
@@ -72,7 +72,7 @@ export type GetNamespaceSeparator<T extends Namespace = Namespace> = T extends S
  * type T = WithSeparator<AdminNamespace> | WithSeparator<ApiNamespace>
  * // ^ 'admin::' | 'api::{string}.'
  */
-export type WithSeparator<N extends Namespace> = AddSuffix<N, GetNamespaceSeparator<N>>;
+export type WithSeparator<N extends Namespace> = Suffix<N, GetNamespaceSeparator<N>>;
 
 /**
  * Represents namespaces composed of an origin and a name, separated by colons
