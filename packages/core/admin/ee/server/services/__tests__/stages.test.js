@@ -151,7 +151,7 @@ describe('Review workflows - Stages service', () => {
       expect(entityServiceMock.findOne).toBeCalledWith(STAGE_MODEL_UID, 1, {});
     });
   });
-  describe('replaceWorkflowStages', () => {
+  describe('replaceStages', () => {
     test('Should create a new stage and assign it to workflow', async () => {
       await stagesService.replaceStages(
         [...workflowMock.stages],

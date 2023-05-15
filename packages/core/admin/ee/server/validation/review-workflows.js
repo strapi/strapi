@@ -30,7 +30,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
     .of(stageObject)
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
-    .required(),
+    .required('Can not create a workflow without stages'),
   assignedContentTypes: validateAssignedContentTypes,
 });
 
