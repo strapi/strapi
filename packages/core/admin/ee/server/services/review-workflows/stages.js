@@ -66,6 +66,53 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
+    async replaceStages(fromStages, toStages) {
+      const { created, updated, deleted } = getDiffBetweenStages(fromStages, toStages);
+
+      assertAtLeastOneStageRemain(fromStages || [], { created, deleted });
+
+      // Update stages and assign entity stages
+      return strapi.db.transaction(async ({ trx }) => {
+        // Create the new stages
+        const createdStages = await this.createMany(created, { fields: ['id'] });
+        // Put all the newly created stages ids
+        const createdStagesIds = map('id', createdStages);
+        // TODO: Find content types assigned to the workflow
+        // const contentTypes = getContentTypeUIDsWithActivatedReviewWorkflows(strapi.contentTypes);
+        const contentTypes = [];
+
+        // Update the workflow stages
+        await mapAsync(updated, (stage) => this.update(stage.id, stage));
+
+        // Delete the stages that are not in the new stages list
+        await mapAsync(deleted, async (stage) => {
+          // Find the nearest stage in the workflow and newly created stages
+          // that is not deleted, prioritizing the previous stages
+          const nearestStage = findNearestMatchingStage(
+            [...fromStages, ...createdStages],
+            fromStages.findIndex((s) => s.id === stage.id),
+            (targetStage) => {
+              return !deleted.find((s) => s.id === targetStage.id);
+            }
+          );
+
+          // Assign the new stage to entities that had the deleted stage
+          await mapAsync(contentTypes, (contentTypeUID) => {
+            this.updateEntitiesStage(contentTypeUID, {
+              fromStageId: stage.id,
+              toStageId: nearestStage.id,
+              trx,
+            });
+          });
+
+          return this.delete(stage.id);
+        });
+
+        return toStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
+      });
+    },
+
+    // TODO: remove this method when the old workflow replace method is removed
     async replaceWorkflowStages(workflowId, stages) {
       const workflow = await workflowsService.findById(workflowId, { populate: ['stages'] });
 

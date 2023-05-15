@@ -87,7 +87,6 @@ describe('Review workflows service', () => {
       expect(workflowsServiceMock.count).toBeCalled();
       expect(stagesServiceMock.count).toBeCalled();
 
-      expect(stagesServiceMock.createMany).toBeCalled();
       expect(workflowsServiceMock.create).toBeCalled();
     });
     test('With a workflow in DB', async () => {
