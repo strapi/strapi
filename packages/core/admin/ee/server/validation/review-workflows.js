@@ -15,6 +15,14 @@ const validateUpdateStageOnEntity = yup
   })
   .required();
 
+const validateAssignedContentTypes = yup.array().of(
+  yup.string().test({
+    name: 'content-type-exists',
+    message: (value) => `Content type ${value.originalValue} does not exist`,
+    test: (uid) => strapi.getModel(uid),
+  })
+);
+
 const validateWorkflowCreateSchema = yup.object().shape({
   name: yup.string().max(255).required(),
   stages: yup
@@ -23,6 +31,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
     .required(),
+  assignedContentTypes: validateAssignedContentTypes,
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
@@ -30,8 +39,9 @@ const validateWorkflowUpdateSchema = yup.object().shape({
   stages: yup
     .array()
     .of(stageObject)
-    .min(1, 'Can not create a workflow without stages')
+    .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
+  assignedContentTypes: validateAssignedContentTypes,
 });
 
 module.exports = {
