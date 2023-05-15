@@ -160,4 +160,5 @@ export type ResolveUIDNamespace<U extends UID> =
   | AssertUIDNamespace<U, AdminNamespace>
   | AssertUIDNamespace<U, StrapiNamespace>
   | AssertUIDNamespace<U, ApiNamespace>
-  | AssertUIDNamespace<U, PluginNamespace>;
+  | AssertUIDNamespace<U, PluginNamespace>
+  | AssertUIDNamespace<U, GlobalNamespace>;
