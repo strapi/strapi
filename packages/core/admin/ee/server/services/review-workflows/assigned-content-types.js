@@ -63,7 +63,6 @@ module.exports = () => ({
     });
   },
 
-  // TODO: Change name to getWorkflow(?) / getWorkflowByAssignedContentType() /
   async getAssignedWorkflow(uid, opts) {
     // TODO: Improve filter
     const workflows = await getService('workflows').find({

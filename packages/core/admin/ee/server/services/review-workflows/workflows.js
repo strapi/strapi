@@ -40,7 +40,6 @@ module.exports = ({ strapi }) => ({
     });
   },
 
-  // TODO: Can not assign a CT twice
   async update(workflow, opts) {
     const stageService = getService('stages', { strapi });
     let updateOpts = { ...opts, populate: { stages: true } };
