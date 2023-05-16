@@ -33,21 +33,6 @@ const productModel = {
   },
 };
 
-const categoryUID = 'api::category.category';
-const categoryModel = {
-  draftAndPublish: true,
-  pluginOptions: {},
-  singularName: 'category',
-  pluralName: 'categories',
-  displayName: 'Category',
-  kind: 'collectionType',
-  attributes: {
-    name: {
-      type: 'string',
-    },
-  },
-};
-
 describeOnCondition(edition === 'EE')('Review workflows', () => {
   const builder = createTestBuilder();
 
@@ -89,15 +74,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     return body;
   };
 
-  const updateEntry = async (uid, id, data) => {
-    const { body } = await requests.admin({
-      method: 'PUT',
-      url: `/content-manager/collection-types/${uid}/${id}`,
-      body: data,
-    });
-    return body;
-  };
-
   const findAll = async (uid) => {
     const { body } = await requests.admin({
       method: 'GET',
@@ -107,7 +83,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([productModel, categoryModel]).build();
+    await builder.addContentTypes([productModel]).build();
 
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
@@ -115,8 +91,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     await Promise.all([
       createEntry(productUID, { name: 'Product 1' }),
       createEntry(productUID, { name: 'Product 2' }),
-      createEntry(categoryUID, { name: 'Category 1' }),
-      createEntry(categoryUID, { name: 'Category 2' }),
     ]);
   });
 
@@ -290,7 +264,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       workflow2 = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
     });
 
-    test('Can get list of workflows filtered by CT', async () => {
+    test('Should list workflows filtered by CT', async () => {
       const workflows = await getWorkflows({ contentTypes: { $contains: [productUID] } });
 
       expect(workflows).toHaveLength(1);
@@ -298,7 +272,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     // Depends on the previous test
-    test('Filter works ok with similar CT names (plugin::my-plugin.my-ct and plugin::my-plugin.my-ct2)', async () => {
+    test('Should list workflows filtered by CT even with similar names (plugin::my-plugin.my-ct and plugin::my-plugin.my-ct2)', async () => {
       // Manually update workflow to have a similar CT name
       await strapi.db.query(WORKFLOW_MODEL_UID).update({
         where: { id: workflow1.id },
@@ -310,6 +284,26 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
+    });
+  });
+
+  describe('Creating an entity in a review workflow content type', () => {
+    let workflow;
+
+    test('when content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
+      // Create a workflow with product content type
+      await createWorkflow({ contentTypes: [productUID] });
+
+      const entry = await createEntry(productUID, { name: 'Product' });
+      expect(await entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
+    });
+
+    test('when content type is not assigned to workflow, new entries should have a null stage', async () => {
+      // Unassign product content type from default workflow
+      await updateWorkflow(workflow.id, { contentTypes: [] });
+
+      const entry = await createEntry(productUID, { name: 'Product' });
+      expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
     });
   });
 });
