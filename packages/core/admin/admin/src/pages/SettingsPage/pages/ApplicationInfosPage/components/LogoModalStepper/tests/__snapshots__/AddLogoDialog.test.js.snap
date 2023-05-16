@@ -66,6 +66,42 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   padding-left: 20px;
 }
 
+.c5 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c7 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c17 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c11 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -146,42 +182,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   flex-direction: row;
 }
 
-.c5 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c7 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c17 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c15 path {
   fill: #4945ff;
 }
@@ -191,13 +191,13 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   outline: none;
 }
 
-.c21 svg {
+.c21 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c21 svg > g,
-.c21 svg path {
+.c21 > svg > g,
+.c21 > svg path {
   fill: #ffffff;
 }
 
@@ -613,6 +613,36 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-left: 20px;
 }
 
+.c7 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -675,48 +705,18 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   gap: 4px;
 }
 
-.c7 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c5 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c12 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
 .c23 {
   position: relative;
   outline: none;
 }
 
-.c23 svg {
+.c23 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c23 svg > g,
-.c23 svg path {
+.c23 > svg > g,
+.c23 > svg path {
   fill: #ffffff;
 }
 

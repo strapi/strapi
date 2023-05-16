@@ -45,6 +45,20 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   height: 24px;
 }
 
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+}
+
 .c1 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -109,20 +123,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c3 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
 }
 
 .c16 path {

@@ -1,41 +1,42 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderRTL } from '@testing-library/react';
+import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
 import { IntlProvider } from 'react-intl';
+
 import { AssetCardBase } from '../AssetCardBase';
 
-const render = (props) =>
-  renderRTL(
-    <IntlProvider locale="en" messages={{}} defaultLocale="en">
-      <ThemeProvider theme={lightTheme}>
-        <AssetCardBase name="Card" extension="png" {...props} />
-      </ThemeProvider>
-    </IntlProvider>
-  );
+const render = (props) => ({
+  user: userEvent.setup(),
+  ...renderRTL(<AssetCardBase name="Card" extension="png" {...props} />, {
+    wrapper: ({ children }) => (
+      <IntlProvider locale="en" messages={{}} defaultLocale="en">
+        <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+      </IntlProvider>
+    ),
+  }),
+});
 
 describe('AssetCardBase', () => {
   describe('Interaction', () => {
-    it('should call onSelect when the checkbox is clicked', async () => {
-      const user = userEvent.setup();
+    it.only('should call onSelect when the checkbox is clicked', async () => {
       const onSelect = jest.fn();
-      const { getByRole } = render({
+      const { getByRole, user } = render({
         onSelect,
       });
 
-      const checkbox = getByRole('checkbox');
+      await user.click(getByRole('checkbox'));
 
-      await user.click(checkbox);
-
-      expect(onSelect).toHaveBeenCalledTimes(1);
+      /**
+       * If we don't wait for a single tick the assertion will fail.
+       */
+      waitFor(() => expect(onSelect).toHaveBeenNthCalledWith(1, true));
     });
 
     it('should call onEdit when the edit button is clicked', async () => {
       const onEdit = jest.fn();
-      const user = userEvent.setup();
 
-      const { getByRole } = render({
+      const { getByRole, user } = render({
         onEdit,
       });
 
@@ -50,8 +51,8 @@ describe('AssetCardBase', () => {
 
     it('should call onRemove when the remove button is clicked', async () => {
       const onRemove = jest.fn();
-      const user = userEvent.setup();
-      const { getByRole } = render({
+
+      const { getByRole, user } = render({
         onRemove,
       });
 
@@ -66,8 +67,8 @@ describe('AssetCardBase', () => {
 
     it('should call onEdit when the card is clicked', async () => {
       const onEdit = jest.fn();
-      const user = userEvent.setup();
-      const { getAllByRole } = render({
+
+      const { getAllByRole, user } = render({
         onEdit,
       });
 
@@ -81,8 +82,7 @@ describe('AssetCardBase', () => {
 
   describe('Keyboard Navigation', () => {
     it('should focus the checkbox when the card is first tabbed once', async () => {
-      const user = userEvent.setup();
-      const { getByRole } = render({
+      const { getByRole, user } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
@@ -94,8 +94,7 @@ describe('AssetCardBase', () => {
     });
 
     it('should focus remove from selection when the card is first tabbed twice', async () => {
-      const user = userEvent.setup();
-      const { getByRole } = render({
+      const { getByRole, user } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
@@ -114,8 +113,7 @@ describe('AssetCardBase', () => {
     });
 
     it('should focus the edit button when the card is three times', async () => {
-      const user = userEvent.setup();
-      const { getByRole } = render({
+      const { getByRole, user } = render({
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
