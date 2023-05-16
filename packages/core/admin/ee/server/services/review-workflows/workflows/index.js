@@ -27,15 +27,33 @@ module.exports = ({ strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
 
   return {
+    /**
+     * Returns all the workflows matching the user-defined filters.
+     * @param {object} opts - Options for the query.
+     * @param {object} opts.filters - Filters object.
+     * @returns {Promise<object[]>} - List of workflows that match the user's filters.
+     */
     async find(opts) {
       const filters = processFilters({ strapi }, opts.filters);
       return strapi.entityService.findMany(WORKFLOW_MODEL_UID, { ...opts, filters });
     },
 
+    /**
+     * Returns the workflow with the specified ID.
+     * @param {string} id - ID of the requested workflow.
+     * @param {object} opts - Options for the query.
+     * @returns {Promise<object>} - Workflow object matching the requested ID.
+     */
     findById(id, opts) {
       return strapi.entityService.findOne(WORKFLOW_MODEL_UID, id, opts);
     },
 
+    /**
+     * Creates a new workflow.
+     * @param {object} opts - Options for creating the new workflow.
+     * @returns {Promise<object>} - Workflow object that was just created.
+     * @throws {ValidationError} - If the workflow has no stages.
+     */
     async create(opts) {
       let createOpts = { ...opts, populate: { stages: true } };
 
@@ -66,6 +84,13 @@ module.exports = ({ strapi }) => {
       });
     },
 
+    /**
+     * Updates an existing workflow.
+     * @param {object} workflow - The existing workflow to update.
+     * @param {object} opts - Options for updating the workflow.
+     * @returns {Promise<object>} - Workflow object that was just updated.
+     * @throws {ApplicationError} - If the supplied stage ID does not belong to the workflow.
+     */
     async update(workflow, opts) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { stages: true } };
@@ -105,10 +130,20 @@ module.exports = ({ strapi }) => {
       });
     },
 
+    /**
+     * Returns the total count of workflows.
+     * @returns {Promise<number>} - Total count of workflows.
+     */
     count() {
       return strapi.entityService.count(WORKFLOW_MODEL_UID);
     },
 
+    /**
+     * Finds the assigned workflow for a given content type ID.
+     * @param {string} uid - Content type ID to find the assigned workflow for.
+     * @param {object} opts - Options for the query.
+     * @returns {Promise<object|null>} - Assigned workflow object if found, or null.
+     */
     async getAssignedWorkflow(uid, opts) {
       const workflows = await getService('workflows').find({
         ...opts,
@@ -117,6 +152,12 @@ module.exports = ({ strapi }) => {
       return workflows.length > 0 ? workflows[0] : null;
     },
 
+    /**
+     * Asserts that a content type has an assigned workflow.
+     * @param {string} uid - Content type ID to verify the assignment of.
+     * @returns {Promise<object>} - Workflow object associated with the content type ID.
+     * @throws {ApplicationError} - If no assigned workflow is found for the content type ID.
+     */
     async assertContentTypeBelongsToWorkflow(uid) {
       const workflow = await this.getAssignedWorkflow(uid, {
         populate: 'stages',
@@ -127,6 +168,13 @@ module.exports = ({ strapi }) => {
       return workflow;
     },
 
+    /**
+     * Asserts that a stage belongs to a given workflow.
+     * @param {string} stageId - ID of stage to check.
+     * @param {object} workflow - Workflow object to check against.
+     * @returns
+     * @throws {ApplicationError} - If the stage does not belong to the specified workflow.
+     */
     assertStageBelongsToWorkflow(stageId, workflow) {
       if (!stageId) {
         return;
