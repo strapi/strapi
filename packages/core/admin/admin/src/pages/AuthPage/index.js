@@ -87,7 +87,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     try {
       await axios({
         method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
+        url: `${window.strapi.backendURL}${requestURL}`,
         data: body,
         cancelToken: source.token,
       });
@@ -110,7 +110,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         },
       } = await axios({
         method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
+        url: `${window.strapi.backendURL}${requestURL}`,
         data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
@@ -158,7 +158,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         },
       } = await axios({
         method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
+        url: `${window.strapi.backendURL}${requestURL}`,
         data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
@@ -214,7 +214,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         },
       } = await axios({
         method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
+        url: `${window.strapi.backendURL}${requestURL}`,
         data: { ...body, resetPasswordToken: query.get('code') },
         cancelToken: source.token,
       });
