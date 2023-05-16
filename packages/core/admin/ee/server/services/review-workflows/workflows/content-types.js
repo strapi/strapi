@@ -6,15 +6,22 @@ const { getService } = require('../../../utils');
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 
 module.exports = ({ strapi }) => ({
+  /**
+   *
+   * @param {*} param0
+   */
   async migrate({ srcContentTypes = [], destContentTypes, destWorkflow }) {
     const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
     await mapAsync(created, async (uid) => {
+      // If it was assigned to another workflow, transfer it from the previous workflow
       const srcWorkflow = await getService('workflows').getAssignedWorkflow(uid);
       if (srcWorkflow) {
-        return this.transferContentType(srcWorkflow, destWorkflow, uid);
+        await this.transferContentType(srcWorkflow, destWorkflow, uid);
       }
-      return this.migrateEntities(destWorkflow, uid);
+
+      const newStage = destWorkflow.stages[0];
+      return getService('stages').updateAllEntitiesStage(uid, { toStageId: newStage.id });
     });
 
     await mapAsync(deleted, async (uid) => {
@@ -23,32 +30,16 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Transferring involves:
-   *  - Updating entity stages of the content type
-   *  - Updating the contentTypes of the previous workflow
-   * @param {Workflow} srcWorkflow
-   * @param {Workflow} destWorkflow
-   * @param {string} uid
+   * @param {Workflow} srcWorkflow - The workflow to transfer from
+   * @param {Workflow} destWorkflow - The workflow to transfer to
+   * @param {string} uid - The content type uid
    */
   async transferContentType(srcWorkflow, destWorkflow, uid) {
-    // Update entity stages of the content type
-    const newStage = destWorkflow.stages[0];
-    await getService('stages').updateAllEntitiesStage(uid, { toStageId: newStage.id });
-
     // Update assignedContentTypes of the previous workflow
     await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
       data: {
         contentTypes: srcWorkflow.contentTypes.filter((ct) => ct !== uid),
       },
-    });
-  },
-
-  async migrateEntities(destWorkflow, uid) {
-    const newStage = destWorkflow.stages[0];
-
-    return getService('stages').updateEntitiesStage(uid, {
-      fromStageId: null,
-      toStageId: newStage.id,
     });
   },
 });
