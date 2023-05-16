@@ -135,14 +135,13 @@ module.exports = ({ strapi }) => {
 
     /**
      * Updates the stage of all entities of a content type that are in a specific stage
-     * @param {string} uid
+     * @param {string} contentTypeUID
      * @param {number} fromStageId
      * @param {number} toStageId
-     * @param {KnexTransaction} trx
      * @returns
      */
-    async updateEntitiesStage(uid, { fromStageId, toStageId }) {
-      const { attributes, tableName } = strapi.db.metadata.get(uid);
+    async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId }) {
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
@@ -169,8 +168,8 @@ module.exports = ({ strapi }) => {
       });
     },
 
-    async updateAllEntitiesStage(uid, { toStageId }) {
-      const { attributes } = strapi.db.metadata.get(uid);
+    async updateAllEntitiesStage(contentTypeUID, { toStageId }) {
+      const { attributes } = strapi.db.metadata.get(contentTypeUID);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
@@ -184,8 +183,8 @@ module.exports = ({ strapi }) => {
       );
     },
 
-    async deleteAllEntitiesStage(uid) {
-      const { attributes } = strapi.db.metadata.get(uid);
+    async deleteAllEntitiesStage(contentTypeUID) {
+      const { attributes } = strapi.db.metadata.get(contentTypeUID);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
 
       // Delete all stage links for the content type
