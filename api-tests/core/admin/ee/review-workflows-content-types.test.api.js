@@ -1,12 +1,11 @@
 'use strict';
 
 const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest, createRequest } = require('api-tests/request');
+const { createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
 const { describeOnCondition } = require('api-tests/utils');
 
 const {
-  STAGE_MODEL_UID,
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
 } = require('../../../../packages/core/admin/ee/server/constants/workflows');
@@ -99,12 +98,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     await builder.cleanup();
   });
 
-  beforeEach(async () => {});
-
   describe('Create workflow', () => {
     let workflow1, workflow2;
 
-    describe('Basic', () => {
+    describe('Create workflow and assign content type', () => {
       test('Can create and assign a content type', async () => {
         const res = await createWorkflow({ contentTypes: [productUID] });
 
@@ -123,8 +120,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
     });
 
-    describe('Steal content type', () => {
-      test('Can create stealing content type from another', async () => {
+    describe('Create workflow and steal content type from another workflow', () => {
+      test('Can create workflow stealing content type from another', async () => {
         const res = await createWorkflow({
           contentTypes: [productUID],
           stages: [{ name: 'Review' }],
@@ -256,6 +253,26 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
+  describe('Creating an entity in a review workflow content type', () => {
+    let workflow;
+    test('when content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
+      // Create a workflow with product content type
+      workflow = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
+
+      const entry = await createEntry(productUID, { name: 'Product' });
+      expect(await entry[ENTITY_STAGE_ATTRIBUTE].id).toEqual(workflow.stages[0].id);
+    });
+
+    // Depends on the previous test
+    test('when content type is not assigned to workflow, new entries should have a null stage', async () => {
+      // Unassign product content type from default workflow
+      await updateWorkflow(workflow.id, { contentTypes: [] });
+
+      const entry = await createEntry(productUID, { name: 'Product' });
+      expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
+    });
+  });
+
   describe('Get workflows', () => {
     let workflow1, workflow2;
 
@@ -284,26 +301,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
-    });
-  });
 
-  describe('Creating an entity in a review workflow content type', () => {
-    let workflow;
-
-    test('when content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
-      // Create a workflow with product content type
-      await createWorkflow({ contentTypes: [productUID] });
-
-      const entry = await createEntry(productUID, { name: 'Product' });
-      expect(await entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
-    });
-
-    test('when content type is not assigned to workflow, new entries should have a null stage', async () => {
-      // Unassign product content type from default workflow
-      await updateWorkflow(workflow.id, { contentTypes: [] });
-
-      const entry = await createEntry(productUID, { name: 'Product' });
-      expect(await entry[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
+      // To avoid breaking other tests
+      await strapi.db.query(WORKFLOW_MODEL_UID).update({
+        where: { id: workflow1.id },
+        data: { contentTypes: [] },
+      });
     });
   });
 });

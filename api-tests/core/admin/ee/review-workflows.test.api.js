@@ -13,8 +13,6 @@ const {
   ENTITY_STAGE_ATTRIBUTE,
 } = require('../../../../packages/core/admin/ee/server/constants/workflows');
 
-const defaultStages = require('../../../../packages/core/admin/ee/server/constants/default-stages.json');
-
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const productUID = 'api::product.product';
@@ -80,12 +78,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     expect(result.statusCode).toBe(201);
-  };
-
-  const restart = async () => {
-    await strapi.destroy();
-    strapi = await createStrapiInstance();
-    requests.admin = await createAuthRequest({ strapi });
   };
 
   beforeAll(async () => {
