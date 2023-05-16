@@ -22,7 +22,6 @@ const getDataWithStage = async (workflow, data) => {
  */
 const decorator = (service) => ({
   async create(uid, opts = {}) {
-    // TODO: Store this in memory to avoid querying the DB every time
     const workflow = await getService('assigned-content-types').getAssignedWorkflow(uid, {
       populate: 'stages',
     });
