@@ -21,6 +21,8 @@ const validateContentTypes = yup.array().of(
     name: 'content-type-exists',
     message: (value) => `Content type ${value.originalValue} does not exist`,
     test(uid) {
+      // Warning; we use the strapi global - to avoid that, it would need to refactor how
+      // we generate validation function by using a factory with the strapi instance as parameter.
       const model = strapi.getModel(uid);
       if (!model) return false;
       // It's not a valid  content type if it's not visible in the content manager
