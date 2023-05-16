@@ -62,7 +62,7 @@
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit": "jest --config jest.config.js",
     "test:unit:watch": "run test:unit --watch",
-    "test:api": "node test/api.js",
+    "test:api": "node test/scripts/run-api-tests.js",
     "test:generate-app": "yarn build:ts && node test/scripts/generate-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
