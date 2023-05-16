@@ -1,8 +1,3 @@
-/**
- *
- * EditView
- *
- */
 import * as React from 'react';
 import {
   LoadingIndicatorPage,
@@ -27,7 +22,7 @@ const EditView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
+  const { isLoading: isLoadingForModels } = useModels();
   const { put, get, post } = useFetchClient();
 
   const isCreating = id === 'create';
@@ -123,11 +118,6 @@ const EditView = () => {
     }
   };
 
-  const isDraftAndPublishEvents = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
-
   if (isLoading || isLoadingForModels) {
     return <LoadingIndicatorPage />;
   }
@@ -144,7 +134,6 @@ const EditView = () => {
           isTriggering,
           isTriggerIdle,
           triggerResponse: triggerResponse?.data.data,
-          isDraftAndPublishEvents,
         }}
       />
     </Main>
