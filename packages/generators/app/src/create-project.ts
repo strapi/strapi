@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
-import { openSync } from 'node:fs';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 import execa from 'execa';
