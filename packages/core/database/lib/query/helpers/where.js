@@ -31,6 +31,7 @@ const OPERATORS = [
   '$notContains',
   '$containsi',
   '$notContainsi',
+  '$jsonSupersetOf',
 ];
 
 const CAST_OPERATORS = [
@@ -317,7 +318,14 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
 
-    // TODO: json operators
+    // Only on MySQL, PostgreSQL and CockroachDB.
+    // https://knexjs.org/guide/query-builder.html#wherejsonsupersetof
+    case '$jsonSupersetOf': {
+      qb.whereJsonSupersetOf(column, value);
+      break;
+    }
+
+    // TODO: Add more JSON operators: whereJsonObject, whereJsonPath, whereJsonSubsetOf
 
     // TODO: relational operators every/some/exists/size ...
 

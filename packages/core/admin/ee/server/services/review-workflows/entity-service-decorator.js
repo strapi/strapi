@@ -22,7 +22,7 @@ const getDataWithStage = async (workflow, data) => {
  */
 const decorator = (service) => ({
   async create(uid, opts = {}) {
-    const workflow = await getService('assigned-content-types').getAssignedWorkflow(uid, {
+    const workflow = await getService('workflows').getAssignedWorkflow(uid, {
       populate: 'stages',
     });
 
