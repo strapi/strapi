@@ -46,7 +46,10 @@ describe('Review workflows - Workflows service', () => {
 
       expect(entityServiceMock.findOne).not.toBeCalled();
       expect(entityServiceMock.findMany).toBeCalled();
-      expect(entityServiceMock.findMany).toBeCalledWith(WORKFLOW_MODEL_UID, { opt1: 1 });
+      expect(entityServiceMock.findMany).toBeCalledWith(WORKFLOW_MODEL_UID, {
+        opt1: 1,
+        filters: {},
+      });
     });
   });
   describe('findById', () => {

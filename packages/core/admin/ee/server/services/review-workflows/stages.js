@@ -64,8 +64,7 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },
 
-    // TODO : improve contentTypesToUpdate name
-    async replaceStages(srcStages, destStages, contentTypesToUpdate) {
+    async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
       const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
       assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
@@ -93,7 +92,7 @@ module.exports = ({ strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypesToUpdate, (contentTypeUID) => {
+          await mapAsync(contentTypesToMigrate, (contentTypeUID) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
