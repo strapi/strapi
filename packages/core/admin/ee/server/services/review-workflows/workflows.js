@@ -92,7 +92,7 @@ module.exports = ({ strapi }) => ({
 
     const belongs = workflow.stages.some((stage) => stage.id === stageId);
     if (!belongs) {
-      throw new ApplicationError(`Stage ${stageId} does not belong to workflow ${workflow.id}`);
+      throw new ApplicationError(`Stage does not belong to workflow "${workflow.name}"`);
     }
   },
 });
