@@ -62,7 +62,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
           const {
             data: { data },
           } = await axios.get(
-            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
+            `${window.strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
           );
 
           if (data) {
