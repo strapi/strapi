@@ -120,7 +120,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           <tr>
             <td />
             {headersName.map((header) => {
-              if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
+              if (header.id === 'app.utils.publish' || header.id === 'app.utils.unpublish') {
                 return (
                   <td
                     key={header.id}
