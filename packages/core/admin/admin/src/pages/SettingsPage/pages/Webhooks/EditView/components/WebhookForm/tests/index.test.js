@@ -9,6 +9,13 @@ import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleP
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
+import { useModels } from '../../../../../../../../hooks';
+
+jest.mock('../../../../../../../../hooks', () => ({
+  useModels: jest.fn(),
+  useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
+}));
+
 const makeApp = (component) => {
   const history = createMemoryHistory();
   const messages = { en };
@@ -26,6 +33,12 @@ const makeApp = (component) => {
 };
 
 describe('Create Webhook', () => {
+  useModels.mockImplementation(() => ({
+    isLoading: false,
+    collectionTypes: [],
+    singleTypes: [],
+  }));
+
   it('renders without crashing', () => {
     const triggerWebhook = jest.fn();
     triggerWebhook.cancel = jest.fn();
@@ -36,7 +49,6 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
         data={{
           name: '',
@@ -59,7 +71,6 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
         data={{
           name: '',

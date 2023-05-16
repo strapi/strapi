@@ -6,11 +6,11 @@ import { Button, Flex, TextInput } from '@strapi/design-system';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { useIntl } from 'react-intl';
 
+import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
+import schema from '../utils/schema';
 import * as Layout from './Layout';
-import EventInput from '../EventInput';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
-import schema from '../utils/schema';
 
 const WebhookForm = ({
   handleSubmit,
@@ -19,7 +19,6 @@ const WebhookForm = ({
   isCreating,
   isTriggering,
   triggerResponse,
-  isDraftAndPublishEvents,
 }) => {
   const { formatMessage } = useIntl();
   const [showTriggerResponse, setShowTriggerResponse] = useState(false);
@@ -125,7 +124,7 @@ const WebhookForm = ({
             }
           />
           <HeadersInput />
-          <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
+          <EventTable />
         </Layout.Root>
       </Form>
     </FormikProvider>
@@ -137,7 +136,6 @@ WebhookForm.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   triggerWebhook: PropTypes.func.isRequired,
   isCreating: PropTypes.bool.isRequired,
-  isDraftAndPublishEvents: PropTypes.bool.isRequired,
   isTriggering: PropTypes.bool.isRequired,
   triggerResponse: PropTypes.object,
 };
