@@ -7,8 +7,11 @@ const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 
 module.exports = ({ strapi }) => ({
   /**
-   *
-   * @param {*} param0
+   * Migrate content types entities assigned to a workflow
+   * @param {*} options
+   * @param {Array<string>} options.srcContentTypes - The content types assigned to the previous workflow
+   * @param {Array<string>} options.destContentTypes - The content types assigned to the new workflow
+   * @param {Workflow} options.destWorkflow - The new workflow
    */
   async migrate({ srcContentTypes = [], destContentTypes, destWorkflow }) {
     const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
