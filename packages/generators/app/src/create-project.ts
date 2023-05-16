@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
+import { openSync } from 'node:fs';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 import execa from 'execa';
@@ -98,6 +99,13 @@ export default async function createProject(
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
+    // TODO: we only want to do that if we create a test app,
+    // to make sure yarn install works even when the folder is
+    // within a yarn workspace monorepo
+    if (scope.useYarn /* && isTestApp */) {
+      await fse.ensureFile(join(rootPath, 'yarn.lock'));
+    }
+
     // create config/database
     await fse.appendFile(join(rootPath, '.env'), generateDbEnvariables({ client, connection }));
     await fse.writeFile(
@@ -136,12 +144,10 @@ export default async function createProject(
 
   try {
     if (scope.installDependencies !== false) {
-      const runner = runInstall(scope);
+      const runner = await runInstall(scope);
 
-      runner.stdout?.on('data', logInstall);
-      runner.stderr?.on('data', logInstall);
-
-      await runner;
+      logInstall(runner.stdout);
+      logInstall(runner.stderr);
     }
 
     loader.stop();
@@ -219,17 +225,38 @@ export default async function createProject(
   console.log();
 }
 
-const installArguments = ['install', '--production', '--no-optional'];
-function runInstall({ rootPath, useYarn }: Scope) {
-  if (useYarn) {
-    // Increase timeout for slow internet connections.
-    installArguments.push('--network-timeout 1000000');
+const installArguments = {
+  npm: ['install', '--production', '--no-optional'],
+  yarn: ['install', '--production', '--no-optional', '--network-timeout 1000000'],
+  yarn3: ['focus'],
+};
 
-    return execa('yarnpkg', installArguments, {
-      cwd: rootPath,
-      stdin: 'ignore',
-    });
+async function runInstall({ rootPath, useYarn }: Scope) {
+  if (useYarn) {
+    // Try installing using yarn@1
+    try {
+      return await execa('yarnpkg', installArguments.yarn, {
+        cwd: rootPath,
+        stdin: 'ignore',
+      });
+      // Try install using yarn@3
+    } catch (error) {
+      // TODO: for a test-app we want to install all dependencies;
+      // also: yarn focus will fail
+      // eslint-disable-next-line no-constant-condition
+      if (/* isTestApp */ true) {
+        return await execa('yarnpkg', [], {
+          cwd: rootPath,
+          stdin: 'ignore',
+        });
+      }
+
+      return await execa('yarnpkg', installArguments.yarn3, {
+        cwd: rootPath,
+        stdin: 'ignore',
+      });
+    }
   }
 
-  return execa('npm', installArguments, { cwd: rootPath, stdin: 'ignore' });
+  return execa('npm', installArguments.npm, { cwd: rootPath, stdin: 'ignore' });
 }

@@ -39,7 +39,12 @@ const databases = {
 const main = async (database, appPath, opts) => {
   try {
     await cleanTestApp(appPath);
-    await generateTestApp({ appPath, database, template: opts.template });
+    await generateTestApp({
+      appPath,
+      database,
+      installDependencies: opts.installDependencies,
+      template: opts.template,
+    });
 
     if (opts.run) {
       await runTestApp(appPath);
@@ -63,6 +68,8 @@ yargs
 
       yarg.boolean('run');
 
+      yarg.boolean('installDependencies');
+
       yarg.positional('appPath', {
         type: 'string',
         default: 'test-apps/base',
@@ -74,10 +81,10 @@ yargs
       });
     },
     (argv) => {
-      const { databaseName, run, appPath = 'test-apps/base', template } = argv;
+      const { databaseName, installDependencies, run, appPath = 'test-apps/base', template } = argv;
 
       if (databaseName) {
-        return main(databases[databaseName], appPath, { run, template });
+        return main(databases[databaseName], appPath, { installDependencies, run, template });
       }
 
       return main(
@@ -93,7 +100,7 @@ yargs
           },
         },
         appPath,
-        { run, template }
+        { installDependencies, run, template }
       );
     }
   )

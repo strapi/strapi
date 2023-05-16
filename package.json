@@ -25,7 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
-    "test-apps/*",
+    "test-apps/!(playwright)/**",
     ".github/actions/*",
     "scripts/*"
   ],
@@ -50,7 +50,7 @@
     "test:e2e": "playwright test",
     "test:e2e:codegen": "playwright codegen",
     "test:e2e:debug": "yarn test:e2e:setup && PWDEBUG=1 playwright test",
-    "test:e2e:setup": "yarn test:generate-app --appPath test-apps/playwright --template=./e2e/app-template",
+    "test:e2e:setup": "yarn test:generate-app --appPath test-apps/playwright --template=./e2e/app-template --installDependencies",
     "test:front:all": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles",
     "test:front": "cross-env IS_EE=true jest --config jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true run test:front --watch",

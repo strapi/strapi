@@ -24,7 +24,7 @@ const cleanTestApp = (appPath) => {
  * @param {string} options.appPath - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = async ({ appPath, database, template }) => {
+const generateTestApp = async ({ appPath, database, installDependencies = false, template }) => {
   const scope = {
     database,
     rootPath: path.resolve(appPath),
@@ -40,7 +40,7 @@ const generateTestApp = async ({ appPath, database, template }) => {
     deviceId: null,
     // use yarn if available and --use-npm isn't true
     useYarn: true,
-    installDependencies: false,
+    installDependencies,
     strapiDependencies: [
       '@strapi/strapi',
       '@strapi/plugin-users-permissions',
