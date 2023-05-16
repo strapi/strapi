@@ -98,7 +98,7 @@ jobs:
       - name: Run build:ts for admin-test-utils
         run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycles
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   build:
     name: 'build (node: ${{ matrix.node }})'
