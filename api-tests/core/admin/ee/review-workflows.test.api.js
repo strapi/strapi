@@ -105,7 +105,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
       data: {
-        uid: 'workflow',
+        name: 'workflow',
         stages: [defaultStage.id, secondStage.id],
       },
     });
@@ -446,76 +446,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Enabling/Disabling review workflows on a content type', () => {
-    beforeAll(async () => {
-      await createEntry(productUID, { name: 'Product' });
-      await createEntry(productUID, { name: 'Product 1' });
-      await createEntry(productUID, { name: 'Product 2' });
-    });
-
-    test('when enabled on a content type, entries of this type should be added to the first stage of the workflow', async () => {
-      await updateContentType(productUID, {
-        components: [],
-        contentType: { ...model, reviewWorkflows: true },
-      });
-      await restart();
-
-      const response = await requests.admin({
-        method: 'GET',
-        url: `/content-type-builder/content-types/api::product.product`,
-      });
-
-      expect(response.body.data.schema.reviewWorkflows).toBeTruthy();
-
-      const {
-        body: { results },
-      } = await requests.admin({
-        method: 'GET',
-        url: '/content-manager/collection-types/api::product.product',
-      });
-
-      expect(results.length).toEqual(3);
-      for (let i = 0; i < results.length; i += 1) {
-        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeDefined();
-      }
-    });
-
-    test('when disabled entries in the content type should be removed from any workflow stage', async () => {
-      await updateContentType(productUID, {
-        components: [],
-        contentType: { ...model, reviewWorkflows: false },
-      });
-
-      await restart();
-
-      const response = await requests.admin({
-        method: 'GET',
-        url: `/content-type-builder/content-types/api::product.product`,
-      });
-      expect(response.body.data.schema.reviewWorkflows).toBeFalsy();
-
-      const {
-        body: { results },
-      } = await requests.admin({
-        method: 'GET',
-        url: '/content-manager/collection-types/api::product.product',
-      });
-
-      for (let i = 0; i < results.length; i += 1) {
-        expect(results[i][ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
-      }
-    });
-  });
-
   describe('Update a stage on an entity', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
-        await updateContentType(productUID, {
-          components: [],
-          contentType: { ...model, reviewWorkflows: true },
-        });
-        await restart();
+        // Update workflow to unassign content type
+        await requests.admin.put(
+          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { contentTypes: [productUID] } }
+        );
       });
+
       test('Should update the accordingly on an entity', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
 
@@ -532,7 +472,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect.objectContaining({ id: secondStage.id })
         );
       });
-      test('Should throw an error if stage does not exist', async () => {
+      test('Should throw an error if stage does not belong to the workflow', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
 
         const response = await requests.admin({
@@ -546,16 +486,16 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(response.status).toEqual(400);
         expect(response.body.error).toBeDefined();
         expect(response.body.error.name).toEqual('ApplicationError');
-        expect(response.body.error.message).toEqual('Selected stage does not exist');
+        expect(response.body.error.message).toEqual('Stage does not belong to workflow "workflow"');
       });
     });
     describe('Review Workflow is disabled', () => {
       beforeAll(async () => {
-        await updateContentType(productUID, {
-          components: [],
-          contentType: { ...model, reviewWorkflows: false },
-        });
-        await restart();
+        // Update workflow to unassign content type
+        await requests.admin.put(
+          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+          { body: { contentTypes: [] } }
+        );
       });
       test('Should not update the entity', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
@@ -575,23 +515,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Creating an entity in a review workflow content type', () => {
+  describe('Deleting a stage when content already exists', () => {
     beforeAll(async () => {
-      await updateContentType(productUID, {
-        components: [],
-        contentType: { ...model, reviewWorkflows: true },
+      // Update workflow to unassign content type
+      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { contentTypes: [productUID] },
       });
-      await restart();
     });
 
-    test('when review workflows is enabled on a content type, new entries should be added to the first stage of the default workflow', async () => {
-      const adminResponse = await createEntry(productUID, { name: 'Product' });
-      expect(await adminResponse[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStages[0].name);
-    });
-  });
-
-  // TODO: Fix this test when implementing the Workflow Content Type assignment
-  describe.skip('Deleting a stage when content already exists', () => {
     test('When content exists in a review stage and this stage is deleted, the content should be moved to the nearest available stage', async () => {
       const products = await findAll(productUID);
 
