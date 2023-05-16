@@ -69,18 +69,16 @@ module.exports = ({ strapi }) => {
 
         createOpts = set('data.stages', stageIds, createOpts);
 
-        // Create Workflow
-        const workflow = await strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
-
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
             destContentTypes: opts.data.contentTypes,
-            destWorkflow: workflow,
+            stageId: stageIds[0],
           });
         }
 
-        return workflow;
+        // Create Workflow
+        return strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
       });
     },
 
@@ -94,7 +92,7 @@ module.exports = ({ strapi }) => {
     async update(workflow, opts) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { stages: true } };
-      let updatedStageIds = [];
+      let updatedStageIds;
 
       return strapi.db.transaction(async () => {
         // Update stages
@@ -110,23 +108,17 @@ module.exports = ({ strapi }) => {
           updateOpts = set('data.stages', updatedStageIds, opts);
         }
 
-        // Update Workflow
-        const updatedWorkflow = await strapi.entityService.update(
-          WORKFLOW_MODEL_UID,
-          workflow.id,
-          updateOpts
-        );
-
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
             srcContentTypes: workflow.contentTypes,
             destContentTypes: opts.data.contentTypes,
-            destWorkflow: updatedWorkflow,
+            stageId: updatedStageIds ? updatedStageIds[0] : workflow.stages[0].id,
           });
         }
 
-        return updatedWorkflow;
+        // Update Workflow
+        return strapi.entityService.update(WORKFLOW_MODEL_UID, workflow.id, updateOpts);
       });
     },
 
@@ -144,7 +136,7 @@ module.exports = ({ strapi }) => {
      * @param {object} opts - Options for the query.
      * @returns {Promise<object|null>} - Assigned workflow object if found, or null.
      */
-    async getAssignedWorkflow(uid, opts) {
+    async getAssignedWorkflow(uid, opts = {}) {
       const workflows = await getService('workflows').find({
         ...opts,
         filters: { contentTypes: getContentTypeFilter({ strapi }, uid) },

@@ -11,20 +11,25 @@ module.exports = ({ strapi }) => ({
    * @param {*} options
    * @param {Array<string>} options.srcContentTypes - The content types assigned to the previous workflow
    * @param {Array<string>} options.destContentTypes - The content types assigned to the new workflow
-   * @param {Workflow} options.destWorkflow - The new workflow
+   * @param {Workflow.Stage} options.stageId - The new stage to assign the entities to
    */
-  async migrate({ srcContentTypes = [], destContentTypes, destWorkflow }) {
+  async migrate({ srcContentTypes = [], destContentTypes, stageId }) {
     const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
     await mapAsync(created, async (uid) => {
       // If it was assigned to another workflow, transfer it from the previous workflow
       const srcWorkflow = await getService('workflows').getAssignedWorkflow(uid);
       if (srcWorkflow) {
-        await this.transferContentType(srcWorkflow, destWorkflow, uid);
+        // Updates all entities stages links to the new stage
+        await getService('stages').updateAllEntitiesStage(uid, { toStageId: stageId });
+        return this.transferContentType(srcWorkflow, uid);
       }
 
-      const newStage = destWorkflow.stages[0];
-      return getService('stages').updateAllEntitiesStage(uid, { toStageId: newStage.id });
+      // Create entity stages links to the new stage
+      return getService('stages').updateEntitiesStage(uid, {
+        fromStageId: null,
+        toStageId: stageId,
+      });
     });
 
     await mapAsync(deleted, async (uid) => {
@@ -34,10 +39,9 @@ module.exports = ({ strapi }) => ({
 
   /**
    * @param {Workflow} srcWorkflow - The workflow to transfer from
-   * @param {Workflow} destWorkflow - The workflow to transfer to
    * @param {string} uid - The content type uid
    */
-  async transferContentType(srcWorkflow, destWorkflow, uid) {
+  async transferContentType(srcWorkflow, uid) {
     // Update assignedContentTypes of the previous workflow
     await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
       data: {
