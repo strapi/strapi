@@ -133,9 +133,15 @@ module.exports = ({ strapi }) => {
     },
 
     /**
-     * Updates the stage of all entities of a content type that are in a specific stage
+     * Updates entity stages of a content type:
+     *  - If fromStageId is undefined, all entities with an existing stage will be assigned the new stage
+     *  - If fromStageId is null, all entities without a stage will be assigned the new stage
+     *  - If fromStageId is a number, all entities with that stage will be assigned the new stage
+     *
+     * For performance reasons we use knex queries directly.
+     *
      * @param {string} contentTypeUID
-     * @param {number} fromStageId
+     * @param {number | undefined | null} fromStageId
      * @param {number} toStageId
      * @returns
      */
@@ -144,6 +150,17 @@ module.exports = ({ strapi }) => {
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
+
+      if (fromStageId === undefined) {
+        // Update all already existing links to the new stage
+        return strapi.db.transaction(async ({ trx }) =>
+          strapi.db
+            .getConnection()
+            .from(joinTable.name)
+            .update({ [invJoinColumn]: toStageId })
+            .transacting(trx)
+        );
+      }
 
       return strapi.db.transaction(async ({ trx }) => {
         const selectStatement = strapi.db
@@ -167,21 +184,11 @@ module.exports = ({ strapi }) => {
       });
     },
 
-    async updateAllEntitiesStage(contentTypeUID, { toStageId }) {
-      const { attributes } = strapi.db.metadata.get(contentTypeUID);
-      const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
-      const invJoinColumn = joinTable.inverseJoinColumn.name;
-
-      // Move all entries to the specified stage
-      return strapi.db.transaction(async ({ trx }) =>
-        strapi.db
-          .getConnection()
-          .from(joinTable.name)
-          .update({ [invJoinColumn]: toStageId })
-          .transacting(trx)
-      );
-    },
-
+    /**
+     * Deletes all entity stages of a content type
+     * @param {string} contentTypeUID
+     * @returns
+     */
     async deleteAllEntitiesStage(contentTypeUID) {
       const { attributes } = strapi.db.metadata.get(contentTypeUID);
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;

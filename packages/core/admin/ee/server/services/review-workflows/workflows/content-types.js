@@ -7,7 +7,7 @@ const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 
 module.exports = ({ strapi }) => ({
   /**
-   * Migrate content types entities assigned to a workflow
+   * Migrates entities stages. Used when a content type is assigned to a workflow.
    * @param {*} options
    * @param {Array<string>} options.srcContentTypes - The content types assigned to the previous workflow
    * @param {Array<string>} options.destContentTypes - The content types assigned to the new workflow
@@ -20,12 +20,12 @@ module.exports = ({ strapi }) => ({
       // If it was assigned to another workflow, transfer it from the previous workflow
       const srcWorkflow = await getService('workflows').getAssignedWorkflow(uid);
       if (srcWorkflow) {
-        // Updates all entities stages links to the new stage
-        await getService('stages').updateAllEntitiesStage(uid, { toStageId: stageId });
+        // Updates all existing entities stages links to the new stage
+        await getService('stages').updateEntitiesStage(uid, { toStageId: stageId });
         return this.transferContentType(srcWorkflow, uid);
       }
 
-      // Create entity stages links to the new stage
+      // Create new stages links to the new stage
       return getService('stages').updateEntitiesStage(uid, {
         fromStageId: null,
         toStageId: stageId,
@@ -38,6 +38,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
+   * Filters the content types assigned to the previous workflow.
    * @param {Workflow} srcWorkflow - The workflow to transfer from
    * @param {string} uid - The content type uid
    */
