@@ -18314,8 +18314,11 @@ __metadata:
     passport-google-oauth2: 0.2.0
     pg: 8.8.0
     react: ^18.2.0
+    react-dom: ^18.2.0
     react-intl: 6.4.1
+    react-router-dom: 5.3.4
     sqlite3: 5.1.2
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -22420,6 +22423,10 @@ __metadata:
     "@strapi/plugin-users-permissions": 4.10.5
     "@strapi/strapi": 4.10.5
     better-sqlite3: 8.3.0
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    react-router-dom: 5.3.4
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
@@ -22435,7 +22442,11 @@ __metadata:
     mysql: 2.18.1
     passport-google-oauth2: 0.2.0
     pg: 8.8.0
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    react-router-dom: 5.3.4
     sqlite3: 5.1.2
+    styled-components: 5.3.3
   languageName: unknown
   linkType: soft
 
