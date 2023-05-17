@@ -106,7 +106,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     let workflow1, workflow2;
 
     describe('Create workflow and assign content type', () => {
-      test('Can create and assign a content type', async () => {
+      test('It should create a workflow and assign a content type', async () => {
         const res = await createWorkflow({ contentTypes: [productUID] });
 
         expect(res.status).toBe(200);
@@ -114,7 +114,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         workflow1 = res.body.data;
       });
 
-      test('All product entities have the first stage', async () => {
+      test('All product entities should have the first stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -125,7 +125,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     describe('Create workflow and steal content type from another workflow', () => {
-      test('Can create workflow stealing content type from another', async () => {
+      test('It should create workflow stealing content type from another', async () => {
         const res = await createWorkflow({
           contentTypes: [productUID],
           stages: [{ name: 'Review' }],
@@ -135,7 +135,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         workflow2 = res.body.data;
       });
 
-      test('All product entities have the new first stage', async () => {
+      test('All product entities should have the new first stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -144,13 +144,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         }
       });
 
-      test('Original workflow is updated', async () => {
+      test('Original workflow should be updated', async () => {
         const workflow = await getWorkflow(workflow1.id);
         expect(workflow).toMatchObject({ contentTypes: [] });
       });
     });
 
-    test('Can not create with invalid content type', async () => {
+    test("It shouldn't create a workflow with invalid content type", async () => {
       const res = await createWorkflow({ contentTypes: ['someUID'] });
       expect(res.status).toBe(400);
     });
@@ -160,7 +160,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     let workflow1, workflow2;
 
     describe('Basic update', () => {
-      test('Can assign a content type', async () => {
+      test('It should assign a content type', async () => {
         workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
 
         const res = await updateWorkflow(workflow1.id, {
@@ -171,7 +171,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
       });
 
-      test('All product entities have the first stage', async () => {
+      test('All product entities should have the first stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -183,14 +183,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
     // Depends on the previous test
     describe('Steal content type', () => {
-      test('Can steal content type from another', async () => {
+      test('It should be able to steal a content type from another workflow', async () => {
         workflow2 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
         const res = await updateWorkflow(workflow2.id, { contentTypes: [productUID] });
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
       });
 
-      test('All product entities have the new first stage', async () => {
+      test('All product entities should have the new first stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -199,7 +199,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         }
       });
 
-      test('Original workflow is updated', async () => {
+      test('Original workflow should be updated', async () => {
         const workflow = await getWorkflow(workflow1.id);
         expect(workflow).toMatchObject({ contentTypes: [] });
       });
@@ -207,13 +207,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
     // Depends on the previous test
     describe('Unassign content type', () => {
-      test('Can unassign content type', async () => {
+      test('It should unassign content type', async () => {
         const res = await updateWorkflow(workflow2.id, { contentTypes: [] });
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({ contentTypes: [] });
       });
 
-      test('All product entities have null stage', async () => {
+      test('All product entities should have null stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -224,7 +224,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     describe('Assign and update stages', () => {
-      test('Can assign and update stages', async () => {
+      test('It should assign and update stages', async () => {
         workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
 
         // Update stages
@@ -240,7 +240,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         });
       });
 
-      test('All product entities have the new first stage', async () => {
+      test('All product entities should have the new first stage', async () => {
         const products = await findAll(productUID);
 
         expect(products.results).toHaveLength(2);
@@ -251,7 +251,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
     });
 
-    test('Can not create with invalid content type', async () => {
+    test("It shouldn't create with invalid content type", async () => {
       const res = await createWorkflow({ contentTypes: ['someUID'] });
       expect(res.status).toBe(400);
     });
@@ -259,7 +259,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   describe('Delete workflow', () => {
     let workflow;
-    test('Can delete workflow', async () => {
+    test('It should delete the workflow', async () => {
       workflow = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
 
       const res = await deleteWorkflow(workflow.id);
@@ -267,7 +267,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     // Depends on the previous test
-    test('All entities have null stage', async () => {
+    test('All entities should have null stage', async () => {
       const products = await findAll(productUID);
 
       expect(products.results).toHaveLength(2);
@@ -276,9 +276,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       }
     });
   });
-  describe('Creating an entity in a review workflow content type', () => {
+  describe('Creating entity assigned to a workflow', () => {
     let workflow;
-    test('when content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
+    test('When content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {
       // Create a workflow with product content type
       workflow = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
 
@@ -287,7 +287,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     // Depends on the previous test
-    test('when content type is not assigned to workflow, new entries should have a null stage', async () => {
+    test('When content type is not assigned to workflow, new entries should have a null stage', async () => {
       // Unassign product content type from default workflow
       await updateWorkflow(workflow.id, { contentTypes: [] });
 
