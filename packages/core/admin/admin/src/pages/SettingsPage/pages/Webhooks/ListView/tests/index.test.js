@@ -110,19 +110,6 @@ describe('Admin | containers | ListView', () => {
     });
   });
 
-  it('should show confirmation delete modal', async () => {
-    const { getByText, getByRole } = render();
-    await waitFor(() => {
-      getByText('http:://strapi.io');
-    });
-
-    await act(async () => {
-      await user.click(getByRole('button', { name: 'Delete Webhook 1' }));
-    });
-
-    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
-  });
-
   it('should delete all webhooks', async () => {
     const { getByText, getByRole, findByText } = render();
     await waitFor(() => {
@@ -146,13 +133,14 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText } = render();
+    const { getByText, getByRole, findByText, getAllByRole } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
+    const deleteButtons = getAllByRole('button', { name: /delete webhook/i });
     await act(async () => {
-      await user.click(getByRole('button', { name: 'Delete Webhook 1' }));
+      await user.click(deleteButtons[0]);
     });
 
     await waitFor(async () => {

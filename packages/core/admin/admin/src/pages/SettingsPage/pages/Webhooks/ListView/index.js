@@ -348,13 +348,10 @@ const ListView = () => {
                               setWebhooksToDelete([webhook.id]);
                               setShowModal(true);
                             }}
-                            label={formatMessage(
-                              {
-                                id: 'Settings.webhooks.events.delete',
-                                defaultMessage: 'Delete Webhook {id}',
-                              },
-                              { id: webhook.id }
-                            )}
+                            label={formatMessage({
+                              id: 'Settings.webhooks.events.delete',
+                              defaultMessage: 'Delete webhook',
+                            })}
                             icon={<Trash />}
                             noBorder
                           />

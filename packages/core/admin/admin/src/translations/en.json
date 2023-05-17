@@ -287,7 +287,7 @@
   "Settings.webhooks.event.publish-tooltip": "This event only exists for contents with Draft/Publish system enabled",
   "Settings.webhooks.events.create": "Create",
   "Settings.webhooks.events.update": "Update",
-  "Settings.webhooks.events.delete": "Delete Webhook {id}",
+  "Settings.webhooks.events.delete": "Delete webhook",
   "Settings.webhooks.form.events": "Events",
   "Settings.webhooks.form.headers": "Headers",
   "Settings.webhooks.form.url": "URL",
