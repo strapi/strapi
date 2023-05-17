@@ -113,10 +113,7 @@ export function ReviewWorkflowsListView() {
                 >
                   <Td width={pxToRem(250)}>
                     <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                      {formatMessage({
-                        id: 'Settings.review-workflows.list.page.list.column.name.defaultName',
-                        defaultMessage: 'Default workflow',
-                      })}
+                      {workflow.name}
                     </Typography>
                   </Td>
                   <Td>
@@ -131,7 +128,7 @@ export function ReviewWorkflowsListView() {
                             id: 'Settings.review-workflows.list.page.list.column.actions.edit.label',
                             defaultMessage: 'Edit {name}',
                           },
-                          { name: 'Default workflow' }
+                          { name: workflow.name }
                         )}
                       >
                         <Pencil />
