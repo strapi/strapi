@@ -12,7 +12,7 @@ export interface ComponentProperties<
 
 export type Component<
   // Targeted component
-  T extends Common.UID.Component,
+  T extends Common.UID.Component = Common.UID.Component,
   // Repeatable
   R extends boolean = false
 > = Attribute.Attribute<'component'> &

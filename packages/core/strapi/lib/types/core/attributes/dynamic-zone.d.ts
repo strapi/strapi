@@ -4,7 +4,7 @@ export interface DynamicZoneProperties<T extends Common.UID.Component[] = []> {
   components: T;
 }
 
-export type DynamicZone<T extends Common.UID.Component[] = []> =
+export type DynamicZone<T extends Common.UID.Component[] = Common.UID.Component[]> =
   Attribute.Attribute<'dynamiczone'> &
     // Properties
     DynamicZoneProperties<T> &
