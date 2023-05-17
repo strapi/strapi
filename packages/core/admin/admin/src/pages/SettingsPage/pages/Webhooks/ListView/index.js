@@ -193,7 +193,6 @@ const ListView = () => {
                   )}
                 </Typography>
                 <Button
-                  id="delete-selected"
                   onClick={() => setShowModal(true)}
                   startIcon={<Trash />}
                   size="L"
@@ -308,7 +307,7 @@ const ListView = () => {
                     <Td>
                       <Flex {...stopPropagation}>
                         <Switch
-                          id={`enable-${webhook.id}`}
+                          data-testid={`enable-${webhook.id}`}
                           onLabel={formatMessage({
                             id: 'global.enabled',
                             defaultMessage: 'Enabled',
@@ -359,7 +358,7 @@ const ListView = () => {
                             })}
                             icon={<Trash />}
                             noBorder
-                            id={`delete-${webhook.id}`}
+                            data-testid={`delete-${webhook.id}`}
                           />
                         )}
                       </Flex>

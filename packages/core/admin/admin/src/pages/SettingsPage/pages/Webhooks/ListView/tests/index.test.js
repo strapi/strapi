@@ -21,7 +21,10 @@ const toggleNotification = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn().mockImplementation(() => toggleNotification),
-  useRBAC: jest.fn(),
+  useRBAC: jest.fn().mockImplementation(() => ({
+    isLoading: false,
+    allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
+  })),
   useFocusWhenNavigate: jest.fn(),
 }));
 
@@ -49,6 +52,8 @@ const render = (props) => ({
 
 const originalError = console.error;
 
+const user = userEvent.setup();
+
 describe('Admin | containers | ListView', () => {
   beforeAll(() => {
     console.error = (...args) => {
@@ -75,11 +80,6 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should show a loader when data is loading and then display the data', async () => {
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
     const { getByText } = render();
 
     const loadingElement = getByText('Loading content.');
@@ -92,7 +92,7 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should show a loader when permissions are loading', () => {
-    useRBAC.mockImplementation(() => ({
+    useRBAC.mockImplementationOnce(() => ({
       isLoading: true,
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
@@ -103,11 +103,6 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should show a list of webhooks', async () => {
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
     const { getByText } = render();
 
     await waitFor(() => {
@@ -116,33 +111,19 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should show confirmation delete modal', async () => {
-    const user = userEvent.setup();
-
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
-    const { container, getByText } = render();
+    const { getByText, getByTestId } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
     await act(async () => {
-      await user.click(container.querySelector('#delete-1'));
+      await user.click(getByTestId('delete-1'));
     });
 
     expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 
   it('should delete all webhooks', async () => {
-    const user = userEvent.setup();
-
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
     const { getByText, getByRole, findByText } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
@@ -161,6 +142,46 @@ describe('Admin | containers | ListView', () => {
 
     await waitFor(async () => {
       expect(await findByText('No webhooks found')).toBeInTheDocument();
+    });
+  });
+
+  it('should delete a single webhook', async () => {
+    const { getByText, getByRole, findByText, getByTestId } = render();
+    await waitFor(() => {
+      getByText('http:://strapi.io');
+    });
+
+    await act(async () => {
+      await user.click(getByTestId('delete-1'));
+    });
+
+    await waitFor(async () => {
+      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await user.click(getByRole('button', { name: /confirm/i }));
+    });
+
+    await waitForElementToBeRemoved(() => getByText('http:://strapi.io'));
+
+    await waitFor(async () => {
+      expect(await findByText('http://me.io')).toBeInTheDocument();
+    });
+  });
+
+  it('should disable a webhook', async () => {
+    const { getByText, getByTestId } = render();
+    await waitFor(() => {
+      getByText('http:://strapi.io');
+    });
+
+    await act(async () => {
+      await user.click(getByTestId('enable-1'));
+    });
+
+    await waitFor(async () => {
+      expect(getByTestId('enable-1')).toHaveAttribute('aria-checked', 'false');
     });
   });
 });
