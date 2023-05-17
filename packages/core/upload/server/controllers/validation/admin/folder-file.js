@@ -75,7 +75,11 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
       });
 
       const unmovableFoldersNames = folders
-        .filter((folder) => destinationFolder.path.startsWith(folder.path))
+        .filter(
+          (folder) =>
+            destinationFolder.path === folder.path ||
+            destinationFolder.path.startsWith(`${folder.path}/`)
+        )
         .map((f) => f.name);
       if (unmovableFoldersNames.length > 0) {
         return this.createError({

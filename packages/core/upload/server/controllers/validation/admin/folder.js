@@ -78,7 +78,11 @@ const validateUpdateFolderSchema = (id) =>
 
             if (!destinationFolder || !currentFolder) return true;
 
-            return !destinationFolder.path.startsWith(currentFolder.path);
+            const isUnMovable =
+              destinationFolder.path === currentFolder.path ||
+              destinationFolder.path.startsWith(`${currentFolder.path}/`);
+
+            return !isUnMovable;
           }
         ),
     })
