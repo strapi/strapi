@@ -41,3 +41,26 @@ export type SetPluginOptions<T extends object = object> = { pluginOptions?: T };
 
 // default
 export type DefaultTo<T> = { default: T };
+
+// Any Attribute
+export type Any =
+  | Attribute.BigInteger
+  | Attribute.Boolean
+  | Attribute.Component
+  | Attribute.DateTime
+  | Attribute.Date
+  | Attribute.Decimal
+  | Attribute.DynamicZone
+  | Attribute.Email
+  | Attribute.Enumeration
+  | Attribute.Float
+  | Attribute.JSON
+  | Attribute.Media
+  | Attribute.Password
+  | Attribute.Relation
+  | Attribute.RichText
+  | Attribute.String
+  | Attribute.Text
+  | Attribute.Time
+  | Attribute.Timestamp
+  | Attribute.UID;
