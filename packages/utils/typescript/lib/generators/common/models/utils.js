@@ -55,6 +55,10 @@ const getSchemaModelType = (schema) => {
 const getSchemaExtendsTypeName = (schema) => {
   const base = getSchemaModelType(schema);
 
+  if (base === null) {
+    return null;
+  }
+
   return `${NAMESPACES.schema}.${upperFirst(base)}`;
 };
 
