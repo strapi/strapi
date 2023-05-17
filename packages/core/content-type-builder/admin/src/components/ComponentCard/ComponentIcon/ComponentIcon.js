@@ -23,7 +23,7 @@ export function ComponentIcon({ isActive, icon }) {
       background={isActive ? 'primary200' : 'neutral200'}
       justifyContent="center"
     >
-      <Icon as={Icons[icon] || Icons['Cube']} />
+      <Icon as={Icons[icon] || Icons.Cube} />
     </Wrapper>
   );
 }

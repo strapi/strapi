@@ -15,6 +15,7 @@ import {
 import * as Icons from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { getTrad } from '../../utils';
 
 const EXCLUDE_ICONS = [
@@ -83,6 +84,14 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
   );
 };
 
+IconPick.propTypes = {
+  iconKey: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  ariaLabel: PropTypes.string.isRequired,
+};
+
 const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
   const [showSearch, setShowSearch] = useState(false);
@@ -90,9 +99,6 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const allIcons = Object.keys(Icons).filter((icon) => !EXCLUDE_ICONS.includes(icon));
   const [icons, setIcons] = useState(allIcons);
   const searchIconRef = useRef(null);
-
-  const SearchIcon = Icons['Search'];
-  const TrashIcon = Icons['Trash'];
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
@@ -154,7 +160,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
                 id: getTrad('IconPicker.search.button.label'),
                 defaultMessage: 'Search icon button',
               })}
-              icon={<SearchIcon />}
+              icon={<Icons.Search />}
               noBorder
             />
           )}
@@ -165,7 +171,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
                 id: getTrad('IconPicker.remove.label'),
                 defaultMessage: 'Remove the selected icon',
               })}
-              icon={<TrashIcon />}
+              icon={<Icons.Trash />}
               noBorder
             />
           )}
@@ -212,6 +218,17 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
       </IconPickerWrapper>
     </Box>
   );
+};
+
+IconPicker.defaultProps = {
+  value: '',
+};
+
+IconPicker.propTypes = {
+  intlLabel: PropTypes.object.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
 };
 
 export default IconPicker;

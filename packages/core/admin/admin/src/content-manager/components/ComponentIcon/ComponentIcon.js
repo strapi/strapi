@@ -29,7 +29,7 @@ export function ComponentIcon({ showBackground = true, size = 'M', icon }) {
       size={size}
       showBackground={showBackground}
     >
-      <Icon as={Icons[icon] || Icons['Cube']} />
+      <Icon as={Icons[icon] || Icons.Cube} />
     </Wrapper>
   );
 }
