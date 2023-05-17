@@ -58,7 +58,7 @@ export type ContentType = StringSuffix<
  *
  * Warning: Can cause overlap with other UID formats.
  */
-export type Component = `${string}.${string}`;
+export type Component<T extends string = string, N extends string = string> = `${T}.${N}`;
 
 /**
  * Represents any UID
