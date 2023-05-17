@@ -2,6 +2,9 @@ import * as yup from 'yup';
 
 export function getWorkflowValidationSchema({ formatMessage }) {
   return yup.object({
+    contentTypes: yup.array().of(yup.string()).required(),
+    name: yup.string().required(),
+
     stages: yup.array().of(
       yup.object().shape({
         name: yup

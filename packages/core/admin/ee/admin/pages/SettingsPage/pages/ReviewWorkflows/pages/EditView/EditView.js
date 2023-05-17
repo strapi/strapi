@@ -1,51 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { FormikProvider, useFormik, Form } from 'formik';
+import * as React from 'react';
+import { useFormik, Form, FormikProvider } from 'formik';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from 'react-query';
+import { useParams } from 'react-router-dom';
 
 import {
   CheckPagePermissions,
   ConfirmDialog,
-  Link,
-  SettingsPageTitle,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
-import { ArrowLeft, Check } from '@strapi/icons';
+import { Button, Flex, Loader } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 
+import { useModels } from '../../../../../../../../admin/src/hooks';
+import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { Stages } from '../../components/Stages';
 import { reducer, initialState } from '../../reducer';
-import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from '../../constants';
+import { REDUX_NAMESPACE } from '../../constants';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
-import { setWorkflows } from '../../actions';
+import { setWorkflow } from '../../actions';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 import adminPermissions from '../../../../../../../../admin/src/permissions';
-import { StageDragPreview } from '../../components/StageDragPreview';
-import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 
-function renderDragLayerItem({ type, item }) {
-  switch (type) {
-    case DRAG_DROP_TYPES.STAGE:
-      return <StageDragPreview {...item} />;
-
-    default:
-      return null;
-  }
-}
+import * as Layout from '../../components/Layout';
 
 export function ReviewWorkflowsEditView() {
   const { trackUsage } = useTracking();
+  const { workflowId } = useParams();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows: workflow, refetchWorkflow } = useReviewWorkflows(workflowId);
+  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useModels();
   const {
     status,
     clientState: {
@@ -56,13 +49,13 @@ export function ReviewWorkflowsEditView() {
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflowId, stages }) => {
       const {
         data: { data },
-      } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
+      } = await put(`/admin/review-workflows/workflows/${workflowId}`, {
         data: stages,
       });
 
@@ -119,99 +112,92 @@ export function ReviewWorkflowsEditView() {
       }
     },
     validationSchema: getWorkflowValidationSchema({ formatMessage }),
-    validateOnChange: false,
+    validateOnChange: true,
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
-  useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     trackUsage('didViewWorkflow');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  React.useEffect(() => {
+    dispatch(setWorkflow({ status: workflow.status, data: workflow.data }));
+  }, [workflow.status, workflow.data, dispatch]);
+
+  // TODO redirect back to list-view if workflow is not found?
+
   return (
     <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
-      <Layout>
-        <SettingsPageTitle
-          name={formatMessage({
-            id: 'Settings.review-workflows.page.title',
-            defaultMessage: 'Review Workflows',
-          })}
-        />
-        <Main tabIndex={-1}>
-          <DragLayer renderItem={renderDragLayerItem} />
+      <Layout.DragLayerRendered />
 
-          <FormikProvider value={formik}>
-            <Form onSubmit={formik.handleSubmit}>
-              <HeaderLayout
-                navigationAction={
-                  <Link startIcon={<ArrowLeft />} to="/settings/review-workflows">
-                    {formatMessage({
-                      id: 'global.back',
-                      defaultMessage: 'Back',
-                    })}
-                  </Link>
-                }
-                primaryAction={
-                  <Button
-                    startIcon={<Check />}
-                    type="submit"
-                    size="M"
-                    disabled={!currentWorkflowIsDirty}
-                    // if the confirm dialog is open the loading state is on
-                    // the confirm button already
-                    loading={!isConfirmDeleteDialogOpen && isLoading}
-                  >
-                    {formatMessage({
-                      id: 'global.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                }
-                title={formatMessage({
-                  id: 'Settings.review-workflows.page.title',
-                  defaultMessage: 'Review Workflows',
+      <FormikProvider value={formik}>
+        <Form onSubmit={formik.handleSubmit}>
+          <Layout.Header
+            navigationAction={<Layout.Back href="/settings/review-workflows" />}
+            primaryAction={
+              <Button
+                startIcon={<Check />}
+                type="submit"
+                size="M"
+                disabled={!currentWorkflowIsDirty}
+                // if the confirm dialog is open the loading state is on
+                // the confirm button already
+                loading={!isConfirmDeleteDialogOpen && isLoading}
+              >
+                {formatMessage({
+                  id: 'global.save',
+                  defaultMessage: 'Save',
                 })}
-                subtitle={formatMessage(
-                  {
-                    id: 'Settings.review-workflows.page.subtitle',
-                    defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-                  },
-                  { count: currentWorkflow?.stages?.length ?? 0 }
-                )}
-              />
-              <ContentLayout>
-                {status === 'loading' && (
-                  <Loader>
-                    {formatMessage({
-                      id: 'Settings.review-workflows.page.isLoading',
-                      defaultMessage: 'Workflow is loading',
-                    })}
-                  </Loader>
-                )}
-
-                <Stages stages={formik.values?.stages} />
-              </ContentLayout>
-            </Form>
-          </FormikProvider>
-
-          <ConfirmDialog
-            bodyText={{
-              id: 'Settings.review-workflows.page.delete.confirm.body',
-              defaultMessage:
-                'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
-            }}
-            isConfirmButtonLoading={isLoading}
-            isOpen={isConfirmDeleteDialogOpen}
-            onToggleDialog={toggleConfirmDeleteDialog}
-            onConfirm={handleConfirmDeleteDialog}
+              </Button>
+            }
+            subtitle={formatMessage(
+              {
+                id: 'Settings.review-workflows.page.subtitle',
+                defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+              },
+              { count: currentWorkflow?.stages?.length ?? 0 }
+            )}
+            // TODO: Remove once the name migration is merged
+            title={
+              currentWorkflow?.name ??
+              formatMessage({
+                id: 'Settings.review-workflows.page.title',
+                defaultMessage: 'Edit Review Workflow',
+              })
+            }
           />
-        </Main>
-      </Layout>
+
+          <Layout.Root>
+            {isLoadingModels || status === 'loading' ? (
+              <Loader>
+                {formatMessage({
+                  id: 'Settings.review-workflows.page.isLoading',
+                  defaultMessage: 'Workflow is loading',
+                })}
+              </Loader>
+            ) : (
+              <Flex alignItems="stretch" direction="column" gap={7}>
+                <WorkflowAttributes contentTypes={{ collectionTypes, singleTypes }} />
+                <Stages stages={formik.values?.stages} />
+              </Flex>
+            )}
+          </Layout.Root>
+        </Form>
+      </FormikProvider>
+
+      <ConfirmDialog
+        bodyText={{
+          id: 'Settings.review-workflows.page.delete.confirm.body',
+          defaultMessage:
+            'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
+        }}
+        isConfirmButtonLoading={isLoading}
+        isOpen={isConfirmDeleteDialogOpen}
+        onToggleDialog={toggleConfirmDeleteDialog}
+        onConfirm={handleConfirmDeleteDialog}
+      />
     </CheckPagePermissions>
   );
 }
