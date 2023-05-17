@@ -35,14 +35,14 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
       <GridItem col={6}>
         <MultiSelectNested
           {...contentTypesField}
-          customizeContent={() =>
+          customizeContent={(value) =>
             formatMessage(
               {
                 id: 'Settings.review-workflows.workflow.contentTypes.displayValue',
                 defaultMessage:
                   '{count} {count, plural, one {content type} other {content types}} selected',
               },
-              { count: contentTypesField.value.length }
+              { count: value.length }
             )
           }
           error={contentTypesMeta.error ?? false}
