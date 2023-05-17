@@ -221,7 +221,7 @@ describe('Bulk actions for folders & files', () => {
       expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder.id]));
     });
 
-    test('Can delete folders without deleting others with similar name', async () => {
+    test('Can delete folders without deleting others with similar path', async () => {
       // Ensure the folder algo does not only delete by folders that start with the same path (startswith /1 matches /10 too)
 
       // Delete all previous folders, so first file path is /1
