@@ -239,13 +239,13 @@ describe('Bulk actions for folders & files', () => {
       // Delete folder1
       await rq.post('/upload/actions/bulk-delete', { body: { folderIds: [folder1.id] } });
 
-      const afterFolderIds = await rq
+      const folderIds = await rq
         .get('/upload/folders')
         .then((res) => res.body.data.map((f) => f.id));
 
       // Should include all folders except the one we deleted
-      expect(afterFolderIds.length).toBe(20);
-      expect(afterFolderIds).toEqual(expect.not.arrayContaining([folder1.id]));
+      expect(folderIds.length).toBe(20);
+      expect(folderIds).toEqual(expect.not.arrayContaining([folder1.id]));
     });
   });
 
