@@ -6,7 +6,7 @@ const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE, ENTITY_STAGE_JOINTABLENAME } = require('../../constants/workflows');
 
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
@@ -37,6 +37,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       type: 'relation',
       relation: 'oneToOne',
       target: 'admin::workflow-stage',
+      joinTableName: ENTITY_STAGE_JOINTABLENAME,
     });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
@@ -62,7 +63,7 @@ function persistStagesJoinTables({ strapi }) {
     );
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
-    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
+    await removePersistedTablesWithSuffix(`_${ENTITY_STAGE_JOINTABLENAME}_links`);
     await persistTables(joinTablesToPersist);
   };
 }
