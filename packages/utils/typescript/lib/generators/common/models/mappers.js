@@ -3,56 +3,56 @@
 const ts = require('typescript');
 const _ = require('lodash/fp');
 
-const { toTypeLiteral } = require('./utils');
+const { toTypeLiteral, withAttributeNamespace } = require('./utils');
 
 const { factory } = ts;
 
 module.exports = {
   string() {
-    return ['StringAttribute'];
+    return [withAttributeNamespace('String')];
   },
   text() {
-    return ['TextAttribute'];
+    return [withAttributeNamespace('Text')];
   },
   richtext() {
-    return ['RichTextAttribute'];
+    return [withAttributeNamespace('RichText')];
   },
   password() {
-    return ['PasswordAttribute'];
+    return [withAttributeNamespace('Password')];
   },
   email() {
-    return ['EmailAttribute'];
+    return [withAttributeNamespace('Email')];
   },
   date() {
-    return ['DateAttribute'];
+    return [withAttributeNamespace('Date')];
   },
   time() {
-    return ['TimeAttribute'];
+    return [withAttributeNamespace('Time')];
   },
   datetime() {
-    return ['DateTimeAttribute'];
+    return [withAttributeNamespace('DateTime')];
   },
   timestamp() {
-    return ['TimestampAttribute'];
+    return [withAttributeNamespace('Timestamp')];
   },
   integer() {
-    return ['IntegerAttribute'];
+    return [withAttributeNamespace('Integer')];
   },
   biginteger() {
-    return ['BigIntegerAttribute'];
+    return [withAttributeNamespace('BigInteger')];
   },
   float() {
-    return ['FloatAttribute'];
+    return [withAttributeNamespace('Float')];
   },
   decimal() {
-    return ['DecimalAttribute'];
+    return [withAttributeNamespace('Decimal')];
   },
   uid({ attribute, uid }) {
     const { targetField, options } = attribute;
 
     // If there are no params to compute, then return the attribute type alone
     if (targetField === undefined && options === undefined) {
-      return ['UIDAttribute'];
+      return [withAttributeNamespace('UID')];
     }
 
     const params = [];
@@ -74,21 +74,21 @@ module.exports = {
       params.push(toTypeLiteral(options));
     }
 
-    return ['UIDAttribute', params];
+    return [withAttributeNamespace('UID'), params];
   },
   enumeration({ attribute }) {
     const { enum: enumValues } = attribute;
 
-    return ['EnumerationAttribute', [toTypeLiteral(enumValues)]];
+    return [withAttributeNamespace('Enumeration'), [toTypeLiteral(enumValues)]];
   },
   boolean() {
-    return ['BooleanAttribute'];
+    return [withAttributeNamespace('Boolean')];
   },
   json() {
-    return ['JSONAttribute'];
+    return [withAttributeNamespace('JSON')];
   },
   media() {
-    return ['MediaAttribute'];
+    return [withAttributeNamespace('Media')];
   },
   relation({ uid, attribute }) {
     const { relation, target } = attribute;
@@ -97,13 +97,13 @@ module.exports = {
 
     if (isMorphRelation) {
       return [
-        'RelationAttribute',
+        withAttributeNamespace('Relation'),
         [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
       ];
     }
 
     return [
-      'RelationAttribute',
+      withAttributeNamespace('Relation'),
       [
         factory.createStringLiteral(uid, true),
         factory.createStringLiteral(relation, true),
@@ -119,13 +119,13 @@ module.exports = {
       params.push(factory.createTrue());
     }
 
-    return ['ComponentAttribute', params];
+    return [withAttributeNamespace('Component'), params];
   },
   dynamiczone({ attribute }) {
     const componentsParam = factory.createTupleTypeNode(
       attribute.components.map((component) => factory.createStringLiteral(component))
     );
 
-    return ['DynamicZoneAttribute', [componentsParam]];
+    return [withAttributeNamespace('DynamicZone'), [componentsParam]];
   },
 };

@@ -17,13 +17,10 @@ const {
   propEq,
 } = require('lodash/fp');
 
-/**
- * Get all components and content-types in a Strapi application
- *
- * @param {Strapi} strapi
- * @returns {object}
- */
-const getAllStrapiSchemas = (strapi) => ({ ...strapi.contentTypes, ...strapi.components });
+const NAMESPACES = {
+  schema: 'Schema',
+  attribute: 'Attribute',
+};
 
 /**
  * Extract a valid interface name from a schema uid
@@ -58,7 +55,7 @@ const getSchemaModelType = (schema) => {
 const getSchemaExtendsTypeName = (schema) => {
   const base = getSchemaModelType(schema);
 
-  return `${upperFirst(base)}Schema`;
+  return `${NAMESPACES.schema}.${upperFirst(base)}`;
 };
 
 /**
@@ -143,8 +140,26 @@ const getDefinitionAttributesCount = (definition) => {
   return attributesNode.type.members.length;
 };
 
+/**
+ * Add the attribute namespace before the typename
+ *
+ * @param {string} typeName
+ * @returns {string}
+ */
+const withAttributeNamespace = (typeName) => `${NAMESPACES.attribute}.${typeName}`;
+
+/**
+ * Add the schema namespace before the typename
+ *
+ * @param {string} typeName
+ * @returns {string}
+ */
+const withSchemaNamespace = (typeName) => `${NAMESPACES.schema}.${typeName}`;
+
 module.exports = {
-  getAllStrapiSchemas,
+  NAMESPACES,
+  withAttributeNamespace,
+  withSchemaNamespace,
   getSchemaInterfaceName,
   getSchemaExtendsTypeName,
   getSchemaModelType,
