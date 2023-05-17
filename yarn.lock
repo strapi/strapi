@@ -7795,7 +7795,6 @@ __metadata:
     react-dnd-html5-backend: 15.1.3
     react-dom: ^17.0.2
     react-error-boundary: 3.1.4
-    react-fast-compare: ^3.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-is: ^17.0.2
@@ -27820,7 +27819,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-fast-compare@npm:^3.1.1, react-fast-compare@npm:^3.2.0":
+"react-fast-compare@npm:^3.1.1":
   version: 3.2.0
   resolution: "react-fast-compare@npm:3.2.0"
   checksum: 8ef272c825ae329f61633ce4ce7f15aa5b84e5214d88bc0823880236e03e985a13195befa2c7a4eda7db3b017dc7985729152d88445823f652403cf36c2b86aa

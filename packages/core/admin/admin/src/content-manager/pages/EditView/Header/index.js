@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import isEqualFastCompare from 'react-fast-compare';
+import isEqualFastCompare from 'lodash/isEqual';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
