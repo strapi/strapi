@@ -1,5 +1,4 @@
 import React from 'react';
-import get from 'lodash/get';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -56,7 +55,7 @@ const DynamicZoneList = ({ components }) => {
           as={Link}
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
-          <ComponentIcon icon={get(componentLayouts, [componentUid, 'info', 'icon'], '')} />
+          <ComponentIcon icon={componentLayouts?.[componentUid]?.info?.icon ?? ''} />
 
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">

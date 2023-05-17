@@ -106,15 +106,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c60 {
+  color: #666687;
+}
+
+.c62 {
   margin-top: 4px;
   max-width: 100%;
 }
 
-.c67 {
+.c69 {
   background: #eaeaef;
 }
 
-.c69 {
+.c71 {
   background: #f0f0ff;
   padding: 20px;
 }
@@ -175,7 +179,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #4945ff;
 }
 
-.c61 {
+.c63 {
   font-size: 0.75rem;
   line-height: 1.33;
   display: block;
@@ -348,6 +352,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
+}
+
+.c61 path {
+  fill: #666687;
 }
 
 .c12 {
@@ -579,7 +587,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c68 {
+.c70 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -607,7 +615,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c71 {
+.c73 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -625,16 +633,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c71 svg {
+.c73 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c71 svg path {
+.c73 svg path {
   fill: #4945ff;
 }
 
-.c70 {
+.c72 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
@@ -720,19 +728,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   width: 20px;
 }
 
-.c63 {
+.c65 {
   position: absolute;
   display: none;
   top: 5px;
   right: 0.5rem;
 }
 
-.c63 svg {
+.c65 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c63 svg path {
+.c65 svg path {
   fill: #4945ff;
 }
 
@@ -753,9 +761,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c57.active .c62,
-.c57:focus .c62,
-.c57:hover .c62 {
+.c57.active .c64,
+.c57:focus .c64,
+.c57:hover .c64 {
   display: block;
 }
 
@@ -869,7 +877,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   overflow-x: auto;
 }
 
-.c64 {
+.c66 {
   padding-top: 5.625rem;
 }
 
@@ -951,7 +959,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c66 {
+.c68 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -969,12 +977,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c66 svg {
+.c68 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c66 svg path {
+.c68 svg path {
   fill: #4945ff;
 }
 
@@ -1014,7 +1022,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #eaeaef;
 }
 
-.c65 {
+.c67 {
   position: relative;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
@@ -1024,7 +1032,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   transform: translate(-0.5px,-1px);
 }
 
-.c65 * {
+.c67 * {
   fill: #d9d8ff;
 }
 
@@ -3547,25 +3555,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <div
                             class="c58 c34 c59"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
+                            <div
+                              class="c60 c61"
                             />
                           </div>
-                          <button
-                            class="c62 c63"
+                          <div
+                            class="c62"
+                          >
+                            <span
+                              class="c7 c63"
+                            />
+                          </div>
+                          <span
+                            class="c64 c65"
                             type="button"
                           >
                             <svg
@@ -3580,7 +3582,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                         </button>
                         <button
                           class="c55 c56 c57"
@@ -3589,25 +3591,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <div
                             class="c43 c34 c59"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
+                            <div
+                              class="c60 c61"
                             />
                           </div>
-                          <button
-                            class="c62 c63"
+                          <div
+                            class="c62"
+                          >
+                            <span
+                              class="c7 c63"
+                            />
+                          </div>
+                          <span
+                            class="c64 c65"
                             type="button"
                           >
                             <svg
@@ -3622,7 +3618,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                         </button>
                         <button
                           class="c55 c56 c57"
@@ -3631,25 +3627,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <div
                             class="c43 c34 c59"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
+                            <div
+                              class="c60 c61"
                             />
                           </div>
-                          <button
-                            class="c62 c63"
+                          <div
+                            class="c62"
+                          >
+                            <span
+                              class="c7 c63"
+                            />
+                          </div>
+                          <span
+                            class="c64 c65"
                             type="button"
                           >
                             <svg
@@ -3664,7 +3654,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                         </button>
                         <button
                           class="c55 c56 c57"
@@ -3673,25 +3663,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           <div
                             class="c43 c34 c59"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
+                            <div
+                              class="c60 c61"
                             />
                           </div>
-                          <button
-                            class="c62 c63"
+                          <div
+                            class="c62"
+                          >
+                            <span
+                              class="c7 c63"
+                            />
+                          </div>
+                          <span
+                            class="c64 c65"
                             type="button"
                           >
                             <svg
@@ -3706,12 +3690,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 fill="#212134"
                               />
                             </svg>
-                          </button>
+                          </span>
                         </button>
                       </div>
                     </div>
                     <div
-                      class="c64"
+                      class="c66"
                     >
                       <div
                         class=""
@@ -3744,7 +3728,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3888,7 +3872,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4032,7 +4016,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4177,7 +4161,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c66"
+                                        class="c58 c68"
                                       >
                                         <svg
                                           fill="none"
@@ -4240,7 +4224,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4384,7 +4368,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4528,7 +4512,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4672,7 +4656,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4818,7 +4802,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4964,7 +4948,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5112,7 +5096,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c66"
+                                        class="c58 c68"
                                       >
                                         <svg
                                           fill="none"
@@ -5175,7 +5159,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5319,7 +5303,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5463,7 +5447,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6541,7 +6525,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c66"
+                                        class="c58 c68"
                                       >
                                         <svg
                                           fill="none"
@@ -6604,7 +6588,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6748,7 +6732,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6894,7 +6878,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c65"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -7039,7 +7023,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c66"
+                                        class="c58 c68"
                                       >
                                         <svg
                                           fill="none"
@@ -7079,17 +7063,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c67 c68"
+              class="c69 c70"
             />
             <button
-              class="c69 c70"
+              class="c71 c72"
             >
               <div
                 class="c6"
               >
                 <div
                   aria-hidden="true"
-                  class="c58 c71"
+                  class="c58 c73"
                 >
                   <svg
                     fill="none"

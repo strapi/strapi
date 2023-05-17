@@ -103,7 +103,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="button" onClick={onClose} type="button">
+        <CloseButton as="span" onClick={onClose} type="button">
           <Cross />
         </CloseButton>
       )}

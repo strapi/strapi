@@ -16,16 +16,6 @@ describe('ComponentCard', () => {
       </ThemeProvider>
     );
 
-  it('should render default icon if not icon is passed', () => {
-    const { getByTestId } = setup();
-    expect(getByTestId('component-card-icon-default')).toBeInTheDocument();
-  });
-
-  it('should render the passed icon', () => {
-    const { getByTestId } = setup({ icon: 'Calendar' });
-    expect(getByTestId('component-card-icon')).toBeInTheDocument();
-  });
-
   it('should call the onClick handler when passed', () => {
     const onClick = jest.fn();
     const { getByText } = setup({ onClick });

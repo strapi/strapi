@@ -1,40 +1,85 @@
 import React, { useState, useRef } from 'react';
-import { Box, Flex, Icon, Typography, Searchbar, IconButton } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Icon,
+  Typography,
+  Searchbar,
+  IconButton,
+  inputFocusStyle,
+  VisuallyHidden,
+  Field,
+  FieldLabel,
+  FieldInput,
+} from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { inputFocusStyle } from '@strapi/design-system';
 import styled from 'styled-components';
 import { getTrad } from '../../utils';
 
+const EXCLUDE_ICONS = [
+  'Boolean',
+  'CodeSquare',
+  'CollectionType',
+  'Component',
+  'CrossCircle',
+  'Component',
+  'Date',
+  'Dot',
+  'DynamicZone',
+  'Email',
+  'Enumeration',
+  'FeatherSquare',
+  'GlassesSquare',
+  'InformationSquare',
+  'Json',
+  'List',
+  'Media',
+  'MenuBurger',
+  'Minus',
+  'MinusOutlined',
+  'Number',
+  'Password',
+  'PlaySquare',
+  'PlusCircle',
+  'Relation',
+  'RichText',
+  'SingleType',
+  'Strapi',
+  'Text',
+  'Uid',
+  'default',
+];
+
 const IconPickerWrapper = styled(Flex)`
-  position: relative;
-
   label {
-    border-radius: 4px;
     ${inputFocusStyle}
-  }
-
-  input {
-    position: absolute;
-    opacity: 0;
+    border-radius: ${({ theme }) => theme.borderRadius};
   }
 `;
 
-const IconPick = ({ iconKey, name, onChange, isSelected }) => {
+const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
   return (
-    <label htmlFor={iconKey}>
-      <input
-        id={iconKey}
-        name={name}
-        checked={isSelected}
-        onChange={onChange}
-        value={iconKey}
-        type="radio"
-      />
-      <Box padding={2} cursor="pointer" hasRadius background={isSelected ? 'primary200' : null}>
-        <Icon as={Icons[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
-      </Box>
-    </label>
+    <Field name={name} required={false}>
+      <FieldLabel htmlFor={iconKey} id={`${iconKey}-label`}>
+        <VisuallyHidden>
+          <FieldInput
+            type="radio"
+            id={iconKey}
+            name={name}
+            checked={isSelected}
+            onChange={onChange}
+            value={iconKey}
+            aria-checked={isSelected}
+            aria-labelledby={`${iconKey}-label`}
+          />
+          <span>{ariaLabel}</span>
+        </VisuallyHidden>
+        <Box padding={2} cursor="pointer" hasRadius background={isSelected ? 'primary200' : null}>
+          <Icon as={Icons[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
+        </Box>
+      </FieldLabel>
+    </Field>
   );
 };
 
@@ -42,7 +87,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
-  const allIcons = Object.keys(Icons);
+  const allIcons = Object.keys(Icons).filter((icon) => !EXCLUDE_ICONS.includes(icon));
   const [icons, setIcons] = useState(allIcons);
   const searchIconRef = useRef(null);
 
@@ -93,11 +138,11 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
               onClear={onClearSearch}
               clearLabel={formatMessage({
                 id: getTrad('IconPicker.search.clear.label'),
-                defaultMessage: 'Clearing the icon search',
+                defaultMessage: 'Clear the icon search',
               })}
             >
               {formatMessage({
-                id: getTrad('ComponentIconPicker.search.placeholder'),
+                id: getTrad('IconPicker.search.placeholder.label'),
                 defaultMessage: 'Search for an icon',
               })}
             </Searchbar>
@@ -105,7 +150,10 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
             <IconButton
               ref={searchIconRef}
               onClick={toggleSearch}
-              aria-label="Edit"
+              aria-label={formatMessage({
+                id: getTrad('IconPicker.search.button.label'),
+                defaultMessage: 'Search icon button',
+              })}
               icon={<SearchIcon />}
               noBorder
             />
@@ -113,7 +161,10 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
           {value && (
             <IconButton
               onClick={removeIconSelected}
-              aria-label="Remove Icon"
+              aria-label={formatMessage({
+                id: getTrad('IconPicker.remove.label'),
+                defaultMessage: 'Remove the selected icon',
+              })}
               icon={<TrashIcon />}
               noBorder
             />
@@ -121,6 +172,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
         </Flex>
       </Flex>
       <IconPickerWrapper
+        position="relative"
         padding={1}
         background="neutral100"
         hasRadius
@@ -128,16 +180,35 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
         gap={2}
         maxHeight="126px"
         overflow="auto"
+        textAlign="center"
       >
-        {icons.map((iconKey) => (
-          <IconPick
-            key={iconKey}
-            iconKey={iconKey}
-            name={name}
-            onChange={onChange}
-            isSelected={iconKey === value}
-          />
-        ))}
+        {icons.length > 0 ? (
+          icons.map((iconKey) => (
+            <IconPick
+              key={iconKey}
+              iconKey={iconKey}
+              name={name}
+              onChange={onChange}
+              isSelected={iconKey === value}
+              ariaLabel={formatMessage(
+                {
+                  id: getTrad('IconPicker.icon.label'),
+                  defaultMessage: 'Select {icon} icon',
+                },
+                { icon: iconKey }
+              )}
+            />
+          ))
+        ) : (
+          <Box padding={4} grow={2}>
+            <Typography variant="delta" textColor="neutral600" textAlign="center">
+              {formatMessage({
+                id: getTrad('IconPicker.emptyState.label'),
+                defaultMessage: 'No icon found',
+              })}
+            </Typography>
+          </Box>
+        )}
       </IconPickerWrapper>
     </Box>
   );
