@@ -1,10 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
-import { CheckPagePermissions, Link, LinkButton, pxToRem } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  ConfirmDialog,
+  Link,
+  LinkButton,
+  pxToRem,
+  useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
+} from '@strapi/helper-plugin';
 import {
   Flex,
+  IconButton,
   Loader,
   Table,
   Thead,
@@ -15,7 +26,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Pencil, Plus } from '@strapi/icons';
+import { Pencil, Plus, Trash } from '@strapi/icons';
 
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import adminPermissions from '../../../../../../../../admin/src/permissions';
@@ -43,6 +54,53 @@ export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const { workflows: workflowsData } = useReviewWorkflows();
+  const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
+  const { del } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+  const toggleNotification = useNotification();
+
+  const { mutateAsync, isLoading } = useMutation(
+    async ({ workflowId, stages }) => {
+      const {
+        data: { data },
+      } = await del(`/admin/review-workflows/workflows/${workflowId}`, {
+        data: stages,
+      });
+
+      return data;
+    },
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.deleted', defaultMessage: 'Deleted' },
+        });
+      },
+    }
+  );
+
+  const handleDeleteWorkflow = (workflowId) => {
+    setWorkflowToDelete(workflowId);
+  };
+
+  const toggleConfirmDeleteDialog = () => {
+    setWorkflowToDelete(null);
+  };
+
+  const handleConfirmDeleteDialog = async () => {
+    try {
+      const res = await mutateAsync({ workflowId: workflowToDelete });
+
+      return res;
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+
+      return null;
+    }
+  };
 
   return (
     <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
@@ -124,6 +182,21 @@ export function ReviewWorkflowsListView() {
                   </Td>
                   <Td>
                     <Flex gap={2} justifyContent="end">
+                      <IconButton
+                        aria-label={formatMessage(
+                          {
+                            id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
+                            defaultMessage: 'Delete {name}',
+                          },
+                          { name: 'Default workflow' }
+                        )}
+                        icon={<Trash />}
+                        noBorder
+                        onClick={() => {
+                          handleDeleteWorkflow(workflow.id);
+                        }}
+                      />
+
                       <ActionLink
                         to={`/settings/review-workflows/${workflow.id}`}
                         aria-label={formatMessage(
@@ -143,6 +216,18 @@ export function ReviewWorkflowsListView() {
             </Tbody>
           </Table>
         )}
+
+        <ConfirmDialog
+          bodyText={{
+            id: 'Settings.review-workflows.list.page.delete.confirm.body',
+            defaultMessage:
+              'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
+          }}
+          isConfirmButtonLoading={isLoading}
+          isOpen={!!workflowToDelete}
+          onToggleDialog={toggleConfirmDeleteDialog}
+          onConfirm={handleConfirmDeleteDialog}
+        />
       </Layout.Root>
     </CheckPagePermissions>
   );
