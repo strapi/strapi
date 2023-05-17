@@ -149,7 +149,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         if (axios.isCancel(err)) {
           return;
         }
-
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {

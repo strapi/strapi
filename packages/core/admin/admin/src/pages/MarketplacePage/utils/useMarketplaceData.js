@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { useNotifyAT } from '@strapi/design-system';
-import useFetchMarketplacePlugins from '../../../hooks/useFetchMarketplacePlugins';
-import useFetchMarketplaceProviders from '../../../hooks/useFetchMarketplaceProviders';
+import useFetchMarketplacePlugins from '../../../hooks/marketplace/useFetchMarketplacePlugins';
+import useFetchMarketplaceProviders from '../../../hooks/marketplace/useFetchMarketplaceProviders';
 
 function useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery }) {
   const { notifyStatus } = useNotifyAT();
