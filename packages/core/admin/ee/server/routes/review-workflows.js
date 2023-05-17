@@ -41,6 +41,23 @@ module.exports = {
       },
     },
     {
+      method: 'DELETE',
+      path: '/review-workflows/workflows/:id',
+      handler: 'workflows.delete',
+      config: {
+        middlewares: [enableFeatureMiddleware('review-workflows')],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['admin::review-workflows.delete'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/review-workflows/workflows',
       handler: 'workflows.find',
