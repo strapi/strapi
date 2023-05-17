@@ -229,7 +229,6 @@ const ListView = () => {
                 <Tr>
                   <Th>
                     <BaseCheckbox
-                      id="select-all"
                       aria-label={formatMessage({
                         id: 'global.select-all-entries',
                         defaultMessage: 'Select all entries',
@@ -292,7 +291,6 @@ const ListView = () => {
                         })} ${webhook.name}`}
                         value={webhooksToDelete?.includes(webhook.id)}
                         onValueChange={(selected) => selectOneCheckbox(selected, webhook.id)}
-                        id="select"
                         name="select"
                       />
                     </Td>
@@ -305,9 +303,8 @@ const ListView = () => {
                       <Typography textColor="neutral800">{webhook.url}</Typography>
                     </Td>
                     <Td>
-                      <Flex {...stopPropagation}>
+                      <Flex>
                         <Switch
-                          data-testid={`enable-${webhook.id}`}
                           onLabel={formatMessage({
                             id: 'global.enabled',
                             defaultMessage: 'Enabled',
@@ -321,23 +318,21 @@ const ListView = () => {
                             defaultMessage: 'Status',
                           })}`}
                           selected={webhook.isEnabled}
-                          onChange={async () =>
+                          onChange={async (e) => {
+                            e.stopPropagation();
                             enabledMutation.mutateAsync({
                               isEnabled: !webhook.isEnabled,
                               id: webhook.id,
-                            })
-                          }
+                            });
+                          }}
                           visibleLabels
                         />
                       </Flex>
                     </Td>
                     <Td>
-                      <Flex gap={1} {...stopPropagation}>
+                      <Flex gap={1}>
                         {canUpdate && (
                           <IconButton
-                            onClick={() => {
-                              goTo(webhook.id);
-                            }}
                             label={formatMessage({
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
@@ -348,17 +343,20 @@ const ListView = () => {
                         )}
                         {canDelete && (
                           <IconButton
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setWebhooksToDelete([webhook.id]);
                               setShowModal(true);
                             }}
-                            label={formatMessage({
-                              id: 'global.delete',
-                              defaultMessage: 'Delete',
-                            })}
+                            label={formatMessage(
+                              {
+                                id: 'Settings.webhooks.events.delete',
+                                defaultMessage: 'Delete Webhook {id}',
+                              },
+                              { id: webhook.id }
+                            )}
                             icon={<Trash />}
                             noBorder
-                            data-testid={`delete-${webhook.id}`}
                           />
                         )}
                       </Flex>

@@ -111,13 +111,13 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should show confirmation delete modal', async () => {
-    const { getByText, getByTestId } = render();
+    const { getByText, getByRole } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
     await act(async () => {
-      await user.click(getByTestId('delete-1'));
+      await user.click(getByRole('button', { name: 'Delete Webhook 1' }));
     });
 
     expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe('Admin | containers | ListView', () => {
     });
 
     fireEvent.click(getByRole('checkbox', { name: 'Select all entries' }));
-    fireEvent.click(getByRole('button', { name: /delete/i }));
+    fireEvent.click(getByRole('button', { name: 'Delete' }));
 
     await waitFor(async () => {
       expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
@@ -146,13 +146,13 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText, getByTestId } = render();
+    const { getByText, getByRole, findByText } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
     await act(async () => {
-      await user.click(getByTestId('delete-1'));
+      await user.click(getByRole('button', { name: 'Delete Webhook 1' }));
     });
 
     await waitFor(async () => {
@@ -171,17 +171,19 @@ describe('Admin | containers | ListView', () => {
   });
 
   it('should disable a webhook', async () => {
-    const { getByText, getByTestId } = render();
+    const { getByText, getAllByRole } = render();
     await waitFor(() => {
       getByText('http:://strapi.io');
     });
 
+    const enableSwitches = getAllByRole('switch', { name: /status/i });
+
     await act(async () => {
-      await user.click(getByTestId('enable-1'));
+      await user.click(enableSwitches[0]);
     });
 
     await waitFor(async () => {
-      expect(getByTestId('enable-1')).toHaveAttribute('aria-checked', 'false');
+      expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
     });
   });
 });
