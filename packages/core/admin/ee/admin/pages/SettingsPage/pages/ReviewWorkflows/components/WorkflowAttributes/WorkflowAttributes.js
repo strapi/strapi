@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useField } from 'formik';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { Grid, GridItem, MultiSelect, MultiSelectOption, TextInput } from '@strapi/design-system';
+import { Grid, GridItem, MultiSelectNested, TextInput } from '@strapi/design-system';
 
 import { updateWorkflow } from '../../actions';
 
@@ -33,12 +33,12 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
       </GridItem>
 
       <GridItem col={6}>
-        <MultiSelect
+        <MultiSelectNested
           {...contentTypesField}
           customizeContent={() =>
             formatMessage(
               {
-                id: 'Settings.review-workflows.workflow.mappedContentTypes.displayValue',
+                id: 'Settings.review-workflows.workflow.contentTypes.displayValue',
                 defaultMessage:
                   '{count} {count, plural, one {content type} other {content types}} selected',
               },
@@ -48,21 +48,42 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
           error={contentTypesMeta.error ?? false}
           id={contentTypesField.name}
           label={formatMessage({
-            id: 'Settings.review-workflows.workflow.mappedContentTypes.label',
+            id: 'Settings.review-workflows.workflow.contentTypes.label',
             defaultMessage: 'Associated to',
           })}
           onChange={(values) => {
-            dispatch(updateWorkflow({ mappedContentTypes: values }));
+            dispatch(updateWorkflow({ contentTypes: values }));
             contentTypesField.onChange({ target: { value: values } });
           }}
+          options={[
+            {
+              label: formatMessage({
+                id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
+                defaultMessage: 'Collection Types',
+              }),
+              children: collectionTypes.map((contentType) => ({
+                label: contentType.info.displayName,
+                value: contentType.uid,
+              })),
+            },
+
+            {
+              label: formatMessage({
+                id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
+                defaultMessage: 'Single Types',
+              }),
+              children: singleTypes.map((contentType) => ({
+                label: contentType.info.displayName,
+                value: contentType.uid,
+              })),
+            },
+          ]}
+          placeholder={formatMessage({
+            id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
+            defaultMessage: 'Select',
+          })}
           required
-        >
-          {[...collectionTypes, ...singleTypes].map((contentType) => (
-            <MultiSelectOption key={contentType.uid} value={contentType.uid}>
-              {contentType.info.displayName}
-            </MultiSelectOption>
-          ))}
-        </MultiSelect>
+        />
       </GridItem>
     </Grid>
   );
