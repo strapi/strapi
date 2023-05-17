@@ -56,9 +56,20 @@ const validateBidirectionalRelations = async (db) => {
     const contentType = db.metadata.get(invRelation.target);
     const invContentType = db.metadata.get(relation.target);
 
+    const getAttributeJoinTableNamePart = ({ attributes }, attributeName) => {
+      return attributes[attributeName].joinTableName
+        ? attributes[attributeName].joinTableName
+        : attributeName;
+    };
     // Generate the join table name based on the relation target table and attribute name.
-    const joinTableName = getJoinTableName(contentType.tableName, invRelation.inversedBy);
-    const inverseJoinTableName = getJoinTableName(invContentType.tableName, relation.inversedBy);
+    const joinTableName = getJoinTableName(
+      contentType.tableName,
+      getAttributeJoinTableNamePart(invContentType, invRelation.inversedBy)
+    );
+    const inverseJoinTableName = getJoinTableName(
+      invContentType.tableName,
+      getAttributeJoinTableNamePart(contentType, relation.inversedBy)
+    );
 
     const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);
     const inverseJoinTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);

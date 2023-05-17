@@ -409,7 +409,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinTableName = getJoinTableName(meta.tableName, attributeName);
+  const joinTableName = getJoinTableName(meta.tableName, attribute.joinTableName || attributeName);
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
