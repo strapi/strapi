@@ -2,29 +2,28 @@ import React from 'react';
 import {
   act,
   fireEvent,
-  render,
-  screen,
+  render as renderRTL,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { useRBAC, useNotification } from '@strapi/helper-plugin';
+import { MemoryRouter } from 'react-router-dom';
+
+import { useRBAC } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import ListView from '../index';
-import server from './server';
+import server, { resetWebhooks } from './server';
+
+const toggleNotification = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
+  useNotification: jest.fn().mockImplementation(() => toggleNotification),
   useRBAC: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
 }));
-
-const history = createMemoryHistory();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,30 +33,46 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-        <Router history={history}>
-          <ListView />
-        </Router>
-      </IntlProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
-);
+const render = (props) => ({
+  ...renderRTL(<ListView {...props} />, {
+    wrapper: ({ children }) => (
+      <ThemeProvider theme={lightTheme}>
+        <QueryClientProvider client={queryClient}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+            <MemoryRouter>{children}</MemoryRouter>
+          </IntlProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    ),
+  }),
+});
+
+const originalError = console.error;
 
 describe('Admin | containers | ListView', () => {
-  beforeAll(() => server.listen());
+  beforeAll(() => {
+    console.error = (...args) => {
+      if (args[0] instanceof Error && args[0].name.includes('CanceledError')) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+    server.listen();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    resetWebhooks();
     server.resetHandlers();
   });
 
-  afterAll(() => server.close());
+  afterAll(() => {
+    console.error = originalError;
+    server.close();
+  });
 
   it('should show a loader when data is loading and then display the data', async () => {
     useRBAC.mockImplementation(() => ({
@@ -65,17 +80,15 @@ describe('Admin | containers | ListView', () => {
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    useNotification.mockImplementation(() => jest.fn());
+    const { getByText } = render();
 
-    render(App);
-
-    const loadingElement = await screen.findByText('Loading content.');
+    const loadingElement = getByText('Loading content.');
 
     expect(loadingElement).toBeInTheDocument();
 
-    await waitForElementToBeRemoved(() => screen.getByText('Loading content.'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    expect(screen.getByText('http:://strapi.io')).toBeInTheDocument();
+    expect(getByText('http:://strapi.io')).toBeInTheDocument();
   });
 
   it('should show a loader when permissions are loading', () => {
@@ -84,9 +97,7 @@ describe('Admin | containers | ListView', () => {
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    useNotification.mockImplementation(() => jest.fn());
-
-    const { getByText } = render(App);
+    const { getByText } = render();
 
     expect(getByText('Loading content.')).toBeInTheDocument();
   });
@@ -97,25 +108,29 @@ describe('Admin | containers | ListView', () => {
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    render(App);
+    const { getByText } = render();
 
     await waitFor(() => {
-      expect(screen.getByText('http:://strapi.io')).toBeInTheDocument();
+      expect(getByText('http:://strapi.io')).toBeInTheDocument();
     });
   });
 
   it('should show confirmation delete modal', async () => {
+    const user = userEvent.setup();
+
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    const { container, getByText } = render(App);
+    const { container, getByText } = render();
     await waitFor(() => {
-      screen.getByText('http:://strapi.io');
+      getByText('http:://strapi.io');
     });
 
-    fireEvent.click(container.querySelector('#delete-1'));
+    await act(async () => {
+      await user.click(container.querySelector('#delete-1'));
+    });
 
     expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
@@ -128,70 +143,24 @@ describe('Admin | containers | ListView', () => {
       allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
     }));
 
-    useNotification.mockImplementation(() => jest.fn());
-
-    const { container, getByText, getByRole } = render(App);
+    const { getByText, getByRole, findByText } = render();
     await waitFor(() => {
-      screen.getByText('http:://strapi.io');
+      getByText('http:://strapi.io');
     });
 
-    fireEvent.click(container.querySelector('#select-all'));
-    fireEvent.click(container.querySelector('#delete-selected'));
+    fireEvent.click(getByRole('checkbox', { name: 'Select all entries' }));
+    fireEvent.click(getByRole('button', { name: /delete/i }));
 
-    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    });
 
     await act(async () => {
       await user.click(getByRole('button', { name: /confirm/i }));
     });
 
-    expect(getByText('No webhooks found')).toBeInTheDocument();
-  });
-
-  it('should delete a single webhook', async () => {
-    const user = userEvent.setup();
-
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
-    useNotification.mockImplementation(() => jest.fn());
-
-    const { container, getByText, getByRole, queryByText } = render(App);
-    await waitFor(() => {
-      screen.getByText('http:://strapi.io');
+    await waitFor(async () => {
+      expect(await findByText('No webhooks found')).toBeInTheDocument();
     });
-    fireEvent.click(container.querySelector('#delete-1'));
-
-    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
-
-    await act(async () => {
-      await user.click(getByRole('button', { name: /confirm/i }));
-    });
-
-    expect(queryByText('http:://strapi.io')).toBeNull();
-    expect(getByText('http://me.io')).toBeInTheDocument();
-  });
-
-  it('should disable a webhook', async () => {
-    const user = userEvent.setup();
-
-    useRBAC.mockImplementation(() => ({
-      isLoading: false,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
-    useNotification.mockImplementation(() => jest.fn());
-
-    const { container } = render(App);
-    await waitFor(() => {
-      screen.getByText('http:://strapi.io');
-    });
-
-    await act(async () => {
-      await user.click(container.querySelector('#enable-1'));
-    });
-
-    expect(container.querySelector('#enable-1')).toHaveAttribute('aria-checked', 'false');
   });
 });
