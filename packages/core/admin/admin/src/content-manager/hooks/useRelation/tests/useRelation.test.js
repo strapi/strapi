@@ -187,14 +187,10 @@ describe('useRelation', () => {
 
     const { result } = await setup();
 
-    await new Promise(process.nextTick);
+    await waitFor(() => expect(result.current.relations.isLoading).toBe(false));
 
     act(() => {
       result.current.relations.fetchNextPage();
-    });
-
-    await waitFor(() => {
-      expect(get).toBeCalledTimes(2);
     });
 
     expect(get).toBeCalledTimes(2);
@@ -235,9 +231,7 @@ describe('useRelation', () => {
       result.current.relations.fetchNextPage();
     });
 
-    await new Promise(process.nextTick);
-
-    expect(get).toBeCalledTimes(1);
+    await waitFor(() => expect(get).toBeCalledTimes(1));
   });
 
   test('does not fetch search by default', async () => {
@@ -310,15 +304,15 @@ describe('useRelation', () => {
       result.current.searchFor('something');
     });
 
-    await new Promise(process.nextTick);
+    await waitFor(() => expect(result.current.search.isLoading).toBe(false));
 
     act(() => {
       result.current.search.fetchNextPage();
     });
 
-    await waitFor(() => {
-      expect(spy).toBeCalledTimes(2);
-    });
+    await waitFor(() => expect(result.current.search.isLoading).toBe(false));
+
+    expect(spy).toBeCalledTimes(2);
 
     expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
       params: {
@@ -342,13 +336,14 @@ describe('useRelation', () => {
     const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },
     });
+
     useFetchClient().get = spy;
 
     act(() => {
       result.current.searchFor('something');
     });
 
-    await new Promise(process.nextTick);
+    await waitFor(() => expect(result.current.search.isLoading).toBe(false));
 
     act(() => {
       result.current.search.fetchNextPage();
