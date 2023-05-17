@@ -151,18 +151,17 @@ module.exports = ({ strapi }) => {
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
-      if (fromStageId === undefined) {
+      return strapi.db.transaction(async ({ trx }) => {
         // Update all already existing links to the new stage
-        return strapi.db.transaction(async ({ trx }) =>
-          strapi.db
+        if (fromStageId === undefined) {
+          return strapi.db
             .getConnection()
             .from(joinTable.name)
             .update({ [invJoinColumn]: toStageId })
-            .transacting(trx)
-        );
-      }
+            .transacting(trx);
+        }
 
-      return strapi.db.transaction(async ({ trx }) => {
+        // Update all links from the specified stage to the new stage
         const selectStatement = strapi.db
           .getConnection()
           .select({ [joinColumn]: 't1.id', [invJoinColumn]: toStageId })
