@@ -50,6 +50,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   };
 
+  const deleteWorkflow = async (id) => {
+    return requests.admin.delete(`/admin/review-workflows/workflows/${id}`);
+  };
+
   const getWorkflow = async (id) => {
     const { body } = await requests.admin.get(`/admin/review-workflows/workflows/${id}?populate=*`);
     return body.data;
@@ -253,6 +257,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
+  describe('Delete workflow', () => {
+    let workflow;
+    test('Can delete workflow', async () => {
+      workflow = await createWorkflow({ contentTypes: [productUID] }).then((res) => res.body.data);
+
+      const res = await deleteWorkflow(workflow.id);
+      expect(res.status).toBe(200);
+    });
+
+    // Depends on the previous test
+    test('All entities have null stage', async () => {
+      const products = await findAll(productUID);
+
+      expect(products.results).toHaveLength(2);
+      for (const product of products.results) {
+        expect(product[ENTITY_STAGE_ATTRIBUTE]).toBeNull();
+      }
+    });
+  });
   describe('Creating an entity in a review workflow content type', () => {
     let workflow;
     test('when content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {

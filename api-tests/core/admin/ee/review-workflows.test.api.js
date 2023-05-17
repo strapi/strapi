@@ -174,7 +174,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Create workflow', () => {
-    test('You can not create a workflow without stages', async () => {
+    test('It should create a workflow without stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows', {
         body: {
           name: 'testWorkflow',
@@ -190,7 +190,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.body.data).toBeUndefined();
       }
     });
-    test('You can create a workflow with stages', async () => {
+    test('It should create a workflow with stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows?populate=stages', {
         body: {
           name: 'createdWorkflow',
@@ -214,7 +214,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Update workflow', () => {
-    test('You can update a workflow', async () => {
+    test('It should update a workflow', async () => {
       const res = await requests.admin.put(
         `/admin/review-workflows/workflows/${createdWorkflow.id}`,
         { body: { name: 'updatedWorkflow' } }
@@ -229,7 +229,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       }
     });
 
-    test('You can update a workflow with stages', async () => {
+    test('It should update a workflow with stages', async () => {
       const res = await requests.admin.put(
         `/admin/review-workflows/workflows/${createdWorkflow.id}?populate=stages`,
         {
@@ -256,6 +256,27 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
       }
+    });
+  });
+
+  describe('Delete workflow', () => {
+    test('It should delete a workflow', async () => {
+      const createdRes = await requests.admin.post('/admin/review-workflows/workflows', {
+        body: { name: 'testWorkflow', stages: [{ name: 'Stage 1' }] },
+      });
+
+      const res = await requests.admin.delete(
+        `/admin/review-workflows/workflows/${createdRes.body.data.id}`
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toMatchObject({ name: 'testWorkflow' });
+    });
+    test("It shouldn't delete a workflow that does not exist", async () => {
+      const res = await requests.admin.delete(`/admin/review-workflows/workflows/123456789`);
+
+      expect(res.status).toBe(404);
+      expect(res.body.data).toBeNull();
     });
   });
 
