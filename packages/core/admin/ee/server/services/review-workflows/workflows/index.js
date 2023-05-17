@@ -132,6 +132,12 @@ module.exports = ({ strapi }) => {
     async delete(workflow, opts) {
       const stageService = getService('stages', { strapi });
 
+      const workflowCount = await this.count();
+
+      if (workflowCount <= 1) {
+        throw new ApplicationError('Can not delete the last workflow');
+      }
+
       return strapi.db.transaction(async () => {
         // Delete stages
         await stageService.deleteMany(workflow.stages.map((stage) => stage.id));
