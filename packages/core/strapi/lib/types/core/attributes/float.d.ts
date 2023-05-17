@@ -1,22 +1,13 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type FloatAttribute = Attribute<'float'> &
+export type Float = Attribute.Attribute<'float'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<FloatValue> &
-  MinMaxOption &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<FloatValue> &
+  Attribute.MinMaxOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type FloatValue = number;
 
-export type GetFloatAttributeValue<T extends Attribute> = T extends FloatAttribute
-  ? FloatValue
-  : never;
+export type GetFloatValue<T extends Attribute.Attribute> = T extends Float ? FloatValue : never;

@@ -1,9 +1,7 @@
-import { GetAttributeValue } from './utils';
-
 /**
  * List of all the Strapi attribute types
  */
-export type AttributeType =
+export type Type =
   | 'string'
   | 'text'
   | 'richtext'
@@ -29,7 +27,7 @@ export type AttributeType =
 /**
  * Most basic shape of a schema attribute
  */
-export interface Attribute<T extends AttributeType = AttributeType> {
+export interface Attribute<T extends Type = Type> {
   /**
    * Type of the attribute
    */

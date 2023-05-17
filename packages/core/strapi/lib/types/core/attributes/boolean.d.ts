@@ -1,20 +1,14 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type BooleanAttribute = Attribute<'boolean'> &
+export type Boolean = Attribute.Attribute<'boolean'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<BooleanValue> &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<BooleanValue> &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type BooleanValue = boolean;
 
-export type GetBooleanAttributeValue<T extends Attribute> = T extends BooleanAttribute
+export type GetBooleanValue<T extends Attribute.Attribute> = T extends Boolean
   ? BooleanValue
   : never;

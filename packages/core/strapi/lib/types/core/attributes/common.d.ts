@@ -2,32 +2,27 @@
  * Strapi custom scalar types
  */
 
-import { MinMaxLengthOption, MinMaxOption } from './base';
-import { StringAttribute } from './string';
-
-export type JSON<T extends object = object> = T;
-
-export type Media = any;
+import type { Attribute } from '@strapi/strapi';
 
 /**
  * Setters for the attributes options
  */
 
 // required
-export type RequiredAttribute = { required: true };
-export type NonRequiredAttribute = { required: false };
+export type Required = { required: true };
+export type NonRequired = { required: false };
 
 // private
-export type PrivateAttribute = { private: true };
-export type NonPrivateAttribute = { private: false };
+export type Private = { private: true };
+export type NonPrivate = { private: false };
 
 // unique
-export type UniqueAttribute = { unique: true };
-export type NonUniqueAttribute = { unique: false };
+export type Unique = { unique: true };
+export type NonUnique = { unique: false };
 
 // configurable
-export type ConfigurableAttribute = { configurable: true };
-export type NonConfigurableAttribute = { configurable: false };
+export type Configurable = { configurable: true };
+export type NonConfigurable = { configurable: false };
 
 // custom field
 export type CustomField<T extends string, P extends object = undefined> = {
@@ -36,10 +31,10 @@ export type CustomField<T extends string, P extends object = undefined> = {
 };
 
 // min/max
-export type SetMinMax<T extends MinMaxOption<U>, U = number> = T;
+export type SetMinMax<T extends Attribute.MinMaxOption<U>, U = number> = T;
 
 // minLength/maxLength
-export type SetMinMaxLength<T extends MinMaxLengthOption> = T;
+export type SetMinMaxLength<T extends Attribute.MinMaxLengthOption> = T;
 
 // pluginOptions
 export type SetPluginOptions<T extends object = object> = { pluginOptions?: T };

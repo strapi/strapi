@@ -1,15 +1,6 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxLengthOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
-import { SchemaUID } from '../../utils';
-import { GetAttributesKeysByType } from './utils';
+import type { Attribute, Common } from '@strapi/strapi';
 
-export interface UIDAttributeOptions {
+export interface UIDOptions {
   separator?: string;
   lowercase?: boolean;
   decamelize?: boolean;
@@ -17,41 +8,41 @@ export interface UIDAttributeOptions {
   preserveLeadingUnderscore?: boolean;
 }
 
-export interface UIDAttributeProperties<
+export interface UIDProperties<
   // Own Schema Reference
-  T extends SchemaUID | undefined = undefined,
+  T extends Common.UID.Schema | undefined = undefined,
   // Target attribute
-  U extends T extends SchemaUID
-    ? GetAttributesKeysByType<T, 'string' | 'text'>
+  U extends T extends Common.UID.Schema
+    ? Attribute.GetKeysByType<T, 'string' | 'text'>
     : undefined = undefined,
   // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions
+  S extends UIDOptions = UIDOptions
 > {
   targetField?: U;
-  options?: UIDAttributeOptions & S;
+  options?: UIDOptions & S;
 }
 
-export type UIDAttribute<
+export type UID<
   // Own Schema Reference
-  T extends SchemaUID | undefined = undefined,
+  T extends Common.UID.Schema | undefined = undefined,
   // Target attribute
-  U extends T extends SchemaUID
-    ? GetAttributesKeysByType<T, 'string' | 'text'>
+  U extends T extends Common.UID.Schema
+    ? Attribute.GetKeysByType<T, 'string' | 'text'>
     : undefined = undefined,
   // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions
-> = Attribute<'uid'> &
+  S extends UIDOptions = UIDOptions
+> = Attribute.Attribute<'uid'> &
   // Properties
-  UIDAttributeProperties<T, U, S> &
+  UIDProperties<T, U, S> &
   // Options
-  ConfigurableOption &
-  DefaultOption<UIDValue> &
-  MinMaxLengthOption &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<UIDValue> &
+  Attribute.MinMaxLengthOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type UIDValue = string;
 
-export type GetUIDAttributeValue<T extends Attribute> = T extends UIDAttribute<infer _U, infer _P>
+export type GetUIDValue<T extends Attribute.Attribute> = T extends UID<infer _U, infer _P>
   ? UIDValue
   : never;

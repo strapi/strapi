@@ -1,98 +1,71 @@
-import { Get, KeysBy, NeverGuard, PickBy, SchemaUID } from '../../utils';
-import {
-  Attribute,
-  AttributeType,
-  GetBigIntegerAttributeValue,
-  GetBooleanAttributeValue,
-  GetDecimalAttributeValue,
-  GetDynamicZoneAttributeValue,
-  GetEnumerationAttributeValue,
-  GetFloatAttributeValue,
-  GetIntegerAttributeValue,
-  GetJsonAttributeValue,
-  GetMediaAttributeValue,
-  GetPasswordAttributeValue,
-  GetRelationAttributeValue,
-  GetRichTextAttributeValue,
-  GetStringAttributeValue,
-  GetTextAttributeValue,
-  GetUIDAttributeValue,
-  GetComponentAttributeValue,
-  GetEmailAttributeValue,
-} from '.';
-import { GetDateAttributeValue } from './date';
-import { GetDateTimeAttributeValue } from './date-time';
-import { GetTimeAttributeValue } from './time';
-import { GetTimestampAttributeValue } from './timestamp';
+import { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type PickTypes<T extends AttributeType> = T;
+export type PickTypes<T extends Attribute.Type> = T;
 
-export type GetAttributesKeysByType<
-  T extends SchemaUID,
-  U extends AttributeType,
+export type GetKeysByType<
+  T extends Common.UID.Schema,
+  U extends Attribute.Type,
   P = never
-> = KeysBy<GetAttributes<T>, Attribute<U> & NeverGuard<P, unknown>>;
+> = Utils.KeysBy<GetAll<T>, Attribute.Attribute<U> & Utils.NeverGuard<P, unknown>>;
 
-export type GetAttributesByType<T extends SchemaUID, U extends AttributeType, P = never> = PickBy<
-  GetAttributes<T>,
-  Attribute<U> & NeverGuard<P, unknown>
->;
+export type GetByType<
+  T extends Common.UID.Schema,
+  U extends Attribute.Type,
+  P = never
+> = Utils.PickBy<GetAll<T>, Attribute.Attribute<U> & Utils.NeverGuard<P, unknown>>;
 
-export type GetAttribute<T extends SchemaUID, U extends GetAttributesKey<T>> = Get<
-  GetAttributes<T>,
+export type Get<T extends Common.UID.Schema, U extends GetKeys<T>> = Utils.Get<GetAll<T>, U>;
+
+export type GetAll<T extends Common.UID.Schema> = Utils.Get<Common.Schemas[T], 'attributes'>;
+
+export type GetKeys<T extends Common.UID.Schema> = keyof GetAll<T>;
+
+export type GetValue<T extends Attribute.Attribute> =
+  | Attribute.GetBigIntegerValue<T>
+  | Attribute.GetBooleanValue<T>
+  | Attribute.GetComponentValue<T>
+  | Attribute.GetDecimalValue<T>
+  | Attribute.GetDynamicZoneValue<T>
+  | Attribute.GetEnumerationValue<T>
+  | Attribute.GetEmailValue<T>
+  | Attribute.GetFloatValue<T>
+  | Attribute.GetIntegerValue<T>
+  | Attribute.GetJsonValue<T>
+  | Attribute.GetMediaValue<T>
+  | Attribute.GetPasswordValue<T>
+  | Attribute.GetRelationValue<T>
+  | Attribute.GetRichTextValue<T>
+  | Attribute.GetStringValue<T>
+  | Attribute.GetTextValue<T>
+  | Attribute.GetUIDValue<T>
+  | Attribute.GetDateValue<T>
+  | Attribute.GetDateTimeValue<T>
+  | Attribute.GetTimeValue<T>
+  | Attribute.GetTimestampValue<T>;
+
+export type GetValueByKey<T extends Common.UID.Schema, U extends GetKeys<T>> = Get<
+  T,
   U
->;
-
-export type GetAttributes<T extends SchemaUID> = Get<Strapi.Schemas[T], 'attributes'>;
-
-export type GetAttributesKey<T extends SchemaUID> = keyof GetAttributes<T>;
-
-export type GetAttributeValue<T extends Attribute> =
-  | GetBigIntegerAttributeValue<T>
-  | GetBooleanAttributeValue<T>
-  | GetComponentAttributeValue<T>
-  | GetDecimalAttributeValue<T>
-  | GetDynamicZoneAttributeValue<T>
-  | GetEnumerationAttributeValue<T>
-  | GetEmailAttributeValue<T>
-  | GetFloatAttributeValue<T>
-  | GetIntegerAttributeValue<T>
-  | GetJsonAttributeValue<T>
-  | GetMediaAttributeValue<T>
-  | GetPasswordAttributeValue<T>
-  | GetRelationAttributeValue<T>
-  | GetRichTextAttributeValue<T>
-  | GetStringAttributeValue<T>
-  | GetTextAttributeValue<T>
-  | GetUIDAttributeValue<T>
-  | GetMediaAttributeValue<T>
-  | GetDateAttributeValue<T>
-  | GetDateTimeAttributeValue<T>
-  | GetTimeAttributeValue<T>
-  | GetTimestampAttributeValue<T>;
-
-export type GetAttributeValueByKey<
-  T extends SchemaUID,
-  U extends GetAttributesKey<T>
-> = GetAttribute<T, U> extends infer P
-  ? P extends Attribute
-    ? GetAttributeValue<P>
+> extends infer P
+  ? P extends Attribute.Attribute
+    ? GetValue<P>
     : never
   : never;
 
-export type GetAttributesValues<T extends SchemaUID> = {
+export type GetValues<T extends Common.UID.Schema, U extends GetKeys<T> = GetKeys<T>> = {
   // Handle required attributes
-  [key in GetAttributesRequiredKeys<T>]-?: GetAttributeValueByKey<T, key>;
+  [key in GetRequiredKeys<T> as key extends U ? key : never]-?: GetValueByKey<T, key>;
 } & {
   // Handle optional attributes
-  [key in GetAttributesOptionalKeys<T>]?: GetAttributeValueByKey<T, key>;
+  [key in GetOptionalKeys<T> as key extends U ? key : never]?: GetValueByKey<T, key>;
 };
 
-export type GetAttributesRequiredKeys<T extends SchemaUID> = KeysBy<
-  GetAttributes<T>,
+export type GetRequiredKeys<T extends Common.UID.Schema> = Utils.KeysBy<
+  GetAll<T>,
   { required: true }
 >;
-export type GetAttributesOptionalKeys<T extends SchemaUID> = keyof Omit<
-  GetAttributes<T>,
-  GetAttributesRequiredKeys<T>
+
+export type GetOptionalKeys<T extends Common.UID.Schema> = keyof Omit<
+  GetAll<T>,
+  GetRequiredKeys<T>
 >;
