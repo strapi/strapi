@@ -60,6 +60,12 @@ module.exports = ({ strapi }) => {
       return stage;
     },
 
+    async deleteMany(stagesId) {
+      return strapi.entityService.deleteMany(STAGE_MODEL_UID, {
+        filters: { id: { $in: stagesId } },
+      });
+    },
+
     count() {
       return strapi.entityService.count(STAGE_MODEL_UID);
     },

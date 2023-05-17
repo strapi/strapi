@@ -123,6 +123,30 @@ module.exports = ({ strapi }) => {
     },
 
     /**
+     * Deletes an existing workflow.
+     * Also deletes all the workflow stages and migrate all assigned the content types.
+     * @param {*} workflow
+     * @param {*} opts
+     * @returns
+     */
+    async delete(workflow, opts) {
+      const stageService = getService('stages', { strapi });
+
+      return strapi.db.transaction(async () => {
+        // Delete stages
+        await stageService.deleteMany(workflow.stages.map((stage) => stage.id));
+
+        // Unassign all content types, this will migrate the content types to null
+        await workflowsContentTypes.migrate({
+          srcContentTypes: workflow.contentTypes,
+          destContentTypes: [],
+        });
+
+        // Delete Workflow
+        return strapi.entityService.delete(WORKFLOW_MODEL_UID, workflow.id, opts);
+      });
+    },
+    /**
      * Returns the total count of workflows.
      * @returns {Promise<number>} - Total count of workflows.
      */
