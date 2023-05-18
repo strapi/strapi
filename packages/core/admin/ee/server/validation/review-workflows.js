@@ -17,18 +17,26 @@ const validateUpdateStageOnEntity = yup
   .required();
 
 const validateContentTypes = yup.array().of(
-  yup.string().test({
-    name: 'content-type-exists',
-    message: (value) => `Content type ${value.originalValue} does not exist`,
-    test(uid) {
-      // Warning; we use the strapi global - to avoid that, it would need to refactor how
-      // we generate validation function by using a factory with the strapi instance as parameter.
-      const model = strapi.getModel(uid);
-      if (!model) return false;
-      // It's not a valid  content type if it's not visible in the content manager
-      return getVisibleContentTypesUID({ [uid]: model }).includes(uid);
-    },
-  })
+  yup
+    .string()
+    .test({
+      name: 'content-type-exists',
+      message: (value) => `Content type ${value.originalValue} does not exist`,
+      test(uid) {
+        // Warning; we use the strapi global - to avoid that, it would need to refactor how
+        // we generate validation function by using a factory with the strapi instance as parameter.
+        return strapi.getModel(uid);
+      },
+    })
+    .test({
+      name: 'content-type-review-workflow-enabled',
+      message: (value) =>
+        `Content type ${value.originalValue} does not have review workflow enabled`,
+      test(uid) {
+        // It's not a valid  content type if it's not visible in the content manager
+        return getVisibleContentTypesUID({ [uid]: strapi.getModel(uid) }).includes(uid);
+      },
+    })
 );
 
 const validateWorkflowCreateSchema = yup.object().shape({
