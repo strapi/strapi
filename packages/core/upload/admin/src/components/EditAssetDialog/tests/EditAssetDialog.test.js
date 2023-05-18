@@ -156,14 +156,13 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByText('Finish').parentElement).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it.skip('shows an error and sends the focus back to the name when its not filled', async () => {
+    it('shows an error on the FileName input when its not filled', async () => {
       renderCompo();
 
       fireEvent.change(screen.getByLabelText('File name'), { target: { value: '' } });
       fireEvent.click(screen.getByText('Finish'));
 
       await waitFor(() => expect(screen.getByText('name is a required field')).toBeInTheDocument());
-      await waitFor(() => expect(screen.getByLabelText('File name')).toHaveFocus());
     });
   });
 
