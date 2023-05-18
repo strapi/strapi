@@ -43,7 +43,7 @@ const defaultSanitizeFilters = curry((schema, filters) => {
       ({ key, attribute }, { remove }) => {
         const isAttribute = !!attribute;
 
-        if (!isAttribute && !isOperator(key)) {
+        if (!isAttribute && !isOperator(key) && key !== 'id') {
           remove(key);
         }
       },
