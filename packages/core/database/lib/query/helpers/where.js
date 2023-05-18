@@ -2,7 +2,7 @@
 
 const { isArray, castArray, keys, isPlainObject } = require('lodash/fp');
 
-const { isOperatorOfType } = require('@strapi/utils').operators;
+const { isOperatorOfType } = require('@strapi/utils');
 const types = require('../../types');
 const { createField } = require('../../fields');
 const { createJoin } = require('./join');
