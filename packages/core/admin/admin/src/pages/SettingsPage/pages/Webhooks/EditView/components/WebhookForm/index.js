@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import castArray from 'lodash/castArray';
+import { Field, FormikProvider, useFormik } from 'formik';
+import { useIntl } from 'react-intl';
 import { Form, Link } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
 import { Button, Flex, TextInput } from '@strapi/design-system';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { useIntl } from 'react-intl';
 
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
 import schema from '../utils/schema';
@@ -14,11 +15,11 @@ import TriggerContainer from '../TriggerContainer';
 
 const WebhookForm = ({
   handleSubmit,
-  data,
   triggerWebhook,
   isCreating,
   isTriggering,
   triggerResponse,
+  data,
 }) => {
   const { formatMessage } = useIntl();
   const [showTriggerResponse, setShowTriggerResponse] = useState(false);
@@ -27,9 +28,7 @@ const WebhookForm = ({
     initialValues: {
       name: data?.name || '',
       url: data?.url || '',
-      headers: Object.keys(data?.headers || []).length
-        ? Object.entries(data.headers).map(([key, value]) => ({ key, value }))
-        : [{ key: '', value: '' }],
+      headers: castArray(data?.headers || []),
       events: data?.events || [],
     },
     onSubmit: handleSubmit,
@@ -59,7 +58,13 @@ const WebhookForm = ({
                   defaultMessage: 'Trigger',
                 })}
               </Button>
-              <Button startIcon={<Check />} type="submit" size="L">
+              <Button
+                startIcon={<Check />}
+                type="submit"
+                size="L"
+                disabled={!formik.dirty}
+                loading={formik.isSubmitting}
+              >
                 {formatMessage({
                   id: 'global.save',
                   defaultMessage: 'Save',

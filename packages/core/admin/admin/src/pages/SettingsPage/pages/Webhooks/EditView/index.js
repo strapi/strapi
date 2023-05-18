@@ -3,12 +3,13 @@ import {
   LoadingIndicatorPage,
   SettingsPageTitle,
   useNotification,
-  useOverlayBlocker,
   useFetchClient,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+
 import { useModels } from '../../../../../hooks';
 import WebhookForm from './components/WebhookForm';
 import cleanData from './utils/formatData';
@@ -19,36 +20,40 @@ const EditView = () => {
   } = useRouteMatch('/settings/webhooks/:id');
 
   const { replace } = useHistory();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler();
   const queryClient = useQueryClient();
   const { isLoading: isLoadingForModels } = useModels();
   const { put, get, post } = useFetchClient();
 
   const isCreating = id === 'create';
 
-  const { isLoading, data } = useQuery(
+  const {
+    isLoading,
+    data: webhookData,
+    error: webhookError,
+  } = useQuery(
     ['get-webhook', id],
     async () => {
-      try {
-        const {
-          data: { data },
-        } = await get(`/admin/webhooks/${id}`);
+      const {
+        data: { data },
+      } = await get(`/admin/webhooks/${id}`);
 
-        return data;
-      } catch (err) {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-
-        return null;
-      }
+      return data;
     },
     {
       enabled: !isCreating,
     }
   );
+
+  React.useEffect(() => {
+    if (webhookError) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(webhookError),
+      });
+    }
+  }, [webhookError, toggleNotification, formatAPIError]);
 
   const {
     isLoading: isTriggering,
@@ -59,10 +64,10 @@ const EditView = () => {
 
   const triggerWebhook = () =>
     mutate(null, {
-      onError() {
+      onError(error) {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error' },
+          message: formatAPIError(error),
         });
       },
     });
@@ -73,7 +78,6 @@ const EditView = () => {
 
   const handleSubmit = async (data) => {
     if (isCreating) {
-      lockApp();
       createWebhookMutation.mutate(cleanData(data), {
         onSuccess({ data: result }) {
           toggleNotification({
@@ -81,41 +85,35 @@ const EditView = () => {
             message: { id: 'Settings.webhooks.created' },
           });
           replace(`/settings/webhooks/${result.data.id}`);
-          unlockApp();
         },
-        onError(e) {
+        onError(error) {
           toggleNotification({
             type: 'warning',
-            message: { id: 'notification.error' },
+            message: formatAPIError(error),
           });
-          console.log(e);
-          unlockApp();
         },
       });
-    } else {
-      lockApp();
-      updateWebhookMutation.mutate(
-        { id, body: cleanData(data) },
-        {
-          onSuccess() {
-            queryClient.invalidateQueries(['get-webhook', id]);
-            toggleNotification({
-              type: 'success',
-              message: { id: 'notification.form.success.fields' },
-            });
-            unlockApp();
-          },
-          onError(e) {
-            toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.error' },
-            });
-            console.log(e);
-            unlockApp();
-          },
-        }
-      );
+
+      return;
     }
+    updateWebhookMutation.mutate(
+      { id, body: cleanData(data) },
+      {
+        onSuccess() {
+          queryClient.invalidateQueries(['get-webhook', id]);
+          toggleNotification({
+            type: 'success',
+            message: { id: 'notification.form.success.fields' },
+          });
+        },
+        onError(error) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
+        },
+      }
+    );
   };
 
   if (isLoading || isLoadingForModels) {
@@ -127,8 +125,8 @@ const EditView = () => {
       <SettingsPageTitle name="Webhooks" />
       <WebhookForm
         {...{
+          data: webhookData,
           handleSubmit,
-          data,
           triggerWebhook,
           isCreating,
           isTriggering,
