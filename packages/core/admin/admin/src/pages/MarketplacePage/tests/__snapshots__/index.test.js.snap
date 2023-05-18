@@ -1306,7 +1306,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   >
                     <label
                       class="c8 c30 c31"
-                      for="0"
+                      for=":r1:"
                     >
                       Search
                     </label>
@@ -1342,7 +1342,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       aria-invalid="false"
                       aria-required="false"
                       class="c37"
-                      id="0"
+                      id=":r1:"
                       name="searchbar"
                       placeholder="Search"
                       value=""
@@ -1372,7 +1372,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </label>
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-0"
+                    aria-controls="radix-:r5:"
                     aria-describedby="sort-by-select-hint sort-by-select-error"
                     aria-expanded="false"
                     aria-label="Sort by"
@@ -1720,7 +1720,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="2"
+                                  aria-describedby=":ra:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1790,7 +1790,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="3"
+                            aria-describedby=":rc:"
                             class=""
                             tabindex="0"
                           >
@@ -1943,7 +1943,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="4"
+                            aria-describedby=":re:"
                             class=""
                             tabindex="0"
                           >
@@ -2090,7 +2090,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="5"
+                                  aria-describedby=":rg:"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2285,7 +2285,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby="6"
+                            aria-describedby=":ri:"
                             class=""
                             tabindex="0"
                           >
@@ -2349,17 +2349,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 >
                   <label
                     class="c8 c30 c31"
-                    for="8"
+                    for=":rk:"
                   />
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-5"
-                    aria-describedby="8-hint 8-error"
+                    aria-controls="radix-:rn:"
+                    aria-describedby=":rk:-hint :rk:-error"
                     aria-expanded="false"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
-                    id="8"
+                    id=":rk:"
                     overflow="hidden"
                     role="combobox"
                     tabindex="0"
