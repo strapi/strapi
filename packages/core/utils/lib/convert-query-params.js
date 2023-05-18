@@ -400,7 +400,7 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
 };
 
 const isValidSchemaAttribute = (key, schema) => {
-  if (key.trim().toLowerCase() === 'id') {
+  if (key === 'id') {
     return true;
   }
 
