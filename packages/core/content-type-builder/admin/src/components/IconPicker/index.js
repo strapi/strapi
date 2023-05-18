@@ -12,45 +12,12 @@ import {
   FieldLabel,
   FieldInput,
 } from '@strapi/design-system';
-import * as Icons from '@strapi/icons';
+import { Trash, Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { getTrad } from '../../utils';
-
-const EXCLUDE_ICONS = [
-  'Boolean',
-  'CodeSquare',
-  'CollectionType',
-  'Component',
-  'CrossCircle',
-  'Component',
-  'Date',
-  'Dot',
-  'DynamicZone',
-  'Email',
-  'Enumeration',
-  'FeatherSquare',
-  'GlassesSquare',
-  'InformationSquare',
-  'Json',
-  'List',
-  'Media',
-  'MenuBurger',
-  'Minus',
-  'MinusOutlined',
-  'Number',
-  'Password',
-  'PlaySquare',
-  'PlusCircle',
-  'Relation',
-  'RichText',
-  'SingleType',
-  'Strapi',
-  'Text',
-  'Uid',
-  'default',
-];
+import COMPONENT_ICONS from '../../utils/componentIcons';
 
 const IconPickerWrapper = styled(Flex)`
   label {
@@ -76,8 +43,8 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
           />
           <span>{ariaLabel}</span>
         </VisuallyHidden>
-        <Box padding={2} cursor="pointer" hasRadius background={isSelected ? 'primary200' : null}>
-          <Icon as={Icons[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
+        <Box padding={2} cursor="pointer" hasRadius background={isSelected && 'primary200'}>
+          <Icon as={COMPONENT_ICONS[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
         </Box>
       </FieldLabel>
     </Field>
@@ -96,7 +63,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const { formatMessage } = useIntl();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
-  const allIcons = Object.keys(Icons).filter((icon) => !EXCLUDE_ICONS.includes(icon));
+  const allIcons = Object.keys(COMPONENT_ICONS);
   const [icons, setIcons] = useState(allIcons);
   const searchIconRef = useRef(null);
 
@@ -160,7 +127,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
                 id: getTrad('IconPicker.search.button.label'),
                 defaultMessage: 'Search icon button',
               })}
-              icon={<Icons.Search />}
+              icon={<Search />}
               noBorder
             />
           )}
@@ -171,7 +138,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
                 id: getTrad('IconPicker.remove.label'),
                 defaultMessage: 'Remove the selected icon',
               })}
-              icon={<Icons.Trash />}
+              icon={<Trash />}
               noBorder
             />
           )}

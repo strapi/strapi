@@ -62,7 +62,7 @@ describe('IconPicker', () => {
     await userEvent.click(screen.getByText('Search icon button'));
     await userEvent.type(screen.getByPlaceholderText('Search for an icon'), 'calendar');
 
-    expect(screen.getByText('Select Calendar icon')).toBeInTheDocument();
+    expect(screen.getByText('Select calendar icon')).toBeInTheDocument();
     expect(screen.queryByText('Select Trash icon')).not.toBeInTheDocument();
   });
 
@@ -97,14 +97,14 @@ describe('IconPicker', () => {
     const App = makeApp({ onChange: onChangeMock });
     render(App);
 
-    fireEvent.click(screen.getByLabelText('Select Calendar icon'));
+    fireEvent.click(screen.getByLabelText('Select calendar icon'));
 
     expect(onChangeMock);
     expect(onChangeMock).toHaveBeenCalledWith(
       expect.objectContaining({
         target: expect.objectContaining({
           name: 'componentToCreate.icon',
-          value: 'Calendar',
+          value: 'calendar',
         }),
       })
     );

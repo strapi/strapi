@@ -3,7 +3,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Flex, Icon } from '@strapi/design-system';
-import * as Icons from '@strapi/icons';
+import { Cube } from '@strapi/icons';
+import COMPONENT_ICONS from '../../../utils/componentIcons';
 
 const Wrapper = styled(Flex)`
   border-radius: 50%;
@@ -23,14 +24,14 @@ export function ComponentIcon({ isActive, icon }) {
       background={isActive ? 'primary200' : 'neutral200'}
       justifyContent="center"
     >
-      <Icon as={Icons[icon] || Icons.Cube} />
+      <Icon as={COMPONENT_ICONS[icon] || Cube} />
     </Wrapper>
   );
 }
 
 ComponentIcon.defaultProps = {
   isActive: false,
-  icon: 'Cube',
+  icon: null,
 };
 
 ComponentIcon.propTypes = {

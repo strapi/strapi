@@ -3,7 +3,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Flex, Icon } from '@strapi/design-system';
-import * as Icons from '@strapi/icons';
+import { Cube } from '@strapi/icons';
+import COMPONENT_ICONS from '../../utils/componentIcons';
 
 const WIDTH_S = 5;
 const WIDTH_M = 8;
@@ -29,7 +30,7 @@ export function ComponentIcon({ showBackground = true, size = 'M', icon }) {
       size={size}
       showBackground={showBackground}
     >
-      <Icon as={Icons[icon] || Icons.Cube} />
+      <Icon as={COMPONENT_ICONS[icon] || Cube} />
     </Wrapper>
   );
 }
@@ -37,7 +38,7 @@ export function ComponentIcon({ showBackground = true, size = 'M', icon }) {
 ComponentIcon.defaultProps = {
   showBackground: true,
   size: 'M',
-  icon: 'Cube',
+  icon: null,
 };
 
 ComponentIcon.propTypes = {
