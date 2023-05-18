@@ -232,8 +232,8 @@ describe('Bulk actions for folders & files', () => {
 
       // Create folders
       const folder1 = await createFolder('folderToDelete', null);
-      data.folders = await Promise.all(
-        Array.from({ length: 20 }).map((_, i) => createFolder(`${i}`, null))
+      await Promise.all(
+        Array.from({ length: 20 }).map((_, i) => createFolder(`folder-${i}`, null))
       );
 
       // Delete folder1
