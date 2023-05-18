@@ -115,7 +115,6 @@
     "react-dnd-html5-backend": "15.1.3",
     "react-dom": "^17.0.2",
     "react-error-boundary": "3.1.4",
-    "react-fast-compare": "^3.2.0",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-is": "^17.0.2",
@@ -148,7 +147,6 @@
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
     "msw": "1.2.1",
-    "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
     "webpack-bundle-analyzer": "^4.8.0"
   },
