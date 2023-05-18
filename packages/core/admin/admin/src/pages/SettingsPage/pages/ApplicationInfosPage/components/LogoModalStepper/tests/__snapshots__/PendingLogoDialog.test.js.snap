@@ -515,7 +515,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
       class="c12"
     >
       <article
-        aria-labelledby="0-title"
+        aria-labelledby=":r0:-title"
         class="c13"
         tabindex="0"
       >
@@ -543,7 +543,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
             >
               <div
                 class="c4 c5"
-                id="0-title"
+                id=":r0:-title"
               >
                 asset.jpeg
               </div>

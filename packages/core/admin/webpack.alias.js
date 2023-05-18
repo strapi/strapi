@@ -19,7 +19,6 @@ const aliasExactMatch = [
   'react-dnd-html5-backend',
   'react-dom',
   'react-error-boundary',
-  'react-fast-compare',
   'react-helmet',
   'react-is',
   'react-intl',
