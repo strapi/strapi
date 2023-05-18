@@ -124,7 +124,12 @@ const createAuditLogsService = (strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      await state.provider.saveEvent(processedEvent);
+      // This avoids saving logs during a transaction that was previously being committed.
+      // handleEvent is asynchronous, so there is a change that there is transaction  being committed
+      // strapi.db.onTransactionEnd(() => state.provider.saveEvent(processedEvent));
+      await strapi.db.transaction(({ onCommit }) => {
+        onCommit(() => state.provider.saveEvent(processedEvent));
+      });
     }
   }
 
