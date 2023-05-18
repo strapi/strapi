@@ -45,7 +45,7 @@ const contentTypesMock = {
     },
   },
   test2: {
-    options: {},
+    options: { reviewWorkflows: true },
     attributes: {},
   },
 };
