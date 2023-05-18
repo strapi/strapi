@@ -10,6 +10,7 @@ const handlers = [
         data: {
           autoRegister: true,
           defaultRole: '2',
+          authenticationDisabled: ['1'],
         },
       })
     );
