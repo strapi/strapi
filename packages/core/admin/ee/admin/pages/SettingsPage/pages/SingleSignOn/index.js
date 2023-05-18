@@ -20,6 +20,8 @@ import {
   Grid,
   GridItem,
   Flex,
+  MultiSelect,
+  MultiSelectOption,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
@@ -49,6 +51,7 @@ export const SingleSignOn = () => {
   ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
     'autoRegister',
     'defaultRole',
+    'authenticationDisabled',
   ]);
   const { roles } = useRolesList(canReadRoles);
 
@@ -188,6 +191,44 @@ export const SingleSignOn = () => {
                         </Option>
                       ))}
                     </Select>
+                  </GridItem>
+                  <GridItem col={6} m={6} s={12}>
+                    <MultiSelect
+                      disabled={!canUpdate}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.description',
+                        defaultMessage:
+                          'Select the roles for which you want to disable the local authentication',
+                      })}
+                      error={
+                        formErrors.authenticationDisabled
+                          ? formatMessage({
+                              id: formErrors.authenticationDisabled.id,
+                              defaultMessage: formErrors.authenticationDisabled.id,
+                            })
+                          : ''
+                      }
+                      label={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.label',
+                        defaultMessage: 'Local authentication lock-out',
+                      })}
+                      name="authenticationDisabled"
+                      onChange={(value) => {
+                        handleChange({ target: { name: 'authenticationDisabled', value } });
+                      }}
+                      placeholder={formatMessage({
+                        id: 'components.InputSelect.option.placeholder',
+                        defaultMessage: 'Choose here',
+                      })}
+                      value={modifiedData.authenticationDisabled}
+                      withTags
+                    >
+                      {roles.map(({ id, name }) => (
+                        <MultiSelectOption key={id} value={id.toString()}>
+                          {name}
+                        </MultiSelectOption>
+                      ))}
+                    </MultiSelect>
                   </GridItem>
                 </Grid>
               </Flex>

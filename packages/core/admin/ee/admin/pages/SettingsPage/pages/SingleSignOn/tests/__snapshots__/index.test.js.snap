@@ -142,6 +142,16 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   color: #32324d;
 }
 
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
 .c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -437,7 +447,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   flex-wrap: wrap;
 }
 
-.c47[data-state='checked'] .c8 {
+.c48[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -786,6 +796,89 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         id=":r2:-hint"
                       >
                         It will attach the new authenticated user to the selected role
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c21"
+              >
+                <div
+                  class=""
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c23"
+                    >
+                      <label
+                        class="c8 c24 c25"
+                        for=":r6:"
+                      >
+                        Local authentication lock-out
+                      </label>
+                      <div
+                        aria-autocomplete="none"
+                        aria-controls="radix-:r9:"
+                        aria-describedby=":r6:-hint :r6:-error"
+                        aria-disabled="false"
+                        aria-expanded="false"
+                        aria-label="Local authentication lock-out"
+                        class="c38 c39 c40"
+                        data-placeholder=""
+                        data-state="closed"
+                        dir="ltr"
+                        id=":r6:"
+                        overflow="hidden"
+                        role="combobox"
+                        tabindex="0"
+                      >
+                        <span
+                          class="c41 c42"
+                        >
+                          <span
+                            class="c8 c47 c44"
+                          >
+                            <span
+                              class="c45"
+                            >
+                              <span>
+                                Choose here
+                              </span>
+                            </span>
+                          </span>
+                        </span>
+                        <span
+                          class="c42"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="c46"
+                          >
+                            <svg
+                              fill="none"
+                              height="1rem"
+                              viewBox="0 0 14 8"
+                              width="1rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        </span>
+                      </div>
+                      <p
+                        class="c8 c37"
+                        id=":r6:-hint"
+                      >
+                        Select the roles for which you want to disable the local authentication
                       </p>
                     </div>
                   </div>

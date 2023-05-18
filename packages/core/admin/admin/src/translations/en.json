@@ -245,6 +245,8 @@
   "Settings.sso.form.defaultRole.description": "It will attach the new authenticated user to the selected role",
   "Settings.sso.form.defaultRole.description-not-allowed": "You need to have the permission to read the admin roles",
   "Settings.sso.form.defaultRole.label": "Default role",
+  "Settings.sso.form.localAuthenticationLock.label": "Local authentication lock-out",
+  "Settings.sso.form.localAuthenticationLock.description": "Select the roles for which you want to disable the local authentication",
   "Settings.sso.form.registration.description": "Create new user on SSO login if no account exists",
   "Settings.sso.form.registration.label": "Auto-registration",
   "Settings.sso.title": "Single Sign-On",
