@@ -100,9 +100,6 @@ const ListView = () => {
       await post('/admin/webhooks/batch-delete', {
         ids: webhooksToDelete,
       });
-      setWebhooksToDelete([]);
-
-      setShowModal(false);
     },
     {
       onError(error) {
@@ -110,8 +107,11 @@ const ListView = () => {
           type: 'warning',
           message: formatAPIError(error),
         });
+        setShowModal(false);
       },
       onSuccess() {
+        setWebhooksToDelete([]);
+        setShowModal(false);
         refetchWebhooks();
       },
     }
@@ -119,11 +119,11 @@ const ListView = () => {
 
   const enabledMutation = useMutation(
     async ({ isEnabled, id }) => {
+      const { id: _, ...webhook } = webhooks.find((webhook) => webhook.id === id) ?? {};
       const body = {
-        ...webhooks.find((webhook) => webhook.id === id),
+        ...webhook,
         isEnabled,
       };
-      delete body.id;
 
       await put(`/admin/webhooks/${id}`, body);
     },
@@ -140,7 +140,7 @@ const ListView = () => {
     }
   );
 
-  const confirmDelete = async () => deleteMutation.mutateAsync();
+  const confirmDelete = () => deleteMutation.mutate();
 
   const selectAllCheckbox = (selected) =>
     selected ? setWebhooksToDelete(webhooks.map((webhook) => webhook.id)) : setWebhooksToDelete([]);
@@ -318,9 +318,9 @@ const ListView = () => {
                             defaultMessage: 'Status',
                           })}`}
                           selected={webhook.isEnabled}
-                          onChange={async (e) => {
+                          onChange={(e) => {
                             e.stopPropagation();
-                            enabledMutation.mutateAsync({
+                            enabledMutation.mutate({
                               isEnabled: !webhook.isEnabled,
                               id: webhook.id,
                             });
