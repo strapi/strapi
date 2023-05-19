@@ -285,7 +285,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test('Should list workflows filtered by CT', async () => {
-      const workflows = await getWorkflows({ contentTypes: { $contains: [productUID] } });
+      const workflows = await getWorkflows({ contentTypes: productUID });
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
@@ -299,8 +299,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         data: { contentTypes: [`${productUID}-2`] },
       });
 
-      // FIXME: This filter should be { $contains: [productUID] }
-      const workflows = await getWorkflows({ contentTypes: { $contains: [`"${productUID}"`] } });
+      const workflows = await getWorkflows({ contentTypes: productUID });
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
