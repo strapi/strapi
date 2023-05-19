@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
 import { InformationBoxEE } from '../InformationBoxEE';
+import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 
 const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 const STAGE_FIXTURE = {
@@ -94,6 +95,18 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(getByText('Last update')).toBeInTheDocument();
   });
 
+  it('filters workflows based on the model uid', () => {
+    useCMEditViewDataManager.mockReturnValue({
+      initialData: {},
+      isCreatingEntry: true,
+      layout: { uid: 'api::articles:articles' },
+    });
+
+    expect(useReviewWorkflows).toHaveBeenCalledWith(undefined, {
+      filters: { contentTypes: 'api::articles:articles' },
+    });
+  });
+
   it('renders no select input, if no workflow stage is assigned to the entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
@@ -105,21 +118,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('renders an error, if no workflow stage is assigned to the entity', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
-      },
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { getByText, queryByRole } = setup();
-
-    expect(getByText(/select a stage/i)).toBeInTheDocument();
-    expect(queryByRole('combobox')).toBeInTheDocument();
-  });
-
-  it('does not render the select input, if the entity is created', () => {
+  it('does not render the select input, if the entity is being created', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
