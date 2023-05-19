@@ -42,8 +42,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   let strapi;
 
   const createWorkflow = async (data) => {
+    const name = `${data.name}-${Math.random().toString(36)}`;
     return requests.admin.post('/admin/review-workflows/workflows?populate=*', {
-      body: { ...baseWorkflow, ...data },
+      body: { ...baseWorkflow, name, ...data },
     });
   };
 
@@ -133,6 +134,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           contentTypes: [productUID],
           stages: [{ name: 'Review' }],
         });
+
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
         workflow2 = res.body.data;

@@ -11,11 +11,7 @@ import type {
   TransferStage,
 } from '../../../../types';
 import { client, server } from '../../../../types/remote/protocol';
-import {
-  ProviderInitializationError,
-  ProviderTransferError,
-  ProviderValidationError,
-} from '../../../errors/providers';
+import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
@@ -170,56 +166,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async initTransfer(): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.ws
-        ?.on('unexpected-response', (_req, res) => {
-          if (res.statusCode === 401) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Authentication Error'
-              )
-            );
-          }
-
-          if (res.statusCode === 403) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Authorization Error'
-              )
-            );
-          }
-
-          if (res.statusCode === 404) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Data transfer is not enabled on the remote host'
-              )
-            );
-          }
-
-          return reject(
-            new ProviderInitializationError(
-              `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
-            )
-          );
-        })
-        ?.once('open', async () => {
-          const query = this.dispatcher?.dispatchCommand({
-            command: 'init',
-          });
-
-          const res = (await query) as server.Payload<server.InitMessage>;
-
-          if (!res?.transferID) {
-            return reject(
-              new ProviderTransferError('Init failed, invalid response from the server')
-            );
-          }
-
-          resolve(res.transferID);
-        })
-        .once('error', reject);
+    const query = this.dispatcher?.dispatchCommand({
+      command: 'init',
     });
+
+    const res = (await query) as server.Payload<server.InitMessage>;
+
+    if (!res?.transferID) {
+      throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+
+    return res.transferID;
   }
 
   async bootstrap(): Promise<void> {
