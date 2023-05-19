@@ -76,6 +76,35 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   flex: 1;
 }
 
+.c47 {
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 4px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
+}
+
+.c51 {
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c48 {
+  background: #f0f0ff;
+  color: #4945ff;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+  height: 2rem;
+}
+
 .c9 {
   font-weight: 600;
   font-size: 2rem;
@@ -140,16 +169,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   overflow: hidden;
   text-overflow: ellipsis;
   color: #32324d;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
 }
 
 .c5 {
@@ -398,6 +417,19 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   align-items: center;
 }
 
+.c52 {
+  border: none;
+}
+
+.c52 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c52 svg path {
+  fill: #666687;
+}
+
 .c40 {
   border: 1px solid #dcdce4;
   min-height: 2.5rem;
@@ -447,7 +479,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   flex-wrap: wrap;
 }
 
-.c48[data-state='checked'] .c8 {
+.c53[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -474,6 +506,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
 
 .c3:focus-visible {
   outline: none;
+}
+
+.c49 > svg {
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
+.c49 > svg path {
+  fill: #4945ff;
+}
+
+.c50 {
+  color: inherit;
+  border-right: 1px solid #d9d8ff;
+  padding-right: 8px;
 }
 
 .c26 {
@@ -826,8 +873,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-label="Local authentication lock-out"
-                        class="c38 c39 c40"
-                        data-placeholder=""
+                        class="c47 c39 c40"
                         data-state="closed"
                         dir="ltr"
                         id=":r6:"
@@ -839,20 +885,61 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           class="c41 c42"
                         >
                           <span
-                            class="c8 c47 c44"
+                            class="c8 c43 c44"
                           >
                             <span
                               class="c45"
                             >
-                              <span>
-                                Choose here
-                              </span>
+                              <button
+                                aria-disabled="false"
+                                class="c48 c11 c49"
+                                tabindex="-1"
+                              >
+                                <span
+                                  class="c8 c24 c50"
+                                >
+                                  Super Admin
+                                </span>
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 24 24"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </button>
                             </span>
                           </span>
                         </span>
                         <span
                           class="c42"
                         >
+                          <button
+                            aria-disabled="false"
+                            aria-label="Clear"
+                            class="c51 c52"
+                            role="button"
+                            tabindex="0"
+                            title="Clear"
+                          >
+                            <svg
+                              fill="none"
+                              height="1rem"
+                              viewBox="0 0 24 24"
+                              width="1rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </button>
                           <span
                             aria-hidden="true"
                             class="c46"
