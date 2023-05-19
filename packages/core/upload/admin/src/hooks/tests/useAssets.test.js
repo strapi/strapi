@@ -2,7 +2,7 @@ import React from 'react';
 import { stringify } from 'qs';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
@@ -74,10 +74,7 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if no query was set', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup();
-
-    await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
+    await setup();
 
     const { get } = useFetchClient();
 
@@ -95,16 +92,17 @@ describe('useAssets', () => {
       },
     };
 
-    expect(get).toBeCalledWith(
-      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(
+        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+      )
     );
   });
 
   test('fetches data from the right URL if a query was set', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
+    const { result } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
     const { get } = useFetchClient();
 
     const expected = {
@@ -119,18 +117,19 @@ describe('useAssets', () => {
       },
     };
 
-    expect(get).toBeCalledWith(
-      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(
+        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+      )
     );
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    const { result } = await setup({
       query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
     const { get } = useFetchClient();
 
     const expected = {
@@ -148,18 +147,19 @@ describe('useAssets', () => {
       },
     };
 
-    expect(get).toBeCalledWith(
-      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(
+        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+      )
     );
   });
 
   test('does not use folder filter in params if _q', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    const { result } = await setup({
       query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
     const { get } = useFetchClient();
 
     const expected = {
@@ -173,19 +173,20 @@ describe('useAssets', () => {
       _q: 'something',
     };
 
-    expect(get).toBeCalledWith(
-      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(
+        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+      )
     );
   });
 
   test('correctly encodes the search query _q', async () => {
     const _q = 'something&else';
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    const { result } = await setup({
       query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
     const { get } = useFetchClient();
 
     const expected = {
@@ -199,13 +200,15 @@ describe('useAssets', () => {
       _q: encodeURIComponent(_q),
     };
 
-    expect(get).toBeCalledWith(
-      `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(
+        `/upload/files${stringify(expected, { encode: false, addQueryPrefix: true })}`
+      )
     );
   });
 
   test('it does not fetch, if skipWhen is set', async () => {
-    const { result, waitFor } = await setup({ skipWhen: true });
+    const { result } = await setup({ skipWhen: true });
 
     await waitFor(() => result.current.isSuccess);
 
@@ -217,12 +220,11 @@ describe('useAssets', () => {
   test('calls notifyStatus in case of success', async () => {
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { result, waitFor, waitForNextUpdate } = await setup({});
+    const { result } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
+    await waitFor(() => expect(notifyStatus).toBeCalledWith('The assets have finished loading.'));
 
-    expect(notifyStatus).toBeCalledWith('The assets have finished loading.');
     expect(toggleNotification).toBeCalledTimes(0);
   });
 
@@ -235,12 +237,11 @@ describe('useAssets', () => {
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { result, waitFor, waitForNextUpdate } = await setup({});
+    const { result } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
+    await waitFor(() => expect(toggleNotification).toBeCalled());
 
-    expect(toggleNotification).toBeCalled();
     expect(notifyStatus).not.toBeCalled();
 
     console.error = originalConsoleError;
@@ -266,17 +267,17 @@ describe('useAssets', () => {
       },
     });
 
-    const { result, waitFor } = await setup({});
+    const { result } = await setup({});
 
-    await waitFor(() => result.current.data !== undefined);
-
-    expect(result.current.data.results).toEqual([
-      {
-        name: 'test',
-        mime: 'image/jpeg',
-        ext: 'jpg',
-      },
-    ]);
+    await waitFor(() =>
+      expect(result.current.data.results).toEqual([
+        {
+          name: 'test',
+          mime: 'image/jpeg',
+          ext: 'jpg',
+        },
+      ])
+    );
   });
 
   it('should set mime and ext to strings as defaults if they are nullish', async () => {
@@ -309,33 +310,33 @@ describe('useAssets', () => {
       },
     });
 
-    const { result, waitFor } = await setup({});
+    const { result } = await setup({});
 
-    await waitFor(() => result.current.data !== undefined);
-
-    expect(result.current.data.results).toMatchInlineSnapshot(`
-      [
-        {
-          "ext": "jpg",
-          "mime": "",
-          "name": "test 1",
-        },
-        {
-          "ext": "",
-          "mime": "image/jpeg",
-          "name": "test 2",
-        },
-        {
-          "ext": "",
-          "mime": "",
-          "name": "test 3",
-        },
-        {
-          "ext": "jpg",
-          "mime": "image/jpeg",
-          "name": "test 4",
-        },
-      ]
-    `);
+    await waitFor(() =>
+      expect(result.current.data.results).toMatchInlineSnapshot(`
+    [
+      {
+        "ext": "jpg",
+        "mime": "",
+        "name": "test 1",
+      },
+      {
+        "ext": "",
+        "mime": "image/jpeg",
+        "name": "test 2",
+      },
+      {
+        "ext": "",
+        "mime": "",
+        "name": "test 3",
+      },
+      {
+        "ext": "jpg",
+        "mime": "image/jpeg",
+        "name": "test 4",
+      },
+    ]
+  `)
+    );
   });
 });

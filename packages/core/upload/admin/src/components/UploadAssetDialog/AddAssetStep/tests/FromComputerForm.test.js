@@ -5,9 +5,11 @@ import { TrackingProvider } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import { FromComputerForm } from '../FromComputerForm';
 
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  get: jest.fn(),
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  getFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn(),
+  }),
 }));
 
 describe('FromComputerForm', () => {

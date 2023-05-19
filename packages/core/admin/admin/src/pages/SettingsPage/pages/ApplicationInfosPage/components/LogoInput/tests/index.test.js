@@ -2,7 +2,7 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render as renderTL, fireEvent, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import axios from 'axios';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 import LogoInput from '../index';
 
@@ -32,16 +32,18 @@ global.Image = class extends Image {
   }
 };
 
-jest.mock('axios', () => ({
-  ...jest.requireActual('axios'),
-  get: jest.fn().mockResolvedValue({
-    data: new Blob(['my-image'], { type: 'image/png' }),
-    headers: {
-      'content-type': 'image/png',
-    },
-    config: {
-      url: 'some-png',
-    },
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  getFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: new Blob(['my-image'], { type: 'image/png' }),
+      headers: {
+        'content-type': 'image/png',
+      },
+      config: {
+        url: 'some-png',
+      },
+    }),
   }),
 }));
 
@@ -237,7 +239,9 @@ describe('ApplicationsInfosPage || LogoInput', () => {
     });
 
     it('should show error message when uploading wrong file format', async () => {
-      axios.get.mockResolvedValueOnce({
+      const { get } = getFetchClient();
+
+      get.mockResolvedValueOnce({
         data: new Blob(['my-image'], { type: 'image/gif' }),
         headers: {
           'content-type': 'image/gif',
@@ -283,7 +287,9 @@ describe('ApplicationsInfosPage || LogoInput', () => {
     });
 
     it('should show error message when uploading unauthorized file-size', async () => {
-      axios.get.mockResolvedValueOnce({
+      const { get } = getFetchClient();
+
+      get.mockResolvedValueOnce({
         data: new Blob(['1'.repeat(1024 * 1024 + 1)], { type: 'image/png' }),
         headers: {
           'content-type': 'image/png',
