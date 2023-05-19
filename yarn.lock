@@ -18868,7 +18868,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-cli@npm:29.5.0, jest-cli@npm:^29.0.3":
+"jest-cli@npm:29.0.3":
+  version: 29.0.3
+  resolution: "jest-cli@npm:29.0.3"
+  dependencies:
+    "@jest/core": ^29.0.3
+    "@jest/test-result": ^29.0.3
+    "@jest/types": ^29.0.3
+    chalk: ^4.0.0
+    exit: ^0.1.2
+    graceful-fs: ^4.2.9
+    import-local: ^3.0.2
+    jest-config: ^29.0.3
+    jest-util: ^29.0.3
+    jest-validate: ^29.0.3
+    prompts: ^2.0.1
+    yargs: ^17.3.1
+  peerDependencies:
+    node-notifier: ^8.0.1 || ^9.0.0 || ^10.0.0
+  peerDependenciesMeta:
+    node-notifier:
+      optional: true
+  bin:
+    jest: bin/jest.js
+  checksum: 4cd6ed7effcf703c3275bb07231227e32bd2de2dfc84354f0bbd25a2a8b26395570c8902c7dc87b02bed4a57c304a6b48e21a60fa26025b89c1e4e61eae1ea38
+  languageName: node
+  linkType: hard
+
+"jest-cli@npm:^29.0.3":
   version: 29.5.0
   resolution: "jest-cli@npm:29.5.0"
   dependencies:
@@ -18895,7 +18922,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-config@npm:^29.5.0":
+"jest-config@npm:^29.0.3, jest-config@npm:^29.5.0":
   version: 29.5.0
   resolution: "jest-config@npm:29.5.0"
   dependencies:
@@ -19294,7 +19321,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-validate@npm:^29.5.0":
+"jest-validate@npm:^29.0.3, jest-validate@npm:^29.5.0":
   version: 29.5.0
   resolution: "jest-validate@npm:29.5.0"
   dependencies:
@@ -27376,7 +27403,7 @@ __metadata:
     inquirer: 8.2.5
     jest: 29.0.3
     jest-circus: 29.0.3
-    jest-cli: 29.5.0
+    jest-cli: 29.0.3
     jest-environment-jsdom: 29.0.3
     jest-watch-typeahead: 2.2.2
     lerna: 6.5.1
