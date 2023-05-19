@@ -220,7 +220,11 @@ export const SingleSignOn = () => {
                         id: 'components.InputSelect.option.placeholder',
                         defaultMessage: 'Choose here',
                       })}
-                      value={modifiedData.authenticationDisabled}
+                      onClear={() => {
+                        const emptyArray = [1];
+                        handleChange({ target: { name: 'authenticationDisabled', emptyArray } });;
+                      }}
+                      value={modifiedData.authenticationDisabled || []}
                       withTags
                     >
                       {roles.map(({ id, name }) => (

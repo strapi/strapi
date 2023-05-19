@@ -54,6 +54,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   };
 
   const handleChange = ({ target: { name, value, type: inputType } }) => {
+
     dispatch({
       type: 'ON_CHANGE',
       inputType,
@@ -92,6 +93,10 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
 
         if (cleanedData.roles) {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
+        }
+
+        if (cleanedData.authenticationDisabled) {
+          cleanedData.authenticationDisabled = [...new Set(cleanedData.authenticationDisabled)];
         }
 
         const {

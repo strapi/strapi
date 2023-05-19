@@ -40,8 +40,7 @@ module.exports = {
 
     const adminStore = await utils.getAdminStore();
     const currentAuthOptions = await adminStore.get({ key: 'auth' });
-    const newAuthOptions = merge(currentAuthOptions, { providers: body });
-
+    const newAuthOptions = { ...currentAuthOptions, providers: body };
     await adminStore.set({ key: 'auth', value: newAuthOptions });
 
     ctx.body = {

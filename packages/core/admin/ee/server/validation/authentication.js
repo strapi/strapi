@@ -10,6 +10,12 @@ const providerOptionsUpdateSchema = yup.object().shape({
     .test('is-valid-role', 'You must submit a valid default role', (roleId) => {
       return strapi.admin.services.role.exists({ id: roleId });
     }),
+  authenticationDisabled: yup.array().of(yup
+    .strapiID()
+    .required()
+    .test('is-valid-role', 'You must submit a valid role for the authentication disabled', (roleId) => {
+      return strapi.admin.services.role.exists({ id: roleId });
+    })),
 });
 
 module.exports = {
