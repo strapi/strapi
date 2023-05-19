@@ -143,8 +143,8 @@ export function Stage({
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
-  const [nameField, nameMeta] = useField(`stages.${index}.name`);
-  const [colorField, colorMeta] = useField(`stages.${index}.color`);
+  const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);
+  const [colorField, colorMeta, colorHelper] = useField(`stages.${index}.color`);
   const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(canReorder, {
       index,
@@ -249,7 +249,7 @@ export function Stage({
                   })}
                   error={nameMeta.error ?? false}
                   onChange={(event) => {
-                    nameField.onChange(event);
+                    nameHelper.setValue(event.target.value);
                     dispatch(updateStage(id, { name: event.target.value }));
                   }}
                   required
@@ -278,7 +278,7 @@ export function Stage({
                       name={colorField.name}
                       options={colorOptions}
                       onChange={({ value }) => {
-                        colorField.onChange({ target: { value } });
+                        colorHelper.setValue(value);
                         dispatch(updateStage(id, { color: value }));
                       }}
                       // If no color was found in all the valid theme colors it means a user

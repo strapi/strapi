@@ -10,8 +10,8 @@ import { updateWorkflow } from '../../actions';
 export function WorkflowAttributes({ contentTypes: { collectionTypes, singleTypes } }) {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const [nameField, nameMeta] = useField('name');
-  const [contentTypesField, contentTypesMeta] = useField('contentTypes');
+  const [nameField, nameMeta, nameHelper] = useField('name');
+  const [contentTypesField, contentTypesMeta, contentTypesHelper] = useField('contentTypes');
 
   return (
     <Grid background="neutral0" hasRadius gap={4} padding={6} shadow="tableShadow">
@@ -26,7 +26,7 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
           error={nameMeta.error ?? false}
           onChange={(event) => {
             dispatch(updateWorkflow({ name: event.target.value }));
-            nameField.onChange(event);
+            nameHelper.setValue(event.target.value);
           }}
           required
         />
@@ -53,7 +53,7 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
           })}
           onChange={(values) => {
             dispatch(updateWorkflow({ contentTypes: values }));
-            contentTypesField.onChange({ target: { value: values } });
+            contentTypesHelper.setValue(values);
           }}
           options={[
             {

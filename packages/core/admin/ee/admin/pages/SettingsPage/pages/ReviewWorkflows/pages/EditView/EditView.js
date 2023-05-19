@@ -112,7 +112,6 @@ export function ReviewWorkflowsEditView() {
       }
     },
     validationSchema: getWorkflowValidationSchema({ formatMessage }),
-    validateOnChange: true,
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
