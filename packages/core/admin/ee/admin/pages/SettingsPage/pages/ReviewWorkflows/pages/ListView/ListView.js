@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   Link,
   LinkButton,
+  onRowClick,
   pxToRem,
   useAPIErrorHandler,
   useFetchClient,
@@ -34,7 +35,17 @@ import adminPermissions from '../../../../../../../../admin/src/permissions';
 import * as Layout from '../../components/Layout';
 
 const ActionLink = styled(Link)`
+  align-items: center;
+  height: ${pxToRem(32)};
+  display: flex;
+  justify-content: center;
+  padding: ${({ theme }) => `${theme.spaces[2]}}`};
+  width: ${pxToRem(32)};
+
   svg {
+    height: ${pxToRem(12)};
+    width: ${pxToRem(12)};
+
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
     }
@@ -168,7 +179,16 @@ export function ReviewWorkflowsListView() {
             <Tbody>
               {workflowsData.data.map((workflow) => (
                 <Tr
-                  onRowClick={() => push(`/settings/review-workflows/${workflow.id}`)}
+                  {...onRowClick({
+                    fn(event) {
+                      // Abort row onClick event when the user click on the delete button
+                      if (event.target.nodeName === 'BUTTON') {
+                        return;
+                      }
+
+                      push(`/settings/review-workflows/${workflow.id}`);
+                    },
+                  })}
                   key={`workflow-${workflow.id}`}
                 >
                   <Td width={pxToRem(250)}>
@@ -180,24 +200,7 @@ export function ReviewWorkflowsListView() {
                     <Typography textColor="neutral800">{workflow.stages.length}</Typography>
                   </Td>
                   <Td>
-                    <Flex gap={2} justifyContent="end">
-                      {workflowsData.data.length > 1 && (
-                        <IconButton
-                          aria-label={formatMessage(
-                            {
-                              id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
-                              defaultMessage: 'Delete {name}',
-                            },
-                            { name: 'Default workflow' }
-                          )}
-                          icon={<Trash />}
-                          noBorder
-                          onClick={() => {
-                            handleDeleteWorkflow(workflow.id);
-                          }}
-                        />
-                      )}
-
+                    <Flex alignItems="center" justifyContent="end">
                       <ActionLink
                         to={`/settings/review-workflows/${workflow.id}`}
                         aria-label={formatMessage(
@@ -210,6 +213,22 @@ export function ReviewWorkflowsListView() {
                       >
                         <Pencil />
                       </ActionLink>
+
+                      <IconButton
+                        aria-label={formatMessage(
+                          {
+                            id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
+                            defaultMessage: 'Delete {name}',
+                          },
+                          { name: 'Default workflow' }
+                        )}
+                        disabled={workflowsData.data.length === 1}
+                        icon={<Trash />}
+                        noBorder
+                        onClick={() => {
+                          handleDeleteWorkflow(workflow.id);
+                        }}
+                      />
                     </Flex>
                   </Td>
                 </Tr>
