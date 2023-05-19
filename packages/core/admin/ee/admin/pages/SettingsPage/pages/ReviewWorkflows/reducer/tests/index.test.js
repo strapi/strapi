@@ -561,7 +561,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
                 },
               ],
             },
-            isDirty: false,
+            isDirty: true,
           }),
         }),
       })
