@@ -16,7 +16,7 @@ module.exports = {
     const { body } = ctx.request;
     const { populate } = ctx.query;
 
-    const workflowBody = await validateWorkflowCreate(body);
+    const workflowBody = await validateWorkflowCreate(body.data);
 
     const workflowService = getService('workflows');
     const data = await workflowService.create({ data: workflowBody, populate });
@@ -36,7 +36,7 @@ module.exports = {
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
 
-    const workflowBody = await validateWorkflowUpdate(body);
+    const workflowBody = await validateWorkflowUpdate(body.data);
 
     const workflow = await workflowService.findById(id, { populate: ['stages'] });
     if (!workflow) {

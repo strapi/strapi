@@ -166,6 +166,14 @@ export function ReviewWorkflowsListView() {
                   </Typography>
                 </Th>
                 <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: 'Settings.review-workflows.list.page.list.column.contentTypes.title',
+                      defaultMessage: 'Content Types',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
                   <VisuallyHidden>
                     {formatMessage({
                       id: 'Settings.review-workflows.list.page.list.column.actions.title',
@@ -198,6 +206,11 @@ export function ReviewWorkflowsListView() {
                   </Td>
                   <Td>
                     <Typography textColor="neutral800">{workflow.stages.length}</Typography>
+                  </Td>
+                  <Td>
+                    <Typography textColor="neutral800">
+                      {(workflow?.contentTypes ?? []).join(', ')}
+                    </Typography>
                   </Td>
                   <Td>
                     <Flex alignItems="center" justifyContent="end">
