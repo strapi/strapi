@@ -51,6 +51,27 @@ module.exports = {
   },
 
   /**
+   * Delete a workflow
+   * @param {import('koa').BaseContext} ctx - koa context
+   */
+  async delete(ctx) {
+    const { id } = ctx.params;
+    const { populate } = ctx.query;
+    const workflowService = getService('workflows');
+
+    const workflow = await workflowService.findById(id, { populate: ['stages'] });
+    if (!workflow) {
+      return ctx.notFound("Workflow doesn't exist");
+    }
+
+    const data = await workflowService.delete(workflow, { populate });
+
+    ctx.body = {
+      data,
+    };
+  },
+
+  /**
    * List all workflows
    * @param {import('koa').BaseContext} ctx - koa context
    */
