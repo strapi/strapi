@@ -22,6 +22,8 @@ const {
   exitMessageText,
   abortTransfer,
   getTransferTelemetryPayload,
+  setSignalHandler,
+  getDiffHandler,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
 
@@ -146,6 +148,8 @@ module.exports = async (opts) => {
 
   const { updateLoader } = loadersFactory();
 
+  engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
+
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
   });
@@ -171,10 +175,7 @@ module.exports = async (opts) => {
   let results;
   try {
     // Abort transfer if user interrupts process
-    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((signal) => {
-      process.removeAllListeners(signal);
-      process.on(signal, () => abortTransfer({ engine, strapi }));
-    });
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
 
     results = await engine.transfer();
   } catch (e) {

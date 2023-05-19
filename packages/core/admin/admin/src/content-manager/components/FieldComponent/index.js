@@ -2,7 +2,7 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import size from 'lodash/size';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { NotAllowedInput } from '@strapi/helper-plugin';
