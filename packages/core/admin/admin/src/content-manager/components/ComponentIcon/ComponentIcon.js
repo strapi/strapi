@@ -1,37 +1,29 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from 'styled-components';
 
 import { Flex, Icon } from '@strapi/design-system';
 import { Cube } from '@strapi/icons';
-import COMPONENT_ICONS from '../../utils/componentIcons';
-
-const WIDTH_S = 5;
-const WIDTH_M = 8;
-
-const Wrapper = styled(Flex)`
-  border-radius: ${({ showBackground }) => (showBackground ? `50%` : 0)};
-  color: ${({ theme }) => theme.colors.neutral600};
-  height: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S : WIDTH_M]};
-  width: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S : WIDTH_M]};
-
-  svg {
-    height: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S - 2 : WIDTH_M - 3]};
-    width: ${({ theme, size }) => theme.spaces[size === 'S' ? WIDTH_S - 2 : WIDTH_M - 3]};
-  }
-`;
+import { COMPONENT_ICONS } from './constants';
 
 export function ComponentIcon({ showBackground = true, size = 'M', icon }) {
   return (
-    <Wrapper
+    <Flex
       alignItems="center"
       background={showBackground ? 'neutral200' : null}
       justifyContent="center"
       size={size}
       showBackground={showBackground}
+      height={size === 'S' ? 5 : 8}
+      width={size === 'S' ? 5 : 8}
+      color="neutral600"
+      borderRadius={showBackground ? '50%' : 0}
     >
-      <Icon as={COMPONENT_ICONS[icon] || Cube} />
-    </Wrapper>
+      <Icon
+        as={COMPONENT_ICONS[icon] || Cube}
+        height={size === 'S' ? 3 : 5}
+        width={size === 'S' ? 3 : 5}
+      />
+    </Flex>
   );
 }
 

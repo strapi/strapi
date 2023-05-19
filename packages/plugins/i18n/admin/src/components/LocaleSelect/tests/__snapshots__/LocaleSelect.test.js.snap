@@ -146,7 +146,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   >
     <label
       class="c1 c2 c3"
-      for=":r0:"
+      for="1"
     >
       Locales
     </label>
@@ -159,16 +159,16 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
       >
         <input
           aria-autocomplete="both"
-          aria-controls="radix-:r3:"
+          aria-controls="radix-0"
           aria-disabled="false"
           aria-expanded="false"
           aria-invalid="false"
-          aria-labelledby=":r0:-hint :r0:-error"
+          aria-labelledby="1-hint 1-error"
           aria-required="false"
           class="c7"
           data-placeholder=""
           data-state="closed"
-          id=":r0:"
+          id="1"
           placeholder="Select"
           role="combobox"
           type="text"
@@ -179,7 +179,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         class="c6"
       >
         <button
-          aria-controls="radix-:r3:"
+          aria-controls="radix-0"
           aria-disabled="false"
           aria-expanded="false"
           aria-hidden="true"

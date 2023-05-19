@@ -467,9 +467,7 @@ exports[`IconPicker should render 1`] = `
                 value="alien"
               />
             </div>
-            <span>
-              Select alien icon
-            </span>
+            Select alien icon
           </div>
           <div
             class="c15"
@@ -517,9 +515,7 @@ exports[`IconPicker should render 1`] = `
                 value="apps"
               />
             </div>
-            <span>
-              Select apps icon
-            </span>
+            Select apps icon
           </div>
           <div
             class="c15"
@@ -567,9 +563,7 @@ exports[`IconPicker should render 1`] = `
                 value="archive"
               />
             </div>
-            <span>
-              Select archive icon
-            </span>
+            Select archive icon
           </div>
           <div
             class="c15"
@@ -617,9 +611,7 @@ exports[`IconPicker should render 1`] = `
                 value="arrowDown"
               />
             </div>
-            <span>
-              Select arrowDown icon
-            </span>
+            Select arrowDown icon
           </div>
           <div
             class="c15"
@@ -667,9 +659,7 @@ exports[`IconPicker should render 1`] = `
                 value="arrowLeft"
               />
             </div>
-            <span>
-              Select arrowLeft icon
-            </span>
+            Select arrowLeft icon
           </div>
           <div
             class="c15"
@@ -717,9 +707,7 @@ exports[`IconPicker should render 1`] = `
                 value="arrowRight"
               />
             </div>
-            <span>
-              Select arrowRight icon
-            </span>
+            Select arrowRight icon
           </div>
           <div
             class="c15"
@@ -767,9 +755,7 @@ exports[`IconPicker should render 1`] = `
                 value="arrowUp"
               />
             </div>
-            <span>
-              Select arrowUp icon
-            </span>
+            Select arrowUp icon
           </div>
           <div
             class="c15"
@@ -817,9 +803,7 @@ exports[`IconPicker should render 1`] = `
                 value="attachment"
               />
             </div>
-            <span>
-              Select attachment icon
-            </span>
+            Select attachment icon
           </div>
           <div
             class="c15"
@@ -867,9 +851,7 @@ exports[`IconPicker should render 1`] = `
                 value="bell"
               />
             </div>
-            <span>
-              Select bell icon
-            </span>
+            Select bell icon
           </div>
           <div
             class="c15"
@@ -917,9 +899,7 @@ exports[`IconPicker should render 1`] = `
                 value="bold"
               />
             </div>
-            <span>
-              Select bold icon
-            </span>
+            Select bold icon
           </div>
           <div
             class="c15"
@@ -969,9 +949,7 @@ exports[`IconPicker should render 1`] = `
                 value="book"
               />
             </div>
-            <span>
-              Select book icon
-            </span>
+            Select book icon
           </div>
           <div
             class="c15"
@@ -1019,9 +997,7 @@ exports[`IconPicker should render 1`] = `
                 value="briefcase"
               />
             </div>
-            <span>
-              Select briefcase icon
-            </span>
+            Select briefcase icon
           </div>
           <div
             class="c15"
@@ -1069,9 +1045,7 @@ exports[`IconPicker should render 1`] = `
                 value="brush"
               />
             </div>
-            <span>
-              Select brush icon
-            </span>
+            Select brush icon
           </div>
           <div
             class="c15"
@@ -1119,9 +1093,7 @@ exports[`IconPicker should render 1`] = `
                 value="bulletList"
               />
             </div>
-            <span>
-              Select bulletList icon
-            </span>
+            Select bulletList icon
           </div>
           <div
             class="c15"
@@ -1171,9 +1143,7 @@ exports[`IconPicker should render 1`] = `
                 value="calendar"
               />
             </div>
-            <span>
-              Select calendar icon
-            </span>
+            Select calendar icon
           </div>
           <div
             class="c15"
@@ -1223,9 +1193,7 @@ exports[`IconPicker should render 1`] = `
                 value="car"
               />
             </div>
-            <span>
-              Select car icon
-            </span>
+            Select car icon
           </div>
           <div
             class="c15"
@@ -1273,9 +1241,7 @@ exports[`IconPicker should render 1`] = `
                 value="cast"
               />
             </div>
-            <span>
-              Select cast icon
-            </span>
+            Select cast icon
           </div>
           <div
             class="c15"
@@ -1323,9 +1289,7 @@ exports[`IconPicker should render 1`] = `
                 value="chartBubble"
               />
             </div>
-            <span>
-              Select chartBubble icon
-            </span>
+            Select chartBubble icon
           </div>
           <div
             class="c15"
@@ -1373,9 +1337,7 @@ exports[`IconPicker should render 1`] = `
                 value="chartCircle"
               />
             </div>
-            <span>
-              Select chartCircle icon
-            </span>
+            Select chartCircle icon
           </div>
           <div
             class="c15"
@@ -1423,9 +1385,7 @@ exports[`IconPicker should render 1`] = `
                 value="chartPie"
               />
             </div>
-            <span>
-              Select chartPie icon
-            </span>
+            Select chartPie icon
           </div>
           <div
             class="c15"
@@ -1473,9 +1433,7 @@ exports[`IconPicker should render 1`] = `
                 value="check"
               />
             </div>
-            <span>
-              Select check icon
-            </span>
+            Select check icon
           </div>
           <div
             class="c15"
@@ -1523,9 +1481,7 @@ exports[`IconPicker should render 1`] = `
                 value="clock"
               />
             </div>
-            <span>
-              Select clock icon
-            </span>
+            Select clock icon
           </div>
           <div
             class="c15"
@@ -1575,9 +1531,7 @@ exports[`IconPicker should render 1`] = `
                 value="cloud"
               />
             </div>
-            <span>
-              Select cloud icon
-            </span>
+            Select cloud icon
           </div>
           <div
             class="c15"
@@ -1625,9 +1579,7 @@ exports[`IconPicker should render 1`] = `
                 value="code"
               />
             </div>
-            <span>
-              Select code icon
-            </span>
+            Select code icon
           </div>
           <div
             class="c15"
@@ -1675,9 +1627,7 @@ exports[`IconPicker should render 1`] = `
                 value="cog"
               />
             </div>
-            <span>
-              Select cog icon
-            </span>
+            Select cog icon
           </div>
           <div
             class="c15"
@@ -1727,9 +1677,7 @@ exports[`IconPicker should render 1`] = `
                 value="collapse"
               />
             </div>
-            <span>
-              Select collapse icon
-            </span>
+            Select collapse icon
           </div>
           <div
             class="c15"
@@ -1777,9 +1725,7 @@ exports[`IconPicker should render 1`] = `
                 value="command"
               />
             </div>
-            <span>
-              Select command icon
-            </span>
+            Select command icon
           </div>
           <div
             class="c15"
@@ -1826,9 +1772,7 @@ exports[`IconPicker should render 1`] = `
                 value="connector"
               />
             </div>
-            <span>
-              Select connector icon
-            </span>
+            Select connector icon
           </div>
           <div
             class="c15"
@@ -1876,9 +1820,7 @@ exports[`IconPicker should render 1`] = `
                 value="crop"
               />
             </div>
-            <span>
-              Select crop icon
-            </span>
+            Select crop icon
           </div>
           <div
             class="c15"
@@ -1926,9 +1868,7 @@ exports[`IconPicker should render 1`] = `
                 value="cross"
               />
             </div>
-            <span>
-              Select cross icon
-            </span>
+            Select cross icon
           </div>
           <div
             class="c15"
@@ -1976,9 +1916,7 @@ exports[`IconPicker should render 1`] = `
                 value="crown"
               />
             </div>
-            <span>
-              Select crown icon
-            </span>
+            Select crown icon
           </div>
           <div
             class="c15"
@@ -2026,9 +1964,7 @@ exports[`IconPicker should render 1`] = `
                 value="cup"
               />
             </div>
-            <span>
-              Select cup icon
-            </span>
+            Select cup icon
           </div>
           <div
             class="c15"
@@ -2076,9 +2012,7 @@ exports[`IconPicker should render 1`] = `
                 value="cursor"
               />
             </div>
-            <span>
-              Select cursor icon
-            </span>
+            Select cursor icon
           </div>
           <div
             class="c15"
@@ -2126,9 +2060,7 @@ exports[`IconPicker should render 1`] = `
                 value="dashboard"
               />
             </div>
-            <span>
-              Select dashboard icon
-            </span>
+            Select dashboard icon
           </div>
           <div
             class="c15"
@@ -2176,9 +2108,7 @@ exports[`IconPicker should render 1`] = `
                 value="database"
               />
             </div>
-            <span>
-              Select database icon
-            </span>
+            Select database icon
           </div>
           <div
             class="c15"
@@ -2226,9 +2156,7 @@ exports[`IconPicker should render 1`] = `
                 value="discord"
               />
             </div>
-            <span>
-              Select discord icon
-            </span>
+            Select discord icon
           </div>
           <div
             class="c15"
@@ -2276,9 +2204,7 @@ exports[`IconPicker should render 1`] = `
                 value="discuss"
               />
             </div>
-            <span>
-              Select discuss icon
-            </span>
+            Select discuss icon
           </div>
           <div
             class="c15"
@@ -2326,9 +2252,7 @@ exports[`IconPicker should render 1`] = `
                 value="doctor"
               />
             </div>
-            <span>
-              Select doctor icon
-            </span>
+            Select doctor icon
           </div>
           <div
             class="c15"
@@ -2376,9 +2300,7 @@ exports[`IconPicker should render 1`] = `
                 value="download"
               />
             </div>
-            <span>
-              Select download icon
-            </span>
+            Select download icon
           </div>
           <div
             class="c15"
@@ -2428,9 +2350,7 @@ exports[`IconPicker should render 1`] = `
                 value="drag"
               />
             </div>
-            <span>
-              Select drag icon
-            </span>
+            Select drag icon
           </div>
           <div
             class="c15"
@@ -2502,9 +2422,7 @@ exports[`IconPicker should render 1`] = `
                 value="duplicate"
               />
             </div>
-            <span>
-              Select duplicate icon
-            </span>
+            Select duplicate icon
           </div>
           <div
             class="c15"
@@ -2556,9 +2474,7 @@ exports[`IconPicker should render 1`] = `
                 value="earth"
               />
             </div>
-            <span>
-              Select earth icon
-            </span>
+            Select earth icon
           </div>
           <div
             class="c15"
@@ -2614,9 +2530,7 @@ exports[`IconPicker should render 1`] = `
                 value="emotionHappy"
               />
             </div>
-            <span>
-              Select emotionHappy icon
-            </span>
+            Select emotionHappy icon
           </div>
           <div
             class="c15"
@@ -2664,9 +2578,7 @@ exports[`IconPicker should render 1`] = `
                 value="emotionUnhappy"
               />
             </div>
-            <span>
-              Select emotionUnhappy icon
-            </span>
+            Select emotionUnhappy icon
           </div>
           <div
             class="c15"
@@ -2714,9 +2626,7 @@ exports[`IconPicker should render 1`] = `
                 value="envelop"
               />
             </div>
-            <span>
-              Select envelop icon
-            </span>
+            Select envelop icon
           </div>
           <div
             class="c15"
@@ -2772,9 +2682,7 @@ exports[`IconPicker should render 1`] = `
                 value="exit"
               />
             </div>
-            <span>
-              Select exit icon
-            </span>
+            Select exit icon
           </div>
           <div
             class="c15"
@@ -2826,9 +2734,7 @@ exports[`IconPicker should render 1`] = `
                 value="expand"
               />
             </div>
-            <span>
-              Select expand icon
-            </span>
+            Select expand icon
           </div>
           <div
             class="c15"
@@ -2876,9 +2782,7 @@ exports[`IconPicker should render 1`] = `
                 value="eye"
               />
             </div>
-            <span>
-              Select eye icon
-            </span>
+            Select eye icon
           </div>
           <div
             class="c15"
@@ -2932,9 +2836,7 @@ exports[`IconPicker should render 1`] = `
                 value="facebook"
               />
             </div>
-            <span>
-              Select facebook icon
-            </span>
+            Select facebook icon
           </div>
           <div
             class="c15"
@@ -2984,9 +2886,7 @@ exports[`IconPicker should render 1`] = `
                 value="feather"
               />
             </div>
-            <span>
-              Select feather icon
-            </span>
+            Select feather icon
           </div>
           <div
             class="c15"
@@ -3034,9 +2934,7 @@ exports[`IconPicker should render 1`] = `
                 value="file"
               />
             </div>
-            <span>
-              Select file icon
-            </span>
+            Select file icon
           </div>
           <div
             class="c15"
@@ -3086,9 +2984,7 @@ exports[`IconPicker should render 1`] = `
                 value="fileError"
               />
             </div>
-            <span>
-              Select fileError icon
-            </span>
+            Select fileError icon
           </div>
           <div
             class="c15"
@@ -3138,9 +3034,7 @@ exports[`IconPicker should render 1`] = `
                 value="filePdf"
               />
             </div>
-            <span>
-              Select filePdf icon
-            </span>
+            Select filePdf icon
           </div>
           <div
             class="c15"
@@ -3194,9 +3088,7 @@ exports[`IconPicker should render 1`] = `
                 value="filter"
               />
             </div>
-            <span>
-              Select filter icon
-            </span>
+            Select filter icon
           </div>
           <div
             class="c15"
@@ -3246,9 +3138,7 @@ exports[`IconPicker should render 1`] = `
                 value="folder"
               />
             </div>
-            <span>
-              Select folder icon
-            </span>
+            Select folder icon
           </div>
           <div
             class="c15"
@@ -3296,9 +3186,7 @@ exports[`IconPicker should render 1`] = `
                 value="gate"
               />
             </div>
-            <span>
-              Select gate icon
-            </span>
+            Select gate icon
           </div>
           <div
             class="c15"
@@ -3346,9 +3234,7 @@ exports[`IconPicker should render 1`] = `
                 value="gift"
               />
             </div>
-            <span>
-              Select gift icon
-            </span>
+            Select gift icon
           </div>
           <div
             class="c15"
@@ -3396,9 +3282,7 @@ exports[`IconPicker should render 1`] = `
                 value="github"
               />
             </div>
-            <span>
-              Select github icon
-            </span>
+            Select github icon
           </div>
           <div
             class="c15"
@@ -3446,9 +3330,7 @@ exports[`IconPicker should render 1`] = `
                 value="globe"
               />
             </div>
-            <span>
-              Select globe icon
-            </span>
+            Select globe icon
           </div>
           <div
             class="c15"
@@ -3496,9 +3378,7 @@ exports[`IconPicker should render 1`] = `
                 value="graphQl"
               />
             </div>
-            <span>
-              Select graphQl icon
-            </span>
+            Select graphQl icon
           </div>
           <div
             class="c15"
@@ -3548,9 +3428,7 @@ exports[`IconPicker should render 1`] = `
                 value="grid"
               />
             </div>
-            <span>
-              Select grid icon
-            </span>
+            Select grid icon
           </div>
           <div
             class="c15"
@@ -3598,9 +3476,7 @@ exports[`IconPicker should render 1`] = `
                 value="handHeart"
               />
             </div>
-            <span>
-              Select handHeart icon
-            </span>
+            Select handHeart icon
           </div>
           <div
             class="c15"
@@ -3648,9 +3524,7 @@ exports[`IconPicker should render 1`] = `
                 value="hashtag"
               />
             </div>
-            <span>
-              Select hashtag icon
-            </span>
+            Select hashtag icon
           </div>
           <div
             class="c15"
@@ -3698,9 +3572,7 @@ exports[`IconPicker should render 1`] = `
                 value="headphone"
               />
             </div>
-            <span>
-              Select headphone icon
-            </span>
+            Select headphone icon
           </div>
           <div
             class="c15"
@@ -3748,9 +3620,7 @@ exports[`IconPicker should render 1`] = `
                 value="heart"
               />
             </div>
-            <span>
-              Select heart icon
-            </span>
+            Select heart icon
           </div>
           <div
             class="c15"
@@ -3798,9 +3668,7 @@ exports[`IconPicker should render 1`] = `
                 value="house"
               />
             </div>
-            <span>
-              Select house icon
-            </span>
+            Select house icon
           </div>
           <div
             class="c15"
@@ -3848,9 +3716,7 @@ exports[`IconPicker should render 1`] = `
                 value="information"
               />
             </div>
-            <span>
-              Select information icon
-            </span>
+            Select information icon
           </div>
           <div
             class="c15"
@@ -3898,9 +3764,7 @@ exports[`IconPicker should render 1`] = `
                 value="italic"
               />
             </div>
-            <span>
-              Select italic icon
-            </span>
+            Select italic icon
           </div>
           <div
             class="c15"
@@ -3948,9 +3812,7 @@ exports[`IconPicker should render 1`] = `
                 value="key"
               />
             </div>
-            <span>
-              Select key icon
-            </span>
+            Select key icon
           </div>
           <div
             class="c15"
@@ -3998,9 +3860,7 @@ exports[`IconPicker should render 1`] = `
                 value="landscape"
               />
             </div>
-            <span>
-              Select landscape icon
-            </span>
+            Select landscape icon
           </div>
           <div
             class="c15"
@@ -4050,9 +3910,7 @@ exports[`IconPicker should render 1`] = `
                 value="layer"
               />
             </div>
-            <span>
-              Select layer icon
-            </span>
+            Select layer icon
           </div>
           <div
             class="c15"
@@ -4100,9 +3958,7 @@ exports[`IconPicker should render 1`] = `
                 value="layout"
               />
             </div>
-            <span>
-              Select layout icon
-            </span>
+            Select layout icon
           </div>
           <div
             class="c15"
@@ -4152,9 +4008,7 @@ exports[`IconPicker should render 1`] = `
                 value="lightbulb"
               />
             </div>
-            <span>
-              Select lightbulb icon
-            </span>
+            Select lightbulb icon
           </div>
           <div
             class="c15"
@@ -4202,9 +4056,7 @@ exports[`IconPicker should render 1`] = `
                 value="link"
               />
             </div>
-            <span>
-              Select link icon
-            </span>
+            Select link icon
           </div>
           <div
             class="c15"
@@ -4256,9 +4108,7 @@ exports[`IconPicker should render 1`] = `
                 value="lock"
               />
             </div>
-            <span>
-              Select lock icon
-            </span>
+            Select lock icon
           </div>
           <div
             class="c15"
@@ -4306,9 +4156,7 @@ exports[`IconPicker should render 1`] = `
                 value="magic"
               />
             </div>
-            <span>
-              Select magic icon
-            </span>
+            Select magic icon
           </div>
           <div
             class="c15"
@@ -4356,9 +4204,7 @@ exports[`IconPicker should render 1`] = `
                 value="manyToMany"
               />
             </div>
-            <span>
-              Select manyToMany icon
-            </span>
+            Select manyToMany icon
           </div>
           <div
             class="c15"
@@ -4426,9 +4272,7 @@ exports[`IconPicker should render 1`] = `
                 value="manyToOne"
               />
             </div>
-            <span>
-              Select manyToOne icon
-            </span>
+            Select manyToOne icon
           </div>
           <div
             class="c15"
@@ -4486,9 +4330,7 @@ exports[`IconPicker should render 1`] = `
                 value="manyWays"
               />
             </div>
-            <span>
-              Select manyWays icon
-            </span>
+            Select manyWays icon
           </div>
           <div
             class="c15"
@@ -4550,9 +4392,7 @@ exports[`IconPicker should render 1`] = `
                 value="medium"
               />
             </div>
-            <span>
-              Select medium icon
-            </span>
+            Select medium icon
           </div>
           <div
             class="c15"
@@ -4602,9 +4442,7 @@ exports[`IconPicker should render 1`] = `
                 value="message"
               />
             </div>
-            <span>
-              Select message icon
-            </span>
+            Select message icon
           </div>
           <div
             class="c15"
@@ -4652,9 +4490,7 @@ exports[`IconPicker should render 1`] = `
                 value="microphone"
               />
             </div>
-            <span>
-              Select microphone icon
-            </span>
+            Select microphone icon
           </div>
           <div
             class="c15"
@@ -4702,9 +4538,7 @@ exports[`IconPicker should render 1`] = `
                 value="monitor"
               />
             </div>
-            <span>
-              Select monitor icon
-            </span>
+            Select monitor icon
           </div>
           <div
             class="c15"
@@ -4752,9 +4586,7 @@ exports[`IconPicker should render 1`] = `
                 value="moon"
               />
             </div>
-            <span>
-              Select moon icon
-            </span>
+            Select moon icon
           </div>
           <div
             class="c15"
@@ -4802,9 +4634,7 @@ exports[`IconPicker should render 1`] = `
                 value="music"
               />
             </div>
-            <span>
-              Select music icon
-            </span>
+            Select music icon
           </div>
           <div
             class="c15"
@@ -4852,9 +4682,7 @@ exports[`IconPicker should render 1`] = `
                 value="oneToMany"
               />
             </div>
-            <span>
-              Select oneToMany icon
-            </span>
+            Select oneToMany icon
           </div>
           <div
             class="c15"
@@ -4912,9 +4740,7 @@ exports[`IconPicker should render 1`] = `
                 value="oneToOne"
               />
             </div>
-            <span>
-              Select oneToOne icon
-            </span>
+            Select oneToOne icon
           </div>
           <div
             class="c15"
@@ -4968,9 +4794,7 @@ exports[`IconPicker should render 1`] = `
                 value="oneWay"
               />
             </div>
-            <span>
-              Select oneWay icon
-            </span>
+            Select oneWay icon
           </div>
           <div
             class="c15"
@@ -5020,9 +4844,7 @@ exports[`IconPicker should render 1`] = `
                 value="paint"
               />
             </div>
-            <span>
-              Select paint icon
-            </span>
+            Select paint icon
           </div>
           <div
             class="c15"
@@ -5070,9 +4892,7 @@ exports[`IconPicker should render 1`] = `
                 value="paintBrush"
               />
             </div>
-            <span>
-              Select paintBrush icon
-            </span>
+            Select paintBrush icon
           </div>
           <div
             class="c15"
@@ -5120,9 +4940,7 @@ exports[`IconPicker should render 1`] = `
                 value="paperPlane"
               />
             </div>
-            <span>
-              Select paperPlane icon
-            </span>
+            Select paperPlane icon
           </div>
           <div
             class="c15"
@@ -5170,9 +4988,7 @@ exports[`IconPicker should render 1`] = `
                 value="pencil"
               />
             </div>
-            <span>
-              Select pencil icon
-            </span>
+            Select pencil icon
           </div>
           <div
             class="c15"
@@ -5222,9 +5038,7 @@ exports[`IconPicker should render 1`] = `
                 value="phone"
               />
             </div>
-            <span>
-              Select phone icon
-            </span>
+            Select phone icon
           </div>
           <div
             class="c15"
@@ -5272,9 +5086,7 @@ exports[`IconPicker should render 1`] = `
                 value="picture"
               />
             </div>
-            <span>
-              Select picture icon
-            </span>
+            Select picture icon
           </div>
           <div
             class="c15"
@@ -5324,9 +5136,7 @@ exports[`IconPicker should render 1`] = `
                 value="pin"
               />
             </div>
-            <span>
-              Select pin icon
-            </span>
+            Select pin icon
           </div>
           <div
             class="c15"
@@ -5374,9 +5184,7 @@ exports[`IconPicker should render 1`] = `
                 value="pinMap"
               />
             </div>
-            <span>
-              Select pinMap icon
-            </span>
+            Select pinMap icon
           </div>
           <div
             class="c15"
@@ -5424,9 +5232,7 @@ exports[`IconPicker should render 1`] = `
                 value="plane"
               />
             </div>
-            <span>
-              Select plane icon
-            </span>
+            Select plane icon
           </div>
           <div
             class="c15"
@@ -5474,9 +5280,7 @@ exports[`IconPicker should render 1`] = `
                 value="play"
               />
             </div>
-            <span>
-              Select play icon
-            </span>
+            Select play icon
           </div>
           <div
             class="c15"
@@ -5524,9 +5328,7 @@ exports[`IconPicker should render 1`] = `
                 value="plus"
               />
             </div>
-            <span>
-              Select plus icon
-            </span>
+            Select plus icon
           </div>
           <div
             class="c15"
@@ -5574,9 +5376,7 @@ exports[`IconPicker should render 1`] = `
                 value="priceTag"
               />
             </div>
-            <span>
-              Select priceTag icon
-            </span>
+            Select priceTag icon
           </div>
           <div
             class="c15"
@@ -5624,9 +5424,7 @@ exports[`IconPicker should render 1`] = `
                 value="puzzle"
               />
             </div>
-            <span>
-              Select puzzle icon
-            </span>
+            Select puzzle icon
           </div>
           <div
             class="c15"
@@ -5676,9 +5474,7 @@ exports[`IconPicker should render 1`] = `
                 value="question"
               />
             </div>
-            <span>
-              Select question icon
-            </span>
+            Select question icon
           </div>
           <div
             class="c15"
@@ -5726,9 +5522,7 @@ exports[`IconPicker should render 1`] = `
                 value="quote"
               />
             </div>
-            <span>
-              Select quote icon
-            </span>
+            Select quote icon
           </div>
           <div
             class="c15"
@@ -5776,9 +5570,7 @@ exports[`IconPicker should render 1`] = `
                 value="reddit"
               />
             </div>
-            <span>
-              Select reddit icon
-            </span>
+            Select reddit icon
           </div>
           <div
             class="c15"
@@ -5828,9 +5620,7 @@ exports[`IconPicker should render 1`] = `
                 value="refresh"
               />
             </div>
-            <span>
-              Select refresh icon
-            </span>
+            Select refresh icon
           </div>
           <div
             class="c15"
@@ -5880,9 +5670,7 @@ exports[`IconPicker should render 1`] = `
                 value="repeat"
               />
             </div>
-            <span>
-              Select repeat icon
-            </span>
+            Select repeat icon
           </div>
           <div
             class="c15"
@@ -5930,9 +5718,7 @@ exports[`IconPicker should render 1`] = `
                 value="restaurant"
               />
             </div>
-            <span>
-              Select restaurant icon
-            </span>
+            Select restaurant icon
           </div>
           <div
             class="c15"
@@ -5980,9 +5766,7 @@ exports[`IconPicker should render 1`] = `
                 value="rocket"
               />
             </div>
-            <span>
-              Select rocket icon
-            </span>
+            Select rocket icon
           </div>
           <div
             class="c15"
@@ -6030,9 +5814,7 @@ exports[`IconPicker should render 1`] = `
                 value="rotate"
               />
             </div>
-            <span>
-              Select rotate icon
-            </span>
+            Select rotate icon
           </div>
           <div
             class="c15"
@@ -6080,9 +5862,7 @@ exports[`IconPicker should render 1`] = `
                 value="scissors"
               />
             </div>
-            <span>
-              Select scissors icon
-            </span>
+            Select scissors icon
           </div>
           <div
             class="c15"
@@ -6130,9 +5910,7 @@ exports[`IconPicker should render 1`] = `
                 value="search"
               />
             </div>
-            <span>
-              Select search icon
-            </span>
+            Select search icon
           </div>
           <div
             class="c15"
@@ -6182,9 +5960,7 @@ exports[`IconPicker should render 1`] = `
                 value="seed"
               />
             </div>
-            <span>
-              Select seed icon
-            </span>
+            Select seed icon
           </div>
           <div
             class="c15"
@@ -6232,9 +6008,7 @@ exports[`IconPicker should render 1`] = `
                 value="server"
               />
             </div>
-            <span>
-              Select server icon
-            </span>
+            Select server icon
           </div>
           <div
             class="c15"
@@ -6282,9 +6056,7 @@ exports[`IconPicker should render 1`] = `
                 value="shield"
               />
             </div>
-            <span>
-              Select shield icon
-            </span>
+            Select shield icon
           </div>
           <div
             class="c15"
@@ -6334,9 +6106,7 @@ exports[`IconPicker should render 1`] = `
                 value="shirt"
               />
             </div>
-            <span>
-              Select shirt icon
-            </span>
+            Select shirt icon
           </div>
           <div
             class="c15"
@@ -6384,9 +6154,7 @@ exports[`IconPicker should render 1`] = `
                 value="shoppingCart"
               />
             </div>
-            <span>
-              Select shoppingCart icon
-            </span>
+            Select shoppingCart icon
           </div>
           <div
             class="c15"
@@ -6436,9 +6204,7 @@ exports[`IconPicker should render 1`] = `
                 value="slideshow"
               />
             </div>
-            <span>
-              Select slideshow icon
-            </span>
+            Select slideshow icon
           </div>
           <div
             class="c15"
@@ -6486,9 +6252,7 @@ exports[`IconPicker should render 1`] = `
                 value="stack"
               />
             </div>
-            <span>
-              Select stack icon
-            </span>
+            Select stack icon
           </div>
           <div
             class="c15"
@@ -6536,9 +6300,7 @@ exports[`IconPicker should render 1`] = `
                 value="star"
               />
             </div>
-            <span>
-              Select star icon
-            </span>
+            Select star icon
           </div>
           <div
             class="c15"
@@ -6586,9 +6348,7 @@ exports[`IconPicker should render 1`] = `
                 value="store"
               />
             </div>
-            <span>
-              Select store icon
-            </span>
+            Select store icon
           </div>
           <div
             class="c15"
@@ -6636,9 +6396,7 @@ exports[`IconPicker should render 1`] = `
                 value="strikeThrough"
               />
             </div>
-            <span>
-              Select strikeThrough icon
-            </span>
+            Select strikeThrough icon
           </div>
           <div
             class="c15"
@@ -6686,9 +6444,7 @@ exports[`IconPicker should render 1`] = `
                 value="sun"
               />
             </div>
-            <span>
-              Select sun icon
-            </span>
+            Select sun icon
           </div>
           <div
             class="c15"
@@ -6736,9 +6492,7 @@ exports[`IconPicker should render 1`] = `
                 value="television"
               />
             </div>
-            <span>
-              Select television icon
-            </span>
+            Select television icon
           </div>
           <div
             class="c15"
@@ -6786,9 +6540,7 @@ exports[`IconPicker should render 1`] = `
                 value="thumbDown"
               />
             </div>
-            <span>
-              Select thumbDown icon
-            </span>
+            Select thumbDown icon
           </div>
           <div
             class="c15"
@@ -6836,9 +6588,7 @@ exports[`IconPicker should render 1`] = `
                 value="thumbUp"
               />
             </div>
-            <span>
-              Select thumbUp icon
-            </span>
+            Select thumbUp icon
           </div>
           <div
             class="c15"
@@ -6886,9 +6636,7 @@ exports[`IconPicker should render 1`] = `
                 value="train"
               />
             </div>
-            <span>
-              Select train icon
-            </span>
+            Select train icon
           </div>
           <div
             class="c15"
@@ -6936,9 +6684,7 @@ exports[`IconPicker should render 1`] = `
                 value="trash"
               />
             </div>
-            <span>
-              Select trash icon
-            </span>
+            Select trash icon
           </div>
           <div
             class="c15"
@@ -6986,9 +6732,7 @@ exports[`IconPicker should render 1`] = `
                 value="twitter"
               />
             </div>
-            <span>
-              Select twitter icon
-            </span>
+            Select twitter icon
           </div>
           <div
             class="c15"
@@ -7036,9 +6780,7 @@ exports[`IconPicker should render 1`] = `
                 value="typhoon"
               />
             </div>
-            <span>
-              Select typhoon icon
-            </span>
+            Select typhoon icon
           </div>
           <div
             class="c15"
@@ -7086,9 +6828,7 @@ exports[`IconPicker should render 1`] = `
                 value="underline"
               />
             </div>
-            <span>
-              Select underline icon
-            </span>
+            Select underline icon
           </div>
           <div
             class="c15"
@@ -7136,9 +6876,7 @@ exports[`IconPicker should render 1`] = `
                 value="upload"
               />
             </div>
-            <span>
-              Select upload icon
-            </span>
+            Select upload icon
           </div>
           <div
             class="c15"
@@ -7188,9 +6926,7 @@ exports[`IconPicker should render 1`] = `
                 value="user"
               />
             </div>
-            <span>
-              Select user icon
-            </span>
+            Select user icon
           </div>
           <div
             class="c15"
@@ -7238,9 +6974,7 @@ exports[`IconPicker should render 1`] = `
                 value="volumeMute"
               />
             </div>
-            <span>
-              Select volumeMute icon
-            </span>
+            Select volumeMute icon
           </div>
           <div
             class="c15"
@@ -7288,9 +7022,7 @@ exports[`IconPicker should render 1`] = `
                 value="volumeUp"
               />
             </div>
-            <span>
-              Select volumeUp icon
-            </span>
+            Select volumeUp icon
           </div>
           <div
             class="c15"
@@ -7338,9 +7070,7 @@ exports[`IconPicker should render 1`] = `
                 value="walk"
               />
             </div>
-            <span>
-              Select walk icon
-            </span>
+            Select walk icon
           </div>
           <div
             class="c15"
@@ -7388,9 +7118,7 @@ exports[`IconPicker should render 1`] = `
                 value="wheelchair"
               />
             </div>
-            <span>
-              Select wheelchair icon
-            </span>
+            Select wheelchair icon
           </div>
           <div
             class="c15"
@@ -7440,9 +7168,7 @@ exports[`IconPicker should render 1`] = `
                 value="write"
               />
             </div>
-            <span>
-              Select write icon
-            </span>
+            Select write icon
           </div>
           <div
             class="c15"

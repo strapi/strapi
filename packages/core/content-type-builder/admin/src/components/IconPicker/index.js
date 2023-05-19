@@ -16,8 +16,9 @@ import { Trash, Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+
 import { getTrad } from '../../utils';
-import COMPONENT_ICONS from '../../utils/componentIcons';
+import { COMPONENT_ICONS } from './constants';
 
 const IconPickerWrapper = styled(Flex)`
   label {
@@ -41,7 +42,7 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
             aria-checked={isSelected}
             aria-labelledby={`${iconKey}-label`}
           />
-          <span>{ariaLabel}</span>
+          {ariaLabel}
         </VisuallyHidden>
         <Box padding={2} cursor="pointer" hasRadius background={isSelected && 'primary200'}>
           <Icon as={COMPONENT_ICONS[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
