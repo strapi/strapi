@@ -52,11 +52,11 @@ export function ReviewWorkflowsEditView() {
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
 
   const { mutateAsync, isLoading } = useMutation(
-    async ({ workflowId, stages }) => {
+    async ({ workflow }) => {
       const {
         data: { data },
-      } = await put(`/admin/review-workflows/workflows/${workflowId}`, {
-        data: stages,
+      } = await put(`/admin/review-workflows/workflows/${workflow.id}`, {
+        data: workflow,
       });
 
       return data;
@@ -71,9 +71,9 @@ export function ReviewWorkflowsEditView() {
     }
   );
 
-  const updateWorkflowStages = async (workflowId, stages) => {
+  const updateWorkflow = async (workflow) => {
     try {
-      const res = await mutateAsync({ workflowId, stages });
+      const res = await mutateAsync({ workflow });
 
       return res;
     } catch (error) {
@@ -87,7 +87,7 @@ export function ReviewWorkflowsEditView() {
   };
 
   const submitForm = async () => {
-    await updateWorkflowStages(currentWorkflow.id, currentWorkflow.stages);
+    await updateWorkflow(currentWorkflow);
     await refetchWorkflow();
 
     setIsConfirmDeleteDialogOpen(false);
