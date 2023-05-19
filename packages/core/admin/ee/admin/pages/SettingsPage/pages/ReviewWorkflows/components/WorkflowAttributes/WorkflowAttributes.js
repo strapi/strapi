@@ -82,7 +82,6 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
             id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
             defaultMessage: 'Select',
           })}
-          required
         />
       </GridItem>
     </Grid>
