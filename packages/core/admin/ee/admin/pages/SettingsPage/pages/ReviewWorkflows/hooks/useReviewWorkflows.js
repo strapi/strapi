@@ -9,7 +9,7 @@ export function useReviewWorkflows(workflowId) {
   const client = useQueryClient();
   const workflowQueryKey = [QUERY_BASE_KEY, workflowId ?? 'default'];
 
-  async function fetchWorkflows({ params = { populate: 'stages' } }) {
+  async function fetchWorkflows({ params = { sort: 'name:asc', populate: 'stages' } }) {
     try {
       const {
         data: { data },
