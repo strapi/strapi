@@ -18,16 +18,7 @@ const FiltersPopover = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Popover
-      source={source}
-      onDismiss={() => {
-        console.log('DISMISS ME');
-        onToggle();
-      }}
-      padding={3}
-      spacing={4}
-      onBlur={() => {}}
-    >
+    <Popover source={source} onDismiss={onToggle} padding={3} spacing={4}>
       <FiltersFlex direction="column" alignItems="stretch" gap={1}>
         <FilterSelect
           message={formatMessage({
