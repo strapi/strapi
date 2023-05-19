@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import castArray from 'lodash/castArray';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { useIntl } from 'react-intl';
 import { Form, Link } from '@strapi/helper-plugin';
@@ -24,11 +23,19 @@ const WebhookForm = ({
   const { formatMessage } = useIntl();
   const [showTriggerResponse, setShowTriggerResponse] = useState(false);
 
+  const mapHeaders = (headers) => {
+    if (!Object.keys(headers).length) {
+      return [{ key: '', value: '' }];
+    }
+
+    return Object.entries(headers).map(([key, value]) => ({ key, value }));
+  };
+
   const formik = useFormik({
     initialValues: {
       name: data?.name || '',
       url: data?.url || '',
-      headers: castArray(data?.headers || []),
+      headers: mapHeaders(data?.headers || {}),
       events: data?.events || [],
     },
     onSubmit: handleSubmit,

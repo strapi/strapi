@@ -12,12 +12,28 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { useModels } from '../../../../../hooks';
 import WebhookForm from './components/WebhookForm';
-import cleanData from './utils/formatData';
+
+const cleanData = (data) => ({
+  ...data,
+  headers: data.headers.reduce((acc, current) => {
+    const { key, value } = current;
+
+    if (key !== '') {
+      return {
+        ...acc,
+        [key]: value,
+      };
+    }
+
+    return acc;
+  }, {}),
+});
 
 const EditView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
+  const isCreating = id === 'create';
 
   const { replace } = useHistory();
   const toggleNotification = useNotification();
@@ -25,8 +41,6 @@ const EditView = () => {
   const queryClient = useQueryClient();
   const { isLoading: isLoadingForModels } = useModels();
   const { put, get, post } = useFetchClient();
-
-  const isCreating = id === 'create';
 
   const {
     isLoading,

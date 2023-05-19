@@ -32,23 +32,22 @@ const HeadersInput = () => {
           name="headers"
           render={({ push, remove }) => (
             <Grid gap={4}>
-              {values.headers?.map((header, i) => (
-                // eslint-disable-next-line
-                <React.Fragment key={i}>
+              {values.headers?.map((header, index) => (
+                <React.Fragment key={`header-${header.key}`}>
                   <GridItem col={6}>
                     <Field
                       as={Combobox}
-                      name={`headers.${i}.key`}
-                      aria-label={`row ${i + 1} key`}
+                      name={`headers.${index}.key`}
+                      aria-label={`row ${index + 1} key`}
                       label={formatMessage({
                         id: 'Settings.webhooks.key',
                         defaultMessage: 'Key',
                       })}
                       error={
-                        errors.headers?.[i]?.key &&
+                        errors.headers?.[index]?.key &&
                         formatMessage({
-                          id: errors.headers[i]?.key,
-                          defaultMessage: errors.headers[i]?.key,
+                          id: errors.headers[index]?.key,
+                          defaultMessage: errors.headers[index]?.key,
                         })
                       }
                     />
@@ -58,17 +57,17 @@ const HeadersInput = () => {
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
-                          aria-label={`row ${i + 1} value`}
+                          name={`headers.${index}.value`}
+                          aria-label={`row ${index + 1} value`}
                           label={formatMessage({
                             id: 'Settings.webhooks.value',
                             defaultMessage: 'Value',
                           })}
-                          name={`headers.${i}.value`}
                           error={
-                            errors.headers?.[i]?.value &&
+                            errors.headers?.[index]?.value &&
                             formatMessage({
-                              id: errors.headers[i]?.value,
-                              defaultMessage: errors.headers[i]?.value,
+                              id: errors.headers[index]?.value,
+                              defaultMessage: errors.headers[index]?.value,
                             })
                           }
                         />
@@ -76,16 +75,16 @@ const HeadersInput = () => {
                       <Flex
                         paddingLeft={2}
                         style={{ alignSelf: 'center' }}
-                        paddingTop={errors.headers?.[i]?.value ? 0 : 5}
+                        paddingTop={errors.headers?.[index]?.value ? 0 : 5}
                       >
                         <RemoveRoundedButton
-                          onClick={() => values.headers.length !== 1 && remove(i)}
+                          onClick={() => values.headers.length !== 1 && remove(index)}
                           label={formatMessage(
                             {
                               id: 'Settings.webhooks.headers.remove',
                               defaultMessage: 'Remove header row {number}',
                             },
-                            { number: i + 1 }
+                            { number: index + 1 }
                           )}
                         />
                       </Flex>

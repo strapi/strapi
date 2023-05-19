@@ -72,12 +72,6 @@ const getEvents = (isDraftAndPublish) => {
 
 const Root = (props) => {
   const { formatMessage } = useIntl();
-  const { collectionTypes } = useModels();
-
-  const isDraftAndPublish = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
@@ -87,11 +81,7 @@ const Root = (props) => {
           defaultMessage: 'Events',
         })}
       </FieldLabel>
-      <StyledTable>
-        {React.Children.map(props.children, (child) => {
-          return React.cloneElement(child, { ...props, isDraftAndPublish });
-        })}
-      </StyledTable>
+      <StyledTable>{props.children}</StyledTable>
     </Flex>
   );
 };
@@ -100,7 +90,14 @@ Root.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const Headers = ({ isDraftAndPublish }) => {
+const Headers = () => {
+  const { collectionTypes } = useModels();
+
+  const isDraftAndPublish = React.useMemo(
+    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
+    [collectionTypes]
+  );
+
   const { formatMessage } = useIntl();
   const headers = getHeaders(isDraftAndPublish);
 
@@ -138,11 +135,14 @@ const Headers = ({ isDraftAndPublish }) => {
   );
 };
 
-Headers.propTypes = {
-  isDraftAndPublish: PropTypes.bool.isRequired,
-};
+const Body = () => {
+  const { collectionTypes } = useModels();
 
-const Body = ({ isDraftAndPublish }) => {
+  const isDraftAndPublish = React.useMemo(
+    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
+    [collectionTypes]
+  );
+
   const events = getEvents(isDraftAndPublish);
   const { values, handleChange: onChange } = useFormikContext();
 
@@ -195,10 +195,6 @@ const Body = ({ isDraftAndPublish }) => {
       })}
     </tbody>
   );
-};
-
-Body.propTypes = {
-  isDraftAndPublish: PropTypes.bool.isRequired,
 };
 
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {

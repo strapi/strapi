@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useFormikContext } from 'formik';
 import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
 import keys from './keys';
 
 const Combobox = ({ name, onChange, value, ...props }) => {
-  const [options, setOptions] = useState(value ? [...keys, value] : keys);
+  const {
+    values: { headers },
+  } = useFormikContext();
+  const [options, setOptions] = useState(keys);
+
+  useEffect(() => {
+    setOptions(
+      keys.filter((key) => !headers?.some((header) => header.key !== value && header.key === key))
+    );
+  }, [headers, value]);
 
   const handleChange = (value) => {
     onChange({ target: { name, value } });
