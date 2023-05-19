@@ -122,6 +122,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -444,52 +445,52 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   fill: #ffffff;
 }
 
-.c57 {
+.c56 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c57[aria-disabled='true'] {
+.c56[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true'] .c3 {
+.c56[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true'] svg > g,.c57[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c57[aria-disabled='true']:active {
+.c56[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true']:active .c3 {
+.c56[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true']:active svg > g,.c57[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c57:hover {
+.c56:hover {
   background-color: #f6f6f9;
 }
 
-.c57:active {
+.c56:active {
   background-color: #eaeaef;
 }
 
-.c57 .c3 {
+.c56 .c3 {
   color: #32324d;
 }
 
-.c57 svg > g,
-.c57 svg path {
+.c56 svg > g,
+.c56 svg path {
   fill: #32324d;
 }
 
@@ -595,10 +596,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c55 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
-}
-
-.c56 > * + * {
-  margin-left: 8px;
 }
 
 .c11 {
@@ -1261,11 +1258,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
         class="c2"
       >
         <div
-          class="c27 c56"
+          class="c17"
         >
           <button
             aria-disabled="false"
-            class="c16 c17 c7 c57"
+            class="c16 c17 c7 c56"
             type="button"
           >
             <span
@@ -1276,7 +1273,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
           </button>
         </div>
         <div
-          class="c27 c56"
+          class="c17"
         >
           <button
             aria-disabled="false"

@@ -231,6 +231,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -436,6 +437,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         -ms-flex-direction: row;
         flex-direction: row;
         gap: 12px;
+      }
+
+      .c60 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 4px;
       }
 
       .c23 path {
@@ -763,10 +779,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c60 > * + * {
-        margin-left: 4px;
-      }
-
       .c61 {
         padding: 12px;
         border-radius: 4px;
@@ -811,7 +823,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c62 {
-        font-size: 0.7rem;
+        font-size: 0.6875rem;
         pointer-events: none;
       }
 
@@ -825,7 +837,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c63 {
-        font-size: 0.7rem;
+        font-size: 0.6875rem;
       }
 
       .c63 svg path {
@@ -1447,11 +1459,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                 </div>
               </div>
               <nav
-                aria-label="pagination"
+                aria-label="Pagination"
                 class=""
               >
-                <ul
-                  class="c4 c60"
+                <ol
+                  class="c60"
                 >
                   <li>
                     <a
@@ -1508,7 +1520,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </svg>
                     </a>
                   </li>
-                </ul>
+                </ol>
               </nav>
             </div>
           </div>
