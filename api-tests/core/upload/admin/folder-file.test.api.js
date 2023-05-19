@@ -232,12 +232,13 @@ describe('Bulk actions for folders & files', () => {
 
       // Create folders
       const folder1 = await createFolder('folderToDelete', null);
-      data.folders = await Promise.all(
-        Array.from({ length: 20 }).map((_, i) => createFolder(`${i}`, null))
-      );
-
+      for (let i = 0; i < 20; i++) {
+        await createFolder(`folderToKeep-${i}`, null);
+      }
       // Delete folder1
-      await rq.post('/upload/actions/bulk-delete', { body: { folderIds: [folder1.id] } });
+      await rq.post('/upload/actions/bulk-delete', {
+        body: { folderIds: [folder1.id] },
+      });
 
       const folderIds = await rq
         .get('/upload/folders')
