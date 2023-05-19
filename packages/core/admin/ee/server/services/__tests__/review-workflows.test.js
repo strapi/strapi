@@ -36,15 +36,16 @@ const queryMock = {
 
 const contentTypesMock = {
   test1: {
-    options: {
-      reviewWorkflows: false,
-    },
+    options: {},
     attributes: {},
+    pluginOptions: {
+      'content-manager': {
+        visible: false,
+      },
+    },
   },
   test2: {
-    options: {
-      reviewWorkflows: true,
-    },
+    options: { reviewWorkflows: true },
     attributes: {},
   },
 };

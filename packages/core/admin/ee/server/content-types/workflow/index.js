@@ -31,6 +31,11 @@ module.exports = {
         relation: 'oneToMany',
         mappedBy: 'workflow',
       },
+      contentTypes: {
+        type: 'json',
+        required: true,
+        default: [],
+      },
     },
   },
 };

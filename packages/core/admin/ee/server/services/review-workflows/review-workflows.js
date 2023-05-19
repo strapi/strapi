@@ -1,18 +1,16 @@
 'use strict';
 
 const { set, forEach, pipe, map } = require('lodash/fp');
-const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
-const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
+const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
-const { getDefaultWorkflow } = require('../../utils/review-workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
-async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
+async function initDefaultWorkflow({ workflowsService, stagesService }) {
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
 
@@ -25,8 +23,6 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
     };
 
     await workflowsService.create({ data: workflow });
-    // If there is any manually activated RW on content-types, we want to migrate the related entities
-    await enableReviewWorkflow({ strapi })({ contentTypes: strapi.contentTypes });
   }
 }
 
@@ -44,45 +40,12 @@ function extendReviewWorkflowContentTypes({ strapi }) {
     });
     strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
   };
+
   pipe([
-    getContentTypeUIDsWithActivatedReviewWorkflows,
+    getVisibleContentTypesUID,
     // Iterate over UIDs to extend the content-type
     forEach(extendContentType),
   ])(strapi.contentTypes);
-}
-
-/**
- * Enables the review workflow for the given content types.
- * @param {Object} strapi - Strapi instance
- */
-function enableReviewWorkflow({ strapi }) {
-  /**
-   * @param {Array<string>} contentTypes - Content type UIDs to enable the review workflow for.
-   * @returns {Promise<void>} - Promise that resolves when the review workflow is enabled.
-   */
-  return async ({ contentTypes }) => {
-    const defaultWorkflow = await getDefaultWorkflow({ strapi });
-    // This is possible if this is the first start of EE, there won't be any workflow in DB before bootstrap
-    if (!defaultWorkflow) {
-      return;
-    }
-    const firstStage = defaultWorkflow.stages[0];
-    const stagesService = getService('stages', { strapi });
-
-    const updateEntitiesStage = async (contentTypeUID) => {
-      // Update CT entities stage
-      return stagesService.updateEntitiesStage(contentTypeUID, {
-        fromStageId: null,
-        toStageId: firstStage.id,
-      });
-    };
-
-    return pipe([
-      getContentTypeUIDsWithActivatedReviewWorkflows,
-      // Iterate over UIDs to extend the content-type
-      (contentTypesUIDs) => mapAsync(contentTypesUIDs, updateEntitiesStage),
-    ])(contentTypes);
-  };
 }
 
 function persistStagesJoinTables({ strapi }) {
@@ -94,10 +57,9 @@ function persistStagesJoinTables({ strapi }) {
       return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
-    const joinTablesToPersist = pipe([
-      getContentTypeUIDsWithActivatedReviewWorkflows,
-      map(getStageTableToPersist),
-    ])(contentTypes);
+    const joinTablesToPersist = pipe([getVisibleContentTypesUID, map(getStageTableToPersist)])(
+      contentTypes
+    );
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
     await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
@@ -115,7 +77,6 @@ module.exports = ({ strapi }) => {
     },
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
-      strapi.hook('strapi::content-types.afterSync').register(enableReviewWorkflow({ strapi }));
       strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
     },
   };

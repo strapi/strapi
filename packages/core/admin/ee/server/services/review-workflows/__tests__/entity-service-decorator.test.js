@@ -2,8 +2,17 @@
 
 const { omit } = require('lodash/fp');
 const { decorator } = require('../entity-service-decorator')();
+const utils = require('../../../utils');
 
-jest.mock('../../../utils');
+jest.mock('../../../utils', () => {
+  const workflowsMock = {
+    getAssignedWorkflow: jest.fn(() => ({ id: 1, stages: [{ id: 1, name: 'To Do' }] })),
+  };
+
+  return {
+    getService: jest.fn(() => workflowsMock),
+  };
+});
 
 const rwModel = {
   options: {
@@ -39,6 +48,7 @@ describe('Entity service decorator', () => {
 
   describe('Create', () => {
     test('Calls original create for non review workflow content types', async () => {
+      utils.getService().getAssignedWorkflow.mockReturnValueOnce(null);
       const entry = {
         id: 1,
       };

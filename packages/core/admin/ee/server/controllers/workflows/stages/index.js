@@ -1,8 +1,6 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { getService } = require('../../../utils');
-const { hasReviewWorkflow } = require('../../../utils/review-workflows');
 const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
 
 module.exports = {
@@ -58,6 +56,7 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const stagesService = getService('stages');
+    const workflowService = getService('workflows');
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
     const entityId = Number(entityIdString);
 
@@ -66,12 +65,8 @@ module.exports = {
       'You should pass an id to the body of the put request.'
     );
 
-    if (!hasReviewWorkflow({ strapi }, modelUID)) {
-      throw new ApplicationError(`Review workflows is not activated on ${modelUID}.`);
-    }
-
-    // TODO When multiple workflows are possible, check if the stage is part of the right one
-    // Didn't need this today as their can only be one workflow
+    const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
+    workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
     const data = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
 

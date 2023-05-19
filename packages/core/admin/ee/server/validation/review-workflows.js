@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
+const { getVisibleContentTypesUID } = require('../utils/review-workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
@@ -15,6 +16,29 @@ const validateUpdateStageOnEntity = yup
   })
   .required();
 
+const validateContentTypes = yup.array().of(
+  yup
+    .string()
+    .test({
+      name: 'content-type-exists',
+      message: (value) => `Content type ${value.originalValue} does not exist`,
+      test(uid) {
+        // Warning; we use the strapi global - to avoid that, it would need to refactor how
+        // we generate validation function by using a factory with the strapi instance as parameter.
+        return strapi.getModel(uid);
+      },
+    })
+    .test({
+      name: 'content-type-review-workflow-enabled',
+      message: (value) =>
+        `Content type ${value.originalValue} does not have review workflow enabled`,
+      test(uid) {
+        // It's not a valid  content type if it's not visible in the content manager
+        return getVisibleContentTypesUID({ [uid]: strapi.getModel(uid) }).includes(uid);
+      },
+    })
+);
+
 const validateWorkflowCreateSchema = yup.object().shape({
   name: yup.string().max(255).required(),
   stages: yup
@@ -23,6 +47,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
+  contentTypes: validateContentTypes,
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
@@ -30,8 +55,9 @@ const validateWorkflowUpdateSchema = yup.object().shape({
   stages: yup
     .array()
     .of(stageObject)
-    .min(1, 'Can not create a workflow without stages')
+    .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
+  contentTypes: validateContentTypes,
 });
 
 module.exports = {
