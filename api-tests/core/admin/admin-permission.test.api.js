@@ -380,6 +380,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "options",
                 },
                 {
+                  "action": "admin::review-workflows.delete",
+                  "category": "review workflows",
+                  "displayName": "Delete",
+                  "subCategory": "options",
+                },
+                {
                   "action": "admin::review-workflows.read",
                   "category": "review workflows",
                   "displayName": "Read",
