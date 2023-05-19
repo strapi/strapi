@@ -3,6 +3,7 @@ import { useFormik, Form, FormikProvider } from 'formik';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
 
 import {
   CheckPagePermissions,
@@ -28,6 +29,7 @@ import * as Layout from '../../components/Layout';
 export function ReviewWorkflowsCreateView() {
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
+  const { push } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
@@ -42,7 +44,7 @@ export function ReviewWorkflowsCreateView() {
     async ({ workflow }) => {
       const {
         data: { data },
-      } = await post(`/admin/review-workflows/workflow`, {
+      } = await post(`/admin/review-workflows/workflows`, {
         data: workflow,
       });
 
@@ -52,7 +54,10 @@ export function ReviewWorkflowsCreateView() {
       onSuccess() {
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: {
+            id: 'Settings.review-workflows.create.page.notification.success',
+            defaultMessage: 'Workflow successfully created',
+          },
         });
       },
     }
@@ -60,9 +65,11 @@ export function ReviewWorkflowsCreateView() {
 
   const submitForm = async () => {
     try {
-      const res = await mutateAsync({ workflow: currentWorkflow });
+      const workflow = await mutateAsync({ workflow: currentWorkflow });
 
-      return res;
+      push(`/settings/review-workflows/${workflow.id}`);
+
+      return workflow;
     } catch (error) {
       toggleNotification({
         type: 'warning',
@@ -71,8 +78,6 @@ export function ReviewWorkflowsCreateView() {
 
       return null;
     }
-
-    // TODO: redirect to edit view
   };
 
   const formik = useFormik({
@@ -82,14 +87,13 @@ export function ReviewWorkflowsCreateView() {
       submitForm();
     },
     validationSchema: getWorkflowValidationSchema({ formatMessage }),
-    validateOnChange: false,
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   React.useEffect(() => {
     dispatch(resetWorkflow());
-  }, [dispatch, collectionTypes, singleTypes]);
+  }, [dispatch]);
 
   return (
     <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>

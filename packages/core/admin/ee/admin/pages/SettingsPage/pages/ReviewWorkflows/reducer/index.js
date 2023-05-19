@@ -20,10 +20,13 @@ export const initialState = {
   clientState: {
     currentWorkflow: {
       data: {
+        name: '',
+        contentTypes: [],
         stages: [
           {
             color: STAGE_COLOR_DEFAULT,
             name: '',
+            __temp_key__: 1,
           },
         ],
       },
@@ -159,8 +162,8 @@ export function reducer(state = initialState, action) {
         draft.serverState.workflow
       );
     } else {
-      // if there is no workflow on the server, the workflow can never be dirty
-      draft.clientState.currentWorkflow.isDirty = false;
+      // if there is no workflow on the server, the workflow is awalys considered dirty
+      draft.clientState.currentWorkflow.isDirty = true;
     }
   });
 }

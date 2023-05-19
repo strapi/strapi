@@ -65,7 +65,7 @@ describe('useReviewWorkflows', () => {
 
     expect(result.current.workflows.isLoading).toBe(true);
     expect(get).toBeCalledWith('/admin/review-workflows/workflows/', {
-      params: { populate: 'stages' },
+      params: { sort: 'name:asc', populate: 'stages' },
     });
 
     await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));

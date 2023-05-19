@@ -553,15 +553,11 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       expect.objectContaining({
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
-            data: {
-              stages: [
-                {
-                  color: '#4945ff',
-                  name: '',
-                },
-              ],
-            },
-            isDirty: false,
+            data: expect.objectContaining({
+              name: '',
+              stages: [expect.objectContaining({ name: '', __temp_key__: 1 })],
+            }),
+            isDirty: true,
           }),
         }),
       })
