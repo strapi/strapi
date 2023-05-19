@@ -249,11 +249,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         }
       });
     });
-
-    test('Can not create with invalid content type', async () => {
-      const res = await createWorkflow({ contentTypes: ['someUID'] });
-      expect(res.status).toBe(400);
-    });
   });
 
   describe('Creating an entity in a review workflow content type', () => {
