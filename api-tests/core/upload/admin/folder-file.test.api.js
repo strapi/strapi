@@ -15,19 +15,11 @@ const data = {
 };
 
 const createFolder = async (name, parent = null) => {
-  const log = name.startsWith('folderToKeep');
-  if (log) {
-    console.log('=====================');
-    console.log('createFolderBefore', name, parent);
-  }
   const res = await rq({
     method: 'POST',
     url: '/upload/folders',
     body: { name, parent },
   });
-  if (log) {
-    console.log('createFolder', res.body.data);
-  }
   return res.body.data;
 };
 
@@ -240,18 +232,14 @@ describe('Bulk actions for folders & files', () => {
 
       // Create folders
       const folder1 = await createFolder('folderToDelete', null);
-      // await Promise.all(
-      //   Array.from({ length: 20 }).map((_, i) => createFolder(`folderToKeep-${i}`, null))
-      // );
       for (let i = 0; i < 20; i++) {
         await createFolder(`folderToKeep-${i}`, null);
       }
       // Delete folder1
-      const res = await rq.post('/upload/actions/bulk-delete', {
+      await rq.post('/upload/actions/bulk-delete', {
         body: { folderIds: [folder1.id] },
       });
 
-      console.log('deleteFolders', JSON.stringify(res.body, null, 2));
       const folderIds = await rq
         .get('/upload/folders')
         .then((res) => res.body.data.map((f) => f.id));
