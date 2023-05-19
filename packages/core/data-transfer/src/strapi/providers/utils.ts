@@ -30,6 +30,8 @@ export const createDispatcher = (ws: WebSocket) => {
     return new Promise<U | null>((resolve, reject) => {
       const uuid = randomUUID();
       const payload = { ...message, uuid };
+      let numberOfTimesMessageWasSent = 0;
+      let responseWasReceived = false;
 
       if (options.attachTransfer) {
         Object.assign(payload, { transferID: state.transfer?.id });
@@ -43,7 +45,23 @@ export const createDispatcher = (ws: WebSocket) => {
         }
       });
 
+      const sendPeriodically = () => {
+        setTimeout(() => {
+          if (!responseWasReceived) {
+            if (numberOfTimesMessageWasSent < 5) {
+              numberOfTimesMessageWasSent += 1;
+              ws.send(stringifiedPayload);
+              sendPeriodically();
+            } else {
+              reject(new ProviderError('error', 'Request timed out'));
+            }
+          }
+        }, 50000);
+      };
+
       const onResponse = (raw: RawData) => {
+        responseWasReceived = true;
+        numberOfTimesMessageWasSent = 0;
         const response: server.Message<U> = JSON.parse(raw.toString());
         if (response.uuid === uuid) {
           if (response.error) {
@@ -57,6 +75,7 @@ export const createDispatcher = (ws: WebSocket) => {
       };
 
       ws.once('message', onResponse);
+      sendPeriodically();
     });
   };
 

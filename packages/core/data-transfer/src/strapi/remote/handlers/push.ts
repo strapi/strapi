@@ -205,8 +205,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
 
-    const { uuid, type } = msg;
+    if (proto.hasUUID(msg.uuid)) {
+      await this.respond(msg.uuid);
+      return;
+    }
 
+    const { uuid, type } = msg;
+    proto.addUUID(uuid);
     // Regular command message (init, end, status)
     if (type === 'command') {
       const { command } = msg;
