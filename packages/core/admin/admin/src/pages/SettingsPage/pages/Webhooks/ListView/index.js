@@ -187,7 +187,7 @@ const ListView = () => {
                     {
                       id: 'Settings.webhooks.to.delete',
                       defaultMessage:
-                        '{webhooksToDeleteLength, plural, one {# asset} other {# assets}} selected',
+                        '{webhooksToDeleteLength, plural, one {# webhook} other {# webhooks}} selected',
                     },
                     { webhooksToDeleteLength }
                   )}
