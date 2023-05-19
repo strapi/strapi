@@ -189,13 +189,13 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
       >
         <label
           class="c3 c4"
-          for="1"
+          for=":r0:"
         >
           default
         </label>
         <div
           class=""
-          id="1"
+          id=":r0:"
         >
           <div
             class="c5"
