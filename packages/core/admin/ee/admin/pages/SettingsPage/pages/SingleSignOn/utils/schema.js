@@ -6,7 +6,9 @@ const schema = yup.object().shape({
   defaultRole: yup.mixed().when('autoRegister', (value, initSchema) => {
     return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
   }),
-  authenticationDisabled: yup.array().optional(),
+  authenticationDisabled: yup.array().of(yup.mixed().when('authenticationDisabled', (value, initSchema) => {
+    return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
+  })),
 });
 
 export default schema;
