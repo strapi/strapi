@@ -129,6 +129,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           contentTypes: [productUID],
           stages: [{ name: 'Review' }],
         });
+        if (res.status !== 200) {
+          console.log('Failed to create', res.body);
+        }
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
         workflow2 = res.body.data;
