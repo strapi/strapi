@@ -28,6 +28,9 @@ const model = {
       type: 'string',
     },
   },
+  options: {
+    reviewWorkflows: true,
+  }
 };
 
 describeOnCondition(edition === 'EE')('Review workflows', () => {

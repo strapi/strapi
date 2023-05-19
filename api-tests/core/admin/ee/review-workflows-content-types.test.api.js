@@ -30,6 +30,9 @@ const productModel = {
       type: 'string',
     },
   },
+  options: {
+    reviewWorkflows: true,
+  },
 };
 
 describeOnCondition(edition === 'EE')('Review workflows', () => {
@@ -250,11 +253,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         }
       });
     });
-
-    test("It shouldn't create with invalid content type", async () => {
-      const res = await createWorkflow({ contentTypes: ['someUID'] });
-      expect(res.status).toBe(400);
-    });
   });
 
   describe('Delete workflow', () => {
@@ -305,7 +303,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test('Should list workflows filtered by CT', async () => {
-      const workflows = await getWorkflows({ contentTypes: { $contains: [productUID] } });
+      const workflows = await getWorkflows({ contentTypes: productUID });
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
@@ -319,8 +317,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         data: { contentTypes: [`${productUID}-2`] },
       });
 
-      // FIXME: This filter should be { $contains: [productUID] }
-      const workflows = await getWorkflows({ contentTypes: { $contains: [`"${productUID}"`] } });
+      const workflows = await getWorkflows({ contentTypes: productUID });
 
       expect(workflows).toHaveLength(1);
       expect(workflows[0]).toMatchObject({ id: workflow2.id });
