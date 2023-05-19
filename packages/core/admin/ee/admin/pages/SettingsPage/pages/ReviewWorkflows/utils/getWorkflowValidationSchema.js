@@ -3,7 +3,16 @@ import * as yup from 'yup';
 export function getWorkflowValidationSchema({ formatMessage }) {
   return yup.object({
     contentTypes: yup.array().of(yup.string()),
-    name: yup.string().required(),
+    name: yup
+      .string()
+      .max(
+        255,
+        formatMessage({
+          id: 'Settings.review-workflows.validation.name.max-length',
+          defaultMessage: 'Name can not be longer than 255 characters',
+        })
+      )
+      .required(),
 
     stages: yup
       .array()
