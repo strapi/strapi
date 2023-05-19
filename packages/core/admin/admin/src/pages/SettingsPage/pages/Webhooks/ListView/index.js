@@ -45,8 +45,8 @@ import { Plus, Pencil, Trash, EmptyDocuments } from '@strapi/icons';
 import adminPermissions from '../../../../../permissions';
 
 const ListView = () => {
-  const [webhooksToDelete, setWebhooksToDelete] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [webhooksToDelete, setWebhooksToDelete] = useState([]);
 
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
@@ -64,7 +64,7 @@ const ListView = () => {
 
   const QUERY_KEY = 'webhooks';
   const {
-    isLoading: webhooksLoading,
+    isLoading: isWebhooksLoading,
     data: webhooks,
     error: webhooksError,
     refetch: refetchWebhooks,
@@ -152,8 +152,8 @@ const ListView = () => {
 
   const goTo = (to) => push(`${pathname}/${to}`);
 
-  const isLoading = isRBACLoading || webhooksLoading;
-  const numberOfWebhooks = isLoading ? 0 : webhooks?.length ?? 0;
+  const isLoading = isRBACLoading || isWebhooksLoading;
+  const numberOfWebhooks = webhooks?.length ?? 0;
   const webhooksToDeleteLength = webhooksToDelete.length;
 
   return (
@@ -389,6 +389,7 @@ const ListView = () => {
         isOpen={showModal}
         onToggleDialog={() => setShowModal((prev) => !prev)}
         onConfirm={confirmDelete}
+        isConfirmButtonLoading={deleteMutation.isLoading}
       />
     </Layout>
   );
