@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  act,
   fireEvent,
   render as renderRTL,
   waitFor,
@@ -88,7 +87,9 @@ describe('Admin | containers | ListView', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    expect(getByText('http:://strapi.io')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(getByText('http:://strapi.io')).toBeInTheDocument();
+    });
   });
 
   it('should show a loader when permissions are loading', () => {
@@ -123,9 +124,7 @@ describe('Admin | containers | ListView', () => {
       expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
     });
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /confirm/i }));
-    });
+    await user.click(getByRole('button', { name: /confirm/i }));
 
     await waitFor(async () => {
       expect(await findByText('No webhooks found')).toBeInTheDocument();
@@ -139,17 +138,13 @@ describe('Admin | containers | ListView', () => {
     });
 
     const deleteButtons = getAllByRole('button', { name: /delete webhook/i });
-    await act(async () => {
-      await user.click(deleteButtons[0]);
-    });
+    await user.click(deleteButtons[0]);
 
     await waitFor(async () => {
       expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
     });
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /confirm/i }));
-    });
+    await user.click(getByRole('button', { name: /confirm/i }));
 
     await waitForElementToBeRemoved(() => getByText('http:://strapi.io'));
 
@@ -166,9 +161,7 @@ describe('Admin | containers | ListView', () => {
 
     const enableSwitches = getAllByRole('switch', { name: /status/i });
 
-    await act(async () => {
-      await user.click(enableSwitches[0]);
-    });
+    await user.click(enableSwitches[0]);
 
     await waitFor(async () => {
       expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
