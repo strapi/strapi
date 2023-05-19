@@ -221,8 +221,8 @@ export const SingleSignOn = () => {
                         defaultMessage: 'Choose here',
                       })}
                       onClear={() => {
-                        const emptyArray = [1];
-                        handleChange({ target: { name: 'authenticationDisabled', emptyArray } });;
+                        const emptyArray = [];
+                        handleChange({ target: { name: 'authenticationDisabled', emptyArray } });
                       }}
                       value={modifiedData.authenticationDisabled || []}
                       withTags
