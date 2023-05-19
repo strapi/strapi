@@ -26,6 +26,7 @@ export const initialState = {
           {
             color: STAGE_COLOR_DEFAULT,
             name: '',
+            __temp_key__: 1,
           },
         ],
       },
