@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, merge } = require('lodash/fp');
+const { pick } = require('lodash/fp');
 const compose = require('koa-compose');
 const { ValidationError } = require('@strapi/utils').errors;
 
