@@ -50,7 +50,7 @@
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
     "fs-extra": "10.0.0",
-    "node-plop": "0.26.3",
+    "node-plop": "0.31.1",
     "plop": "2.7.6",
     "pluralize": "8.0.0"
   },
