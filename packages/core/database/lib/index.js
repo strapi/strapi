@@ -61,31 +61,29 @@ class Database {
 
     async function commit() {
       if (notNestedTransaction) {
-        transactionCtx.clear();
-        await trx.commit();
+        await transactionCtx.commit(trx);
       }
     }
 
     async function rollback() {
       if (notNestedTransaction) {
-        transactionCtx.clear();
-        await trx.rollback();
+        await transactionCtx.rollback(trx);
       }
     }
 
     if (!cb) {
-      return {
-        commit,
-        rollback,
-        get() {
-          return trx;
-        },
-      };
+      return { commit, rollback, get: () => trx };
     }
 
     return transactionCtx.run(trx, async () => {
       try {
-        const callbackParams = { trx, commit, rollback };
+        const callbackParams = {
+          trx,
+          commit,
+          rollback,
+          onCommit: transactionCtx.onCommit,
+          onRollback: transactionCtx.onRollback,
+        };
         const res = await cb(callbackParams);
         await commit();
         return res;
