@@ -1,57 +1,46 @@
-import { useReducer, useEffect, useCallback } from 'react';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
-import reducer, { initialState } from './reducer';
+import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useQueries } from 'react-query';
 
-/**
- * TODO: refactor this to not use the `useReducer` hook,
- * it's not really necessary. Also use `useQuery`?
- */
 const useModels = () => {
-  const toggleNotification = useNotification();
-  const [state, dispatch] = useReducer(reducer, initialState);
-
   const { get } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
+  const toggleNotification = useNotification();
+  const queries = useQueries(
+    ['components', 'content-types'].map((type) => {
+      return {
+        queryKey: [type],
+        async queryFn() {
+          const {
+            data: { data },
+          } = await get(`/content-manager/${type}`);
 
-  const fetchModels = useCallback(async () => {
-    dispatch({
-      type: 'GET_MODELS',
-    });
-
-    try {
-      const [
-        {
-          data: { data: components },
+          return data;
         },
-        {
-          data: { data: contentTypes },
+        onError(error) {
+          toggleNotification({
+            type: 'warning',
+            message: formatAPIError(error),
+          });
         },
-      ] = await Promise.all(
-        ['components', 'content-types'].map((endPoint) => get(`/content-manager/${endPoint}`))
-      );
+      };
+    })
+  );
 
-      dispatch({
-        type: 'GET_MODELS_SUCCEDED',
-        contentTypes,
-        components,
-      });
-    } catch (err) {
-      dispatch({
-        type: 'GET_MODELS_ERROR',
-      });
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-  }, [toggleNotification, get]);
+  const [components, contentTypes] = queries;
+  const isLoading = components.isLoading || contentTypes.isLoading;
 
-  useEffect(() => {
-    fetchModels();
-  }, [fetchModels]);
+  const collectionTypes = (contentTypes?.data ?? []).filter(
+    (contentType) => contentType.kind === 'collectionType' && contentType.isDisplayed
+  );
+  const singleTypes = (contentTypes?.data ?? []).filter(
+    (contentType) => contentType.kind !== 'collectionType' && contentType.isDisplayed
+  );
 
   return {
-    ...state,
-    getData: fetchModels,
+    isLoading,
+    components: components.data,
+    collectionTypes,
+    singleTypes,
   };
 };
 
