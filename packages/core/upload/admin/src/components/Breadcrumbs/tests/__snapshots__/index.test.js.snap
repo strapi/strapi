@@ -48,6 +48,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -266,9 +267,9 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11 sc-hRMWxn c10"
+          class="c7 c8 c9 c10 c11 sc-iukxot c10"
           data-state="closed"
-          id="radix-:r1:"
+          id="radix-0"
           label="..."
           type="button"
         >

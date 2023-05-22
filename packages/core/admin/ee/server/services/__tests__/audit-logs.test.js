@@ -8,6 +8,10 @@ const createEventHub = require('../../../../../strapi/lib/services/event-hub');
 
 jest.mock('../../../../server/register');
 
+jest.mock('../../utils', () => ({
+  getService: jest.fn().mockReturnValue({}),
+}));
+
 jest.mock('@strapi/strapi/lib/utils/ee', () => ({
   features: {
     isEnabled: jest.fn(),
@@ -146,6 +150,16 @@ describe('Audit logs service', () => {
         hook: () => ({ register: jest.fn() }),
         config: {
           get: () => 90,
+        },
+        db: {
+          transaction(cb) {
+            const opt = {
+              onCommit(func) {
+                return func();
+              },
+            };
+            return cb(opt);
+          },
         },
       };
     });

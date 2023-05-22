@@ -7,7 +7,6 @@ import {
   Button,
   Divider,
   Flex,
-  FocusTrap,
   Icon,
   Portal,
   PopoverPrimitives,
@@ -119,103 +118,102 @@ const Onboarding = () => {
         <Portal>
           <PopoverPrimitives.Content
             padding={0}
+            onDimiss={handlePopoverVisibility}
             source={triggerRef}
             placement="top-end"
             spacing={12}
           >
-            <FocusTrap onEscape={handlePopoverVisibility}>
-              <Flex
-                justifyContent="space-between"
-                paddingBottom={5}
-                paddingRight={6}
+            <Flex
+              justifyContent="space-between"
+              paddingBottom={5}
+              paddingRight={6}
+              paddingLeft={6}
+              paddingTop={6}
+            >
+              <TypographyLineHeight fontWeight="bold">
+                {formatMessage({
+                  id: 'app.components.Onboarding.title',
+                  defaultMessage: 'Get started videos',
+                })}
+              </TypographyLineHeight>
+              <TextLink
+                as="a"
+                href={WATCH_MORE.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                variant="pi"
+                textColor="primary600"
+              >
+                {formatMessage(WATCH_MORE.label)}
+              </TextLink>
+            </Flex>
+            <Divider />
+            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+              <VideoLinkWrapper
+                as="a"
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                key={href}
+                hasRadius
+                paddingTop={4}
+                paddingBottom={4}
                 paddingLeft={6}
-                paddingTop={6}
+                paddingRight={11}
               >
-                <TypographyLineHeight fontWeight="bold">
-                  {formatMessage({
-                    id: 'app.components.Onboarding.title',
-                    defaultMessage: 'Get started videos',
-                  })}
-                </TypographyLineHeight>
-                <TextLink
-                  as="a"
-                  href={WATCH_MORE.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  variant="pi"
-                  textColor="primary600"
-                >
-                  {formatMessage(WATCH_MORE.label)}
-                </TextLink>
-              </Flex>
-              <Divider />
-              {VIDEO_LINKS.map(({ href, duration, label }, index) => (
-                <VideoLinkWrapper
-                  as="a"
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  key={href}
-                  hasRadius
-                  paddingTop={4}
-                  paddingBottom={4}
-                  paddingLeft={6}
-                  paddingRight={11}
-                >
-                  <Box paddingRight={5}>
-                    <Typography textColor="neutral200" variant="alpha">
-                      {index + 1}
-                    </Typography>
-                  </Box>
-                  <Box position="relative">
-                    <Preview src={onboardingPreview} alt="" />
-                    <IconWrapper
-                      position="absolute"
-                      top="50%"
-                      left="50%"
-                      background="primary600"
-                      borderRadius="50%"
-                      justifyContent="center"
-                      width={6}
-                      height={6}
-                    >
-                      <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
-                    </IconWrapper>
-                  </Box>
-                  <Flex direction="column" alignItems="start" paddingLeft={4}>
-                    <Typography fontWeight="bold">{formatMessage(label)}</Typography>
-                    <VisuallyHidden>:</VisuallyHidden>
-                    <Typography textColor="neutral600" variant="pi">
-                      {duration}
-                    </Typography>
-                  </Flex>
-                </VideoLinkWrapper>
+                <Box paddingRight={5}>
+                  <Typography textColor="neutral200" variant="alpha">
+                    {index + 1}
+                  </Typography>
+                </Box>
+                <Box position="relative">
+                  <Preview src={onboardingPreview} alt="" />
+                  <IconWrapper
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    background="primary600"
+                    borderRadius="50%"
+                    justifyContent="center"
+                    width={6}
+                    height={6}
+                  >
+                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                  </IconWrapper>
+                </Box>
+                <Flex direction="column" alignItems="start" paddingLeft={4}>
+                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                  <VisuallyHidden>:</VisuallyHidden>
+                  <Typography textColor="neutral600" variant="pi">
+                    {duration}
+                  </Typography>
+                </Flex>
+              </VideoLinkWrapper>
+            ))}
+            <Flex
+              direction="column"
+              alignItems="stretch"
+              gap={2}
+              paddingLeft={5}
+              paddingTop={2}
+              paddingBottom={5}
+            >
+              {docLinks.map(({ label, href, icon }) => (
+                <Flex gap={3} key={href}>
+                  <Icon as={icon} color="primary600" />
+                  <TextLink
+                    as="a"
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    variant="sigma"
+                    textColor="primary700"
+                  >
+                    {formatMessage(label)}
+                  </TextLink>
+                </Flex>
               ))}
-              <Flex
-                direction="column"
-                alignItems="stretch"
-                gap={2}
-                paddingLeft={5}
-                paddingTop={2}
-                paddingBottom={5}
-              >
-                {docLinks.map(({ label, href, icon }) => (
-                  <Flex gap={3} key={href}>
-                    <Icon as={icon} color="primary600" />
-                    <TextLink
-                      as="a"
-                      href={href}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      variant="sigma"
-                      textColor="primary700"
-                    >
-                      {formatMessage(label)}
-                    </TextLink>
-                  </Flex>
-                ))}
-              </Flex>
-            </FocusTrap>
+            </Flex>
           </PopoverPrimitives.Content>
         </Portal>
       )}
