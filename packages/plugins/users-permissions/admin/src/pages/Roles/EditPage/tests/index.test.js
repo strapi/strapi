@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, act, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -37,7 +37,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  act(() => history.push(`/settings/${pluginId}/roles/1`));
+  history.push(`/settings/${pluginId}/roles/1`);
 
   return renderResult;
 }
@@ -972,7 +972,7 @@ describe('Admin | containers | RoleEditPage', () => {
                             >
                               <label
                                 class="c9 c25 c26"
-                                for=":r0:"
+                                for="1"
                               >
                                 Name
                               </label>
@@ -984,7 +984,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c28"
-                                  id=":r0:"
+                                  id="1"
                                   name="name"
                                   value="Authenticated"
                                 />
@@ -1073,10 +1073,10 @@ describe('Admin | containers | RoleEditPage', () => {
                               class="c5 c44 c45"
                             >
                               <button
-                                aria-controls="accordion-content-:r4:"
+                                aria-controls="accordion-content-2"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-:r4:"
+                                aria-labelledby="accordion-label-2"
                                 class="c5 c46 c12 c47 c48"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
@@ -1086,13 +1086,13 @@ describe('Admin | containers | RoleEditPage', () => {
                                 >
                                   <span
                                     class="c9 c50"
-                                    id="accordion-label-:r4:"
+                                    id="accordion-label-2"
                                   >
                                     Address
                                   </span>
                                   <p
                                     class="c9 c39"
-                                    id="accordion-desc-:r4:"
+                                    id="accordion-desc-2"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>
@@ -1194,7 +1194,7 @@ describe('Admin | containers | RoleEditPage', () => {
   it('can toggle the permissions accordions and actions', async () => {
     const user = userEvent.setup();
     // Create app and wait for loading
-    const { getByLabelText, getByRole, queryByText, getByTestId, getByText, getAllByRole } =
+    const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
       makeAndRenderApp();
     const loader = getByTestId('loader');
     await waitForElementToBeRemoved(loader);
@@ -1211,16 +1211,13 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(getByText('POST')).toBeInTheDocument();
     expect(getByText('/addresses')).toBeInTheDocument();
 
-    expect(getByRole('checkbox', { name: 'Select all' }).checked).toBe(false);
-
-    await user.click(getByRole('checkbox', { name: 'Select all' }));
-
-    getAllByRole('checkbox')
-      .slice(1, -1)
-      .forEach((actionCheckbox) => {
-        console.log(actionCheckbox.checked);
-        expect(actionCheckbox.checked).toBe(true);
-      });
+    // Select all actions with the "select all" checkbox
+    const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
+    expect(selectAllCheckbox.checked).toBe(false);
+    fireEvent.click(selectAllCheckbox);
+    actionCheckboxes.forEach((actionCheckbox) => {
+      expect(actionCheckbox.checked).toBe(true);
+    });
 
     // Close the collapse
     await user.click(collapse);

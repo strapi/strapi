@@ -1,7 +1,7 @@
 import React from 'react';
 import { Router, Route } from 'react-router-dom';
 import { StrapiAppProvider, AppInfosContext, TrackingProvider } from '@strapi/helper-plugin';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { lightTheme, darkTheme } from '@strapi/design-system';
@@ -65,7 +65,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
-    act(() => history.push(route));
+    history.push(route);
 
     const { container } = render(App);
 
@@ -228,7 +228,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings';
-    act(() => history.push(route));
+    history.push(route);
 
     render(App);
 
@@ -311,7 +311,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     });
     const route = '/settings/application-infos';
     const user = userEvent.setup();
-    act(() => history.push(route));
+    history.push(route);
 
     render(App);
 

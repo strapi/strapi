@@ -1317,7 +1317,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r0:"
+                            aria-labelledby="0"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1348,7 +1348,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r2:"
+                            aria-labelledby="1"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1429,6 +1429,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         style="font-style: italic;"
                       >
+                        
                          
                       </span>
                     </span>
@@ -1445,7 +1446,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r4:"
+                            aria-labelledby="2"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1476,7 +1477,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r6:"
+                            aria-labelledby="3"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1572,7 +1573,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r8:"
+                            aria-labelledby="4"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1603,7 +1604,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":ra:"
+                            aria-labelledby="5"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1699,7 +1700,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rc:"
+                            aria-labelledby="6"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1730,7 +1731,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":re:"
+                            aria-labelledby="7"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1824,7 +1825,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rg:"
+                            aria-labelledby="8"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1855,7 +1856,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":ri:"
+                            aria-labelledby="9"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1951,7 +1952,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rk:"
+                            aria-labelledby="10"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1982,7 +1983,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rm:"
+                            aria-labelledby="11"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2072,7 +2073,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":ro:"
+                            aria-labelledby="12"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2103,7 +2104,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rq:"
+                            aria-labelledby="13"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2203,7 +2204,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":rs:"
+                            aria-labelledby="14"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2234,7 +2235,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":ru:"
+                            aria-labelledby="15"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2361,7 +2362,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r10:"
+                                        aria-labelledby="16"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2392,7 +2393,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r12:"
+                                        aria-labelledby="17"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2505,7 +2506,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r14:"
+                                        aria-labelledby="18"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2536,7 +2537,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r16:"
+                                        aria-labelledby="19"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2649,7 +2650,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r18:"
+                                        aria-labelledby="20"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2680,7 +2681,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1a:"
+                                        aria-labelledby="21"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2821,7 +2822,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r1c:"
+                            aria-labelledby="22"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2852,7 +2853,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r1e:"
+                            aria-labelledby="23"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2979,7 +2980,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1g:"
+                                        aria-labelledby="24"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3010,7 +3011,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1i:"
+                                        aria-labelledby="25"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3123,7 +3124,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1k:"
+                                        aria-labelledby="26"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3154,7 +3155,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1m:"
+                                        aria-labelledby="27"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3267,7 +3268,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1o:"
+                                        aria-labelledby="28"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3298,7 +3299,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby=":r1q:"
+                                        aria-labelledby="29"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3433,7 +3434,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r1s:"
+                            aria-labelledby="30"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -3464,7 +3465,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r1u:"
+                            aria-labelledby="31"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -3808,7 +3809,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r20:"
+                                                    aria-labelledby="32"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3839,7 +3840,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r22:"
+                                                    aria-labelledby="33"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3952,7 +3953,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r24:"
+                                                    aria-labelledby="34"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3983,7 +3984,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r26:"
+                                                    aria-labelledby="35"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4096,7 +4097,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r28:"
+                                                    aria-labelledby="36"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4127,7 +4128,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2a:"
+                                                    aria-labelledby="37"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4304,7 +4305,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2c:"
+                                                    aria-labelledby="38"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4335,7 +4336,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2e:"
+                                                    aria-labelledby="39"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4448,7 +4449,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2g:"
+                                                    aria-labelledby="40"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4479,7 +4480,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2i:"
+                                                    aria-labelledby="41"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4592,7 +4593,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2k:"
+                                                    aria-labelledby="42"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4623,7 +4624,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2m:"
+                                                    aria-labelledby="43"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4738,7 +4739,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2o:"
+                                                    aria-labelledby="44"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4769,7 +4770,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2q:"
+                                                    aria-labelledby="45"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4884,7 +4885,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2s:"
+                                                    aria-labelledby="46"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4915,7 +4916,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r2u:"
+                                                    aria-labelledby="47"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5015,6 +5016,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 style="font-style: italic;"
                                               >
+                                                
                                                  
                                               </span>
                                             </span>
@@ -5031,7 +5033,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r30:"
+                                                    aria-labelledby="48"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5062,7 +5064,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r32:"
+                                                    aria-labelledby="49"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5239,7 +5241,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r34:"
+                                                    aria-labelledby="50"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5270,7 +5272,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r36:"
+                                                    aria-labelledby="51"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5383,7 +5385,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r38:"
+                                                    aria-labelledby="52"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5414,7 +5416,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r3a:"
+                                                    aria-labelledby="53"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5534,7 +5536,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r3c:"
+                                                    aria-labelledby="54"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5565,7 +5567,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r3e:"
+                                                    aria-labelledby="55"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5692,7 +5694,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3g:"
+                                                                aria-labelledby="56"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5723,7 +5725,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3i:"
+                                                                aria-labelledby="57"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5836,7 +5838,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3k:"
+                                                                aria-labelledby="58"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5867,7 +5869,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3m:"
+                                                                aria-labelledby="59"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5980,7 +5982,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3o:"
+                                                                aria-labelledby="60"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6011,7 +6013,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3q:"
+                                                                aria-labelledby="61"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6126,7 +6128,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3s:"
+                                                                aria-labelledby="62"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6157,7 +6159,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r3u:"
+                                                                aria-labelledby="63"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6272,7 +6274,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r40:"
+                                                                aria-labelledby="64"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6303,7 +6305,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r42:"
+                                                                aria-labelledby="65"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6403,6 +6405,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             style="font-style: italic;"
                                                           >
+                                                            
                                                              
                                                           </span>
                                                         </span>
@@ -6419,7 +6422,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r44:"
+                                                                aria-labelledby="66"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6450,7 +6453,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby=":r46:"
+                                                                aria-labelledby="67"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6668,7 +6671,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r48:"
+                                                    aria-labelledby="68"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6699,7 +6702,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r4a:"
+                                                    aria-labelledby="69"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6814,7 +6817,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r4c:"
+                                                    aria-labelledby="70"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6845,7 +6848,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r4e:"
+                                                    aria-labelledby="71"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6958,7 +6961,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r4g:"
+                                                    aria-labelledby="72"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6989,7 +6992,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby=":r4i:"
+                                                    aria-labelledby="73"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"

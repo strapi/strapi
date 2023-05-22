@@ -613,7 +613,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
           >
             <div>
               <button
-                aria-controls=":r0:"
+                aria-controls="0"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -701,7 +701,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                       >
                         <label
                           class="c6 c20 c21"
-                          for=":r1:"
+                          for="2"
                         >
                           Password
                           <span
@@ -714,12 +714,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           class="c24 c25"
                         >
                           <input
-                            aria-describedby=":r1:-hint"
+                            aria-describedby="2-hint"
                             aria-disabled="false"
                             aria-invalid="false"
                             aria-required="true"
                             class="c26 c27"
-                            id=":r1:"
+                            id="2"
                             name="password"
                             type="password"
                             value=""
@@ -755,7 +755,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         </div>
                         <p
                           class="c6 c34"
-                          id=":r1:-hint"
+                          id="2-hint"
                         >
                           Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
                         </p>
@@ -771,7 +771,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                       >
                         <label
                           class="c6 c20 c21"
-                          for=":r3:"
+                          for="4"
                         >
                           Confirm Password
                           <span
@@ -788,7 +788,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             aria-invalid="false"
                             aria-required="true"
                             class="c26 c27"
-                            id=":r3:"
+                            id="4"
                             name="confirmPassword"
                             type="password"
                             value=""

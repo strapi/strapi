@@ -111,7 +111,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
     >
       <label
         class="c1 c2"
-        for=":ri:"
+        for="0"
       >
         Default label
       </label>

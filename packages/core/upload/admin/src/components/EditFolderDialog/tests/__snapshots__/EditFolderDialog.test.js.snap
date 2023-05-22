@@ -591,7 +591,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                           >
                             <label
                               class="c10 c20 c21"
-                              for=":r0:"
+                              for="1"
                             >
                               Name
                             </label>
@@ -603,7 +603,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c23"
-                                id=":r0:"
+                                id="1"
                                 name="name"
                                 value=""
                               />

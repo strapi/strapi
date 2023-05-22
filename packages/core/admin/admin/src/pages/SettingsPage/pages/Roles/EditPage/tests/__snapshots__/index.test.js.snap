@@ -750,7 +750,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c8 c27 c28"
-                            for=":r0:"
+                            for="1"
                           >
                             Name
                           </label>
@@ -762,7 +762,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c30"
-                              id=":r0:"
+                              id="1"
                               name="name"
                               value=""
                             />

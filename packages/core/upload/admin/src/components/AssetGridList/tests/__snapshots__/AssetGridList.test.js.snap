@@ -360,7 +360,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
           class="c2"
         >
           <article
-            aria-labelledby=":r0:-title"
+            aria-labelledby="0-title"
             class="c3 c4"
             role="button"
             tabindex="-1"
@@ -376,7 +376,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     class=""
                   >
                     <input
-                      aria-labelledby=":r0:-title"
+                      aria-labelledby="0-title"
                       class="c12"
                       type="checkbox"
                     />
@@ -408,7 +408,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   >
                     <h2
                       class="c19"
-                      id=":r0:-title"
+                      id="0-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
@@ -453,7 +453,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
           class="c2"
         >
           <article
-            aria-labelledby=":r1:-title"
+            aria-labelledby="1-title"
             class="c3 c4"
             role="button"
             tabindex="-1"
@@ -469,7 +469,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     class=""
                   >
                     <input
-                      aria-labelledby=":r1:-title"
+                      aria-labelledby="1-title"
                       class="c12"
                       type="checkbox"
                     />
@@ -529,7 +529,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   >
                     <h2
                       class="c19"
-                      id=":r1:-title"
+                      id="1-title"
                     >
                       mov_bbb.mp4
                     </h2>
@@ -542,6 +542,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     >
                       mp4
                     </span>
+                    
                   </div>
                 </div>
                 <div
@@ -573,7 +574,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
           class="c2"
         >
           <article
-            aria-labelledby=":r2:-title"
+            aria-labelledby="2-title"
             class="c3 c4"
             role="button"
             tabindex="-1"
@@ -589,7 +590,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     class=""
                   >
                     <input
-                      aria-labelledby=":r2:-title"
+                      aria-labelledby="2-title"
                       class="c12"
                       type="checkbox"
                     />
@@ -638,7 +639,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   >
                     <h2
                       class="c19"
-                      id=":r2:-title"
+                      id="2-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
@@ -651,6 +652,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     >
                       pdf
                     </span>
+                    
                   </div>
                 </div>
                 <div

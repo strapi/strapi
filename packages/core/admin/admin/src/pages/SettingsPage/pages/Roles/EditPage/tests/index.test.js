@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -48,7 +48,7 @@ describe('<EditPage />', () => {
     const App = makeApp(history);
     const { container } = render(App);
 
-    act(() => history.push('/settings/roles/1'));
+    history.push('/settings/roles/1');
 
     expect(container).toMatchSnapshot();
   });
