@@ -114,6 +114,10 @@ describe('useContentTypes', () => {
 
     expect(result.current.isLoading).toBe(true);
 
+    expect(result.current.components).toStrictEqual([]);
+    expect(result.current.singleTypes).toStrictEqual([]);
+    expect(result.current.collectionTypes).toStrictEqual([]);
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.components).toStrictEqual(

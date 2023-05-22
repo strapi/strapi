@@ -8,7 +8,7 @@ export function useContentTypes() {
   const queries = useQueries(
     ['components', 'content-types'].map((type) => {
       return {
-        queryKey: [type],
+        queryKey: ['content-manager', type],
         async queryFn() {
           const {
             data: { data },
@@ -38,7 +38,7 @@ export function useContentTypes() {
 
   return {
     isLoading,
-    components: components.data,
+    components: components?.data ?? [],
     collectionTypes,
     singleTypes,
   };
