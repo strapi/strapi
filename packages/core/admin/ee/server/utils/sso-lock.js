@@ -5,7 +5,6 @@ const { isEmpty } = require('lodash/fp');
 
 const isSsoLocked = async (user) => {
   if (!features.isEnabled('sso') || !user) {
-    // TODO: we should be calling strapi.features.isEnabled("sso") but that's EE code. Should we load it dynamically when EE is enabled? Or add EE code to override this strategy?
     return false;
   }
 
