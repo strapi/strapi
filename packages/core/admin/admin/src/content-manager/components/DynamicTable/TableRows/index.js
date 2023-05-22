@@ -4,29 +4,27 @@ import { Link, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
 import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
-
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
-
-import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
-
-import { usePluginsQueryParams } from '../../../hooks';
-
-import { getFullName } from '../../../../utils';
+import { useTracking, stopPropagation, onRowClick, useTableContext } from '@strapi/helper-plugin';
 
 import CellContent from '../CellContent';
+import { usePluginsQueryParams } from '../../../hooks';
+import { getFullName } from '../../../../utils';
+import ConfirmDialogDelete from '../ConfirmDialogDelete';
 
 const TableRows = ({
   canCreate,
   canDelete,
   contentType,
-  headers,
-  entriesToDelete,
-  onClickDelete,
-  onSelectRow,
-  withMainAction,
-  withBulkActions,
+  onConfirmDelete,
   rows,
+  withBulkActions,
+  withMainAction,
+  headers,
 }) => {
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const {
     push,
     location: { pathname },
@@ -35,11 +33,24 @@ const TableRows = ({
 
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
+  const { selectedEntries, setSelectedEntries, onSelectRow } = useTableContext();
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsLoading(true);
+      await onConfirmDelete(selectedEntries[0]);
+      setIsConfirmDeleteOpen(false);
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      setIsConfirmDeleteOpen(false);
+    }
+  };
 
   return (
     <Tbody>
       {rows.map((data, index) => {
-        const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
+        const isChecked = selectedEntries.findIndex((id) => id === data.id) !== -1;
         const itemLineText = formatMessage(
           {
             id: 'content-manager.components.DynamicTable.row-line',
@@ -146,7 +157,8 @@ const TableRows = ({
                       <IconButton
                         onClick={() => {
                           trackUsage('willDeleteEntryFromList');
-                          onClickDelete(data.id);
+                          setSelectedEntries([data.id]);
+                          setIsConfirmDeleteOpen(true);
                         }}
                         label={formatMessage(
                           { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
@@ -163,6 +175,12 @@ const TableRows = ({
           </Tr>
         );
       })}
+      <ConfirmDialogDelete
+        isConfirmButtonLoading={isLoading}
+        onConfirm={handleConfirmDelete}
+        onToggleDialog={() => setIsConfirmDeleteOpen(!isConfirmDeleteOpen)}
+        isOpen={isConfirmDeleteOpen}
+      />
     </Tbody>
   );
 };
@@ -174,6 +192,7 @@ TableRows.defaultProps = {
   onClickDelete() {},
   onSelectRow() {},
   rows: [],
+  headers: [],
   withBulkActions: false,
   withMainAction: false,
 };
@@ -185,8 +204,19 @@ TableRows.propTypes = {
     uid: PropTypes.string.isRequired,
   }).isRequired,
   entriesToDelete: PropTypes.array,
-  headers: PropTypes.array.isRequired,
+  headers: PropTypes.arrayOf(
+    PropTypes.shape({
+      cellFormatter: PropTypes.func,
+      key: PropTypes.string.isRequired,
+      metadatas: PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        sortable: PropTypes.bool,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
   onClickDelete: PropTypes.func,
+  onConfirmDelete: PropTypes.func.isRequired,
   onSelectRow: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,

@@ -4,7 +4,7 @@ import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@str
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, useTableContext } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
 import { listViewDomain } from '../../../pages/ListView/selectors';
@@ -180,12 +180,11 @@ const BulkActionsBar = ({
   onConfirmDeleteAll,
   onConfirmPublishAll,
   onConfirmUnpublishAll,
-  selectedEntries,
-  clearSelectedEntries,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { data } = useSelector(listViewDomain());
+  const { selectedEntries, setSelectedEntries } = useTableContext();
 
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [dialogToOpen, setDialogToOpen] = useState(null);
@@ -230,7 +229,7 @@ const BulkActionsBar = ({
       await confirmAction(selectedEntries);
       setIsConfirmButtonLoading(false);
       toggleModal();
-      clearSelectedEntries();
+      setSelectedEntries([]);
     } catch (error) {
       setIsConfirmButtonLoading(false);
       toggleModal();
@@ -300,8 +299,6 @@ BulkActionsBar.propTypes = {
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
-  selectedEntries: PropTypes.array.isRequired,
-  clearSelectedEntries: PropTypes.func.isRequired,
 };
 
 export default BulkActionsBar;

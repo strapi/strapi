@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import { Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
 import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
@@ -9,7 +9,6 @@ import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import TableRows from './TableRows';
-import ConfirmDialogDelete from './ConfirmDialogDelete';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
 import BulkActionsBar from './BulkActionsBar';
 
@@ -90,39 +89,53 @@ const DynamicTable = ({
     return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
+  const withMainAction = (canDelete || canPublish) && isBulkable;
+  const rowCount = rows.length + 1;
+  // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
+  const colCount = tableHeaders.length + 1 + (withMainAction ? 1 : 0);
+
   return (
     <Table
-      components={{ ConfirmDialogDelete }}
       contentType={contentTypeName}
-      action={action}
-      isLoading={isLoading}
       headers={tableHeaders}
-      onConfirmDelete={onConfirmDelete}
-      onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
-      rows={rows}
-      withBulkActions
-      withMainAction={(canDelete || canPublish) && isBulkable}
-      renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
-        <BulkActionsBar
-          showPublish={canPublish && hasDraftAndPublish}
-          showDelete={canDelete}
-          onConfirmDeleteAll={onConfirmDeleteAll}
-          onConfirmPublishAll={onConfirmPublishAll}
-          onConfirmUnpublishAll={onConfirmUnpublishAll}
-          selectedEntries={selectedEntries}
-          clearSelectedEntries={clearSelectedEntries}
+      rowCount={rowCount}
+      colCount={colCount}
+      tableHead={
+        <Table.Head withBulkActions withMainAction={withMainAction} rows={rows}>
+          <Table.Headers headers={tableHeaders} />
+        </Table.Head>
+      }
+      tableActionBar={
+        <Table.ActionBar>
+          <BulkActionsBar
+            showPublish={canPublish && hasDraftAndPublish}
+            showDelete={canDelete}
+            onConfirmDeleteAll={onConfirmDeleteAll}
+            onConfirmPublishAll={onConfirmPublishAll}
+            onConfirmUnpublishAll={onConfirmUnpublishAll}
+          />
+        </Table.ActionBar>
+      }
+    >
+      {!rows.length || isLoading ? (
+        <Table.EmptyBody
+          colSpan={colCount}
+          action={action}
+          contentType={contentTypeName}
+          isLoading={isLoading}
+        />
+      ) : (
+        <TableRows
+          canCreate={canCreate}
+          canDelete={canDelete}
+          onConfirmDelete={onConfirmDelete}
+          contentType={layout.contentType}
+          withBulkActions
+          withMainAction={(canDelete || canPublish) && isBulkable}
+          rows={rows}
+          headers={tableHeaders}
         />
       )}
-    >
-      <TableRows
-        canCreate={canCreate}
-        canDelete={canDelete}
-        contentType={layout.contentType}
-        headers={tableHeaders}
-        rows={rows}
-        withBulkActions
-        withMainAction={canDelete && isBulkable}
-      />
     </Table>
   );
 };
