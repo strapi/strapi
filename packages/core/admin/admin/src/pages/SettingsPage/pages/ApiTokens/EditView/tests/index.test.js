@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -14,7 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useRBAC: jest.fn(() => ({
     allowedActions: {
       canCreate: true,
@@ -91,7 +90,7 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     const App = makeApp(history);
     const { container, getByText } = render(App);
 
-    history.push('/settings/api-tokens/create');
+    act(() => history.push('/settings/api-tokens/create'));
 
     await waitFor(() => {
       expect(getByText('Address')).toBeInTheDocument();
@@ -105,7 +104,7 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     const App = makeApp(history);
     const { container, getByText } = render(App);
 
-    history.push('/settings/api-tokens/1');
+    act(() => history.push('/settings/api-tokens/1'));
 
     await waitFor(() => {
       expect(getByText('My super token')).toBeInTheDocument();

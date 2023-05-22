@@ -1,4 +1,4 @@
-import formatValue from '../utils/formatValue';
+import { formatValue } from '..';
 
 describe('utils | formatValue', () => {
   it('should format array to object', () => {

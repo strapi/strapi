@@ -148,6 +148,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         font-size: 1rem;
         line-height: 1.25;
         color: #666687;
+        text-align: center;
       }
 
       .c5 {
@@ -268,6 +269,20 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         justify-content: space-around;
       }
 
+      .c31 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
       .c26 path {
         fill: #32324d;
       }
@@ -382,21 +397,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
         will-change: transform;
-      }
-
-      .c31 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
       }
 
       .c33 svg {
@@ -527,7 +527,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                     <span>
                       <button
                         aria-disabled="false"
-                        aria-labelledby="0"
+                        aria-labelledby=":r0:"
                         class="c21 c22 c12 c23"
                         tabindex="0"
                         type="button"
