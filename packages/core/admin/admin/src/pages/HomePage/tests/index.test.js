@@ -6,7 +6,7 @@ import { IntlProvider } from 'react-intl';
 import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
-import { useContentTypes } from '../../../hooks';
+import { useModels } from '../../../hooks';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -30,7 +30,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../hooks/useContentTypes');
+jest.mock('../../../hooks', () => ({
+  useModels: jest.fn(),
+}));
 
 jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
   __esModule: true,
@@ -50,6 +52,12 @@ const App = (
 );
 
 describe('Homepage', () => {
+  useModels.mockImplementation(() => ({
+    isLoading: false,
+    collectionTypes: [],
+    singleTypes: [],
+  }));
+
   test('should render all homepage links', () => {
     const { getByRole } = render(App);
     expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();
@@ -105,11 +113,11 @@ describe('Homepage', () => {
   });
 
   it('should display particular text and action when there are collectionTypes and singletypes', () => {
-    useContentTypes.mockReturnValue({
+    useModels.mockImplementation(() => ({
       isLoading: false,
       collectionTypes: [{ uuid: 102 }],
       singleTypes: [{ isDisplayed: true }],
-    });
+    }));
 
     const { getByText, getByRole } = render(App);
 
