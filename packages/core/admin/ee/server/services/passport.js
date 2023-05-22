@@ -5,13 +5,24 @@ const { features } = require('@strapi/strapi/lib/utils/ee');
 
 const createLocalStrategy = require('../../../server/services/passport/local-strategy');
 const sso = require('./passport/sso');
+const { isSsoLocked } = require('../utils/sso-lock');
+
+const localStrategyMiddleware = async ([error, user, message], done) => {
+  if (await isSsoLocked(user)) {
+    return done(error, null, {
+      message: 'Login not allowed, please contact your administrator',
+    });
+  }
+
+  return done(error, user, message);
+};
 
 const getPassportStrategies = () => {
-  const localStrategy = createLocalStrategy(strapi);
-
   if (!features.isEnabled('sso')) {
-    return [localStrategy];
+    return [createLocalStrategy(strapi)];
   }
+
+  const localStrategy = createLocalStrategy(strapi, localStrategyMiddleware);
 
   if (!strapi.isLoaded) {
     sso.syncProviderRegistryWithConfig();

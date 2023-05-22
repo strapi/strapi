@@ -2,9 +2,8 @@
 
 const { toLower } = require('lodash/fp');
 const { Strategy: LocalStrategy } = require('passport-local');
-const { isSsoLocked } = require('./utils/sso-lock');
 
-const createLocalStrategy = (strapi) => {
+const createLocalStrategy = (strapi, middleware) => {
   return new LocalStrategy(
     {
       usernameField: 'email',
@@ -18,10 +17,8 @@ const createLocalStrategy = (strapi) => {
           password,
         })
         .then(async ([error, user, message]) => {
-          if (await isSsoLocked(user)) {
-            return done(error, null, {
-              message: 'Login not allowed, please contact your administrator',
-            });
+          if (middleware) {
+            return middleware([error, user, message], done);
           }
 
           return done(error, user, message);

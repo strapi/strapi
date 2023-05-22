@@ -1,36 +1,41 @@
 'use strict';
 
+const { features } = require('@strapi/strapi/ee');
+const { isEmpty } = require('lodash/fp');
+
 const isSsoLocked = async (user) => {
-  if (!strapi.EE || !user) {
+  if (!features.isEnabled('sso') || !user) {
     // TODO: we should be calling strapi.features.isEnabled("sso") but that's EE code. Should we load it dynamically when EE is enabled? Or add EE code to override this strategy?
     return false;
   }
 
-  // TODO: if user object has roles === undefined, we need to query for it. [] should be fine, it means we got the roles object but they don't have any
-
+  // check if any roles are locked
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
   const { providers } = await adminStore.get({ key: 'auth' });
   const lockedRoles = providers.authenticationDisabled || [];
+  if (isEmpty(lockedRoles)) {
+    return false;
+  }
+
+  // Ensure we have user.roles and get them if we don't have them
+  let roles = user.roles;
+  if (!user.roles) {
+    const u = await strapi.query('admin::user').findOne({
+      where: { id: user.id },
+      populate: ['roles'],
+    });
+    roles = u.roles;
+  }
 
   // Check for roles that have blocked
   const isLocked = lockedRoles.some((lockedId) =>
     // lockedRoles will be a string to avoid issues with frontend and bigints
-    user.roles?.some((role) => lockedId === role.id.toString())
+    roles?.some((role) => lockedId === role.id.toString())
   );
 
   return isLocked;
 };
 
-const userPopulateForSso = () => {
-  if (!strapi.EE) {
-    // TODO: we should be calling strapi.features.isEnabled("sso") but that's EE code. Should we load it dynamically when EE is enabled? Or add EE code to override this strategy?
-    return undefined;
-  }
-
-  return ['roles'];
-};
-
 module.exports = {
   isSsoLocked,
-  userPopulateForSso,
 };

@@ -5,7 +5,7 @@ const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
-const { isSsoLocked, userPopulateForSso } = require('./passport/utils/sso-lock');
+const { isSsoLocked } = require('../../ee/server/utils/sso-lock');
 
 /**
  * hashes a password
@@ -31,7 +31,6 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
 const checkCredentials = async ({ email, password }) => {
   const user = await strapi.query('admin::user').findOne({
     where: { email },
-    populate: userPopulateForSso(),
   });
 
   if (!user || !user.password) {
@@ -59,11 +58,10 @@ const checkCredentials = async ({ email, password }) => {
  * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {}) => {
-  const user = await strapi
-    .query('admin::user')
-    .findOne({ where: { email, isActive: true }, populate: userPopulateForSso() });
+  const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user || (await isSsoLocked(user))) {
+    // TODO: this needs to be removed and overidden in /ee/
     return;
   }
 
@@ -104,9 +102,10 @@ const forgotPassword = async ({ email } = {}) => {
 const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   const matchingUser = await strapi
     .query('admin::user')
-    .findOne({ where: { resetPasswordToken, isActive: true }, populate: userPopulateForSso() });
+    .findOne({ where: { resetPasswordToken, isActive: true } });
 
   if (!matchingUser || isSsoLocked(matchingUser)) {
+    // TODO: this needs to be removed and overidden in /ee/
     throw new ApplicationError();
   }
 
