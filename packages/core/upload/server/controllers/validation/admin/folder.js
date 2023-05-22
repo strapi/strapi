@@ -5,6 +5,7 @@ const { yup, validateYupSchema } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { FOLDER_MODEL_UID } = require('../../../constants');
 const { folderExists } = require('./utils');
+const { isFolderOrChild } = require('../../utils/folders');
 
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;
@@ -78,11 +79,7 @@ const validateUpdateFolderSchema = (id) =>
 
             if (!destinationFolder || !currentFolder) return true;
 
-            const isUnMovable =
-              destinationFolder.path === currentFolder.path ||
-              destinationFolder.path.startsWith(`${currentFolder.path}/`);
-
-            return !isUnMovable;
+            return !isFolderOrChild(destinationFolder, currentFolder);
           }
         ),
     })
