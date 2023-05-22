@@ -34,5 +34,31 @@ export const useSelectionState = (keys, initialValue) => {
     }
   };
 
-  return [selections, { selectOne, selectAll, selectOnly, setSelections }];
+  const selectMultiple = (nextSelections) => {
+    setSelections([
+      ...selections,
+      ...nextSelections.filter(
+        (nextSelection) =>
+          selections.findIndex((currentSelection) =>
+            keys.every((key) => currentSelection[key] === nextSelection[key])
+          ) === -1
+      ),
+    ]);
+  };
+
+  const deselectMultiple = (nextSelections) => {
+    setSelections([
+      ...selections.filter(
+        (currentSelection) =>
+          nextSelections.findIndex((nextSelection) =>
+            keys.every((key) => currentSelection[key] === nextSelection[key])
+          ) === -1
+      ),
+    ]);
+  };
+
+  return [
+    selections,
+    { selectOne, selectAll, selectOnly, selectMultiple, deselectMultiple, setSelections },
+  ];
 };
