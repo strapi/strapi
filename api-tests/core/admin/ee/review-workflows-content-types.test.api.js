@@ -44,13 +44,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   const createWorkflow = async (data) => {
     const name = `${data.name}-${Math.random().toString(36)}`;
     return requests.admin.post('/admin/review-workflows/workflows?populate=*', {
-      body: { ...baseWorkflow, name, ...data },
+      body: { data: { ...baseWorkflow, name, ...data } },
     });
   };
 
   const updateWorkflow = async (id, data) => {
     return requests.admin.put(`/admin/review-workflows/workflows/${id}?populate=stages`, {
-      body: data,
+      body: { data },
     });
   };
 
