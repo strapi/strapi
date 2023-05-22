@@ -786,7 +786,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c8 c27 c28"
-                          for=":r2:"
+                          for="description"
                         >
                           Description
                         </label>
@@ -798,7 +798,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                             aria-required="false"
                             class="c33 c34"
                             font-size="2"
-                            id=":r2:"
+                            id="description"
                           />
                         </div>
                       </div>

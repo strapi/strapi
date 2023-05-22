@@ -1298,7 +1298,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                         >
                           <label
                             class="c8 c24 c25"
-                            for=":r11:"
+                            for="urls"
                           >
                             URL
                           </label>
@@ -1306,17 +1306,17 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                             class="c26 c27"
                           >
                             <textarea
-                              aria-describedby=":r11:-hint"
+                              aria-describedby="urls-hint"
                               aria-invalid="false"
                               aria-required="false"
                               class="c28 c29"
                               font-size="2"
-                              id=":r11:"
+                              id="urls"
                             />
                           </div>
                           <p
                             class="c8 c30"
-                            id=":r11:-hint"
+                            id="urls-hint"
                           >
                             Separate your URL links by a carriage return.
                           </p>

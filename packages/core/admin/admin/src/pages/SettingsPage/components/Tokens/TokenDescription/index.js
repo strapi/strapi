@@ -12,7 +12,7 @@ const TokenDescription = ({ errors, values, onChange, canEditInputs }) => {
         id: 'Settings.tokens.form.description',
         defaultMessage: 'Description',
       })}
-      name="description"
+      id="description"
       error={
         errors.description
           ? formatMessage(

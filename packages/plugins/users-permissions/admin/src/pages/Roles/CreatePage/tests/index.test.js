@@ -914,7 +914,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                           >
                             <label
                               class="c6 c22 c23"
-                              for=":r2:"
+                              for="description"
                             >
                               Description
                             </label>
@@ -926,7 +926,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 aria-required="false"
                                 class="c28 c29"
                                 font-size="2"
-                                id=":r2:"
+                                id="description"
                               />
                             </div>
                           </div>

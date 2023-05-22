@@ -1008,7 +1008,7 @@ describe('Admin | containers | RoleEditPage', () => {
                           >
                             <label
                               class="c9 c25 c26"
-                              for=":r2:"
+                              for="description"
                             >
                               Description
                             </label>
@@ -1020,7 +1020,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 aria-required="false"
                                 class="c31 c32"
                                 font-size="2"
-                                id=":r2:"
+                                id="description"
                               >
                                 Default role given to authenticated user.
                               </textarea>

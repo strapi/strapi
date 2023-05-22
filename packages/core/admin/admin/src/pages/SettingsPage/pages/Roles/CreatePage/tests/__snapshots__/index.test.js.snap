@@ -826,7 +826,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c10 c29 c30"
-                          for=":r2:"
+                          for="description"
                         >
                           Description
                         </label>
@@ -838,7 +838,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                             aria-required="false"
                             class="c35 c36"
                             font-size="2"
-                            id=":r2:"
+                            id="description"
                           >
                             Created April 1st, 2020
                           </textarea>

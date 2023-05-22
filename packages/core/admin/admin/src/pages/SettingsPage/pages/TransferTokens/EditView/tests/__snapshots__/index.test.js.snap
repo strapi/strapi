@@ -1023,7 +1023,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for=":r3:"
+                          for="description"
                         >
                           Description
                         </label>
@@ -1035,7 +1035,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-required="false"
                             class="c38 c39"
                             font-size="2"
-                            id=":r3:"
+                            id="description"
                           >
                             This describe my super token
                           </textarea>

@@ -1101,7 +1101,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <label
                           class="c9 c24 c25"
-                          for=":r2:"
+                          for="description"
                         >
                           Description
                         </label>
@@ -1113,7 +1113,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-required="false"
                             class="c32 c33"
                             font-size="2"
-                            id=":r2:"
+                            id="description"
                           />
                         </div>
                       </div>
@@ -2771,7 +2771,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <label
                           class="c9 c31 c32"
-                          for=":ro:"
+                          for="description"
                         >
                           Description
                         </label>
@@ -2783,7 +2783,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-required="false"
                             class="c39 c40"
                             font-size="2"
-                            id=":ro:"
+                            id="description"
                           >
                             This describe my super token
                           </textarea>
