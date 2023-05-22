@@ -102,7 +102,8 @@ export function ReviewWorkflowsListView() {
     try {
       const res = await mutateAsync({ workflowId: workflowToDelete });
 
-      refetchWorkflow();
+      await refetchWorkflow();
+      setWorkflowToDelete(null);
 
       return res;
     } catch (error) {
