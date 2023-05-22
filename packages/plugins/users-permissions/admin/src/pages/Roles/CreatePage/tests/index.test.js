@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
@@ -36,7 +36,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/new`);
+  act(() => history.push(`/settings/${pluginId}/roles/new`));
 
   return renderResult;
 }
@@ -902,7 +902,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                             >
                               <label
                                 class="c6 c22 c23"
-                                for="1"
+                                for=":r0:"
                               >
                                 Name
                               </label>
@@ -914,7 +914,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c25"
-                                  id="1"
+                                  id=":r0:"
                                   name="name"
                                   value=""
                                 />
@@ -944,7 +944,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                               >
                                 <label
                                   class="c6 c22 c23"
-                                  for="3"
+                                  for=":r2:"
                                 >
                                   Description
                                 </label>
@@ -956,7 +956,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                   aria-invalid="false"
                                   aria-required="false"
                                   class="c28"
-                                  id="3"
+                                  id=":r2:"
                                   name="description"
                                 />
                               </div>
@@ -1009,10 +1009,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                               class="c2 c40 c41"
                             >
                               <button
-                                aria-controls="accordion-content-4"
+                                aria-controls="accordion-content-:r4:"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-4"
+                                aria-labelledby="accordion-label-:r4:"
                                 class="c2 c42 c9 c43 c44"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
@@ -1022,13 +1022,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 >
                                   <span
                                     class="c6 c46"
-                                    id="accordion-label-4"
+                                    id="accordion-label-:r4:"
                                   >
                                     Address
                                   </span>
                                   <p
                                     class="c6 c35"
-                                    id="accordion-desc-4"
+                                    id="accordion-desc-:r4:"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>

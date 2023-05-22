@@ -38,7 +38,8 @@
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
     "@testing-library/jest-dom": "5.16.5",
-    "jest-styled-components": "7.1.1"
+    "jest-styled-components": "7.1.1",
+    "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
     "eslint-config-custom": "4.10.5",

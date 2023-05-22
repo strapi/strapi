@@ -157,7 +157,6 @@ const forms = {
     },
   },
   contentType: {
-    
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
@@ -197,7 +196,7 @@ const forms = {
         reservedModels: reservedNames.models,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
-        collectionNames
+        collectionNames,
       });
 
       // FIXME

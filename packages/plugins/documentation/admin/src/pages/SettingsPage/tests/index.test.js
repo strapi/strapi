@@ -578,7 +578,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
                           >
                             <label
                               class="c5 c21 c22"
-                              for="1"
+                              for=":r0:"
                             >
                               Restricted Access
                             </label>
@@ -616,11 +616,11 @@ describe('Plugin | Documentation | SettingsPage', () => {
                                 </span>
                               </div>
                               <input
-                                aria-describedby="1-hint"
+                                aria-describedby=":r0:-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c33"
-                                id="1"
+                                id=":r0:"
                                 name="restrictedAccess"
                                 type="checkbox"
                               />
@@ -628,7 +628,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
                           </label>
                           <p
                             class="c5 c34"
-                            id="1-hint"
+                            id=":r0:-hint"
                           >
                             Make the documentation endpoint private
                           </p>
