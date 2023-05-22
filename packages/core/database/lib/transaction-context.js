@@ -53,14 +53,14 @@ const transactionCtx = {
   onCommit(cb) {
     const store = storage.getStore();
     if (store?.commitCallbacks) {
-      store.commitCallbacks = [...store.commitCallbacks, cb];
+      store.commitCallbacks.push(cb);
     }
   },
 
   onRollback(cb) {
     const store = storage.getStore();
     if (store?.rollbackCallbacks) {
-      store.rollbackCallbacks = [...store.rollbackCallbacks, cb];
+      store.rollbackCallbacks.push(cb);
     }
   },
 };
