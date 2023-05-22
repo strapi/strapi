@@ -17,7 +17,10 @@ module.exports = {
   login: compose([
     (ctx, next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) {
+        if (err?.details?.code) {
+          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
+          throw err;
+        } else if (err) {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
           return ctx.notImplemented();
         }
