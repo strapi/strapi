@@ -141,9 +141,14 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
   );
 };
 
+Headers.defaultProps = {
+  getHeaders: getCEHeaders,
+  isDraftAndPublish: false,
+};
+
 Headers.propTypes = {
-  getHeaders: PropTypes.func.isRequired,
-  isDraftAndPublish: PropTypes.bool.isRequired,
+  getHeaders: PropTypes.func,
+  isDraftAndPublish: PropTypes.bool,
 };
 
 const Body = ({ providedEvents, isDraftAndPublish }) => {
@@ -203,11 +208,12 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
 
 Body.defaultProps = {
   providedEvents: null,
+  isDraftAndPublish: false,
 };
 
 Body.propTypes = {
   providedEvents: PropTypes.object,
-  isDraftAndPublish: PropTypes.bool.isRequired,
+  isDraftAndPublish: PropTypes.bool,
 };
 
 /**
