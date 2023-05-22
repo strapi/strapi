@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import upperFirst from 'lodash/upperFirst';
 import { FieldLabel, Flex, Typography, BaseCheckbox, Checkbox } from '@strapi/design-system';
 
 import { useModels } from '../../../../../../../hooks';
@@ -38,7 +37,7 @@ const StyledTable = styled.table`
   }
 `;
 
-const getHeaders = (isDraftAndPublish) => {
+const getCEHeaders = (isDraftAndPublish) => {
   if (isDraftAndPublish) {
     return [
       { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
@@ -56,7 +55,7 @@ const getHeaders = (isDraftAndPublish) => {
   ];
 };
 
-const getEvents = (isDraftAndPublish) => {
+const getCEEvents = (isDraftAndPublish) => {
   if (isDraftAndPublish) {
     return {
       entry: ['entry.create', 'entry.update', 'entry.delete', 'entry.publish', 'entry.unpublish'],
@@ -70,8 +69,22 @@ const getEvents = (isDraftAndPublish) => {
   };
 };
 
-const Root = (props) => {
+const Root = ({ children }) => {
   const { formatMessage } = useIntl();
+  const { collectionTypes } = useModels();
+
+  const isDraftAndPublish = React.useMemo(
+    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
+    [collectionTypes]
+  );
+
+  const childrenWithProps = React.Children.map(children, (child) => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, { isDraftAndPublish });
+    }
+
+    return child;
+  });
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
@@ -81,7 +94,7 @@ const Root = (props) => {
           defaultMessage: 'Events',
         })}
       </FieldLabel>
-      <StyledTable>{props.children}</StyledTable>
+      <StyledTable>{childrenWithProps}</StyledTable>
     </Flex>
   );
 };
@@ -90,14 +103,7 @@ Root.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const Headers = () => {
-  const { collectionTypes } = useModels();
-
-  const isDraftAndPublish = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
-
+const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
   const { formatMessage } = useIntl();
   const headers = getHeaders(isDraftAndPublish);
 
@@ -135,15 +141,13 @@ const Headers = () => {
   );
 };
 
-const Body = () => {
-  const { collectionTypes } = useModels();
+Headers.propTypes = {
+  getHeaders: PropTypes.func.isRequired,
+  isDraftAndPublish: PropTypes.bool.isRequired,
+};
 
-  const isDraftAndPublish = React.useMemo(
-    () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
-    [collectionTypes]
-  );
-
-  const events = getEvents(isDraftAndPublish);
+const Body = ({ providedEvents, isDraftAndPublish }) => {
+  const events = providedEvents || getCEEvents(isDraftAndPublish);
   const { values, handleChange: onChange } = useFormikContext();
 
   const inputName = 'events';
@@ -197,11 +201,33 @@ const Body = () => {
   );
 };
 
+Body.defaultProps = {
+  providedEvents: null,
+};
+
+Body.propTypes = {
+  providedEvents: PropTypes.object,
+  isDraftAndPublish: PropTypes.bool.isRequired,
+};
+
+/**
+ * Converts a string to title case and removes hyphens.
+ *
+ * @param {string} str - The string to convert.
+ * @returns {string} The converted string.
+ */
+const removeHyphensAndTitleCase = (str) =>
+  str
+    .replace(/-/g, ' ')
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
   const enabledCheckboxes = events.filter((event) => !disabledEvents.includes(event));
 
-  const areAllCheckboxesSelected = inputValue.length === enabledCheckboxes.length;
   const hasSomeCheckboxSelected = inputValue.length > 0;
+  const areAllCheckboxesSelected = inputValue.length === enabledCheckboxes.length;
 
   const onChangeAll = ({ target: { name } }) => {
     const valueToSet = !areAllCheckboxesSelected;
@@ -221,7 +247,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
           onChange={onChangeAll}
           value={areAllCheckboxesSelected}
         >
-          {upperFirst(name)}
+          {removeHyphensAndTitleCase(name)}
         </Checkbox>
       </td>
 

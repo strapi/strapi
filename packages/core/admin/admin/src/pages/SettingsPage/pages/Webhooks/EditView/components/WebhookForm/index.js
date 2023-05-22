@@ -23,6 +23,11 @@ const WebhookForm = ({
   const { formatMessage } = useIntl();
   const [showTriggerResponse, setShowTriggerResponse] = useState(false);
 
+  /**
+   * Map the headers into a form that can be used within the formik form
+   * @param {Object} headers
+   * @returns {Array}
+   */
   const mapHeaders = (headers) => {
     if (!Object.keys(headers).length) {
       return [{ key: '', value: '' }];
