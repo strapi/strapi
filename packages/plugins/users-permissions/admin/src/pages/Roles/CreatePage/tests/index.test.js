@@ -62,125 +62,6 @@ describe('Admin | containers | RoleCreatePage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c4 {
-        min-width: 0;
-      }
-
-      .c14 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c16 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c26 {
-        border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
-      }
-
-      .c28 {
-        font-size: 0.875rem;
-        background: #ffffff;
-        color: #32324d;
-        padding: 16px;
-        border-radius: 4px;
-        width: 100%;
-        height: 6.5625rem;
-        line-height: 1.43;
-      }
-
-      .c8 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
-      }
-
-      .c30 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c32 {
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
-      .c37 {
-        border-radius: 4px;
-      }
-
-      .c39 {
-        background: #f6f6f9;
-        padding-top: 24px;
-        padding-right: 24px;
-        padding-bottom: 24px;
-        padding-left: 24px;
-      }
-
-      .c41 {
-        max-width: 100%;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c43 {
-        background: transparent;
-        min-width: 0;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c48 {
-        background: #dcdce4;
-        border-radius: 50%;
-        width: 2rem;
-        height: 2rem;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-
-      .c50 {
-        color: #666687;
-        width: 0.6875rem;
-      }
-
-      .c52 {
-        background: #eaeaef;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
       .c7 {
         font-weight: 600;
         font-size: 2rem;
@@ -237,6 +118,125 @@ describe('Admin | containers | RoleCreatePage', () => {
         overflow: hidden;
         text-overflow: ellipsis;
         color: #4a4a6a;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c4 {
+        min-width: 0;
+      }
+
+      .c14 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c16 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c26 {
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+      }
+
+      .c28 {
+        font-size: 0.875rem;
+        background: #ffffff;
+        color: #32324d;
+        padding: 16px;
+        border-radius: 4px;
+        width: 100%;
+        height: 6.5625rem;
+        line-height: 4;
+      }
+
+      .c8 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c30 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c33 {
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c37 {
+        border-radius: 4px;
+      }
+
+      .c39 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 24px;
+        padding-bottom: 24px;
+        padding-left: 24px;
+      }
+
+      .c41 {
+        max-width: 100%;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c43 {
+        background: transparent;
+        min-width: 0;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c48 {
+        background: #dcdce4;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      .c50 {
+        color: #666687;
+        width: 0.6875rem;
+      }
+
+      .c53 {
+        background: #eaeaef;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
       }
 
       .c3 {
@@ -677,12 +677,12 @@ describe('Admin | containers | RoleCreatePage', () => {
         max-width: 100%;
       }
 
-      .c33 {
+      .c32 {
         grid-column: span 7;
         max-width: 100%;
       }
 
-      .c53 {
+      .c52 {
         grid-column: span 5;
         max-width: 100%;
       }
@@ -755,25 +755,25 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c33 {
+        .c32 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c33 {
+        .c32 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c53 {
+        .c52 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c53 {
+        .c52 {
           grid-column: span;
         }
       }
@@ -866,31 +866,35 @@ describe('Admin | containers | RoleCreatePage', () => {
                     <div
                       class="c20"
                     >
-                      <div>
-                        <div
-                          class=""
-                        >
+                      <div
+                        class=""
+                      >
+                        <div>
                           <div
-                            class="c2 c21"
+                            class=""
                           >
-                            <label
-                              class="c6 c22 c23"
-                              for="1"
-                            >
-                              Name
-                            </label>
                             <div
-                              class="c2 c3 c24"
+                              class="c2 c21"
                             >
-                              <input
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c25"
-                                id="1"
-                                name="name"
-                                value=""
-                              />
+                              <label
+                                class="c6 c22 c23"
+                                for="1"
+                              >
+                                Name
+                              </label>
+                              <div
+                                class="c2 c3 c24"
+                              >
+                                <input
+                                  aria-disabled="false"
+                                  aria-invalid="false"
+                                  aria-required="false"
+                                  class="c25"
+                                  id="1"
+                                  name="name"
+                                  value=""
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -903,24 +907,28 @@ describe('Admin | containers | RoleCreatePage', () => {
                         class=""
                       >
                         <div
-                          class="c2 c21"
+                          class=""
                         >
-                          <label
-                            class="c6 c22 c23"
-                            for="description"
-                          >
-                            Description
-                          </label>
                           <div
-                            class="c26 c27"
+                            class="c2 c21"
                           >
-                            <textarea
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c28 c29"
-                              font-size="2"
-                              id="description"
-                            />
+                            <label
+                              class="c6 c22 c23"
+                              for="description"
+                            >
+                              Description
+                            </label>
+                            <div
+                              class="c26 c27"
+                            >
+                              <textarea
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c28 c29"
+                                font-size="2"
+                                id="description"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -932,89 +940,93 @@ describe('Admin | containers | RoleCreatePage', () => {
                 class="c30 c31"
               >
                 <div
-                  class="c32 c33"
+                  class="c32"
                 >
                   <div
-                    class="c2 c34"
+                    class="c33"
                   >
                     <div
-                      class="c2 c35"
-                    >
-                      <h2
-                        class="c6 c18"
-                      >
-                        Permissions
-                      </h2>
-                      <p
-                        class="c6 c36"
-                      >
-                        Only actions bound by a route are listed below.
-                      </p>
-                    </div>
-                    <div
-                      class="c2 c21"
+                      class="c2 c34"
                     >
                       <div
-                        aria-disabled="false"
-                        class="c37 c38"
-                        data-strapi-expanded="false"
+                        class="c2 c35"
+                      >
+                        <h2
+                          class="c6 c18"
+                        >
+                          Permissions
+                        </h2>
+                        <p
+                          class="c6 c36"
+                        >
+                          Only actions bound by a route are listed below.
+                        </p>
+                      </div>
+                      <div
+                        class="c2 c21"
                       >
                         <div
-                          class="c2 c39 c3 c40"
+                          aria-disabled="false"
+                          class="c37 c38"
+                          data-strapi-expanded="false"
                         >
                           <div
-                            class="c2 c41 c42"
+                            class="c2 c39 c3 c40"
                           >
-                            <button
-                              aria-controls="accordion-content-2"
-                              aria-disabled="false"
-                              aria-expanded="false"
-                              aria-labelledby="accordion-label-2"
-                              class="c2 c43 c9 c44 c45"
-                              data-strapi-accordion-toggle="true"
-                              type="button"
+                            <div
+                              class="c2 c41 c42"
                             >
-                              <span
-                                class="c6 c46"
+                              <button
+                                aria-controls="accordion-content-2"
+                                aria-disabled="false"
+                                aria-expanded="false"
+                                aria-labelledby="accordion-label-2"
+                                class="c2 c43 c9 c44 c45"
+                                data-strapi-accordion-toggle="true"
+                                type="button"
                               >
                                 <span
-                                  class="c6 c47"
-                                  id="accordion-label-2"
+                                  class="c6 c46"
                                 >
-                                  Address
+                                  <span
+                                    class="c6 c47"
+                                    id="accordion-label-2"
+                                  >
+                                    Address
+                                  </span>
+                                  <p
+                                    class="c6 c36"
+                                    id="accordion-desc-2"
+                                  >
+                                    Define all allowed actions for the api::address plugin.
+                                  </p>
                                 </span>
-                                <p
-                                  class="c6 c36"
-                                  id="accordion-desc-2"
-                                >
-                                  Define all allowed actions for the api::address plugin.
-                                </p>
-                              </span>
-                            </button>
-                            <div
-                              class="c2 c42"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c2 c48 c49"
-                                data-strapi-dropdown="true"
+                              </button>
+                              <div
+                                class="c2 c42"
                               >
-                                <svg
-                                  class="c50 c51"
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <span
+                                  aria-hidden="true"
+                                  class="c2 c48 c49"
+                                  data-strapi-dropdown="true"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                  <svg
+                                    class="c50 c51"
+                                    fill="none"
+                                    height="1rem"
+                                    viewBox="0 0 14 8"
+                                    width="1rem"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1023,22 +1035,26 @@ describe('Admin | containers | RoleCreatePage', () => {
                   </div>
                 </div>
                 <div
-                  class="c52 c53"
-                  style="min-height: 100%;"
+                  class="c52"
                 >
                   <div
-                    class="c2 c35"
+                    class="c53"
+                    style="min-height: 100%;"
                   >
-                    <h3
-                      class="c6 c18"
+                    <div
+                      class="c2 c35"
                     >
-                      Advanced settings
-                    </h3>
-                    <p
-                      class="c6 c36"
-                    >
-                      Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
-                    </p>
+                      <h3
+                        class="c6 c18"
+                      >
+                        Advanced settings
+                      </h3>
+                      <p
+                        class="c6 c36"
+                      >
+                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

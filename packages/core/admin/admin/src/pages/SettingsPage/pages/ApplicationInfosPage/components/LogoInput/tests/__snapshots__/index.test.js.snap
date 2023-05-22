@@ -1,6 +1,86 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationsInfosPage || LogoInput from computer should render upload modal with from computer tab 1`] = `
+.c18 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c35 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c37 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c47 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c52 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c4 {
   background: #f6f6f9;
   padding: 8px;
@@ -141,74 +221,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 
 .c53 {
   padding-top: 24px;
-}
-
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c35 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c37 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c47 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c52 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c54 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c0 {
@@ -394,18 +406,6 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c18 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c51 {
@@ -976,6 +976,73 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 `;
 
 exports[`ApplicationsInfosPage || LogoInput from url should render upload modal with from url tab 1`] = `
+.c18 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c37 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c35 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c47 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c4 {
   background: #f6f6f9;
   padding: 8px;
@@ -1090,61 +1157,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
-}
-
-.c2 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c37 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c35 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c47 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
 }
 
 .c0 {
@@ -1295,18 +1307,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid #4945ff;
 }
 
-.c18 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c48 {
   height: 2rem;
 }
@@ -1426,6 +1426,15 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   align-items: center;
 }
 
+.c39 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
 .c42 {
   border: none;
   border-radius: 4px;
@@ -1485,15 +1494,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 .c41:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c39 {
-  height: 1px;
-  border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  margin: 0;
 }
 
 .c17 svg > g,
@@ -1895,6 +1895,35 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 `;
 
 exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`] = `
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
 .c3 {
   background: #f6f6f9;
   padding: 8px;
@@ -1949,23 +1978,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
-}
-
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
 }
 
 .c0 {
@@ -2081,18 +2093,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c5 {

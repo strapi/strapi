@@ -61,6 +61,18 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c3 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -77,18 +89,6 @@ describe('<ListPage />', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c3 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c4 {

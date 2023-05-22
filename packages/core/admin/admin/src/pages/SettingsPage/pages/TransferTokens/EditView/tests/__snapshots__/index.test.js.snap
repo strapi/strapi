@@ -1,6 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
+.c43 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c19 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c1 {
   background: #f6f6f9;
   padding-top: 24px;
@@ -57,7 +124,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border-radius: 4px;
   width: 100%;
   height: 6.5625rem;
-  line-height: 1.43;
+  line-height: 4;
 }
 
 .c33 {
@@ -75,61 +142,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c19 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c25 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c38 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c42 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c5 {
@@ -307,18 +319,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c43 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c13 {
   height: 2rem;
 }
@@ -377,6 +377,60 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 
 .c26 {
   line-height: 0;
+}
+
+.c35 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c35[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c35:focus-visible {
+  outline: none;
+}
+
+.c35:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 > svg {
+  width: 0.375rem;
+}
+
+.c41 > svg > path {
+  fill: #666687;
+}
+
+.c39 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c40 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c44[data-state='checked'] .c8 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
 .c28 {
@@ -438,60 +492,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 .c27:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c35 {
-  border: 1px solid #dcdce4;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c35[aria-disabled='true'] {
-  color: #666687;
-}
-
-.c35:focus-visible {
-  outline: none;
-}
-
-.c35:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c41 > svg {
-  width: 0.375rem;
-}
-
-.c41 > svg > path {
-  fill: #666687;
-}
-
-.c39 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c40 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  gap: 4px;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-}
-
-.c44[data-state='checked'] .c8 {
-  font-weight: bold;
-  color: #4945ff;
 }
 
 .c20 {
@@ -755,7 +755,51 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                 <div
                   class="c21"
                 >
-                  <div>
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c22"
+                        >
+                          <label
+                            class="c8 c23 c24"
+                            for="1"
+                          >
+                            Name
+                            <span
+                              class="c8 c25 c26"
+                            >
+                              *
+                            </span>
+                          </label>
+                          <div
+                            class="c5 c27"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="true"
+                              class="c28"
+                              id="1"
+                              name="name"
+                              value=""
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c21"
+                >
+                  <div
+                    class=""
+                  >
                     <div
                       class=""
                     >
@@ -764,26 +808,19 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c23 c24"
-                          for="1"
+                          for="description"
                         >
-                          Name
-                          <span
-                            class="c8 c25 c26"
-                          >
-                            *
-                          </span>
+                          Description
                         </label>
                         <div
-                          class="c5 c27"
+                          class="c29 c30"
                         >
-                          <input
-                            aria-disabled="false"
+                          <textarea
                             aria-invalid="false"
-                            aria-required="true"
-                            class="c28"
-                            id="1"
-                            name="name"
-                            value=""
+                            aria-required="false"
+                            class="c31 c32"
+                            font-size="2"
+                            id="description"
                           />
                         </div>
                       </div>
@@ -797,26 +834,82 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     class=""
                   >
                     <div
-                      class="c22"
+                      class=""
                     >
-                      <label
-                        class="c8 c23 c24"
-                        for="description"
-                      >
-                        Description
-                      </label>
                       <div
-                        class="c29 c30"
+                        class="c22"
                       >
-                        <textarea
-                          aria-invalid="false"
-                          aria-required="false"
-                          class="c31 c32"
-                          font-size="2"
-                          id="description"
-                        />
+                        <label
+                          class="c8 c23 c24"
+                          for="4"
+                        >
+                          Token duration
+                          <span
+                            class="c8 c25 c26"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-0"
+                          aria-describedby="4-hint 4-error"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-label="Token duration"
+                          aria-required="true"
+                          class="c33 c34 c35"
+                          data-state="closed"
+                          dir="ltr"
+                          id="4"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c36 c37"
+                          >
+                            <span
+                              class="c8 c38 c39"
+                            >
+                              <span
+                                class="c40"
+                              >
+                                <span>
+                                  Select
+                                </span>
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c37"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c41"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <span
+                      class="c8 c42"
+                    />
                   </div>
                 </div>
                 <div
@@ -826,154 +919,77 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     class=""
                   >
                     <div
-                      class="c22"
+                      class=""
                     >
-                      <label
-                        class="c8 c23 c24"
-                        for="3"
-                      >
-                        Token duration
-                        <span
-                          class="c8 c25 c26"
-                        >
-                          *
-                        </span>
-                      </label>
                       <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-0"
-                        aria-describedby="3-hint 3-error"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-label="Token duration"
-                        aria-required="true"
-                        class="c33 c34 c35"
-                        data-state="closed"
-                        dir="ltr"
-                        id="3"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                        class="c22"
                       >
-                        <span
-                          class="c36 c37"
+                        <label
+                          class="c8 c23 c24"
+                          for="7"
+                        >
+                          Token type
+                          <span
+                            class="c8 c25 c26"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-1"
+                          aria-describedby="7-hint 7-error"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-label="Token type"
+                          aria-required="true"
+                          class="c33 c34 c35"
+                          data-state="closed"
+                          dir="ltr"
+                          id="7"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
                           <span
-                            class="c8 c38 c39"
+                            class="c36 c37"
                           >
                             <span
-                              class="c40"
+                              class="c8 c38 c39"
                             >
-                              <span>
-                                Select
+                              <span
+                                class="c40"
+                              >
+                                <span>
+                                  Select
+                                </span>
                               </span>
                             </span>
                           </span>
-                        </span>
-                        <span
-                          class="c37"
-                        >
                           <span
-                            aria-hidden="true"
-                            class="c41"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <span
-                    class="c8 c42"
-                  />
-                </div>
-                <div
-                  class="c21"
-                >
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c22"
-                    >
-                      <label
-                        class="c8 c23 c24"
-                        for="5"
-                      >
-                        Token type
-                        <span
-                          class="c8 c25 c26"
-                        >
-                          *
-                        </span>
-                      </label>
-                      <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-1"
-                        aria-describedby="5-hint 5-error"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-label="Token type"
-                        aria-required="true"
-                        class="c33 c34 c35"
-                        data-state="closed"
-                        dir="ltr"
-                        id="5"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
-                      >
-                        <span
-                          class="c36 c37"
-                        >
-                          <span
-                            class="c8 c38 c39"
+                            class="c37"
                           >
                             <span
-                              class="c40"
+                              aria-hidden="true"
+                              class="c41"
                             >
-                              <span>
-                                Select
-                              </span>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </span>
                           </span>
-                        </span>
-                        <span
-                          class="c37"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="c41"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1011,6 +1027,86 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 `;
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
+.c51 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c24 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c27 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c45 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c6 {
   min-width: 0;
 }
@@ -1080,7 +1176,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border-radius: 4px;
   width: 100%;
   height: 6.5625rem;
-  line-height: 1.43;
+  line-height: 4;
 }
 
 .c40 {
@@ -1109,74 +1205,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   overflow: hidden;
   width: 100%;
   cursor: default;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c24 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c27 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c30 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c45 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c5 {
@@ -1354,18 +1382,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c51 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c52[aria-disabled='true'] .c8 {
   color: #666687;
 }
@@ -1483,6 +1499,60 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   line-height: 0;
 }
 
+.c42 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c42[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c42:focus-visible {
+  outline: none;
+}
+
+.c42:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c48 > svg {
+  width: 0.375rem;
+}
+
+.c48 > svg > path {
+  fill: #666687;
+}
+
+.c46 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c53[data-state='checked'] .c8 {
+  font-weight: bold;
+  color: #4945ff;
+}
+
 .c35 {
   border: none;
   border-radius: 4px;
@@ -1542,60 +1612,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 .c34:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c42 {
-  border: 1px solid #dcdce4;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c42[aria-disabled='true'] {
-  color: #666687;
-}
-
-.c42:focus-visible {
-  outline: none;
-}
-
-.c42:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c48 > svg {
-  width: 0.375rem;
-}
-
-.c48 > svg > path {
-  fill: #666687;
-}
-
-.c46 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c47 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  gap: 4px;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-}
-
-.c53[data-state='checked'] .c8 {
-  font-weight: bold;
-  color: #4945ff;
 }
 
 .c28 {
@@ -1941,36 +1957,40 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                 <div
                   class="c29"
                 >
-                  <div>
-                    <div
-                      class=""
-                    >
+                  <div
+                    class=""
+                  >
+                    <div>
                       <div
-                        class="c21"
+                        class=""
                       >
-                        <label
-                          class="c8 c30 c31"
-                          for="10"
-                        >
-                          Name
-                          <span
-                            class="c8 c32 c33"
-                          >
-                            *
-                          </span>
-                        </label>
                         <div
-                          class="c5 c34"
+                          class="c21"
                         >
-                          <input
-                            aria-disabled="false"
-                            aria-invalid="false"
-                            aria-required="true"
-                            class="c35"
-                            id="10"
-                            name="name"
-                            value="My super token"
-                          />
+                          <label
+                            class="c8 c30 c31"
+                            for="10"
+                          >
+                            Name
+                            <span
+                              class="c8 c32 c33"
+                            >
+                              *
+                            </span>
+                          </label>
+                          <div
+                            class="c5 c34"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="true"
+                              class="c35"
+                              id="10"
+                              name="name"
+                              value="My super token"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1983,26 +2003,30 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     class=""
                   >
                     <div
-                      class="c21"
+                      class=""
                     >
-                      <label
-                        class="c8 c30 c31"
-                        for="description"
-                      >
-                        Description
-                      </label>
                       <div
-                        class="c36 c37"
+                        class="c21"
                       >
-                        <textarea
-                          aria-invalid="false"
-                          aria-required="false"
-                          class="c38 c39"
-                          font-size="2"
-                          id="description"
+                        <label
+                          class="c8 c30 c31"
+                          for="description"
                         >
-                          This describe my super token
-                        </textarea>
+                          Description
+                        </label>
+                        <div
+                          class="c36 c37"
+                        >
+                          <textarea
+                            aria-invalid="false"
+                            aria-required="false"
+                            class="c38 c39"
+                            font-size="2"
+                            id="description"
+                          >
+                            This describe my super token
+                          </textarea>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2014,81 +2038,85 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     class=""
                   >
                     <div
-                      class="c21"
+                      class=""
                     >
-                      <label
-                        class="c8 c30 c31"
-                        for="12"
-                      >
-                        Token duration
-                        <span
-                          class="c8 c32 c33"
-                        >
-                          *
-                        </span>
-                      </label>
                       <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-9"
-                        aria-describedby="12-hint 12-error"
-                        aria-disabled="true"
-                        aria-expanded="false"
-                        aria-label="Token duration"
-                        aria-required="true"
-                        class="c40 c41 c42"
-                        data-disabled=""
-                        data-state="closed"
-                        dir="ltr"
-                        id="12"
-                        overflow="hidden"
-                        role="combobox"
+                        class="c21"
                       >
-                        <span
-                          class="c43 c44"
+                        <label
+                          class="c8 c30 c31"
+                          for="13"
+                        >
+                          Token duration
+                          <span
+                            class="c8 c32 c33"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-9"
+                          aria-describedby="13-hint 13-error"
+                          aria-disabled="true"
+                          aria-expanded="false"
+                          aria-label="Token duration"
+                          aria-required="true"
+                          class="c40 c41 c42"
+                          data-disabled=""
+                          data-state="closed"
+                          dir="ltr"
+                          id="13"
+                          overflow="hidden"
+                          role="combobox"
                         >
                           <span
-                            class="c8 c45 c46"
+                            class="c43 c44"
                           >
                             <span
-                              class="c47"
+                              class="c8 c45 c46"
                             >
-                              <span>
-                                Select
+                              <span
+                                class="c47"
+                              >
+                                <span>
+                                  Select
+                                </span>
                               </span>
                             </span>
                           </span>
-                        </span>
-                        <span
-                          class="c44"
-                        >
                           <span
-                            aria-hidden="true"
-                            class="c48"
+                            class="c44"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              aria-hidden="true"
+                              class="c48"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
                           </span>
-                        </span>
+                        </div>
                       </div>
                     </div>
+                    <span
+                      class="c8 c49"
+                    >
+                      Expiration date: Unlimited
+                    </span>
                   </div>
-                  <span
-                    class="c8 c49"
-                  >
-                    Expiration date: Unlimited
-                  </span>
                 </div>
                 <div
                   class="c29"
@@ -2097,73 +2125,77 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                     class=""
                   >
                     <div
-                      class="c21"
+                      class=""
                     >
-                      <label
-                        class="c8 c30 c31"
-                        for="14"
-                      >
-                        Token type
-                        <span
-                          class="c8 c32 c33"
-                        >
-                          *
-                        </span>
-                      </label>
                       <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-10"
-                        aria-describedby="14-hint 14-error"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-label="Token type"
-                        aria-required="true"
-                        class="c50 c41 c42"
-                        data-state="closed"
-                        dir="ltr"
-                        id="14"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                        class="c21"
                       >
-                        <span
-                          class="c43 c44"
+                        <label
+                          class="c8 c30 c31"
+                          for="16"
+                        >
+                          Token type
+                          <span
+                            class="c8 c32 c33"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-10"
+                          aria-describedby="16-hint 16-error"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-label="Token type"
+                          aria-required="true"
+                          class="c50 c41 c42"
+                          data-state="closed"
+                          dir="ltr"
+                          id="16"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
                           <span
-                            class="c8 c45 c46"
+                            class="c43 c44"
                           >
                             <span
-                              class="c47"
+                              class="c8 c45 c46"
                             >
-                              <span>
-                                Select
+                              <span
+                                class="c47"
+                              >
+                                <span>
+                                  Select
+                                </span>
                               </span>
                             </span>
                           </span>
-                        </span>
-                        <span
-                          class="c44"
-                        >
                           <span
-                            aria-hidden="true"
-                            class="c48"
+                            class="c44"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              aria-hidden="true"
+                              class="c48"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
                           </span>
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </div>

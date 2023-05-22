@@ -32,6 +32,39 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c17 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c24 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c33 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         border-radius: 4px;
@@ -89,27 +122,6 @@ describe('ImageAssetCard', () => {
         padding-right: 8px;
         padding-left: 8px;
         min-width: 20px;
-      }
-
-      .c24 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c33 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
       }
 
       .c3 {
@@ -296,18 +308,6 @@ describe('ImageAssetCard', () => {
 
       .c9:indeterminate:disabled:after {
         background-color: #8e8ea9;
-      }
-
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c7 > * {

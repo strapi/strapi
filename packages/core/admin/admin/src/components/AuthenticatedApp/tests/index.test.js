@@ -99,6 +99,18 @@ describe('Admin | components | AuthenticatedApp', () => {
     const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -115,18 +127,6 @@ describe('Admin | components | AuthenticatedApp', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c2 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c3 {

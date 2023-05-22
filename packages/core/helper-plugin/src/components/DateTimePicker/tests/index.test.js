@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import DateTimePicker from '../index';
 
@@ -20,8 +20,8 @@ describe('DateTimePicker', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('should initialize the two inputs', () => {
-    const { getByRole, getByText } = render(
+  it('should initialize the two inputs', async () => {
+    const { getByRole } = render(
       <ThemeProvider theme={lightTheme}>
         <DateTimePicker
           value={new Date('2021-10-13T13:43:00.000Z')}
@@ -34,9 +34,11 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    expect(getByText('13:45')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(getByRole('combobox', { name: 'Choose time' })).toHaveValue('13:45')
+    );
 
-    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('10/13/2021');
+    expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue('10/13/2021');
   });
 
   it('should rerender a new value passed as props', () => {
@@ -66,7 +68,7 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('10/4/2021');
+    expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue('04/10/2021');
   });
 
   it('should rerender an empty value if it is passed as props', () => {
@@ -95,6 +97,6 @@ describe('DateTimePicker', () => {
       </ThemeProvider>
     );
 
-    expect(getByRole('textbox', { name: 'Date time picker' })).toHaveValue('');
+    expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue('');
   });
 });
