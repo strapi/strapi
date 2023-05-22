@@ -1,7 +1,7 @@
 import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 
-export function useModels() {
+export function useContentTypes() {
   const { get } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
@@ -43,5 +43,3 @@ export function useModels() {
     singleTypes,
   };
 }
-
-export default useModels;
