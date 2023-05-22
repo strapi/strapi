@@ -191,12 +191,18 @@ const forms = {
         return get(contentType, ['schema', 'collectionName'], '');
       });
 
+      const takenCollectionNames = isEditing ? collectionNames.filter((collectionName) => {
+        const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+
+        return collectionName !== currentPluralName;
+      }) : collectionNames;
+
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,
         reservedModels: reservedNames.models,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
-        collectionNames,
+        collectionNames: takenCollectionNames,
       });
 
       // FIXME
