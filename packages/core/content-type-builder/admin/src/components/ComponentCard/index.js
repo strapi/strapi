@@ -82,7 +82,6 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
 
   return (
     <ComponentBox
-      as="button"
       alignItems="center"
       direction="column"
       className={isActive ? 'active' : ''}
@@ -91,8 +90,13 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       paddingLeft={4}
       paddingRight={4}
       shrink={0}
-      type="button"
       onClick={onClick}
+      role="tab"
+      tabIndex={isActive ? 0 : -1}
+      cursor="pointer"
+      aria-selected={isActive}
+      aria-controls={`dz-${dzName}-panel-${index}`}
+      id={`dz-${dzName}-tab-${index}`}
     >
       <ComponentIcon icon={icon} isActive={isActive} />
 
@@ -103,7 +107,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="span" onClick={onClose} type="button">
+        <CloseButton as="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

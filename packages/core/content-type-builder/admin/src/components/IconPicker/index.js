@@ -88,7 +88,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   };
 
   return (
-    <Box>
+    <>
       <Flex justifyContent="space-between" padding={1}>
         <Typography variant="pi" fontWeight="bold" textColor="neutral800" as="label">
           {formatMessage(intlLabel)}
@@ -184,7 +184,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
           </Box>
         )}
       </IconPickerWrapper>
-    </Box>
+    </>
   );
 };
 

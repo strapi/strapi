@@ -99,6 +99,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .c58 {
@@ -3554,196 +3555,216 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </span>
                           </div>
                         </button>
-                        <button
-                          class="c55 c56 c57 active"
-                          type="button"
+                        <div
+                          class="c11"
+                          role="tablist"
                         >
                           <div
-                            class="c58 c34"
+                            aria-controls="dz-DynamicZone-panel-0"
+                            aria-selected="true"
+                            class="c55 c56 c57 active"
+                            id="dz-DynamicZone-tab-0"
+                            role="tab"
+                            tabindex="0"
                           >
-                            <svg
-                              class="c59 c60"
-                              height="1rem"
-                              viewBox="0 0 448 512"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c58 c34"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="#212134"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
+                            >
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
                           </div>
                           <div
-                            class="c61"
+                            aria-controls="dz-DynamicZone-panel-1"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-1"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <span
-                              class="c7 c62"
-                            />
-                          </div>
-                          <span
-                            class="c63 c64"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </span>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
-                          <div
-                            class="c65 c34"
-                          >
-                            <svg
-                              class="c59 c60"
-                              height="1rem"
-                              viewBox="0 0 448 512"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="#212134"
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </div>
-                          <div
-                            class="c61"
-                          >
-                            <span
-                              class="c7 c62"
-                            />
-                          </div>
-                          <span
-                            class="c63 c64"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            </div>
+                            <button
+                              class="c63 c64"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </span>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
-                          <div
-                            class="c65 c34"
-                          >
-                            <svg
-                              class="c59 c60"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M3.869 2.99V0h2.9v2.99h10.463V0h2.9v2.99h.629c2.768 0 3.203.498 3.239 2.926V21c0 2.124-.191 3-2.802 3H2.818C.208 24 0 23.363 0 20.785V6.21c.035-2.049.233-3.22 3.001-3.22h.868ZM2.32 20.369c0 .811.245.865.776.865h17.905c.53 0 .68-.012.68-.825V8.233c-.015-.627-.219-.737-.631-.737H2.907c-.413 0-.592.09-.587.573v12.3Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
                           </div>
                           <div
-                            class="c61"
+                            aria-controls="dz-DynamicZone-panel-2"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-2"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <span
-                              class="c7 c62"
-                            />
-                          </div>
-                          <span
-                            class="c63 c64"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
+                              <svg
+                                class="c59 c60"
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M3.869 2.99V0h2.9v2.99h10.463V0h2.9v2.99h.629c2.768 0 3.203.498 3.239 2.926V21c0 2.124-.191 3-2.802 3H2.818C.208 24 0 23.363 0 20.785V6.21c.035-2.049.233-3.22 3.001-3.22h.868ZM2.32 20.369c0 .811.245.865.776.865h17.905c.53 0 .68-.012.68-.825V8.233c-.015-.627-.219-.737-.631-.737H2.907c-.413 0-.592.09-.587.573v12.3Z"
+                                  fill="#212134"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
+                            >
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </span>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                           <div
-                            class="c65 c34"
+                            aria-controls="dz-DynamicZone-panel-3"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-3"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <svg
-                              class="c59 c60"
-                              height="1rem"
-                              viewBox="0 0 448 512"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c61"
-                          >
-                            <span
-                              class="c7 c62"
-                            />
-                          </div>
-                          <span
-                            class="c63 c64"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </span>
-                        </button>
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div
                       class="c66"
                     >
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-0"
                         class=""
+                        id="dz-DynamicZone-panel-0"
+                        role="tabpanel"
                         style="display: block;"
                       >
                         <table>
@@ -4239,7 +4260,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-1"
                         class=""
+                        id="dz-DynamicZone-panel-1"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>
@@ -5175,7 +5199,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-2"
                         class=""
+                        id="dz-DynamicZone-panel-2"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>
@@ -6605,7 +6632,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-3"
                         class=""
+                        id="dz-DynamicZone-panel-3"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>

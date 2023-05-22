@@ -32,6 +32,7 @@ const COMPONENT_ICONS = {
   crop: Icons.Crop,
   cross: Icons.Cross,
   crown: Icons.Crown,
+  cube: Icons.Cube,
   cup: Icons.Cup,
   cursor: Icons.Cursor,
   dashboard: Icons.Dashboard,

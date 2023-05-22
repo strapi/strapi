@@ -62,7 +62,7 @@ export default function ComponentCard({ children, onClick, icon }) {
 
 ComponentCard.defaultProps = {
   onClick() {},
-  icon: null,
+  icon: 'Cube',
 };
 
 ComponentCard.propTypes = {
