@@ -31,6 +31,7 @@ import { Pencil, Plus, Trash } from '@strapi/icons';
 
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import adminPermissions from '../../../../../../../../admin/src/permissions';
+import { useModels } from '../../../../../../../../admin/src/hooks';
 
 import * as Layout from '../../components/Layout';
 
@@ -64,6 +65,7 @@ const ActionLink = styled(Link)`
 export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
+  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useModels();
   const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
   const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
   const { del } = useFetchClient();
@@ -89,6 +91,14 @@ export function ReviewWorkflowsListView() {
       },
     }
   );
+
+  const getContentTypeDisplayName = (uid) => {
+    const contentType = [...collectionTypes, ...singleTypes].find(
+      (contentType) => contentType.uid === uid
+    );
+
+    return contentType.info.displayName;
+  };
 
   const handleDeleteWorkflow = (workflowId) => {
     setWorkflowToDelete(workflowId);
@@ -138,7 +148,7 @@ export function ReviewWorkflowsListView() {
       />
 
       <Layout.Root>
-        {workflowsData.status === 'loading' ? (
+        {workflowsData.status === 'loading' || isLoadingModels ? (
           <Loader>
             {formatMessage({
               id: 'Settings.review-workflows.page.list.isLoading',
@@ -209,7 +219,7 @@ export function ReviewWorkflowsListView() {
                   </Td>
                   <Td>
                     <Typography textColor="neutral800">
-                      {(workflow?.contentTypes ?? []).join(', ')}
+                      {(workflow?.contentTypes ?? []).map(getContentTypeDisplayName).join(', ')}
                     </Typography>
                   </Td>
                   <Td>
