@@ -30,7 +30,7 @@ const model = {
   },
   options: {
     reviewWorkflows: true,
-  }
+  },
 };
 
 describeOnCondition(edition === 'EE')('Review workflows', () => {
@@ -180,8 +180,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should create a workflow without stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows', {
         body: {
-          name: 'testWorkflow',
-          stages: [],
+          data: {
+            name: 'testWorkflow',
+            stages: [],
+          },
         },
       });
 
@@ -196,8 +198,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should create a workflow with stages', async () => {
       const res = await requests.admin.post('/admin/review-workflows/workflows?populate=stages', {
         body: {
-          name: 'createdWorkflow',
-          stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+          data: {
+            name: 'createdWorkflow',
+            stages: [{ name: 'Stage 1' }, { name: 'Stage 2' }],
+          },
         },
       });
 
@@ -220,7 +224,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should update a workflow', async () => {
       const res = await requests.admin.put(
         `/admin/review-workflows/workflows/${createdWorkflow.id}`,
-        { body: { name: 'updatedWorkflow' } }
+        { body: { data: { name: 'updatedWorkflow' } } }
       );
 
       if (hasRW) {
@@ -237,11 +241,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         `/admin/review-workflows/workflows/${createdWorkflow.id}?populate=stages`,
         {
           body: {
-            name: 'updatedWorkflow',
-            stages: [
-              { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
-              { name: 'Stage 2' },
-            ],
+            data: {
+              name: 'updatedWorkflow',
+              stages: [
+                { id: createdWorkflow.stages[0].id, name: 'Stage 1_Updated' },
+                { name: 'Stage 2' },
+              ],
+            },
           },
         }
       );
@@ -265,7 +271,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   describe('Delete workflow', () => {
     test('It should delete a workflow', async () => {
       const createdRes = await requests.admin.post('/admin/review-workflows/workflows', {
-        body: { name: 'testWorkflow', stages: [{ name: 'Stage 1' }] },
+        body: { data: { name: 'testWorkflow', stages: [{ name: 'Stage 1' }] } },
       });
 
       const res = await requests.admin.delete(
@@ -387,10 +393,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         {
           body: {
-            stages: [
-              defaultStage,
-              { id: secondStage.id, name: secondStage.name, color: '#000000' },
-            ],
+            data: {
+              stages: [
+                defaultStage,
+                { id: secondStage.id, name: secondStage.name, color: '#000000' },
+              ],
+            },
           },
         }
       );
@@ -414,7 +422,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should be available for every connected users (admin)', async () => {
       const workflowRes = await requests.admin.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-        { body: { stages: stagesUpdateData } }
+        { body: { data: { stages: stagesUpdateData } } }
       );
 
       if (hasRW) {
@@ -435,7 +443,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should throw an error if trying to delete all stages in a workflow', async () => {
       const workflowRes = await requests.admin.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-        { body: { stages: [] } }
+        { body: { data: { stages: [] } } }
       );
 
       if (hasRW) {
@@ -450,7 +458,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     test('It should throw an error if trying to create more than 200 stages', async () => {
       const stagesRes = await requests.admin.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-        { body: { stages: Array(201).fill({ name: 'new stage' }) } }
+        { body: { data: { stages: Array(201).fill({ name: 'new stage' }) } } }
       );
 
       if (hasRW) {
@@ -468,7 +476,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         // Update workflow to unassign content type
         await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { contentTypes: [productUID] } }
+          { body: { data: { contentTypes: [productUID] } } }
         );
       });
 
@@ -510,7 +518,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         // Update workflow to unassign content type
         await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { contentTypes: [] } }
+          { body: { data: { contentTypes: [] } } }
         );
       });
       test('Should not update the entity', async () => {
@@ -535,7 +543,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     beforeAll(async () => {
       // Update workflow to unassign content type
       await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
-        body: { contentTypes: [productUID] },
+        body: { data: { contentTypes: [productUID] } },
       });
     });
 
@@ -552,7 +560,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
       // Delete last stage stage of the default workflow
       await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
-        body: { stages: [defaultStage] },
+        body: { data: { stages: [defaultStage] } },
       });
 
       // Expect the content in these stages to be moved to the nearest available stage
