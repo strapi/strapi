@@ -74,7 +74,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 id: 'global.description',
                 defaultMessage: 'Description',
               })}
-              name="description"
+              id="description"
               error={errors.name && formatMessage({ id: errors.name })}
               onChange={onChange}
               onBlur={onBlur}
