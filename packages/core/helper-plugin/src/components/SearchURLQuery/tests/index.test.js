@@ -156,7 +156,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby=":r0:"
+            aria-labelledby="0"
             class="c0 c1 c2 c3"
             tabindex="0"
             type="button"
@@ -380,7 +380,7 @@ describe('<SearchURLQuery />', () => {
                 >
                   <label
                     class="c2 c3"
-                    for=":r4:"
+                    for="4"
                   >
                     Search label
                   </label>
@@ -413,7 +413,7 @@ describe('<SearchURLQuery />', () => {
                     aria-invalid="false"
                     aria-required="false"
                     class="c10"
-                    id=":r4:"
+                    id="4"
                     name="search"
                     value=""
                   />

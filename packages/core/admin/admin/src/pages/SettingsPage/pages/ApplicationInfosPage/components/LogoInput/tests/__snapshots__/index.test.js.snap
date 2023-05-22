@@ -604,13 +604,13 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       >
         <label
           class="c1 c2 c3"
-          for=":r14:"
+          for="39"
         >
           logo input label
         </label>
         <div
           class=""
-          id=":r14:"
+          id="39"
         >
           <div
             class="c4"
@@ -646,7 +646,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby=":r16:"
+                    aria-labelledby="36"
                     class="c15 c11 c16 c17"
                     tabindex="0"
                     type="button"
@@ -679,7 +679,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
             >
               <span>
                 <div
-                  aria-labelledby=":r18:"
+                  aria-labelledby="37"
                   class="c11"
                   tabindex="0"
                 >
@@ -723,7 +723,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   >
     <div
       class="c21 c22"
-      id=":r16:"
+      id="36"
       role="tooltip"
     >
       <p
@@ -738,7 +738,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   >
     <div
       class="c21 c22"
-      id=":r18:"
+      id="37"
       role="tooltip"
     >
       <p
@@ -810,11 +810,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                   role="tablist"
                 >
                   <button
-                    aria-controls=":r1a:-0-tabpanel"
+                    aria-controls="43-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c32"
-                    id=":r1a:-0-tab"
+                    id="43-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -833,7 +833,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     aria-disabled="false"
                     aria-selected="false"
                     class="c32"
-                    id=":r1a:-1-tab"
+                    id="43-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -855,8 +855,8 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               </div>
               <div>
                 <div
-                  aria-labelledby=":r1a:-0-tab"
-                  id=":r1a:-0-tabpanel"
+                  aria-labelledby="43-0-tab"
+                  id="43-0-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1554,13 +1554,13 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       >
         <label
           class="c1 c2 c3"
-          for=":r2o:"
+          for="91"
         >
           logo input label
         </label>
         <div
           class=""
-          id=":r2o:"
+          id="91"
         >
           <div
             class="c4"
@@ -1596,7 +1596,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby=":r2q:"
+                    aria-labelledby="88"
                     class="c15 c11 c16 c17"
                     tabindex="0"
                     type="button"
@@ -1629,7 +1629,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
             >
               <span>
                 <div
-                  aria-labelledby=":r2s:"
+                  aria-labelledby="89"
                   class="c11"
                   tabindex="0"
                 >
@@ -1673,7 +1673,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   >
     <div
       class="c21 c22"
-      id=":r2q:"
+      id="88"
       role="tooltip"
     >
       <p
@@ -1688,7 +1688,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   >
     <div
       class="c21 c22"
-      id=":r2s:"
+      id="89"
       role="tooltip"
     >
       <p
@@ -1763,7 +1763,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     aria-disabled="false"
                     aria-selected="false"
                     class="c32"
-                    id=":r2u:-0-tab"
+                    id="95-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -1779,11 +1779,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                     </div>
                   </button>
                   <button
-                    aria-controls=":r2u:-1-tabpanel"
+                    aria-controls="95-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c32"
-                    id=":r2u:-1-tab"
+                    id="95-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -1805,8 +1805,8 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
               </div>
               <div>
                 <div
-                  aria-labelledby=":r2u:-1-tab"
-                  id=":r2u:-1-tabpanel"
+                  aria-labelledby="95-1-tab"
+                  id="95-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1823,7 +1823,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                           >
                             <label
                               class="c1 c2 c3"
-                              for=":r30:"
+                              for="97"
                             >
                               URL
                             </label>
@@ -1835,7 +1835,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c42"
-                                id=":r30:"
+                                id="97"
                                 name="logo-url"
                                 value=""
                               />
@@ -2143,13 +2143,13 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
     >
       <label
         class="c1 c2"
-        for=":r0:"
+        for="3"
       >
         logo input label
       </label>
       <div
         class=""
-        id=":r0:"
+        id="3"
       >
         <div
           class="c3"
@@ -2185,7 +2185,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby=":r2:"
+                  aria-labelledby="0"
                   class="c14 c10 c15 c16"
                   tabindex="0"
                   type="button"
@@ -2218,7 +2218,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
           >
             <span>
               <div
-                aria-labelledby=":r4:"
+                aria-labelledby="1"
                 class="c10"
                 tabindex="0"
               >

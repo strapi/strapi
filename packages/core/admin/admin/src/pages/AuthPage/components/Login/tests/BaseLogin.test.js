@@ -700,7 +700,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for=":r0:"
+                      for="1"
                     >
                       Email
                       <span
@@ -717,7 +717,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c19"
-                        id=":r0:"
+                        id="1"
                         name="email"
                         placeholder="kai@doe.com"
                         value=""
@@ -735,7 +735,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for=":r2:"
+                      for="3"
                     >
                       Password
                       <span
@@ -752,7 +752,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c20 c21"
-                        id=":r2:"
+                        id="3"
                         name="password"
                         type="password"
                         value=""
@@ -804,7 +804,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-label="rememberMe"
                         class="c30"
-                        id=":r4:"
+                        id="5"
                         name="rememberMe"
                         type="checkbox"
                       />
