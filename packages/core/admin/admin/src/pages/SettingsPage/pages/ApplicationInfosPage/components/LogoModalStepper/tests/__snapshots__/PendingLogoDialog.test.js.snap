@@ -79,6 +79,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -193,20 +194,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   justify-content: center;
 }
 
-.c31 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c26 {
   border-radius: 4px;
   height: 1.5rem;
@@ -261,7 +248,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   border: 2px solid #4945ff;
 }
 
-.c35 {
+.c33 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -332,97 +319,97 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   fill: #271fe0;
 }
 
-.c33 {
+.c31 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c33[aria-disabled='true'] {
+.c31[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true'] .c4 {
+.c31[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c33[aria-disabled='true'] svg > g,.c33[aria-disabled='true'] svg path {
+.c31[aria-disabled='true'] svg > g,.c31[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c33[aria-disabled='true']:active {
+.c31[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true']:active .c4 {
+.c31[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c33[aria-disabled='true']:active svg > g,.c33[aria-disabled='true']:active svg path {
+.c31[aria-disabled='true']:active svg > g,.c31[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c33:hover {
+.c31:hover {
   background-color: #f6f6f9;
 }
 
-.c33:active {
+.c31:active {
   background-color: #eaeaef;
 }
 
-.c33 .c4 {
+.c31 .c4 {
   color: #32324d;
 }
 
-.c33 svg > g,
-.c33 svg path {
+.c31 svg > g,
+.c31 svg path {
   fill: #32324d;
 }
 
-.c34 {
+.c32 {
   height: 2rem;
 }
 
-.c34[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true'] .c4 {
+.c32[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c34[aria-disabled='true'] svg > g,.c34[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c34[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true']:active .c4 {
+.c32[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c34[aria-disabled='true']:active svg > g,.c34[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c34:hover {
+.c32:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c34:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c34 svg > g,
-.c34 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #ffffff;
 }
 
@@ -474,10 +461,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   border-top: 1px solid #eaeaef;
 }
 
-.c32 > * + * {
-  margin-left: 8px;
-}
-
 <div>
   <div
     class="c0"
@@ -515,7 +498,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
       class="c12"
     >
       <article
-        aria-labelledby=":r0:-title"
+        aria-labelledby="0-title"
         class="c13"
         tabindex="0"
       >
@@ -543,7 +526,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
             >
               <div
                 class="c4 c5"
-                id=":r0:-title"
+                id="0-title"
               >
                 asset.jpeg
               </div>
@@ -578,11 +561,11 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
       class="c2"
     >
       <div
-        class="c31 c32"
+        class="c8"
       >
         <button
           aria-disabled="false"
-          class="c7 c8 c9 c33"
+          class="c7 c8 c9 c31"
           type="button"
         >
           <span
@@ -593,11 +576,11 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
         </button>
       </div>
       <div
-        class="c31 c32"
+        class="c8"
       >
         <button
           aria-disabled="false"
-          class="c7 c8 c9 c34"
+          class="c7 c8 c9 c32"
           type="button"
         >
           <span
@@ -610,7 +593,7 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
     </div>
   </div>
   <div
-    class="c35"
+    class="c33"
   >
     <p
       aria-live="polite"

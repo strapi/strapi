@@ -122,6 +122,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -444,52 +445,52 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   fill: #ffffff;
 }
 
-.c57 {
+.c56 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c57[aria-disabled='true'] {
+.c56[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true'] .c3 {
+.c56[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true'] svg > g,.c57[aria-disabled='true'] svg path {
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c57[aria-disabled='true']:active {
+.c56[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c57[aria-disabled='true']:active .c3 {
+.c56[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c57[aria-disabled='true']:active svg > g,.c57[aria-disabled='true']:active svg path {
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c57:hover {
+.c56:hover {
   background-color: #f6f6f9;
 }
 
-.c57:active {
+.c56:active {
   background-color: #eaeaef;
 }
 
-.c57 .c3 {
+.c56 .c3 {
   color: #32324d;
 }
 
-.c57 svg > g,
-.c57 svg path {
+.c56 svg > g,
+.c56 svg path {
   fill: #32324d;
 }
 
@@ -595,10 +596,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c55 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
-}
-
-.c56 > * + * {
-  margin-left: 8px;
 }
 
 .c11 {
@@ -744,7 +741,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 class=""
               >
                 <article
-                  aria-labelledby=":r0:-title"
+                  aria-labelledby="2-title"
                   class="c22 c23"
                   role="button"
                   tabindex="-1"
@@ -760,7 +757,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           class=""
                         >
                           <input
-                            aria-labelledby=":r0:-title"
+                            aria-labelledby="2-title"
                             class="c30"
                             type="checkbox"
                           />
@@ -773,7 +770,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":r1:"
+                          aria-labelledby="0"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -802,7 +799,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":r3:"
+                          aria-labelledby="1"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -856,7 +853,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         >
                           <h2
                             class="c3 c14"
-                            id=":r0:-title"
+                            id="2-title"
                           >
                             something.jpg
                           </h2>
@@ -869,6 +866,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           >
                             jpg
                           </span>
+                          
                         </div>
                       </div>
                       <div
@@ -900,7 +898,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 class=""
               >
                 <article
-                  aria-labelledby=":r5:-title"
+                  aria-labelledby="5-title"
                   class="c22 c23"
                   role="button"
                   tabindex="-1"
@@ -916,7 +914,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           class=""
                         >
                           <input
-                            aria-labelledby=":r5:-title"
+                            aria-labelledby="5-title"
                             class="c30"
                             type="checkbox"
                           />
@@ -929,7 +927,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":r6:"
+                          aria-labelledby="3"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -958,7 +956,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":r8:"
+                          aria-labelledby="4"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -1029,7 +1027,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         >
                           <h2
                             class="c3 c14"
-                            id=":r5:-title"
+                            id="5-title"
                           >
                             something.pdf
                           </h2>
@@ -1042,6 +1040,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           >
                             pdf
                           </span>
+                          
                         </div>
                       </div>
                       <div
@@ -1073,7 +1072,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                 class=""
               >
                 <article
-                  aria-labelledby=":ra:-title"
+                  aria-labelledby="8-title"
                   class="c22 c23"
                   role="button"
                   tabindex="-1"
@@ -1089,7 +1088,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           class=""
                         >
                           <input
-                            aria-labelledby=":ra:-title"
+                            aria-labelledby="8-title"
                             class="c30"
                             type="checkbox"
                           />
@@ -1102,7 +1101,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":rb:"
+                          aria-labelledby="6"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -1131,7 +1130,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby=":rd:"
+                          aria-labelledby="7"
                           class="c5 c6 c7 c8"
                           tabindex="0"
                           type="button"
@@ -1213,7 +1212,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         >
                           <h2
                             class="c3 c14"
-                            id=":ra:-title"
+                            id="8-title"
                           >
                             something.mp4
                           </h2>
@@ -1226,6 +1225,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                           >
                             mp4
                           </span>
+                          
                         </div>
                       </div>
                       <div
@@ -1261,11 +1261,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
         class="c2"
       >
         <div
-          class="c27 c56"
+          class="c17"
         >
           <button
             aria-disabled="false"
-            class="c16 c17 c7 c57"
+            class="c16 c17 c7 c56"
             type="button"
           >
             <span
@@ -1276,7 +1276,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
           </button>
         </div>
         <div
-          class="c27 c56"
+          class="c17"
         >
           <button
             aria-disabled="false"
