@@ -25,7 +25,7 @@ const transactionCtx = {
     // Commit transaction
     await trx.commit();
 
-    if (!store?.commitCallbacks) return;
+    if (!store?.commitCallbacks.length) return;
 
     // Run callbacks
     store.commitCallbacks.forEach((cb) => cb());
@@ -43,7 +43,7 @@ const transactionCtx = {
     // Rollback transaction
     await trx.rollback();
 
-    if (!store?.rollbackCallbacks) return;
+    if (!store?.rollbackCallbacks.length) return;
 
     // Run callbacks
     store.rollbackCallbacks.forEach((cb) => cb());
@@ -52,15 +52,15 @@ const transactionCtx = {
 
   onCommit(cb) {
     const store = storage.getStore();
-    if (store?.callbacks) {
-      store.callbacks.push(cb);
+    if (store?.commitCallbacks) {
+      store.commitCallbacks = [...store.commitCallbacks, cb];
     }
   },
 
   onRollback(cb) {
     const store = storage.getStore();
-    if (store?.callbacks) {
-      store.callbacks.push(cb);
+    if (store?.rollbackCallbacks) {
+      store.rollbackCallbacks = [...store.rollbackCallbacks, cb];
     }
   },
 };
