@@ -100,3 +100,5 @@ Transactions should not be used for operations that are not dependent on each ot
 Performing multiple operations within a transaction can lead to locking, which can block the execution of transactions from other processes until the original transaction is complete.
 
 Furthermore, transactions can stall if they are not committed or rolled back appropriately.
+
+For example, if a transaction is opened but there is a path in your code that does not close it, the transaction will be left open indefinitely and could cause instability until your server is restarted and the connection is forced to close. These issues can be difficult to debug, so use transactions with care in the cases they are necessary.
