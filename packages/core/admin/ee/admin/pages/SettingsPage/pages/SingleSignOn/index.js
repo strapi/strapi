@@ -51,7 +51,7 @@ export const SingleSignOn = () => {
   ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
     'autoRegister',
     'defaultRole',
-    'authenticationDisabled',
+    'ssoLockedRoles',
   ]);
   const { roles } = useRolesList(canReadRoles);
 
@@ -201,10 +201,10 @@ export const SingleSignOn = () => {
                           'Select the roles for which you want to disable the local authentication',
                       })}
                       error={
-                        formErrors.authenticationDisabled
+                        formErrors.ssoLockedRoles
                           ? formatMessage({
-                              id: formErrors.authenticationDisabled.id,
-                              defaultMessage: formErrors.authenticationDisabled.id,
+                              id: formErrors.ssoLockedRoles.id,
+                              defaultMessage: formErrors.ssoLockedRoles.id,
                             })
                           : ''
                       }
@@ -212,9 +212,9 @@ export const SingleSignOn = () => {
                         id: 'Settings.sso.form.localAuthenticationLock.label',
                         defaultMessage: 'Local authentication lock-out',
                       })}
-                      name="authenticationDisabled"
+                      name="ssoLockedRoles"
                       onChange={(value) => {
-                        handleChange({ target: { name: 'authenticationDisabled', value } });
+                        handleChange({ target: { name: 'ssoLockedRoles', value } });
                       }}
                       placeholder={formatMessage({
                         id: 'components.InputSelect.option.placeholder',
@@ -222,9 +222,9 @@ export const SingleSignOn = () => {
                       })}
                       onClear={() => {
                         const emptyArray = [];
-                        handleChange({ target: { name: 'authenticationDisabled', emptyArray } });
+                        handleChange({ target: { name: 'ssoLockedRoles', emptyArray } });
                       }}
-                      value={modifiedData.authenticationDisabled || []}
+                      value={modifiedData.ssoLockedRoles || []}
                       withTags
                     >
                       {roles.map(({ id, name }) => (

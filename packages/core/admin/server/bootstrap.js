@@ -10,7 +10,7 @@ const defaultAdminAuthSettings = {
   providers: {
     autoRegister: false,
     defaultRole: null,
-    authenticationDisabled: null,
+    ssoLockedRoles: null,
   },
 };
 

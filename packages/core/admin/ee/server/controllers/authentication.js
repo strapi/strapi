@@ -8,7 +8,7 @@ const { validateProviderOptionsUpdate } = require('../validation/authentication'
 const { middlewares, utils } = require('./authentication/index');
 
 const toProviderDTO = pick(['uid', 'displayName', 'icon']);
-const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'authenticationDisabled']);
+const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 
 const providerAuthenticationFlow = compose([
   middlewares.authenticate,

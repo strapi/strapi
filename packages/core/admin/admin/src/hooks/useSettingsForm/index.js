@@ -95,8 +95,8 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }
 
-        if (cleanedData.authenticationDisabled) {
-          cleanedData.authenticationDisabled = [...new Set(cleanedData.authenticationDisabled)];
+        if (cleanedData.ssoLockedRoles) {
+          cleanedData.ssoLockedRoles = [...new Set(cleanedData.ssoLockedRoles)];
         }
 
         const {
