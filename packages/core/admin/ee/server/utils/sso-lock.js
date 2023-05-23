@@ -25,7 +25,7 @@ const isSsoLocked = async (user) => {
     user.roles ||
     (await strapi.query('admin::user').load(user, 'roles', { roles: { fields: ['id'] } }));
 
-  // Check for roles that have blocked
+  // Check if any of the user's roles are in lockedRoles
   const isLocked = lockedRoles.some((lockedId) =>
     // lockedRoles will be a string to avoid issues with frontend and bigints
     roles?.some((role) => lockedId === role.id.toString())
