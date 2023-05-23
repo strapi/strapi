@@ -61,16 +61,9 @@ const createContentAPISanitizers = () => {
   };
 
   const sanitizeQuery = async (query, schema, { auth } = {}) => {
-    const { filters, sort, fields, populate, ignoreKind } = query;
+    const { filters, sort, fields, populate } = query;
 
     const sanitizedQuery = cloneDeep(query);
-
-    // Some methods behave different if requesting a Content Type or Single Type (entityService findMany)
-    // In some cases, we want to ignore such behaviour, and we do so by using `ignoreKind` flag.
-    // This sanitization is here to avoid potential security issues of using `ignoreKind`, specially using decorators & extensions.
-    if (ignoreKind) {
-      delete sanitizedQuery.ignoreKind;
-    }
 
     if (filters) {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });

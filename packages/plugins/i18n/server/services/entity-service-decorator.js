@@ -168,8 +168,12 @@ const decorator = (service) => ({
 
     if (kind === 'singleType') {
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
-        return service.findMany.call(this, uid, { ...opts, ignoreKind: true });
+        // TODO Fix so this won't break lower lying find many wrappers
+        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
+        return strapi.db.query(uid).findMany(wrappedParams);
       }
+
+      // This one gets transformed into a findOne on a lower layer
       return service.findMany.call(this, uid, opts);
     }
 
