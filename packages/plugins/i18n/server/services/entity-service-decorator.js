@@ -155,7 +155,7 @@ const decorator = (service) => ({
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async findMany(uid, opts = {}) {
+  async findMany(uid, opts) {
     const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
