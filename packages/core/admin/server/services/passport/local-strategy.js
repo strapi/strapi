@@ -12,10 +12,7 @@ const createLocalStrategy = (strapi, middleware) => {
     },
     (email, password, done) => {
       return strapi.admin.services.auth
-        .checkCredentials({
-          email: toLower(email),
-          password,
-        })
+        .checkCredentials({ email: toLower(email), password })
         .then(async ([error, user, message]) => {
           if (middleware) {
             return middleware([error, user, message], done);
