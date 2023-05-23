@@ -5,7 +5,6 @@ const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
-const { isSsoLocked } = require('../../ee/server/utils/sso-lock');
 
 /**
  * hashes a password
