@@ -4,8 +4,12 @@ const { features } = require('@strapi/strapi/ee');
 const { isEmpty } = require('lodash/fp');
 
 const isSsoLocked = async (user) => {
-  if (!features.isEnabled('sso') || !user) {
+  if (!features.isEnabled('sso')) {
     return false;
+  }
+
+  if (!user) {
+    throw new Error('Missing user object');
   }
 
   // check if any roles are locked
