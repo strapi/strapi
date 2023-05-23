@@ -50,9 +50,7 @@ const checkCredentials = async ({ email, password }) => {
 };
 
 /**
- * Send an email to the user if it exists and is not locked to SSO
- * If those conditions are not met, nothing happens
- *
+ * Send an email to the user if it exists or do nothing
  * @param {Object} param params
  * @param {string} param.email user email for which to reset the password
  */
