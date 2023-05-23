@@ -5,7 +5,7 @@ tags:
   - database
 ---
 
-This provides an API to wrap a set of operations in a transaction that ensures the integrity of data.
+An API to wrap a set of operations in a transaction that ensures the integrity of data.
 
 ## What are transactions
 
