@@ -79,7 +79,7 @@ await strapi.db.transaction(async ({ onCommit, onRollback }) => {
 
 ### Using knex queries
 
-Transactions can also be used with knex queries.
+Transactions can also be used with knex queries, but in those cases `.transacting(trx)` must be explicitly called.
 
 ```js
 await strapi.db.transaction(async ({ trx, rollback, commit }) => {
