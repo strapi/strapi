@@ -17,10 +17,13 @@ module.exports = {
   login: compose([
     (ctx, next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err?.details?.code) {
+        // if this is a recognized error, allow it to bubble up to user
+        if (err?.details?.code === 'LOGIN_NOT_ALLOWED') {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
           throw err;
-        } else if (err) {
+        }
+        // for all other errors throw a generic error to prevent leaking info
+        else if (err) {
           strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
           return ctx.notImplemented();
         }
