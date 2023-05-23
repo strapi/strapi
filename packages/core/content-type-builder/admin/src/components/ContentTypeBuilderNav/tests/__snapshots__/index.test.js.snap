@@ -594,7 +594,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby=":r1:"
+              aria-labelledby="0"
               class="c6 c7 c8 c9"
               tabindex="0"
               type="button"
@@ -648,7 +648,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r3:"
+                    aria-controls="2"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -694,7 +694,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id=":r3:"
+                id="2"
               >
                 <li>
                   <a
@@ -808,7 +808,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r4:"
+                    aria-controls="3"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -854,7 +854,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id=":r4:"
+                id="3"
               >
                 <li>
                   <a
@@ -933,7 +933,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r5:"
+                    aria-controls="6"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -979,7 +979,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id=":r5:"
+                id="6"
               >
                 <li>
                   <div
@@ -992,7 +992,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c44"
                       >
                         <button
-                          aria-controls=":r6:"
+                          aria-controls="4"
                           aria-expanded="true"
                           class="c45"
                         >
@@ -1028,7 +1028,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id=":r6:"
+                      id="4"
                     >
                       <li>
                         <a
@@ -1079,7 +1079,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c44"
                       >
                         <button
-                          aria-controls=":r7:"
+                          aria-controls="5"
                           aria-expanded="true"
                           class="c45"
                         >
@@ -1115,7 +1115,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id=":r7:"
+                      id="5"
                     >
                       <li>
                         <a

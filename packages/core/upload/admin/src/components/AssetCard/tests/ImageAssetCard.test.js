@@ -415,7 +415,7 @@ describe('ImageAssetCard', () => {
 
       <div>
         <article
-          aria-labelledby=":r0:-title"
+          aria-labelledby="1-title"
           class="c0 c1"
           role="button"
           tabindex="-1"
@@ -431,7 +431,7 @@ describe('ImageAssetCard', () => {
                   class=""
                 >
                   <input
-                    aria-labelledby=":r0:-title"
+                    aria-labelledby="1-title"
                     class="c9"
                     type="checkbox"
                   />
@@ -444,7 +444,7 @@ describe('ImageAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby=":r1:"
+                  aria-labelledby="0"
                   class="c14 c3 c15 c16"
                   tabindex="0"
                   type="button"
@@ -498,7 +498,7 @@ describe('ImageAssetCard', () => {
                 >
                   <h2
                     class="c24"
-                    id=":r0:-title"
+                    id="1-title"
                   >
                     hello.png
                   </h2>

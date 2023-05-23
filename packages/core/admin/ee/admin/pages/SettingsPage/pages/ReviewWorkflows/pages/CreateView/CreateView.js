@@ -14,7 +14,7 @@ import {
 import { Button, Flex, Loader } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
-import { useModels } from '../../../../../../../../admin/src/hooks';
+import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { Stages } from '../../components/Stages';
 import { reducer, initialState } from '../../reducer';
@@ -33,7 +33,7 @@ export function ReviewWorkflowsCreateView() {
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useModels();
+  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
     clientState: {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },

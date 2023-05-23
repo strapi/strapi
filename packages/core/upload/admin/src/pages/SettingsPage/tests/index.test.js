@@ -118,6 +118,7 @@ describe('Upload | SettingsPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -617,7 +618,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c5 c25 c26"
-                                      for=":r0:"
+                                      for="1"
                                     >
                                       Responsive friendly upload
                                     </label>
@@ -655,14 +656,14 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
-                                        aria-describedby=":r0:-hint"
+                                        aria-describedby="1-hint"
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="responsiveDimensions"
-                                        id=":r0:"
+                                        id="1"
                                         name="responsiveDimensions"
                                         type="checkbox"
                                       />
@@ -670,7 +671,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c38"
-                                    id=":r0:-hint"
+                                    id="1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                   </p>
@@ -695,7 +696,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c5 c25 c26"
-                                      for=":r2:"
+                                      for="3"
                                     >
                                       Size optimization
                                     </label>
@@ -733,13 +734,13 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
-                                        aria-describedby=":r2:-hint"
+                                        aria-describedby="3-hint"
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
                                         aria-required="false"
                                         class="c37"
                                         data-testid="sizeOptimization"
-                                        id=":r2:"
+                                        id="3"
                                         name="sizeOptimization"
                                         type="checkbox"
                                       />
@@ -747,7 +748,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c38"
-                                    id=":r2:-hint"
+                                    id="3-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
                                   </p>
@@ -772,7 +773,7 @@ describe('Upload | SettingsPage', () => {
                                   >
                                     <label
                                       class="c5 c25 c26"
-                                      for=":r4:"
+                                      for="5"
                                     >
                                       Auto orientation
                                     </label>
@@ -810,14 +811,14 @@ describe('Upload | SettingsPage', () => {
                                         </span>
                                       </div>
                                       <input
-                                        aria-describedby=":r4:-hint"
+                                        aria-describedby="5-hint"
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
                                         aria-required="false"
                                         checked=""
                                         class="c37"
                                         data-testid="autoOrientation"
-                                        id=":r4:"
+                                        id="5"
                                         name="autoOrientation"
                                         type="checkbox"
                                       />
@@ -825,7 +826,7 @@ describe('Upload | SettingsPage', () => {
                                   </label>
                                   <p
                                     class="c5 c38"
-                                    id=":r4:-hint"
+                                    id="5-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                   </p>

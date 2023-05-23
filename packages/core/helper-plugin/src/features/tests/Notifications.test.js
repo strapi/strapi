@@ -1,5 +1,5 @@
 import React from 'react';
-import { render as renderRTL, act } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
@@ -66,7 +66,7 @@ describe('Notifications', () => {
 
       expect(getByText(/test/)).toBeInTheDocument();
 
-      act(() => jest.advanceTimersByTime(3000));
+      jest.advanceTimersByTime(3000);
 
       expect(queryByText(/test/)).not.toBeInTheDocument();
 
@@ -76,7 +76,7 @@ describe('Notifications', () => {
 
       expect(getByText('react-intl test title')).toBeInTheDocument();
 
-      act(() => jest.advanceTimersByTime(3000));
+      jest.advanceTimersByTime(3000);
 
       expect(queryByText('react-intl test title')).not.toBeInTheDocument();
     });
@@ -148,7 +148,7 @@ describe('Notifications', () => {
 
       expect(getByText(/test/)).toBeInTheDocument();
 
-      act(() => jest.advanceTimersByTime(1001));
+      jest.advanceTimersByTime(1001);
 
       expect(queryByText(/test/)).not.toBeInTheDocument();
     });
@@ -167,7 +167,7 @@ describe('Notifications', () => {
 
     expect(queryAllByText(/test/)).toHaveLength(2);
 
-    act(() => jest.advanceTimersByTime(1500));
+    jest.advanceTimersByTime(1000);
 
     expect(queryAllByText(/test/)).toHaveLength(1);
   });

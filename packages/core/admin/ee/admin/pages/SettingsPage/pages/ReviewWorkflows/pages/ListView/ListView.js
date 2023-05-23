@@ -31,7 +31,7 @@ import { Pencil, Plus, Trash } from '@strapi/icons';
 
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import adminPermissions from '../../../../../../../../admin/src/permissions';
-import { useModels } from '../../../../../../../../admin/src/hooks';
+import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 
 import * as Layout from '../../components/Layout';
 
@@ -65,7 +65,7 @@ const ActionLink = styled(Link)`
 export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useModels();
+  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
   const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
   const { del } = useFetchClient();

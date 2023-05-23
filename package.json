@@ -78,7 +78,7 @@
     "core-js": "3.30.1",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
-    "eslint": "8.27.0",
+    "eslint": "8.41.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",

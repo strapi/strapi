@@ -1,9 +1,9 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 
 import configureStore from '../../../core/store/configureStore';
-import { useInjectReducer } from '../useInjectReducer';
+import { useInjectReducer } from '..';
 
 const store = configureStore([], [(state = {}) => state]);
 

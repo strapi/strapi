@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
 
 import { useFetchClient } from '@strapi/helper-plugin';
@@ -61,7 +61,7 @@ describe('useReviewWorkflows', () => {
       },
     });
 
-    const { result } = await setup();
+    const { result, waitFor } = await setup();
 
     expect(result.current.workflows.isLoading).toBe(true);
     expect(get).toBeCalledWith('/admin/review-workflows/workflows/', {
@@ -92,7 +92,7 @@ describe('useReviewWorkflows', () => {
       },
     });
 
-    const { result } = await setup(idFixture);
+    const { result, waitFor } = await setup(idFixture);
 
     expect(result.current.workflows.isLoading).toBe(true);
     expect(get).toBeCalledWith(

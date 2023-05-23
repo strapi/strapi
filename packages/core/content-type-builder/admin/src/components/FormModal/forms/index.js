@@ -157,7 +157,6 @@ const forms = {
     },
   },
   contentType: {
-    
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
@@ -192,12 +191,25 @@ const forms = {
         return get(contentType, ['schema', 'collectionName'], '');
       });
 
+      const takenCollectionNames = isEditing
+        ? collectionNames.filter((collectionName) => {
+            const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+            const currentCollectionName = get(
+              contentTypes,
+              [ctUid, 'schema', 'collectionName'],
+              ''
+            );
+
+            return collectionName !== currentPluralName || collectionName !== currentCollectionName;
+          })
+        : collectionNames;
+
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,
         reservedModels: reservedNames.models,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
-        collectionNames
+        collectionNames: takenCollectionNames,
       });
 
       // FIXME
