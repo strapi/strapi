@@ -43,7 +43,6 @@
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
     "pluralize": "8.0.0",
-    "react-copy-to-clipboard": "^5.1.0",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.24.3",
