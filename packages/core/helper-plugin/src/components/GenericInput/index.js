@@ -236,11 +236,6 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           value={value && new Date(value)}
-          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-          selectButtonTitle={formatMessage({
-            id: 'selectButtonTitle',
-            defaultMessage: 'Select',
-          })}
         />
       );
     }

@@ -161,9 +161,10 @@ describe('GenericInput', () => {
       const user = userEvent.setup();
       const { getByRole } = setupDatetimePicker();
 
+
       await user.click(getByRole('combobox', { name: 'Choose date' }));
       await user.click(getByRole('gridcell', { name: /15/ }));
-      await user.click(getByRole('button', { name: /clear date/i }));
+      await user.click(getByRole('button', { name: 'Clear date' }));
 
       expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue('');
       expect(getByRole('combobox', { name: 'Choose time' })).toHaveValue('');
