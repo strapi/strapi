@@ -28,9 +28,7 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
  * @param {string} options.password
  */
 const checkCredentials = async ({ email, password }) => {
-  const user = await strapi.query('admin::user').findOne({
-    where: { email },
-  });
+  const user = await strapi.query('admin::user').findOne({ where: { email } });
 
   if (!user || !user.password) {
     return [null, false, { message: 'Invalid credentials' }];
