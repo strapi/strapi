@@ -1,6 +1,6 @@
 'use strict';
 
-const { set, forEach, pipe, map } = require('lodash/fp');
+const { has, filter, set, forEach, pipe, map, stubTrue, cond } = require('lodash/fp');
 const { getService } = require('../../utils');
 const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
 
@@ -28,6 +28,20 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
+    const assertContentTypeCompatibility = (contentType) => {
+      const joinTableNameLength =
+        contentType.collectionName.length +
+        1 /* _ */ +
+        ENTITY_STAGE_ATTRIBUTE.length +
+        '_links_inv_fk'.length;
+      return joinTableNameLength < 63; // This is the maximum length limit of table name in PostgreSQL (64 for MariaDB)
+    };
+    const incompatibleContentTypeAlert = (contentType) => {
+      strapi.log.warn(
+        `ContentType ${contentType.name} cannot have Review Workflow activated as the name is too long.`
+      );
+      return contentType;
+    };
     const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
       writable: true,
       private: false,
@@ -38,7 +52,12 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       relation: 'oneToOne',
       target: 'admin::workflow-stage',
     });
-    strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
+
+    const extendContentTypeIfCompatible = cond([
+      [assertContentTypeCompatibility, setStageAttribute],
+      [stubTrue, incompatibleContentTypeAlert],
+    ]);
+    strapi.container.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
   };
 
   pipe([
@@ -50,6 +69,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
 
 function persistStagesJoinTables({ strapi }) {
   return async ({ contentTypes }) => {
+    const hasStageAttribute = has('attributes', ENTITY_STAGE_ATTRIBUTE);
     const getStageTableToPersist = (contentTypeUID) => {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
@@ -57,9 +77,11 @@ function persistStagesJoinTables({ strapi }) {
       return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
-    const joinTablesToPersist = pipe([getVisibleContentTypesUID, map(getStageTableToPersist)])(
-      contentTypes
-    );
+    const joinTablesToPersist = pipe([
+      getVisibleContentTypesUID,
+      filter(hasStageAttribute),
+      map(getStageTableToPersist),
+    ])(contentTypes);
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
     await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
