@@ -2,6 +2,7 @@ import React from 'react';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { Table, useTableContext } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
 
@@ -10,6 +11,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: () => ({
     trackUsage: jest.fn(),
   }),
+  useTableContext: jest.fn(() => ({
+    selectedEntries: [1, 2],
+    setSelectedEntries: jest.fn(),
+  })),
 }));
 
 jest.mock('react-redux', () => ({
@@ -29,15 +34,21 @@ jest.mock('../../../../../shared/hooks', () => ({
 const user = userEvent.setup();
 
 describe('BulkActionsBar', () => {
-  const requiredProps = {
-    selectedEntries: [1, 2],
-    clearSelectedEntries: jest.fn(),
-  };
-
   const TestComponent = (props) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <BulkActionsBar {...requiredProps} {...props} />
+        <Table
+          rowCount={1}
+          colCount={1}
+          tableHead={
+            <thead>
+              <tr>
+                <th>test</th>
+              </tr>
+            </thead>
+          }
+          tableActionBar={<BulkActionsBar {...props} />}
+        />
       </IntlProvider>
     </ThemeProvider>
   );
@@ -95,13 +106,19 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show publish button if selected entries are all published', () => {
-    setup({ showPublish: true, selectedEntries: [2] });
+    useTableContext.mockReturnValueOnce({
+      selectedEntries: [2],
+    });
+    setup({ showPublish: true });
 
     expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
-    setup({ showPublish: true, selectedEntries: [1] });
+    useTableContext.mockReturnValueOnce({
+      selectedEntries: [1],
+    });
+    setup({ showPublish: true });
 
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
