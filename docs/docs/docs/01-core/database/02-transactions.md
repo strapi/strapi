@@ -93,7 +93,7 @@ Transactions should be used in cases where multiple operations should be execute
 
 ## When not to use transactions
 
-Transactions should not be used for small or simple sets of operations since it can result in performance penalties.
+Transactions should not be used for operations that are not dependent on each other since it can result in performance penalties.
 
 ## Potential problems of transactions
 
