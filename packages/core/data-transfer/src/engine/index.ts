@@ -615,11 +615,11 @@ class TransferEngine<
   }
 
   async #getSchemas() {
-    if (this.#schema.source) {
+    if (!this.#schema.source) {
       this.#schema.source = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
     }
 
-    if (this.#schema.destination) {
+    if (!this.#schema.destination) {
       this.#schema.destination = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
     }
 
