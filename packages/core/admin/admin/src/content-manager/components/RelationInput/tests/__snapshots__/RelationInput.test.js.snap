@@ -770,7 +770,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     <span>
                       <a
                         aria-current="page"
-                        aria-describedby=":r1:"
+                        aria-describedby="0"
                         class="c27 c28 active"
                         href="/"
                         tabindex="0"
@@ -892,7 +892,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby=":r3:"
+                        aria-describedby="1"
                         class="c4 c37"
                         tabindex="0"
                       >
@@ -1009,7 +1009,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby=":r5:"
+                        aria-describedby="2"
                         class="c4 c37"
                         tabindex="0"
                       >

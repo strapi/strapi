@@ -111,7 +111,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
     >
       <label
         class="c1 c2"
-        for=":ri:"
+        for="0"
       >
         Default label
       </label>
@@ -447,6 +447,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
           aria-required="true"
           class="c7"
           id="number"
+          inputmode="decimal"
           name="number"
           placeholder="Default placeholder"
           type="text"

@@ -168,6 +168,8 @@ export interface Database {
       trx: Knex.Transaction;
       rollback: () => Promise<void>;
       commit: () => Promise<void>;
+      onCommit: (cb) => void;
+      onRollback: (cb) => void;
     }) => Promise<unknown>
   ):
     | Promise<unknown>

@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button, Flex, Box, Popover, FocusTrap, Select, Option } from '@strapi/design-system';
+import { Button, Flex, Box, Popover, Select, Option } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useQueryParams from '../../hooks/useQueryParams';
@@ -113,66 +113,64 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
   const Inputs = appliedFilter.metadatas.customInput || DefaultInputs;
 
   return (
-    <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
-      <FocusTrap onEscape={onToggle}>
-        <form onSubmit={handleSubmit}>
-          <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
-            <SelectContainers direction="column" alignItems="stretch" gap={1}>
-              <Select
-                label={formatMessage({
-                  id: 'app.utils.select-field',
-                  defaultMessage: 'Select field',
-                })}
-                name="name"
-                size="M"
-                onChange={handleChangeFilterField}
-                value={modifiedData.name}
-              >
-                {displayedFilters.map((filter) => {
-                  return (
-                    <Option key={filter.name} value={filter.name}>
-                      {filter.metadatas.label}
-                    </Option>
-                  );
-                })}
-              </Select>
-              <Select
-                label={formatMessage({
-                  id: 'app.utils.select-filter',
-                  defaultMessage: 'Select filter',
-                })}
-                name="filter"
-                size="M"
-                value={modifiedData.filter}
-                onChange={handleChangeOperator}
-              >
-                {filterList.map((option) => {
-                  return (
-                    <Option key={option.value} value={option.value}>
-                      {formatMessage(option.intlLabel)}
-                    </Option>
-                  );
-                })}
-              </Select>
-            </SelectContainers>
-            {operator !== '$null' && operator !== '$notNull' && (
-              <Box>
-                <Inputs
-                  {...appliedFilter.metadatas}
-                  {...appliedFilter.fieldSchema}
-                  value={modifiedData.value}
-                  onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
-                />
-              </Box>
-            )}
+    <Popover source={source} onDismiss={onToggle} padding={3} spacing={4} onBlur={onBlur}>
+      <form onSubmit={handleSubmit}>
+        <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
+          <SelectContainers direction="column" alignItems="stretch" gap={1}>
+            <Select
+              label={formatMessage({
+                id: 'app.utils.select-field',
+                defaultMessage: 'Select field',
+              })}
+              name="name"
+              size="M"
+              onChange={handleChangeFilterField}
+              value={modifiedData.name}
+            >
+              {displayedFilters.map((filter) => {
+                return (
+                  <Option key={filter.name} value={filter.name}>
+                    {filter.metadatas.label}
+                  </Option>
+                );
+              })}
+            </Select>
+            <Select
+              label={formatMessage({
+                id: 'app.utils.select-filter',
+                defaultMessage: 'Select filter',
+              })}
+              name="filter"
+              size="M"
+              value={modifiedData.filter}
+              onChange={handleChangeOperator}
+            >
+              {filterList.map((option) => {
+                return (
+                  <Option key={option.value} value={option.value}>
+                    {formatMessage(option.intlLabel)}
+                  </Option>
+                );
+              })}
+            </Select>
+          </SelectContainers>
+          {operator !== '$null' && operator !== '$notNull' && (
             <Box>
-              <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
-                {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-              </Button>
+              <Inputs
+                {...appliedFilter.metadatas}
+                {...appliedFilter.fieldSchema}
+                value={modifiedData.value}
+                onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
+              />
             </Box>
-          </Flex>
-        </form>
-      </FocusTrap>
+          )}
+          <Box>
+            <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
+              {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+            </Button>
+          </Box>
+        </Flex>
+      </form>
     </Popover>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -73,6 +73,7 @@ describe('useRemoveAsset', () => {
   test('calls the proper endpoint', async () => {
     const {
       result: { current },
+      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -87,6 +88,7 @@ describe('useRemoveAsset', () => {
     const toggleNotification = useNotification();
     const {
       result: { current },
+      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -107,6 +109,7 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
+      waitFor,
     } = await setup(jest.fn);
     const { removeAsset } = current;
 
@@ -130,6 +133,7 @@ describe('useRemoveAsset', () => {
     const toggleNotification = useNotification();
     const {
       result: { current },
+      waitFor,
     } = await setup();
     const { removeAsset } = current;
 

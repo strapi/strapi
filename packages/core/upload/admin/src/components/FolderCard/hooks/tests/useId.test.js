@@ -1,13 +1,20 @@
-import { renderHook } from '@testing-library/react';
+import React from 'react';
+import { render, act } from '@testing-library/react';
 
 import useId from '../useId';
 
 function setup(...args) {
-  const { result } = renderHook((...props) => useId(...props), {
-    initialProps: args,
-  });
+  let returnVal;
 
-  return result.current;
+  function TestComponent() {
+    returnVal = useId(...args);
+
+    return null;
+  }
+
+  render(<TestComponent />);
+
+  return returnVal;
 }
 
 describe('useId', () => {
@@ -18,13 +25,17 @@ describe('useId', () => {
 
     expect(id).toBe('one-1');
 
-    id = setup('one');
+    act(() => {
+      id = setup('one');
+    });
 
     expect(id).toBe('one-2');
   });
 
   test('works with namespaces', () => {
-    id = setup('two');
+    act(() => {
+      id = setup('two');
+    });
 
     expect(id).toBe('two-3');
   });

@@ -30,32 +30,32 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.7.5",
+    "@strapi/design-system": "1.7.7",
     "@strapi/helper-plugin": "4.10.5",
-    "@strapi/icons": "1.7.5",
+    "@strapi/icons": "1.7.7",
     "@strapi/utils": "4.10.5",
     "formik": "2.2.9",
     "immer": "9.0.19",
     "lodash": "4.17.21",
-    "prop-types": "^15.8.1",
+    "prop-types": "^15.7.2",
     "qs": "6.11.1",
     "react-intl": "6.4.1",
-    "react-query": "3.39.2",
+    "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "yup": "^0.32.9"
   },
   "peerDependencies": {
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "12.1.4",
     "msw": "1.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
