@@ -20,12 +20,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
   color: #32324d;
 }
 
-.c18 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c4 {
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -170,6 +164,16 @@ exports[`DateTimePicker snapshots the component 1`] = `
   cursor: inherit;
 }
 
+.c20[data-state='checked'] .c1 {
+  color: #4945ff;
+  font-weight: bold;
+}
+
+.c20[data-highlighted] .c1 {
+  color: #4945ff;
+  font-weight: bold;
+}
+
 .c21[data-state='checked'] .c1 {
   color: #4945ff;
   font-weight: bold;
@@ -181,16 +185,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 .c22[data-state='checked'] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c22[data-highlighted] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c23[data-state='checked'] .c1 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -242,11 +236,11 @@ exports[`DateTimePicker snapshots the component 1`] = `
   cursor: inherit;
 }
 
-.c19 div[role='combobox'] .c1 {
+.c18 div[role='combobox'] .c1 {
   color: #32324d;
 }
 
-.c20:hover > .c1 {
+.c19:hover > .c1 {
   color: #4945ff;
 }
 
@@ -383,7 +377,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
             placeholder="--:--"
             role="combobox"
             type="text"
-            value=""
+            value="13:43"
           />
         </span>
         <span
@@ -416,12 +410,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
         </span>
       </div>
     </div>
-    <p
-      class="c1 c18"
-      id="3-hint"
-    >
-      This is a super description
-    </p>
   </span>
 </fieldset>
 `;

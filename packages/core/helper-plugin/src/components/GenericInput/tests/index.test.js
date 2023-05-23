@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,7 +21,7 @@ function setup(props) {
       {
         wrapper: ({ children }) => (
           <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            <DesignSystemProvider locale="en-GB">{children}</DesignSystemProvider>
           </IntlProvider>
         ),
       }
