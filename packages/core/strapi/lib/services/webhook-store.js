@@ -51,7 +51,7 @@ const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
 
   // TODO: Use a Map
-  const webhookEvents = new Map([
+  const allowedEvents = new Map([
     ['ENTRY_CREATE', 'entry.create'],
     ['ENTRY_UPDATE', 'entry.update'],
     ['ENTRY_DELETE', 'entry.delete'],
@@ -63,7 +63,7 @@ const createWebhookStore = ({ db }) => {
   ]);
 
   return {
-    webhookEvents,
+    allowedEvents,
     async findWebhooks() {
       const results = await webhookQueries.findMany();
 
@@ -76,6 +76,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     createWebhook(data) {
+      // TODO: Validate webhook event
       return webhookQueries
         .create({
           data: toDBObject({ ...data, isEnabled: true }),
@@ -84,6 +85,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     async updateWebhook(id, data) {
+      // TODO: Validate webhook event
       const webhook = await webhookQueries.update({
         where: { id },
         data: toDBObject(data),
