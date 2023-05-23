@@ -79,7 +79,6 @@ export const handlerControllerFactory =
     return async (ctx: Context) => {
       handleWSUpgrade(wss, ctx, (ws) => {
         const state: TransferState = { id: undefined };
-        const messageuuids = new Set<string>();
 
         const prototype: Handler = {
           // Transfer ID
@@ -100,12 +99,12 @@ export const handlerControllerFactory =
             state.startedAt = timestamp;
           },
 
-          addUUID(uuid) {
-            messageuuids.add(uuid);
+          get response() {
+            return state.response;
           },
 
-          hasUUID(uuid) {
-            return messageuuids.has(uuid);
+          set response(response) {
+            state.response = response;
           },
 
           isTransferStarted() {
@@ -135,7 +134,11 @@ export const handlerControllerFactory =
                 reject(new Error('Missing uuid for this message'));
                 return;
               }
-
+              this.response = {
+                uuid,
+                data,
+                e,
+              };
               const payload = JSON.stringify({
                 uuid,
                 data: data ?? null,
@@ -208,6 +211,7 @@ export const handlerControllerFactory =
           cleanup() {
             this.transferID = undefined;
             this.startedAt = undefined;
+            this.response = undefined;
           },
 
           teardown() {

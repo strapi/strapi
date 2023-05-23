@@ -70,6 +70,12 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
 
+    const previousResponse = proto.response;
+    if (previousResponse?.uuid === msg.uuid) {
+      await this.respond(previousResponse?.uuid, previousResponse.e, previousResponse.data);
+      return;
+    }
+
     const { uuid, type } = msg;
 
     // Regular command message (init, end, status)

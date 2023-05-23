@@ -35,14 +35,12 @@ export const createDispatcher = (ws: WebSocket) => {
       const uuid = randomUUID();
       const payload = { ...message, uuid };
       let numberOfTimesMessageWasSent = 0;
-      let responseWasReceived = false;
 
       if (options.attachTransfer) {
         Object.assign(payload, { transferID: state.transfer?.id });
       }
 
       const stringifiedPayload = JSON.stringify(payload);
-
       ws.send(stringifiedPayload, (error) => {
         if (error) {
           reject(error);
@@ -50,28 +48,26 @@ export const createDispatcher = (ws: WebSocket) => {
       });
 
       const sendPeriodically = () => {
-        setTimeout(() => {
-          if (!responseWasReceived) {
-            if (numberOfTimesMessageWasSent < 5) {
-              numberOfTimesMessageWasSent += 1;
-              ws.send(stringifiedPayload);
-              sendPeriodically();
-            } else {
-              reject(new ProviderError('error', 'Request timed out'));
+        if (numberOfTimesMessageWasSent < 5) {
+          numberOfTimesMessageWasSent += 1;
+          ws.send(stringifiedPayload, (error) => {
+            if (error) {
+              reject(error);
             }
-          }
-        }, 50000);
+          });
+        } else {
+          reject(new ProviderError('error', 'Request timed out'));
+        }
       };
+      const interval = setInterval(sendPeriodically, 30000);
 
       const onResponse = (raw: RawData) => {
-        responseWasReceived = true;
-        numberOfTimesMessageWasSent = 0;
         const response: server.Message<U> = JSON.parse(raw.toString());
         if (response.uuid === uuid) {
+          clearInterval(interval);
           if (response.error) {
             return reject(new ProviderError('error', response.error.message));
           }
-
           resolve(response.data ?? null);
         } else {
           ws.once('message', onResponse);
@@ -79,7 +75,6 @@ export const createDispatcher = (ws: WebSocket) => {
       };
 
       ws.once('message', onResponse);
-      sendPeriodically();
     });
   };
 

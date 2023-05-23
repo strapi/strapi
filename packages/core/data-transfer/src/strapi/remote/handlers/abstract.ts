@@ -8,6 +8,11 @@ type BufferLike = Parameters<WebSocket['send']>[0];
 export interface TransferState {
   id?: string;
   startedAt?: number;
+  response?: {
+    uuid?: string;
+    e?: Error | null;
+    data?: unknown;
+  };
 }
 
 export interface Handler {
@@ -19,11 +24,8 @@ export interface Handler {
   get startedAt(): TransferState['startedAt'];
   set startedAt(id: TransferState['startedAt']);
 
-  // Add message UUIDs
-  addUUID(uuid: string): void;
-
-  // Check if a message UUID exists
-  hasUUID(uuid: string): boolean;
+  get response(): TransferState['response'];
+  set response(response: TransferState['response']);
 
   /**
    * Returns whether a transfer is currently in progress or not
