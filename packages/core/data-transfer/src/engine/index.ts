@@ -95,6 +95,8 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
+  #schema: { source?: SchemaMap; destination?: SchemaMap } = {};
+
   // Progress of the current stage
   progress: {
     // metrics on the progress such as size and record count
@@ -623,12 +625,12 @@ class TransferEngine<
       );
     }
 
-    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    this.#schema.source = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    this.#schema.destination = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
 
     try {
-      if (sourceSchemas && destinationSchemas) {
-        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+      if (this.#schema.source && this.#schema.destination) {
+        this.#assertSchemasMatching(this.#schema.source, this.#schema.destination);
       }
     } catch (error) {
       // if this is a schema matching error, allow handlers to resolve it
@@ -760,7 +762,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const schemas = this.#schema.destination;
 
           if (!schemas) {
             return callback(null, entity);
@@ -801,7 +803,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const schemas = this.#schema.destination;
 
           if (!schemas) {
             return callback(null, link);
