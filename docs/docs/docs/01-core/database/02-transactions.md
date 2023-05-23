@@ -89,7 +89,7 @@ await strapi.db.transaction(async ({ trx, rollback, commit }) => {
 
 ## When to use transactions
 
-Transactions should be used in cases where multiple operations should be executed together and their execution is dependent on each other. For example, when creating a user registration form, the transaction can be used to ensure that data is only committed to the database if all fields are properly filled out and validated.
+Transactions should be used in cases where multiple operations should be executed together and their execution is dependent on each other. For example, when creating a new user, the user should be created in the database and a welcome email should be sent to the user. If the email fails to send, the user should not be created in the database.
 
 ## When not to use transactions
 
