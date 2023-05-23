@@ -9,7 +9,7 @@ const createContentTypeSchema = ({
   reservedModels = [],
   singularNames = [],
   pluralNames = [],
-  collectionNames = []
+  collectionNames = [],
 }) => {
   const shape = {
     displayName: yup

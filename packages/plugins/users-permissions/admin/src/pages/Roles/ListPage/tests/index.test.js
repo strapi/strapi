@@ -134,6 +134,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -527,7 +528,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                     <span>
                       <button
                         aria-disabled="false"
-                        aria-labelledby=":r0:"
+                        aria-labelledby="0"
                         class="c21 c22 c12 c23"
                         tabindex="0"
                         type="button"

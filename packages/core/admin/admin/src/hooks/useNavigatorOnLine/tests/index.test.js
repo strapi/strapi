@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import useNavigatorOnLine from '../index';
 
 describe('useNavigatorOnLine', () => {
@@ -19,30 +19,30 @@ describe('useNavigatorOnLine', () => {
   it('listens for network change online', async () => {
     // Initialize an offline state
     jest.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false);
-    const { result } = renderHook(() => useNavigatorOnLine());
+    const { result, waitForNextUpdate } = renderHook(() => useNavigatorOnLine());
 
     await act(async () => {
       // Simulate a change from offline to online
       window.dispatchEvent(new window.Event('online'));
+
+      await waitForNextUpdate();
     });
 
-    await waitFor(() => {
-      expect(result.current).toEqual(true);
-    });
+    expect(result.current).toEqual(true);
   });
 
   it('listens for network change offline', async () => {
     // Initialize an online state
     jest.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(true);
-    const { result } = renderHook(() => useNavigatorOnLine());
+    const { result, waitForNextUpdate } = renderHook(() => useNavigatorOnLine());
 
     await act(async () => {
       // Simulate a change from online to offline
       window.dispatchEvent(new window.Event('offline'));
+
+      await waitForNextUpdate();
     });
 
-    await waitFor(() => {
-      expect(result.current).toEqual(false);
-    });
+    expect(result.current).toEqual(false);
   });
 });

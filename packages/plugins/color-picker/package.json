@@ -9,26 +9,26 @@
     "displayName": "Color Picker"
   },
   "dependencies": {
-    "@strapi/design-system": "1.7.5",
+    "@strapi/design-system": "1.7.7",
     "@strapi/helper-plugin": "4.10.5",
-    "@strapi/icons": "1.7.5",
+    "@strapi/icons": "1.7.7",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
-    "@testing-library/react": "14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@testing-library/react": "12.1.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.4.0",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3"
   },
   "scripts": {
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",

@@ -49,9 +49,18 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: revert;
+  color: #32324d;
+}
+
 .c26 {
   font-size: 0.75rem;
   line-height: 1.33;
+  line-height: revert;
   color: #32324d;
 }
 
@@ -136,6 +145,21 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   gap: 12px;
 }
 
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+}
+
 .c21 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -211,14 +235,6 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 .c28[data-state='checked'] .c4 {
   font-weight: bold;
   color: #4945ff;
-}
-
-.c18 > * + * {
-  margin-left: 4px;
-}
-
-.c24 {
-  line-height: revert;
 }
 
 .c19 {
@@ -326,7 +342,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c20 {
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
   pointer-events: none;
 }
 
@@ -340,7 +356,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c27 {
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
 }
 
 .c27 svg path {
@@ -370,17 +386,17 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           >
             <label
               class="c4 c5 c6"
-              for=":r0:"
+              for="1"
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-:r3:"
-              aria-describedby=":r0:-hint :r0:-error"
+              aria-controls="radix-0"
+              aria-describedby="1-hint 1-error"
               aria-expanded="false"
               class="c7 c8 c9"
               data-state="closed"
               dir="ltr"
-              id=":r0:"
+              id="1"
               overflow="hidden"
               role="combobox"
               tabindex="0"
@@ -436,11 +452,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
         </div>
       </div>
       <nav
-        aria-label="pagination"
+        aria-label="Pagination"
         class=""
       >
-        <ul
-          class="c2 c18"
+        <ol
+          class="c18"
         >
           <li>
             <a
@@ -483,7 +499,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               </div>
               <span
                 aria-hidden="true"
-                class="c4 c5 c24"
+                class="c4 c24"
               >
                 1
               </span>
@@ -502,7 +518,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               </div>
               <span
                 aria-hidden="true"
-                class="c4 c26 c24"
+                class="c4 c26"
               >
                 2
               </span>
@@ -535,7 +551,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
               </svg>
             </a>
           </li>
-        </ul>
+        </ol>
       </nav>
     </div>
   </div>

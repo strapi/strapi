@@ -75,6 +75,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -598,20 +599,20 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       >
                         <label
                           class="c11 c24 c25"
-                          for=":r0:"
+                          for="1"
                         >
                           Entries per page
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r3:"
-                          aria-describedby=":r0:-hint :r0:-error"
+                          aria-controls="radix-0"
+                          aria-describedby="1-hint 1-error"
                           aria-expanded="false"
                           aria-label="Entries per page"
                           class="c26 c27 c28"
                           data-state="closed"
                           dir="ltr"
-                          id=":r0:"
+                          id="1"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -655,7 +656,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c11 c35"
-                          id=":r0:-hint"
+                          id="1-hint"
                         >
                           Number of assets displayed by default in the Media Library
                         </p>
@@ -677,20 +678,20 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       >
                         <label
                           class="c11 c24 c25"
-                          for=":r4:"
+                          for="3"
                         >
                           Default sort order
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r7:"
-                          aria-describedby=":r4:-hint :r4:-error"
+                          aria-controls="radix-1"
+                          aria-describedby="3-hint 3-error"
                           aria-expanded="false"
                           aria-label="Default sort order"
                           class="c26 c27 c28"
                           data-state="closed"
                           dir="ltr"
-                          id=":r4:"
+                          id="3"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -734,7 +735,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         </div>
                         <p
                           class="c11 c35"
-                          id=":r4:-hint"
+                          id="3-hint"
                         >
                           Note: You can override this value in the media library.
                         </p>

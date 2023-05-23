@@ -20,11 +20,7 @@
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
-    "sqlite3": "5.1.2",
-    "styled-components": "5.3.3"
+    "sqlite3": "5.1.2"
   },
   "strapi": {
     "uuid": "getstarted"

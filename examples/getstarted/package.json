@@ -12,7 +12,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "1.7.5",
+    "@strapi/icons": "1.7.7",
     "@strapi/plugin-color-picker": "4.10.5",
     "@strapi/plugin-documentation": "4.10.5",
     "@strapi/plugin-graphql": "4.10.5",
@@ -29,12 +29,9 @@
     "mysql2": "3.3.0",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^17.0.2",
     "react-intl": "6.4.1",
-    "react-router-dom": "5.3.4",
-    "sqlite3": "5.1.2",
-    "styled-components": "5.3.3"
+    "sqlite3": "5.1.2"
   },
   "strapi": {
     "uuid": "getstarted"
