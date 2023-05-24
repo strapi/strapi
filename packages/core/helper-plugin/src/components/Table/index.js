@@ -438,7 +438,7 @@ Content.propTypes = {
   emptyAction: PropTypes.node,
 };
 
-export const Table = {
+const Table = {
   Content,
   Provider,
   ActionBar,
@@ -448,4 +448,4 @@ export const Table = {
   BulkDeleteButton,
 };
 
-export { useTableContext };
+export { Table, useTableContext };

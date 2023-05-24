@@ -12,7 +12,7 @@ import TableHead from './TableHead';
 
 /**
  * @deprecated
- * This component will be replaced by packages/core/helper-plugin/src/components/DynamicTable/v2/Table.js
+ * This component will be replaced by packages/core/helper-plugin/src/components/Table
  * in the next major release.
  */
 const Table = ({
