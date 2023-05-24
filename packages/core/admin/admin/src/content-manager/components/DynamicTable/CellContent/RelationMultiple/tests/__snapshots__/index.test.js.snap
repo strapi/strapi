@@ -19,6 +19,22 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   min-width: 20px;
 }
 
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -84,21 +100,6 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   flex-direction: row;
 }
 
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
 .c10 {
   border-radius: 4px;
   height: 1.5rem;
@@ -109,13 +110,13 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   outline: none;
 }
 
-.c2 svg {
+.c2 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c2 svg > g,
-.c2 svg path {
+.c2 > svg > g,
+.c2 > svg path {
   fill: #ffffff;
 }
 

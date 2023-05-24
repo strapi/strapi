@@ -34,8 +34,8 @@ import pxToRem from '../utils/pxToRem';
 /**
  * @preserve
  * @typedef {Object} AutoReloadOverlayBlockerContextValue
- * @property {(config: AutoReloadOverlayBlockerConfig) => void} lockApp
- * @property {() => void} unlockApp
+ * @property {(config: AutoReloadOverlayBlockerConfig) => void} lockAppWithAutoreload
+ * @property {() => void} unlockAppWithAutoreload
  */
 
 /**
@@ -111,8 +111,8 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
 
   const autoReloadValue = React.useMemo(
     () => ({
-      lockApp: lockAppWithAutoreload,
-      unlockApp: unlockAppWithAutoreload,
+      lockAppWithAutoreload,
+      unlockAppWithAutoreload,
     }),
     [lockAppWithAutoreload, unlockAppWithAutoreload]
   );

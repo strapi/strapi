@@ -25,7 +25,6 @@ const notificationStatusMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockResolvedValue({ data: { data: {} } }),
     get: jest.fn(),

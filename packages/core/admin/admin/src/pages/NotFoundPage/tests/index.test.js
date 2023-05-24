@@ -57,6 +57,21 @@ describe('NotFoundPage', () => {
         padding-bottom: 16px;
       }
 
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -89,21 +104,11 @@ describe('NotFoundPage', () => {
         flex-direction: row;
       }
 
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-      }
-
       .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -111,11 +116,6 @@ describe('NotFoundPage', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
       }
 
       .c10 svg {
@@ -178,13 +178,13 @@ describe('NotFoundPage', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 

@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';

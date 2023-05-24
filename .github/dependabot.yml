@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: sunday
+      time: '22:00'
+    open-pull-requests-limit: 10
     versioning-strategy: increase
     ignore:
       # Only allow patch as minor babel versions need to be upgraded all together
@@ -21,9 +24,12 @@ updates:
       - 'source: dependencies'
       - 'pr: chore'
   - package-ecosystem: github-actions
+    open-pull-requests-limit: 10
     directory: /
     schedule:
       interval: weekly
+      day: sunday
+      time: '22:00'
     labels:
       - 'source: dependencies'
       - 'pr: chore'

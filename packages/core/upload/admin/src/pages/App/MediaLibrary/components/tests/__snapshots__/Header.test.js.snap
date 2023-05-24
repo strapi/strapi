@@ -32,6 +32,27 @@ exports[`Header renders 1`] = `
   cursor: pointer;
 }
 
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c10 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -79,38 +100,18 @@ exports[`Header renders 1`] = `
   gap: 8px;
 }
 
-.c6 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c10 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c13 {
   position: relative;
   outline: none;
 }
 
-.c13 svg {
+.c13 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c13 svg > g,
-.c13 svg path {
+.c13 > svg > g,
+.c13 > svg path {
   fill: #ffffff;
 }
 
