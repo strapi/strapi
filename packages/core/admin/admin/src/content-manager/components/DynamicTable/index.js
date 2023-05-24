@@ -102,9 +102,9 @@ const DynamicTable = ({
   const colCount = tableHeaders.length + 1 + (withEntityActions ? 1 : 0);
 
   return (
-    <TableProvider rowCount={rowCount} colCount={colCount}>
+    <TableProvider>
       {isLoading || !rows.length ? (
-        <Table rowCount={rowCount} colCount={colCount} shadow="">
+        <Table rowCount={rowCount} colCount={colCount}>
           <TableEmptyBody
             colSpan={colCount}
             action={action}
