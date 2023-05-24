@@ -106,7 +106,7 @@ const renderML = () =>
 
 describe('Media library homepage', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('navigation', () => {

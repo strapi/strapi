@@ -30,7 +30,7 @@ jest.mock('../../../FieldComponent', () => () => "I'm a field component");
 
 describe('DynamicComponent', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {

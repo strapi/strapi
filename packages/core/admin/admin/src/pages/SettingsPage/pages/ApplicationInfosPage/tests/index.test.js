@@ -66,7 +66,7 @@ describe('Application page', () => {
 
   afterEach(() => {
     server.resetHandlers();
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   afterAll(() => server.close());

@@ -15,7 +15,7 @@ jest.mock('../../../../hooks', () => ({
 
 describe('ComponentPicker', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const Component = (props) => (

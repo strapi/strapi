@@ -29,7 +29,7 @@ const render = ({ pageSize = testPageSize, sort = testSort, onChange = jest.fn()
 
 describe('Upload - Configure | Settings', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('initial render', () => {

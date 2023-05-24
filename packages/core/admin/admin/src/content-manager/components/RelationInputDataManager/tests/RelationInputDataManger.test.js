@@ -150,7 +150,7 @@ const setup = (props) => render(<RelationInputDataManagerComponent {...props} />
 
 describe('RelationInputDataManager', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('Does pass through props from the CM', async () => {
