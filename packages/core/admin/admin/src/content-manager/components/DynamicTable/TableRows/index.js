@@ -41,6 +41,7 @@ const TableRows = ({
       await onConfirmDelete(selectedEntries[0]);
       setIsConfirmDeleteOpen(false);
       setIsLoading(false);
+      setSelectedEntries([]);
     } catch (error) {
       setIsLoading(false);
       setIsConfirmDeleteOpen(false);

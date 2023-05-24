@@ -1,7 +1,15 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Table, useStrapiApp } from '@strapi/helper-plugin';
+import {
+  TableProvider,
+  TableEmptyBody,
+  TableActionBar,
+  TableHead,
+  TableHeaders,
+  useStrapiApp,
+} from '@strapi/helper-plugin';
+import { Table } from '@strapi/design-system';
 import { useSelector } from 'react-redux';
 
 import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
@@ -95,48 +103,45 @@ const DynamicTable = ({
   const colCount = tableHeaders.length + 1 + (withMainAction ? 1 : 0);
 
   return (
-    <Table
-      contentType={contentTypeName}
-      headers={tableHeaders}
-      rowCount={rowCount}
-      colCount={colCount}
-      tableHead={
-        <Table.Head withBulkActions withMainAction={withMainAction} rows={rows}>
-          <Table.Headers headers={tableHeaders} />
-        </Table.Head>
-      }
-      tableActionBar={
-        <Table.ActionBar>
-          <BulkActionsBar
-            showPublish={canPublish && hasDraftAndPublish}
-            showDelete={canDelete}
-            onConfirmDeleteAll={onConfirmDeleteAll}
-            onConfirmPublishAll={onConfirmPublishAll}
-            onConfirmUnpublishAll={onConfirmUnpublishAll}
+    <TableProvider rowCount={rowCount} colCount={colCount}>
+      {isLoading || !rows.length ? (
+        <Table rowCount={rowCount} colCount={colCount} shadow="">
+          <TableEmptyBody
+            colSpan={colCount}
+            action={action}
+            contentType={contentTypeName}
+            isLoading={isLoading}
           />
-        </Table.ActionBar>
-      }
-    >
-      {!rows.length || isLoading ? (
-        <Table.EmptyBody
-          colSpan={colCount}
-          action={action}
-          contentType={contentTypeName}
-          isLoading={isLoading}
-        />
+        </Table>
       ) : (
-        <TableRows
-          canCreate={canCreate}
-          canDelete={canDelete}
-          onConfirmDelete={onConfirmDelete}
-          contentType={layout.contentType}
-          withBulkActions
-          withMainAction={(canDelete || canPublish) && isBulkable}
-          rows={rows}
-          headers={tableHeaders}
-        />
+        <>
+          <TableActionBar>
+            <BulkActionsBar
+              showPublish={canPublish && hasDraftAndPublish}
+              showDelete={canDelete}
+              onConfirmDeleteAll={onConfirmDeleteAll}
+              onConfirmPublishAll={onConfirmPublishAll}
+              onConfirmUnpublishAll={onConfirmUnpublishAll}
+            />
+          </TableActionBar>
+          <Table rowCount={rowCount} colCount={colCount} shadow="">
+            <TableHead withBulkActions withMainAction={withMainAction} rows={rows}>
+              <TableHeaders headers={tableHeaders} />
+            </TableHead>
+            <TableRows
+              canCreate={canCreate}
+              canDelete={canDelete}
+              onConfirmDelete={onConfirmDelete}
+              contentType={layout.contentType}
+              withBulkActions
+              withMainAction={(canDelete || canPublish) && isBulkable}
+              rows={rows}
+              headers={tableHeaders}
+            />
+          </Table>
+        </>
       )}
-    </Table>
+    </TableProvider>
   );
 };
 

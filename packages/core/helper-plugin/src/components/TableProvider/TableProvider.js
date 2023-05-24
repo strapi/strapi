@@ -5,7 +5,6 @@ import {
   Flex,
   Button,
   Typography,
-  Table as TableCompo,
   Th,
   Tbody,
   Td,
@@ -20,36 +19,17 @@ import {
 import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
 
-import useQueryParams from '../../../hooks/useQueryParams';
-import { useTracking } from '../../../features/Tracking';
-import ConfirmDialog from '../../ConfirmDialog';
-import SortIcon from '../../../icons/SortIcon';
-import EmptyStateLayout from '../../EmptyStateLayout';
+import useQueryParams from '../../hooks/useQueryParams';
+import { useTracking } from '../../features/Tracking';
+import ConfirmDialog from '../ConfirmDialog';
+import SortIcon from '../../icons/SortIcon';
+import EmptyStateLayout from '../EmptyStateLayout';
 
 /* -------------------------------------------------------------------------------------------------
  * TableContext
  * -----------------------------------------------------------------------------------------------*/
+
 const TableContext = React.createContext(null);
-
-const TableProvider = ({ children, selectedEntries, setSelectedEntries, onSelectRow }) => {
-  const context = React.useMemo(
-    () => ({
-      selectedEntries,
-      setSelectedEntries,
-      onSelectRow,
-    }),
-    [selectedEntries, setSelectedEntries, onSelectRow]
-  );
-
-  return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
-};
-
-TableProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-  onSelectRow: PropTypes.func.isRequired,
-  selectedEntries: PropTypes.array.isRequired,
-  setSelectedEntries: PropTypes.func.isRequired,
-};
 
 export const useTableContext = () => {
   const context = React.useContext(TableContext);
@@ -65,7 +45,7 @@ export const useTableContext = () => {
  * TableActionBar
  * -----------------------------------------------------------------------------------------------*/
 
-const TableActionBar = ({ children }) => {
+export const TableActionBar = ({ children }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries } = useTableContext();
 
@@ -95,7 +75,7 @@ TableActionBar.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const TableButtonBulkDelete = ({ onConfirmDeleteAll }) => {
+export const TableButtonBulkDelete = ({ onConfirmDeleteAll }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
   const { formatMessage } = useIntl();
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
@@ -151,7 +131,7 @@ TableButtonBulkDelete.propTypes = {
  * TableHead
  * -----------------------------------------------------------------------------------------------*/
 
-const TableHead = ({ children, withMainAction, withBulkActions, rows }) => {
+export const TableHead = ({ children, withMainAction, withBulkActions, rows }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
@@ -215,7 +195,7 @@ TableHead.propTypes = {
  * TableHead
  * -----------------------------------------------------------------------------------------------*/
 
-const TableHeaders = ({ headers }) => {
+export const TableHeaders = ({ headers }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || '';
@@ -303,10 +283,10 @@ TableHeaders.propTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableEmptyBody
+ * TableEmptyContent
  * -----------------------------------------------------------------------------------------------*/
 
-const TableEmptyBody = ({ colSpan, isLoading, contentType, ...rest }) => {
+export const TableEmptyBody = ({ colSpan, isLoading, contentType, ...rest }) => {
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
 
@@ -367,56 +347,33 @@ TableEmptyBody.propTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Table
+ * TableProvider
  * -----------------------------------------------------------------------------------------------*/
 
-const Table = ({ children, footer, rowCount, colCount, tableActionBar, tableHead }) => {
+export const TableProvider = ({ children }) => {
   const [selectedEntries, setSelectedEntries] = useState([]);
 
-  const handleSelectRow = ({ name, value }) => {
-    setSelectedEntries((prev) => {
-      if (value) {
-        return prev.concat(name);
-      }
+  const context = React.useMemo(() => {
+    const handleSelectRow = ({ name, value }) => {
+      setSelectedEntries((prev) => {
+        if (value) {
+          return prev.concat(name);
+        }
 
-      return prev.filter((id) => id !== name);
-    });
-  };
+        return prev.filter((id) => id !== name);
+      });
+    };
 
-  return (
-    <TableProvider
-      selectedEntries={selectedEntries}
-      setSelectedEntries={setSelectedEntries}
-      onSelectRow={handleSelectRow}
-    >
-      {tableActionBar}
-      <TableCompo colCount={colCount} rowCount={rowCount} footer={footer}>
-        {tableHead}
-        {children}
-      </TableCompo>
-    </TableProvider>
-  );
+    return {
+      selectedEntries,
+      setSelectedEntries,
+      onSelectRow: handleSelectRow,
+    };
+  }, [selectedEntries, setSelectedEntries]);
+
+  return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
 
-Table.defaultProps = {
-  children: undefined,
-  footer: undefined,
-  tableActionBar: undefined,
+TableProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
-
-Table.propTypes = {
-  children: PropTypes.node,
-  footer: PropTypes.node,
-  tableActionBar: PropTypes.node,
-  tableHead: PropTypes.node.isRequired,
-  rowCount: PropTypes.number.isRequired,
-  colCount: PropTypes.number.isRequired,
-};
-
-Table.Head = TableHead;
-Table.Headers = TableHeaders;
-Table.ActionBar = TableActionBar;
-Table.ButtonBulkDelete = TableButtonBulkDelete;
-Table.EmptyBody = TableEmptyBody;
-
-export default Table;

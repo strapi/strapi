@@ -2,7 +2,7 @@ import React from 'react';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Table, useTableContext } from '@strapi/helper-plugin';
+import { TableProvider, useTableContext } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
 
@@ -37,18 +37,9 @@ describe('BulkActionsBar', () => {
   const TestComponent = (props) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Table
-          rowCount={1}
-          colCount={1}
-          tableHead={
-            <thead>
-              <tr>
-                <th>test</th>
-              </tr>
-            </thead>
-          }
-          tableActionBar={<BulkActionsBar {...props} />}
-        />
+        <TableProvider>
+          <BulkActionsBar {...props} />
+        </TableProvider>
       </IntlProvider>
     </ThemeProvider>
   );
