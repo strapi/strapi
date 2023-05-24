@@ -52,7 +52,13 @@ const reducer = (state, action) =>
       }
       case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
+        const {
+          keys,
+          allComponents,
+          componentLayoutData,
+          shouldCheckErrors,
+          position = undefined,
+        } = action;
 
         if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
@@ -62,7 +68,15 @@ const reducer = (state, action) =>
           draftState.modifiedDZName = keys[0];
         }
 
-        const currentValue = get(state, ['modifiedData', ...keys], []);
+        const currentValue = [...get(state, ['modifiedData', ...keys], [])];
+
+        let actualPosition = position;
+
+        if (actualPosition === undefined) {
+          actualPosition = currentValue.length;
+        } else if (actualPosition < 0) {
+          actualPosition = 0;
+        }
 
         const defaultDataStructure =
           action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE'
@@ -87,9 +101,7 @@ const reducer = (state, action) =>
           componentLayoutData.attributes
         );
 
-        const newValue = Array.isArray(currentValue)
-          ? [...currentValue, componentDataStructure]
-          : [componentDataStructure];
+        const newValue = currentValue.toSpliced(actualPosition, 0, componentDataStructure);
 
         set(draftState, ['modifiedData', ...keys], newValue);
 

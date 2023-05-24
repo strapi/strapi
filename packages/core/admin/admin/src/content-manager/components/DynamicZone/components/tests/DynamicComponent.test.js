@@ -1,11 +1,12 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render as renderRTL, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import DynamicComponent from '../DynamicComponent';
+import { DynamicComponent } from '../DynamicComponent';
 
 import { layoutData } from './fixtures';
 
@@ -42,65 +43,72 @@ describe('DynamicComponent', () => {
 
   // eslint-disable-next-line react/prop-types
   const TestComponent = ({ testingDnd, ...restProps }) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DndProvider backend={HTML5Backend}>
-          <DynamicComponent {...defaultProps} {...restProps} />
-          {testingDnd ? <DynamicComponent {...defaultProps} {...restProps} /> : null}
-        </DndProvider>
-      </IntlProvider>
-    </ThemeProvider>
+    <>
+      <DynamicComponent {...defaultProps} {...restProps} />
+      {testingDnd ? <DynamicComponent {...defaultProps} {...restProps} /> : null}
+    </>
   );
 
-  const setup = (props) => render(<TestComponent {...props} />);
-
-  it('should by default render the name of the component in the accordion trigger', () => {
-    setup();
-
-    expect(screen.getByRole('button', { name: 'component1' })).toBeInTheDocument();
+  const render = (props) => ({
+    ...renderRTL(<TestComponent {...props} />, {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en">
+            <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+          </IntlProvider>
+        </ThemeProvider>
+      ),
+    }),
+    user: userEvent.setup(),
   });
 
-  it('should allow removal of the component & call the onRemoveComponentClick callback when the field isAllowed', () => {
-    const onRemoveComponentClick = jest.fn();
-    setup({ isFieldAllowed: true, onRemoveComponentClick });
+  it('should by default render the name of the component in the accordion trigger', () => {
+    const { getByRole } = render();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Delete component1' }));
+    expect(getByRole('button', { name: 'component1' })).toBeInTheDocument();
+  });
+
+  it('should allow removal of the component & call the onRemoveComponentClick callback when the field isAllowed', async () => {
+    const onRemoveComponentClick = jest.fn();
+    const { getByRole, user } = render({ isFieldAllowed: true, onRemoveComponentClick });
+
+    await user.click(getByRole('button', { name: 'Delete component1' }));
 
     expect(onRemoveComponentClick).toHaveBeenCalled();
   });
 
   it('should not show you the delete component button if isFieldAllowed is false', () => {
-    setup({ isFieldAllowed: false });
+    const { queryByRole } = render({ isFieldAllowed: false });
 
-    expect(screen.queryByRole('button', { name: 'Delete component1' })).not.toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Delete component1' })).not.toBeInTheDocument();
   });
 
-  it('should hide the field component when you close the accordion', () => {
-    setup();
+  it('should hide the field component when you close the accordion', async () => {
+    const { queryByText, user, getByRole } = render();
 
-    expect(screen.queryByText("I'm a field component")).toBeInTheDocument();
+    expect(queryByText("I'm a field component")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'component1' }));
+    await user.click(getByRole('button', { name: 'component1' }));
 
-    expect(screen.queryByText("I'm a field component")).not.toBeInTheDocument();
+    expect(queryByText("I'm a field component")).not.toBeInTheDocument();
   });
 
   describe('Keyboard drag and drop', () => {
     it('should not move with arrow keys if the button is not pressed first', () => {
       const onMoveComponent = jest.fn();
-      setup({
+      const { getAllByText } = render({
         onMoveComponent,
         testingDnd: true,
       });
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       expect(onMoveComponent).not.toBeCalled();
     });
 
     it('should move with the arrow keys if the button has been activated first', () => {
       const onMoveComponent = jest.fn();
-      setup({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = screen.getAllByText('Drag');
+      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       expect(onMoveComponent).toBeCalledWith(1, 0);
@@ -108,8 +116,8 @@ describe('DynamicComponent', () => {
 
     it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
       const onMoveComponent = jest.fn();
-      setup({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = screen.getAllByText('Drag');
+      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
@@ -119,13 +127,19 @@ describe('DynamicComponent', () => {
 
     it('should exit drag and drop mode when the escape key is pressed', () => {
       const onMoveComponent = jest.fn();
-      setup({ onMoveComponent, testingDnd: true });
-      const [draggedItem] = screen.getAllByText('Drag');
+      const { getAllByText } = render({ onMoveComponent, testingDnd: true });
+      const [draggedItem] = getAllByText('Drag');
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
       expect(onMoveComponent).not.toBeCalled();
     });
+  });
+
+  describe('adding above and below components', () => {
+    it.todo('should call the onAddComponent callback with the correct index when adding above');
+
+    it.todo('should call the onAddComponent callback with the correct index when adding below');
   });
 
   it.todo('should handle errors in the fields');
