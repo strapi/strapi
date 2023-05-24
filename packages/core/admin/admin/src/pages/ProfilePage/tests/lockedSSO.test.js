@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import ProfilePage from '../index';
-import server from './utils/server';
+import serverLockedSSO from './utils/serverLockedSSO';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
@@ -43,19 +43,19 @@ const App = (
 );
 
 describe('ADMIN | Pages | Profile page', () => {
-  beforeAll(() => server.listen());
+  beforeAll(() => serverLockedSSO.listen());
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    server.resetHandlers();
+    serverLockedSSO.resetHandlers();
   });
 
   afterAll(() => {
     jest.resetAllMocks();
-    server.close();
+    serverLockedSSO.close();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -74,10 +74,10 @@ describe('ADMIN | Pages | Profile page', () => {
     });
   });
 
-  it('should display the change password section', async () => {
+  it('should not display the change password section if the user role is Locked', async () => {
     render(App);
     await waitFor(() => {
-      expect(screen.getByText('Change password')).toBeInTheDocument();
+      expect(screen.queryByText('Change password')).toBeNull();
     });
   });
 });

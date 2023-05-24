@@ -16,4 +16,16 @@ const putUser = async (body) => {
   return { ...data.data, currentTheme: body.currentTheme };
 };
 
-export { fetchUser, putUser };
+const fetchSSOInfo = async () => {
+  const { get } = getFetchClient();
+
+  const { 
+    data: {
+      data
+    }
+  } = await get('/admin/providers/options');
+
+  return data;
+}
+
+export { fetchUser, fetchSSOInfo, putUser };

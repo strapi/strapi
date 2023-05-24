@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   Form,
@@ -10,7 +10,6 @@ import {
   useOverlayBlocker,
   auth,
   useTracking,
-  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -37,7 +36,7 @@ import {
 import { Eye, EyeStriked, Check } from '@strapi/icons';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
-import { fetchUser, putUser } from './utils/api';
+import { fetchUser, fetchSSOInfo, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
 
@@ -63,7 +62,6 @@ const FieldActionWrapper = styled(FieldAction)`
 
 const ProfilePage = () => {
   const [passwordShown, setPasswordShown] = useState(false);
-  const [ssoInfo, setSsoInfo] = useState({});
   const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
   const [currentPasswordShown, setCurrentPasswordShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
@@ -75,10 +73,9 @@ const ProfilePage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
-  const { get } = useFetchClient();
   useFocusWhenNavigate();
 
-  const { status, data } = useQuery('user', () => fetchUser(), {
+  const { status, data } = useQuery('user', fetchUser, {
     onSuccess() {
       notifyStatus(
         formatMessage({
@@ -94,30 +91,17 @@ const ProfilePage = () => {
       });
     },
   });
-  useEffect(() => {
-    const getSSOInfo = async () => {
-      try {
-        const {
-          data: {
-            data
-          }
-        } =  await get('/admin/providers/options');
+  const { status: statusSSO, data: dataSSO } = useQuery('sso', fetchSSOInfo, {
+    onSuccess() {},
+    onError() {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    },
+  });
 
-        if (data) {
-          setSsoInfo(data);
-        }
-      } catch (error) {
-        console.error(error.response);
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
-    }
-    getSSOInfo();
-  }, [get, toggleNotification]);
-
-  const isLoading = status !== 'success';
+  const isLoading = status !== 'success' && statusSSO !== 'success';
 
   const submitMutation = useMutation((body) => putUser(body), {
     async onSuccess(data) {
@@ -205,10 +189,9 @@ const ProfilePage = () => {
     (themeName) => allApplicationThemes[themeName]
   );
 
-  const { ssoLockedRoles } = ssoInfo;
   const currentUserRoles = data.roles?.map(role => role.id) || [];
   // check if the user role is in the locked roles list
-  const hasLockedRole = ssoLockedRoles?.some((roleId) => currentUserRoles.includes(Number(roleId))) || false;
+  const hasLockedRole = dataSSO?.ssoLockedRoles?.some((roleId) => currentUserRoles.includes(Number(roleId))) || false;
 
   return (
     <Main aria-busy={isSubmittingForm}>

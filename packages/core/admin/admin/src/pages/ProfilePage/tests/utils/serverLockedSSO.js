@@ -14,7 +14,7 @@ const handlers = [
           username: 'yolo',
           preferedLanguage: 'en',
           roles: [{
-            id: 2
+            id: 1
           }]
         },
       })
@@ -35,6 +35,6 @@ const handlers = [
   })
 ];
 
-const server = setupServer(...handlers);
+const serverLockedSSO = setupServer(...handlers);
 
-export default server;
+export default serverLockedSSO;
