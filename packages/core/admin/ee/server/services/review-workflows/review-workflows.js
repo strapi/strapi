@@ -11,6 +11,10 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
+// The suffix should looks like _strapi_reviewWorkflow_stage_links_inv_fk
+const MAX_JOIN_TABLE_NAME_SUFFIX =
+  1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
+const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
 
 async function initDefaultWorkflow({ workflowsService, stagesService }) {
   const wfCount = await workflowsService.count();
@@ -30,13 +34,11 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
-    const maxContentTypeNameLength =
-      MAX_DB_TABLE_NAME_LEN - 1 /* _ */ - ENTITY_STAGE_ATTRIBUTE.length - '_links_inv_fk'.length;
     const assertContentTypeCompatibility = (contentType) =>
-      contentType.collectionName.length <= maxContentTypeNameLength;
+      contentType.collectionName.length <= MAX_CONTENT_TYPE_NAME_LEN;
     const incompatibleContentTypeAlert = (contentType) => {
       strapi.log.warn(
-        `Content type "${contentType.info.displayName}" cannot have Review Workflow activated as the name is too long. (${maxContentTypeNameLength} maximum characters)`
+        `Content type "${contentType.info.displayName}" cannot have Review Workflow activated as the name is too long. (${MAX_CONTENT_TYPE_NAME_LEN} maximum characters)`
       );
       return contentType;
     };
