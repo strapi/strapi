@@ -31,13 +31,14 @@ const productModel = {
     },
   },
 };
-const longCTUID = 'api::thatsanabsurdlongcontenttypename.thatsanabsurdlongcontenttypename';
+const longCTUID =
+  'api::thatsanabsurdreallyreallylongcontenttypename.thatsanabsurdreallyreallylongcontenttypename';
 const longCTModel = {
   draftAndPublish: true,
   pluginOptions: {},
-  singularName: 'thatsanabsurdlongcontenttypename',
-  pluralName: 'thatsanabsurdlongcontenttypenamewithans',
-  displayName: 'Thats an absurd long content type name',
+  singularName: 'thatsanabsurdreallyreallylongcontenttypename',
+  pluralName: 'thatsanabsurdreallyreallylongcontenttypenamewithans',
+  displayName: 'Thats an absurd really really long content type name',
   kind: 'collectionType',
   attributes: {
     name: {
