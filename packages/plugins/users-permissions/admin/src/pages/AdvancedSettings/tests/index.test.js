@@ -46,7 +46,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     server.close();
   });
 

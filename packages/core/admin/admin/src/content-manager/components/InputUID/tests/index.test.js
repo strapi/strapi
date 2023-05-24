@@ -81,7 +81,6 @@ describe('Content-Manager | <InputUID />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders', async () => {
