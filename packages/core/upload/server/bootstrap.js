@@ -36,10 +36,17 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
+  await registerWebhookEvents();
 
   await getService('weeklyMetrics').registerCron();
   getService('metrics').sendUploadPluginMetrics();
 };
+
+const registerWebhookEvents = async () =>
+  strapi.webhookStore.allowedEvents
+    .set('MEDIA_CREATE', 'media.create')
+    .set('MEDIA_UPDATE', 'media.update')
+    .set('MEDIA_DELETE', 'media.delete');
 
 const registerPermissionActions = async () => {
   const actions = [
