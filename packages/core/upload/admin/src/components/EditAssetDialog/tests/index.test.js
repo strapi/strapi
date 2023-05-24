@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -145,12 +145,14 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
     });
 
-    it('copies the link and shows a notification when pressing "Copy link"', () => {
+    it('copies the link and shows a notification when pressing "Copy link"', async () => {
       renderCompo();
 
       fireEvent.click(screen.getByLabelText('Copy link'));
 
-      expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
+      );
     });
 
     it('downloads the file when pressing "Download"', () => {
