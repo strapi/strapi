@@ -7,7 +7,8 @@ const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
-const isMorphRelation = (attribute) => isRelation(attribute) && attribute.relation.includes('morph');
+const isMorphRelation = (attribute) =>
+  isRelation(attribute) && attribute.relation.includes('morph');
 const isMedia = propEq('type', 'media');
 const isRelation = propEq('type', 'relation');
 const isComponent = propEq('type', 'component');
@@ -197,25 +198,21 @@ const getDeepPopulateDraftCount = (uid) => {
   return { populate, hasRelations };
 };
 
-
-
 // TODO: Explain this function and the populate format
 const getQueryPopulate = async (uid, query) => {
-
   const pathToPopulate = (path) => path.replaceAll('.', '.populate.');
   let populateQuery = {};
 
   await strapiUtils.traverse.traverseQueryFilters(
     /**
-     * 
-     * @param {*} param0 
+     *
+     * @param {*} param0
      * @param {*} param0.key - Attribute name
      * @param {*} param0.attribute - Attribute definition
      * @param {*} param0.path - Content Type path to the attribute
-     * @returns 
+     * @returns
      */
     ({ key, attribute, path }) => {
-
       // Ignore dynamic zones and morph relations
       if (!attribute || isDynamicZone(attribute) || isMorphRelation(attribute)) {
         return;
@@ -237,14 +234,13 @@ const getQueryPopulate = async (uid, query) => {
       const pathWithoutKey = path.attribute.slice(0, path.attribute.lastIndexOf('.'));
       const populatePath = pathToPopulate(pathWithoutKey);
       get(populatePath, populateQuery).fields.push(key);
-
     },
     { schema: strapi.contentType(uid) },
     query
   );
 
   return populateQuery;
-}
+};
 
 module.exports = {
   getDeepPopulate,

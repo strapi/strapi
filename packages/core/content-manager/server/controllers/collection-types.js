@@ -1,12 +1,9 @@
 'use strict';
 
-const { set, get } = require('lodash/fp');
-
-const { setCreatorFields, pipeAsync, traverse } = require('@strapi/utils');
+const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
-const traverseQueryFilters = require('@strapi/utils/lib/traverse/query-filters');
 
 module.exports = {
   async find(ctx) {
@@ -48,58 +45,7 @@ module.exports = {
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    // { $and: { addresses: { elemMatch: { postal_code: { gt: 60 } } } }
-    // populate: ['addresses']
-    // populate: { addresses: { fields: ['postal_code'] } }
-    // const populate = {
-    //   addresses: {
-    //     fields: ['postal_code'],
-    //     populate: {
-    //       createdBy: {
-    //         fields: [],
-    //       },
-    //     },
-    //   },
-    // };
-    const populateQuery = {};
-    await traverse.traverseQueryFilters(
-      ({ key, value, attribute, path }) => {
-        if (!attribute) {
-          return;
-        }
-
-        console.log('---visitor---');
-        console.log(key, value);
-        console.log(path, attribute?.type);
-
-        const { type } = attribute;
-
-        if (
-          type === 'dynamiczone' ||
-          (type === 'relation' && attribute.relation.toLowerCase().includes('morphTo'))
-        ) {
-          return;
-        }
-
-        if (['relation', 'media', 'component'].includes(type)) {
-          const attributePath = path.attribute.replaceAll('.', '.populate.');
-          console.log('Got a relation', key, attributePath);
-          Object.assign(populateQuery, set(attributePath, { fields: [] }, populateQuery));
-        } else {
-          const attributePath = path.attribute
-            .slice(0, path.attribute.lastIndexOf('.'))
-            .replaceAll('.', '.populate.');
-
-          if (key !== path.attribute) {
-            get(attributePath, populateQuery).fields.push(key);
-          }
-        }
-      },
-      { schema: strapi.contentType(model) },
-      permissionQuery
-    );
-    console.log(JSON.stringify(populateQuery, null, 2));
+    const populateQuery = await permissionChecker.queryPopulate(ctx.query);
 
     const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model, {
       populate: populateQuery,
@@ -113,6 +59,8 @@ module.exports = {
     if (permissionChecker.cannot.read(entity)) {
       return ctx.forbidden();
     }
+
+    // TODO: Move the transform relations to count here.
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
   },
