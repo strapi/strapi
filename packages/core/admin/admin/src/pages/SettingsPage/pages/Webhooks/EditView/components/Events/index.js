@@ -243,6 +243,8 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
     });
   };
 
+  const targetColumns = 5;
+
   return (
     <tr>
       <td>
@@ -270,6 +272,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
           </td>
         );
       })}
+      {events.length < targetColumns && <td colSpan={`${targetColumns - events.length}`} />}
     </tr>
   );
 };
