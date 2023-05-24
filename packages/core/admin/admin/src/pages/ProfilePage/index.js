@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   Form,
@@ -10,6 +10,7 @@ import {
   useOverlayBlocker,
   auth,
   useTracking,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -62,6 +63,7 @@ const FieldActionWrapper = styled(FieldAction)`
 
 const ProfilePage = () => {
   const [passwordShown, setPasswordShown] = useState(false);
+  const [ssoInfo, setSsoInfo] = useState({});
   const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
   const [currentPasswordShown, setCurrentPasswordShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
@@ -73,6 +75,7 @@ const ProfilePage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
+  const { get } = useFetchClient();
   useFocusWhenNavigate();
 
   const { status, data } = useQuery('user', () => fetchUser(), {
@@ -91,6 +94,28 @@ const ProfilePage = () => {
       });
     },
   });
+  useEffect(() => {
+    const getSSOInfo = async () => {
+      try {
+        const {
+          data: {
+            data
+          }
+        } =  await get('/admin/providers/options');
+
+        if (data) {
+          setSsoInfo(data);
+        }
+      } catch (error) {
+        console.error(error.response);
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+    }
+    getSSOInfo();
+  }, [get, toggleNotification]);
 
   const isLoading = status !== 'success';
 
@@ -179,6 +204,11 @@ const ProfilePage = () => {
   const themesToDisplay = Object.keys(allApplicationThemes).filter(
     (themeName) => allApplicationThemes[themeName]
   );
+
+  const { ssoLockedRoles } = ssoInfo;
+  const currentUserRoles = data.roles?.map(role => role.id) || [];
+  // check if the user role is in the locked roles list
+  const hasLockedRole = ssoLockedRoles?.some((roleId) => currentUserRoles.includes(Number(roleId))) || false;
 
   return (
     <Main aria-busy={isSubmittingForm}>
@@ -280,155 +310,159 @@ const ProfilePage = () => {
                         </Grid>
                       </Flex>
                     </Box>
-                    <Box
-                      background="neutral0"
-                      hasRadius
-                      shadow="filterShadow"
-                      paddingTop={6}
-                      paddingBottom={6}
-                      paddingLeft={7}
-                      paddingRight={7}
-                    >
-                      <Flex direction="column" alignItems="stretch" gap={4}>
-                        <Typography variant="delta" as="h2">
-                          {formatMessage({
-                            id: 'global.change-password',
-                            defaultMessage: 'Change password',
-                          })}
-                        </Typography>
-
-                        <Grid gap={5}>
-                          <GridItem s={12} col={6}>
-                            <PasswordInput
-                              error={
-                                errors.currentPassword
-                                  ? formatMessage({
-                                      id: errors.currentPassword,
-                                      defaultMessage: errors.currentPassword,
-                                    })
-                                  : ''
-                              }
-                              onChange={handleChange}
-                              value={values.currentPassword || ''}
-                              label={formatMessage({
-                                id: 'Auth.form.currentPassword.label',
-                                defaultMessage: 'Current Password',
-                              })}
-                              name="currentPassword"
-                              type={currentPasswordShown ? 'text' : 'password'}
-                              endAction={
-                                <FieldActionWrapper
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setCurrentPasswordShown((prev) => !prev);
-                                  }}
-                                  label={formatMessage(
-                                    currentPasswordShown
-                                      ? {
-                                          id: 'Auth.form.password.show-password',
-                                          defaultMessage: 'Show password',
-                                        }
-                                      : {
-                                          id: 'Auth.form.password.hide-password',
-                                          defaultMessage: 'Hide password',
-                                        }
-                                  )}
-                                >
-                                  {currentPasswordShown ? <Eye /> : <EyeStriked />}
-                                </FieldActionWrapper>
-                              }
-                            />
-                          </GridItem>
-                        </Grid>
-
-                        <Grid gap={5}>
-                          <GridItem s={12} col={6}>
-                            <PasswordInput
-                              error={
-                                errors.password
-                                  ? formatMessage({
-                                      id: errors.password,
-                                      defaultMessage: errors.password,
-                                    })
-                                  : ''
-                              }
-                              onChange={handleChange}
-                              value={values.password || ''}
-                              label={formatMessage({
-                                id: 'global.password',
-                                defaultMessage: 'Password',
-                              })}
-                              name="password"
-                              type={passwordShown ? 'text' : 'password'}
-                              autoComplete="new-password"
-                              endAction={
-                                <FieldActionWrapper
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPasswordShown((prev) => !prev);
-                                  }}
-                                  label={formatMessage(
-                                    passwordShown
-                                      ? {
-                                          id: 'Auth.form.password.show-password',
-                                          defaultMessage: 'Show password',
-                                        }
-                                      : {
-                                          id: 'Auth.form.password.hide-password',
-                                          defaultMessage: 'Hide password',
-                                        }
-                                  )}
-                                >
-                                  {passwordShown ? <Eye /> : <EyeStriked />}
-                                </FieldActionWrapper>
-                              }
-                            />
-                          </GridItem>
-                          <GridItem s={12} col={6}>
-                            <PasswordInput
-                              error={
-                                errors.confirmPassword
-                                  ? formatMessage({
-                                      id: errors.confirmPassword,
-                                      defaultMessage: errors.confirmPassword,
-                                    })
-                                  : ''
-                              }
-                              onChange={handleChange}
-                              value={values.confirmPassword || ''}
-                              label={formatMessage({
-                                id: 'Auth.form.confirmPassword.label',
-                                defaultMessage: 'Password confirmation',
-                              })}
-                              name="confirmPassword"
-                              type={passwordConfirmShown ? 'text' : 'password'}
-                              autoComplete="new-password"
-                              endAction={
-                                <FieldActionWrapper
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPasswordConfirmShown((prev) => !prev);
-                                  }}
-                                  label={formatMessage(
-                                    passwordConfirmShown
-                                      ? {
-                                          id: 'Auth.form.password.show-password',
-                                          defaultMessage: 'Show password',
-                                        }
-                                      : {
-                                          id: 'Auth.form.password.hide-password',
-                                          defaultMessage: 'Hide password',
-                                        }
-                                  )}
-                                >
-                                  {passwordConfirmShown ? <Eye /> : <EyeStriked />}
-                                </FieldActionWrapper>
-                              }
-                            />
-                          </GridItem>
-                        </Grid>
-                      </Flex>
-                    </Box>
+                    {
+                      !hasLockedRole && (
+                        <Box
+                        background="neutral0"
+                        hasRadius
+                        shadow="filterShadow"
+                        paddingTop={6}
+                        paddingBottom={6}
+                        paddingLeft={7}
+                        paddingRight={7}
+                      >
+                        <Flex direction="column" alignItems="stretch" gap={4}>
+                          <Typography variant="delta" as="h2">
+                            {formatMessage({
+                              id: 'global.change-password',
+                              defaultMessage: 'Change password',
+                            })}
+                          </Typography>
+  
+                          <Grid gap={5}>
+                            <GridItem s={12} col={6}>
+                              <PasswordInput
+                                error={
+                                  errors.currentPassword
+                                    ? formatMessage({
+                                        id: errors.currentPassword,
+                                        defaultMessage: errors.currentPassword,
+                                      })
+                                    : ''
+                                }
+                                onChange={handleChange}
+                                value={values.currentPassword || ''}
+                                label={formatMessage({
+                                  id: 'Auth.form.currentPassword.label',
+                                  defaultMessage: 'Current Password',
+                                })}
+                                name="currentPassword"
+                                type={currentPasswordShown ? 'text' : 'password'}
+                                endAction={
+                                  <FieldActionWrapper
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCurrentPasswordShown((prev) => !prev);
+                                    }}
+                                    label={formatMessage(
+                                      currentPasswordShown
+                                        ? {
+                                            id: 'Auth.form.password.show-password',
+                                            defaultMessage: 'Show password',
+                                          }
+                                        : {
+                                            id: 'Auth.form.password.hide-password',
+                                            defaultMessage: 'Hide password',
+                                          }
+                                    )}
+                                  >
+                                    {currentPasswordShown ? <Eye /> : <EyeStriked />}
+                                  </FieldActionWrapper>
+                                }
+                              />
+                            </GridItem>
+                          </Grid>
+  
+                          <Grid gap={5}>
+                            <GridItem s={12} col={6}>
+                              <PasswordInput
+                                error={
+                                  errors.password
+                                    ? formatMessage({
+                                        id: errors.password,
+                                        defaultMessage: errors.password,
+                                      })
+                                    : ''
+                                }
+                                onChange={handleChange}
+                                value={values.password || ''}
+                                label={formatMessage({
+                                  id: 'global.password',
+                                  defaultMessage: 'Password',
+                                })}
+                                name="password"
+                                type={passwordShown ? 'text' : 'password'}
+                                autoComplete="new-password"
+                                endAction={
+                                  <FieldActionWrapper
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPasswordShown((prev) => !prev);
+                                    }}
+                                    label={formatMessage(
+                                      passwordShown
+                                        ? {
+                                            id: 'Auth.form.password.show-password',
+                                            defaultMessage: 'Show password',
+                                          }
+                                        : {
+                                            id: 'Auth.form.password.hide-password',
+                                            defaultMessage: 'Hide password',
+                                          }
+                                    )}
+                                  >
+                                    {passwordShown ? <Eye /> : <EyeStriked />}
+                                  </FieldActionWrapper>
+                                }
+                              />
+                            </GridItem>
+                            <GridItem s={12} col={6}>
+                              <PasswordInput
+                                error={
+                                  errors.confirmPassword
+                                    ? formatMessage({
+                                        id: errors.confirmPassword,
+                                        defaultMessage: errors.confirmPassword,
+                                      })
+                                    : ''
+                                }
+                                onChange={handleChange}
+                                value={values.confirmPassword || ''}
+                                label={formatMessage({
+                                  id: 'Auth.form.confirmPassword.label',
+                                  defaultMessage: 'Password confirmation',
+                                })}
+                                name="confirmPassword"
+                                type={passwordConfirmShown ? 'text' : 'password'}
+                                autoComplete="new-password"
+                                endAction={
+                                  <FieldActionWrapper
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPasswordConfirmShown((prev) => !prev);
+                                    }}
+                                    label={formatMessage(
+                                      passwordConfirmShown
+                                        ? {
+                                            id: 'Auth.form.password.show-password',
+                                            defaultMessage: 'Show password',
+                                          }
+                                        : {
+                                            id: 'Auth.form.password.hide-password',
+                                            defaultMessage: 'Hide password',
+                                          }
+                                    )}
+                                  >
+                                    {passwordConfirmShown ? <Eye /> : <EyeStriked />}
+                                  </FieldActionWrapper>
+                                }
+                              />
+                            </GridItem>
+                          </Grid>
+                        </Flex>
+                      </Box>
+                      )
+                    }
                     <Box
                       background="neutral0"
                       hasRadius
