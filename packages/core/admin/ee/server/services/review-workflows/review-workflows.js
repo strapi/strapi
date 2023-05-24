@@ -28,17 +28,13 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
-    const assertContentTypeCompatibility = (contentType) => {
-      const joinTableNameLength =
-        contentType.collectionName.length +
-        1 /* _ */ +
-        ENTITY_STAGE_ATTRIBUTE.length +
-        '_links_inv_fk'.length;
-      return joinTableNameLength < 63; // This is the maximum length limit of table name in PostgreSQL (64 for MariaDB)
-    };
+    const maxContentTypeNameLength =
+      63 - 1 /* _ */ - ENTITY_STAGE_ATTRIBUTE.length - '_links_inv_fk'.length;
+    const assertContentTypeCompatibility = (contentType) =>
+      contentType.collectionName.length <= maxContentTypeNameLength; // This is the maximum length limit of table name in PostgreSQL (64 for MariaDB)
     const incompatibleContentTypeAlert = (contentType) => {
       strapi.log.warn(
-        `ContentType ${contentType.name} cannot have Review Workflow activated as the name is too long.`
+        `Content type "${contentType.info.displayName}" cannot have Review Workflow activated as the name is too long. (${maxContentTypeNameLength} maximum characters)`
       );
       return contentType;
     };
