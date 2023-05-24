@@ -19,6 +19,7 @@ const cleanData = (data) => ({
     if (key !== '') {
       acc[key] = value;
     }
+
     return acc;
   }, {}),
 });

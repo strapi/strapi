@@ -11,6 +11,11 @@ import {
   BaseCheckbox,
   Checkbox,
   Loader,
+  RawTable as Table,
+  RawTd as Td,
+  RawTr as Tr,
+  RawThead as Thead,
+  RawTbody as Tbody,
 } from '@strapi/design-system';
 
 import { useModels } from '../../../../../../../hooks';
@@ -27,16 +32,23 @@ export const formatValue = (value) =>
     return acc;
   }, {});
 
-const StyledTable = styled.table`
+const StyledTable = styled(Table)`
+  tbody tr:nth-child(odd) {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  thead td span {
+    color: ${({ theme }) => theme.colors.neutral500};
+  }
+
   td {
-    height: ${52 / 16}rem;
     width: 10%;
     vertical-align: middle;
     text-align: center;
   }
 
-  tbody tr:nth-child(odd) {
-    background: ${({ theme }) => theme.colors.neutral100};
+  tr {
+    height: 52px;
   }
 
   tbody tr td:first-child {
@@ -50,6 +62,7 @@ const getCEHeaders = (isDraftAndPublish) => {
     { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
     { id: 'app.utils.delete', defaultMessage: 'Delete' },
   ];
+
   if (isDraftAndPublish) {
     headers.push({ id: 'app.utils.publish', defaultMessage: 'Publish' });
     headers.push({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' });
@@ -60,6 +73,7 @@ const getCEHeaders = (isDraftAndPublish) => {
 
 const getCEEvents = (isDraftAndPublish) => {
   const entryEvents = ['entry.create', 'entry.update', 'entry.delete'];
+
   if (isDraftAndPublish) {
     entryEvents.push('entry.publish', 'entry.unpublish');
   }
@@ -117,13 +131,13 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
   const headers = getHeaders(isDraftAndPublish);
 
   return (
-    <thead>
-      <tr>
-        <td />
+    <Thead>
+      <Tr>
+        <Td />
         {headers.map((header) => {
           if (header.id === 'app.utils.publish' || header.id === 'app.utils.unpublish') {
             return (
-              <td
+              <Td
                 key={header.id}
                 title={formatMessage({
                   id: 'Settings.webhooks.event.publish-tooltip',
@@ -133,20 +147,20 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage(header)}
                 </Typography>
-              </td>
+              </Td>
             );
           }
 
           return (
-            <td key={header.id}>
+            <Td key={header.id}>
               <Typography variant="sigma" textColor="neutral600">
                 {formatMessage(header)}
               </Typography>
-            </td>
+            </Td>
           );
         })}
-      </tr>
-    </thead>
+      </Tr>
+    </Thead>
   );
 };
 
@@ -197,7 +211,7 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
   };
 
   return (
-    <tbody>
+    <Tbody>
       {Object.keys(events).map((event) => {
         return (
           <EventRow
@@ -211,7 +225,7 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
           />
         );
       })}
-    </tbody>
+    </Tbody>
   );
 };
 
@@ -256,8 +270,8 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
   const targetColumns = 5;
 
   return (
-    <tr>
-      <td>
+    <Tr>
+      <Td>
         <Checkbox
           indeterminate={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
           aria-label={formatMessage({
@@ -270,11 +284,11 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
         >
           {removeHyphensAndTitleCase(name)}
         </Checkbox>
-      </td>
+      </Td>
 
       {events.map((event) => {
         return (
-          <td key={event}>
+          <Td key={event}>
             <BaseCheckbox
               disabled={disabledEvents.includes(event)}
               aria-label={event}
@@ -282,11 +296,11 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
               value={inputValue.includes(event)}
               onValueChange={(value) => handleChange({ target: { name: event, value } })}
             />
-          </td>
+          </Td>
         );
       })}
-      {events.length < targetColumns && <td colSpan={`${targetColumns - events.length}`} />}
-    </tr>
+      {events.length < targetColumns && <Td colSpan={`${targetColumns - events.length}`} />}
+    </Tr>
   );
 };
 
