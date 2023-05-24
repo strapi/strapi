@@ -224,17 +224,17 @@ describe('<PageSizeURLQuery />', () => {
           >
             <label
               class="c2 c3 c4"
-              for=":r0:"
+              for="1"
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-:r3:"
-              aria-describedby=":r0:-hint :r0:-error"
+              aria-controls="radix-0"
+              aria-describedby="1-hint 1-error"
               aria-expanded="false"
               class="c5 c6 c7"
               data-state="closed"
               dir="ltr"
-              id=":r0:"
+              id="1"
               overflow="hidden"
               role="combobox"
               tabindex="0"

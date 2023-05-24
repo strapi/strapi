@@ -95,6 +95,8 @@ class TransferEngine<
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
 
+  #schema: { source?: SchemaMap; destination?: SchemaMap } = {};
+
   // Progress of the current stage
   progress: {
     // metrics on the progress such as size and record count
@@ -612,6 +614,21 @@ class TransferEngine<
     }
   }
 
+  async #getSchemas() {
+    if (!this.#schema.source) {
+      this.#schema.source = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    if (!this.#schema.destination) {
+      this.#schema.destination = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    return {
+      sourceSchema: this.#schema.source,
+      destinationSchema: this.#schema.destination,
+    };
+  }
+
   async integrityCheck() {
     const sourceMetadata = await this.sourceProvider.getMetadata();
     const destinationMetadata = await this.destinationProvider.getMetadata();
@@ -623,12 +640,11 @@ class TransferEngine<
       );
     }
 
-    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    const { sourceSchema, destinationSchema } = await this.#getSchemas();
 
     try {
-      if (sourceSchemas && destinationSchemas) {
-        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+      if (sourceSchema && destinationSchema) {
+        this.#assertSchemasMatching(sourceSchema, destinationSchema);
       }
     } catch (error) {
       // if this is a schema matching error, allow handlers to resolve it
@@ -760,7 +776,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const { destinationSchema: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, entity);
@@ -801,7 +817,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const { destinationSchema: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, link);

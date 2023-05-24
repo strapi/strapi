@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -37,10 +37,11 @@ describe('<PaginationURLQuery />', () => {
     } = render(makeApp(history, 1));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c7 {
+      .c6 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: revert;
         color: #32324d;
       }
 
@@ -56,9 +57,10 @@ describe('<PaginationURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        gap: 4px;
       }
 
-      .c4 {
+      .c3 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -70,15 +72,7 @@ describe('<PaginationURLQuery />', () => {
         width: 1px;
       }
 
-      .c1 > * + * {
-        margin-left: 4px;
-      }
-
-      .c8 {
-        line-height: revert;
-      }
-
-      .c2 {
+      .c1 {
         padding: 12px;
         border-radius: 4px;
         -webkit-text-decoration: none;
@@ -91,7 +85,7 @@ describe('<PaginationURLQuery />', () => {
         outline: none;
       }
 
-      .c2:after {
+      .c1:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -106,11 +100,55 @@ describe('<PaginationURLQuery />', () => {
         border: 2px solid transparent;
       }
 
-      .c2:focus-visible {
+      .c1:focus-visible {
         outline: none;
       }
 
-      .c2:focus-visible:after {
+      .c1:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c4 {
+        padding: 12px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c4:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c4:focus-visible {
+        outline: none;
+      }
+
+      .c4:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -122,89 +160,45 @@ describe('<PaginationURLQuery />', () => {
       }
 
       .c5 {
-        padding: 12px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        position: relative;
-        outline: none;
-      }
-
-      .c5:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c5:focus-visible {
-        outline: none;
-      }
-
-      .c5:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c6 {
         color: #271fe0;
         background: #ffffff;
       }
 
-      .c6:hover {
+      .c5:hover {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c3 {
-        font-size: 0.7rem;
+      .c2 {
+        font-size: 0.6875rem;
         pointer-events: none;
       }
 
-      .c3 svg path {
+      .c2 svg path {
         fill: #c0c0cf;
       }
 
-      .c3:focus svg path,
-      .c3:hover svg path {
+      .c2:focus svg path,
+      .c2:hover svg path {
         fill: #c0c0cf;
       }
 
       <nav
-        aria-label="pagination"
+        aria-label="Pagination"
         class=""
       >
-        <ul
-          class="c0 c1"
+        <ol
+          class="c0"
         >
           <li>
             <a
               aria-current="page"
               aria-disabled="true"
-              class="c2 c3 active"
+              class="c1 c2 active"
               href="/"
               tabindex="-1"
             >
               <div
-                class="c4"
+                class="c3"
               >
                 Go to previous page
               </div>
@@ -226,17 +220,17 @@ describe('<PaginationURLQuery />', () => {
           <li>
             <a
               aria-current="page"
-              class="c5 c6 active"
+              class="c4 c5 active"
               href="/?page=1"
             >
               <div
-                class="c4"
+                class="c3"
               >
                 Go to page 1
               </div>
               <span
                 aria-hidden="true"
-                class="c7 c8"
+                class="c6"
               >
                 1
               </span>
@@ -246,12 +240,12 @@ describe('<PaginationURLQuery />', () => {
             <a
               aria-current="page"
               aria-disabled="true"
-              class="c2 c3 active"
+              class="c1 c2 active"
               href="/"
               tabindex="-1"
             >
               <div
-                class="c4"
+                class="c3"
               >
                 Go to next page
               </div>
@@ -270,7 +264,7 @@ describe('<PaginationURLQuery />', () => {
               </svg>
             </a>
           </li>
-        </ul>
+        </ol>
       </nav>
     `);
   });
@@ -288,7 +282,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should change the page correctly', async () => {
     const history = createMemoryHistory();
-    act(() => history.push({ pathname: '/test', search: 'page=3&pageSize=10&sort=firstname' }));
+    history.push({ pathname: '/test', search: 'page=3&pageSize=10&sort=firstname' });
     render(makeApp(history, 10));
 
     expect(screen.getByText('Go to page 1')).toBeInTheDocument();
@@ -310,7 +304,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should display the dots correctly', () => {
     const history = createMemoryHistory();
-    act(() => history.push({ pathname: '/test', search: 'page=5&pageSize=10&sort=firstname' }));
+    history.push({ pathname: '/test', search: 'page=5&pageSize=10&sort=firstname' });
     const {
       container: { firstChild },
     } = render(makeApp(history, 10));
@@ -320,7 +314,7 @@ describe('<PaginationURLQuery />', () => {
 
   it('should work when the pageCount is inferior or equal to 4', async () => {
     const history = createMemoryHistory();
-    act(() => history.push({ pathname: '/test', search: 'page=1&pageSize=10&sort=firstname' }));
+    history.push({ pathname: '/test', search: 'page=1&pageSize=10&sort=firstname' });
     const {
       container: { firstChild },
     } = render(makeApp(history, 4));

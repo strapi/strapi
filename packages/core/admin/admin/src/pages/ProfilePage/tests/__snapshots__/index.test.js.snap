@@ -87,6 +87,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -900,7 +901,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for=":r8:"
+                            for="1"
                           >
                             Current Password
                           </label>
@@ -912,7 +913,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-invalid="false"
                               aria-required="false"
                               class="c27 c28"
-                              id=":r8:"
+                              id="1"
                               name="currentPassword"
                               type="password"
                               value=""
@@ -970,7 +971,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for=":ra:"
+                            for="3"
                           >
                             Password
                           </label>
@@ -983,7 +984,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id=":ra:"
+                              id="3"
                               name="password"
                               type="password"
                               value=""
@@ -1037,7 +1038,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         >
                           <label
                             class="c5 c21 c22"
-                            for=":rc:"
+                            for="5"
                           >
                             Password confirmation
                           </label>
@@ -1050,7 +1051,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                               aria-required="false"
                               autocomplete="new-password"
                               class="c27 c28"
-                              id=":rc:"
+                              id="5"
                               name="confirmPassword"
                               type="password"
                               value=""
@@ -1138,20 +1139,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for=":re:"
+                          for="7"
                         >
                           Interface language
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:rh:"
-                          aria-describedby=":re:-hint :re:-error"
+                          aria-controls="radix-0"
+                          aria-describedby="7-hint 7-error"
                           aria-expanded="false"
                           aria-label="Interface language"
                           class="c37 c38 c39"
                           data-state="closed"
                           dir="ltr"
-                          id=":re:"
+                          id="7"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1213,7 +1214,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c48"
-                          id=":re:-hint"
+                          id="7-hint"
                         >
                           This will only display your own interface in the chosen language.
                         </p>
@@ -1235,20 +1236,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for=":ri:"
+                          for="9"
                         >
                           Interface mode
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:rl:"
-                          aria-describedby=":ri:-hint :ri:-error"
+                          aria-controls="radix-1"
+                          aria-describedby="9-hint 9-error"
                           aria-expanded="false"
                           aria-label="Interface mode"
                           class="c37 c38 c39"
                           data-state="closed"
                           dir="ltr"
-                          id=":ri:"
+                          id="9"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1292,7 +1293,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                         </div>
                         <p
                           class="c5 c48"
-                          id=":ri:-hint"
+                          id="9-hint"
                         >
                           Displays your interface in the chosen mode.
                         </p>

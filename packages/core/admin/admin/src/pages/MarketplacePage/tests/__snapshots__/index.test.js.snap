@@ -217,6 +217,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -236,6 +237,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c67 {
   font-size: 0.75rem;
   line-height: 1.33;
+  line-height: 16;
   color: #32324d;
 }
 
@@ -251,6 +253,21 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   line-height: 1.43;
   font-weight: 600;
   color: #328048;
+}
+
+.c90 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: revert;
+  color: #32324d;
+}
+
+.c92 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  line-height: revert;
+  color: #32324d;
 }
 
 .c5 {
@@ -771,15 +788,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   outline: none;
 }
 
-.c86 > * + * {
-  margin-left: 4px;
-}
-
-.c91 {
-  line-height: revert;
-}
-
-.c87 {
+.c86 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -792,7 +801,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   outline: none;
 }
 
-.c87:after {
+.c86:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -807,11 +816,55 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border: 2px solid transparent;
 }
 
-.c87:focus-visible {
+.c86:focus-visible {
   outline: none;
 }
 
-.c87:focus-visible:after {
+.c86:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c88 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c88:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c88:focus-visible {
+  outline: none;
+}
+
+.c88:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -823,82 +876,38 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 }
 
 .c89 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c89:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c89:focus-visible {
-  outline: none;
-}
-
-.c89:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c90 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c90:hover {
+.c89:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c92 {
+.c91 {
   color: #32324d;
 }
 
-.c92:hover {
+.c91:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c88 {
-  font-size: 0.7rem;
+.c87 {
+  font-size: 0.6875rem;
   pointer-events: none;
 }
 
-.c88 svg path {
+.c87 svg path {
   fill: #c0c0cf;
 }
 
-.c88:focus svg path,
-.c88:hover svg path {
+.c87:focus svg path,
+.c87:hover svg path {
   fill: #c0c0cf;
 }
 
 .c93 {
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
 }
 
 .c93 svg path {
@@ -914,7 +923,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   font-size: 0.8rem;
 }
 
-.c36 svg path {
+.c36 path {
   fill: #32324d;
 }
 
@@ -929,7 +938,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   transition-duration: 0.2s;
 }
 
-.c28:focus-within .c35 svg path {
+.c28:focus-within .c35 path {
   fill: #4945ff;
 }
 
@@ -1200,7 +1209,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 sc-DtmNo c11 c12 c13 c14"
+              class="c10 sc-cjrPHo c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1306,7 +1315,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   >
                     <label
                       class="c8 c30 c31"
-                      for=":r1:"
+                      for="0"
                     >
                       Search
                     </label>
@@ -1317,32 +1326,29 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     <div
                       class="c34"
                     >
-                      <div
-                        class="c35 c7 c36"
+                      <svg
+                        aria-hidden="true"
+                        class="c35 c36"
+                        fill="none"
+                        height="1rem"
+                        viewBox="0 0 24 24"
+                        width="1rem"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <svg
-                          aria-hidden="true"
-                          fill="none"
-                          height="1rem"
-                          viewBox="0 0 24 24"
-                          width="1rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            clip-rule="evenodd"
-                            d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
-                            fill="#32324D"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
-                      </div>
+                        <path
+                          clip-rule="evenodd"
+                          d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
                     </div>
                     <input
                       aria-disabled="false"
                       aria-invalid="false"
                       aria-required="false"
                       class="c37"
-                      id=":r1:"
+                      id="0"
                       name="searchbar"
                       placeholder="Search"
                       value=""
@@ -1372,7 +1378,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </label>
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-:r5:"
+                    aria-controls="radix-0"
                     aria-describedby="sort-by-select-hint sort-by-select-error"
                     aria-expanded="false"
                     aria-label="Sort by"
@@ -1593,7 +1599,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Comments"
-                          class="c10 sc-DtmNo c11 c12 c13 c14"
+                          class="c10 sc-cjrPHo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-comments"
                           target="_self"
                         >
@@ -1720,7 +1726,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby=":ra:"
+                                  aria-describedby="2"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -1761,7 +1767,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Config Sync"
-                          class="c10 sc-DtmNo c11 c12 c13 c14"
+                          class="c10 sc-cjrPHo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                           target="_self"
                         >
@@ -1790,7 +1796,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby=":rc:"
+                            aria-describedby="3"
                             class=""
                             tabindex="0"
                           >
@@ -1914,7 +1920,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Content Versioning"
-                          class="c10 sc-DtmNo c11 c12 c13 c14"
+                          class="c10 sc-cjrPHo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                           target="_self"
                         >
@@ -1943,7 +1949,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby=":re:"
+                            aria-describedby="4"
                             class=""
                             tabindex="0"
                           >
@@ -2090,7 +2096,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby=":rg:"
+                                  aria-describedby="5"
                                   class="c7"
                                   tabindex="0"
                                 >
@@ -2121,7 +2127,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Documentation"
-                          class="c10 sc-DtmNo c11 c12 c13 c14"
+                          class="c10 sc-cjrPHo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                           target="_self"
                         >
@@ -2256,7 +2262,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         <a
                           aria-disabled="false"
                           aria-label="Learn more about Transformer"
-                          class="c10 sc-DtmNo c11 c12 c13 c14"
+                          class="c10 sc-cjrPHo c11 c12 c13 c14"
                           href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                           target="_self"
                         >
@@ -2285,7 +2291,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                         </a>
                         <span>
                           <div
-                            aria-describedby=":ri:"
+                            aria-describedby="6"
                             class=""
                             tabindex="0"
                           >
@@ -2349,17 +2355,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 >
                   <label
                     class="c8 c30 c31"
-                    for=":rk:"
+                    for="8"
                   />
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-:rn:"
-                    aria-describedby=":rk:-hint :rk:-error"
+                    aria-controls="radix-5"
+                    aria-describedby="8-hint 8-error"
                     aria-expanded="false"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
-                    id=":rk:"
+                    id="8"
                     overflow="hidden"
                     role="combobox"
                     tabindex="0"
@@ -2415,17 +2421,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               </div>
             </div>
             <nav
-              aria-label="pagination"
+              aria-label="Pagination"
               class=""
             >
-              <ul
-                class="c7 c86"
+              <ol
+                class="c62"
               >
                 <li>
                   <a
                     aria-current="page"
                     aria-disabled="true"
-                    class="c87 c88 active"
+                    class="c86 c87 active"
                     href="/"
                     tabindex="-1"
                   >
@@ -2452,7 +2458,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <li>
                   <a
                     aria-current="page"
-                    class="c89 c90 active"
+                    class="c88 c89 active"
                     href="/?page=1"
                   >
                     <div
@@ -2462,7 +2468,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     </div>
                     <span
                       aria-hidden="true"
-                      class="c8 c30 c91"
+                      class="c8 c90"
                     >
                       1
                     </span>
@@ -2471,7 +2477,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <li>
                   <a
                     aria-current="page"
-                    class="c87 c92 active"
+                    class="c86 c91 active"
                     href="/?page=2"
                   >
                     <div
@@ -2481,7 +2487,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     </div>
                     <span
                       aria-hidden="true"
-                      class="c8 c67 c91"
+                      class="c8 c92"
                     >
                       2
                     </span>
@@ -2490,7 +2496,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <li>
                   <a
                     aria-current="page"
-                    class="c87 c92 active"
+                    class="c86 c91 active"
                     href="/?page=3"
                   >
                     <div
@@ -2500,7 +2506,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     </div>
                     <span
                       aria-hidden="true"
-                      class="c8 c67 c91"
+                      class="c8 c92"
                     >
                       3
                     </span>
@@ -2509,7 +2515,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <li>
                   <a
                     aria-current="page"
-                    class="c87 c92 active"
+                    class="c86 c91 active"
                     href="/?page=4"
                   >
                     <div
@@ -2519,7 +2525,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     </div>
                     <span
                       aria-hidden="true"
-                      class="c8 c67 c91"
+                      class="c8 c92"
                     >
                       4
                     </span>
@@ -2529,7 +2535,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   <a
                     aria-current="page"
                     aria-disabled="false"
-                    class="c87 c93 active"
+                    class="c86 c93 active"
                     href="/?page=2"
                   >
                     <div
@@ -2552,7 +2558,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                     </svg>
                   </a>
                 </li>
-              </ul>
+              </ol>
             </nav>
           </div>
         </div>

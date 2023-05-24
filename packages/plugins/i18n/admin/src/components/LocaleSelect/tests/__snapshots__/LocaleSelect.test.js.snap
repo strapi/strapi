@@ -156,66 +156,63 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   >
     <label
       class="c1 c2 c3"
-      for=":r0:"
+      for="1"
     >
       Locales
     </label>
     <div
+      class="c4"
       tabindex="-1"
     >
-      <div
-        class="c4"
+      <span
+        class="c5 c6"
       >
-        <span
-          class="c5 c6"
+        <input
+          aria-autocomplete="both"
+          aria-controls="radix-0"
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-invalid="false"
+          aria-labelledby="1-hint 1-error"
+          aria-required="false"
+          class="c7"
+          data-placeholder=""
+          data-state="closed"
+          id="1"
+          placeholder="Select"
+          role="combobox"
+          type="text"
+          value=""
+        />
+      </span>
+      <span
+        class="c6"
+      >
+        <button
+          aria-controls="radix-0"
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-hidden="true"
+          class="c8"
+          tabindex="-1"
+          type="button"
         >
-          <input
-            aria-autocomplete="both"
-            aria-controls="radix-:r3:"
-            aria-disabled="false"
-            aria-expanded="false"
-            aria-invalid="false"
-            aria-labelledby=":r0:-hint :r0:-error"
-            aria-required="false"
-            class="c7"
-            data-placeholder=""
-            data-state="closed"
-            id=":r0:"
-            placeholder="Select"
-            role="combobox"
-            type="text"
-            value=""
-          />
-        </span>
-        <span
-          class="c6"
-        >
-          <button
-            aria-controls="radix-:r3:"
-            aria-disabled="false"
-            aria-expanded="false"
-            aria-hidden="true"
-            class="c8"
-            tabindex="-1"
-            type="button"
+          <svg
+            fill="none"
+            height="1rem"
+            viewBox="0 0 14 8"
+            width="1rem"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              fill="none"
-              height="1rem"
-              viewBox="0 0 14 8"
-              width="1rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                clip-rule="evenodd"
-                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                fill="#32324D"
-                fill-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </span>
-      </div>
+            <path
+              clip-rule="evenodd"
+              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+              fill="#32324D"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </span>
     </div>
   </div>
 </div>

@@ -30,9 +30,9 @@
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/design-system": "1.7.5",
+    "@strapi/design-system": "1.7.7",
     "@strapi/helper-plugin": "4.10.5",
-    "@strapi/icons": "1.7.5",
+    "@strapi/icons": "1.7.7",
     "@strapi/utils": "4.10.5",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
@@ -43,10 +43,9 @@
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
     "pluralize": "8.0.0",
-    "react-copy-to-clipboard": "^5.1.0",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
-    "react-query": "3.39.2",
+    "react-query": "3.24.3",
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
@@ -56,18 +55,18 @@
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",
-    "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "12.1.4",
     "history": "^4.9.0",
     "msw": "1.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },

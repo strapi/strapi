@@ -1,7 +1,313 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when creating token 1`] = `
-.c0 {
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c6 {
+  min-width: 0;
+}
+
+.c11 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c15 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c17 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c29 {
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #32324d;
+  padding: 16px;
+  border-radius: 4px;
+  width: 100%;
+  height: 6.5625rem;
+  line-height: 4;
+}
+
+.c33 {
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
+}
+
+.c36 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c19 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c25 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c16 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.c18 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c22 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c34 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c37 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c12 {
+  position: relative;
+  outline: none;
+}
+
+.c12 > svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c12 > svg > g,
+.c12 > svg path {
+  fill: #ffffff;
+}
+
+.c12[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c12:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c12:focus-visible {
+  outline: none;
+}
+
+.c12:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c43 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,9 +319,690 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
+.c13 {
+  height: 2rem;
+}
+
+.c13[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c13[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c13[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c13[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c13:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c13:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c13 svg > g,
+.c13 svg path {
+  fill: #ffffff;
+}
+
+.c24 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c26 {
+  line-height: 0;
+}
+
+.c28 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c28::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c28[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c28:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c27 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c27:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c35 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c35[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c35:focus-visible {
+  outline: none;
+}
+
+.c35:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c41 > svg {
+  width: 0.375rem;
+}
+
+.c41 > svg > path {
+  fill: #666687;
+}
+
+.c39 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c40 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c44[data-state='checked'] .c8 {
+  font-weight: bold;
+  color: #4945ff;
+}
+
+.c20 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 20px;
+}
+
+.c21 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c30 {
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c30:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c32 {
+  border: none;
+  resize: none;
+}
+
+.c32::-webkit-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32::-moz-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32:-ms-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32::placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c32:focus-within {
+  outline: none;
+}
+
+.c4 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  gap: 8px;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg {
+  font-size: 0.625rem;
+}
+
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3:hover {
+  color: #7b79ff;
+}
+
+.c3:active {
+  color: #271fe0;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+@media (max-width:68.75rem) {
+  .c21 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c21 {
+    grid-column: span 12;
+  }
+}
+
 <div>
-  <div
+  <main
+    aria-labelledby="main-content-title"
     class="c0"
+    id="main-content"
+    tabindex="-1"
+  >
+    <form
+      action="#"
+      novalidate=""
+    >
+      <div
+        style="height: 0px;"
+      >
+        <div
+          class="c1"
+          data-strapi-header="true"
+        >
+          <div
+            class="c2"
+          >
+            <a
+              aria-current="page"
+              class="c3 active"
+              href="/settings/transfer-tokens"
+            >
+              <svg
+                fill="none"
+                height="1rem"
+                viewBox="0 0 24 24"
+                width="1rem"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
+                  fill="#212134"
+                />
+              </svg>
+              <span
+                class="c4"
+              >
+                Back
+              </span>
+            </a>
+          </div>
+          <div
+            class="c5"
+          >
+            <div
+              class="c6 c7"
+            >
+              <h1
+                class="c8 c9"
+              >
+                Create Transfer Token
+              </h1>
+            </div>
+            <div
+              class="c10"
+            >
+              <button
+                aria-disabled="false"
+                class="c11 c10 c12 c13"
+                type="submit"
+              >
+                <div
+                  aria-hidden="true"
+                  class=""
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="c8 c14"
+                >
+                  Save
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="c15"
+      >
+        <div
+          class="c16"
+        >
+          <div
+            class="c17"
+          >
+            <div
+              class="c18"
+            >
+              <h2
+                class="c8 c19"
+              >
+                Details
+              </h2>
+              <div
+                class="c20"
+              >
+                <div
+                  class="c21"
+                >
+                  <div
+                    class=""
+                  >
+                    <div>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c22"
+                        >
+                          <label
+                            class="c8 c23 c24"
+                            for="1"
+                          >
+                            Name
+                            <span
+                              class="c8 c25 c26"
+                            >
+                              *
+                            </span>
+                          </label>
+                          <div
+                            class="c5 c27"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="true"
+                              class="c28"
+                              id="1"
+                              name="name"
+                              value=""
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c21"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c22"
+                      >
+                        <label
+                          class="c8 c23 c24"
+                          for="description"
+                        >
+                          Description
+                        </label>
+                        <div
+                          class="c29 c30"
+                        >
+                          <textarea
+                            aria-invalid="false"
+                            aria-required="false"
+                            class="c31 c32"
+                            font-size="2"
+                            id="description"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c21"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c22"
+                      >
+                        <label
+                          class="c8 c23 c24"
+                          for="3"
+                        >
+                          Token duration
+                          <span
+                            class="c8 c25 c26"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-0"
+                          aria-describedby="3-hint 3-error"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-label="Token duration"
+                          aria-required="true"
+                          class="c33 c34 c35"
+                          data-state="closed"
+                          dir="ltr"
+                          id="3"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c36 c37"
+                          >
+                            <span
+                              class="c8 c38 c39"
+                            >
+                              <span
+                                class="c40"
+                              >
+                                <span>
+                                  Select
+                                </span>
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c37"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c41"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      class="c8 c42"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="c21"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c22"
+                      >
+                        <label
+                          class="c8 c23 c24"
+                          for="5"
+                        >
+                          Token type
+                          <span
+                            class="c8 c25 c26"
+                          >
+                            *
+                          </span>
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-1"
+                          aria-describedby="5-hint 5-error"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-label="Token type"
+                          aria-required="true"
+                          class="c33 c34 c35"
+                          data-state="closed"
+                          dir="ltr"
+                          id="5"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c36 c37"
+                          >
+                            <span
+                              class="c8 c38 c39"
+                            >
+                              <span
+                                class="c40"
+                              >
+                                <span>
+                                  Select
+                                </span>
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c37"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c41"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+  <div
+    class="c43"
   >
     <p
       aria-live="polite"
@@ -95,7 +1082,24 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c39 {
+.c36 {
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+}
+
+.c38 {
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #32324d;
+  padding: 16px;
+  border-radius: 4px;
+  width: 100%;
+  height: 6.5625rem;
+  line-height: 4;
+}
+
+.c40 {
   background: #eaeaef;
   padding-right: 12px;
   padding-left: 12px;
@@ -106,13 +1110,13 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   cursor: default;
 }
 
-.c42 {
+.c43 {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c49 {
+.c50 {
   background: #ffffff;
   padding-right: 12px;
   padding-left: 12px;
@@ -138,6 +1142,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -174,7 +1179,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #d02b20;
 }
 
-.c44 {
+.c45 {
   font-size: 0.875rem;
   line-height: 1.43;
   display: block;
@@ -184,7 +1189,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   color: #666687;
 }
 
-.c48 {
+.c49 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -282,7 +1287,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   gap: 16px;
 }
 
-.c40 {
+.c41 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -301,7 +1306,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   justify-content: space-between;
 }
 
-.c43 {
+.c44 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -365,7 +1370,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c50 {
+.c51 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -377,11 +1382,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   width: 1px;
 }
 
-.c51[aria-disabled='true'] .c8 {
+.c52[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c51[aria-disabled='true']:active .c8 {
+.c52[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
@@ -555,7 +1560,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c41 {
+.c42 {
   border: 1px solid #dcdce4;
   min-height: 2.5rem;
   outline: none;
@@ -566,34 +1571,34 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   transition-duration: 0.2s;
 }
 
-.c41[aria-disabled='true'] {
+.c42[aria-disabled='true'] {
   color: #666687;
 }
 
-.c41:focus-visible {
+.c42:focus-visible {
   outline: none;
 }
 
-.c41:focus-within {
+.c42:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c47 > svg {
+.c48 > svg {
   width: 0.375rem;
 }
 
-.c47 > svg > path {
+.c48 > svg > path {
   fill: #666687;
 }
 
-.c45 {
+.c46 {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c46 {
+.c47 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -604,7 +1609,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   flex-wrap: wrap;
 }
 
-.c52[data-state='checked'] .c8 {
+.c53[data-state='checked'] .c8 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -625,13 +1630,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 }
 
 .c37 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
   outline: none;
   box-shadow: 0;
   -webkit-transition-property: border-color,box-shadow,fill;
@@ -645,76 +1643,41 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c38 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
+.c39 {
   border: none;
-  color: #32324d;
   resize: none;
-  background: inherit;
 }
 
-.c38::-webkit-input-placeholder {
+.c39::-webkit-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38::-moz-placeholder {
+.c39::-moz-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38:-ms-input-placeholder {
+.c39:-ms-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38::placeholder {
+.c39::placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c38:focus-within {
+.c39:focus-within {
   outline: none;
-}
-
-.c36 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c36 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c36 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
 }
 
 .c4 {
@@ -1006,7 +1969,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         >
                           <label
                             class="c8 c30 c31"
-                            for=":r1:"
+                            for="10"
                           >
                             Name
                             <span
@@ -1023,53 +1986,10 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                               aria-invalid="false"
                               aria-required="true"
                               class="c35"
-                              id=":r1:"
+                              id="10"
                               name="name"
                               value="My super token"
                             />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c29"
-                >
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c36"
-                    >
-                      <div
-                        class=""
-                      >
-                        <div
-                          class="c21"
-                        >
-                          <div
-                            class="c7"
-                          >
-                            <label
-                              class="c8 c30 c31"
-                              for=":r3:"
-                            >
-                              Description
-                            </label>
-                          </div>
-                          <div
-                            class="c37"
-                          >
-                            <textarea
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c38"
-                              id=":r3:"
-                              name="description"
-                            >
-                              This describe my super token
-                            </textarea>
                           </div>
                         </div>
                       </div>
@@ -1090,7 +2010,42 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for=":r5:"
+                          for="description"
+                        >
+                          Description
+                        </label>
+                        <div
+                          class="c36 c37"
+                        >
+                          <textarea
+                            aria-invalid="false"
+                            aria-required="false"
+                            class="c38 c39"
+                            font-size="2"
+                            id="description"
+                          >
+                            This describe my super token
+                          </textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c29"
+                >
+                  <div
+                    class=""
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c21"
+                      >
+                        <label
+                          class="c8 c30 c31"
+                          for="12"
                         >
                           Token duration
                           <span
@@ -1101,28 +2056,28 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r8:"
-                          aria-describedby=":r5:-hint :r5:-error"
+                          aria-controls="radix-9"
+                          aria-describedby="12-hint 12-error"
                           aria-disabled="true"
                           aria-expanded="false"
                           aria-label="Token duration"
                           aria-required="true"
-                          class="c39 c40 c41"
+                          class="c40 c41 c42"
                           data-disabled=""
                           data-state="closed"
                           dir="ltr"
-                          id=":r5:"
+                          id="12"
                           overflow="hidden"
                           role="combobox"
                         >
                           <span
-                            class="c42 c43"
+                            class="c43 c44"
                           >
                             <span
-                              class="c8 c44 c45"
+                              class="c8 c45 c46"
                             >
                               <span
-                                class="c46"
+                                class="c47"
                               >
                                 <span>
                                   Select
@@ -1131,11 +2086,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c43"
+                            class="c44"
                           >
                             <span
                               aria-hidden="true"
-                              class="c47"
+                              class="c48"
                             >
                               <svg
                                 fill="none"
@@ -1157,7 +2112,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       </div>
                     </div>
                     <span
-                      class="c8 c48"
+                      class="c8 c49"
                     >
                       Expiration date: Unlimited
                     </span>
@@ -1177,7 +2132,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for=":r9:"
+                          for="14"
                         >
                           Token type
                           <span
@@ -1188,28 +2143,28 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:rc:"
-                          aria-describedby=":r9:-hint :r9:-error"
+                          aria-controls="radix-10"
+                          aria-describedby="14-hint 14-error"
                           aria-disabled="false"
                           aria-expanded="false"
                           aria-label="Token type"
                           aria-required="true"
-                          class="c49 c40 c41"
+                          class="c50 c41 c42"
                           data-state="closed"
                           dir="ltr"
-                          id=":r9:"
+                          id="14"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
                         >
                           <span
-                            class="c42 c43"
+                            class="c43 c44"
                           >
                             <span
-                              class="c8 c44 c45"
+                              class="c8 c45 c46"
                             >
                               <span
-                                class="c46"
+                                class="c47"
                               >
                                 <span>
                                   Select
@@ -1218,11 +2173,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             </span>
                           </span>
                           <span
-                            class="c43"
+                            class="c44"
                           >
                             <span
                               aria-hidden="true"
-                              class="c47"
+                              class="c48"
                             >
                               <svg
                                 fill="none"
@@ -1253,7 +2208,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c50"
+    class="c51"
   >
     <p
       aria-live="polite"
