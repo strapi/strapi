@@ -9,7 +9,8 @@ const sso = require('./passport/sso');
 const { isSsoLocked } = require('../utils/sso-lock');
 
 const localStrategyMiddleware = async ([error, user, message], done) => {
-  if (await isSsoLocked(user)) {
+  // if we got a user, we need to check that it's not sso locked
+  if (user && !error && (await isSsoLocked(user))) {
     throw new UnauthorizedError('Login not allowed, please contact your administrator', {
       code: 'LOGIN_NOT_ALLOWED',
     });
