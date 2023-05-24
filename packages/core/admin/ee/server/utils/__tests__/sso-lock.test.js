@@ -49,7 +49,7 @@ describe('isSsoLocked', () => {
         get: jest.fn(() => {
           return {
             providers: {
-              authenticationDisabled: lockedRoles,
+              ssoLockedRoles: lockedRoles,
             },
           };
         }),

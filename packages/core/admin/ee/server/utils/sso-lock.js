@@ -15,7 +15,7 @@ const isSsoLocked = async (user) => {
   // check if any roles are locked
   const adminStore = await strapi.store({ type: 'core', name: 'admin' });
   const { providers } = await adminStore.get({ key: 'auth' });
-  const lockedRoles = providers.authenticationDisabled || [];
+  const lockedRoles = providers.ssoLockedRoles || []; // ssoLockedRoles
   if (isEmpty(lockedRoles)) {
     return false;
   }
