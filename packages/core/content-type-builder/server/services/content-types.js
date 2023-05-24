@@ -160,6 +160,19 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   const previousKind = builder.contentTypes.get(uid).schema.kind;
   const newKind = contentType.kind || previousKind;
 
+  // Restore non-visible attributes from previous schema
+  const previousAttributes = builder.contentTypes.get(uid).schema.attributes;
+  const prevNonVisibleAttributes = contentTypesUtils
+    .getNonVisibleAttributes(builder.contentTypes.get(uid).schema)
+    .reduce((acc, key) => {
+      if (key in previousAttributes) {
+        acc[key] = previousAttributes[key];
+      }
+
+      return acc;
+    }, {});
+  contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
+
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();
     if (entryCount > 1) {
