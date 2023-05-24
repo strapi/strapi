@@ -63,8 +63,8 @@ const createPermissionChecker =
       )(query);
     };
 
-    const populateQuery = (query) => {
-      const permissionQuery = this.sanitizedQuery.read(query);
+    const populateQuery = async (query) => {
+      const permissionQuery = await sanitizedQuery.read(query);
       return getQueryPopulate(model, permissionQuery);
     };
 

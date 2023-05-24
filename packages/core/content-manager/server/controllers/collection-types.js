@@ -45,7 +45,7 @@ module.exports = {
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
-    const populateQuery = await permissionChecker.queryPopulate(ctx.query);
+    const populateQuery = await permissionChecker.populateQuery(ctx.query);
 
     const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model, {
       populate: populateQuery,
