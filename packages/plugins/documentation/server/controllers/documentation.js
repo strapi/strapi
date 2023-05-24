@@ -15,6 +15,28 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const koaStatic = require('koa-static');
 
+const getFullDocumentation = (ctx) => {
+  /**
+       * We don't expose the specs using koa-static or something else due to security reasons.
+       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
+       */
+  const { major, minor, patch } = ctx.params;
+  const version =
+    major && minor && patch
+      ? `${major}.${minor}.${patch}`
+      : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
+
+  const openAPISpecsPath = path.join(
+    strapi.dirs.app.extensions,
+    'documentation',
+    'documentation',
+    version,
+    'full_documentation.json'
+  );
+
+  return fs.readFileSync(openAPISpecsPath, 'utf8');
+}
+
 module.exports = {
   async getInfos(ctx) {
     try {
@@ -35,25 +57,8 @@ module.exports = {
 
   async index(ctx, next) {
     try {
-      /**
-       * We don't expose the specs using koa-static or something else due to security reasons.
-       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
-       */
-      const { major, minor, patch } = ctx.params;
-      const version =
-        major && minor && patch
-          ? `${major}.${minor}.${patch}`
-          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
+      const documentation = getFullDocumentation(ctx);
 
-      const openAPISpecsPath = path.join(
-        strapi.dirs.app.extensions,
-        'documentation',
-        'documentation',
-        version,
-        'full_documentation.json'
-      );
-
-      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
       const layout = fs.readFileSync(
         path.resolve(__dirname, '..', 'public', 'index.html'),
         'utf8'
@@ -88,25 +93,7 @@ module.exports = {
 
   async json(ctx, next) {
     try {
-      /**
-       * We don't expose the specs using koa-static or something else due to security reasons.
-       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
-       */
-      const { major, minor, patch } = ctx.params;
-      const version =
-        major && minor && patch
-          ? `${major}.${minor}.${patch}`
-          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
-
-      const openAPISpecsPath = path.join(
-        strapi.dirs.app.extensions,
-        'documentation',
-        'documentation',
-        version,
-        'full_documentation.json'
-      );
-
-      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+      const documentation = getFullDocumentation(ctx);
 
       const layoutPath = path.resolve(
         strapi.dirs.app.extensions,
