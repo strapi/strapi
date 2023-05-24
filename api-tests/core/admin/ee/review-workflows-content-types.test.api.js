@@ -46,7 +46,7 @@ const longCTModel = {
   },
 };
 
-describe('Review workflows', () => {
+describeOnCondition(edition === 'EE')('Review workflows', () => {
   const builder = createTestBuilder();
 
   const requests = { admin: null };
