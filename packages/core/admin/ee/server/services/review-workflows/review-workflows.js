@@ -10,6 +10,8 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
+const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
+
 async function initDefaultWorkflow({ workflowsService, stagesService }) {
   const wfCount = await workflowsService.count();
   const stagesCount = await stagesService.count();
@@ -29,9 +31,9 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
     const maxContentTypeNameLength =
-      63 - 1 /* _ */ - ENTITY_STAGE_ATTRIBUTE.length - '_links_inv_fk'.length;
+      MAX_DB_TABLE_NAME_LEN - 1 /* _ */ - ENTITY_STAGE_ATTRIBUTE.length - '_links_inv_fk'.length;
     const assertContentTypeCompatibility = (contentType) =>
-      contentType.collectionName.length <= maxContentTypeNameLength; // This is the maximum length limit of table name in PostgreSQL (64 for MariaDB)
+      contentType.collectionName.length <= maxContentTypeNameLength;
     const incompatibleContentTypeAlert = (contentType) => {
       strapi.log.warn(
         `Content type "${contentType.info.displayName}" cannot have Review Workflow activated as the name is too long. (${maxContentTypeNameLength} maximum characters)`
