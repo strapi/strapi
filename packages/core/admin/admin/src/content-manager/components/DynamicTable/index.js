@@ -18,7 +18,7 @@ import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import TableRows from './TableRows';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
-import BulkActionsBar from './BulkActionsBar';
+import BulkActionButtons from './BulkActionButtons';
 
 const DynamicTable = ({
   canCreate,
@@ -26,7 +26,7 @@ const DynamicTable = ({
   canPublish,
   contentTypeName,
   action,
-  isBulkable,
+  withEntityActions,
   isLoading,
   onConfirmDelete,
   onConfirmDeleteAll,
@@ -97,7 +97,6 @@ const DynamicTable = ({
     return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
-  const withEntityActions = (canDelete || canPublish) && isBulkable;
   const rowCount = rows.length + 1;
   // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
   const colCount = tableHeaders.length + 1 + (withEntityActions ? 1 : 0);
@@ -116,7 +115,7 @@ const DynamicTable = ({
       ) : (
         <>
           <TableActionBar>
-            <BulkActionsBar
+            <BulkActionButtons
               showPublish={canPublish && hasDraftAndPublish}
               showDelete={canDelete}
               onConfirmDeleteAll={onConfirmDeleteAll}
@@ -155,7 +154,7 @@ DynamicTable.propTypes = {
   canPublish: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   action: PropTypes.node,
-  isBulkable: PropTypes.bool.isRequired,
+  withEntityActions: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,

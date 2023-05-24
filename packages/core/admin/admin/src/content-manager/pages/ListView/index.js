@@ -448,7 +448,7 @@ function ListView({
               onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmPublishAll={handleConfirmPublishAllData}
               onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-              isBulkable={isBulkable}
+              withEntityActions={(canDelete || canPublish) && isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
               layout={layout}

@@ -174,7 +174,7 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
-const BulkActionsBar = ({
+const BulkActionButtons = ({
   showPublish,
   showDelete,
   onConfirmDeleteAll,
@@ -285,7 +285,7 @@ const BulkActionsBar = ({
   );
 };
 
-BulkActionsBar.defaultProps = {
+BulkActionButtons.defaultProps = {
   showPublish: false,
   showDelete: false,
   onConfirmDeleteAll() {},
@@ -293,7 +293,7 @@ BulkActionsBar.defaultProps = {
   onConfirmUnpublishAll() {},
 };
 
-BulkActionsBar.propTypes = {
+BulkActionButtons.propTypes = {
   showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
@@ -301,4 +301,4 @@ BulkActionsBar.propTypes = {
   onConfirmUnpublishAll: PropTypes.func,
 };
 
-export default BulkActionsBar;
+export default BulkActionButtons;
