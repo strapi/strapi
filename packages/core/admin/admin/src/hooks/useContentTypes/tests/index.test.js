@@ -5,7 +5,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { useContentTypes } from '../useContentTypes';
+import { useContentTypes } from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

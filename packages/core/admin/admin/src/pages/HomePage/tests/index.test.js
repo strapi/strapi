@@ -50,12 +50,6 @@ const App = (
 );
 
 describe('Homepage', () => {
-  useContentTypes.mockReturnValue({
-    isLoading: false,
-    collectionTypes: [],
-    singleTypes: [],
-  });
-
   test('should render all homepage links', () => {
     const { getByRole } = render(App);
     expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();

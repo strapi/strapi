@@ -2,6 +2,8 @@ import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/hel
 import { useQueries } from 'react-query';
 
 export function useContentTypes() {
+  console.log('----> read');
+
   const { get } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();

@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Layout, Main, Box, Grid, GridItem } from '@strapi/design-system';
 import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+
 import cornerOrnamentPath from './assets/corner-ornament.svg';
 import { useContentTypes } from '../../hooks/useContentTypes';
 import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
