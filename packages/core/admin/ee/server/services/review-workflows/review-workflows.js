@@ -1,8 +1,8 @@
 'use strict';
 
-const { has, filter, set, forEach, pipe, map, stubTrue, cond } = require('lodash/fp');
+const { filter, set, forEach, pipe, map, stubTrue, cond } = require('lodash/fp');
 const { getService } = require('../../utils');
-const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
+const { getVisibleContentTypesUID, hasStageAttribute } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
@@ -69,7 +69,6 @@ function extendReviewWorkflowContentTypes({ strapi }) {
 
 function persistStagesJoinTables({ strapi }) {
   return async ({ contentTypes }) => {
-    const hasStageAttribute = has('attributes', ENTITY_STAGE_ATTRIBUTE);
     const getStageTableToPersist = (contentTypeUID) => {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);

@@ -1,6 +1,7 @@
 'use strict';
 
-const { getOr, keys, pickBy, pipe } = require('lodash/fp');
+const { getOr, keys, pickBy, pipe, has } = require('lodash/fp');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../constants/workflows');
 
 const getVisibleContentTypesUID = pipe([
   // Pick only content-types visible in the content-manager
@@ -9,6 +10,9 @@ const getVisibleContentTypesUID = pipe([
   keys,
 ]);
 
+const hasStageAttribute = has(['attributes', ENTITY_STAGE_ATTRIBUTE]);
+
 module.exports = {
   getVisibleContentTypesUID,
+  hasStageAttribute,
 };
