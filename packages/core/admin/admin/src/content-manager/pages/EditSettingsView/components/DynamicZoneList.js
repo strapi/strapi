@@ -38,7 +38,6 @@ const CustomLink = styled(Flex)`
 const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
 
-  console.log('test', componentLayouts);
 
   return (
     <Flex gap={2} overflow="scroll hidden" padding={3}>
