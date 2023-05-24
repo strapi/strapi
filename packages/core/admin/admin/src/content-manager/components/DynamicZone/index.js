@@ -85,22 +85,10 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     ? { id: metadatas.description, defaultMessage: metadatas.description }
     : null;
 
-  const dynamicZoneErrors = useMemo(() => {
-    return Object.keys(formErrors)
-      .filter((key) => {
-        return key === name;
-      })
-      .map((key) => formErrors[key]);
-  }, [formErrors, name]);
+  const dynamicZoneError = formErrors[name];
 
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
-  const hasError = dynamicZoneErrors.length > 0;
-
-  const hasMinError =
-    dynamicZoneErrors.length > 0 && get(dynamicZoneErrors, [0, 'id'], '').includes('min');
-
-  const hasMaxError =
-    hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
+  const hasError = !!dynamicZoneError;
 
   const handleAddComponent = (componentUid, position) => {
     setAddComponentIsOpen(false);
@@ -215,14 +203,14 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
       return formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
     }
 
-    if (hasMaxError) {
+    if (hasError && dynamicZoneError.id.includes('max')) {
       return formatMessage({
         id: 'components.Input.error.validation.max',
         defaultMessage: 'The value is too high.',
       });
     }
 
-    if (hasMinError) {
+    if (hasError && dynamicZoneError.id.includes('min')) {
       return formatMessage(
         {
           id: getTrad(`components.DynamicZone.missing-components`),

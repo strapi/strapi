@@ -12,6 +12,7 @@ import {
   IconButton,
   Box,
   Flex,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
@@ -134,7 +135,13 @@ export const DynamicComponent = ({
       </IconButton>
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={undefined} paddingLeft={2} paddingRight={2}>
-          <More />
+          <More aria-hidden focusable={false} />
+          <VisuallyHidden as="span">
+            {formatMessage({
+              id: getTrad('components.DynamicZone.more-actions'),
+              defaultMessage: 'More actions',
+            })}
+          </VisuallyHidden>
         </Menu.Trigger>
         <Menu.Content>
           <Menu.SubRoot>

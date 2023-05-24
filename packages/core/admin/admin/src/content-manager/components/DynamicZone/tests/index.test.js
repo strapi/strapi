@@ -398,21 +398,45 @@ describe('DynamicZone', () => {
   });
 
   describe('Add component button', () => {
-    // it('should render the close label if the isOpen prop is true', () => {
-    //   render({ isOpen: true });
-    //   expect(getByText(/Close/)).toBeInTheDocument();
-    // });
-    // it('should render the name of the field when the label is an empty string', () => {
-    //   render({ label: '' });
-    //   expect(getByText(/name/)).toBeInTheDocument();
-    // });
-    // it('should render a too high error if there is hasMaxError is true and the component is not open', () => {
-    //   render({ hasMaxError: true });
-    //   expect(getByText(/The value is too high./)).toBeInTheDocument();
-    // });
-    // it('should render a label telling the user there are X missing components if hasMinError is true and the component is not open', () => {
-    //   render({ hasMinError: true });
-    //   expect(getByText(/missing components/)).toBeInTheDocument();
-    // });
+    it('should render the close label if the component picker is open prop is true', async () => {
+      const { getByRole, user } = render();
+
+      expect(getByRole('button', { name: /Add a component to/i })).toBeInTheDocument();
+
+      await user.click(getByRole('button', { name: /Add a component to/i }));
+
+      expect(getByRole('button', { name: /Close/ })).toBeInTheDocument();
+    });
+
+    it('should render the name of the field when the label is an empty string', () => {
+      const { getByRole } = render({ metadatas: {} });
+      expect(getByRole('button', { name: `Add a component to ${TEST_NAME}` })).toBeInTheDocument();
+    });
+
+    it('should render a too high error if there is hasMaxError is true and the component is not open', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        ...defaultCMEditViewMock,
+        formErrors: {
+          [TEST_NAME]: {
+            id: 'components.Input.error.validation.max',
+          },
+        },
+      }));
+      const { getByRole } = render();
+      expect(getByRole('button', { name: /The value is too high./ })).toBeInTheDocument();
+    });
+
+    it('should render a label telling the user there are X missing components if hasMinError is true and the component is not open', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        ...defaultCMEditViewMock,
+        formErrors: {
+          [TEST_NAME]: {
+            id: 'components.Input.error.validation.min',
+          },
+        },
+      }));
+      const { getByRole } = render();
+      expect(getByRole('button', { name: /missing components/ })).toBeInTheDocument();
+    });
   });
 });

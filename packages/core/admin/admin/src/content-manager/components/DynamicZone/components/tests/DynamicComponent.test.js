@@ -8,7 +8,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { DynamicComponent } from '../DynamicComponent';
 
-import { layoutData } from './fixtures';
+import { layoutData, dynamicComponentsByCategory } from './fixtures';
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
@@ -137,9 +137,64 @@ describe('DynamicComponent', () => {
   });
 
   describe('adding above and below components', () => {
-    it.todo('should call the onAddComponent callback with the correct index when adding above');
+    it('should render a menu button with two items that have submenus that list the components grouped by categories', async () => {
+      const { getByRole, getByText, user } = render({ dynamicComponentsByCategory });
 
-    it.todo('should call the onAddComponent callback with the correct index when adding below');
+      expect(getByRole('button', { name: 'More actions' })).toBeInTheDocument();
+
+      await user.click(getByRole('button', { name: 'More actions' }));
+
+      expect(getByRole('menuitem', { name: 'Add item above' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'Add item below' })).toBeInTheDocument();
+
+      await user.click(getByRole('menuitem', { name: 'Add item above' }));
+
+      expect(getByText('myComponents')).toBeInTheDocument();
+      expect(getByText('otherComponents')).toBeInTheDocument();
+
+      expect(getByRole('menuitem', { name: 'component1' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'component2' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'component3' })).toBeInTheDocument();
+
+      await user.click(getByRole('menuitem', { name: 'Add item below' }));
+
+      expect(getByText('myComponents')).toBeInTheDocument();
+      expect(getByText('otherComponents')).toBeInTheDocument();
+
+      expect(getByRole('menuitem', { name: 'component1' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'component2' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'component3' })).toBeInTheDocument();
+    });
+
+    it('should call the onAddComponent callback with the correct index when adding above', async () => {
+      const onAddComponent = jest.fn();
+      const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
+
+      await user.click(getByRole('button', { name: 'More actions' }));
+      await user.click(getByRole('menuitem', { name: 'Add item above' }));
+
+      /**
+       * @note – for some reason, user.click() doesn't work here
+       */
+      fireEvent.click(getByRole('menuitem', { name: 'component1' }));
+
+      expect(onAddComponent).toHaveBeenCalledWith('component1', -1);
+    });
+
+    it('should call the onAddComponent callback with the correct index when adding below', async () => {
+      const onAddComponent = jest.fn();
+      const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
+
+      await user.click(getByRole('button', { name: 'More actions' }));
+      await user.click(getByRole('menuitem', { name: 'Add item below' }));
+
+      /**
+       * @note – for some reason, user.click() doesn't work here
+       */
+      fireEvent.click(getByRole('menuitem', { name: 'component1' }));
+
+      expect(onAddComponent).toHaveBeenCalledWith('component1', 1);
+    });
   });
 
   it.todo('should handle errors in the fields');
