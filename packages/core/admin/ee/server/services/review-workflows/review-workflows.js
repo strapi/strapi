@@ -108,6 +108,9 @@ function persistStagesJoinTables({ strapi }) {
   };
 }
 
+const registerWebhookEvents = async () =>
+  strapi.webhookStore.allowedEvents.set('WORKFLOW_STAGE_CHANGE', 'workflow.stage.change');
+
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
@@ -115,6 +118,7 @@ module.exports = ({ strapi }) => {
   return {
     async bootstrap() {
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
+      await registerWebhookEvents();
     },
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
