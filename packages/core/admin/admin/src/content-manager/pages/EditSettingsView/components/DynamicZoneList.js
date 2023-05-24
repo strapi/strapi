@@ -38,6 +38,8 @@ const CustomLink = styled(Flex)`
 const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
 
+  console.log('test', componentLayouts);
+
   return (
     <Flex gap={2} overflow="scroll hidden" padding={3}>
       {components.map((componentUid) => (
@@ -55,7 +57,7 @@ const DynamicZoneList = ({ components }) => {
           as={Link}
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
-          <ComponentIcon icon={componentLayouts?.[componentUid]?.info?.icon ?? ''} />
+          <ComponentIcon icon={componentLayouts?.[componentUid]?.info?.icon} />
 
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">

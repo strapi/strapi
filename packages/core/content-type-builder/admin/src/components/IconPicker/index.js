@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Flex,
@@ -11,6 +11,7 @@ import {
   Field,
   FieldLabel,
   FieldInput,
+  Tooltip,
 } from '@strapi/design-system';
 import { Trash, Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -24,6 +25,7 @@ const IconPickerWrapper = styled(Flex)`
   label {
     ${inputFocusStyle}
     border-radius: ${({ theme }) => theme.borderRadius};
+    border: 1px solid ${({ theme }) => theme.colors.neutral100};
   }
 `;
 
@@ -44,9 +46,9 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }) => {
           />
           {ariaLabel}
         </VisuallyHidden>
-        <Box padding={2} cursor="pointer" hasRadius background={isSelected && 'primary200'}>
+        <Flex padding={2} cursor="pointer" hasRadius background={isSelected && 'primary200'}>
           <Icon as={COMPONENT_ICONS[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
-        </Box>
+        </Flex>
       </FieldLabel>
     </Field>
   );
@@ -67,6 +69,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
   const allIcons = Object.keys(COMPONENT_ICONS);
   const [icons, setIcons] = useState(allIcons);
   const searchIconRef = useRef(null);
+  const searchBarRef = useRef(null);
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
@@ -87,6 +90,12 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
     onChange({ target: { name, value: '' } });
   };
 
+  useEffect(() => {
+    if (showSearch) {
+      searchBarRef.current.focus();
+    }
+  }, [showSearch]);
+
   return (
     <>
       <Flex justifyContent="space-between" padding={1}>
@@ -96,6 +105,7 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
         <Flex gap={1}>
           {showSearch ? (
             <Searchbar
+              ref={searchBarRef}
               name="searchbar"
               size="S"
               placeholder={formatMessage({
@@ -133,15 +143,22 @@ const IconPicker = ({ intlLabel, name, onChange, value }) => {
             />
           )}
           {value && (
-            <IconButton
-              onClick={removeIconSelected}
-              aria-label={formatMessage({
-                id: getTrad('IconPicker.remove.label'),
+            <Tooltip
+              description={formatMessage({
+                id: getTrad('IconPicker.remove.tooltip'),
                 defaultMessage: 'Remove the selected icon',
               })}
-              icon={<Trash />}
-              noBorder
-            />
+            >
+              <IconButton
+                onClick={removeIconSelected}
+                aria-label={formatMessage({
+                  id: getTrad('IconPicker.remove.button'),
+                  defaultMessage: 'Remove the selected icon button',
+                })}
+                icon={<Trash />}
+                noBorder
+              />
+            </Tooltip>
           )}
         </Flex>
       </Flex>

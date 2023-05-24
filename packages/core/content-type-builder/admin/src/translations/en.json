@@ -201,7 +201,8 @@
   "IconPicker.search.placeholder.label": "Search for an icon",
   "IconPicker.search.clear.label": "Clear the icon search",
   "IconPicker.search.button.label": "Search icon button",
-  "IconPicker.remove.label": "Remove the selected icon",
+  "IconPicker.remove.tooltip": "Remove the selected icon",
+  "IconPicker.remove.button": "Remove the selected icon button",
   "IconPicker.emptyState.label": "No icon found",
   "IconPicker.icon.label": "Select {icon} icon" 
 }

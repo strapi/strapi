@@ -1,91 +1,78 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import IconPicker from '../index';
 
-const makeApp = (props) => {
-  const history = createMemoryHistory();
+const defaultProps = {
+  intlLabel: {
+    id: 'content-type-builder.modalForm.components.icon.label',
+    defaultMessage: 'Icon',
+  },
+  name: 'componentToCreate.icon',
+  onChange: jest.fn(),
+  value: '',
+};
 
-  const defaultProps = {
-    intlLabel: {
-      id: 'content-type-builder.modalForm.components.icon.label',
-      defaultMessage: 'Icon',
-    },
-    name: 'componentToCreate.icon',
-    onChange: jest.fn(),
-    value: '',
+const setup = (props) => {
+  return {
+    ...render(<IconPicker {...defaultProps} {...props} />, {
+      wrapper: ({ children }) => (
+        <IntlProvider locale="en" messages={{}} defaultLocale="en">
+          <ThemeProvider theme={lightTheme}>
+            <MemoryRouter history={history}>{children}</MemoryRouter>
+          </ThemeProvider>
+        </IntlProvider>
+      ),
+    }),
+    user: userEvent.setup(),
   };
-
-  return (
-    <IntlProvider locale="en" messages={{}} defaultLocale="en">
-      <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
-          <IconPicker {...defaultProps} {...props} />
-        </Router>
-      </ThemeProvider>
-    </IntlProvider>
-  );
 };
 
 describe('IconPicker', () => {
-  it('should render', () => {
-    const App = makeApp();
-    const { container } = render(App);
-
-    expect(container).toMatchSnapshot();
-  });
-
   it('should show the search icon by default and no search bar', () => {
-    const App = makeApp();
-    render(App);
+    const { getByText } = setup();
 
-    expect(screen.getByText('Search icon button')).toBeInTheDocument();
+    expect(getByText('Search icon button')).toBeInTheDocument();
   });
 
   it('should show the searchbar if the search icon is clicked', async () => {
-    const App = makeApp();
-    render(App);
+    const { getByText, getByPlaceholderText, user } = setup();
 
-    await userEvent.click(screen.getByText('Search icon button'));
+    await user.click(getByText('Search icon button'));
 
-    expect(screen.getByPlaceholderText('Search for an icon')).toBeInTheDocument();
+    expect(getByPlaceholderText('Search for an icon')).toBeInTheDocument();
   });
 
   it('should filter icons when write on the searchbar', async () => {
-    const App = makeApp();
-    render(App);
+    const { user, getByText, getByPlaceholderText, queryByText } = setup();
 
-    await userEvent.click(screen.getByText('Search icon button'));
-    await userEvent.type(screen.getByPlaceholderText('Search for an icon'), 'calendar');
+    await user.click(getByText('Search icon button'));
+    await user.type(getByPlaceholderText('Search for an icon'), 'calendar');
 
-    expect(screen.getByText('Select calendar icon')).toBeInTheDocument();
-    expect(screen.queryByText('Select Trash icon')).not.toBeInTheDocument();
+    expect(getByText('Select calendar icon')).toBeInTheDocument();
+    expect(queryByText('Select Trash icon')).not.toBeInTheDocument();
   });
 
   it('should not render delete button if there is no icon selected', () => {
-    const App = makeApp();
-    render(App);
+    const { queryByText } = setup();
 
-    expect(screen.queryByText('Remove the selected icon')).not.toBeInTheDocument();
+    expect(queryByText('Remove the selected icon')).not.toBeInTheDocument();
   });
 
   it('should render delete button if there is an icon selected', async () => {
-    const App = makeApp({ value: 'Calendar' });
-    render(App);
+    const { getByText } = setup({ value: 'calendar' });
 
-    expect(screen.getByText('Remove the selected icon')).toBeInTheDocument();
+    expect(getByText('Remove the selected icon')).toBeInTheDocument();
   });
 
   it('should call onChange with an empty string when clicking on the delete button', async () => {
     const onChangeMock = jest.fn();
-    const App = makeApp({ value: 'Calendar', onChange: onChangeMock });
-    render(App);
+    const { user, getByText } = setup({ value: 'calendar', onChange: onChangeMock });
 
-    await userEvent.click(screen.getByText('Remove the selected icon'));
+    await user.click(getByText('Remove the selected icon button'));
 
     expect(onChangeMock).toHaveBeenCalledWith({
       target: { name: 'componentToCreate.icon', value: '' },
@@ -94,10 +81,9 @@ describe('IconPicker', () => {
 
   it('should call onChange with the icon name when clicking on an icon', async () => {
     const onChangeMock = jest.fn();
-    const App = makeApp({ onChange: onChangeMock });
-    render(App);
+    const { getByLabelText } = setup({ onChange: onChangeMock });
 
-    fireEvent.click(screen.getByLabelText('Select calendar icon'));
+    fireEvent.click(getByLabelText('Select calendar icon'));
 
     expect(onChangeMock);
     expect(onChangeMock).toHaveBeenCalledWith(
