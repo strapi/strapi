@@ -30,12 +30,23 @@ const productModel = {
       type: 'string',
     },
   },
-  options: {
-    reviewWorkflows: true,
+};
+const longCTUID = 'api::thatsanabsurdlongcontenttypename.thatsanabsurdlongcontenttypename';
+const longCTModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'thatsanabsurdlongcontenttypename',
+  pluralName: 'thatsanabsurdlongcontenttypenamewithans',
+  displayName: 'Thats an absurd long content type name',
+  kind: 'collectionType',
+  attributes: {
+    name: {
+      type: 'string',
+    },
   },
 };
 
-describeOnCondition(edition === 'EE')('Review workflows', () => {
+describe('Review workflows', () => {
   const builder = createTestBuilder();
 
   const requests = { admin: null };
@@ -90,7 +101,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([productModel]).build();
+    await builder.addContentTypes([productModel, longCTModel]).build();
 
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
@@ -98,6 +109,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     await Promise.all([
       createEntry(productUID, { name: 'Product 1' }),
       createEntry(productUID, { name: 'Product 2' }),
+      createEntry(longCTUID, { name: 'Product 1' }),
+      createEntry(longCTUID, { name: 'Product 2' }),
     ]);
   });
 
@@ -329,6 +342,15 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         where: { id: workflow1.id },
         data: { contentTypes: [] },
       });
+    });
+  });
+
+  describe('With long content type names', () => {
+    test('Should not load Review Workflow on too long content-type name', async () => {
+      const contentType = strapi.contentTypes[longCTUID];
+
+      expect(contentType.attributes[ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
+      // Cannot test the log as it happens during the Strapi instance creation (in the beforeAll)
     });
   });
 });
