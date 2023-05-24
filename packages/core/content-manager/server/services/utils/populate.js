@@ -1,11 +1,17 @@
 'use strict';
 
-const { merge, isEmpty } = require('lodash/fp');
+const { merge, isEmpty, get, set, propEq } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
+
+const isMorphRelation = (attribute) => isRelation(attribute) && attribute.relation.includes('morph');
+const isMedia = propEq('type', 'media');
+const isRelation = propEq('type', 'relation');
+const isComponent = propEq('type', 'component');
+const isDynamicZone = propEq('type', 'dynamiczone');
 
 /**
  * Populate the model for relation
@@ -191,7 +197,57 @@ const getDeepPopulateDraftCount = (uid) => {
   return { populate, hasRelations };
 };
 
+
+
+// TODO: Explain this function and the populate format
+const getQueryPopulate = async (uid, query) => {
+
+  const pathToPopulate = (path) => path.replaceAll('.', '.populate.');
+  let populateQuery = {};
+
+  await strapiUtils.traverse.traverseQueryFilters(
+    /**
+     * 
+     * @param {*} param0 
+     * @param {*} param0.key - Attribute name
+     * @param {*} param0.attribute - Attribute definition
+     * @param {*} param0.path - Content Type path to the attribute
+     * @returns 
+     */
+    ({ key, attribute, path }) => {
+
+      // Ignore dynamic zones and morph relations
+      if (!attribute || isDynamicZone(attribute) || isMorphRelation(attribute)) {
+        return;
+      }
+
+      // Populate all relations, components and media
+      if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
+        const populatePath = pathToPopulate(path.attribute);
+        populateQuery = set(populatePath, { fields: [] }, populateQuery);
+        return;
+      }
+
+      // Top level attributes are not populated
+      if (key === path.attribute) {
+        return;
+      }
+
+      // Can only get here if attribute is a field from a relation / compo
+      const pathWithoutKey = path.attribute.slice(0, path.attribute.lastIndexOf('.'));
+      const populatePath = pathToPopulate(pathWithoutKey);
+      get(populatePath, populateQuery).fields.push(key);
+
+    },
+    { schema: strapi.contentType(uid) },
+    query
+  );
+
+  return populateQuery;
+}
+
 module.exports = {
   getDeepPopulate,
   getDeepPopulateDraftCount,
+  getQueryPopulate,
 };
