@@ -131,7 +131,7 @@ TableButtonBulkDelete.propTypes = {
  * TableHead
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableHead = ({ children, withMainAction, withBulkActions, rows }) => {
+export const TableHead = ({ children, withEntityActions, withBulkActions, rows }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
@@ -149,7 +149,7 @@ export const TableHead = ({ children, withMainAction, withBulkActions, rows }) =
   return (
     <Thead>
       <Tr>
-        {withMainAction && (
+        {withBulkActions && (
           <Th>
             <BaseCheckbox
               aria-label={formatMessage({
@@ -163,7 +163,7 @@ export const TableHead = ({ children, withMainAction, withBulkActions, rows }) =
           </Th>
         )}
         {children}
-        {withBulkActions && (
+        {withEntityActions && (
           <Th>
             <VisuallyHidden>
               {formatMessage({
@@ -179,14 +179,14 @@ export const TableHead = ({ children, withMainAction, withBulkActions, rows }) =
 };
 
 TableHead.defaultProps = {
-  withMainAction: false,
+  withEntityActions: false,
   withBulkActions: false,
   rows: [],
 };
 
 TableHead.propTypes = {
   children: PropTypes.node.isRequired,
-  withMainAction: PropTypes.bool,
+  withEntityActions: PropTypes.bool,
   withBulkActions: PropTypes.bool,
   rows: PropTypes.array,
 };

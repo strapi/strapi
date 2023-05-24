@@ -97,10 +97,10 @@ const DynamicTable = ({
     return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
-  const withMainAction = (canDelete || canPublish) && isBulkable;
+  const withEntityActions = (canDelete || canPublish) && isBulkable;
   const rowCount = rows.length + 1;
   // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
-  const colCount = tableHeaders.length + 1 + (withMainAction ? 1 : 0);
+  const colCount = tableHeaders.length + 1 + (withEntityActions ? 1 : 0);
 
   return (
     <TableProvider rowCount={rowCount} colCount={colCount}>
@@ -125,7 +125,7 @@ const DynamicTable = ({
             />
           </TableActionBar>
           <Table rowCount={rowCount} colCount={colCount}>
-            <TableHead withBulkActions withMainAction={withMainAction} rows={rows}>
+            <TableHead withBulkActions withEntityActions={withEntityActions} rows={rows}>
               <TableHeaders headers={tableHeaders} />
             </TableHead>
             <TableRows
@@ -134,7 +134,7 @@ const DynamicTable = ({
               onConfirmDelete={onConfirmDelete}
               contentType={layout.contentType}
               withBulkActions
-              withMainAction={(canDelete || canPublish) && isBulkable}
+              withEntityActions={withEntityActions}
               rows={rows}
               headers={tableHeaders}
             />

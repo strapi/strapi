@@ -19,7 +19,7 @@ const TableRows = ({
   onConfirmDelete,
   rows,
   withBulkActions,
-  withMainAction,
+  withEntityActions,
   headers,
 }) => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
@@ -75,7 +75,7 @@ const TableRows = ({
               condition: withBulkActions,
             })}
           >
-            {withMainAction && (
+            {withEntityActions && (
               <Td {...stopPropagation}>
                 <BaseCheckbox
                   aria-label={formatMessage(
@@ -195,7 +195,7 @@ TableRows.defaultProps = {
   rows: [],
   headers: [],
   withBulkActions: false,
-  withMainAction: false,
+  withEntityActions: false,
 };
 
 TableRows.propTypes = {
@@ -221,7 +221,7 @@ TableRows.propTypes = {
   onSelectRow: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
-  withMainAction: PropTypes.bool,
+  withEntityActions: PropTypes.bool,
 };
 
 export default TableRows;
