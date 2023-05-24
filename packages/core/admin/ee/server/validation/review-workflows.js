@@ -35,12 +35,8 @@ const validateContentTypes = yup.array().of(
       test(uid) {
         const model = strapi.getModel(uid);
 
-        if (!hasStageAttribute(model)) {
-          // This content type doesn't handle review workflows
-          return false;
-        }
-        // It's not a valid  content type if it's not visible in the content manager
-        return getVisibleContentTypesUID({ [uid]: strapi.getModel(uid) }).includes(uid);
+        // It's not a valid content type if it doesn't have the stage attribute
+        return hasStageAttribute(model);
       },
     })
 );
