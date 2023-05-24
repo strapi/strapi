@@ -75,9 +75,13 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   it('should display the change password section', async () => {
-    render(App);
+    const { getByRole } = render(App);
+    const changePassword = getByRole('heading', {
+      name: 'Change password'
+    });
+    
     await waitFor(() => {
-      expect(screen.getByText('Change password')).toBeInTheDocument();
+      expect(changePassword).toBeInTheDocument();
     });
   });
 });

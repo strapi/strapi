@@ -75,9 +75,13 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   it('should not display the change password section if the user role is Locked', async () => {
-    render(App);
+    const { queryByRole } = render(App);
+    const changePassword = queryByRole('heading', {
+      name: 'Change password'
+    });
+    
     await waitFor(() => {
-      expect(screen.queryByText('Change password')).toBeNull();
+      expect(changePassword).not.toBeInTheDocument();
     });
   });
 });
