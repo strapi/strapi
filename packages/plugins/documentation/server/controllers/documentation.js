@@ -53,46 +53,34 @@ module.exports = {
         'full_documentation.json'
       );
 
-      try {
-        const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
-        const layout = fs.readFileSync(
-          path.resolve(__dirname, '..', 'public', 'index.html'),
-          'utf8'
-        );
-        const filledLayout = _.template(layout)({
-          backendUrl: strapi.config.server.url,
-          spec: JSON.stringify(JSON.parse(documentation)),
-        });
+      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+      const layout = fs.readFileSync(
+        path.resolve(__dirname, '..', 'public', 'index.html'),
+        'utf8'
+      );
+      const filledLayout = _.template(layout)({
+        backendUrl: strapi.config.server.url,
+        spec: JSON.stringify(JSON.parse(documentation)),
+      });
 
-        try {
-          const layoutPath = path.resolve(
-            strapi.dirs.app.extensions,
-            'documentation',
-            'public',
-            'index.html'
-          );
-          await fs.ensureFile(layoutPath);
-          await fs.writeFile(layoutPath, filledLayout);
+      const layoutPath = path.resolve(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'public',
+        'index.html'
+      );
+      await fs.ensureFile(layoutPath);
+      await fs.writeFile(layoutPath, filledLayout);
 
-          // Serve the file.
-          ctx.url = path.basename(`${ctx.url}/index.html`);
+      // Serve the file.
+      ctx.url = path.basename(`${ctx.url}/index.html`);
 
-          try {
-            const staticFolder = path.resolve(
-              strapi.dirs.app.extensions,
-              'documentation',
-              'public'
-            );
-            return koaStatic(staticFolder)(ctx, next);
-          } catch (e) {
-            strapi.log.error(e);
-          }
-        } catch (e) {
-          strapi.log.error(e);
-        }
-      } catch (e) {
-        strapi.log.error(e);
-      }
+      const staticFolder = path.resolve(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'public'
+      );
+      return koaStatic(staticFolder)(ctx, next);
     } catch (e) {
       strapi.log.error(e);
     }
@@ -118,38 +106,26 @@ module.exports = {
         'full_documentation.json'
       );
 
-      try {
-        const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
 
-        try {
-          const layoutPath = path.resolve(
-            strapi.dirs.app.extensions,
-            'documentation',
-            'public',
-            'swagger.json'
-          );
-          await fs.ensureFile(layoutPath);
-          await fs.writeFile(layoutPath, documentation);
+      const layoutPath = path.resolve(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'public',
+        'swagger.json'
+      );
+      await fs.ensureFile(layoutPath);
+      await fs.writeFile(layoutPath, documentation);
 
-          // Serve the file.
-          ctx.url = path.basename(`${ctx.url}/swagger.json`);
+      // Serve the file.
+      ctx.url = path.basename(`${ctx.url}/swagger.json`);
 
-          try {
-            const staticFolder = path.resolve(
-              strapi.dirs.app.extensions,
-              'documentation',
-              'public'
-            );
-            return koaStatic(staticFolder)(ctx, next);
-          } catch (e) {
-            strapi.log.error(e);
-          }
-        } catch (e) {
-          strapi.log.error(e);
-        }
-      } catch (e) {
-        strapi.log.error(e);
-      }
+      const staticFolder = path.resolve(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'public'
+      );
+      return koaStatic(staticFolder)(ctx, next);
     } catch (e) {
       strapi.log.error(e);
     }
@@ -164,35 +140,26 @@ module.exports = {
     try {
       const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
       const filledLayout = _.template(layout)({
-        actionUrl: `${strapi.config.server.url}${
-          strapi.config.get('plugin.documentation.x-strapi-config').path
-        }/login`,
+        actionUrl: `${strapi.config.server.url}${strapi.config.get('plugin.documentation.x-strapi-config').path
+          }/login`,
       });
       const $ = cheerio.load(filledLayout);
 
       $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
 
-      try {
-        const layoutPath = path.resolve(
-          strapi.dirs.app.extensions,
-          'documentation',
-          'public',
-          'login.html'
-        );
-        await fs.ensureFile(layoutPath);
-        await fs.writeFile(layoutPath, $.html());
+      const layoutPath = path.resolve(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'public',
+        'login.html'
+      );
+      await fs.ensureFile(layoutPath);
+      await fs.writeFile(layoutPath, $.html());
 
-        ctx.url = path.basename(`${ctx.url}/login.html`);
+      ctx.url = path.basename(`${ctx.url}/login.html`);
 
-        try {
-          const staticFolder = path.resolve(strapi.dirs.app.extensions, 'documentation', 'public');
-          return koaStatic(staticFolder)(ctx, next);
-        } catch (e) {
-          strapi.log.error(e);
-        }
-      } catch (e) {
-        strapi.log.error(e);
-      }
+      const staticFolder = path.resolve(strapi.dirs.app.extensions, 'documentation', 'public');
+      return koaStatic(staticFolder)(ctx, next);
     } catch (e) {
       strapi.log.error(e);
     }
@@ -220,8 +187,7 @@ module.exports = {
     }
 
     ctx.redirect(
-      `${strapi.config.server.url}${
-        strapi.config.get('plugin.documentation.x-strapi-config').path
+      `${strapi.config.server.url}${strapi.config.get('plugin.documentation.x-strapi-config').path
       }${querystring}`
     );
   },
