@@ -9,7 +9,7 @@ export { default as CheckPermissions } from './components/CheckPermissions';
 export { default as ConfirmDialog } from './components/ConfirmDialog';
 export { default as ContentBox } from './components/ContentBox';
 export { default as DynamicTable } from './components/DynamicTable';
-export * from './components/TableProvider/TableProvider';
+export { Table, useTableContext } from './components/Table';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as NoContent } from './components/NoContent';
 export { default as NoMedia } from './components/NoMedia';

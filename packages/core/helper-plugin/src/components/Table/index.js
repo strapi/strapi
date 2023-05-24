@@ -15,6 +15,7 @@ import {
   BaseCheckbox,
   VisuallyHidden,
   Loader,
+  Table as DSTable,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
@@ -26,12 +27,12 @@ import SortIcon from '../../icons/SortIcon';
 import EmptyStateLayout from '../EmptyStateLayout';
 
 /* -------------------------------------------------------------------------------------------------
- * TableContext
+ * Context
  * -----------------------------------------------------------------------------------------------*/
 
 const TableContext = React.createContext(null);
 
-export const useTableContext = () => {
+const useTableContext = () => {
   const context = React.useContext(TableContext);
 
   if (!context) {
@@ -42,10 +43,10 @@ export const useTableContext = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableActionBar
+ * ActionBar
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableActionBar = ({ children }) => {
+const ActionBar = ({ children }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries } = useTableContext();
 
@@ -71,11 +72,11 @@ export const TableActionBar = ({ children }) => {
   );
 };
 
-TableActionBar.propTypes = {
+ActionBar.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const TableButtonBulkDelete = ({ onConfirmDeleteAll }) => {
+const BulkDeleteButton = ({ onConfirmDeleteAll }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
   const { formatMessage } = useIntl();
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
@@ -123,16 +124,17 @@ export const TableButtonBulkDelete = ({ onConfirmDeleteAll }) => {
   );
 };
 
-TableButtonBulkDelete.propTypes = {
+BulkDeleteButton.propTypes = {
   onConfirmDeleteAll: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableHead
+ * Head
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableHead = ({ children, withEntityActions, withBulkActions, rows }) => {
-  const { selectedEntries, setSelectedEntries } = useTableContext();
+const Head = ({ children }) => {
+  const { selectedEntries, setSelectedEntries, withEntityActions, withBulkActions, rows } =
+    useTableContext();
 
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
   const isIndeterminate = !areAllEntriesSelected && selectedEntries.length > 0;
@@ -178,24 +180,16 @@ export const TableHead = ({ children, withEntityActions, withBulkActions, rows }
   );
 };
 
-TableHead.defaultProps = {
-  withEntityActions: false,
-  withBulkActions: false,
-  rows: [],
-};
-
-TableHead.propTypes = {
+Head.propTypes = {
   children: PropTypes.node.isRequired,
-  withEntityActions: PropTypes.bool,
-  withBulkActions: PropTypes.bool,
-  rows: PropTypes.array,
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableHeaders
+ * Headers
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableHeaders = ({ headers }) => {
+const Headers = () => {
+  const { headers } = useTableContext();
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || '';
@@ -264,11 +258,11 @@ export const TableHeaders = ({ headers }) => {
   );
 };
 
-TableHeaders.defaultProps = {
+Headers.defaultProps = {
   headers: [],
 };
 
-TableHeaders.propTypes = {
+Headers.propTypes = {
   headers: PropTypes.arrayOf(
     PropTypes.shape({
       cellFormatter: PropTypes.func,
@@ -283,10 +277,78 @@ TableHeaders.propTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableEmptyBody
+ * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableEmptyBody = ({ colSpan, isLoading, contentType, ...rest }) => {
+const Provider = ({ children, headers, rows, withBulkActions, withEntityActions, isLoading }) => {
+  const [selectedEntries, setSelectedEntries] = useState([]);
+  const context = React.useMemo(() => {
+    const onSelectRow = ({ name, value }) => {
+      setSelectedEntries((prev) => {
+        if (value) {
+          return prev.concat(name);
+        }
+
+        return prev.filter((id) => id !== name);
+      });
+    };
+
+    return {
+      selectedEntries,
+      setSelectedEntries,
+      onSelectRow,
+      headers,
+      rows,
+      withBulkActions,
+      withEntityActions,
+      isLoading,
+    };
+  }, [
+    selectedEntries,
+    setSelectedEntries,
+    headers,
+    rows,
+    withBulkActions,
+    withEntityActions,
+    isLoading,
+  ]);
+
+  return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
+};
+
+Provider.defaultProps = {
+  headers: [],
+  rows: [],
+  withBulkActions: false,
+  withEntityActions: false,
+  isLoading: false,
+};
+
+Provider.propTypes = {
+  children: PropTypes.node.isRequired,
+  headers: PropTypes.arrayOf(
+    PropTypes.shape({
+      cellFormatter: PropTypes.func,
+      key: PropTypes.string.isRequired,
+      metadatas: PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        sortable: PropTypes.bool,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
+  rows: PropTypes.arrayOf(PropTypes.object),
+  withBulkActions: PropTypes.bool,
+  withEntityActions: PropTypes.bool,
+  isLoading: PropTypes.bool,
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * EmptyBody
+ * -----------------------------------------------------------------------------------------------*/
+
+const EmptyBody = ({ colSpan, contentType, ...rest }) => {
+  const { isLoading } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
 
@@ -325,55 +387,65 @@ export const TableEmptyBody = ({ colSpan, isLoading, contentType, ...rest }) => 
   );
 };
 
-TableEmptyBody.defaultProps = {
+EmptyBody.defaultProps = {
   action: undefined,
   colSpan: 1,
-  content: undefined,
   icon: undefined,
-  isLoading: false,
 };
 
-TableEmptyBody.propTypes = {
+EmptyBody.propTypes = {
   action: PropTypes.any,
   colSpan: PropTypes.number,
-  content: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-    values: PropTypes.object,
-  }),
   icon: PropTypes.oneOf(['document', 'media', 'permissions']),
-  isLoading: PropTypes.bool,
   contentType: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
- * TableProvider
+ * Content
  * -----------------------------------------------------------------------------------------------*/
 
-export const TableProvider = ({ children }) => {
-  const [selectedEntries, setSelectedEntries] = useState([]);
+const Content = ({ children, footer, contentType, emptyAction }) => {
+  const { rows, headers, withBulkActions, withEntityActions, isLoading } = useTableContext();
+  const rowCount = rows.length + 1;
+  // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
+  const colCount = headers.length + (withBulkActions ? 1 : 0) + (withEntityActions ? 1 : 0);
 
-  const context = React.useMemo(() => {
-    const handleSelectRow = ({ name, value }) => {
-      setSelectedEntries((prev) => {
-        if (value) {
-          return prev.concat(name);
-        }
-
-        return prev.filter((id) => id !== name);
-      });
-    };
-
-    return {
-      selectedEntries,
-      setSelectedEntries,
-      onSelectRow: handleSelectRow,
-    };
-  }, [selectedEntries, setSelectedEntries]);
-
-  return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
+  return (
+    <DSTable rowCount={rowCount} colCount={colCount} footer={footer}>
+      {isLoading || !rows.length ? (
+        <EmptyBody
+          colSpan={colCount}
+          action={emptyAction}
+          contentType={contentType}
+          isLoading={isLoading}
+        />
+      ) : (
+        children
+      )}
+    </DSTable>
+  );
 };
 
-TableProvider.propTypes = {
+Content.defaultProps = {
+  footer: null,
+  emptyAction: null,
+};
+
+Content.propTypes = {
+  footer: PropTypes.node,
   children: PropTypes.node.isRequired,
+  contentType: PropTypes.string.isRequired,
+  emptyAction: PropTypes.node,
 };
+
+export const Table = {
+  Content,
+  Provider,
+  ActionBar,
+  Head,
+  Headers,
+  EmptyBody,
+  BulkDeleteButton,
+};
+
+export { useTableContext };

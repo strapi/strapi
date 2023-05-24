@@ -12,16 +12,7 @@ import { usePluginsQueryParams } from '../../../hooks';
 import { getFullName } from '../../../../utils';
 import ConfirmDialogDelete from '../ConfirmDialogDelete';
 
-const TableRows = ({
-  canCreate,
-  canDelete,
-  contentType,
-  onConfirmDelete,
-  rows,
-  withBulkActions,
-  withEntityActions,
-  headers,
-}) => {
+const TableRows = ({ canCreate, canDelete, contentType, onConfirmDelete }) => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -33,7 +24,15 @@ const TableRows = ({
 
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
-  const { selectedEntries, setSelectedEntries, onSelectRow } = useTableContext();
+  const {
+    selectedEntries,
+    setSelectedEntries,
+    onSelectRow,
+    rows,
+    withBulkActions,
+    withEntityActions,
+    headers,
+  } = useTableContext();
 
   const handleConfirmDelete = async () => {
     try {
