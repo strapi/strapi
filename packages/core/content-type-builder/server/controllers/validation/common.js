@@ -13,7 +13,7 @@ const validators = {
 const NAME_REGEX = /^[A-Za-z][_0-9A-Za-z]*$/;
 const COLLECTION_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
 const CATEGORY_NAME_REGEX = /^[A-Za-z][-_0-9A-Za-z]*$/;
-const ICON_REGEX = /^[A-Za-z0-9][-A-Za-z0-9]*$/;
+const ICON_REGEX = /^[a-z][a-zA-Z0-9]*([A-Z][a-zA-Z0-9]*)*$/;
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 const isValidName = {
