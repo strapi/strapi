@@ -98,7 +98,7 @@ describe('TableList | TableRows', () => {
     });
 
     it('should reflect selected assets state', () => {
-      const { getByRole } = setup({ selected: [{ id: 1 }] });
+      const { getByRole } = setup({ selected: [{ id: 1, type: 'asset' }] });
 
       expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
     });
@@ -176,7 +176,10 @@ describe('TableList | TableRows', () => {
     });
 
     it('should reflect selected folder state', () => {
-      const { getByRole } = setup({ rows: [FOLDER_FIXTURE], selected: [{ id: 2 }] });
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE],
+        selected: [{ id: 2, type: 'folder' }],
+      });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
     });
