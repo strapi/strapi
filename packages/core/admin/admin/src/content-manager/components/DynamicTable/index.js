@@ -124,7 +124,7 @@ const DynamicTable = ({
               onConfirmUnpublishAll={onConfirmUnpublishAll}
             />
           </TableActionBar>
-          <Table rowCount={rowCount} colCount={colCount} shadow="">
+          <Table rowCount={rowCount} colCount={colCount}>
             <TableHead withBulkActions withMainAction={withMainAction} rows={rows}>
               <TableHeaders headers={tableHeaders} />
             </TableHead>
