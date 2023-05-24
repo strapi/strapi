@@ -104,13 +104,11 @@ const WebhookForm = ({
         <Layout.Root
           triggerContainer={
             showTriggerResponse && (
-              <div className="trigger-wrapper">
-                <TriggerContainer
-                  isPending={isTriggering}
-                  response={triggerResponse}
-                  onCancel={() => setShowTriggerResponse(false)}
-                />
-              </div>
+              <TriggerContainer
+                isPending={isTriggering}
+                response={triggerResponse}
+                onCancel={() => setShowTriggerResponse(false)}
+              />
             )
           }
         >

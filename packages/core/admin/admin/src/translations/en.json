@@ -285,6 +285,7 @@
   "Settings.webhooks.create.header": "Create new header",
   "Settings.webhooks.created": "Webhook created",
   "Settings.webhooks.event.publish-tooltip": "This event only exists for contents with Draft/Publish system enabled",
+  "Settings.webhooks.events.isLoading": "Events loading",
   "Settings.webhooks.events.create": "Create",
   "Settings.webhooks.events.update": "Update",
   "Settings.webhooks.form.events": "Events",

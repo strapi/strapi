@@ -15,16 +15,10 @@ import WebhookForm from './components/WebhookForm';
 
 const cleanData = (data) => ({
   ...data,
-  headers: data.headers.reduce((acc, current) => {
-    const { key, value } = current;
-
+  headers: data.headers.reduce((acc, { key, value }) => {
     if (key !== '') {
-      return {
-        ...acc,
-        [key]: value,
-      };
+      acc[key] = value;
     }
-
     return acc;
   }, {}),
 });

@@ -4,7 +4,14 @@ import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { FieldLabel, Flex, Typography, BaseCheckbox, Checkbox } from '@strapi/design-system';
+import {
+  FieldLabel,
+  Flex,
+  Typography,
+  BaseCheckbox,
+  Checkbox,
+  Loader,
+} from '@strapi/design-system';
 
 import { useModels } from '../../../../../../../hooks';
 
@@ -38,40 +45,34 @@ const StyledTable = styled.table`
 `;
 
 const getCEHeaders = (isDraftAndPublish) => {
-  if (isDraftAndPublish) {
-    return [
-      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
-      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
-      { id: 'app.utils.delete', defaultMessage: 'Delete' },
-      { id: 'app.utils.publish', defaultMessage: 'Publish' },
-      { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' },
-    ];
-  }
-
-  return [
+  const headers = [
     { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
     { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
     { id: 'app.utils.delete', defaultMessage: 'Delete' },
   ];
+  if (isDraftAndPublish) {
+    headers.push({ id: 'app.utils.publish', defaultMessage: 'Publish' });
+    headers.push({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' });
+  }
+
+  return headers;
 };
 
 const getCEEvents = (isDraftAndPublish) => {
+  const entryEvents = ['entry.create', 'entry.update', 'entry.delete'];
   if (isDraftAndPublish) {
-    return {
-      entry: ['entry.create', 'entry.update', 'entry.delete', 'entry.publish', 'entry.unpublish'],
-      media: ['media.create', 'media.update', 'media.delete'],
-    };
+    entryEvents.push('entry.publish', 'entry.unpublish');
   }
 
   return {
-    entry: ['entry.create', 'entry.update', 'entry.delete'],
+    entry: entryEvents,
     media: ['media.create', 'media.update', 'media.delete'],
   };
 };
 
 const Root = ({ children }) => {
   const { formatMessage } = useIntl();
-  const { collectionTypes } = useModels();
+  const { collectionTypes, isLoading } = useModels();
 
   const isDraftAndPublish = React.useMemo(
     () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
@@ -94,6 +95,14 @@ const Root = ({ children }) => {
           defaultMessage: 'Events',
         })}
       </FieldLabel>
+      {isLoading && (
+        <Loader>
+          {formatMessage({
+            id: 'Settings.webhooks.events.isLoading',
+            defaultMessage: 'Events loading',
+          })}
+        </Loader>
+      )}
       <StyledTable>{childrenWithProps}</StyledTable>
     </Flex>
   );
@@ -230,6 +239,7 @@ const removeHyphensAndTitleCase = (str) =>
     .join(' ');
 
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
+  const { formatMessage } = useIntl();
   const enabledCheckboxes = events.filter((event) => !disabledEvents.includes(event));
 
   const hasSomeCheckboxSelected = inputValue.length > 0;
@@ -250,7 +260,10 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
       <td>
         <Checkbox
           indeterminate={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
-          aria-label="Select all entries"
+          aria-label={formatMessage({
+            id: 'global.select-all-entries',
+            defaultMessage: 'Select all entries',
+          })}
           name={name}
           onChange={onChangeAll}
           value={areAllCheckboxesSelected}

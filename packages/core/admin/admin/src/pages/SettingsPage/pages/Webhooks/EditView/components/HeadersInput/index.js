@@ -32,7 +32,7 @@ const HeadersInput = () => {
           name="headers"
           render={({ push, remove }) => (
             <Grid gap={4}>
-              {values.headers?.map((header, index) => (
+              {values.headers.map((header, index) => (
                 <React.Fragment key={`header-${header.key}`}>
                   <GridItem col={6}>
                     <Field
@@ -46,8 +46,8 @@ const HeadersInput = () => {
                       error={
                         errors.headers?.[index]?.key &&
                         formatMessage({
-                          id: errors.headers[index]?.key,
-                          defaultMessage: errors.headers[index]?.key,
+                          id: errors.headers[index].key,
+                          defaultMessage: errors.headers[index].key,
                         })
                       }
                     />
@@ -66,8 +66,8 @@ const HeadersInput = () => {
                           error={
                             errors.headers?.[index]?.value &&
                             formatMessage({
-                              id: errors.headers[index]?.value,
-                              defaultMessage: errors.headers[index]?.value,
+                              id: errors.headers[index].value,
+                              defaultMessage: errors.headers[index].value,
                             })
                           }
                         />
