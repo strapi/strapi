@@ -45,6 +45,149 @@ const accessTokenSecret = {
 };
 
 const forms = {
+  twitter: {
+    form: [
+      [
+        {
+          intlLabel: enabledLabel,
+          name: 'enabled',
+          type: 'bool',
+          description: enabledDescription,
+          size: 6,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: keyLabel,
+          name: 'key',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: secretLabel,
+          name: 'secret',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: accessToken,
+          name: 'access_token',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 50,
+          validations: {
+            required: false,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: accessTokenSecret,
+          name: 'access_token_secret',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 45,
+          validations: {
+            required: false,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: {
+            id: getTrad({ id: 'PopUpForm.Providers.jwksurl.label' }),
+            defaultMessage: 'JWKS URL',
+          },
+          name: 'jwksurl',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: false,
+          },
+        },
+      ],
+
+      [
+        {
+          intlLabel: {
+            id: getTrad('PopUpForm.Providers.subdomain.label'),
+            defaultMessage: 'Host URI (Subdomain)',
+          },
+          name: 'subdomain',
+          type: 'text',
+          placeholder: {
+            id: getTrad('PopUpForm.Providers.subdomain.placeholder'),
+            defaultMessage: 'my.subdomain.com',
+          },
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: callbackLabel,
+          placeholder: callbackPlaceholder,
+          name: 'callback',
+          type: 'text',
+          size: 12,
+          validations: {
+            required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: hintLabel,
+          name: 'noName',
+          type: 'text',
+          validations: {},
+          size: 12,
+          disabled: true,
+        },
+      ],
+    ],
+    schema: yup.object().shape({
+      enabled: yup.bool().required(translatedErrors.required),
+      key: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      secret: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      subdomain: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      callback: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+    }),
+  },
   email: {
     form: [
       [
@@ -180,30 +323,6 @@ const forms = {
           size: 12,
           validations: {
             required: true,
-          },
-        },
-      ],
-      [
-        {
-          intlLabel: accessToken,
-          name: 'access_token',
-          type: 'text',
-          placeholder: textPlaceholder,
-          size: 50,
-          validations: {
-            required: false,
-          },
-        },
-      ],
-      [
-        {
-          intlLabel: accessTokenSecret,
-          name: 'access_token_secret',
-          type: 'text',
-          placeholder: textPlaceholder,
-          size: 45,
-          validations: {
-            required: false,
           },
         },
       ],
