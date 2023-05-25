@@ -33,7 +33,7 @@ const HeadersInput = () => {
           render={({ push, remove }) => (
             <Grid gap={4}>
               {values.headers.map((header, index) => (
-                <React.Fragment key={`header-${header.key}`}>
+                <React.Fragment key={header.key}>
                   <GridItem col={6}>
                     <Field
                       as={Combobox}

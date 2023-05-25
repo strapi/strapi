@@ -212,13 +212,13 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
 
   return (
     <Tbody>
-      {Object.keys(events).map((event) => {
+      {Object.entries(events).map(([event, value]) => {
         return (
           <EventRow
             disabledEvents={disabledEvents}
             key={event}
             name={event}
-            events={events[event]}
+            events={value}
             inputValue={formattedValue[event]}
             handleChange={handleChange}
             handleChangeAll={handleChangeAll}

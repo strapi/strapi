@@ -8,7 +8,7 @@ import { Button, Flex, TextInput } from '@strapi/design-system';
 
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
 import schema from '../utils/schema';
-import * as Layout from './Layout';
+import { Layout } from './Layout';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
 

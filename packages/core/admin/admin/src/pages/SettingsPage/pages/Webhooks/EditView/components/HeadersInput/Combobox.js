@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
 import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
-import keys from './keys';
+import { keys } from './constants';
 
 const Combobox = ({ name, onChange, value, ...props }) => {
   const {

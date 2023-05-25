@@ -1,4 +1,4 @@
-const keys = [
+export const keys = [
   'A-IM',
   'Accept',
   'Accept-Charset',
@@ -35,5 +35,3 @@ const keys = [
   'Via',
   'Warning',
 ];
-
-export default keys;
