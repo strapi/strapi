@@ -35,7 +35,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
 
   const dynamicDisplayedComponents = useMemo(
     () =>
-      get(modifiedData, [name], []).map((data) => {
+      (modifiedData?.[name] ?? []).map((data) => {
         return {
           componentUid: data.__component,
           id: data.id ?? data.__temp_key__,
