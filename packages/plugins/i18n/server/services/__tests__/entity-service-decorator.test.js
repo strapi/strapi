@@ -377,7 +377,7 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(defaultService.findMany).toBeCalled();
+        expect(global.strapi.db.query).toBeCalled();
       });
 
       test('calls db.findMany for single type with no local param', async () => {
