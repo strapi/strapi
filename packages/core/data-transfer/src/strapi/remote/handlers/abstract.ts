@@ -27,6 +27,12 @@ export interface Handler {
   get response(): TransferState['response'];
   set response(response: TransferState['response']);
 
+  // Add message UUIDs
+  addUUID(uuid: string): void;
+
+  // Check if a message UUID exists
+  hasUUID(uuid: string): boolean;
+
   /**
    * Returns whether a transfer is currently in progress or not
    */

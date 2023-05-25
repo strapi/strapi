@@ -71,13 +71,15 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     }
 
     const previousResponse = proto.response;
-    if (previousResponse?.uuid === msg.uuid) {
-      await this.respond(previousResponse?.uuid, previousResponse.e, previousResponse.data);
+    if (proto.hasUUID(msg.uuid)) {
+      if (previousResponse?.uuid === msg.uuid) {
+        await this.respond(previousResponse?.uuid, previousResponse.e, previousResponse.data);
+      }
       return;
     }
 
     const { uuid, type } = msg;
-
+    proto.addUUID(uuid);
     // Regular command message (init, end, status)
     if (type === 'command') {
       const { command } = msg;

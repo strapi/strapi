@@ -18,7 +18,13 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
-export const createDispatcher = (ws: WebSocket) => {
+export const createDispatcher = (
+  ws: WebSocket,
+  {
+    retryMessageMaxRetries = 5,
+    retryMessageTimeout = 10000,
+  }: { retryMessageMaxRetries?: number; retryMessageTimeout?: number }
+) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<client.Message>;
@@ -48,7 +54,8 @@ export const createDispatcher = (ws: WebSocket) => {
       });
 
       const sendPeriodically = () => {
-        if (numberOfTimesMessageWasSent < 5) {
+        if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
+          console.log('Retrying message', payload, numberOfTimesMessageWasSent);
           numberOfTimesMessageWasSent += 1;
           ws.send(stringifiedPayload, (error) => {
             if (error) {
@@ -59,7 +66,7 @@ export const createDispatcher = (ws: WebSocket) => {
           reject(new ProviderError('error', 'Request timed out'));
         }
       };
-      const interval = setInterval(sendPeriodically, 30000);
+      const interval = setInterval(sendPeriodically, retryMessageTimeout);
 
       const onResponse = (raw: RawData) => {
         const response: server.Message<U> = JSON.parse(raw.toString());
