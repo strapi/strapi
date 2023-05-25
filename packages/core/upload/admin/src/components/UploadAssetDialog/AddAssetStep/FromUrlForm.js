@@ -47,7 +47,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
           <Box paddingLeft={8} paddingRight={8} paddingBottom={6} paddingTop={6}>
             <Textarea
               label={formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
-              name="urls"
+              id="urls"
               hint={formatMessage({
                 id: getTrad('input.url.description'),
                 defaultMessage: 'Separate your URL links by a carriage return.',
@@ -59,9 +59,8 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
                   : undefined)
               }
               onChange={handleChange}
-            >
-              {values.urls}
-            </Textarea>
+              value={values.urls}
+            />
           </Box>
 
           <ModalFooter

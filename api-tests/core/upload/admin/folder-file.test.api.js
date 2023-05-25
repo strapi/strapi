@@ -220,6 +220,34 @@ describe('Bulk actions for folders & files', () => {
       const existingfoldersIds = resFolder.body.data.map((f) => f.id);
       expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder.id]));
     });
+
+    test('Can delete folders without deleting others with similar path', async () => {
+      // Ensure the folder algo does not only delete by folders that start with the same path (startswith /1 matches /10 too)
+
+      // Delete all previous folders, so first file path is /1
+      await rq
+        .get('/upload/folders')
+        .then((res) => res.body.data.map((f) => f.id))
+        .then((folderIds) => rq.post('/upload/actions/bulk-delete', { body: { folderIds } }));
+
+      // Create folders
+      const folder1 = await createFolder('folderToDelete', null);
+      for (let i = 0; i < 20; i++) {
+        await createFolder(`folderToKeep-${i}`, null);
+      }
+      // Delete folder1
+      await rq.post('/upload/actions/bulk-delete', {
+        body: { folderIds: [folder1.id] },
+      });
+
+      const folderIds = await rq
+        .get('/upload/folders')
+        .then((res) => res.body.data.map((f) => f.id));
+
+      // Should include all folders except the one we deleted
+      expect(folderIds.length).toBe(20);
+      expect(folderIds).toEqual(expect.not.arrayContaining([folder1.id]));
+    });
   });
 
   describe('move', () => {

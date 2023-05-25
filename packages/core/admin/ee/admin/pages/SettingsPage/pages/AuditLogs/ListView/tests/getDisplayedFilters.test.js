@@ -1,23 +1,21 @@
 import getDisplayedFilters from '../utils/getDisplayedFilters';
 
-const mockUsers = {
-  results: [
-    {
-      id: 1,
-      firstname: 'test',
-      lastname: 'tester',
-      username: null,
-      email: 'test@test.com',
-    },
-    {
-      id: 2,
-      firstname: 'test2',
-      lastname: 'tester2',
-      username: null,
-      email: 'test2@test.com',
-    },
-  ],
-};
+const mockUsers = [
+  {
+    id: 1,
+    firstname: 'test',
+    lastname: 'tester',
+    username: null,
+    email: 'test@test.com',
+  },
+  {
+    id: 2,
+    firstname: 'test2',
+    lastname: 'tester2',
+    username: null,
+    email: 'test2@test.com',
+  },
+];
 
 describe('Audit Logs getDisplayedFilters', () => {
   it('should return all filters when canReadUsers is true', () => {
