@@ -1,8 +1,9 @@
 import React from 'react';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { renderHook, act as actHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TableProvider, useTableContext } from '@strapi/helper-plugin';
+import { Table, useTableContext } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import BulkActionsBar from '../index';
 
@@ -11,10 +12,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: () => ({
     trackUsage: jest.fn(),
   }),
-  useTableContext: jest.fn(() => ({
-    selectedEntries: [1, 2],
-    setSelectedEntries: jest.fn(),
-  })),
 }));
 
 jest.mock('react-redux', () => ({
@@ -37,9 +34,9 @@ describe('BulkActionsBar', () => {
   const TestComponent = (props) => (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <TableProvider>
+        <Table.Provider withBulkAction withEntityAction>
           <BulkActionsBar {...props} />
-        </TableProvider>
+        </Table.Provider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -97,21 +94,56 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show publish button if selected entries are all published', () => {
-    useTableContext.mockReturnValueOnce({
-      selectedEntries: [2],
+    // use user event and click the checkbox instead doing this with the hook??
+    const { result } = renderHook(() => useTableContext(), {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en">
+            <Table.Provider withBulkActions>
+              <Table.ActionBar>
+                <BulkActionsBar showPublish />
+              </Table.ActionBar>
+              {children}
+            </Table.Provider>
+          </IntlProvider>
+        </ThemeProvider>
+      ),
     });
-    setup({ showPublish: true });
 
-    expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
+    actHook(() => {
+      result.current.setSelectedEntries([2]);
+    });
+
+    waitFor(() => {
+      expect(screen.getByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
+    });
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
-    useTableContext.mockReturnValueOnce({
-      selectedEntries: [1],
+    const { result } = renderHook(() => useTableContext(), {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en">
+            <Table.Provider withBulkActions>
+              <Table.ActionBar>
+                <BulkActionsBar showPublish />
+              </Table.ActionBar>
+              {children}
+            </Table.Provider>
+          </IntlProvider>
+        </ThemeProvider>
+      ),
     });
-    setup({ showPublish: true });
 
-    expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
+    actHook(() => {
+      result.current.setSelectedEntries([2]);
+    });
+
+    waitFor(() => {
+      expect(screen.getByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
+    });
   });
 
   it('should show publish modal if publish button is clicked', async () => {

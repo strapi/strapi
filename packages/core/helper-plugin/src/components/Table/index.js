@@ -52,32 +52,29 @@ const ActionBar = ({ children }) => {
 
   if (!selectedEntries.length > 0) return null;
 
-  /**
-   * TODO: refine DOM nesting
-   */
   return (
-    <Box paddingBottom={4}>
-      <Flex justifyContent="space-between">
-        <Flex gap={3}>
-          <Typography variant="epsilon" textColor="neutral600">
-            {formatMessage(
-              {
-                id: 'content-manager.components.TableDelete.label',
-                defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
-              },
-              { number: selectedEntries.length }
-            )}
-          </Typography>
-          {children}
-        </Flex>
-      </Flex>
-    </Box>
+    <Flex paddingBottom={4} gap={3}>
+      <Typography variant="epsilon" textColor="neutral600">
+        {formatMessage(
+          {
+            id: 'content-manager.components.TableDelete.label',
+            defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
+          },
+          { number: selectedEntries.length }
+        )}
+      </Typography>
+      {children}
+    </Flex>
   );
 };
 
 ActionBar.propTypes = {
   children: PropTypes.node.isRequired,
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * BulkDeleteButton
+ * -----------------------------------------------------------------------------------------------*/
 
 const BulkDeleteButton = ({ onConfirmDeleteAll }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
@@ -167,6 +164,10 @@ const HeaderCheckboxCell = () => {
     }
   };
 
+  if (rows.length === 0) {
+    return null;
+  }
+
   return (
     <Th>
       <BaseCheckbox
@@ -182,8 +183,13 @@ const HeaderCheckboxCell = () => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * HeaderCheckboxCell
+ * -----------------------------------------------------------------------------------------------*/
+
 const HeaderActionsCell = () => {
   const { formatMessage } = useIntl();
+
   return (
     <Th>
       <VisuallyHidden>
@@ -197,106 +203,92 @@ const HeaderActionsCell = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Headers
+ * HeaderCell
  * -----------------------------------------------------------------------------------------------*/
 
-/**
- * TODO: investigate if we can change this to just "headercell" and have the user map their headers?
- */
-const Headers = () => {
-  const { headers } = useTableContext();
-  const { formatMessage } = useIntl();
+const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, label }) => {
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
+  const { formatMessage } = useIntl();
 
-  return headers.map(
-    ({ fieldSchema, name, metadatas: { sortable: isSortable, label, mainField } }) => {
-      let isSorted = sortBy === name;
-      const isUp = sortOrder === 'ASC';
+  let isSorted = sortBy === name;
+  const isUp = sortOrder === 'ASC';
+
+  // relations always have to be sorted by their main field instead of only the
+  // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
+  if (fieldSchemaType === 'relation' && relationFieldName) {
+    isSorted = sortBy === `${name.split('.')[0]}[${relationFieldName}]`;
+  }
+
+  const sortLabel = formatMessage(
+    { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+    { label }
+  );
+
+  const handleClickSort = (shouldAllowClick = true) => {
+    if (isSortable && shouldAllowClick) {
+      let nextSort = name;
 
       // relations always have to be sorted by their main field instead of only the
-      // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
-      if (fieldSchema?.type === 'relation' && mainField) {
-        isSorted = sortBy === `${name.split('.')[0]}[${mainField.name}]`;
+      // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
+      if (fieldSchemaType === 'relation' && relationFieldName) {
+        nextSort = `${name.split('.')[0]}[${relationFieldName}]`;
       }
 
-      const sortLabel = formatMessage(
-        { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-        { label }
-      );
-
-      const handleClickSort = (shouldAllowClick = true) => {
-        if (isSortable && shouldAllowClick) {
-          let nextSort = name;
-
-          // relations always have to be sorted by their main field instead of only the
-          // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
-          if (fieldSchema?.type === 'relation' && mainField) {
-            nextSort = `${name.split('.')[0]}[${mainField.name}]`;
-          }
-
-          setQuery({
-            sort: `${nextSort}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-          });
-        }
-      };
-
-      return (
-        <Th
-          key={name}
-          action={
-            isSorted && (
-              <IconButton
-                label={sortLabel}
-                onClick={handleClickSort}
-                icon={isSorted && <SortIcon isUp={isUp} />}
-                noBorder
-              />
-            )
-          }
-        >
-          <Tooltip label={isSortable ? sortLabel : label}>
-            <Typography
-              textColor="neutral600"
-              as={!isSorted && isSortable ? 'button' : 'span'}
-              label={label}
-              onClick={() => handleClickSort(!isSorted)}
-              variant="sigma"
-            >
-              {label}
-            </Typography>
-          </Tooltip>
-        </Th>
-      );
+      setQuery({
+        sort: `${nextSort}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
+      });
     }
+  };
+
+  return (
+    <Th
+      key={name}
+      action={
+        <IconButton
+          label={sortLabel}
+          onClick={handleClickSort}
+          icon={<SortIcon isUp={isUp} />}
+          noBorder
+        />
+      }
+    >
+      <Tooltip label={isSortable ? sortLabel : label}>
+        <Typography
+          textColor="neutral600"
+          as={!isSorted && isSortable ? 'button' : 'span'}
+          label={label}
+          onClick={() => handleClickSort()}
+          variant="sigma"
+        >
+          {label}
+        </Typography>
+      </Tooltip>
+    </Th>
   );
 };
 
-Headers.defaultProps = {
-  headers: [],
+HeaderCell.defaultProps = {
+  isSortable: false,
+  relationFieldName: null,
 };
 
-Headers.propTypes = {
-  headers: PropTypes.arrayOf(
-    PropTypes.shape({
-      cellFormatter: PropTypes.func,
-      key: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        sortable: PropTypes.bool,
-      }).isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
+HeaderCell.propTypes = {
+  name: PropTypes.string.isRequired,
+  fieldSchemaType: PropTypes.string.isRequired,
+  relationFieldName: PropTypes.string,
+  isSortable: PropTypes.bool,
+  label: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, headers, rows, isLoading }) => {
+const Root = ({ children, rows, isLoading, colCount }) => {
   const [selectedEntries, setSelectedEntries] = useState([]);
+  const rowCount = rows.length + 1;
 
   const onSelectRow = React.useCallback(({ name, value }) => {
     setSelectedEntries((prev) => {
@@ -313,35 +305,26 @@ const Root = ({ children, headers, rows, isLoading }) => {
       selectedEntries,
       setSelectedEntries,
       onSelectRow,
-      headers,
       rows,
       isLoading,
+      colCount,
+      rowCount,
     };
-  }, [onSelectRow, selectedEntries, setSelectedEntries, headers, rows, isLoading]);
+  }, [onSelectRow, selectedEntries, setSelectedEntries, rows, isLoading, colCount, rowCount]);
 
   return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
 
 Root.defaultProps = {
-  headers: [],
   rows: [],
   isLoading: false,
+  colCount: 0,
 };
 
 Root.propTypes = {
   children: PropTypes.node.isRequired,
-  headers: PropTypes.arrayOf(
-    PropTypes.shape({
-      cellFormatter: PropTypes.func,
-      key: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        sortable: PropTypes.bool,
-      }).isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
   rows: PropTypes.arrayOf(PropTypes.object),
+  colCount: PropTypes.number,
   isLoading: PropTypes.bool,
 };
 
@@ -349,8 +332,8 @@ Root.propTypes = {
  * EmptyBody
  * -----------------------------------------------------------------------------------------------*/
 
-const EmptyBody = ({ colSpan, contentType, ...rest }) => {
-  const { rows } = useTableContext();
+const EmptyBody = ({ contentType, ...rest }) => {
+  const { rows, colCount } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
 
@@ -369,7 +352,7 @@ const EmptyBody = ({ colSpan, contentType, ...rest }) => {
   return (
     <Tbody>
       <Tr>
-        <Td colSpan={colSpan}>
+        <Td colSpan={colCount}>
           <EmptyStateLayout {...rest} content={content} hasRadius={false} shadow="" />
         </Td>
       </Tr>
@@ -377,8 +360,23 @@ const EmptyBody = ({ colSpan, contentType, ...rest }) => {
   );
 };
 
+EmptyBody.defaultProps = {
+  action: undefined,
+  icon: undefined,
+};
+
+EmptyBody.propTypes = {
+  action: PropTypes.any,
+  icon: PropTypes.oneOf(['document', 'media', 'permissions']),
+  contentType: PropTypes.string.isRequired,
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * EmptyBody
+ * -----------------------------------------------------------------------------------------------*/
+
 const LoadingBody = () => {
-  const { isLoading, colSpan } = useTableContext();
+  const { isLoading, colCount } = useTableContext();
 
   if (!isLoading) {
     return null;
@@ -387,7 +385,7 @@ const LoadingBody = () => {
   return (
     <Tbody>
       <Tr>
-        <Td colSpan={colSpan}>
+        <Td colSpan={colCount}>
           <Flex justifyContent="center">
             <Box padding={11} background="neutral0">
               <Loader>Loading content...</Loader>
@@ -399,28 +397,12 @@ const LoadingBody = () => {
   );
 };
 
-EmptyBody.defaultProps = {
-  action: undefined,
-  colSpan: 1,
-  icon: undefined,
-};
-
-EmptyBody.propTypes = {
-  action: PropTypes.any,
-  colSpan: PropTypes.number,
-  icon: PropTypes.oneOf(['document', 'media', 'permissions']),
-  contentType: PropTypes.string.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Content
  * -----------------------------------------------------------------------------------------------*/
 
-const Content = ({ children, footer, contentType, emptyAction }) => {
-  const { rows, headers, withBulkActions, withEntityActions } = useTableContext();
-  const rowCount = rows.length + 1;
-  // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
-  const colCount = headers.length + (withBulkActions ? 1 : 0) + (withEntityActions ? 1 : 0);
+const Content = ({ children, footer }) => {
+  const { rowCount, colCount } = useTableContext();
 
   return (
     <DSTable rowCount={rowCount} colCount={colCount} footer={footer}>
@@ -431,22 +413,22 @@ const Content = ({ children, footer, contentType, emptyAction }) => {
 
 Content.defaultProps = {
   footer: null,
-  emptyAction: null,
 };
 
 Content.propTypes = {
   footer: PropTypes.node,
   children: PropTypes.node.isRequired,
-  contentType: PropTypes.string.isRequired,
-  emptyAction: PropTypes.node,
 };
 
 const Table = {
   Content,
-  Provider,
+  Root,
   ActionBar,
   Head,
-  Headers,
+  HeaderCell,
+  HeaderActionsCell,
+  HeaderCheckboxCell,
+  LoadingBody,
   EmptyBody,
   BulkDeleteButton,
 };

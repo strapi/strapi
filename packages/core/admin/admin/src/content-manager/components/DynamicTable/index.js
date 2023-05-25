@@ -2,15 +2,17 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Table, useStrapiApp } from '@strapi/helper-plugin';
+
 import { useSelector } from 'react-redux';
 
 import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
-import TableRows from './TableRows';
+import { Body } from './Body';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
 import BulkActionButtons from './BulkActionButtons';
+import CellContent from './CellContent';
 
 const DynamicTable = ({
   canCreate,
@@ -69,9 +71,6 @@ const DynamicTable = ({
           searchable: false,
           sortable: true,
         },
-        cellFormatter({ publishedAt }) {
-          return <PublicationState isPublished={!!publishedAt} />;
-        },
       });
     }
 
@@ -89,14 +88,11 @@ const DynamicTable = ({
     return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
+  // Add 1 column for the checkbox and 1 for the actions
+  const colCount = tableHeaders.length + 2;
+
   return (
-    <Table.Provider
-      withBulkActions
-      withEntityActions={withEntityActions}
-      rows={rows}
-      headers={tableHeaders}
-      isLoading={isLoading}
-    >
+    <Table.Root rows={rows} isLoading={isLoading} colCount={colCount}>
       <Table.ActionBar>
         <BulkActionButtons
           showPublish={canPublish && hasDraftAndPublish}
@@ -106,18 +102,77 @@ const DynamicTable = ({
           onConfirmUnpublishAll={onConfirmUnpublishAll}
         />
       </Table.ActionBar>
-      <Table.Content emptyAction={action} contentType={contentTypeName}>
+      <Table.Content>
         <Table.Head>
-          <Table.Headers />
+          {/* Bulk action select all checkbox */}
+          <Table.HeaderCheckboxCell />
+          {/* Dynamic headers based on fields */}
+          {tableHeaders.map(({ fieldSchema, key, name, metadatas }) => (
+            <Table.HeaderCell
+              key={key}
+              name={name}
+              fieldSchemaType={fieldSchema.type}
+              relationFieldName={metadatas.mainField?.name}
+              isSortable={metadatas.sortable}
+              label={metadatas.label}
+            />
+          ))}
+          {/* Visually hidden header for actions */}
+          <Table.HeaderActionsCell />
         </Table.Head>
-        <TableRows
-          contentType={layout.contentType}
-          canCreate={canCreate}
-          canDelete={canDelete}
-          onConfirmDelete={onConfirmDelete}
-        />
+        <Table.LoadingBody />
+        <Table.EmptyBody contentType={contentTypeName} aciton={action} />
+        <Body.Root onConfirmDelete={onConfirmDelete}>
+          {rows.map((rowData, index) => {
+            const itemLineText = formatMessage(
+              {
+                id: 'content-manager.components.DynamicTable.row-line',
+                defaultMessage: 'item line {number}',
+              },
+              { number: index }
+            );
+
+            return (
+              <Body.Row key={rowData.id} rowData={rowData}>
+                {/* Bulk action row checkbox */}
+                <Body.CheckboxDataCell rowData={rowData} />
+                {/* Field data */}
+                {tableHeaders.map(({ key, name, ...rest }) => {
+                  if (name === 'publishedAt') {
+                    return (
+                      <Body.FieldDataCell key={key}>
+                        <PublicationState isPublished={Boolean(rowData.publishedAt)} />
+                      </Body.FieldDataCell>
+                    );
+                  }
+
+                  return (
+                    <Body.FieldDataCell key={key}>
+                      <CellContent
+                        content={rowData[name.split('.')[0]]}
+                        name={name}
+                        contentType={layout.contentType}
+                        {...rest}
+                        rowId={rowData.id}
+                      />
+                    </Body.FieldDataCell>
+                  );
+                })}
+                {/* Actions */}
+                {withEntityActions && (
+                  <Body.EntityActionsDataCell
+                    rowId={rowData.id}
+                    itemLineText={itemLineText}
+                    canCreate={canCreate}
+                    canDelete={canDelete}
+                  />
+                )}
+              </Body.Row>
+            );
+          })}
+        </Body.Root>
       </Table.Content>
-    </Table.Provider>
+    </Table.Root>
   );
 };
 
