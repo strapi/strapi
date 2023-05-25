@@ -116,7 +116,7 @@
     "supertest": "6.3.3",
     "ts-jest": "29.0.3",
     "typescript": "5.0.4",
-    "yargs": "17.6.0"
+    "yargs": "17.7.2"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
