@@ -20,6 +20,12 @@ describe('Entity service', () => {
     query: jest.fn(() => ({})),
   };
 
+  beforeEach(() => {
+    global.strapi.webhookStore = {
+      allowedEvents: new Map([['ENTRY_CREATE', 'entry.create']]),
+    };
+  });
+
   describe('Decorator', () => {
     test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
       'Can decorate',
@@ -98,12 +104,15 @@ describe('Entity service', () => {
       global.strapi.getModel.mockImplementation((modelName) => fakeModels[modelName]);
       global.strapi.query.mockImplementation(() => fakeQuery);
     });
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
+
     afterAll(() => {
       global.strapi.getModel.mockImplementation(() => ({}));
     });
+
     describe('assign default values', () => {
       let instance;
       const entityUID = 'api::entity.entity';
