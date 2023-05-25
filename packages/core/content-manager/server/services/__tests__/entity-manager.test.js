@@ -26,6 +26,9 @@ describe('Content-Manager', () => {
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
         },
+        webhookStore: {
+          allowedEvents: new Map([['ENTRY_PUBLISH', 'entry.publish']]),
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
@@ -57,6 +60,9 @@ describe('Content-Manager', () => {
         getModel: jest.fn(() => fakeModel),
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+        },
+        webhookStore: {
+          allowedEvents: new Map([['ENTRY_UNPUBLISH', 'entry.unpublish']]),
         },
       };
       entityManager = entityManagerLoader({ strapi });
