@@ -4,6 +4,7 @@ const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
+const { populateBuilder } = require('../services/utils/populate/builder');
 
 module.exports = {
   async find(ctx) {
@@ -20,8 +21,13 @@ module.exports = {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    const { results, pagination } = await entityManager.findWithRelationCountsPage(
-      permissionQuery,
+    const populate = await populateBuilder(model)
+      .populateDeep(1)
+      .countRelations({ toMany: true, toOne: false })
+      .build();
+
+    const { results, pagination } = await entityManager.findPage(
+      { ...permissionQuery, populate },
       model
     );
 
@@ -45,11 +51,14 @@ module.exports = {
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
-    const populateQuery = await permissionChecker.populateQuery(ctx.query);
 
-    const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model, {
-      populate: populateQuery,
-    });
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .populateDeep(Infinity)
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -86,7 +95,14 @@ module.exports = {
     const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
-    const entity = await entityManager.create(sanitizedBody, model);
+
+    const populate = await populateBuilder(model)
+      .populateDeep(Infinity)
+      // TODO: Use config to know if we need to count relations or not
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
+    const entity = await entityManager.create(sanitizedBody, model, { populate });
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
@@ -109,7 +125,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -122,11 +142,18 @@ module.exports = {
     const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
-
     const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
-
     const sanitizedBody = await sanitizeFn(body);
-    const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
+
+    const populateUpdate = await populateBuilder(model)
+      .populateDeep(Infinity)
+      // TODO: Use config to know if we need to count relations or not
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
+    const updatedEntity = await entityManager.update(entity, sanitizedBody, model, {
+      populate: populateUpdate,
+    });
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
@@ -142,7 +169,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -152,7 +183,15 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const result = await entityManager.delete(entity, model);
+    const populateDelete = await populateBuilder(model)
+      .populateDeep(Infinity)
+      // TODO: Use config to know if we need to count relations or not
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
+    const result = await entityManager.delete(entity, model, { populate: populateDelete });
+
+    // TODO: Count if config was enabled or populate based on permissions is not empty
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
@@ -168,7 +207,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -178,10 +221,16 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    const populatePublish = await populateBuilder(model)
+      .populateDeep(Infinity)
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
     const result = await entityManager.publish(
       entity,
       setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      { populate: populatePublish }
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
@@ -198,7 +247,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -208,10 +261,16 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    const populateUnpublish = await populateBuilder(model)
+      .populateDeep(Infinity)
+      .countRelations({ toMany: true, toOne: true })
+      .build();
+
     const result = await entityManager.unpublish(
       entity,
       setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      { populate: populateUnpublish }
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
@@ -259,7 +318,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model);
+    const populate = await populateBuilder(model)
+      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();

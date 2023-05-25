@@ -4,6 +4,8 @@ const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
+const { populateBuilder } = require('../services/utils/populate/builder');
+const { isRelationsPopulateEnabled } = require('../services/utils/populate');
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -55,7 +57,12 @@ module.exports = {
       if (entityId) {
         const entityManager = getService('entity-manager');
 
-        const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+        const populate = await populateBuilder(model)
+          .populateDeep(Infinity)
+          .countRelations({ toMany: true, toOne: true })
+          .build();
+
+        const entity = await entityManager.findOne(entityId, model, { populate });
 
         if (!entity) {
           return ctx.notFound();
@@ -68,7 +75,8 @@ module.exports = {
     } else {
       // eslint-disable-next-line no-lonely-if
       if (entityId) {
-        const entity = await strapi.entityService.findOne(model, entityId);
+        const populate = await populateBuilder(model).populateDeep(Infinity).build();
+        const entity = await strapi.entityService.findOne(model, entityId, { populate });
 
         if (!entity) {
           return ctx.notFound();
@@ -161,7 +169,13 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const entity = await entityManager.findOneWithCreatorRoles(id, model);
+      const countEnabled = !isRelationsPopulateEnabled();
+      const populate = await populateBuilder(model)
+        .populateDeep(Infinity)
+        .countRelations({ toMany: countEnabled, toOne: countEnabled })
+        .build();
+
+      const entity = await entityManager.findOne(id, model, { populate });
 
       if (!entity) {
         return ctx.notFound();
@@ -171,7 +185,8 @@ module.exports = {
         return ctx.forbidden();
       }
     } else {
-      const entity = await strapi.entityService.findOne(model, id);
+      const populate = await populateBuilder(model).populateDeep(Infinity).build();
+      const entity = await strapi.entityService.findOne(model, id, { populate });
 
       if (!entity) {
         return ctx.notFound();

@@ -7,6 +7,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
 const { sumDraftCounts } = require('./utils/draft');
+const { isRelationsPopulateEnabled } = require('./utils/populate');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
@@ -25,19 +26,6 @@ const emitEvent = async (event, entity, modelUid) => {
     model: modelDef.modelName,
     entry: sanitizedEntity,
   });
-};
-
-/**
- * When webhooks.populateRelations is set to true, populated relations
- * will be passed to any webhook event. The entity-manager
- * response will not have the populated relations though.
- * For performance reasons, it is recommended to set it to false,
- *
- * TODO V5: Set to false by default.
- * TODO V5: Make webhooks always send the same entity data.
- */
-const isRelationsPopulateEnabled = () => {
-  return strapi.config.get('server.webhooks.populateRelations', true);
 };
 
 /**
