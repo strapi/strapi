@@ -80,9 +80,9 @@ export interface Parsed<N extends Namespace.Any = Namespace.Any, E extends strin
 }
 
 /**
- * Parse an UID literal and returns a {@link Parsed} type.
+ * Parse a UID literal and returns a {@link Parsed} type.
  *
- * Warning: Using ParseUID with a union type might produce undesired results as it'll distribute every matching namespace parsing to every union members
+ * Warning: Using ParseUID with a union type might produce undesired results as it'll distribute every matching namespace parsing to every union member
  *
  * @example
  * type T = Parse<'admin::foo'>
