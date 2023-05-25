@@ -69,7 +69,6 @@ describe('Utils', () => {
     const createMainNode = (members = []) => {
       return factory.createInterfaceDeclaration(
         undefined,
-        undefined,
         factory.createIdentifier('Foo'),
         undefined,
         undefined,
@@ -79,7 +78,6 @@ describe('Utils', () => {
 
     const createPropertyDeclaration = (name, type) => {
       return factory.createPropertyDeclaration(
-        undefined,
         undefined,
         factory.createIdentifier(name),
         undefined,

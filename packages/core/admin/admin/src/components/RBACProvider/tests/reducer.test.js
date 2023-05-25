@@ -1,4 +1,4 @@
-import { permissions } from '@strapi/admin-test-utils/lib/fixtures';
+import { fixtures } from '@strapi/admin-test-utils';
 
 import { setPermissions, resetStore } from '../actions';
 import rbacProviderReducer, { initialState } from '../reducer';
@@ -89,7 +89,8 @@ describe('rbacProviderReducer', () => {
       };
 
       expect(
-        rbacProviderReducer(state, setPermissions(permissions)).collectionTypesRelatedPermissions
+        rbacProviderReducer(state, setPermissions(fixtures.permissions.allPermissions))
+          .collectionTypesRelatedPermissions
       ).toEqual(expected);
     });
   });

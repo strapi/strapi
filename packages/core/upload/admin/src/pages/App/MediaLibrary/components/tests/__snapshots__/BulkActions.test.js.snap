@@ -16,6 +16,20 @@ exports[`BulkActions renders 1`] = `
   cursor: pointer;
 }
 
+.c3 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c7 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -31,31 +45,18 @@ exports[`BulkActions renders 1`] = `
   gap: 8px;
 }
 
-.c3 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c7 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c5 {
   position: relative;
   outline: none;
 }
 
-.c5 svg {
+.c5 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c5 > svg > g,
+.c5 > svg path {
   fill: #ffffff;
 }
 

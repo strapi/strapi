@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
 import {
-  useAppInfos,
+  useAppInfo,
   SettingsPageTitle,
   useFocusWhenNavigate,
   useNotification,
@@ -37,7 +37,7 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
-  const appInfos = useAppInfos();
+  const appInfos = useAppInfo();
   const { latestStrapiReleaseTag, shouldUpdateStrapi, strapiVersion } = appInfos;
   const { updateProjectSettings } = useConfigurations();
 

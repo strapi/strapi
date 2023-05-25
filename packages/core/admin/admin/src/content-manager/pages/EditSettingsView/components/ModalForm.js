@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { GridItem, Select, Option } from '@strapi/design-system';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { useLayoutDnd } from '../../../hooks';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
 import getTrad from '../../../utils/getTrad';

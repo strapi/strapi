@@ -6,7 +6,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { Typography, Box, Flex, Grid, GridItem } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import { ExternalLink, Github, Discord, Reddit, Strapi, Twitter, Discourse } from '@strapi/icons';
@@ -131,7 +131,7 @@ const GridGap = styled(Grid)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfos();
+  const { communityEdition } = useAppInfo();
 
   const socialLinksExtended = [
     ...socialLinks,

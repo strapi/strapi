@@ -1,6 +1,6 @@
 const routes = [];
 
-if (strapi.features.isEnabled(strapi.features.SSO)) {
+if (window.strapi.features.isEnabled(window.strapi.features.SSO)) {
   routes.push({
     async Component() {
       const component = await import(
@@ -14,7 +14,21 @@ if (strapi.features.isEnabled(strapi.features.SSO)) {
   });
 }
 
-if (strapi.features.isEnabled(strapi.features.AUDIT_LOGS)) {
+if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
+  routes.push({
+    async Component() {
+      const component = await import(
+        /* webpackChunkName: "review-workflows-settings" */ '../pages/ReviewWorkflows'
+      );
+
+      return component;
+    },
+    to: '/settings/review-workflows',
+    exact: true,
+  });
+}
+
+if (window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)) {
   routes.push({
     async Component() {
       const component = await import(

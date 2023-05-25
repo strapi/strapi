@@ -40,17 +40,6 @@ import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
 
-const StartBlockActions = styled(Flex)`
-  & > * + * {
-    margin-left: ${({ theme }) => theme.spaces[2]};
-  }
-  margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
-`;
-
-const EndBlockActions = styled(StartBlockActions)`
-  flex-shrink: 0;
-`;
-
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
@@ -131,7 +120,7 @@ export const BrowseStep = ({
         <Box paddingBottom={4}>
           <Flex justifyContent="space-between" alignItems="flex-start">
             {(assetCount > 0 || folderCount > 0 || isFiltering) && (
-              <StartBlockActions wrap="wrap">
+              <Flex gap={2} wrap="wrap">
                 {multiple && isGridView && (
                   <Flex
                     paddingLeft={2}
@@ -157,11 +146,11 @@ export const BrowseStep = ({
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
                 />
-              </StartBlockActions>
+              </Flex>
             )}
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <EndBlockActions pullRight>
+              <Flex marginLeft="auto" shrink={0}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     icon={isGridView ? <List /> : <Grid />}
@@ -180,7 +169,7 @@ export const BrowseStep = ({
                   />
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-              </EndBlockActions>
+              </Flex>
             )}
           </Flex>
         </Box>

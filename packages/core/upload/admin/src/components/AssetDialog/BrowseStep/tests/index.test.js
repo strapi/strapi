@@ -14,7 +14,6 @@ jest.mock('../../../../hooks/useFolder');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 
