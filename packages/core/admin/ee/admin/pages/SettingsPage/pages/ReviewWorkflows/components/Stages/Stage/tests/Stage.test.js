@@ -15,11 +15,6 @@ import { reducer } from '../../../../reducer';
 
 import { STAGE_COLOR_DEFAULT } from '../../../../constants';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
-}));
-
 const STAGES_FIXTURE = {
   id: 1,
   index: 0,

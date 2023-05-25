@@ -20,9 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
-  pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -196,6 +194,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     await waitForReload();
 
@@ -220,6 +221,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByTestId('Custom fields-4');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     await waitForReload();
 
@@ -246,6 +250,9 @@ describe('Marketplace page - plugins tab', () => {
     const collectionOption = screen.getByTestId('Made by Strapi-13');
     // When they click the option
     await user.click(collectionOption);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     await user.click(screen.getByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
@@ -257,6 +264,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(categoriesButton);
     const categoryOption = screen.getByTestId('Custom fields-4');
     await user.click(categoryOption);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     // When the page reloads they should see a tag for the selected option
     await waitForReload();
@@ -283,6 +293,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: 'Collections' }));
     await user.click(screen.getByTestId('Made by Strapi-13'));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -290,6 +303,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: `Collections` }));
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -308,6 +324,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: 'Categories' }));
     await user.click(screen.getByRole('option', { name: `Custom fields (4)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -315,6 +334,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: `Categories` }));
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -338,6 +360,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -360,6 +385,9 @@ describe('Marketplace page - plugins tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     const collectionCards = await screen.findAllByTestId('npm-package-card');

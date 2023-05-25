@@ -162,6 +162,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
     </label>
     <div
       class="c4"
+      tabindex="-1"
     >
       <span
         class="c5 c6"

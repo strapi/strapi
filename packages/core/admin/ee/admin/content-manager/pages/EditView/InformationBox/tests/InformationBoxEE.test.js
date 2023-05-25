@@ -12,7 +12,7 @@ import { InformationBoxEE } from '../InformationBoxEE';
 const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 const STAGE_FIXTURE = {
   id: 1,
-  color: 'red',
+  color: '#4945FF',
   name: 'Stage 1',
   worklow: 1,
 };
@@ -29,24 +29,23 @@ jest.mock(
   '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows',
   () => ({
     useReviewWorkflows: jest.fn(() => ({
-      workflows: {
-        isLoading: false,
-        data: [
-          {
-            stages: [
-              {
-                id: 1,
-                name: 'Stage 1',
-              },
-
-              {
-                id: 2,
-                name: 'Stage 2',
-              },
-            ],
-          },
-        ],
-      },
+      isLoading: false,
+      workflows: [
+        {
+          stages: [
+            {
+              id: 1,
+              color: '#4945FF',
+              name: 'Stage 1',
+            },
+            {
+              id: 2,
+              color: '#4945FF',
+              name: 'Stage 2',
+            },
+          ],
+        },
+      ],
     })),
   })
 );

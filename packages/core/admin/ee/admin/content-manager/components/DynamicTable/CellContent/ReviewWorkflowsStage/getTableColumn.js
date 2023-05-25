@@ -34,7 +34,12 @@ export default (layout) => {
       }),
       searchable: false,
       sortable: true,
-      mainField: 'name',
+      mainField: {
+        name: 'name',
+        schema: {
+          type: 'string',
+        },
+      },
     },
     cellFormatter({ strapi_reviewWorkflows_stage }) {
       // if entities are created e.g. through lifecycle methods
