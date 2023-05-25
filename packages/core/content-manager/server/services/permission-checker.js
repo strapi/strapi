@@ -1,7 +1,6 @@
 'use strict';
 
 const { pipeAsync } = require('@strapi/utils');
-const { getQueryPopulate } = require('./utils/populate');
 
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -63,11 +62,6 @@ const createPermissionChecker =
       )(query);
     };
 
-    const populateQuery = async (query) => {
-      const permissionQuery = await sanitizedQuery.read(query);
-      return getQueryPopulate(model, permissionQuery);
-    };
-
     // Sanitized queries shortcuts
     Object.keys(ACTIONS).forEach((action) => {
       sanitizedQuery[action] = (query) => sanitizedQuery(query, ACTIONS[action]);
@@ -90,7 +84,6 @@ const createPermissionChecker =
       sanitizeUpdateInput,
       // Queries Builder
       sanitizedQuery,
-      populateQuery,
     };
   };
 
