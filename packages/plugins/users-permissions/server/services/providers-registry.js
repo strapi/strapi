@@ -345,7 +345,7 @@ module.exports = () => {
       assert(typeof providerName === 'string', 'Provider name must be a string');
       assert(typeof provider === 'function', 'Provider callback must be a function');
 
-      providersCallbacks[providerName] = provider;
+      providersCallbacks[providerName] = provider({ purest });
     },
 
     async run({ provider, accessToken, query, providers }) {
