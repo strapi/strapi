@@ -17,12 +17,9 @@ const {
   sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  webhook: webhookUtils,
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
-
-const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
 const { FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
@@ -347,7 +344,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
-    await this.emitEvent(MEDIA_UPDATE, res);
+    await this.emitEvent(strapi.webhookStore.allowedEvents.get('MEDIA_UPDATE'), res);
 
     return res;
   },
@@ -363,7 +360,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
-    await this.emitEvent(MEDIA_CREATE, res);
+    await this.emitEvent(strapi.webhookStore.allowedEvents.get('MEDIA_CREATE'), res);
 
     return res;
   },
@@ -400,7 +397,7 @@ module.exports = ({ strapi }) => ({
       where: { id: file.id },
     });
 
-    await this.emitEvent(MEDIA_DELETE, media);
+    await this.emitEvent(strapi.webhookStore.allowedEvents.get('MEDIA_DELETE'), media);
 
     return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
   },

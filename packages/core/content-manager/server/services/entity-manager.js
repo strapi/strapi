@@ -10,7 +10,6 @@ const { sumDraftCounts } = require('./utils/draft');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
@@ -254,7 +253,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_PUBLISH, updatedEntity, uid);
+    await emitEvent(strapi.webhookStore.allowedEvents.get('ENTRY_PUBLISH'), updatedEntity, uid);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
@@ -283,7 +282,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(ENTRY_UNPUBLISH, updatedEntity, uid);
+    await emitEvent(strapi.webhookStore.allowedEvents.get('ENTRY_UNPUBLISH'), updatedEntity, uid);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
