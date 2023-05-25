@@ -4,11 +4,19 @@ import { Field, FormikProvider, useFormik } from 'formik';
 import { useIntl } from 'react-intl';
 import { Form, Link } from '@strapi/helper-plugin';
 import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
-import { Button, Flex, TextInput } from '@strapi/design-system';
+import {
+  Grid,
+  GridItem,
+  Button,
+  Flex,
+  TextInput,
+  HeaderLayout,
+  ContentLayout,
+  Box,
+} from '@strapi/design-system';
 
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
 import schema from '../utils/schema';
-import { Layout } from './Layout';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
 
@@ -52,7 +60,7 @@ const WebhookForm = ({
   return (
     <FormikProvider value={formik}>
       <Form onSubmit={formik.handleSubmit}>
-        <Layout.Header
+        <HeaderLayout
           primaryAction={
             <Flex gap={2}>
               <Button
@@ -101,46 +109,49 @@ const WebhookForm = ({
             </Link>
           }
         />
-        <Layout.Root
-          triggerContainer={
-            showTriggerResponse && (
+        <ContentLayout>
+          <Flex direction="column" alignItems="stretch" gap={4}>
+            {showTriggerResponse && (
               <TriggerContainer
                 isPending={isTriggering}
                 response={triggerResponse}
                 onCancel={() => setShowTriggerResponse(false)}
               />
-            )
-          }
-        >
-          <Layout.Fields
-            name={
-              <Field
-                as={TextInput}
-                name="name"
-                error={formik.errors.name && formatMessage({ id: formik.errors.name })}
-                label={formatMessage({
-                  id: 'global.name',
-                  defaultMessage: 'Name',
-                })}
-                required
-              />
-            }
-            url={
-              <Field
-                as={TextInput}
-                name="url"
-                error={formik.errors.url && formatMessage({ id: formik.errors.url })}
-                label={formatMessage({
-                  id: 'Settings.roles.form.input.url',
-                  defaultMessage: 'Url',
-                })}
-                required
-              />
-            }
-          />
-          <HeadersInput />
-          <EventTable />
-        </Layout.Root>
+            )}
+            <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                <Grid gap={6}>
+                  <GridItem col={6}>
+                    <Field
+                      as={TextInput}
+                      name="name"
+                      error={formik.errors.name && formatMessage({ id: formik.errors.name })}
+                      label={formatMessage({
+                        id: 'global.name',
+                        defaultMessage: 'Name',
+                      })}
+                      required
+                    />
+                  </GridItem>
+                  <GridItem col={12}>
+                    <Field
+                      as={TextInput}
+                      name="url"
+                      error={formik.errors.url && formatMessage({ id: formik.errors.url })}
+                      label={formatMessage({
+                        id: 'Settings.roles.form.input.url',
+                        defaultMessage: 'Url',
+                      })}
+                      required
+                    />
+                  </GridItem>
+                </Grid>
+                <HeadersInput />
+                <EventTable />
+              </Flex>
+            </Box>
+          </Flex>
+        </ContentLayout>
       </Form>
     </FormikProvider>
   );
