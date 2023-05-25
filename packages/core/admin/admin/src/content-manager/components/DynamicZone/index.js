@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import get from 'lodash/get';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';

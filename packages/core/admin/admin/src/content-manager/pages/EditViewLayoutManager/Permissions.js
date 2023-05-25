@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useRBAC, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import EditView from '../EditView';
 import { generatePermissionsObject } from '../../utils';
 

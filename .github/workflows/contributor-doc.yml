@@ -33,8 +33,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          path: '**/node_modules'
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
         run: yarn install  --immutable

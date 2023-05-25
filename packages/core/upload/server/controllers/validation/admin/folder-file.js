@@ -4,6 +4,7 @@ const { intersection, map, isEmpty } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { FOLDER_MODEL_UID } = require('../../../constants');
 const { folderExists } = require('./utils');
+const { isFolderOrChild } = require('../../utils/folders');
 
 const validateDeleteManyFoldersFilesSchema = yup
   .object()
@@ -75,7 +76,7 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
       });
 
       const unmovableFoldersNames = folders
-        .filter((folder) => destinationFolder.path.startsWith(folder.path))
+        .filter((folder) => isFolderOrChild(destinationFolder, folder))
         .map((f) => f.name);
       if (unmovableFoldersNames.length > 0) {
         return this.createError({

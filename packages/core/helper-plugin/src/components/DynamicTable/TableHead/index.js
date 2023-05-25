@@ -52,7 +52,7 @@ const TableHead = ({
             // relations always have to be sorted by their main field instead of only the
             // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
             if (fieldSchema?.type === 'relation' && mainField) {
-              isSorted = sortBy === `${name}[${mainField}]`;
+              isSorted = sortBy === `${name.split('.')[0]}[${mainField.name}]`;
             }
 
             const sortLabel = formatMessage(
@@ -67,7 +67,7 @@ const TableHead = ({
                 // relations always have to be sorted by their main field instead of only the
                 // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
                 if (fieldSchema?.type === 'relation' && mainField) {
-                  nextSort = `${name}[${mainField}]`;
+                  nextSort = `${name.split('.')[0]}[${mainField.name}]`;
                 }
 
                 setQuery({
