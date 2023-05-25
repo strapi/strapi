@@ -26,6 +26,8 @@ module.exports = {
     // to be cleaned up throughout codebase (too many to fix at the moment)
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/comma-dangle': 'off',
+    '@typescript-eslint/quotes': 'off',
+    '@typescript-eslint/no-shadow': 'off',
   },
   overrides: [
     {

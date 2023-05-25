@@ -1,4 +1,4 @@
-const form = strapi.features.isEnabled(strapi.features.SSO)
+const form = window.strapi.features.isEnabled(window.strapi.features.SSO)
   ? [
       [
         {

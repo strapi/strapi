@@ -14,7 +14,7 @@ import {
 import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { useModels } from '../../../../../hooks';
+import { useContentTypes } from '../../../../../hooks/useContentTypes';
 import WebhookForm from './components/WebhookForm';
 import cleanData from './utils/formatData';
 
@@ -27,7 +27,7 @@ const EditView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
+  const { isLoading: isLoadingForModels, collectionTypes } = useContentTypes();
   const { put, get, post } = useFetchClient();
 
   const isCreating = id === 'create';

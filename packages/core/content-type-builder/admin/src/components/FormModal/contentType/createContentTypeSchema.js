@@ -9,6 +9,7 @@ const createContentTypeSchema = ({
   reservedModels = [],
   singularNames = [],
   pluralNames = [],
+  collectionNames = [],
 }) => {
   const shape = {
     displayName: yup
@@ -52,6 +53,17 @@ const createContentTypeSchema = ({
         },
       })
       .test({
+        name: 'pluralNameAlreadyUsedAsSingular',
+        message: getTrad('error.contentType.pluralName-equals-singularName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !singularNames.includes(value);
+        },
+      })
+      .test({
         name: 'pluralAndSingularAreUnique',
         message: getTrad('error.contentType.pluralName-used'),
         test(value, context) {
@@ -73,6 +85,17 @@ const createContentTypeSchema = ({
           return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
+      .test({
+        name: 'pluralNameNotAlreadyUsedInCollectionName',
+        message: getTrad('error.contentType.pluralName-equals-collectionName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !collectionNames.includes(value?.trim()?.toLowerCase());
+        },
+      })
       .required(errorsTrads.required),
     singularName: yup
       .string()
@@ -85,6 +108,17 @@ const createContentTypeSchema = ({
           }
 
           return !singularNames.includes(value);
+        },
+      })
+      .test({
+        name: 'singularNameAlreadyUsedAsPlural',
+        message: getTrad('error.contentType.singularName-equals-pluralName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !pluralNames.includes(value);
         },
       })
       .test({
@@ -112,6 +146,7 @@ const createContentTypeSchema = ({
       .required(errorsTrads.required),
     draftAndPublish: yup.boolean(),
     kind: yup.string().oneOf(['singleType', 'collectionType']),
+    reviewWorkflows: yup.boolean(),
   };
 
   return yup.object(shape);

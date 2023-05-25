@@ -3,15 +3,14 @@ import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
-import { useModels } from '../../../hooks';
+import { useContentTypes } from '../../../hooks/useContentTypes';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfos: jest.fn(() => ({ communityEdition: true })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useAppInfo: jest.fn(() => ({ communityEdition: true })),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: false,
     guidedTourState: {
@@ -31,9 +30,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../hooks', () => ({
-  useModels: jest.fn(),
-}));
+jest.mock('../../../hooks/useContentTypes');
 
 jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
   __esModule: true,
@@ -53,12 +50,6 @@ const App = (
 );
 
 describe('Homepage', () => {
-  useModels.mockImplementation(() => ({
-    isLoading: false,
-    collectionTypes: [],
-    singleTypes: [],
-  }));
-
   test('should render all homepage links', () => {
     const { getByRole } = render(App);
     expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();
@@ -93,7 +84,7 @@ describe('Homepage', () => {
   });
 
   test('should display support link for EE edition', () => {
-    useAppInfos.mockImplementation(() => ({ communityEdition: false }));
+    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
     const { getByRole } = render(App);
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
@@ -114,11 +105,11 @@ describe('Homepage', () => {
   });
 
   it('should display particular text and action when there are collectionTypes and singletypes', () => {
-    useModels.mockImplementation(() => ({
+    useContentTypes.mockReturnValue({
       isLoading: false,
       collectionTypes: [{ uuid: 102 }],
       singleTypes: [{ isDisplayed: true }],
-    }));
+    });
 
     const { getByText, getByRole } = render(App);
 

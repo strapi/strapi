@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import { useSelector, shallowEqual } from 'react-redux';
 import axios from 'axios';
-import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
+import { mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import permissions from '../../../permissions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
@@ -22,23 +22,20 @@ const ComponentSettingsView = () => {
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
-
     const fetchData = async (source) => {
       try {
         dispatch(getData());
 
         const {
           data: { data },
-        } = await get(getRequestUrl(`components/${uid}/configuration`), {
+        } = await get(`/content-manager/components/${uid}/configuration`, {
           cancelToken: source.token,
         });
-
         dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
         if (axios.isCancel(err)) {
           return;
         }
-
         console.error(err);
       }
     };

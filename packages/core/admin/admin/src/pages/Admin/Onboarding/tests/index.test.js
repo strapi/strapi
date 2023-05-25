@@ -1,13 +1,14 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfos: jest.fn(() => ({ communityEdition: true })),
+  useAppInfo: jest.fn(() => ({ communityEdition: true })),
 }));
 
 const App = (
@@ -27,18 +28,20 @@ describe('Onboarding', () => {
     'documentation',
     'cheatsheet',
     'get help',
-  ])('should display %s link', (link) => {
+  ])('should display %s link', async (link) => {
+    const user = userEvent.setup();
     const { getByRole } = render(App);
 
-    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+    await user.click(getByRole('button', { name: /open help menu/i }));
 
     expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 
-  test('should display discord link for CE edition', () => {
+  test('should display discord link for CE edition', async () => {
+    const user = userEvent.setup();
     const { getByRole } = render(App);
 
-    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+    await user.click(getByRole('button', { name: /open help menu/i }));
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
       'href',
@@ -46,11 +49,12 @@ describe('Onboarding', () => {
     );
   });
 
-  test('should display support link for EE edition', () => {
-    useAppInfos.mockImplementation(() => ({ communityEdition: false }));
+  test('should display support link for EE edition', async () => {
+    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
+    const user = userEvent.setup();
     const { getByRole } = render(App);
 
-    fireEvent.click(getByRole('button', { name: /open help menu/i }));
+    await user.click(getByRole('button', { name: /open help menu/i }));
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
       'href',
