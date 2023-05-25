@@ -91,6 +91,10 @@ const TableRows = ({ canCreate, canDelete, contentType, onConfirmDelete }) => {
                 />
               </Td>
             )}
+            {/**
+             * TODO: headers never use cellFormatter internally, so we can probably move this out.
+             * Then it'd be nice to stop doing this.
+             */}
             {headers.map(({ key, cellFormatter, name, ...rest }) => {
               return (
                 <Td key={key}>

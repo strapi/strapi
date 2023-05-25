@@ -52,6 +52,9 @@ const ActionBar = ({ children }) => {
 
   if (!selectedEntries.length > 0) return null;
 
+  /**
+   * TODO: refine DOM nesting
+   */
   return (
     <Box paddingBottom={4}>
       <Flex justifyContent="space-between">
@@ -133,12 +136,28 @@ BulkDeleteButton.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const Head = ({ children }) => {
-  const { selectedEntries, setSelectedEntries, withEntityActions, withBulkActions, rows } =
-    useTableContext();
+  return (
+    <Thead>
+      <Tr>{children}</Tr>
+    </Thead>
+  );
+};
+
+Head.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderCheckboxCell
+ * -----------------------------------------------------------------------------------------------*/
+
+const HeaderCheckboxCell = () => {
+  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
+
+  const { formatMessage } = useIntl();
 
   const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
   const isIndeterminate = !areAllEntriesSelected && selectedEntries.length > 0;
-  const { formatMessage } = useIntl();
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
@@ -149,45 +168,41 @@ const Head = ({ children }) => {
   };
 
   return (
-    <Thead>
-      <Tr>
-        {withBulkActions && (
-          <Th>
-            <BaseCheckbox
-              aria-label={formatMessage({
-                id: 'global.select-all-entries',
-                defaultMessage: 'Select all entries',
-              })}
-              checked={areAllEntriesSelected}
-              indeterminate={isIndeterminate}
-              onChange={handleSelectAll}
-            />
-          </Th>
-        )}
-        {children}
-        {withEntityActions && (
-          <Th>
-            <VisuallyHidden>
-              {formatMessage({
-                id: 'global.actions',
-                defaultMessage: 'Actions',
-              })}
-            </VisuallyHidden>
-          </Th>
-        )}
-      </Tr>
-    </Thead>
+    <Th>
+      <BaseCheckbox
+        aria-label={formatMessage({
+          id: 'global.select-all-entries',
+          defaultMessage: 'Select all entries',
+        })}
+        checked={areAllEntriesSelected}
+        indeterminate={isIndeterminate}
+        onChange={handleSelectAll}
+      />
+    </Th>
   );
 };
 
-Head.propTypes = {
-  children: PropTypes.node.isRequired,
+const HeaderActionsCell = () => {
+  const { formatMessage } = useIntl();
+  return (
+    <Th>
+      <VisuallyHidden>
+        {formatMessage({
+          id: 'global.actions',
+          defaultMessage: 'Actions',
+        })}
+      </VisuallyHidden>
+    </Th>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Headers
  * -----------------------------------------------------------------------------------------------*/
 
+/**
+ * TODO: investigate if we can change this to just "headercell" and have the user map their headers?
+ */
 const Headers = () => {
   const { headers } = useTableContext();
   const { formatMessage } = useIntl();
@@ -277,54 +292,43 @@ Headers.propTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Provider
+ * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Provider = ({ children, headers, rows, withBulkActions, withEntityActions, isLoading }) => {
+const Root = ({ children, headers, rows, isLoading }) => {
   const [selectedEntries, setSelectedEntries] = useState([]);
+
+  const onSelectRow = React.useCallback(({ name, value }) => {
+    setSelectedEntries((prev) => {
+      if (value) {
+        return prev.concat(name);
+      }
+
+      return prev.filter((id) => id !== name);
+    });
+  }, []);
+
   const context = React.useMemo(() => {
-    const onSelectRow = ({ name, value }) => {
-      setSelectedEntries((prev) => {
-        if (value) {
-          return prev.concat(name);
-        }
-
-        return prev.filter((id) => id !== name);
-      });
-    };
-
     return {
       selectedEntries,
       setSelectedEntries,
       onSelectRow,
       headers,
       rows,
-      withBulkActions,
-      withEntityActions,
       isLoading,
     };
-  }, [
-    selectedEntries,
-    setSelectedEntries,
-    headers,
-    rows,
-    withBulkActions,
-    withEntityActions,
-    isLoading,
-  ]);
+  }, [onSelectRow, selectedEntries, setSelectedEntries, headers, rows, isLoading]);
 
   return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
 
-Provider.defaultProps = {
+Root.defaultProps = {
   headers: [],
   rows: [],
-  withBulkActions: false,
-  withEntityActions: false,
   isLoading: false,
 };
 
-Provider.propTypes = {
+Root.propTypes = {
   children: PropTypes.node.isRequired,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -338,8 +342,6 @@ Provider.propTypes = {
     })
   ),
   rows: PropTypes.arrayOf(PropTypes.object),
-  withBulkActions: PropTypes.bool,
-  withEntityActions: PropTypes.bool,
   isLoading: PropTypes.bool,
 };
 
@@ -348,7 +350,7 @@ Provider.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const EmptyBody = ({ colSpan, contentType, ...rest }) => {
-  const { isLoading } = useTableContext();
+  const { rows } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
 
@@ -360,20 +362,8 @@ const EmptyBody = ({ colSpan, contentType, ...rest }) => {
       }
     : undefined;
 
-  if (isLoading) {
-    return (
-      <Tbody>
-        <Tr>
-          <Td colSpan={colSpan}>
-            <Flex justifyContent="center">
-              <Box padding={11} background="neutral0">
-                <Loader>Loading content...</Loader>
-              </Box>
-            </Flex>
-          </Td>
-        </Tr>
-      </Tbody>
-    );
+  if (rows?.length > 0) {
+    return null;
   }
 
   return (
@@ -381,6 +371,28 @@ const EmptyBody = ({ colSpan, contentType, ...rest }) => {
       <Tr>
         <Td colSpan={colSpan}>
           <EmptyStateLayout {...rest} content={content} hasRadius={false} shadow="" />
+        </Td>
+      </Tr>
+    </Tbody>
+  );
+};
+
+const LoadingBody = () => {
+  const { isLoading, colSpan } = useTableContext();
+
+  if (!isLoading) {
+    return null;
+  }
+
+  return (
+    <Tbody>
+      <Tr>
+        <Td colSpan={colSpan}>
+          <Flex justifyContent="center">
+            <Box padding={11} background="neutral0">
+              <Loader>Loading content...</Loader>
+            </Box>
+          </Flex>
         </Td>
       </Tr>
     </Tbody>
@@ -405,23 +417,14 @@ EmptyBody.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const Content = ({ children, footer, contentType, emptyAction }) => {
-  const { rows, headers, withBulkActions, withEntityActions, isLoading } = useTableContext();
+  const { rows, headers, withBulkActions, withEntityActions } = useTableContext();
   const rowCount = rows.length + 1;
   // Add 1 for the visually hidden actions header, and 1 for select all checkbox if the table is bulkable
   const colCount = headers.length + (withBulkActions ? 1 : 0) + (withEntityActions ? 1 : 0);
 
   return (
     <DSTable rowCount={rowCount} colCount={colCount} footer={footer}>
-      {isLoading || !rows.length ? (
-        <EmptyBody
-          colSpan={colCount}
-          action={emptyAction}
-          contentType={contentType}
-          isLoading={isLoading}
-        />
-      ) : (
-        children
-      )}
+      {children}
     </DSTable>
   );
 };
