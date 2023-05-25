@@ -38,7 +38,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       contentType.collectionName.length <= MAX_CONTENT_TYPE_NAME_LEN;
     const incompatibleContentTypeAlert = (contentType) => {
       strapi.log.warn(
-        `Content type "${contentType.info.displayName}" cannot have Review Workflow activated as the name is too long. (${MAX_CONTENT_TYPE_NAME_LEN} maximum characters)`
+        `Review Workflow cannot be activated for the content type with the name '${contentType.info.displayName}' because the name exceeds the maximum length of ${MAX_CONTENT_TYPE_NAME_LEN} characters.`
       );
       return contentType;
     };
