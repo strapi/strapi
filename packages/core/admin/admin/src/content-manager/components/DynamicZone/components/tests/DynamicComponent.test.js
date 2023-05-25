@@ -178,7 +178,7 @@ describe('DynamicComponent', () => {
        */
       fireEvent.click(getByRole('menuitem', { name: 'component1' }));
 
-      expect(onAddComponent).toHaveBeenCalledWith('component1', -1);
+      expect(onAddComponent).toHaveBeenCalledWith('component1', 0);
     });
 
     it('should call the onAddComponent callback with the correct index when adding below', async () => {

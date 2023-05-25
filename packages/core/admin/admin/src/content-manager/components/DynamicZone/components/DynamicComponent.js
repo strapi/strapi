@@ -158,7 +158,7 @@ export const DynamicComponent = ({
                   {components.map(({ componentUid, info: { displayName } }) => (
                     <MenuItem
                       key={componentUid}
-                      onSelect={() => onAddComponent(componentUid, index - 1)}
+                      onSelect={() => onAddComponent(componentUid, index)}
                     >
                       {displayName}
                     </MenuItem>
