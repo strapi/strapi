@@ -1,5 +1,5 @@
 export { default as useConfigurations } from './useConfigurations';
-export { default as useModels } from './useModels';
+export { useContentTypes } from './useContentTypes';
 export { default as useFetchPermissionsLayout } from './useFetchPermissionsLayout';
 export { default as useFetchRole } from './useFetchRole';
 export { default as useMenu } from './useMenu';

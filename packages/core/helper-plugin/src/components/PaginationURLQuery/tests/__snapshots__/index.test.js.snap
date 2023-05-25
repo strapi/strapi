@@ -1,16 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
-.c6 {
+.c5 {
   font-size: 0.75rem;
   line-height: 1.33;
+  line-height: revert;
   color: #32324d;
 }
 
-.c11 {
+.c8 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: revert;
   color: #32324d;
 }
 
@@ -26,9 +28,10 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 4px;
 }
 
-.c4 {
+.c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -40,15 +43,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   width: 1px;
 }
 
-.c1 > * + * {
-  margin-left: 4px;
-}
-
-.c7 {
-  line-height: revert;
-}
-
-.c2 {
+.c1 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -61,7 +56,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   outline: none;
 }
 
-.c2:after {
+.c1:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -76,11 +71,11 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   border: 2px solid transparent;
 }
 
-.c2:focus-visible {
+.c1:focus-visible {
   outline: none;
 }
 
-.c2:focus-visible:after {
+.c1:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -91,7 +86,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c9 {
+.c6 {
   padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
@@ -105,7 +100,7 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   outline: none;
 }
 
-.c9:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -120,11 +115,11 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   border: 2px solid transparent;
 }
 
-.c9:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c9:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -135,56 +130,52 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c5 {
+.c4 {
   color: #32324d;
 }
 
-.c5:hover {
+.c4:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c10 {
+.c7 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c10:hover {
+.c7:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c3 {
-  font-size: 0.7rem;
+.c2 {
+  font-size: 0.6875rem;
 }
 
-.c3 svg path {
+.c2 svg path {
   fill: #666687;
 }
 
-.c3:focus svg path,
-.c3:hover svg path {
+.c2:focus svg path,
+.c2:hover svg path {
   fill: #4a4a6a;
 }
 
-.c8 {
-  color: #32324d;
-}
-
 <nav
-  aria-label="pagination"
+  aria-label="Pagination"
   class=""
 >
-  <ul
-    class="c0 c1"
+  <ol
+    class="c0"
   >
     <li>
       <a
         aria-current="page"
         aria-disabled="false"
-        class="c2 c3 active"
+        class="c1 c2 active"
         href="/test?page=4&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to previous page
         </div>
@@ -206,17 +197,17 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     <li>
       <a
         aria-current="page"
-        class="c2 c5 active"
+        class="c1 c4 active"
         href="/test?page=1&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 1
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           1
         </span>
@@ -224,16 +215,16 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     </li>
     <li>
       <div
-        class="c2 c8"
+        class=""
       >
         <div
-          class="c4"
+          class="c3"
         >
           And 4 other links
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           …
         </span>
@@ -242,17 +233,17 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     <li>
       <a
         aria-current="page"
-        class="c2 c5 active"
+        class="c1 c4 active"
         href="/test?page=4&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 4
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           4
         </span>
@@ -261,17 +252,17 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     <li>
       <a
         aria-current="page"
-        class="c9 c10 active"
+        class="c6 c7 active"
         href="/test?page=5&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 5
         </div>
         <span
           aria-hidden="true"
-          class="c11 c7"
+          class="c8"
         >
           5
         </span>
@@ -280,17 +271,17 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     <li>
       <a
         aria-current="page"
-        class="c2 c5 active"
+        class="c1 c4 active"
         href="/test?page=6&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 6
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           6
         </span>
@@ -298,16 +289,16 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     </li>
     <li>
       <div
-        class="c2 c8"
+        class=""
       >
         <div
-          class="c4"
+          class="c3"
         >
           And 8 other links
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           …
         </span>
@@ -316,17 +307,17 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
     <li>
       <a
         aria-current="page"
-        class="c2 c5 active"
+        class="c1 c4 active"
         href="/test?page=10&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 10
         </div>
         <span
           aria-hidden="true"
-          class="c6 c7"
+          class="c5"
         >
           10
         </span>
@@ -336,11 +327,11 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
       <a
         aria-current="page"
         aria-disabled="false"
-        class="c2 c3 active"
+        class="c1 c2 active"
         href="/test?page=6&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to next page
         </div>
@@ -359,21 +350,23 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
         </svg>
       </a>
     </li>
-  </ul>
+  </ol>
 </nav>
 `;
 
 exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
-.c7 {
+.c6 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: revert;
   color: #32324d;
 }
 
-.c10 {
+.c8 {
   font-size: 0.75rem;
   line-height: 1.33;
+  line-height: revert;
   color: #32324d;
 }
 
@@ -389,9 +382,10 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 4px;
 }
 
-.c4 {
+.c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -403,15 +397,7 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   width: 1px;
 }
 
-.c1 > * + * {
-  margin-left: 4px;
-}
-
-.c8 {
-  line-height: revert;
-}
-
-.c2 {
+.c1 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -424,7 +410,7 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   outline: none;
 }
 
-.c2:after {
+.c1:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -439,11 +425,55 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   border: 2px solid transparent;
 }
 
-.c2:focus-visible {
+.c1:focus-visible {
   outline: none;
 }
 
-.c2:focus-visible:after {
+.c1:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c4 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -455,110 +485,66 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
 }
 
 .c5 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c5:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c5:focus-visible {
-  outline: none;
-}
-
-.c5:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c6 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c6:hover {
+.c5:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c9 {
+.c7 {
   color: #32324d;
 }
 
-.c9:hover {
+.c7:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c3 {
-  font-size: 0.7rem;
+.c2 {
+  font-size: 0.6875rem;
   pointer-events: none;
 }
 
-.c3 svg path {
+.c2 svg path {
   fill: #c0c0cf;
 }
 
-.c3:focus svg path,
-.c3:hover svg path {
+.c2:focus svg path,
+.c2:hover svg path {
   fill: #c0c0cf;
 }
 
-.c11 {
-  font-size: 0.7rem;
+.c9 {
+  font-size: 0.6875rem;
 }
 
-.c11 svg path {
+.c9 svg path {
   fill: #666687;
 }
 
-.c11:focus svg path,
-.c11:hover svg path {
+.c9:focus svg path,
+.c9:hover svg path {
   fill: #4a4a6a;
 }
 
 <nav
-  aria-label="pagination"
+  aria-label="Pagination"
   class=""
 >
-  <ul
-    class="c0 c1"
+  <ol
+    class="c0"
   >
     <li>
       <a
         aria-current="page"
         aria-disabled="true"
-        class="c2 c3 active"
+        class="c1 c2 active"
         href="/test"
         tabindex="-1"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to previous page
         </div>
@@ -580,17 +566,17 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
     <li>
       <a
         aria-current="page"
-        class="c5 c6 active"
+        class="c4 c5 active"
         href="/test?page=1&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 1
         </div>
         <span
           aria-hidden="true"
-          class="c7 c8"
+          class="c6"
         >
           1
         </span>
@@ -599,17 +585,17 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
     <li>
       <a
         aria-current="page"
-        class="c2 c9 active"
+        class="c1 c7 active"
         href="/test?page=2&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 2
         </div>
         <span
           aria-hidden="true"
-          class="c10 c8"
+          class="c8"
         >
           2
         </span>
@@ -618,17 +604,17 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
     <li>
       <a
         aria-current="page"
-        class="c2 c9 active"
+        class="c1 c7 active"
         href="/test?page=3&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 3
         </div>
         <span
           aria-hidden="true"
-          class="c10 c8"
+          class="c8"
         >
           3
         </span>
@@ -637,17 +623,17 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
     <li>
       <a
         aria-current="page"
-        class="c2 c9 active"
+        class="c1 c7 active"
         href="/test?page=4&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to page 4
         </div>
         <span
           aria-hidden="true"
-          class="c10 c8"
+          class="c8"
         >
           4
         </span>
@@ -657,11 +643,11 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
       <a
         aria-current="page"
         aria-disabled="false"
-        class="c2 c11 active"
+        class="c1 c9 active"
         href="/test?page=2&pageSize=10&sort=firstname"
       >
         <div
-          class="c4"
+          class="c3"
         >
           Go to next page
         </div>
@@ -680,6 +666,6 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
         </svg>
       </a>
     </li>
-  </ul>
+  </ol>
 </nav>
 `;

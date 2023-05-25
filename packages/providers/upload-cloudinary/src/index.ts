@@ -42,7 +42,7 @@ export = {
           config.folder = file.path;
         }
 
-        const uploadStream = cloudinary.uploader.upload_stream(
+        const uploadStream = cloudinary.uploader.upload_chunked_stream(
           { ...config, ...customConfig },
           (err, image) => {
             if (err) {

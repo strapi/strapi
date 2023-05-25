@@ -24,6 +24,8 @@ describe('Transfer', () => {
       };
     }),
     exitMessageText: jest.fn(),
+    getDiffHandler: jest.fn(),
+    setSignalHandler: jest.fn(),
   };
   jest.mock(
     '../../../utils/data-transfer.js',
@@ -66,6 +68,7 @@ describe('Transfer', () => {
             on: jest.fn().mockReturnThis(),
             onDiagnostic: jest.fn().mockReturnThis(),
           },
+          onSchemaDiff: jest.fn(),
         };
       },
     },

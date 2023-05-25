@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
@@ -158,7 +158,6 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
-
         const {
           data: { results, pagination: paginationResult },
         } = await fetchClient.get(endPoint, opts);

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.10.4",
+  "version": "4.10.6",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -38,12 +38,13 @@
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
     "@testing-library/jest-dom": "5.16.5",
-    "jest-styled-components": "7.1.1"
+    "jest-styled-components": "7.1.1",
+    "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
-    "eslint-config-custom": "4.10.4",
+    "eslint-config-custom": "4.10.6",
     "redux": "^4.2.1",
-    "tsconfig": "4.10.4"
+    "tsconfig": "4.10.6"
   },
   "peerDependencies": {
     "redux": "^4.2.1"

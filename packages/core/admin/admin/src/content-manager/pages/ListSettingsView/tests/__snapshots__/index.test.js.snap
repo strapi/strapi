@@ -143,6 +143,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -1804,6 +1805,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -2479,7 +2481,9 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 <div>
   <div
+    aria-hidden="true"
     class="c0"
+    data-aria-hidden="true"
   >
     <div
       class="c1 c2"
