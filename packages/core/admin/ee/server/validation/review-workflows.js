@@ -1,7 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
-const { getVisibleContentTypesUID, hasStageAttribute } = require('../utils/review-workflows');
+const { hasStageAttribute } = require('../utils/review-workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
