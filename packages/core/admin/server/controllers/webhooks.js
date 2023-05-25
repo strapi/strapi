@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, webhook: webhookUtils, validateYupSchema } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const urlRegex =
   /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)(?:\.(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
@@ -23,7 +23,9 @@ const webhookValidator = yup
         )
         .required();
     }),
-    events: yup.array().of(yup.string().oneOf(_.values(webhookUtils.webhookEvents)).required()),
+    events: yup
+      .array()
+      .of(yup.string().oneOf(Array.from(strapi.webhookStore.allowedEvents.values())).required()),
   })
   .noUnknown();
 
