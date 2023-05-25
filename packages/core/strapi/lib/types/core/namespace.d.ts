@@ -52,7 +52,7 @@ export type GetSeparator<T extends Any = Any> = T extends Scoped
 /**
  * Adds the corresponding separator (using {@link GetSeparator}) at the end of a namespace
  *
- * Warning: Using WithSeparator with a union type might produce undesired results as it'll distribute every matching suffix to every union members
+ * Warning: Using WithSeparator with a union type might produce undesired results as it'll distribute every matching suffix to every union member
  *
  * @example
  * type T = WithSeparator<Admin>
