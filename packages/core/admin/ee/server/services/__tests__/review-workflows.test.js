@@ -71,6 +71,9 @@ const strapiMock = {
         return null;
     }
   },
+  webhookStore: {
+    allowedEvents: new Map([]),
+  },
 };
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
