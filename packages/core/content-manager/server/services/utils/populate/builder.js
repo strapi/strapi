@@ -28,12 +28,13 @@ function populateBuilder(uid) {
       return builder;
     },
     async build() {
-      const basePopulate = getPopulatePermission ? await getPopulatePermission() : {};
+      const initialPopulate = getPopulatePermission ? await getPopulatePermission() : {};
 
       if (deepPopulateOptions.maxLevel === -1) {
-        return basePopulate;
+        return initialPopulate;
       }
-      return getDeepPopulate(uid, { ...deepPopulateOptions, basePopulate });
+
+      return getDeepPopulate(uid, { ...deepPopulateOptions, initialPopulate });
     },
   };
 

@@ -25,13 +25,23 @@ const isDynamicZone = propEq('type', 'dynamiczone');
  * @param {Boolean} options.countOne
  * @returns {true|{count: true}}
  */
-function getPopulateForRelation(attribute, model, attributeName, { countMany, countOne }) {
+function getPopulateForRelation(
+  attribute,
+  model,
+  attributeName,
+  { countMany, countOne, initialPopulate }
+) {
   const isManyRelation = isAnyToMany(attribute);
+
+  if (initialPopulate) {
+    return initialPopulate;
+  }
 
   // always populate createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
     return true;
   }
+
   if ((isManyRelation && countMany) || (!isManyRelation && countOne)) {
     return { count: true };
   }
@@ -116,7 +126,7 @@ function getPopulateFor(attributeName, model, options, level) {
  */
 const getDeepPopulate = (
   uid,
-  { countMany = false, countOne = false, maxLevel = Infinity } = {},
+  { initialPopulate = {}, countMany = false, countOne = false, maxLevel = Infinity } = {},
   level = 1
 ) => {
   if (level > maxLevel) {
@@ -129,7 +139,12 @@ const getDeepPopulate = (
     (populateAcc, attributeName) =>
       merge(
         populateAcc,
-        getPopulateFor(attributeName, model, { countMany, countOne, maxLevel }, level)
+        getPopulateFor(
+          attributeName,
+          model,
+          { initialPopulate: initialPopulate?.[attributeName], countMany, countOne, maxLevel },
+          level
+        )
       ),
     {}
   );
@@ -242,8 +257,22 @@ const getQueryPopulate = async (uid, query) => {
   return populateQuery;
 };
 
+/**
+ * When config admin.webhooks.populateRelations is set to true,
+ * populated relations will be passed to any webhook event.
+ * The entity-manager response will not have the populated relations though.
+ * For performance reasons, it is recommended to set it to false,
+ *
+ * TODO V5: Set to false by default.
+ * TODO V5: Make webhooks always send the same entity data.
+ */
+const isPopulateRelationsEnabled = () => {
+  return strapi.config.get('server.webhooks.populateRelations', true);
+};
+
 module.exports = {
   getDeepPopulate,
   getDeepPopulateDraftCount,
   getQueryPopulate,
+  isPopulateRelationsEnabled,
 };
