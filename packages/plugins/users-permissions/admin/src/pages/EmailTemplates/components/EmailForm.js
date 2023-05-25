@@ -120,7 +120,7 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
                         id: getTrad('PopUpForm.Email.options.message.label'),
                         defaultMessage: 'Message',
                       })}
-                      name="options.message"
+                      id="options.message"
                       onChange={handleChange}
                       value={values.options.message}
                       error={
