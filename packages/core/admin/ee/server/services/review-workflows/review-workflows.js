@@ -11,7 +11,7 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
-// The suffix should looks like _strapi_reviewWorkflow_stage_links_inv_fk
+// The longest index name that Strapi can create is prefixed with '_strapi_reviewWorkflow_stage_links_inv_fk', so the content type name  should be no longer than this.
 const MAX_JOIN_TABLE_NAME_SUFFIX =
   1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
 const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
