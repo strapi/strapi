@@ -64,6 +64,9 @@ describe('Upload plugin bootstrap function', () => {
           set: setStore,
         };
       },
+      webhookStore: {
+        allowedEvents: new Map([]),
+      },
     };
 
     await bootstrap({ strapi });
