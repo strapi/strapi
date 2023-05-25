@@ -126,6 +126,10 @@ export const ProvidersPage = () => {
     if (providerToEditName === 'email') {
       return forms.email;
     }
+    
+    if (providerToEditName === 'twitter') {
+      return forms.twitter;
+    }
 
     if (isProviderWithSubdomain) {
       return forms.providersWithSubdomain;
