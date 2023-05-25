@@ -4,6 +4,9 @@
 
 'use strict';
 
+const { mapValues } = require('lodash/fp');
+const { yup, validateYupSchema } = require('@strapi/utils');
+
 const webhookModel = {
   uid: 'webhook',
   collectionName: 'strapi_webhooks',
@@ -47,6 +50,37 @@ const fromDBObject = (row) => {
   };
 };
 
+const urlRegex =
+  /^(?:([a-z0-9+.-]+):\/\/)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)(?:\.(?:[a-z\u00a1-\uffff0-9_]-*)*[a-z\u00a1-\uffff0-9_]+)*\.?)(?::\d{2,5})?(?:[/?#]\S*)?$/;
+
+const webhookValidator = (allowedEvents) =>
+  yup
+    .object({
+      name: yup.string().required(),
+      url: yup.string().matches(urlRegex, 'url must be a valid URL').required(),
+      headers: yup.lazy((data) => {
+        if (typeof data !== 'object') {
+          return yup.object().required();
+        }
+
+        return yup
+          .object(
+            mapValues(() => {
+              yup.string().min(1).required();
+            }, data)
+          )
+          .required();
+      }),
+      events: yup.array().of(yup.string().oneOf(Array.from(allowedEvents.values())).required()),
+    })
+    .noUnknown();
+
+const updateWebhookValidator = (allowedEvents) =>
+  webhookValidator(allowedEvents).shape({
+    id: yup.number().required(),
+    isEnabled: yup.boolean().required(),
+  });
+
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
 
@@ -71,8 +105,9 @@ const createWebhookStore = ({ db }) => {
       return result ? fromDBObject(result) : null;
     },
 
-    createWebhook(data) {
-      // TODO: Validate webhook event
+    async createWebhook(data) {
+      await validateYupSchema(webhookValidator(allowedEvents))(data);
+
       return webhookQueries
         .create({
           data: toDBObject({ ...data, isEnabled: true }),
@@ -81,7 +116,8 @@ const createWebhookStore = ({ db }) => {
     },
 
     async updateWebhook(id, data) {
-      // TODO: Validate webhook event
+      await validateYupSchema(updateWebhookValidator(allowedEvents))(data);
+
       const webhook = await webhookQueries.update({
         where: { id },
         data: toDBObject(data),
