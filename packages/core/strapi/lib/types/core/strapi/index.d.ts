@@ -21,7 +21,7 @@ interface CustomFieldServerOptions {
    * The existing Strapi data type the custom field uses
    */
   type: string;
-  
+
   /**
    * Settings for the input size in the Admin UI
    */
@@ -81,12 +81,12 @@ export interface Strapi {
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<GenericController>;
+  readonly controllers: StringMap<GenericController>; // TODO type this better (?)
 
   /**
    * Find a controller using its unique identifier
    */
-  controller(uid: string): GenericController | undefined;
+  controller(uid: string): GenericController | undefined; // TODO type this better (?)
 
   /**
    * Getter for the Strapi content types container

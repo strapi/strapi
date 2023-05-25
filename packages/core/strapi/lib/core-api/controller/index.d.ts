@@ -1,6 +1,5 @@
 import { Context, Next } from 'koa';
-
-type ControllerResponse<T = unknown> = T | Promise<T> | undefined;
+import { ControllerHandler } from '../../types/core/common';
 
 interface Controller {
   transformResponse(data: object, meta: object): object;
@@ -9,19 +8,19 @@ interface Controller {
 }
 
 export interface SingleTypeController extends Controller {
-  find?(ctx: Context, next: Next): ControllerResponse;
-  update?(ctx: Context, next: Next): ControllerResponse;
-  delete?(ctx: Context, next: Next): ControllerResponse;
+  find?: ControllerHandler;
+  update?: ControllerHandler;
+  delete?: ControllerHandler;
 }
 
 export interface CollectionTypeController extends Controller {
-  find?(ctx: Context, next: Next): ControllerResponse;
-  findOne?(ctx: Context, next: Next): ControllerResponse;
-  create?(ctx: Context, next: Next): ControllerResponse;
-  update?(ctx: Context, next: Next): ControllerResponse;
-  delete?(ctx: Context, next: Next): ControllerResponse;
+  find?: ControllerHandler;
+  findOne?: ControllerHandler;
+  create?: ControllerHandler;
+  update?: ControllerHandler;
+  delete?: ControllerHandler;
 }
 
 export type GenericController = Partial<Controller> & {
-  [method: string | number | symbol]: (ctx: Context) => unknown;
+  [method: string | number | symbol]: ControllerHandler;
 };
