@@ -11,39 +11,39 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn(() => [{ query: {} }]),
 }));
 
-const PROPS_FIXTURE = {
-  canUpdate: true,
-  rows: [
-    {
-      alternativeText: 'alternative text',
-      createdAt: '2021-10-01T08:04:56.326Z',
-      ext: '.jpeg',
-      formats: {
-        thumbnail: {
-          url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
-        },
-      },
-      id: 1,
-      mime: 'image/jpeg',
-      name: 'michka',
-      size: 11.79,
-      updatedAt: '2021-10-18T08:04:56.326Z',
-      url: '/uploads/michka.jpg',
-      type: 'asset',
+const ASSET_FIXTURE = {
+  alternativeText: 'alternative text',
+  createdAt: '2021-10-01T08:04:56.326Z',
+  ext: '.jpeg',
+  formats: {
+    thumbnail: {
+      url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
     },
-  ],
-  onEditAsset: jest.fn(),
-  onEditFolder: jest.fn(),
-  onSelectOne: jest.fn(),
-  selected: [],
+  },
+  id: 1,
+  mime: 'image/jpeg',
+  name: 'michka',
+  size: 11.79,
+  updatedAt: '2021-10-18T08:04:56.326Z',
+  url: '/uploads/michka.jpg',
+  type: 'asset',
 };
 
 const FOLDER_FIXTURE = {
   createdAt: '2022-11-17T10:40:06.022Z',
-  id: 2,
+  id: 1,
   name: 'folder 1',
   type: 'folder',
   updatedAt: '2022-11-17T10:40:06.022Z',
+};
+
+const PROPS_FIXTURE = {
+  canUpdate: true,
+  rows: [ASSET_FIXTURE],
+  onEditAsset: jest.fn(),
+  onEditFolder: jest.fn(),
+  onSelectOne: jest.fn(),
+  selected: [],
 };
 
 const ComponentFixture = (props) => {
@@ -164,7 +164,7 @@ describe('TableList | TableRows', () => {
 
       fireEvent.click(getByRole('button', { name: 'Access folder', hidden: true }));
 
-      expect(onChangeFolderSpy).toHaveBeenCalledWith(2);
+      expect(onChangeFolderSpy).toHaveBeenCalledWith(1);
     });
 
     it('should reflect non selected folder state', () => {
@@ -178,7 +178,7 @@ describe('TableList | TableRows', () => {
     it('should reflect selected folder state', () => {
       const { getByRole } = setup({
         rows: [FOLDER_FIXTURE],
-        selected: [{ id: 2, type: 'folder' }],
+        selected: [{ id: 1, type: 'folder' }],
       });
 
       expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
@@ -204,6 +204,45 @@ describe('TableList | TableRows', () => {
       const { getAllByText } = setup({ rows: [FOLDER_FIXTURE] });
 
       expect(getAllByText('-').length).toEqual(2);
+    });
+  });
+
+  describe.only('rendering folder & asset with the same id', () => {
+    it('should reflect selected only folder state', () => {
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
+        selected: [{ id: 1, type: 'folder' }],
+      });
+
+      expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
+      expect(
+        getByRole('checkbox', { name: 'Select michka asset', hidden: true })
+      ).not.toBeChecked();
+    });
+
+    it('should reflect selected only asset state', () => {
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
+        selected: [{ id: 1, type: 'asset' }],
+      });
+
+      expect(
+        getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })
+      ).not.toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
+    });
+
+    it('should reflect selected both asset & folder state', () => {
+      const { getByRole } = setup({
+        rows: [FOLDER_FIXTURE, ASSET_FIXTURE],
+        selected: [
+          { id: 1, type: 'asset' },
+          { id: 1, type: 'folder' },
+        ],
+      });
+
+      expect(getByRole('checkbox', { name: 'Select folder 1 folder', hidden: true })).toBeChecked();
+      expect(getByRole('checkbox', { name: 'Select michka asset', hidden: true })).toBeChecked();
     });
   });
 });
