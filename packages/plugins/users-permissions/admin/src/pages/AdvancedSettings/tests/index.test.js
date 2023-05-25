@@ -147,6 +147,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -845,20 +846,20 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         >
                           <label
                             class="c5 c19 c20"
-                            for=":r0:"
+                            for="1"
                           >
                             Default role for authenticated users
                           </label>
                           <div
                             aria-autocomplete="none"
-                            aria-controls="radix-:r3:"
-                            aria-describedby=":r0:-hint :r0:-error"
+                            aria-controls="radix-0"
+                            aria-describedby="1-hint 1-error"
                             aria-expanded="false"
                             aria-label="Default role for authenticated users"
                             class="c21 c22 c23"
                             data-state="closed"
                             dir="ltr"
-                            id=":r0:"
+                            id="1"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -902,7 +903,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </div>
                           <p
                             class="c5 c30"
-                            id=":r0:-hint"
+                            id="1-hint"
                           >
                             It will attach the new authenticated user to the selected role.
                           </p>
@@ -927,7 +928,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c5 c19 c20"
-                              for=":r4:"
+                              for="3"
                             >
                               One account per email address
                             </label>
@@ -965,11 +966,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
-                                aria-describedby=":r4:-hint"
+                                aria-describedby="3-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c43"
-                                id=":r4:"
+                                id="3"
                                 name="unique_email"
                                 type="checkbox"
                               />
@@ -977,7 +978,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c5 c30"
-                            id=":r4:-hint"
+                            id="3-hint"
                           >
                             Disallow the user to create multiple accounts using the same email address with different authentication providers.
                           </p>
@@ -1002,7 +1003,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c5 c19 c20"
-                              for=":r6:"
+                              for="5"
                             >
                               Enable sign-ups
                             </label>
@@ -1040,11 +1041,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
-                                aria-describedby=":r6:-hint"
+                                aria-describedby="5-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c43"
-                                id=":r6:"
+                                id="5"
                                 name="allow_register"
                                 type="checkbox"
                               />
@@ -1052,7 +1053,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c5 c30"
-                            id=":r6:-hint"
+                            id="5-hint"
                           >
                             When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
                           </p>
@@ -1123,7 +1124,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           >
                             <label
                               class="c5 c19 c20"
-                              for=":ra:"
+                              for="7"
                             >
                               Enable email confirmation
                             </label>
@@ -1161,11 +1162,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 </span>
                               </div>
                               <input
-                                aria-describedby=":ra:-hint"
+                                aria-describedby="7-hint"
                                 aria-disabled="false"
                                 aria-required="false"
                                 class="c43"
-                                id=":ra:"
+                                id="7"
                                 name="email_confirmation"
                                 type="checkbox"
                               />
@@ -1173,7 +1174,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                           </label>
                           <p
                             class="c5 c30"
-                            id=":ra:-hint"
+                            id="7-hint"
                           >
                             When enabled (ON), new registered users receive a confirmation email.
                           </p>

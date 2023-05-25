@@ -182,9 +182,7 @@ module.exports = ({ strapi }) => {
 
         generatedDocumentation = produce(generatedDocumentation, (draft) => {
           if (generatedSchemas) {
-            draft.components = {
-              schemas: { ...draft.components.schemas, ...generatedSchemas },
-            };
+            draft.components.schemas = { ...draft.components.schemas, ...generatedSchemas };
           }
 
           if (newApiPath) {

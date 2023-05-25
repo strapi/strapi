@@ -67,6 +67,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -184,7 +185,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c23 {
+.c22 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -241,62 +242,58 @@ exports[`FromComputerForm snapshots the component 1`] = `
   fill: #ffffff;
 }
 
-.c22 {
+.c21 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c22[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true'] .c8 {
+.c21[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
+.c21[aria-disabled='true'] svg > g,.c21[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c22[aria-disabled='true']:active {
+.c21[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c22[aria-disabled='true']:active .c8 {
+.c21[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
+.c21[aria-disabled='true']:active svg > g,.c21[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c22:hover {
+.c21:hover {
   background-color: #f6f6f9;
 }
 
-.c22:active {
+.c21:active {
   background-color: #eaeaef;
 }
 
-.c22 .c8 {
+.c21 .c8 {
   color: #32324d;
 }
 
-.c22 svg > g,
-.c22 svg path {
+.c21 svg > g,
+.c21 svg path {
   fill: #32324d;
 }
 
 .c19 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
-}
-
-.c21 > * + * {
-  margin-left: 8px;
 }
 
 .c5 {
@@ -401,11 +398,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
         class="c20"
       >
         <div
-          class="c4 c21"
+          class="c14"
         >
           <button
             aria-disabled="false"
-            class="c13 c14 c15 c22"
+            class="c13 c14 c15 c21"
             type="button"
           >
             <span
@@ -416,13 +413,13 @@ exports[`FromComputerForm snapshots the component 1`] = `
           </button>
         </div>
         <div
-          class="c4 c21"
+          class="c14"
         />
       </div>
     </div>
   </form>
   <div
-    class="c23"
+    class="c22"
   >
     <p
       aria-live="polite"

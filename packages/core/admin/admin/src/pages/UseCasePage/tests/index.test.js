@@ -128,6 +128,7 @@ describe('Admin | UseCasePage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -159,6 +160,7 @@ describe('Admin | UseCasePage', () => {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -642,7 +644,7 @@ describe('Admin | UseCasePage', () => {
             >
               <div>
                 <button
-                  aria-controls=":r0:"
+                  aria-controls="0"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="true"
@@ -733,7 +735,7 @@ describe('Admin | UseCasePage', () => {
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-:r4:"
+                          aria-controls="radix-0"
                           aria-describedby="usecase-hint usecase-error"
                           aria-expanded="false"
                           aria-label="What type of work do you do?"

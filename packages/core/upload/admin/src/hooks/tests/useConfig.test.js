@@ -1,7 +1,7 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
@@ -85,10 +85,10 @@ describe('useConfig', () => {
       const { get } = useFetchClient();
       get.mockReturnValueOnce(mockGetResponse);
 
-      const { result } = await setup();
+      const { waitFor, result } = await setup();
       expect(get).toHaveBeenCalledWith(`/${pluginId}/configuration`);
 
-      await waitFor(() => expect(result.current.config.isLoading).toBe(false));
+      await waitFor(() => !result.current.config.isLoading);
       expect(result.current.config.data).toEqual(mockGetResponse.data.data);
     });
 
@@ -100,9 +100,11 @@ describe('useConfig', () => {
         },
       });
 
-      const { result } = await setup();
+      const { waitFor, result } = await setup();
 
-      await waitFor(() => expect(result.current.config.data).toEqual({}));
+      await waitFor(() => !result.current.config.isLoading);
+
+      expect(result.current.config.data).toEqual({});
     });
 
     test('calls toggleNotification in case of error', async () => {
@@ -112,7 +114,7 @@ describe('useConfig', () => {
 
       get.mockRejectedValueOnce(new Error('Jest mock error'));
       const toggleNotification = useNotification();
-      await setup({});
+      const { waitFor } = await setup({});
 
       await waitFor(() =>
         expect(toggleNotification).toBeCalledWith({

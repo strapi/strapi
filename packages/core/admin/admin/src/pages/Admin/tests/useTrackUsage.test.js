@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useTrackUsage } from '../index';
 
 const trackUsageMock = jest.fn();

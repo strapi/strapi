@@ -118,21 +118,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     await user.type(getByLabelText(/^Password/i), ' secret ');
     await user.type(getByLabelText(/Confirm Password/i), ' secret ');
 
-    fireEvent.click(getByRole('button', { name: /let's start/i }));
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /let's start/i }));
+    });
 
-    await waitFor(() =>
-      expect(spy).toHaveBeenCalledWith(
-        {
-          firstname: 'First name',
-          lastname: 'Last name',
-          email: 'test@strapi.io',
-          news: false,
-          registrationToken: undefined,
-          confirmPassword: ' secret ',
-          password: ' secret ',
-        },
-        expect.any(Object)
-      )
+    expect(spy).toHaveBeenCalledWith(
+      {
+        firstname: 'First name',
+        lastname: 'Last name',
+        email: 'test@strapi.io',
+        news: false,
+        registrationToken: undefined,
+        confirmPassword: ' secret ',
+        password: ' secret ',
+      },
+      expect.any(Object)
     );
   });
 

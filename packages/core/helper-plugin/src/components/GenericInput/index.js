@@ -409,14 +409,12 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={(event) => onChange({ target: { name, value: event.target.value, type } })}
           required={required}
           placeholder={formattedPlaceholder}
           type={type}
           value={valueWithEmptyStringFallback}
-        >
-          {value}
-        </Textarea>
+        />
       );
     }
     case 'time': {

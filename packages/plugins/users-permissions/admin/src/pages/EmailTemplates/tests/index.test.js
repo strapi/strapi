@@ -518,7 +518,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r0:"
+                            aria-labelledby="0"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"
@@ -598,7 +598,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby=":r2:"
+                            aria-labelledby="1"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"

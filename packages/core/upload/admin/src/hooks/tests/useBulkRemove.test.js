@@ -1,7 +1,7 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
@@ -173,6 +173,7 @@ describe('useBulkRemove', () => {
 
     const {
       result: { current },
+      waitFor,
     } = await setup();
     const { remove } = current;
 
@@ -195,6 +196,7 @@ describe('useBulkRemove', () => {
 
     const {
       result: { current },
+      waitFor,
     } = await setup();
     const { remove } = current;
 

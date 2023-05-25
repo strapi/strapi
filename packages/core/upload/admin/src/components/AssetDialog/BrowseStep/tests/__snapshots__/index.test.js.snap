@@ -129,6 +129,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -909,7 +910,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         >
           <div>
             <button
-              aria-controls=":r0:"
+              aria-controls="0"
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="true"
@@ -988,7 +989,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby=":r1:"
+                aria-labelledby="1"
                 class="c17 c18 c7 c19"
                 tabindex="0"
                 type="button"
@@ -1018,7 +1019,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby=":r3:"
+              aria-labelledby="2"
               class="c17 c18 c7 c19"
               tabindex="0"
               type="button"
@@ -1253,17 +1254,17 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           >
             <label
               class="c9 c58 c59"
-              for=":r5:"
+              for="4"
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-:r8:"
-              aria-describedby=":r5:-hint :r5:-error"
+              aria-controls="radix-0"
+              aria-describedby="4-hint 4-error"
               aria-expanded="false"
               class="c60 c61 c62"
               data-state="closed"
               dir="ltr"
-              id=":r5:"
+              id="4"
               overflow="hidden"
               role="combobox"
               tabindex="0"

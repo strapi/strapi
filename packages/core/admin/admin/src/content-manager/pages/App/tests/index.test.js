@@ -6,7 +6,7 @@ import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
@@ -92,7 +92,7 @@ describe('Content manager | App | main', () => {
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    act(() => history.push('/content-manager'));
+    history.push('/content-manager');
 
     const { container } = render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -552,7 +552,7 @@ describe('Content manager | App | main', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby=":r1:"
+                  aria-labelledby="0"
                   class="c6 c7 c8 c9"
                   tabindex="0"
                   type="button"
@@ -631,7 +631,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id=":r3:"
+                    id="2"
                   >
                     <li>
                       <a
@@ -708,7 +708,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id=":r4:"
+                    id="3"
                   >
                     <li>
                       <a
@@ -819,7 +819,7 @@ describe('Content manager | App | main', () => {
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    act(() => history.push('/content-manager'));
+    history.push('/content-manager');
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -865,7 +865,7 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
-    act(() => history.push('/content-manager/collectionType/category'));
+    history.push('/content-manager/collectionType/category');
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -910,7 +910,7 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
-    act(() => history.push('/content-manager/collectionType/category'));
+    history.push('/content-manager/collectionType/category');
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
