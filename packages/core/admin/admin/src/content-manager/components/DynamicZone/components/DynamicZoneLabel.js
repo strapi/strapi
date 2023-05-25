@@ -7,7 +7,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 
@@ -24,11 +23,12 @@ export const DynamicZoneLabel = ({
 
   return (
     <Flex justifyContent="center">
-      <StyledBox
+      <Box
         paddingTop={3}
         paddingBottom={3}
         paddingRight={4}
         paddingLeft={4}
+        borderRadius={26}
         background="neutral0"
         shadow="filterShadow"
         color="neutral500"
@@ -52,14 +52,10 @@ export const DynamicZoneLabel = ({
             </Box>
           )}
         </Flex>
-      </StyledBox>
+      </Box>
     </Flex>
   );
 };
-
-const StyledBox = styled(Box)`
-  border-radius: ${pxToRem(26)};
-`;
 
 DynamicZoneLabel.defaultProps = {
   intlDescription: undefined,

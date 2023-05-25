@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import { NotAllowedInput, useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';

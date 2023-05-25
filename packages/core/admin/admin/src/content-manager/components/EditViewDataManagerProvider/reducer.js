@@ -101,9 +101,9 @@ const reducer = (state, action) =>
           componentLayoutData.attributes
         );
 
-        const newValue = currentValue.toSpliced(actualPosition, 0, componentDataStructure);
+        currentValue.splice(actualPosition, 0, componentDataStructure);
 
-        set(draftState, ['modifiedData', ...keys], newValue);
+        set(draftState, ['modifiedData', ...keys], currentValue);
 
         break;
       }

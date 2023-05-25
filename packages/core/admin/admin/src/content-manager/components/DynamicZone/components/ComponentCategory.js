@@ -47,6 +47,9 @@ export const ComponentCategory = ({
                 justifyContent="center"
                 onClick={onAddComponent(componentUid)}
                 hasRadius
+                height={pxToRem(84)}
+                shrink={0}
+                borderColor="neutral200"
               >
                 <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
                   <ComponentIcon />
@@ -71,10 +74,6 @@ const Grid = styled.div`
 `;
 
 const ComponentBox = styled(Flex)`
-  flex-shrink: 0;
-  height: ${pxToRem(84)};
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
-
   &:focus,
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
