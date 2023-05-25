@@ -4,8 +4,10 @@
  * Helper functions for the Strapi CLI
  */
 
-const chalk = require('chalk');
+const { yellow, red, green } = require('chalk');
 const { isString, isArray } = require('lodash/fp');
+const resolveCwd = require('resolve-cwd');
+const { has } = require('lodash/fp');
 
 const bytesPerKb = 1024;
 const sizes = ['B ', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -46,9 +48,9 @@ const exitWith = (code, message = undefined, options = {}) => {
 
   const log = (message) => {
     if (code === 0) {
-      logger.log(chalk.green(message));
+      logger.log(green(message));
     } else {
-      logger.error(chalk.red(message));
+      logger.error(red(message));
     }
   };
 
@@ -107,9 +109,58 @@ const ifOptions = (conditionCallback, isMetCallback = () => {}, isNotMetCallback
   };
 };
 
+const assertCwdContainsStrapiProject = (name) => {
+  const logErrorAndExit = () => {
+    console.log(
+      `You need to run ${yellow(
+        `strapi ${name}`
+      )} in a Strapi project. Make sure you are in the right directory.`
+    );
+    process.exit(1);
+  };
+
+  try {
+    const pkgJSON = require(`${process.cwd()}/package.json`);
+    if (!has('dependencies.@strapi/strapi', pkgJSON)) {
+      logErrorAndExit(name);
+    }
+  } catch (err) {
+    logErrorAndExit(name);
+  }
+};
+
+const getLocalScript =
+  (name) =>
+  (...args) => {
+    assertCwdContainsStrapiProject(name);
+
+    const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/actions/${name}/action`);
+    if (!cmdPath) {
+      console.log(
+        `Error loading the local ${yellow(
+          name
+        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
+      );
+      process.exit(1);
+    }
+
+    const script = require(cmdPath);
+
+    Promise.resolve()
+      .then(() => {
+        return script(...args);
+      })
+      .catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
+  };
+
 module.exports = {
   exitWith,
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
+  getLocalScript,
+  assertCwdContainsStrapiProject,
 };

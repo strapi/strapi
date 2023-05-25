@@ -176,7 +176,7 @@ const getInitialProviders = ({ purest }) => ({
     const vk = purest({ provider: 'vk' });
 
     return vk
-      .get('users.get')
+      .get('users')
       .auth(accessToken)
       .qs({ id: query.raw.user_id, v: '5.122' })
       .request()

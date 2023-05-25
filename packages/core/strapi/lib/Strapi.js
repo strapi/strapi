@@ -27,6 +27,7 @@ const createCustomFields = require('./services/custom-fields');
 const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const createStrapiFetch = require('./utils/fetch');
 const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
@@ -109,7 +110,7 @@ class Strapi {
     // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
-    // Strapi utils instanciation
+    // Strapi utils instantiation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -118,6 +119,7 @@ class Strapi {
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
     this.customFields = createCustomFields(this);
+    this.fetch = createStrapiFetch(this);
 
     createUpdateNotifier(this).notify();
 
@@ -253,6 +255,7 @@ class Strapi {
         numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents: _.size(this.components),
         numberOfDynamicZones: getNumberOfDynamicZones(),
+        environment: strapi.config.environment,
         // TODO: to add back
         // providers: this.config.installedProviders,
       },
@@ -393,6 +396,7 @@ class Strapi {
       eventHub: this.eventHub,
       logger: this.log,
       configuration: this.config.get('server.webhooks', {}),
+      fetch: this.fetch,
     });
 
     this.registerInternalHooks();

@@ -186,11 +186,24 @@ const forms = {
           })
         : pluralNames;
 
+      // return the array of collection names not all normalized
+      const collectionNames = Object.values(contentTypes).map((contentType) => {
+        return get(contentType, ['schema', 'collectionName'], '');
+      });
+
+      const takenCollectionNames = isEditing ? collectionNames.filter((collectionName) => {
+        const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+        const currentCollectionName = get(contentTypes, [ctUid, 'schema', 'collectionName'], '');
+
+        return collectionName !== currentPluralName || collectionName !== currentCollectionName;
+      }) : collectionNames;
+
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,
         reservedModels: reservedNames.models,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
+        collectionNames: takenCollectionNames,
       });
 
       // FIXME

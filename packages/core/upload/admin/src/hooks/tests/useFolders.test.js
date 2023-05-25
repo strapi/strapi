@@ -6,7 +6,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system';
+import { useNotifyAT, ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import { useFolders } from '../useFolders';
 
@@ -47,11 +47,13 @@ function ComponentFixture({ children }) {
     <Router>
       <Route>
         <QueryClientProvider client={client}>
-          <NotificationsProvider toggleNotification={() => jest.fn()}>
-            <IntlProvider locale="en" messages={{}}>
-              {children}
-            </IntlProvider>
-          </NotificationsProvider>
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </NotificationsProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </Route>
     </Router>

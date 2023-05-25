@@ -8,30 +8,30 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import Theme from '../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
-import Information from '../index';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import Information from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn(),
 }));
 
-const makeApp = () => {
+const ComponentFixture = () => {
   return (
-    <IntlProvider
-      locale="en"
-      defaultLocale="en"
-      messages={{ 'containers.Edit.information': 'Information' }}
-    >
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <Information />
-        </Theme>
-      </ThemeToggleProvider>
+    <IntlProvider locale="en" messages={{}}>
+      <ThemeProvider theme={lightTheme}>
+        <Information.Root>
+          <Information.Title />
+          <Information.Body />
+        </Information.Root>
+      </ThemeProvider>
     </IntlProvider>
   );
+};
+
+const setup = (props) => {
+  return render(<ComponentFixture {...props} />);
 };
 
 describe('CONTENT MANAGER | EditView | Information', () => {
@@ -51,7 +51,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: true,
     }));
 
-    const { getByText, getAllByText } = render(makeApp());
+    const { getByText, getAllByText } = setup();
 
     expect(getByText('Created')).toBeInTheDocument();
     expect(getByText('Last update')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: false,
     }));
 
-    const { getAllByText } = render(makeApp());
+    const { getAllByText } = setup();
 
     expect(getAllByText('8 months ago').length).toBe(2);
     expect(getAllByText('First name Last name').length).toBe(2);
@@ -104,7 +104,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
       isCreatingEntry: false,
     }));
 
-    const { queryByText, getAllByText } = render(makeApp());
+    const { queryByText, getAllByText } = setup();
 
     expect(getAllByText('user@strapi.io').length).toBe(2);
     expect(queryByText('First name')).toBeNull();

@@ -104,7 +104,7 @@ export default async function buildStarter(
   { projectName, starter }: { projectName: string; starter: string },
   program: Program
 ) {
-  const hasYarnInstalled = await hasYarn();
+  const hasYarnInstalled = hasYarn();
   const { isLocalStarter, starterPath, starterParentPath, starterPackageInfo } =
     await getStarterInfo(starter, { useYarn: hasYarnInstalled });
 

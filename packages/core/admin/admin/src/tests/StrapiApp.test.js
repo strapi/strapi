@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { fixtures } from '@strapi/admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils';
 import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';

@@ -52,6 +52,7 @@ The Strapi core team will review your pull request and either merge it, request 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
 - Fork the repository and create your new branch from `main`.
+- Run `yarn install` in the root of the repository.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
 - Ensure the following test suites are passing:
@@ -78,6 +79,7 @@ Go to the root of the repository and run the setup:
 
 ```bash
 cd strapi
+yarn install
 yarn setup
 
 ```
@@ -183,4 +185,4 @@ Before submitting an issue you need to make sure:
   - Make sure your application has a clean `node_modules` directory, meaning:
     - you didn't link any dependencies (e.g., by running `yarn link`)
     - you haven't made any inline changes to files in the `node_modules` directory
-    - you don't have any global dependency loops. If you aren't sure, the easiest way to double-check any of the above is to run: `$ rm -rf node_modules && yarn cache clean && yarn setup`.
+    - you don't have any global dependency loops. If you aren't sure, the easiest way to double-check any of the above is to run: `$ rm -rf node_modules && yarn cache clean && yarn install && yarn setup`.

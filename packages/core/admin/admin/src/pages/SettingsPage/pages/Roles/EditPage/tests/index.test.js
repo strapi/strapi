@@ -19,7 +19,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const makeApp = (history) => (
