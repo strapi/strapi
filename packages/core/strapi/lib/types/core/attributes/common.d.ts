@@ -2,7 +2,7 @@
  * Strapi custom scalar types
  */
 
-import type { Attribute } from '@strapi/strapi';
+import type { Attribute, Common } from '@strapi/strapi';
 
 /**
  * Setters for the attributes options
@@ -46,16 +46,17 @@ export type DefaultTo<T> = { default: T };
 export type Any =
   | Attribute.BigInteger
   | Attribute.Boolean
-  | Attribute.Component
+  | Attribute.Component<Common.UID.Component, boolean>
   | Attribute.DateTime
   | Attribute.Date
   | Attribute.Decimal
   | Attribute.DynamicZone
   | Attribute.Email
-  | Attribute.Enumeration
+  | Attribute.Enumeration<string[]>
   | Attribute.Float
+  | Attribute.Integer
   | Attribute.JSON
-  | Attribute.Media
+  | (Attribute.Media<undefined, boolean> | Attribute.Media<Attribute.AllowedMediaTypes, boolean>)
   | Attribute.Password
   | Attribute.Relation
   | Attribute.RichText
@@ -63,4 +64,4 @@ export type Any =
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | Attribute.UID;
+  | (Attribute.UID<undefined> | Attribute.UID<Common.UID.Schema>);

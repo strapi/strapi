@@ -1,27 +1,41 @@
-import type { Attribute, Common } from '@strapi/strapi';
+import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
-export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
+export type BasicRelationsType =
+  | 'oneToOne'
+  | 'oneToMany'
+  | 'manyToOne'
+  | 'manyToMany'
+  | 'morphOne'
+  | 'morphMany';
+export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany';
 export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
 
-export interface BasicRelationProperties<
+export type BasicRelationProperties<
   S extends Common.UID.Schema,
-  R extends RelationsType,
+  R extends BasicRelationsType,
   T extends Common.UID.Schema
-> {
+> = {
   relation: R;
   target: T;
-  inversedBy?: RelationsKeysFromTo<T, S>;
-  mappedBy?: RelationsKeysFromTo<T, S>;
-}
+} & R extends `morph${string}`
+  ? {
+      morphBy?: Utils.KeysBy<
+        Common.Schemas[T]['attributes'],
+        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationsType>
+      >;
+    }
+  : {
+      inversedBy?: RelationsKeysFromTo<T, S>;
+      mappedBy?: RelationsKeysFromTo<T, S>;
+    };
 
-export interface PolymorphicRelationProperties<R extends RelationsType> {
+export interface PolymorphicRelationProperties<R extends PolymorphicRelationsType> {
   relation: R;
 }
 
 export type Relation<
-  S extends Common.UID.Schema,
-  R extends RelationsType,
+  S extends Common.UID.Schema = Common.UID.Schema,
+  R extends RelationsType = RelationsType,
   T extends R extends PolymorphicRelationsType ? never : Common.UID.Schema = never
 > = Attribute.Attribute<'relation'> &
   // Properties

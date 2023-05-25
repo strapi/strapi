@@ -1,4 +1,4 @@
-import { Attribute, Common, Utils } from '@strapi/strapi';
+import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 export type PickTypes<T extends Attribute.Type> = T;
 

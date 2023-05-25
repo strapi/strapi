@@ -10,25 +10,21 @@ export interface UIDOptions {
 
 export interface UIDProperties<
   // Own Schema Reference
-  T extends Common.UID.Schema | undefined = undefined,
+  T extends Common.UID.Schema | undefined,
   // Target attribute
-  U extends T extends Common.UID.Schema
-    ? Attribute.GetKeysByType<T, 'string' | 'text'>
-    : undefined = undefined,
+  U extends T extends Common.UID.Schema ? Attribute.GetKeysByType<T, 'string' | 'text'> : undefined,
   // UID options
   S extends UIDOptions = UIDOptions
 > {
-  targetField?: U;
-  options?: UIDOptions & S;
+  targetField: U;
+  options: UIDOptions & S;
 }
 
 export type UID<
   // Own Schema Reference
   T extends Common.UID.Schema | undefined = undefined,
   // Target attribute
-  U extends T extends Common.UID.Schema
-    ? Attribute.GetKeysByType<T, 'string' | 'text'>
-    : undefined = undefined,
+  U extends TargetAttributeByUID<T> = TargetAttributeByUID<T>,
   // UID options
   S extends UIDOptions = UIDOptions
 > = Attribute.Attribute<'uid'> &
@@ -40,6 +36,10 @@ export type UID<
   Attribute.MinMaxLengthOption &
   Attribute.PrivateOption &
   Attribute.RequiredOption;
+
+type TargetAttributeByUID<T extends Common.UID.Schema | undefined> = T extends Common.UID.Schema
+  ? Attribute.GetKeysByType<T, 'string' | 'text'>
+  : undefined;
 
 export type UIDValue = string;
 

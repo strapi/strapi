@@ -4,7 +4,7 @@ export type AllowedMediaTypes = 'images' | 'videos' | 'files' | 'audios';
 
 export interface MediaProperties<
   // Media Type
-  T extends AllowedMediaTypes = undefined,
+  T extends AllowedMediaTypes | undefined = undefined,
   // Multiple
   U extends boolean = false
 > {
@@ -14,7 +14,7 @@ export interface MediaProperties<
 
 export type Media<
   // Media Type
-  T extends AllowedMediaTypes = undefined,
+  T extends AllowedMediaTypes | undefined = undefined,
   // Multiple
   U extends boolean = false
 > = Attribute.Attribute<'media'> &
