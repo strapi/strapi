@@ -89,7 +89,7 @@ const forms = {
           name: 'access_token',
           type: 'text',
           placeholder: textPlaceholder,
-          size: 50,
+          size: 12,
           validations: {
             required: false,
           },
@@ -101,43 +101,9 @@ const forms = {
           name: 'access_token_secret',
           type: 'text',
           placeholder: textPlaceholder,
-          size: 45,
-          validations: {
-            required: false,
-          },
-        },
-      ],
-      [
-        {
-          intlLabel: {
-            id: getTrad({ id: 'PopUpForm.Providers.jwksurl.label' }),
-            defaultMessage: 'JWKS URL',
-          },
-          name: 'jwksurl',
-          type: 'text',
-          placeholder: textPlaceholder,
           size: 12,
           validations: {
             required: false,
-          },
-        },
-      ],
-
-      [
-        {
-          intlLabel: {
-            id: getTrad('PopUpForm.Providers.subdomain.label'),
-            defaultMessage: 'Host URI (Subdomain)',
-          },
-          name: 'subdomain',
-          type: 'text',
-          placeholder: {
-            id: getTrad('PopUpForm.Providers.subdomain.placeholder'),
-            defaultMessage: 'my.subdomain.com',
-          },
-          size: 12,
-          validations: {
-            required: true,
           },
         },
       ],
@@ -176,7 +142,12 @@ const forms = {
         then: yup.string().required(translatedErrors.required),
         otherwise: yup.string(),
       }),
-      subdomain: yup.string().when('enabled', {
+      access_token: yup.string().when('enabled', {
+        is: true,
+        then: yup.string().required(translatedErrors.required),
+        otherwise: yup.string(),
+      }),
+      access_token_secret: yup.string().when('enabled', {
         is: true,
         then: yup.string().required(translatedErrors.required),
         otherwise: yup.string(),
