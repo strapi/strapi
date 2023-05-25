@@ -55,7 +55,6 @@ export const createDispatcher = (
 
       const sendPeriodically = () => {
         if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
-          console.log('Retrying message', payload, numberOfTimesMessageWasSent);
           numberOfTimesMessageWasSent += 1;
           ws.send(stringifiedPayload, (error) => {
             if (error) {
