@@ -74,14 +74,26 @@ describe('ADMIN | Pages | Profile page', () => {
     });
   });
 
-  it('should display the change password section', async () => {
-    const { getByRole } = render(App);
-    const changePassword = getByRole('heading', {
+  it('should display the change password section and all its fields', async () => {
+    const { getByRole, getByTestId } = render(App);
+    const changePasswordHeading = getByRole('heading', {
       name: 'Change password'
     });
     
     await waitFor(() => {
-      expect(changePassword).toBeInTheDocument();
+      expect(changePasswordHeading).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('test-current-password-input')).toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('test-new-password-input')).toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('test-confirmed-password-input')).toBeInTheDocument()
     });
   });
 });

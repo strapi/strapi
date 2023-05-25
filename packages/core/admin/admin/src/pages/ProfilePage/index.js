@@ -10,6 +10,7 @@ import {
   useOverlayBlocker,
   auth,
   useTracking,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
@@ -36,7 +37,7 @@ import {
 import { Eye, EyeStriked, Check } from '@strapi/icons';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
-import { fetchUser, fetchSSOInfo, putUser } from './utils/api';
+import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
 
@@ -73,9 +74,11 @@ const ProfilePage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
+  const { get } = useFetchClient();
+
   useFocusWhenNavigate();
 
-  const { status, data } = useQuery('user', fetchUser, {
+  const { isLoading: isLoadingUser, data } = useQuery('user', fetchUser, {
     onSuccess() {
       notifyStatus(
         formatMessage({
@@ -91,17 +94,25 @@ const ProfilePage = () => {
       });
     },
   });
-  const { status: statusSSO, data: dataSSO } = useQuery('sso', fetchSSOInfo, {
+  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery('sso', async () => {
+    const { 
+      data: {
+        data
+      }
+    } = await get('/admin/providers/options');
+  
+    return data;
+  }, {
     onSuccess() {},
     onError() {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: { id: 'Settings.permissions.users.sso.provider.error' },
       });
     },
   });
 
-  const isLoading = status !== 'success' && statusSSO !== 'success';
+  const isLoading = isLoadingUser && isLoadingSSO;
 
   const submitMutation = useMutation((body) => putUser(body), {
     async onSuccess(data) {
@@ -189,7 +200,7 @@ const ProfilePage = () => {
     (themeName) => allApplicationThemes[themeName]
   );
 
-  const currentUserRoles = data.roles?.map(role => role.id) || [];
+  const currentUserRoles = data?.roles?.map(role => role.id) || [];
   // check if the user role is in the locked roles list
   const hasLockedRole = dataSSO?.ssoLockedRoles?.some((roleId) => currentUserRoles.includes(Number(roleId))) || false;
 
@@ -315,6 +326,7 @@ const ProfilePage = () => {
                           <Grid gap={5}>
                             <GridItem s={12} col={6}>
                               <PasswordInput
+                                data-testid ="test-current-password-input"
                                 error={
                                   errors.currentPassword
                                     ? formatMessage({
@@ -359,6 +371,7 @@ const ProfilePage = () => {
                           <Grid gap={5}>
                             <GridItem s={12} col={6}>
                               <PasswordInput
+                                data-testid ="test-new-password-input"
                                 error={
                                   errors.password
                                     ? formatMessage({
@@ -401,6 +414,7 @@ const ProfilePage = () => {
                             </GridItem>
                             <GridItem s={12} col={6}>
                               <PasswordInput
+                                data-testid ="test-confirmed-password-input"
                                 error={
                                   errors.confirmPassword
                                     ? formatMessage({

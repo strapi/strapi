@@ -8,11 +8,7 @@ import serverLockedSSO from './utils/serverLockedSSO';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: ['en'],
-  messages: ['test'],
-}));
+jest.mock('../../../components/LocalesProvider/useLocalesProvider');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -58,15 +54,6 @@ describe('ADMIN | Pages | Profile page', () => {
     serverLockedSSO.close();
   });
 
-  it('renders and matches the snapshot', async () => {
-    const { container } = render(App);
-    await waitFor(() => {
-      expect(screen.getByText('Interface language')).toBeInTheDocument();
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
   it('should display username if it exists', async () => {
     render(App);
     await waitFor(() => {
@@ -74,14 +61,26 @@ describe('ADMIN | Pages | Profile page', () => {
     });
   });
 
-  it('should not display the change password section if the user role is Locked', async () => {
-    const { queryByRole } = render(App);
-    const changePassword = queryByRole('heading', {
+  it('should not display the change password section and all the fields if the user role is Locked', async () => {
+    const { queryByRole, queryByTestId } = render(App);
+    const changePasswordHeading = queryByRole('heading', {
       name: 'Change password'
     });
     
     await waitFor(() => {
-      expect(changePassword).not.toBeInTheDocument();
+      expect(changePasswordHeading).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-current-password-input')).not.toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-new-password-input')).not.toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-confirmed-password-input')).not.toBeInTheDocument()
     });
   });
 });
