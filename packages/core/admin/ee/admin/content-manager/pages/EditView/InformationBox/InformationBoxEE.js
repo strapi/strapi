@@ -38,10 +38,13 @@ export function InformationBoxEE() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
 
-  const { workflows: { data: workflows, isLoading: workflowIsLoading } = {} } =
-    useReviewWorkflows();
-  // TODO: this works only as long as we support one workflow
-  const workflow = workflows?.[0] ?? null;
+  const { workflows: { data: workflows, isLoading: isWorkflowLoading } = {} } = useReviewWorkflows(
+    undefined,
+    { filters: { contentTypes: uid } }
+  );
+
+  // Filtering will still return an array, which should contain only one workflow
+  const [workflow] = workflows ?? [];
 
   const { error, isLoading, mutateAsync } = useMutation(
     async ({ entityId, stageId, uid }) => {
@@ -72,21 +75,7 @@ export function InformationBoxEE() {
     }
   );
 
-  // if entities are created e.g. through lifecycle methods
-  // they may not have a stage assigned. Updating the entity won't
-  // set the default stage either which may lead to entities that
-  // do not have a stage assigned for a while. By displaying an
-  // error by default we are trying to nudge users into assigning a stage.
-  const initialStageNullError =
-    activeWorkflowStage === null &&
-    !workflowIsLoading &&
-    !isCreatingEntry &&
-    formatMessage({
-      id: 'content-manager.reviewWorkflows.stage.select.placeholder',
-      defaultMessage: 'Select a stage',
-    });
-  const formattedMutationError = error && formatAPIError(error);
-  const formattedError = formattedMutationError || initialStageNullError || null;
+  const formattedError = (error && formatAPIError(error)) || null;
 
   const handleStageChange = async ({ value: stageId }) => {
     try {
@@ -123,7 +112,7 @@ export function InformationBoxEE() {
               }}
               error={formattedError}
               inputId={ATTRIBUTE_NAME}
-              isLoading={isLoading}
+              isLoading={isWorkflowLoading || isLoading}
               isSearchable={false}
               isClearable={false}
               name={ATTRIBUTE_NAME}
