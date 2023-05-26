@@ -10,7 +10,7 @@ const SERVER_HAS_BEEN_KILLED_MESSAGE = 'server is down';
  */
 export default function serverRestartWatcher(response, didShutDownServer) {
   return new Promise((resolve) => {
-    fetch(`${strapi.backendURL}/_health`, {
+    fetch(`${window.strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
       headers: {

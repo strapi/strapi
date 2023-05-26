@@ -1,7 +1,8 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
+import Chain, { chain } from 'stream-chain';
 import { extname } from 'path';
 import { EOL } from 'os';
-import { isEmpty, uniq, last, isNumber } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema, Utils } from '@strapi/strapi';
 
@@ -9,6 +10,7 @@ import type {
   IAsset,
   IDestinationProvider,
   IEntity,
+  ILink,
   IMetadata,
   ISourceProvider,
   ITransferEngine,
@@ -20,6 +22,7 @@ import type {
   IProvider,
   TransferFilters,
   TransferFilterPreset,
+  StreamItem,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -87,6 +90,8 @@ class TransferEngine<
   options: ITransferEngineOptions;
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
+
+  #schema: { source?: SchemaMap; destination?: SchemaMap } = {};
 
   // Progress of the current stage
   progress: {
@@ -172,17 +177,21 @@ class TransferEngine<
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream = new PassThrough({ objectMode: true });
+    let stream: PassThrough | Chain = new PassThrough({ objectMode: true });
 
     const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
+      const chainTransforms: StreamItem[] = [];
       for (const transform of transforms) {
         if ('filter' in transform) {
-          stream = stream.pipe(filter(transform.filter));
+          chainTransforms.push(filter(transform.filter));
         }
 
         if ('map' in transform) {
-          stream = stream.pipe(map(transform.map));
+          chainTransforms.push(map(transform.map));
         }
+      }
+      if (chainTransforms.length) {
+        stream = stream.pipe(chain(chainTransforms));
       }
     };
 
@@ -456,7 +465,7 @@ class TransferEngine<
     stage: TransferStage;
     source?: Readable;
     destination?: Writable;
-    transform?: PassThrough;
+    transform?: PassThrough | Chain;
     tracker?: PassThrough;
   }) {
     const { stage, source, destination, transform, tracker } = options;
@@ -591,23 +600,37 @@ class TransferEngine<
     }
   }
 
+  async #getSchemas() {
+    if (!this.#schema.source) {
+      this.#schema.source = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    if (!this.#schema.destination) {
+      this.#schema.destination = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    return {
+      sourceSchema: this.#schema.source,
+      destinationSchema: this.#schema.destination,
+    };
+  }
+
   async integrityCheck() {
+    const sourceMetadata = await this.sourceProvider.getMetadata();
+    const destinationMetadata = await this.destinationProvider.getMetadata();
+
+    if (sourceMetadata && destinationMetadata) {
+      this.#assertStrapiVersionIntegrity(
+        sourceMetadata?.strapi?.version,
+        destinationMetadata?.strapi?.version
+      );
+    }
+
+    const { sourceSchema, destinationSchema } = await this.#getSchemas();
+
     try {
-      const sourceMetadata = await this.sourceProvider.getMetadata();
-      const destinationMetadata = await this.destinationProvider.getMetadata();
-
-      if (sourceMetadata && destinationMetadata) {
-        this.#assertStrapiVersionIntegrity(
-          sourceMetadata?.strapi?.version,
-          destinationMetadata?.strapi?.version
-        );
-      }
-
-      const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-      const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
-
-      if (sourceSchemas && destinationSchemas) {
-        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+      if (sourceSchema && destinationSchema) {
+        this.#assertSchemasMatching(sourceSchema, destinationSchema);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -709,7 +732,38 @@ class TransferEngine<
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = chain([
+      this.#createStageTransformStream(stage),
+      new Transform({
+        objectMode: true,
+        transform: async (entity: IEntity, _encoding, callback) => {
+          const { destinationSchema: schemas } = await this.#getSchemas();
+
+          if (!schemas) {
+            return callback(null, entity);
+          }
+
+          // TODO: this would be safer if we only ignored things in ignoredDiffs, otherwise continue and let an error be thrown
+          const availableContentTypes = Object.entries(schemas)
+            .filter(([, schema]) => schema.modelType === 'contentType')
+            .map(([uid]) => uid);
+
+          // If the type of the transferred entity doesn't exist in the destination, then discard it
+          if (!availableContentTypes.includes(entity.type)) {
+            return callback(null, undefined);
+          }
+
+          const { type, data } = entity;
+          const attributes = schemas[type].attributes;
+
+          const attributesToRemove = difference(Object.keys(data), Object.keys(attributes));
+          const updatedEntity = set('data', omit(attributesToRemove, data), entity);
+
+          callback(null, updatedEntity);
+        },
+      }),
+    ]);
+
     const tracker = this.#progressTracker(stage, { key: (value: IEntity) => value.type });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
@@ -721,7 +775,33 @@ class TransferEngine<
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage);
+    const transform = chain([
+      this.#createStageTransformStream(stage),
+      new Transform({
+        objectMode: true,
+        transform: async (link: ILink, _encoding, callback) => {
+          const { destinationSchema: schemas } = await this.#getSchemas();
+
+          if (!schemas) {
+            return callback(null, link);
+          }
+
+          // TODO: this would be safer if we only ignored things in ignoredDiffs, otherwise continue and let an error be thrown
+          const availableContentTypes = Object.entries(schemas)
+            .filter(([, schema]) => schema.modelType === 'contentType')
+            .map(([uid]) => uid);
+
+          const isValidType = (uid: string) => availableContentTypes.includes(uid);
+
+          if (!isValidType(link.left.type) || !isValidType(link.right.type)) {
+            return callback(null, undefined); // ignore the link
+          }
+
+          callback(null, link);
+        },
+      }),
+    ]);
+
     const tracker = this.#progressTracker(stage);
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
