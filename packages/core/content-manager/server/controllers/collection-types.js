@@ -23,7 +23,7 @@ module.exports = {
 
     const populate = await populateBuilder(model)
       .populateDeep(1)
-      .countRelations({ toMany: true, toOne: false })
+      .countRelations({ toOne: false })
       .build();
 
     const { results, pagination } = await entityManager.findPage(
@@ -52,10 +52,11 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
     const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
+      .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
-      .countRelations({ toMany: true, toOne: true })
+      .countRelations()
       .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
@@ -69,7 +70,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    // TODO: Move the transform relations to count here.
+    // TODO: Count populated relations by permissions
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
   },
@@ -96,13 +97,7 @@ module.exports = {
 
     const sanitizedBody = await sanitizeFn(body);
 
-    const populate = await populateBuilder(model)
-      .populateDeep(Infinity)
-      // TODO: Use config to know if we need to count relations or not
-      .countRelations({ toMany: true, toOne: true })
-      .build();
-
-    const entity = await entityManager.create(sanitizedBody, model, { populate });
+    const entity = await entityManager.create(sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
@@ -125,9 +120,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
-      .build();
+    const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
+    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -145,15 +139,7 @@ module.exports = {
     const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
     const sanitizedBody = await sanitizeFn(body);
 
-    const populateUpdate = await populateBuilder(model)
-      .populateDeep(Infinity)
-      // TODO: Use config to know if we need to count relations or not
-      .countRelations({ toMany: true, toOne: true })
-      .build();
-
-    const updatedEntity = await entityManager.update(entity, sanitizedBody, model, {
-      populate: populateUpdate,
-    });
+    const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
@@ -169,9 +155,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
-      .build();
+    const permissionQuery = await permissionChecker.sanitizedQuery.delete(ctx.query);
+    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -183,13 +168,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populateDelete = await populateBuilder(model)
-      .populateDeep(Infinity)
-      // TODO: Use config to know if we need to count relations or not
-      .countRelations({ toMany: true, toOne: true })
-      .build();
-
-    const result = await entityManager.delete(entity, model, { populate: populateDelete });
+    const result = await entityManager.delete(entity, model);
 
     // TODO: Count if config was enabled or populate based on permissions is not empty
 
@@ -207,9 +186,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
-      .build();
+    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -221,16 +199,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populatePublish = await populateBuilder(model)
-      .populateDeep(Infinity)
-      .countRelations({ toMany: true, toOne: true })
-      .build();
-
     const result = await entityManager.publish(
       entity,
       setCreatorFields({ user, isEdition: true })({}),
-      model,
-      { populate: populatePublish }
+      model
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
@@ -247,9 +219,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
-      .build();
+    const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
+    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -261,16 +232,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populateUnpublish = await populateBuilder(model)
-      .populateDeep(Infinity)
-      .countRelations({ toMany: true, toOne: true })
-      .build();
-
     const result = await entityManager.unpublish(
       entity,
       setCreatorFields({ user, isEdition: true })({}),
-      model,
-      { populate: populateUnpublish }
+      model
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
@@ -318,9 +283,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await populateBuilder(model)
-      .populateRequiredPermissions(permissionChecker, ctx.query)
-      .build();
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
