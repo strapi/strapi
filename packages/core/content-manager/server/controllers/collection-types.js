@@ -170,8 +170,6 @@ module.exports = {
 
     const result = await entityManager.delete(entity, model);
 
-    // TODO: Count if config was enabled or populate based on permissions is not empty
-
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 

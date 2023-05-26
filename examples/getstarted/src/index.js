@@ -7,19 +7,7 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  async register({ strapi }) {
-    await strapi.admin.services.permission.conditionProvider.register({
-      displayName: 'Something',
-      name: 'is-something',
-      plugin: 'foo',
-      handler: (user) => ({
-        // name: { $ne: 'MARC' },
-        // addresses: { notrepeat_req: { name: 'toto' } },
-        'addresses.repeat_req': { $elemMatch: { name: 'toto' } },
-        addresses: { $elemMatch: { postal_code: { $eq: '58' } } },
-      }),
-    });
-  },
+  async register({ strapi }) {},
 
   /**
    * An asynchronous bootstrap function that runs before
