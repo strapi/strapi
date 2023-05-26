@@ -117,8 +117,8 @@ module.exports = ({ strapi }) => {
 
   return {
     async bootstrap() {
-      await initDefaultWorkflow({ workflowsService, stagesService, strapi });
       await registerWebhookEvents({ strapi });
+      await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
     async register() {
       extendReviewWorkflowContentTypes({ strapi });
