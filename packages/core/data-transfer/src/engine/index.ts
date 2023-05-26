@@ -73,7 +73,7 @@ export const TransferGroupPresets: TransferGroupFilter = {
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
-type SchemaMap = Utils.StringRecord<Schema.Schema>;
+type SchemaMap = Utils.String.Dict<Schema.Schema>;
 
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,

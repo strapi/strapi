@@ -17,11 +17,11 @@ export type Middleware = Registry.Keys<Shared.Middlewares, UID.Middleware>;
 
 export type ContentType = Registry.Keys<Shared.ContentTypes, UID.ContentType>;
 export type CollectionType = Extract<
-  Utils.KeysBy<Shared.ContentTypes, SchemaNamespace.CollectionType>,
+  Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.CollectionType>,
   ContentType
 >;
 export type SingleType = Extract<
-  Utils.KeysBy<Shared.ContentTypes, SchemaNamespace.SingleType>,
+  Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.SingleType>,
   ContentType
 >;
 

@@ -25,7 +25,7 @@ export type Configurable = { configurable: true };
 export type NonConfigurable = { configurable: false };
 
 // custom field
-export type CustomField<T extends string, P extends object = undefined> = {
+export type CustomField<T extends string, P extends object | undefined = undefined> = {
   customField: T;
   options?: P;
 };
@@ -46,7 +46,7 @@ export type DefaultTo<T> = { default: T };
 export type Any =
   | Attribute.BigInteger
   | Attribute.Boolean
-  | Attribute.Component<unknown, boolean>
+  | Attribute.Component<Common.UID.Component, boolean>
   | Attribute.DateTime
   | Attribute.Date
   | Attribute.Decimal
@@ -56,7 +56,7 @@ export type Any =
   | Attribute.Float
   | Attribute.Integer
   | Attribute.JSON
-  | Attribute.Media<unknown, boolean>
+  | Attribute.Media<Attribute.AllowedMediaTypes | undefined, boolean>
   | Attribute.Password
   | Attribute.Relation
   | Attribute.RichText
@@ -64,4 +64,4 @@ export type Any =
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | Attribute.UID<unknown>;
+  | Attribute.UID<Common.UID.Schema | undefined>;

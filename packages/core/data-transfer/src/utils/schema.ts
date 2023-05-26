@@ -22,6 +22,6 @@ const VALID_SCHEMA_PROPERTIES = [
  * Sanitize a schemas dictionary by omitting unwanted properties
  * The list of allowed properties can be found here: {@link VALID_SCHEMA_PROPERTIES}
  */
-export const mapSchemasValues = (schemas: Utils.StringRecord<Schema.Schema>) => {
-  return mapValues(pick(VALID_SCHEMA_PROPERTIES), schemas) as Utils.StringRecord<Schema.Schema>;
+export const mapSchemasValues = (schemas: Utils.String.Dict<Schema.Schema>) => {
+  return mapValues(pick(VALID_SCHEMA_PROPERTIES), schemas) as Utils.String.Dict<Schema.Schema>;
 };

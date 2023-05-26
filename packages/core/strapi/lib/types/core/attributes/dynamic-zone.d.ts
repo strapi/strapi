@@ -14,7 +14,7 @@ export type DynamicZone<T extends Common.UID.Component[] = Common.UID.Component[
     Attribute.RequiredOption;
 
 type DynamicZoneValue<T extends Common.UID.Component[]> = Array<
-  Utils.GetArrayValues<T> extends infer P
+  Utils.Array.Values<T> extends infer P
     ? P extends Common.UID.ContentType
       ? Attribute.GetValues<P> & { __component: P }
       : never

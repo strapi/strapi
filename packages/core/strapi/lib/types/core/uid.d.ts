@@ -1,7 +1,7 @@
 import type * as Namespace from './namespace';
 import type * as Utils from '../utils';
 
-type StringSuffix<T extends string> = Utils.Suffix<T, string>;
+type StringSuffix<T extends string> = Utils.String.Suffix<T, string>;
 
 /**
  * Template for services' unique identifier

@@ -78,7 +78,9 @@ export interface Info {
 /**
  * Low level data structure referencing every schema attribute and its name
  */
-export interface Attributes extends Utils.StringRecord<Attribute.Any> {}
+export interface Attributes {
+  [key: string]: Attribute.Any;
+}
 
 /**
  * Structure containing every core schema options and their associated value

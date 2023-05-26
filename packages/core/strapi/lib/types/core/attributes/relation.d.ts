@@ -19,7 +19,7 @@ export type BasicRelationProperties<
   target: T;
 } & R extends `morph${string}`
   ? {
-      morphBy?: Utils.KeysBy<
+      morphBy?: Utils.Object.KeysBy<
         Common.Schemas[T]['attributes'],
         Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationsType>
       >;
@@ -41,7 +41,9 @@ export type Relation<
   // Properties
   (R extends BasicRelationsType
     ? BasicRelationProperties<S, R, T>
-    : PolymorphicRelationProperties<R>) &
+    : R extends PolymorphicRelationsType
+    ? PolymorphicRelationProperties<R>
+    : {}) &
   // Options
   Attribute.ConfigurableOption &
   Attribute.PrivateOption;

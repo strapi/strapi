@@ -12,7 +12,7 @@ export type Enumeration<T extends string[] = []> = Attribute.Attribute<'enumerat
   Attribute.PrivateOption &
   Attribute.RequiredOption;
 
-export type EnumerationValue<T extends string[]> = Utils.GetArrayValues<T>;
+export type EnumerationValue<T extends string[]> = Utils.Array.Values<T>;
 
 export type GetEnumerationValue<T extends Attribute.Attribute> = T extends Enumeration<infer U>
   ? EnumerationValue<U>

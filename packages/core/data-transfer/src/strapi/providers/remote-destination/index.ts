@@ -263,7 +263,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       return Promise.resolve(null);
     }
 
-    return this.dispatcher.dispatchTransferAction<Utils.StringRecord<Schema.Schema>>('getSchemas');
+    return this.dispatcher.dispatchTransferAction<Utils.String.Dict<Schema.Schema>>('getSchemas');
   }
 
   createEntitiesWriteStream(): Writable {

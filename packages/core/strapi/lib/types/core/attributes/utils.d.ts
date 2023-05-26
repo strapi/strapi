@@ -6,13 +6,13 @@ export type GetKeysByType<
   T extends Common.UID.Schema,
   U extends Attribute.Type,
   P = never
-> = Utils.KeysBy<GetAll<T>, Attribute.Attribute<U> & Utils.NeverGuard<P, unknown>>;
+> = Utils.Object.KeysBy<GetAll<T>, Attribute.Attribute<U> & Utils.Guard.Never<P, unknown>>;
 
 export type GetByType<
   T extends Common.UID.Schema,
   U extends Attribute.Type,
   P = never
-> = Utils.PickBy<GetAll<T>, Attribute.Attribute<U> & Utils.NeverGuard<P, unknown>>;
+> = Utils.Object.PickBy<GetAll<T>, Attribute.Attribute<U> & Utils.Guard.Never<P, unknown>>;
 
 export type Get<T extends Common.UID.Schema, U extends GetKeys<T>> = Utils.Get<GetAll<T>, U>;
 
@@ -60,7 +60,7 @@ export type GetValues<T extends Common.UID.Schema, U extends GetKeys<T> = GetKey
   [key in GetOptionalKeys<T> as key extends U ? key : never]?: GetValueByKey<T, key>;
 };
 
-export type GetRequiredKeys<T extends Common.UID.Schema> = Utils.KeysBy<
+export type GetRequiredKeys<T extends Common.UID.Schema> = Utils.Object.KeysBy<
   GetAll<T>,
   { required: true }
 >;

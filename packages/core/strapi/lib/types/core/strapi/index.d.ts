@@ -1,7 +1,6 @@
-import type Koa from 'koa';
 import { Database } from '@strapi/database';
 
-import type { StringMap } from './utils';
+import type { Shared } from '@strapi/strapi';
 import type { GenericController } from '../../../core-api/controller';
 import type { GenericService } from '../../../core-api/service';
 
@@ -21,7 +20,7 @@ interface CustomFieldServerOptions {
    * The existing Strapi data type the custom field uses
    */
   type: string;
-  
+
   /**
    * Settings for the input size in the Admin UI
    */
@@ -69,7 +68,7 @@ export interface Strapi {
    *
    * It returns all the registered services
    */
-  readonly services: StringMap<GenericService>;
+  readonly services: Shared.Services;
 
   /**
    * Find a service using its unique identifier
@@ -81,7 +80,7 @@ export interface Strapi {
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<GenericController>;
+  readonly controllers: Shared.Controllers;
 
   /**
    * Find a controller using its unique identifier
