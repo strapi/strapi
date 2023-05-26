@@ -4,15 +4,19 @@ const { getQueryPopulate } = require('../populate');
 
 const getFilterQuery = (conditions) => ({
   filters: {
-    $or: [{
-      $and: [{
-        $or: conditions
-      }]
-    }]
-  }
-})
+    $or: [
+      {
+        $and: [
+          {
+            $or: conditions,
+          },
+        ],
+      },
+    ],
+  },
+});
 
-const uid = 'model';
+const uid = 'api::model.model';
 
 describe('Populate', () => {
   const fakeModels = {
@@ -20,8 +24,8 @@ describe('Populate', () => {
       uid: 'empty',
       attributes: {},
     },
-    model: {
-      uid: 'model',
+    [uid]: {
+      uid: 'api::model.model',
       attributes: {
         field: {
           type: 'string',
@@ -29,7 +33,7 @@ describe('Populate', () => {
         relation: {
           type: 'relation',
           relation: 'oneToMany',
-          target: 'model',
+          target: 'api::model.model',
         },
         component: {
           type: 'component',
@@ -42,7 +46,7 @@ describe('Populate', () => {
         },
         media: {
           type: 'media',
-        }
+        },
       },
     },
     component: {
@@ -54,8 +58,8 @@ describe('Populate', () => {
         compoRelation: {
           type: 'relation',
           relation: 'oneToMany',
-          target: 'model',
-        }
+          target: 'api::model.model',
+        },
       },
     },
   };
@@ -68,8 +72,8 @@ describe('Populate', () => {
         db: {
           metadata: {
             get: jest.fn((uid) => ({ ...fakeModels[uid], columnToAttribute: {} })),
-          }
-        }
+          },
+        },
       };
     });
 
@@ -78,7 +82,6 @@ describe('Populate', () => {
     });
 
     test('top level field should not be populated', async () => {
-
       const query = getFilterQuery([{ field: { $exists: true } }]);
       const result = await getQueryPopulate(uid, query);
 
@@ -86,54 +89,47 @@ describe('Populate', () => {
     });
 
     test('one relational field should be populated', async () => {
-
-      const query = getFilterQuery([{ relation: { field: "value" } }]);
+      const query = getFilterQuery([{ relation: { field: 'value' } }]);
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        relation: { fields: ['field'] }
+        relation: { fields: ['field'] },
       });
-
     });
 
     test('relation in component should be populated', async () => {
-
-      const query = getFilterQuery([{ component: { compoRelation: { field: "value" } } }]);
+      const query = getFilterQuery([{ component: { compoRelation: { field: 'value' } } }]);
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        component: { populate: { compoRelation: { fields: ['field'] } }, fields: [] }
+        component: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
       });
-
     });
 
     test('relation in repeatable component should be populated', async () => {
-
-      const query = getFilterQuery([{ repeatableComponent: { compoRelation: { field: "value" } } }]);
+      const query = getFilterQuery([
+        { repeatableComponent: { compoRelation: { field: 'value' } } },
+      ]);
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] }
+        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
       });
-
     });
 
     test('populate multiple fields at once', async () => {
-
       const query = getFilterQuery([
-        { relation: { component: { field: { $eq: "value" } } } },
-        { relation: { field: "value" } },
-        { repeatableComponent: { $elemMatch: { compoRelation: { field: "value" } } } }
+        { relation: { component: { field: { $eq: 'value' } } } },
+        { relation: { field: 'value' } },
+        { repeatableComponent: { $elemMatch: { compoRelation: { field: 'value' } } } },
       ]);
 
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
         relation: { fields: ['field'], populate: { component: { fields: ['field'] } } },
-        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] }
+        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
       });
     });
-
   });
-
 });

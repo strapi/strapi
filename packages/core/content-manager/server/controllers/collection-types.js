@@ -4,7 +4,6 @@ const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput } = require('./validation');
-const { populateBuilder } = require('../services/utils/populate/builder');
 
 module.exports = {
   async find(ctx) {
@@ -21,7 +20,7 @@ module.exports = {
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    const populate = await populateBuilder(model)
+    const populate = await getService('populate-builder')(model)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
       .build();
@@ -53,7 +52,7 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await populateBuilder(model)
+    const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
@@ -121,7 +120,9 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
-    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -156,7 +157,9 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.delete(ctx.query);
-    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -185,7 +188,9 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -218,7 +223,9 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
-    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 
@@ -282,7 +289,9 @@ module.exports = {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
 

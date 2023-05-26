@@ -4,11 +4,11 @@ const { omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getService } = require('../utils');
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
 const { sumDraftCounts } = require('./utils/draft');
-const { isPopulateRelationsEnabled } = require('./utils/populate');
-const { populateBuilder } = require('./utils/populate/builder');
+const { isWebhooksPopulateRelationsEnabled } = require('./utils/populate');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
@@ -32,9 +32,9 @@ const emitEvent = async (event, entity, modelUid) => {
 const buildCreateOrUpdatePopulate = (uid) => {
   // User can configure to populate relations, so downstream services can use them.
   // They will be transformed into counts later if this is set to true.
-  return populateBuilder(uid)
+  return getService('populate-builder')(uid)
     .populateDeep(Infinity)
-    .countRelationsIf(isPopulateRelationsEnabled(uid))
+    .countRelationsIf(isWebhooksPopulateRelationsEnabled(uid))
     .build();
 };
 
@@ -101,7 +101,7 @@ module.exports = ({ strapi }) => ({
       .create(uid, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    if (isPopulateRelationsEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(entity, uid);
     }
 
@@ -117,7 +117,7 @@ module.exports = ({ strapi }) => ({
       .update(uid, entity.id, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    if (isPopulateRelationsEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(updatedEntity, uid);
     }
 
@@ -128,7 +128,7 @@ module.exports = ({ strapi }) => ({
     const deletedEntity = await strapi.entityService.delete(uid, entity.id, opts);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isPopulateRelationsEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(deletedEntity, uid);
     }
 
@@ -165,7 +165,7 @@ module.exports = ({ strapi }) => ({
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isPopulateRelationsEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
@@ -189,7 +189,7 @@ module.exports = ({ strapi }) => ({
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isPopulateRelationsEnabled(uid)) {
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 

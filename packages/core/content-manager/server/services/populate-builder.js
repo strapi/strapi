@@ -1,6 +1,6 @@
 'use strict';
 
-const { getDeepPopulate, getQueryPopulate } = require('.');
+const { getDeepPopulate, getQueryPopulate } = require('./utils/populate');
 
 /**
  * Builder to create a Strapi populate object.
@@ -12,7 +12,7 @@ const { getDeepPopulate, getQueryPopulate } = require('.');
  * // populate = { article: { populate: { count: true } } }
  *
  */
-function populateBuilder(uid) {
+const populateBuilder = (uid) => {
   let getInitialPopulate = async () => {};
   const deepPopulateOptions = {
     countMany: false,
@@ -33,12 +33,12 @@ function populateBuilder(uid) {
     /**
      * Populate relations as count if condition is true.
      * @param {Boolean} condition
-     * @param {Object} options
-     * @param {Boolean} options.toMany - Populate XtoMany relations as count if true.
-     * @param {Boolean} options.toOne - Populate XtoOne relations as count if true.
+     * @param {Object} [options]
+     * @param {Boolean} [options.toMany] - Populate XtoMany relations as count if true.
+     * @param {Boolean} [options.toOne] - Populate XtoOne relations as count if true.
      * @returns {typeof builder} - Builder
      */
-    countRelationsIf(condition, { toMany = true, toOne = true } = {}) {
+    countRelationsIf(condition, { toMany, toOne } = { toMany: true, toOne: true }) {
       if (condition) {
         return this.countRelations({ toMany, toOne });
       }
@@ -46,14 +46,18 @@ function populateBuilder(uid) {
     },
     /**
      * Populate relations as count.
-     * @param {Object} options
-     * @param {Boolean} options.toMany - Populate XtoMany relations as count if true.
-     * @param {Boolean} options.toOne - Populate XtoOne relations as count if true.
+     * @param {Object} [options]
+     * @param {Boolean } [options.toMany] - Populate XtoMany relations as count if true.
+     * @param {Boolean} [options.toOne] - Populate XtoOne relations as count if true.
      * @returns {typeof builder} - Builder
      */
-    countRelations({ toMany = true, toOne = true } = {}) {
-      deepPopulateOptions.countMany = toMany;
-      deepPopulateOptions.countOne = toOne;
+    countRelations({ toMany, toOne } = { toMany: true, toOne: true }) {
+      if (toMany) {
+        deepPopulateOptions.countMany = toMany;
+      }
+      if (toOne) {
+        deepPopulateOptions.countOne = toOne;
+      }
       return builder;
     },
     /**
@@ -81,8 +85,6 @@ function populateBuilder(uid) {
   };
 
   return builder;
-}
-
-module.exports = {
-  populateBuilder,
 };
+
+module.exports = () => populateBuilder;

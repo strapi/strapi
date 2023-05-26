@@ -256,7 +256,7 @@ const getQueryPopulate = async (uid, query) => {
       const populatePath = pathToPopulate(pathWithoutKey);
       get(populatePath, populateQuery).fields.push(key);
     },
-    { schema: strapi.contentType(uid) },
+    { schema: strapi.getModel(uid) },
     query
   );
 
@@ -269,10 +269,12 @@ const getQueryPopulate = async (uid, query) => {
  * The entity-manager response will not have the populated relations though.
  * For performance reasons, it is recommended to set it to false,
  *
+ * See docs: https://docs.strapi.io/dev-docs/configurations/server
+ *
  * TODO V5: Set to false by default.
  * TODO V5: Make webhooks always send the same entity data.
  */
-const isPopulateRelationsEnabled = () => {
+const isWebhooksPopulateRelationsEnabled = () => {
   return strapi.config.get('server.webhooks.populateRelations', true);
 };
 
@@ -280,5 +282,5 @@ module.exports = {
   getDeepPopulate,
   getDeepPopulateDraftCount,
   getQueryPopulate,
-  isPopulateRelationsEnabled,
+  isWebhooksPopulateRelationsEnabled,
 };

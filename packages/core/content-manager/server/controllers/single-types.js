@@ -3,12 +3,11 @@
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
-const { populateBuilder } = require('../services/utils/populate/builder');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
 
-  const populate = await populateBuilder(model)
+  const populate = await getService('populate-builder')(model)
     .populateFromQuery(query)
     .populateDeep(Infinity)
     .countRelations()

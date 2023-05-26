@@ -4,7 +4,6 @@ const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { populateBuilder } = require('../services/utils/populate/builder');
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -57,7 +56,9 @@ module.exports = {
         const entityManager = getService('entity-manager');
 
         const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-        const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+        const populate = await getService('populate-builder')(model)
+          .populateFromQuery(permissionQuery)
+          .build();
 
         const entity = await entityManager.findOne(entityId, model, { populate });
 
@@ -166,7 +167,9 @@ module.exports = {
       }
 
       const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-      const populate = await populateBuilder(model).populateFromQuery(permissionQuery).build();
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
 
       const entity = await entityManager.findOne(id, model, { populate });
 
