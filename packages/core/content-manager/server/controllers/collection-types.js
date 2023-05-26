@@ -23,7 +23,7 @@ module.exports = {
 
     const populate = await populateBuilder(model)
       .populateDeep(1)
-      .countRelations({ toOne: false })
+      .countRelations({ toOne: false, toMany: true })
       .build();
 
     const { results, pagination } = await entityManager.findPage(
