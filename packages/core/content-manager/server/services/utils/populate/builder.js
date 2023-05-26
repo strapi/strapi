@@ -1,24 +1,31 @@
 'use strict';
 
-const { getDeepPopulate, getQueryPopulate } = require('../populate');
+const { getDeepPopulate, getQueryPopulate } = require('.');
 
 function populateBuilder(uid) {
+  let getInitialPopulate = async () => {};
   const deepPopulateOptions = {
     countMany: false,
     countOne: false,
     maxLevel: -1,
   };
-  let getPopulatePermission;
 
   const builder = {
-    populateRequiredPermissions(permissionChecker, query) {
-      getPopulatePermission = async () => {
-        const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
-        return getQueryPopulate(permissionQuery);
-      };
+    /**
+     * Populates fields present in a query.
+     * Useful for populating fields that permissionChecker needs to validate.
+     */
+    populateFromQuery(query) {
+      getInitialPopulate = async () => getQueryPopulate(uid, query);
       return builder;
     },
-    countRelations({ toMany = false, toOne = false } = {}) {
+    countRelationsIf(condition, { toMany = true, toOne = true } = {}) {
+      if (condition) {
+        return this.countRelations({ toMany, toOne });
+      }
+      return builder;
+    },
+    countRelations({ toMany = true, toOne = true } = {}) {
       deepPopulateOptions.countMany = toMany;
       deepPopulateOptions.countOne = toOne;
       return builder;
@@ -28,7 +35,7 @@ function populateBuilder(uid) {
       return builder;
     },
     async build() {
-      const initialPopulate = getPopulatePermission ? await getPopulatePermission() : {};
+      const initialPopulate = await getInitialPopulate();
 
       if (deepPopulateOptions.maxLevel === -1) {
         return initialPopulate;

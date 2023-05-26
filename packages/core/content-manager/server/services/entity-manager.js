@@ -7,7 +7,8 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
 const { sumDraftCounts } = require('./utils/draft');
-const { isRelationsPopulateEnabled } = require('./utils/populate');
+const { isPopulateRelationsEnabled } = require('./utils/populate');
+const { populateBuilder } = require('./utils/populate/builder');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
@@ -26,6 +27,15 @@ const emitEvent = async (event, entity, modelUid) => {
     model: modelDef.modelName,
     entry: sanitizedEntity,
   });
+};
+
+const buildCreateOrUpdatePopulate = (uid) => {
+  // User can configure to populate relations, so downstream services can use them.
+  // They will be transformed into counts later if this is set to true.
+  return populateBuilder(uid)
+    .populateDeep(Infinity)
+    .countRelationsIf(isPopulateRelationsEnabled(uid))
+    .build();
 };
 
 /**
@@ -76,39 +86,38 @@ module.exports = ({ strapi }) => ({
       .then((entity) => this.mapEntity(entity, uid));
   },
 
-  async create(body, uid, opts = {}) {
+  async create(body, uid) {
     const modelDef = strapi.getModel(uid);
     const publishData = { ...body };
+    const populate = await buildCreateOrUpdatePopulate(uid);
 
     if (hasDraftAndPublish(modelDef)) {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    const params = { data: publishData, ...opts };
+    const params = { data: publishData, populate };
 
     const entity = await strapi.entityService
       .create(uid, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(entity, uid);
     }
 
     return entity;
   },
 
-  async update(entity, body, uid, opts = {}) {
+  async update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
-
-    const params = { data: publishData, ...opts };
+    const populate = await buildCreateOrUpdatePopulate(uid);
+    const params = { data: publishData, populate };
 
     const updatedEntity = await strapi.entityService
       .update(uid, entity.id, params)
       .then((entity) => this.mapEntity(entity, uid));
 
-    // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(updatedEntity, uid);
     }
 
@@ -119,7 +128,7 @@ module.exports = ({ strapi }) => ({
     const deletedEntity = await strapi.entityService.delete(uid, entity.id, opts);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(deletedEntity, uid);
     }
 
@@ -131,7 +140,7 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.deleteMany(uid, opts);
   },
 
-  async publish(entity, body = {}, uid, opts = {}) {
+  async publish(entity, body = {}, uid) {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.published');
     }
@@ -145,8 +154,9 @@ module.exports = ({ strapi }) => ({
     );
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
+    const populate = await buildCreateOrUpdatePopulate(uid);
 
-    const params = { data, ...opts };
+    const params = { data, populate };
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
@@ -155,7 +165,7 @@ module.exports = ({ strapi }) => ({
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
@@ -168,14 +178,9 @@ module.exports = ({ strapi }) => ({
     }
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
-    const populateRelations = isRelationsPopulateEnabled(uid);
+    const populate = await buildCreateOrUpdatePopulate(uid);
 
-    const params = {
-      data,
-      populate: populateRelations
-        ? getDeepPopulate(uid, {})
-        : getDeepPopulate(uid, { countMany: true, countOne: true }),
-    };
+    const params = { data, populate };
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
@@ -184,7 +189,7 @@ module.exports = ({ strapi }) => ({
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
     // If relations were populated, relations count will be returned instead of the array of relations.
-    if (isRelationsPopulateEnabled(uid)) {
+    if (isPopulateRelationsEnabled(uid)) {
       return getDeepRelationsCount(mappedEntity, uid);
     }
 
