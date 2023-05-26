@@ -4,6 +4,8 @@ import { EOL } from 'os';
 import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
+import { chain } from 'stream-chain';
+import type Chain from 'stream-chain';
 import * as utils from '../utils';
 
 import type {
@@ -25,6 +27,7 @@ import type {
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
   SchemaMap,
+  StreamItem,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -94,6 +97,8 @@ class TransferEngine<
   options: ITransferEngineOptions;
 
   #metadata: { source?: IMetadata; destination?: IMetadata } = {};
+
+  #schema: { source?: SchemaMap; destination?: SchemaMap } = {};
 
   // Progress of the current stage
   progress: {
@@ -189,17 +194,21 @@ class TransferEngine<
     const { throttle } = this.options;
     const { global: globalTransforms, [key]: stageTransforms } = this.options?.transforms ?? {};
 
-    let stream = new PassThrough({ objectMode: true });
+    let stream: PassThrough | Chain = new PassThrough({ objectMode: true });
 
     const applyTransforms = <U>(transforms: TransferTransform<U>[] = []) => {
+      const chainTransforms: StreamItem[] = [];
       for (const transform of transforms) {
         if ('filter' in transform) {
-          stream = stream.pipe(filter(transform.filter));
+          chainTransforms.push(filter(transform.filter));
         }
 
         if ('map' in transform) {
-          stream = stream.pipe(map(transform.map));
+          chainTransforms.push(map(transform.map));
         }
+      }
+      if (chainTransforms.length) {
+        stream = stream.pipe(chain(chainTransforms));
       }
     };
 
@@ -473,7 +482,7 @@ class TransferEngine<
     stage: TransferStage;
     source?: Readable;
     destination?: Writable;
-    transform?: PassThrough;
+    transform?: PassThrough | Chain;
     tracker?: PassThrough;
   }) {
     const { stage, source, destination, transform, tracker } = options;
@@ -612,6 +621,21 @@ class TransferEngine<
     }
   }
 
+  async #getSchemas() {
+    if (!this.#schema.source) {
+      this.#schema.source = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    if (!this.#schema.destination) {
+      this.#schema.destination = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    }
+
+    return {
+      sourceSchema: this.#schema.source,
+      destinationSchema: this.#schema.destination,
+    };
+  }
+
   async integrityCheck() {
     const sourceMetadata = await this.sourceProvider.getMetadata();
     const destinationMetadata = await this.destinationProvider.getMetadata();
@@ -623,12 +647,11 @@ class TransferEngine<
       );
     }
 
-    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    const { sourceSchema, destinationSchema } = await this.#getSchemas();
 
     try {
-      if (sourceSchemas && destinationSchemas) {
-        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+      if (sourceSchema && destinationSchema) {
+        this.#assertSchemasMatching(sourceSchema, destinationSchema);
       }
     } catch (error) {
       // if this is a schema matching error, allow handlers to resolve it
@@ -756,11 +779,12 @@ class TransferEngine<
     const source = await this.sourceProvider.createEntitiesReadStream?.();
     const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage).pipe(
+    const transform = chain([
+      this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const { destinationSchema: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, entity);
@@ -784,8 +808,9 @@ class TransferEngine<
 
           callback(null, updatedEntity);
         },
-      })
-    );
+      }),
+    ]);
+
     const tracker = this.#progressTracker(stage, { key: (value: IEntity) => value.type });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
@@ -797,11 +822,12 @@ class TransferEngine<
     const source = await this.sourceProvider.createLinksReadStream?.();
     const destination = await this.destinationProvider.createLinksWriteStream?.();
 
-    const transform = this.#createStageTransformStream(stage).pipe(
+    const transform = chain([
+      this.#createStageTransformStream(stage),
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
-          const schemas = await this.destinationProvider.getSchemas?.();
+          const { destinationSchema: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, link);
@@ -820,8 +846,8 @@ class TransferEngine<
 
           callback(null, link);
         },
-      })
-    );
+      }),
+    ]);
 
     const tracker = this.#progressTracker(stage);
 

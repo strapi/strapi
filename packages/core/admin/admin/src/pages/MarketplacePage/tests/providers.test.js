@@ -179,6 +179,9 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -199,6 +202,9 @@ describe('Marketplace page - providers tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: 'Collections' }));
     await user.click(screen.getByTestId('Made by Strapi-6'));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     await waitForReload();
@@ -206,6 +212,9 @@ describe('Marketplace page - providers tab', () => {
     await user.click(screen.getByTestId('filters-button'));
     await user.click(screen.getByRole('combobox', { name: `Collections` }));
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     await waitForReload();
 
@@ -228,6 +237,9 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
     await waitForReload();
 
@@ -249,6 +261,9 @@ describe('Marketplace page - providers tab', () => {
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
     await user.keyboard('[Escape]');
 
     const collectionCards = await screen.findAllByTestId('npm-package-card');

@@ -155,7 +155,7 @@ const EditPage = () => {
                       </GridItem>
                       <GridItem col={6}>
                         <Textarea
-                          name="description"
+                          id="description"
                           value={values.description || ''}
                           onChange={handleChange}
                           label={formatMessage({
