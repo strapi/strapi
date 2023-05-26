@@ -16,7 +16,7 @@ export interface UIDProperties<
   // UID options
   S extends UIDOptions = UIDOptions
 > {
-  targetField: U;
+  targetField: U extends undefined ? string | undefined : U;
   options: UIDOptions & S;
 }
 

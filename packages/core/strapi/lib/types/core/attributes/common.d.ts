@@ -46,7 +46,7 @@ export type DefaultTo<T> = { default: T };
 export type Any =
   | Attribute.BigInteger
   | Attribute.Boolean
-  | Attribute.Component<Common.UID.Component, boolean>
+  | Attribute.Component<unknown, boolean>
   | Attribute.DateTime
   | Attribute.Date
   | Attribute.Decimal
@@ -56,7 +56,7 @@ export type Any =
   | Attribute.Float
   | Attribute.Integer
   | Attribute.JSON
-  | (Attribute.Media<undefined, boolean> | Attribute.Media<Attribute.AllowedMediaTypes, boolean>)
+  | Attribute.Media<unknown, boolean>
   | Attribute.Password
   | Attribute.Relation
   | Attribute.RichText
@@ -64,4 +64,4 @@ export type Any =
   | Attribute.Text
   | Attribute.Time
   | Attribute.Timestamp
-  | (Attribute.UID<undefined> | Attribute.UID<Common.UID.Schema>);
+  | Attribute.UID<unknown>;

@@ -1,4 +1,4 @@
-import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import type { Common } from '@strapi/strapi';
 
 import { get, last } from 'lodash/fp';
 import { Writable } from 'stream';
@@ -10,7 +10,11 @@ import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
   strapi: Strapi.Strapi;
-  updateMappingTable<T extends SchemaUID | string>(type: T, oldID: number, newID: number): void;
+  updateMappingTable<T extends Common.UID.Schema | string>(
+    type: T,
+    oldID: number,
+    newID: number
+  ): void;
   transaction?: Transaction;
 }
 
