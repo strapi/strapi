@@ -44,7 +44,7 @@ export function ReviewWorkflowsPage() {
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows, status: workflowStatus, refetch: refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -124,8 +124,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
+    dispatch(setWorkflows({ status: workflowStatus, data: workflows }));
+  }, [workflowStatus, workflows, dispatch]);
 
   useEffect(() => {
     trackUsage('didViewWorkflow');

@@ -11,50 +11,49 @@ import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListPage from '../index';
 
+jest.mock('../../../../../../hooks/useAdminUsers', () => ({
+  __esModule: true,
+  useAdminUsers: jest.fn().mockReturnValue({
+    users: [
+      {
+        email: 'soup@strapi.io',
+        firstname: 'soup',
+        id: 1,
+        isActive: true,
+        lastname: 'soupette',
+        roles: [
+          {
+            id: 1,
+            name: 'Super Admin',
+          },
+        ],
+      },
+      {
+        email: 'dummy@strapi.io',
+        firstname: 'dummy',
+        id: 2,
+        isActive: false,
+        lastname: 'dum test',
+        roles: [
+          {
+            id: 1,
+            name: 'Super Admin',
+          },
+          {
+            id: 2,
+            name: 'Editor',
+          },
+        ],
+      },
+    ],
+    pagination: { page: 1, pageSize: 10, pageCount: 2, total: 2 },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  getFetchClient: jest.fn(() => ({
-    get: jest.fn().mockReturnValue({
-      data: {
-        data: {
-          pagination: { page: 1, pageSize: 10, pageCount: 2, total: 2 },
-          results: [
-            {
-              email: 'soup@strapi.io',
-              firstname: 'soup',
-              id: 1,
-              isActive: true,
-              lastname: 'soupette',
-              roles: [
-                {
-                  id: 1,
-                  name: 'Super Admin',
-                },
-              ],
-            },
-            {
-              email: 'dummy@strapi.io',
-              firstname: 'dummy',
-              id: 2,
-              isActive: false,
-              lastname: 'dum test',
-              roles: [
-                {
-                  id: 1,
-                  name: 'Super Admin',
-                },
-                {
-                  id: 2,
-                  name: 'Editor',
-                },
-              ],
-            },
-          ],
-        },
-      },
-    }),
-    put: jest.fn(),
-  })),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
   useRBAC: jest.fn(() => ({

@@ -11196,13 +11196,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ansi-sequence-parser@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "ansi-sequence-parser@npm:1.1.0"
-  checksum: 75f4d3a4c555655a698aec05b5763cbddcd16ccccdbfd178fb0aa471ab74fdf98e031b875ef26e64be6a95cf970c89238744b26de6e34af97f316d5186b1df53
-  languageName: node
-  linkType: hard
-
 "ansi-styles@npm:^2.2.1":
   version: 2.2.1
   resolution: "ansi-styles@npm:2.2.1"
@@ -23624,13 +23617,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lunr@npm:^2.3.9":
-  version: 2.3.9
-  resolution: "lunr@npm:2.3.9"
-  checksum: 176719e24fcce7d3cf1baccce9dd5633cd8bdc1f41ebe6a180112e5ee99d80373fe2454f5d4624d437e5a8319698ca6837b9950566e15d2cae5f2a543a3db4b8
-  languageName: node
-  linkType: hard
-
 "luxon@npm:^1.26.0":
   version: 1.28.1
   resolution: "luxon@npm:1.28.1"
@@ -23888,15 +23874,6 @@ __metadata:
   bin:
     markdown-it: bin/markdown-it.js
   checksum: 890555711c1c00fa03b936ca2b213001a3b9b37dea140d8445ae4130ce16628392aad24b12e2a0a9935336ca5951f2957a38f4e5309a2e38eab44e25ff32a41e
-  languageName: node
-  linkType: hard
-
-"marked@npm:^4.2.12":
-  version: 4.2.12
-  resolution: "marked@npm:4.2.12"
-  bin:
-    marked: bin/marked.js
-  checksum: bd551cd61028ee639d4ca2ccdfcc5a6ba4227c1b143c4538f3cde27f569dcb57df8e6313560394645b418b84a7336c07ab1e438b89b6324c29d7d8cdd3102d63
   languageName: node
   linkType: hard
 
@@ -24372,15 +24349,6 @@ __metadata:
   dependencies:
     brace-expansion: ^2.0.1
   checksum: 15ce53d31a06361e8b7a629501b5c75491bc2b59712d53e802b1987121d91b433d73fcc5be92974fde66b2b51d8fb28d75a9ae900d249feb792bb1ba2a4f0a90
-  languageName: node
-  linkType: hard
-
-"minimatch@npm:^7.1.3":
-  version: 7.4.1
-  resolution: "minimatch@npm:7.4.1"
-  dependencies:
-    brace-expansion: ^2.0.1
-  checksum: fd930530878ba08e5a57eacc0e69fbc980d4c1dfeb98c6c5eba3a05a10b1f6d8dd4ecca59442a1909107b7ef891b43c005720c1a8ed1a02db962fd0327bf9557
   languageName: node
   linkType: hard
 
@@ -29842,18 +29810,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shiki@npm:^0.14.1":
-  version: 0.14.1
-  resolution: "shiki@npm:0.14.1"
-  dependencies:
-    ansi-sequence-parser: ^1.1.0
-    jsonc-parser: ^3.2.0
-    vscode-oniguruma: ^1.7.0
-    vscode-textmate: ^8.0.0
-  checksum: b19ea337cc84da69d99ca39d109f82946e0c56c11cc4c67b3b91cc14a9479203365fd0c9e0dd87e908f493ab409dc6f1849175384b6ca593ce7da884ae1edca2
-  languageName: node
-  linkType: hard
-
 "side-channel@npm:^1.0.4":
   version: 1.0.4
   resolution: "side-channel@npm:1.0.4"
@@ -30545,9 +30501,8 @@ __metadata:
     stylelint-processor-styled-components: 1.10.0
     supertest: 6.3.3
     ts-jest: 29.0.3
-    typedoc: 0.23.26
     typescript: 5.0.4
-    yargs: 17.6.0
+    yargs: 17.7.2
   languageName: unknown
   linkType: soft
 
@@ -32138,22 +32093,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:0.23.26":
-  version: 0.23.26
-  resolution: "typedoc@npm:0.23.26"
-  dependencies:
-    lunr: ^2.3.9
-    marked: ^4.2.12
-    minimatch: ^7.1.3
-    shiki: ^0.14.1
-  peerDependencies:
-    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x
-  bin:
-    typedoc: bin/typedoc
-  checksum: 09dbd221b5bd27a7f6c593a6aa7e4efc3c46f20761e109a76bf0ed7239011cca1261357094710c01472582060d75a7558aab5bf5b78db3aff7c52188d146ee65
-  languageName: node
-  linkType: hard
-
 "typescript@npm:5.0.4":
   version: 5.0.4
   resolution: "typescript@npm:5.0.4"
@@ -32950,20 +32889,6 @@ __metadata:
   bin:
     vm2: bin/vm2
   checksum: 1b5b20419a5cef19ab6c95d319c27d625b995785696582e6bec86a4b27704028f07b44dc04a7439a407c1bf8c17997c1aecf01886bb8b0e4e1a9b8c916977089
-  languageName: node
-  linkType: hard
-
-"vscode-oniguruma@npm:^1.7.0":
-  version: 1.7.0
-  resolution: "vscode-oniguruma@npm:1.7.0"
-  checksum: 53519d91d90593e6fb080260892e87d447e9b200c4964d766772b5053f5699066539d92100f77f1302c91e8fc5d9c772fbe40fe4c90f3d411a96d5a9b1e63f42
-  languageName: node
-  linkType: hard
-
-"vscode-textmate@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "vscode-textmate@npm:8.0.0"
-  checksum: 127780dfea89559d70b8326df6ec344cfd701312dd7f3f591a718693812b7852c30b6715e3cfc8b3200a4e2515b4c96f0843c0eacc0a3020969b5de262c2a4bb
   languageName: node
   linkType: hard
 
@@ -33968,7 +33893,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:17.6.0, yargs@npm:^17.3.1":
+"yargs@npm:17.7.2":
+  version: 17.7.2
+  resolution: "yargs@npm:17.7.2"
+  dependencies:
+    cliui: ^8.0.1
+    escalade: ^3.1.1
+    get-caller-file: ^2.0.5
+    require-directory: ^2.1.1
+    string-width: ^4.2.3
+    y18n: ^5.0.5
+    yargs-parser: ^21.1.1
+  checksum: 73b572e863aa4a8cbef323dd911d79d193b772defd5a51aab0aca2d446655216f5002c42c5306033968193bdbf892a7a4c110b0d77954a7fdf563e653967b56a
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^17.3.1":
   version: 17.6.0
   resolution: "yargs@npm:17.6.0"
   dependencies:

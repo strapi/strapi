@@ -38,8 +38,7 @@ export function InformationBoxEE() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
 
-  const { workflows: { data: workflows, isLoading: workflowIsLoading } = {} } =
-    useReviewWorkflows();
+  const { workflows, isLoading: workflowIsLoading } = useReviewWorkflows();
   // TODO: this works only as long as we support one workflow
   const workflow = workflows?.[0] ?? null;
 
