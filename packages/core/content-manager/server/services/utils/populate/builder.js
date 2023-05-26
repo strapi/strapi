@@ -6,7 +6,6 @@ const { getDeepPopulate, getQueryPopulate } = require('.');
  * Builder to create a Strapi populate object.
  *
  * @param {string} uid - Content type UID
- * @returns {Object}
  *
  * @example
  * const populate = await populateBuilder('api::article.article').countRelations().build();
