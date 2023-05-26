@@ -8768,6 +8768,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/utils@npm:4.10.5":
+  version: 4.10.5
+  resolution: "@strapi/utils@npm:4.10.5"
+  dependencies:
+    "@sindresorhus/slugify": 1.1.0
+    date-fns: 2.29.3
+    http-errors: 1.8.1
+    lodash: 4.17.21
+    p-map: 4.0.0
+    yup: 0.32.9
+  checksum: 439f386a730d3d73d1a2592aeaf093dfa25c5393318c8f38f35e111dee54bdd8e520ed05128daebcaca701d11c90a405fb665fc68dc9785d26e54a1101290694
+  languageName: node
+  linkType: hard
+
 "@stylelint/postcss-css-in-js@npm:^0.37.2":
   version: 0.37.3
   resolution: "@stylelint/postcss-css-in-js@npm:0.37.3"
@@ -15165,6 +15179,13 @@ __metadata:
     whatwg-mimetype: ^3.0.0
     whatwg-url: ^11.0.0
   checksum: 033fc3dd0fba6d24bc9a024ddcf9923691dd24f90a3d26f6545d6a2f71ec6956f93462f2cdf2183cc46f10dc01ed3bcb36731a8208456eb1a08147e571fe2a76
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:2.29.3":
+  version: 2.29.3
+  resolution: "date-fns@npm:2.29.3"
+  checksum: e01cf5b62af04e05dfff921bb9c9933310ed0e1ae9a81eb8653452e64dc841acf7f6e01e1a5ae5644d0337e9a7f936175fd2cb6819dc122fdd9c5e86c56be484
   languageName: node
   linkType: hard
 
