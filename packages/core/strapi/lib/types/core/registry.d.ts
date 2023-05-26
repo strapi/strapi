@@ -51,7 +51,7 @@ export type Keys<R, U extends UID.Any = UID.Any> = Extract<keyof R, U>;
  * type T = keyof WhereKeys<Registry, { namespace: Namespace.Plugin | Namespace.Admin }>;
  * // ^ "plugin::foo.bar" | "admin::foo" | "admin::bar"
  *
- * type T = keyof WhereKeys<Registry, { namespace: Namespace.API; name: Utils.Contains<'b'> }>;
+ * type T = keyof WhereKeys<Registry, { namespace: Namespace.API; name: Utils.Includes<'b'> }>;
  * // ^ "api::foo.bar" | "api::foo.baz"
  */
 export type WhereKeys<T, Q extends Partial<UID.Parsed>, U extends UID.Any = UID.Any> = {

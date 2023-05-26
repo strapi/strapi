@@ -10,9 +10,9 @@
 export type Literal = string | number | bigint | boolean;
 
 /**
- * Used to check if a string contains a given literal
+ * Used to check if a string includes a given literal
  */
-export type Contains<S extends Literal> = `${string}${S}${string}`;
+export type Includes<S extends Literal> = `${string}${S}${string}`;
 
 /**
  * Used to make sure the given string is not empty
