@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import type { Readable, Writable, Duplex, Transform } from 'stream';
 import type { Schema } from '@strapi/strapi';
-import type { KnexTransaction } from 'knex';
-import type { IDestinationProvider, ISourceProvider } from './providers';
+import type { Knex } from 'knex';
+import type { Duplex, Readable, Transform, Writable } from 'stream';
 import type { IAsset, IEntity, ILink } from './common-entities';
+import type { IDestinationProvider, ISourceProvider } from './providers';
 
 export type MaybePromise<T> = T | Promise<T>;
 
 // The data type passed in for each stage
 export type TransferStageTypeMap = {
-  schemas: Schema;
+  schemas: Schema.Schema;
   entities: IEntity;
   links: ILink;
   assets: IAsset;
@@ -31,7 +31,7 @@ export type TransferMap<T> = {
 };
 
 export type Stream = Readable | Writable | Duplex | Transform;
-export type TransformFunction = (chunk: any, encoding?: string) => any;
+export type TransformFunction = (chunk: unknown, encoding?: string) => unknown;
 export type StreamItem = Stream | TransformFunction;
 
 export type TransferTransformsTypeMap = TransferStageTypeMap & {
@@ -40,7 +40,9 @@ export type TransferTransformsTypeMap = TransferStageTypeMap & {
 
 export type TransferStage = keyof TransferStageTypeMap;
 
-export type TransferTransformArray<T> = TransferTransform<TransferStageTypeMap[T]>[];
+export type TransferTransformArray<T extends TransferTransformOption> = TransferTransform<
+  TransferTransformsTypeMap[T]
+>[];
 
 export type TransferTransformOption = keyof TransferTransformsTypeMap;
 
@@ -51,7 +53,9 @@ export type TransferTransforms = {
 /*
  * Filters
  */
-export type TransferFilterArray<T> = TransferFilter<TransferStageTypeMap[T]>[];
+export type TransferFilterArray<T extends TransferTransformOption> = TransferFilter<
+  TransferTransforms[T]
+>[];
 
 export type TransferFilters = {
   [key in TransferTransformOption]?: boolean | TransferFilterArray<key>;
@@ -86,7 +90,7 @@ export type IProviderTransferResults = {};
 export type ISourceProviderTransferResults = {};
 export type IDestinationProviderTransferResults = {};
 
-export type { KnexTransaction };
+export type KnexTransaction = Knex.Transaction;
 export type TransactionCallback = (trx?: KnexTransaction) => Promise<void>;
 export type Transaction = {
   attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
