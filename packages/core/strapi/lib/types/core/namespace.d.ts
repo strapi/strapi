@@ -13,12 +13,12 @@ export type Strapi = 'strapi';
 /**
  * Namespace for scoped APIs resources
  */
-export type API<T extends string = string> = `api::${T}`;
+export type API<T extends string = string> = `api${ColonsSeparator}${T}`;
 
 /**
  * Namespace for scoped plugins resources
  */
-export type Plugin<T extends string = string> = `plugin::${T}`;
+export type Plugin<T extends string = string> = `plugin${ColonsSeparator}${T}`;
 
 /**
  * Namespace for global resources
@@ -52,7 +52,7 @@ export type GetSeparator<T extends Any = Any> = T extends Scoped
 /**
  * Adds the corresponding separator (using {@link GetSeparator}) at the end of a namespace
  *
- * Warning: Using WithSeparator with a union type might produce undesired results as it'll distribute every matching suffix to every union members
+ * Warning: Using WithSeparator with a union type might produce undesired results as it'll distribute every matching suffix to every union member
  *
  * @example
  * type T = WithSeparator<Admin>
