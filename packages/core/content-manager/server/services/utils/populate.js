@@ -234,7 +234,7 @@ const getQueryPopulate = async (uid, query) => {
      * @returns
      */
     ({ key, attribute, path }) => {
-      // Ignore dynamic zones and morph relations
+      // TODO: handle dynamic zones and morph relations
       if (!attribute || isDynamicZone(attribute) || isMorphRelation(attribute)) {
         return;
       }
