@@ -1,5 +1,6 @@
 'use strict';
 
+const { isNil } = require('lodash/fp');
 const { getDeepPopulate, getQueryPopulate } = require('./utils/populate');
 
 /**
@@ -52,10 +53,10 @@ const populateBuilder = (uid) => {
      * @returns {typeof builder} - Builder
      */
     countRelations({ toMany, toOne } = { toMany: true, toOne: true }) {
-      if (toMany) {
+      if (!isNil(toMany)) {
         deepPopulateOptions.countMany = toMany;
       }
-      if (toOne) {
+      if (!isNil(toOne)) {
         deepPopulateOptions.countOne = toOne;
       }
       return builder;
