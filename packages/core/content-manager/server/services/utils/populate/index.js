@@ -213,7 +213,13 @@ const getDeepPopulateDraftCount = (uid) => {
   return { populate, hasRelations };
 };
 
-// TODO: Explain this function and the populate format
+/**
+ *  Create a Strapi populate object which populates all attribute fields of a Strapi query.
+ *
+ * @param {string} uid
+ * @param {Object} query
+ * @returns {Object} populate object
+ */
 const getQueryPopulate = async (uid, query) => {
   const pathToPopulate = (path) => path.replaceAll('.', '.populate.');
   let populateQuery = {};
@@ -221,10 +227,10 @@ const getQueryPopulate = async (uid, query) => {
   await strapiUtils.traverse.traverseQueryFilters(
     /**
      *
-     * @param {*} param0
-     * @param {*} param0.key - Attribute name
-     * @param {*} param0.attribute - Attribute definition
-     * @param {*} param0.path - Content Type path to the attribute
+     * @param {Object} param0
+     * @param {string} param0.key - Attribute name
+     * @param {Object} param0.attribute - Attribute definition
+     * @param {string} param0.path - Content Type path to the attribute
      * @returns
      */
     ({ key, attribute, path }) => {
