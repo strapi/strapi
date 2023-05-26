@@ -4,7 +4,8 @@ import { EOL } from 'os';
 import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 import type { Schema } from '@strapi/strapi';
-import Chain, { Stream, chain, pipeline } from 'stream-chain';
+import { chain } from 'stream-chain';
+import type Chain from 'stream-chain';
 import * as utils from '../utils';
 
 import type {
