@@ -13,12 +13,12 @@ export type Strapi = 'strapi';
 /**
  * Namespace for scoped APIs resources
  */
-export type API<T extends string = string> = `api::${T}`;
+export type API<T extends string = string> = `api${ColonsSeparator}${T}`;
 
 /**
  * Namespace for scoped plugins resources
  */
-export type Plugin<T extends string = string> = `plugin::${T}`;
+export type Plugin<T extends string = string> = `plugin${ColonsSeparator}${T}`;
 
 /**
  * Namespace for global resources
