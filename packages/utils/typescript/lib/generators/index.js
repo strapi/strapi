@@ -3,7 +3,7 @@
 const path = require('path');
 const chalk = require('chalk');
 
-const { REGISTRIES_OUT_DIR } = require('./constants');
+const { TYPES_ROOT_DIR, REGISTRIES_OUT_DIR } = require('./constants');
 const { saveDefinitionToFileSystem, createLogger, timer } = require('./utils');
 const generateContentTypesDefinitions = require('./content-types');
 const generateComponentsDefinitions = require('./components');
@@ -37,12 +37,12 @@ const GENERATORS = {
  * @param {GenerateConfig} [config]
  */
 const generate = async (config = {}) => {
-  const { pwd, strapi, artefacts = {}, logger: loggerConfig } = config;
+  const { pwd, rootDir = TYPES_ROOT_DIR, strapi, artefacts = {}, logger: loggerConfig } = config;
   const reports = {};
   const logger = createLogger(loggerConfig);
   const psTimer = timer().start();
 
-  const registryPwd = path.join(pwd, REGISTRIES_OUT_DIR);
+  const registryPwd = path.join(pwd, rootDir, REGISTRIES_OUT_DIR);
   const generatorConfig = { strapi, pwd: registryPwd, logger };
 
   const returnWithMessage = () => {

@@ -4,8 +4,8 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../../../../index');
 
-module.exports = async ({ debug, silent }) => {
-  if (debug && silent) {
+module.exports = async ({ debug, silent, verbose, outDir }) => {
+  if ((debug || verbose) && silent) {
     console.error('Flags conflict: both silent and debug mode are enabled, exiting...');
     process.exit(1);
   }
@@ -16,7 +16,12 @@ module.exports = async ({ debug, silent }) => {
   await tsUtils.generators.generate({
     strapi: app,
     pwd: appContext.appDir,
-    logger: { silent, debug },
+    rootDir: outDir ?? undefined,
+    logger: {
+      silent,
+      // TODO V5: verbose is deprecated and should be removed
+      debug: debug || verbose,
+    },
     artefacts: { contentTypes: true, components: true },
   });
 
