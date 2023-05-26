@@ -24,8 +24,7 @@ interface ITransferTokenAuth {
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
   url: URL;
   auth?: ITransferTokenAuth;
-  retryMessageTimeout?: number;
-  retryMessageMaxRetries?: number;
+  retryMessageOptions?: { retryMessageTimeout: number; retryMessageMaxRetries: number };
 }
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
@@ -212,8 +211,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     }
 
     this.ws = ws;
-    const { retryMessageMaxRetries, retryMessageTimeout } = this.options;
-    this.dispatcher = createDispatcher(this.ws, { retryMessageMaxRetries, retryMessageTimeout });
+    const { retryMessageOptions } = this.options;
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
     const transferID = await this.initTransfer();
 
     this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });

@@ -20,10 +20,10 @@ type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
 export const createDispatcher = (
   ws: WebSocket,
-  {
-    retryMessageMaxRetries = 5,
-    retryMessageTimeout = 10000,
-  }: { retryMessageMaxRetries?: number; retryMessageTimeout?: number }
+  retryMessageOptions = {
+    retryMessageMaxRetries: 5,
+    retryMessageTimeout: 15000,
+  }
 ) => {
   const state: IDispatcherState = {};
 
@@ -52,7 +52,7 @@ export const createDispatcher = (
           reject(error);
         }
       });
-
+      const { retryMessageMaxRetries, retryMessageTimeout } = retryMessageOptions;
       const sendPeriodically = () => {
         if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
           numberOfTimesMessageWasSent += 1;

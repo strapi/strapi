@@ -205,8 +205,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       await this.respond(undefined, new Error('Missing uuid in message'));
     }
 
-    const previousResponse = proto.response;
     if (proto.hasUUID(msg.uuid)) {
+      const previousResponse = proto.response;
       if (previousResponse?.uuid === msg.uuid) {
         await this.respond(previousResponse?.uuid, previousResponse.e, previousResponse.data);
       }

@@ -79,7 +79,7 @@ export const handlerControllerFactory =
     return async (ctx: Context) => {
       handleWSUpgrade(wss, ctx, (ws) => {
         const state: TransferState = { id: undefined };
-        const messageuuids = new Set<string>();
+        const messageUUIDs = new Set<string>();
 
         const prototype: Handler = {
           // Transfer ID
@@ -109,11 +109,11 @@ export const handlerControllerFactory =
           },
 
           addUUID(uuid) {
-            messageuuids.add(uuid);
+            messageUUIDs.add(uuid);
           },
 
           hasUUID(uuid) {
-            return messageuuids.has(uuid);
+            return messageUUIDs.has(uuid);
           },
 
           isTransferStarted() {

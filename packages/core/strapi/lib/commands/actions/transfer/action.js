@@ -79,8 +79,6 @@ module.exports = async (opts) => {
         type: 'token',
         token: opts.fromToken,
       },
-      retryMessageMaxRetries: 5,
-      retryMessageTimeout: 15000,
     });
   }
 
@@ -110,8 +108,6 @@ module.exports = async (opts) => {
       restore: {
         entities: { exclude: DEFAULT_IGNORED_CONTENT_TYPES },
       },
-      retryMessageMaxRetries: 5,
-      retryMessageTimeout: 15000,
     });
   }
 

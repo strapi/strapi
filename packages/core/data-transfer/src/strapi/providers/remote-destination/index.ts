@@ -20,8 +20,7 @@ export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
   auth?: ITransferTokenAuth;
-  retryMessageTimeout?: number;
-  retryMessageMaxRetries?: number;
+  retryMessageOptions?: { retryMessageTimeout: number; retryMessageMaxRetries: number };
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -215,8 +214,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
 
     this.ws = ws;
-    const { retryMessageMaxRetries, retryMessageTimeout } = this.options;
-    this.dispatcher = createDispatcher(this.ws, { retryMessageMaxRetries, retryMessageTimeout });
+    const { retryMessageOptions } = this.options;
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
 
     this.transferID = await this.initTransfer();
 

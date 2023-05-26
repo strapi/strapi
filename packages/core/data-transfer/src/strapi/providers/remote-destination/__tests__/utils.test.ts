@@ -26,9 +26,7 @@ describe('Remote Strapi Destination Utils', () => {
       command: 'status',
     };
 
-    createDispatcher(ws, { retryMessageMaxRetries: 5, retryMessageTimeout: 15000 }).dispatch(
-      message
-    );
+    createDispatcher(ws).dispatch(message);
 
     expect.extend({
       toContain(receivedString, expected) {
