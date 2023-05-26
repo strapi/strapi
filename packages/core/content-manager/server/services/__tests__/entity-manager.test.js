@@ -26,6 +26,13 @@ describe('Content-Manager', () => {
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
         },
+        plugins: {
+          'content-manager': {
+            services: {
+              'populate-builder': require('../populate-builder')(),
+            },
+          },
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
@@ -57,6 +64,13 @@ describe('Content-Manager', () => {
         getModel: jest.fn(() => fakeModel),
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
+        },
+        plugins: {
+          'content-manager': {
+            services: {
+              'populate-builder': require('../populate-builder')(),
+            },
+          },
         },
       };
       entityManager = entityManagerLoader({ strapi });

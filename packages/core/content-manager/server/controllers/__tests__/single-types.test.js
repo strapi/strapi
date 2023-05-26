@@ -60,6 +60,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'populate-builder': require('../../services/populate-builder')(),
           },
         },
       },
@@ -157,6 +158,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'populate-builder': require('../../services/populate-builder')(),
           },
         },
       },
@@ -273,6 +275,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'populate-builder': require('../../services/populate-builder')(),
           },
         },
       },
@@ -370,6 +373,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'populate-builder': require('../../services/populate-builder')(),
           },
         },
       },
@@ -467,6 +471,7 @@ describe('Single Types', () => {
                 return permissionChecker;
               },
             },
+            'populate-builder': require('../../services/populate-builder')(),
           },
         },
       },
