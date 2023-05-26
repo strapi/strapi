@@ -3,12 +3,18 @@
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
+const { populateBuilder } = require('../services/utils/populate/builder');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
 
-  const entity = await entityManager.find(query, model);
-  return entityManager.assocCreatorRoles(entity);
+  const populate = await populateBuilder(model)
+    .populateFromQuery(query)
+    .populateDeep(Infinity)
+    .countRelations()
+    .build();
+
+  return entityManager.find(query, model, { populate });
 };
 
 module.exports = {
@@ -56,7 +62,6 @@ module.exports = {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
-
     const entity = await findEntity(sanitizedQuery, model);
 
     const pickWritables = pickWritableAttributes({ model });
