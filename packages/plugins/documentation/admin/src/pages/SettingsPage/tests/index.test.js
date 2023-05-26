@@ -124,6 +124,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -565,74 +566,70 @@ describe('Plugin | Documentation | SettingsPage', () => {
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         <div
-                          class="c20"
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c21 c22"
+                            for="1"
+                          >
+                            Restricted Access
+                          </label>
+                        </div>
+                        <label
+                          class="c23"
                         >
                           <div
-                            class="c4"
+                            class="c24"
                           >
-                            <label
-                              class="c5 c21 c22"
-                              for="1"
-                            >
-                              Restricted Access
-                            </label>
+                            Restricted Access
                           </div>
-                          <label
-                            class="c23"
+                          <div
+                            class="c25 c26"
+                            display="flex"
                           >
                             <div
-                              class="c24"
+                              aria-hidden="true"
+                              class="c27 c28 c29"
                             >
-                              Restricted Access
+                              <span
+                                class="c5 c30"
+                              >
+                                Off
+                              </span>
                             </div>
                             <div
-                              class="c25 c26"
-                              display="flex"
+                              aria-hidden="true"
+                              class="c27 c28 c31"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c29"
+                              <span
+                                class="c5 c32"
                               >
-                                <span
-                                  class="c5 c30"
-                                >
-                                  Off
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c31"
-                              >
-                                <span
-                                  class="c5 c32"
-                                >
-                                  On
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="1-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c33"
-                                id="1"
-                                name="restrictedAccess"
-                                type="checkbox"
-                              />
+                                On
+                              </span>
                             </div>
-                          </label>
-                          <p
-                            class="c5 c34"
-                            id="1-hint"
-                          >
-                            Make the documentation endpoint private
-                          </p>
-                        </div>
+                            <input
+                              aria-describedby="1-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c33"
+                              id="1"
+                              name="restrictedAccess"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c34"
+                          id="1-hint"
+                        >
+                          Make the documentation endpoint private
+                        </p>
                       </div>
                     </div>
                   </div>

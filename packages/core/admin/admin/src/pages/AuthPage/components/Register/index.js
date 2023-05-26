@@ -5,7 +5,6 @@ import omit from 'lodash/omit';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
-import axios from 'axios';
 import {
   Form,
   useQuery,
@@ -14,6 +13,7 @@ import {
   getYupInnerErrors,
   Link,
   useAPIErrorHandler,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import {
   Box,
@@ -52,6 +52,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const { formatMessage } = useIntl();
   const query = useQuery();
   const { formatAPIError } = useAPIErrorHandler();
+  const { get } = useFetchClient();
 
   const registrationToken = query.get('registrationToken');
 
@@ -61,9 +62,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
         try {
           const {
             data: { data },
-          } = await axios.get(
-            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
-          );
+          } = await get(`/admin/registration-info?registrationToken=${registrationToken}`);
 
           if (data) {
             setUserInfo(data);

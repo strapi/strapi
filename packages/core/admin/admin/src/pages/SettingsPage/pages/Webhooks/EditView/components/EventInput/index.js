@@ -5,7 +5,18 @@ import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import EventRow from './EventRow';
-import formatValue from './utils/formatValue';
+
+export const formatValue = (value) =>
+  value.reduce((acc, curr) => {
+    const key = curr.split('.')[0];
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(curr);
+
+    return acc;
+  }, {});
 
 const StyledTable = styled.table`
   td {
