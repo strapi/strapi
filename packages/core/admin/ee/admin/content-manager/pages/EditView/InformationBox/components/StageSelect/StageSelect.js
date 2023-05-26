@@ -106,7 +106,7 @@ export function StageSelect() {
 
         <ReactSelect
           components={{
-            LoadingIndicator: () => <Loader small />,
+            LoadingIndicator: () => <Loader data-testid="loader" small />,
             Option: OptionColor,
             SingleValue: SingleValueColor,
           }}
