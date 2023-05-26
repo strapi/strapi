@@ -3,7 +3,12 @@ title: Transactions
 description: Conceptual guide to transactions in Strapi
 tags:
   - database
+  - experimental
 ---
+
+:::caution
+This is an experimental feature and is subject to change in future versions.
+:::
 
 An API to wrap a set of operations in a transaction that ensures the integrity of data.
 
