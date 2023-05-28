@@ -34,7 +34,7 @@
     "@strapi/icons": "1.7.9",
     "@strapi/utils": "4.10.6",
     "bcryptjs": "2.4.3",
-    "formik": "2.2.9",
+    "formik": "2.4.0",
     "grant-koa": "5.4.8",
     "immer": "9.0.19",
     "jsonwebtoken": "9.0.0",
