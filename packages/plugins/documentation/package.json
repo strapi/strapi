@@ -49,7 +49,7 @@
     "react-redux": "8.0.5",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
-    "swagger-ui-dist": "4.18.1",
+    "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
     "yup": "^0.32.9"
   },
