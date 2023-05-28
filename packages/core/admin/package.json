@@ -117,7 +117,7 @@
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-is": "^17.0.2",
-    "react-query": "3.24.3",
+    "react-query": "3.39.3",
     "react-redux": "8.0.5",
     "react-refresh": "0.14.0",
     "react-router-dom": "5.3.4",
