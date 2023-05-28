@@ -82,6 +82,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
 
     if (!errors) {
+      
       try {
         lockApp();
 
@@ -116,7 +117,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         });
       } catch (err) {
         const data = err?.response?.payload ?? { data: {} };
-
+        
         if (!!data?.data && typeof data.data === 'string') {
           toggleNotification({
             type: 'warning',

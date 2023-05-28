@@ -863,21 +863,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     >
                       <label
                         class="c8 c24 c25"
-                        for=":r6:"
+                        for="5"
                       >
                         Local authentication lock-out
                       </label>
                       <div
                         aria-autocomplete="none"
-                        aria-controls="radix-:r9:"
-                        aria-describedby=":r6:-hint :r6:-error"
+                        aria-controls="radix-1"
+                        aria-describedby="5-hint 5-error"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-label="Local authentication lock-out"
                         class="c47 c39 c40"
                         data-state="closed"
                         dir="ltr"
-                        id=":r6:"
+                        id="5"
                         overflow="hidden"
                         role="combobox"
                         tabindex="0"
@@ -964,7 +964,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id=":r6:-hint"
+                        id="5-hint"
                       >
                         Select the roles for which you want to disable the local authentication
                       </p>
