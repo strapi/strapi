@@ -115,7 +115,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
               <SortIcon />
 
               {visible && (
-                <Popover source={buttonRef} spacing={16} centered>
+                <Popover onDismiss={handleTogglePopover} source={buttonRef} spacing={16} centered>
                   <ul>
                     {localesArray.map((name) => (
                       <Box key={name} padding={3} as="li">

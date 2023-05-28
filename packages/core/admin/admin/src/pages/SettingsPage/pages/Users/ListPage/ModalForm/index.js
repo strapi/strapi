@@ -15,7 +15,6 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
-
 import { Formik } from 'formik';
 import {
   Form,
@@ -24,20 +23,21 @@ import {
   useOverlayBlocker,
   useFetchClient,
 } from '@strapi/helper-plugin';
-import { useQueryClient, useMutation } from 'react-query';
+import { useMutation } from 'react-query';
+
 import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+
 import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
 
-const ModalForm = ({ queryName, onToggle }) => {
+const ModalForm = ({ onSuccess, onToggle }) => {
   const [currentStep, setStep] = useState('create');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationToken, setRegistrationToken] = useState(null);
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -50,8 +50,7 @@ const ModalForm = ({ queryName, onToggle }) => {
       async onSuccess({ data }) {
         setRegistrationToken(data.data.registrationToken);
 
-        await queryClient.refetchQueries(queryName);
-        await queryClient.refetchQueries(['ee', 'license-limit-info']);
+        await onSuccess();
 
         goNext();
         setIsSubmitting(false);
@@ -216,7 +215,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
 ModalForm.propTypes = {
   onToggle: PropTypes.func.isRequired,
-  queryName: PropTypes.array.isRequired,
+  onSuccess: PropTypes.func.isRequired,
 };
 
 export default ModalForm;
