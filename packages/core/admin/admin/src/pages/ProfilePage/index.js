@@ -112,7 +112,7 @@ const ProfilePage = () => {
     },
   });
 
-  const isLoading = isLoadingUser && isLoadingSSO;
+  const isLoading = isLoadingUser || isLoadingSSO;
 
   const submitMutation = useMutation((body) => putUser(body), {
     async onSuccess(data) {
