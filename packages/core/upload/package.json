@@ -30,7 +30,7 @@
     "@strapi/icons": "1.7.9",
     "@strapi/provider-upload-local": "4.10.6",
     "@strapi/utils": "4.10.6",
-    "axios": "1.3.4",
+    "axios": "1.4.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
     "date-fns": "2.30.0",
