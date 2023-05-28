@@ -45,18 +45,18 @@ const App = (
 describe('ADMIN | Pages | Profile page', () => {
   beforeAll(() => server.listen());
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  // beforeEach(() => {
+  //   jest.clearAllMocks();
+  // });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
+  // afterEach(() => {
+  //   server.resetHandlers();
+  // });
 
-  afterAll(() => {
-    jest.resetAllMocks();
-    server.close();
-  });
+  // afterAll(() => {
+  //   jest.resetAllMocks();
+  //   server.close();
+  // });
 
   it('renders and matches the snapshot', async () => {
     const { container } = render(App);

@@ -94,7 +94,7 @@ const ProfilePage = () => {
       });
     },
   });
-  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery('sso', async () => {
+  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(['providers', 'options'], async () => {
     const { 
       data: {
         data
@@ -200,9 +200,8 @@ const ProfilePage = () => {
     (themeName) => allApplicationThemes[themeName]
   );
 
-  const currentUserRoles = data?.roles?.map(role => role.id) || [];
-  // check if the user role is in the locked roles list
-  const hasLockedRole = dataSSO?.ssoLockedRoles?.some((roleId) => currentUserRoles.includes(Number(roleId))) || false;
+  const currentUserRoles = (data?.roles ?? []).map(role => role.id);
+  const hasLockedRole = (dataSSO?.ssoLockedRoles ?? []).some((roleId) => currentUserRoles.includes(Number(roleId)));
 
   return (
     <Main aria-busy={isSubmittingForm}>
