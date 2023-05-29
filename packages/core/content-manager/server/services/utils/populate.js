@@ -1,6 +1,6 @@
 'use strict';
 
-const { merge, isEmpty, get, set, propEq } = require('lodash/fp');
+const { merge, isEmpty, set, propEq } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
@@ -221,7 +221,6 @@ const getDeepPopulateDraftCount = (uid) => {
  * @returns {Object} populate object
  */
 const getQueryPopulate = async (uid, query) => {
-  const pathToPopulate = (path) => path.replace(/\./g, '.populate.');
   let populateQuery = {};
 
   await strapiUtils.traverse.traverseQueryFilters(
@@ -233,7 +232,7 @@ const getQueryPopulate = async (uid, query) => {
      * @param {string} param0.path - Content Type path to the attribute
      * @returns
      */
-    ({ key, attribute, path }) => {
+    ({ attribute, path }) => {
       // TODO: handle dynamic zones and morph relations
       if (!attribute || isDynamicZone(attribute) || isMorphToRelation(attribute)) {
         return;
@@ -241,20 +240,9 @@ const getQueryPopulate = async (uid, query) => {
 
       // Populate all relations, components and media
       if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
-        const populatePath = pathToPopulate(path.attribute);
-        populateQuery = set(populatePath, { fields: [] }, populateQuery);
-        return;
+        const populatePath = path.attribute.replace(/\./g, '.populate.');
+        populateQuery = set(populatePath, {}, populateQuery);
       }
-
-      // Top level attributes are not populated
-      if (key === path.attribute) {
-        return;
-      }
-
-      // Can only get here if attribute is a field from a relation / compo
-      const pathWithoutKey = path.attribute.slice(0, path.attribute.lastIndexOf('.'));
-      const populatePath = pathToPopulate(pathWithoutKey);
-      get(populatePath, populateQuery).fields.push(key);
     },
     { schema: strapi.getModel(uid) },
     query
