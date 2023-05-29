@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { GridItem, Select, Option } from '@strapi/design-system';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useIntl } from 'react-intl';
-import { useLayoutDnd } from '../../../hooks';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
 import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
 import getTrad from '../../../utils/getTrad';
@@ -102,7 +102,9 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     );
   });
 
-  const { isResizable } = fieldSizes[attributes[selectedField].type];
+  // Check for a custom input provided by a custom field, or use the default one for that type
+  const { type, customField } = attributes[selectedField];
+  const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
 
   const sizeField = (
     <GridItem col={6} key="size">

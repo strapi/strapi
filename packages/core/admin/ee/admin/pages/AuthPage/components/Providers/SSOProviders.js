@@ -35,7 +35,7 @@ const SSOProvidersWrapper = styled(Flex)`
 const SSOProviderButton = ({ provider }) => {
   return (
     <Tooltip label={provider.displayName}>
-      <SSOButton href={`${strapi.backendURL}/admin/connect/${provider.uid}`}>
+      <SSOButton href={`${window.strapi.backendURL}/admin/connect/${provider.uid}`}>
         {provider.icon ? (
           <img src={provider.icon} aria-hidden alt="" height="32px" />
         ) : (

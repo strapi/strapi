@@ -17,7 +17,7 @@ const DividerFull = styled(Divider)`
 `;
 
 const Providers = () => {
-  const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
+  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
 
   const { push } = useHistory();
   const { formatMessage } = useIntl();

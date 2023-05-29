@@ -17,7 +17,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useNotification: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const client = new QueryClient({

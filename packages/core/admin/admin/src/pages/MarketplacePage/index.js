@@ -6,7 +6,7 @@ import {
   useFocusWhenNavigate,
   useTracking,
   useNotification,
-  useAppInfos,
+  useAppInfo,
   useQueryParams,
 } from '@strapi/helper-plugin';
 import {
@@ -43,7 +43,7 @@ const MarketPlacePage = () => {
   const [{ query }, setQuery] = useQueryParams();
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfos();
+  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
   const isOnline = useNavigatorOnLine();
 
   const npmPackageType = query?.npmPackageType || 'plugin';

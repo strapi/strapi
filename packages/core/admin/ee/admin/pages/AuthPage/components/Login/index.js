@@ -13,7 +13,7 @@ const DividerFull = styled(Divider)`
 `;
 
 const Login = (loginProps) => {
-  const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
+  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
 

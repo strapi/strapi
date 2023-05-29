@@ -1,6 +1,6 @@
 {
   "name": "@strapi/babel-plugin-switch-ee-ce",
-  "version": "4.9.2",
+  "version": "4.10.6",
   "description": "Babel plugin to switch from CE to EE at runtime",
   "repository": "git://github.com/strapi/strapi.git",
   "license": "SEE LICENSE IN LICENSE",
@@ -23,7 +23,7 @@
   "dependencies": {
     "@babel/template": "^7.20.7",
     "reselect": "4.1.7",
-    "resolve": "1.20.0"
+    "resolve": "1.22.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.20.7",

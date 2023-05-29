@@ -14,7 +14,7 @@ import {
 } from '@strapi/design-system';
 import styled from 'styled-components';
 import { getTrad } from '../../../utils';
-import { useLayoutDnd } from '../../../hooks';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
 import FieldTypeIcon from '../../../components/FieldTypeIcon';
 import ModalForm from './ModalForm';
 

@@ -2,10 +2,19 @@
 
 exports[`BrowseStep renders and match snapshot 1`] = `
 .c0 {
+  margin-left: -250px;
+  position: fixed;
+  left: 50%;
+  top: 2.875rem;
+  z-index: 10;
+  width: 31.25rem;
+}
+
+.c2 {
   padding-bottom: 16px;
 }
 
-.c4 {
+.c5 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -16,12 +25,19 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   cursor: pointer;
 }
 
-.c14 {
+.c13 {
+  margin-left: auto;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c15 {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-.c16 {
+.c17 {
   background: #ffffff;
   padding: 8px;
   border-radius: 4px;
@@ -32,19 +48,19 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   cursor: pointer;
 }
 
-.c20 {
+.c21 {
   padding-top: 12px;
 }
 
-.c29 {
+.c30 {
   padding-bottom: 8px;
 }
 
-.c33 {
+.c34 {
   position: relative;
 }
 
-.c36 {
+.c37 {
   background: #ffffff;
   padding: 12px;
   border-radius: 4px;
@@ -55,7 +71,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   cursor: pointer;
 }
 
-.c37 {
+.c38 {
   background: #eaf5ff;
   color: #66b7f1;
   padding-top: 8px;
@@ -65,43 +81,126 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c39 {
+.c40 {
   position: relative;
   overflow: hidden;
   max-width: 100%;
 }
 
-.c42 {
+.c43 {
   padding: 4px;
   max-width: 100%;
 }
 
-.c44 {
+.c45 {
   max-width: 100%;
 }
 
-.c51 {
+.c52 {
   right: 16px;
 }
 
-.c54 {
+.c55 {
   padding-top: 16px;
 }
 
 .c60 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c62 {
+  background: #ffffff;
+  padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
 }
 
-.c65 {
+.c63 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c69 {
   padding-left: 8px;
 }
 
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c31 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c58 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c65 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c70 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
 .c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c3 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -119,7 +218,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c2 {
+.c4 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -134,9 +233,10 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
-.c5 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -151,7 +251,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   gap: 8px;
 }
 
-.c10 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -165,7 +265,24 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c17 {
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c18 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -183,7 +300,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: center;
 }
 
-.c40 {
+.c41 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -197,7 +314,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: column;
 }
 
-.c45 {
+.c46 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -211,7 +328,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: column;
 }
 
-.c55 {
+.c56 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -229,7 +346,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c56 {
+.c57 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -241,87 +358,78 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-}
-
-.c9 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c30 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c46 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c48 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
+  gap: 4px;
 }
 
 .c61 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c66 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
+.c64 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
 }
 
-.c72 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c71 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
 }
 
-.c6 {
+.c7 {
   position: relative;
   outline: none;
 }
 
-.c6 svg {
+.c7 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c6 svg > g,
-.c6 svg path {
+.c7 > svg > g,
+.c7 > svg path {
   fill: #ffffff;
 }
 
-.c6[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c6:after {
+.c7:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -336,11 +444,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c6:focus-visible {
+.c7:focus-visible {
   outline: none;
 }
 
-.c6:focus-visible:after {
+.c7:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -351,7 +459,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c19 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -363,120 +471,70 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   width: 1px;
 }
 
-.c7 {
+.c8 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c7[aria-disabled='true'] {
+.c8[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c7[aria-disabled='true'] .c8 {
+.c8[aria-disabled='true'] .c9 {
   color: #666687;
 }
 
-.c7[aria-disabled='true'] svg > g,.c7[aria-disabled='true'] svg path {
+.c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c7[aria-disabled='true']:active {
+.c8[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c7[aria-disabled='true']:active .c8 {
+.c8[aria-disabled='true']:active .c9 {
   color: #666687;
 }
 
-.c7[aria-disabled='true']:active svg > g,.c7[aria-disabled='true']:active svg path {
+.c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c7:hover {
+.c8:hover {
   background-color: #f6f6f9;
 }
 
-.c7:active {
+.c8:active {
   background-color: #eaeaef;
 }
 
-.c7 .c8 {
+.c8 .c9 {
   color: #32324d;
 }
 
-.c7 svg > g,
-.c7 svg path {
+.c8 svg > g,
+.c8 svg path {
   fill: #32324d;
 }
 
-.c52 > * {
+.c53 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c52 > * + * {
+.c53 > * + * {
   margin-left: 8px;
 }
 
-.c53 {
+.c54 {
   position: absolute;
   top: 12px;
 }
 
-.c57 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c57:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c63 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c63 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c63 svg path {
-  fill: #666687;
-}
-
-.c64 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c64 svg {
-  width: 0.375rem;
-}
-
-.c11 {
+.c59 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -487,89 +545,131 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   align-items: center;
 }
 
-.c11 svg {
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 svg {
   height: 4px;
   width: 6px;
 }
 
-.c58 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
+.c62 {
+  border: 1px solid #dcdce4;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
 }
 
-.c58:focus {
+.c62[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c62:focus-visible {
   outline: none;
 }
 
-.c58[data-disabled] {
-  cursor: not-allowed;
+.c62:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c59 {
-  width: 100%;
+.c68 > svg {
+  width: 0.375rem;
 }
 
-.c31 {
+.c68 > svg > path {
+  fill: #666687;
+}
+
+.c66 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c77[data-state='checked'] .c9 {
+  font-weight: bold;
+  color: #4945ff;
+}
+
+.c32 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c32 {
+.c33 {
   grid-column: span 3;
   max-width: 100%;
 }
 
-.c18 svg > g,
-.c18 svg path {
+.c19 svg > g,
+.c19 svg path {
   fill: #8e8ea9;
 }
 
-.c18:hover svg > g,
-.c18:hover svg path {
+.c19:hover svg > g,
+.c19:hover svg path {
   fill: #666687;
 }
 
-.c18:active svg > g,
-.c18:active svg path {
+.c19:active svg > g,
+.c19:active svg path {
   fill: #a5a5ba;
 }
 
-.c18[aria-disabled='true'] svg path {
+.c19[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c24 {
+.c25 {
   padding-top: 4px;
   padding-right: 8px;
   padding-bottom: 4px;
   padding-left: 8px;
 }
 
-.c26 {
+.c27 {
   padding-right: 4px;
   padding-left: 4px;
 }
 
-.c25 {
+.c26 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #32324d;
 }
 
-.c27 {
+.c28 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #8e8ea9;
 }
 
-.c21 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -583,7 +683,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c23 {
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -597,11 +697,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c22:first-child {
+.c23:first-child {
   margin-left: calc(-1*8px);
 }
 
-.c28 {
+.c29 {
   border-radius: 4px;
   color: #666687;
   font-size: 0.75rem;
@@ -611,13 +711,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   text-decoration: none;
 }
 
-.c28:hover,
-.c28:focus {
+.c29:hover,
+.c29:focus {
   background-color: #dcdce4;
   color: #4a4a6a;
 }
 
-.c35 {
+.c36 {
   height: 100%;
   left: 0;
   position: absolute;
@@ -626,46 +726,42 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   width: 100%;
 }
 
-.c35:hover,
-.c35:focus {
+.c36:hover,
+.c36:focus {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c38 path {
+.c39 path {
   fill: currentColor;
 }
 
-.c50 {
+.c51 {
   display: none;
 }
 
-.c34:hover .c49,
-.c34:focus-within .c49 {
+.c35:hover .c50,
+.c35:focus-within .c50 {
   display: block;
 }
 
-.c41 {
+.c42 {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
 
-.c43:focus {
+.c44:focus {
   outline: 2px solid #4945ff;
   outline-offset: -2px;
 }
 
-.c67 > * + * {
-  margin-left: 4px;
-}
-
-.c73 {
+.c76 {
   line-height: revert;
 }
 
-.c68 {
+.c72 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -678,7 +774,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   outline: none;
 }
 
-.c68:after {
+.c72:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -693,11 +789,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c68:focus-visible {
+.c72:focus-visible {
   outline: none;
 }
 
-.c68:focus-visible:after {
+.c72:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -708,7 +804,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c70 {
+.c74 {
   padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
@@ -722,7 +818,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   outline: none;
 }
 
-.c70:after {
+.c74:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -737,11 +833,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c70:focus-visible {
+.c74:focus-visible {
   outline: none;
 }
 
-.c70:focus-visible:after {
+.c74:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -752,79 +848,64 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c71 {
+.c75 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c71:hover {
+.c75:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c69 {
+.c73 {
   font-size: 0.7rem;
   pointer-events: none;
 }
 
-.c69 svg path {
+.c73 svg path {
   fill: #c0c0cf;
 }
 
-.c69:focus svg path,
-.c69:hover svg path {
+.c73:focus svg path,
+.c73:hover svg path {
   fill: #c0c0cf;
 }
 
-.c3 > * + * {
-  margin-left: 8px;
-}
-
-.c12 {
-  margin-left: auto;
-}
-
-.c12 > * + * {
-  margin-left: 8px;
-}
-
-.c13 {
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-}
-
-.c47 {
+.c48 {
   max-width: 100%;
 }
 
-.c15 svg path {
+.c16 svg path {
   fill: #8e8ea9;
 }
 
 @media (max-width:68.75rem) {
-  .c32 {
+  .c33 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c32 {
+  .c33 {
     grid-column: span;
   }
 }
 
 <div>
   <div
+    class="c0 c1"
+  />
+  <div
     class=""
   >
     <div
-      class="c0"
+      class="c2"
     >
       <div
-        class="c1"
+        class="c3"
       >
         <div
-          class="c2 c3"
+          class="c4"
           wrap="wrap"
         >
           <div>
@@ -833,21 +914,21 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="true"
-              class="c4 c5 c6 c7"
+              class="c5 c6 c7 c8"
               label="Sort by"
               type="button"
             >
               <span
-                class="c8 c9"
+                class="c9 c10"
               >
                 Sort by
               </span>
               <div
                 aria-hidden="true"
-                class="c10"
+                class="c11"
               >
                 <span
-                  class="c11"
+                  class="c12"
                 >
                   <svg
                     aria-hidden="true"
@@ -870,7 +951,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </div>
           <button
             aria-disabled="false"
-            class="c4 c5 c6 c7"
+            class="c5 c6 c7 c8"
             type="button"
           >
             <div
@@ -893,28 +974,28 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               </svg>
             </div>
             <span
-              class="c8 c9"
+              class="c9 c10"
             >
               Filters
             </span>
           </button>
         </div>
         <div
-          class="c10 c12 c13"
+          class="c13 c14"
         >
           <div
-            class="c14 c15"
+            class="c15 c16"
           >
             <span>
               <button
                 aria-disabled="false"
                 aria-labelledby="1"
-                class="c16 c17 c6 c18"
+                class="c17 c18 c7 c19"
                 tabindex="0"
                 type="button"
               >
                 <span
-                  class="c19"
+                  class="c20"
                 >
                   List View
                 </span>
@@ -939,12 +1020,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             <button
               aria-disabled="false"
               aria-labelledby="2"
-              class="c16 c17 c6 c18"
+              class="c17 c18 c7 c19"
               tabindex="0"
               type="button"
             >
               <span
-                class="c19"
+                class="c20"
               >
                 Search
               </span>
@@ -970,64 +1051,64 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c20"
+      class="c21"
     >
       <nav
         aria-label="Folders navigation"
         class=""
       >
         <ol
-          class="c21 c22"
+          class="c22 c23"
         >
           <li
-            class="c23"
+            class="c24"
           >
             <div
-              class="c24"
+              class="c25"
             >
               <span
                 aria-current="false"
-                class="c25"
+                class="c26"
               >
                 Media Library
               </span>
             </div>
             <div
               aria-hidden="true"
-              class="c26"
+              class="c27"
             >
               <span
-                class="c27"
+                class="c28"
               >
                 /
               </span>
             </div>
           </li>
           <li
-            class="c23"
+            class="c24"
           >
             <button
-              class="c28"
+              class="c29"
               type="button"
             >
               Folder 2
             </button>
             <div
               aria-hidden="true"
-              class="c26"
+              class="c27"
             >
               <span
-                class="c27"
+                class="c28"
               >
                 /
               </span>
             </div>
           </li>
           <li
-            class="c23"
+            class="c24"
           >
             <button
-              class="c28"
+              class="c29"
               type="button"
             >
               Folder 1
@@ -1040,42 +1121,42 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       class=""
     >
       <div
-        class="c29"
+        class="c30"
       >
         <h2
-          class="c8 c30"
+          class="c9 c31"
         >
           Folders (1)
         </h2>
       </div>
       <div
-        class="c31"
+        class="c32"
       >
         <div
-          class="c32"
+          class="c33"
         >
           <div
             class=""
           >
             <div
-              class="c33 c34"
+              class="c34 c35"
               tabindex="0"
             >
               <button
                 aria-hidden="true"
                 aria-label="Folder 1"
-                class="c35"
+                class="c36"
                 tabindex="-1"
                 type="button"
               />
               <div
-                class="c36 c5"
+                class="c37 c6"
               >
                 <div
-                  class="c37"
+                  class="c38"
                 >
                   <svg
-                    class="c38"
+                    class="c39"
                     fill="none"
                     height="1.5rem"
                     viewBox="0 0 24 24"
@@ -1089,29 +1170,29 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   </svg>
                 </div>
                 <div
-                  class="c39 c40 c41"
+                  class="c40 c41 c42"
                   id="folder-1-1-title"
                   overflow="hidden"
                 >
                   <button
-                    class="c42 c43"
+                    class="c43 c44"
                     type="button"
                   >
                     <h2
-                      class="c44 c45"
+                      class="c45 c46"
                     >
                       <span
-                        class="c8 c46 c47"
+                        class="c9 c47 c48"
                       >
                         Folder 1
                         <div
-                          class="c19"
+                          class="c20"
                         >
                           -
                         </div>
                       </span>
                       <span
-                        class="c8 c48 c47"
+                        class="c9 c49 c48"
                       >
                         1 folder, 1 asset
                       </span>
@@ -1119,18 +1200,18 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                   </button>
                 </div>
                 <div
-                  class="c49 c50"
+                  class="c50 c51"
                 >
                   <div
-                    class="c51 c10 c52 c53"
+                    class="c52 c11 c53 c54"
                   >
                     <button
                       aria-disabled="false"
-                      class="c16 c17 c6 c18"
+                      class="c17 c18 c7 c19"
                       type="button"
                     >
                       <span
-                        class="c19"
+                        class="c20"
                       >
                         Edit folder
                       </span>
@@ -1160,84 +1241,78 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       </div>
     </div>
     <div
-      class="c54 c55"
+      class="c55 c56"
     >
       <div
-        class="c10"
+        class="c11"
       >
         <div
           class=""
         >
           <div
-            class="c56"
+            class="c57"
           >
+            <label
+              class="c9 c58 c59"
+              for="4"
+            />
             <div
-              class="c10 c57"
+              aria-autocomplete="none"
+              aria-controls="radix-0"
+              aria-describedby="4-hint 4-error"
+              aria-expanded="false"
+              class="c60 c61 c62"
+              data-state="closed"
+              dir="ltr"
+              id="4"
+              overflow="hidden"
+              role="combobox"
+              tabindex="0"
             >
-              <button
-                aria-expanded="false"
-                aria-haspopup="listbox"
-                aria-label="Entries per page"
-                aria-labelledby="4 4-label 4-content"
-                aria-required="false"
-                class="c58"
-                id="4"
-                role="combobox"
-                type="button"
-                value="10"
-              />
-              <div
-                class="c55 c59"
+              <span
+                class="c63 c64"
               >
-                <div
-                  class="c10"
+                <span
+                  class="c9 c65 c66"
                 >
-                  <div
-                    class="c60"
+                  <span
+                    class="c67"
                   >
-                    <span
-                      class="c8 c61"
-                      id="4-content"
-                    >
-                      10
-                    </span>
-                  </div>
-                </div>
-                <div
-                  class="c10"
+                    10
+                  </span>
+                </span>
+              </span>
+              <span
+                class="c64"
+              >
+                <span
+                  aria-hidden="true"
+                  class="c68"
                 >
-                  <button
-                    aria-hidden="true"
-                    class="c62 c63 c64"
-                    tabindex="-1"
-                    title="Carret Down Button"
-                    type="button"
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 14 8"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 14 8"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+                    <path
+                      clip-rule="evenodd"
+                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                      fill="#32324D"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="c65"
+          class="c69"
         >
           <label
-            class="c8 c66"
+            class="c9 c70"
             for="page-size"
           >
             Entries per page
@@ -1249,17 +1324,17 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         class=""
       >
         <ul
-          class="c10 c67"
+          class="c71"
         >
           <li>
             <button
               aria-disabled="true"
-              class="c68 c69"
+              class="c72 c73"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c19"
+                class="c20"
               >
                 Go to previous page
               </div>
@@ -1280,17 +1355,17 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </li>
           <li>
             <button
-              class="c70 c71"
+              class="c74 c75"
               type="button"
             >
               <div
-                class="c19"
+                class="c20"
               >
                 Go to page 1
               </div>
               <span
                 aria-hidden="true"
-                class="c8 c72 c73"
+                class="c9 c58 c76"
               >
                 1
               </span>
@@ -1299,12 +1374,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <li>
             <button
               aria-disabled="true"
-              class="c68 c69"
+              class="c72 c73"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c19"
+                class="c20"
               >
                 Go to next page
               </div>
@@ -1328,7 +1403,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c19"
+    class="c20"
   >
     <p
       aria-live="polite"

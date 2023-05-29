@@ -105,7 +105,9 @@ const onlineUpdate = async ({ strapi }) => {
     };
 
     const license = shouldContactRegistry
-      ? await fetchLicense(ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(fallback)
+      ? await fetchLicense({ strapi }, ee.licenseInfo.licenseKey, strapi.config.get('uuid')).catch(
+          fallback
+        )
       : storedInfo.license;
 
     if (license) {

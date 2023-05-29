@@ -477,7 +477,7 @@
   "content-manager.components.DraggableCard.edit.field": "Modifier {item}",
   "content-manager.components.DraggableCard.move.field": "Déplacer {item}",
   "content-manager.components.DynamicTable.row-line": "ligne {number}",
-  "content-manager.components.DynamicZone.ComponentPicker-label": "Choisir un compoosant",
+  "content-manager.components.DynamicZone.ComponentPicker-label": "Choisir un composant",
   "content-manager.components.DynamicZone.add-component": "Ajouter un composant à {componentName}",
   "content-manager.components.DynamicZone.delete-label": "Supprimer {name}",
   "content-manager.components.DynamicZone.error-message": "Le composant contient une ou des erreurs",

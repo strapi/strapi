@@ -3,7 +3,6 @@
 const fs = require('fs');
 const { join } = require('path');
 const crypto = require('crypto');
-const fetch = require('node-fetch');
 
 const machineId = require('../lib/utils/machine-id');
 
@@ -12,7 +11,7 @@ const DEFAULT_FEATURES = {
   silver: [],
   // Set a null retention duration to allow the user to override it
   // The default of 90 days is set in the audit logs service
-  gold: ['sso', { name: 'audit-logs', options: { retentionDays: null } }],
+  gold: ['sso', { name: 'audit-logs', options: { retentionDays: null } }, 'review-workflows'],
 };
 
 const publicKey = fs.readFileSync(join(__dirname, 'resources/key.pub'));
@@ -69,12 +68,14 @@ const throwError = () => {
   throw new LicenseCheckError('Could not proceed to the online validation of your license.', true);
 };
 
-const fetchLicense = async (key, projectId) => {
-  const response = await fetch(`https://license.strapi.io/api/licenses/validate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key, projectId, deviceId: machineId() }),
-  }).catch(throwError);
+const fetchLicense = async ({ strapi }, key, projectId) => {
+  const response = await strapi
+    .fetch(`https://license.strapi.io/api/licenses/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, projectId, deviceId: machineId() }),
+    })
+    .catch(throwError);
 
   const contentType = response.headers.get('Content-Type');
 

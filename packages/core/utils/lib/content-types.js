@@ -82,6 +82,7 @@ const isVisibleAttribute = (model, attributeName) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
 
+const getOptions = (model) => _.assign({ draftAndPublish: false }, _.get(model, 'options', {}));
 const hasDraftAndPublish = (model) => _.get(model, 'options.draftAndPublish', false) === true;
 
 const isDraft = (data, model) =>
@@ -178,6 +179,7 @@ module.exports = {
   getTimestamps,
   isVisibleAttribute,
   hasDraftAndPublish,
+  getOptions,
   isDraft,
   isSingleType,
   isCollectionType,
