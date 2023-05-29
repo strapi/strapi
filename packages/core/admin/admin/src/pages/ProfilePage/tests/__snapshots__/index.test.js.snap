@@ -1137,7 +1137,9 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           >
                             <span
                               class="c44"
-                            />
+                            >
+                              English
+                            </span>
                           </span>
                         </span>
                         <span

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   Form,
-  GenericInput,
   LoadingIndicatorPage,
   useAppInfo,
   useFocusWhenNavigate,
@@ -14,57 +13,29 @@ import {
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
-import upperFirst from 'lodash/upperFirst';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
 import {
   Main,
-  Typography,
   Box,
   ContentLayout,
   HeaderLayout,
   Button,
-  Grid,
-  GridItem,
   Flex,
   useNotifyAT,
-  Select,
-  Option,
-  FieldAction,
-  TextInput,
 } from '@strapi/design-system';
-import { Eye, EyeStriked, Check } from '@strapi/icons';
+import { Check } from '@strapi/icons';
+import UserInfo from './components/UserInfo';
+import Preferences from './components/Preferences';
+import Password from './components/Password';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
 
-const DocumentationLink = styled.a`
-  color: ${({ theme }) => theme.colors.primary600};
-`;
-
-const PasswordInput = styled(TextInput)`
-  ::-ms-reveal {
-    display: none;
-  }
-`;
-
-const FieldActionWrapper = styled(FieldAction)`
-  svg {
-    height: 1rem;
-    width: 1rem;
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
-`;
-
 const ProfilePage = () => {
-  const [passwordShown, setPasswordShown] = useState(false);
-  const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
-  const [currentPasswordShown, setCurrentPasswordShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
   const { setUserDisplayName } = useAppInfo();
   const queryClient = useQueryClient();
@@ -196,10 +167,6 @@ const ProfilePage = () => {
     );
   }
 
-  const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    (themeName) => allApplicationThemes[themeName]
-  );
-
   const currentUserRoles = (data?.roles ?? []).map(role => role.id);
   const hasLockedRole = (dataSSO?.ssoLockedRoles ?? []).some((roleId) => currentUserRoles.includes(Number(roleId)));
 
@@ -232,359 +199,26 @@ const ProfilePage = () => {
               <Box paddingBottom={10}>
                 <ContentLayout>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    <Box
-                      background="neutral0"
-                      hasRadius
-                      shadow="filterShadow"
-                      paddingTop={6}
-                      paddingBottom={6}
-                      paddingLeft={7}
-                      paddingRight={7}
-                    >
-                      <Flex direction="column" alignItems="stretch" gap={4}>
-                        <Typography variant="delta" as="h2">
-                          {formatMessage({
-                            id: 'global.profile',
-                            defaultMessage: 'Profile',
-                          })}
-                        </Typography>
-                        <Grid gap={5}>
-                          <GridItem s={12} col={6}>
-                            <GenericInput
-                              intlLabel={{
-                                id: 'Auth.form.firstname.label',
-                                defaultMessage: 'First name',
-                              }}
-                              error={errors.firstname}
-                              onChange={handleChange}
-                              value={values.firstname || ''}
-                              type="text"
-                              name="firstname"
-                              required
-                            />
-                          </GridItem>
-                          <GridItem s={12} col={6}>
-                            <GenericInput
-                              intlLabel={{
-                                id: 'Auth.form.lastname.label',
-                                defaultMessage: 'Last name',
-                              }}
-                              error={errors.lastname}
-                              onChange={handleChange}
-                              value={values.lastname || ''}
-                              type="text"
-                              name="lastname"
-                            />
-                          </GridItem>
-                          <GridItem s={12} col={6}>
-                            <GenericInput
-                              intlLabel={{ id: 'Auth.form.email.label', defaultMessage: 'Email' }}
-                              error={errors.email}
-                              onChange={handleChange}
-                              value={values.email || ''}
-                              type="email"
-                              name="email"
-                              required
-                            />
-                          </GridItem>
-                          <GridItem s={12} col={6}>
-                            <GenericInput
-                              intlLabel={{
-                                id: 'Auth.form.username.label',
-                                defaultMessage: 'Username',
-                              }}
-                              error={errors.username}
-                              onChange={handleChange}
-                              value={values.username || ''}
-                              type="text"
-                              name="username"
-                            />
-                          </GridItem>
-                        </Grid>
-                      </Flex>
-                    </Box>
+                    <UserInfo 
+                      errors={errors}
+                      onChange={handleChange}
+                      values={values}
+                    />
                     {
                       !hasLockedRole && (
-                        <Box
-                        background="neutral0"
-                        hasRadius
-                        shadow="filterShadow"
-                        paddingTop={6}
-                        paddingBottom={6}
-                        paddingLeft={7}
-                        paddingRight={7}
-                      >
-                        <Flex direction="column" alignItems="stretch" gap={4}>
-                          <Typography variant="delta" as="h2">
-                            {formatMessage({
-                              id: 'global.change-password',
-                              defaultMessage: 'Change password',
-                            })}
-                          </Typography>
-  
-                          <Grid gap={5}>
-                            <GridItem s={12} col={6}>
-                              <PasswordInput
-                                data-testid ="test-current-password-input"
-                                error={
-                                  errors.currentPassword
-                                    ? formatMessage({
-                                        id: errors.currentPassword,
-                                        defaultMessage: errors.currentPassword,
-                                      })
-                                    : ''
-                                }
-                                onChange={handleChange}
-                                value={values.currentPassword || ''}
-                                label={formatMessage({
-                                  id: 'Auth.form.currentPassword.label',
-                                  defaultMessage: 'Current Password',
-                                })}
-                                name="currentPassword"
-                                type={currentPasswordShown ? 'text' : 'password'}
-                                endAction={
-                                  <FieldActionWrapper
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setCurrentPasswordShown((prev) => !prev);
-                                    }}
-                                    label={formatMessage(
-                                      currentPasswordShown
-                                        ? {
-                                            id: 'Auth.form.password.show-password',
-                                            defaultMessage: 'Show password',
-                                          }
-                                        : {
-                                            id: 'Auth.form.password.hide-password',
-                                            defaultMessage: 'Hide password',
-                                          }
-                                    )}
-                                  >
-                                    {currentPasswordShown ? <Eye /> : <EyeStriked />}
-                                  </FieldActionWrapper>
-                                }
-                              />
-                            </GridItem>
-                          </Grid>
-  
-                          <Grid gap={5}>
-                            <GridItem s={12} col={6}>
-                              <PasswordInput
-                                data-testid ="test-new-password-input"
-                                error={
-                                  errors.password
-                                    ? formatMessage({
-                                        id: errors.password,
-                                        defaultMessage: errors.password,
-                                      })
-                                    : ''
-                                }
-                                onChange={handleChange}
-                                value={values.password || ''}
-                                label={formatMessage({
-                                  id: 'global.password',
-                                  defaultMessage: 'Password',
-                                })}
-                                name="password"
-                                type={passwordShown ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                endAction={
-                                  <FieldActionWrapper
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPasswordShown((prev) => !prev);
-                                    }}
-                                    label={formatMessage(
-                                      passwordShown
-                                        ? {
-                                            id: 'Auth.form.password.show-password',
-                                            defaultMessage: 'Show password',
-                                          }
-                                        : {
-                                            id: 'Auth.form.password.hide-password',
-                                            defaultMessage: 'Hide password',
-                                          }
-                                    )}
-                                  >
-                                    {passwordShown ? <Eye /> : <EyeStriked />}
-                                  </FieldActionWrapper>
-                                }
-                              />
-                            </GridItem>
-                            <GridItem s={12} col={6}>
-                              <PasswordInput
-                                data-testid ="test-confirmed-password-input"
-                                error={
-                                  errors.confirmPassword
-                                    ? formatMessage({
-                                        id: errors.confirmPassword,
-                                        defaultMessage: errors.confirmPassword,
-                                      })
-                                    : ''
-                                }
-                                onChange={handleChange}
-                                value={values.confirmPassword || ''}
-                                label={formatMessage({
-                                  id: 'Auth.form.confirmPassword.label',
-                                  defaultMessage: 'Password confirmation',
-                                })}
-                                name="confirmPassword"
-                                type={passwordConfirmShown ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                endAction={
-                                  <FieldActionWrapper
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPasswordConfirmShown((prev) => !prev);
-                                    }}
-                                    label={formatMessage(
-                                      passwordConfirmShown
-                                        ? {
-                                            id: 'Auth.form.password.show-password',
-                                            defaultMessage: 'Show password',
-                                          }
-                                        : {
-                                            id: 'Auth.form.password.hide-password',
-                                            defaultMessage: 'Hide password',
-                                          }
-                                    )}
-                                  >
-                                    {passwordConfirmShown ? <Eye /> : <EyeStriked />}
-                                  </FieldActionWrapper>
-                                }
-                              />
-                            </GridItem>
-                          </Grid>
-                        </Flex>
-                      </Box>
+                        <Password
+                          errors={errors}
+                          onChange={handleChange}
+                          values={values}
+                        />
                       )
                     }
-                    <Box
-                      background="neutral0"
-                      hasRadius
-                      shadow="filterShadow"
-                      paddingTop={6}
-                      paddingBottom={6}
-                      paddingLeft={7}
-                      paddingRight={7}
-                    >
-                      <Flex direction="column" alignItems="stretch" gap={4}>
-                        <Flex direction="column" alignItems="stretch" gap={1}>
-                          <Typography variant="delta" as="h2">
-                            {formatMessage({
-                              id: 'Settings.profile.form.section.experience.title',
-                              defaultMessage: 'Experience',
-                            })}
-                          </Typography>
-                          <Typography>
-                            {formatMessage(
-                              {
-                                id: 'Settings.profile.form.section.experience.interfaceLanguageHelp',
-                                defaultMessage:
-                                  'Preference changes will apply only to you. More information is available {here}.',
-                              },
-                              {
-                                here: (
-                                  <DocumentationLink
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
-                                  >
-                                    {formatMessage({
-                                      id: 'Settings.profile.form.section.experience.here',
-                                      defaultMessage: 'here',
-                                    })}
-                                  </DocumentationLink>
-                                ),
-                              }
-                            )}
-                          </Typography>
-                        </Flex>
-                        <Grid gap={5}>
-                          <GridItem s={12} col={6}>
-                            <Select
-                              label={formatMessage({
-                                id: 'Settings.profile.form.section.experience.interfaceLanguage',
-                                defaultMessage: 'Interface language',
-                              })}
-                              placeholder={formatMessage({
-                                id: 'global.select',
-                                defaultMessage: 'Select',
-                              })}
-                              hint={formatMessage({
-                                id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
-                                defaultMessage:
-                                  'This will only display your own interface in the chosen language.',
-                              })}
-                              onClear={() => {
-                                handleChange({
-                                  target: { name: 'preferedLanguage', value: null },
-                                });
-                              }}
-                              clearLabel={formatMessage({
-                                id: 'Settings.profile.form.section.experience.clear.select',
-                                defaultMessage: 'Clear the interface language selected',
-                              })}
-                              value={values.preferedLanguage}
-                              onChange={(e) => {
-                                handleChange({
-                                  target: { name: 'preferedLanguage', value: e },
-                                });
-                              }}
-                            >
-                              {Object.keys(localeNames).map((language) => {
-                                const langName = localeNames[language];
-
-                                return (
-                                  <Option value={language} key={language}>
-                                    {langName}
-                                  </Option>
-                                );
-                              })}
-                            </Select>
-                          </GridItem>
-                          <GridItem s={12} col={6}>
-                            <Select
-                              label={formatMessage({
-                                id: 'Settings.profile.form.section.experience.mode.label',
-                                defaultMessage: 'Interface mode',
-                              })}
-                              placeholder={formatMessage({
-                                id: 'components.Select.placeholder',
-                                defaultMessage: 'Select',
-                              })}
-                              hint={formatMessage({
-                                id: 'Settings.profile.form.section.experience.mode.hint',
-                                defaultMessage: 'Displays your interface in the chosen mode.',
-                              })}
-                              value={values.currentTheme}
-                              onChange={(e) => {
-                                handleChange({
-                                  target: { name: 'currentTheme', value: e },
-                                });
-                              }}
-                            >
-                              {themesToDisplay.map((theme) => (
-                                <Option value={theme} key={theme}>
-                                  {formatMessage(
-                                    {
-                                      id: 'Settings.profile.form.section.experience.mode.option-label',
-                                      defaultMessage: '{name} mode',
-                                    },
-                                    {
-                                      name: formatMessage({
-                                        id: theme,
-                                        defaultMessage: upperFirst(theme),
-                                      }),
-                                    }
-                                  )}
-                                </Option>
-                              ))}
-                            </Select>
-                          </GridItem>
-                        </Grid>
-                      </Flex>
-                    </Box>
+                    <Preferences 
+                      allApplicationThemes={allApplicationThemes}
+                      onChange={handleChange}
+                      values={values}
+                      localeNames={localeNames}
+                    />
                   </Flex>
                 </ContentLayout>
               </Box>
