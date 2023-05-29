@@ -98,6 +98,11 @@ module.exports = {
 
     const entity = await entityManager.create(sanitizedBody, model);
 
+    // TODO: Revert the creation if create permission conditions are not met
+    // if (permissionChecker.cannot.create(entity)) {
+    //   return ctx.forbidden();
+    // }
+
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
     if (totalEntries === 0) {
