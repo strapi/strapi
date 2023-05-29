@@ -1,6 +1,7 @@
 'use strict';
 
 const reviewWorkflowsServiceFactory = require('../review-workflows/review-workflows');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const workflowMock = {
   id: 1,
@@ -48,10 +49,16 @@ const contentTypesMock = {
   },
 };
 
+const containerMock = {
+  get: jest.fn().mockReturnThis(),
+  extend: jest.fn(),
+};
+
 const hookMock = jest.fn().mockReturnValue({ register: jest.fn() });
 
 const strapiMock = {
   contentTypes: contentTypesMock,
+  container: containerMock,
   hook: hookMock,
   query: jest.fn(() => queryMock),
   service(serviceName) {
@@ -102,6 +109,24 @@ describe('Review workflows service', () => {
 
       expect(stagesServiceMock.createMany).not.toBeCalled();
       expect(workflowsServiceMock.create).not.toBeCalled();
+    });
+  });
+  describe('register', () => {
+    test('Content types with review workflows options should have a new attribute', async () => {
+      await reviewWorkflowsService.register();
+
+      for (const contentType of Object.values(contentTypesMock)) {
+        if (contentType.options.reviewWorkflows) {
+          expect(contentType.attributes).toHaveProperty(ENTITY_STAGE_ATTRIBUTE);
+          expect(contentType.attributes[ENTITY_STAGE_ATTRIBUTE]).toMatchObject({
+            relation: 'oneToOne',
+            target: 'admin::workflow-stage',
+            type: 'relation',
+          });
+        } else {
+          expect(contentType.attributes).not.toHaveProperty(ENTITY_STAGE_ATTRIBUTE);
+        }
+      }
     });
   });
 });
