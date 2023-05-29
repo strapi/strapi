@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
+exports[`ADMIN | Pages | Profile page | without SSO lock renders and matches the snapshot 1`] = `
 .c1 {
   background: #f6f6f9;
   padding-top: 40px;

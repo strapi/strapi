@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import ProfilePage from '../index';
 import server from './utils/server';
+import serverLockedSSO from './utils/serverLockedSSO';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
@@ -44,7 +45,7 @@ const App = (
   </QueryClientProvider>
 );
 
-describe('ADMIN | Pages | Profile page', () => {
+describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => {
@@ -56,7 +57,6 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
     server.close();
   });
 
@@ -96,6 +96,53 @@ describe('ADMIN | Pages | Profile page', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-confirmed-password-input')).toBeInTheDocument()
+    });
+  });
+});
+
+describe('ADMIN | Pages | Profile page | with SSO lock', () => {
+  beforeAll(() => serverLockedSSO.listen());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    serverLockedSSO.resetHandlers();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+    serverLockedSSO.close();
+  });
+
+  it('should display username if it exists', async () => {
+    render(App);
+    await waitFor(() => {
+      expect(screen.getByText('yolo')).toBeInTheDocument();
+    });
+  });
+
+  it('should not display the change password section and all the fields if the user role is Locked', async () => {
+    const { queryByRole, queryByTestId } = render(App);
+    const changePasswordHeading = queryByRole('heading', {
+      name: 'Change password'
+    });
+    
+    await waitFor(() => {
+      expect(changePasswordHeading).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-current-password-input')).not.toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-new-password-input')).not.toBeInTheDocument()
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('test-confirmed-password-input')).not.toBeInTheDocument()
     });
   });
 });
