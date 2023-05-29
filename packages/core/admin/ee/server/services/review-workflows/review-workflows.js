@@ -1,6 +1,6 @@
 'use strict';
 
-const { set, forEach, pipe, map } = require('lodash/fp');
+const { forEach, pipe, map } = require('lodash/fp');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
 const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/review-workflows');
@@ -34,8 +34,10 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
 }
 
 function extendReviewWorkflowContentTypes({ strapi }) {
-  const extendContentType = (contentTypeUID) => {
-    const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
+  const extendContentType = (uid) => {
+    const contentType = strapi.contentTypes[uid];
+
+    contentType.attributes[ENTITY_STAGE_ATTRIBUTE] = {
       writable: true,
       private: false,
       configurable: false,
@@ -44,8 +46,7 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       type: 'relation',
       relation: 'oneToOne',
       target: 'admin::workflow-stage',
-    });
-    strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
+    };
   };
   pipe([
     getContentTypeUIDsWithActivatedReviewWorkflows,
