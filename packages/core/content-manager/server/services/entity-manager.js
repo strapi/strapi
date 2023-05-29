@@ -29,7 +29,7 @@ const emitEvent = async (event, entity, modelUid) => {
   });
 };
 
-const buildCreateOrUpdatePopulate = (uid) => {
+const buildDeepPopulate = (uid) => {
   // User can configure to populate relations, so downstream services can use them.
   // They will be transformed into counts later if this is set to true.
   return getService('populate-builder')(uid)
@@ -89,7 +89,7 @@ module.exports = ({ strapi }) => ({
   async create(body, uid) {
     const modelDef = strapi.getModel(uid);
     const publishData = { ...body };
-    const populate = await buildCreateOrUpdatePopulate(uid);
+    const populate = await buildDeepPopulate(uid);
 
     if (hasDraftAndPublish(modelDef)) {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
@@ -110,7 +110,7 @@ module.exports = ({ strapi }) => ({
 
   async update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
-    const populate = await buildCreateOrUpdatePopulate(uid);
+    const populate = await buildDeepPopulate(uid);
     const params = { data: publishData, populate };
 
     const updatedEntity = await strapi.entityService
@@ -124,8 +124,9 @@ module.exports = ({ strapi }) => ({
     return updatedEntity;
   },
 
-  async delete(entity, uid, opts = {}) {
-    const deletedEntity = await strapi.entityService.delete(uid, entity.id, opts);
+  async delete(entity, uid) {
+    const populate = await buildDeepPopulate(uid);
+    const deletedEntity = await strapi.entityService.delete(uid, entity.id, { populate });
 
     // If relations were populated, relations count will be returned instead of the array of relations.
     if (isWebhooksPopulateRelationsEnabled(uid)) {
@@ -154,7 +155,7 @@ module.exports = ({ strapi }) => ({
     );
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-    const populate = await buildCreateOrUpdatePopulate(uid);
+    const populate = await buildDeepPopulate(uid);
 
     const params = { data, populate };
 
@@ -178,7 +179,7 @@ module.exports = ({ strapi }) => ({
     }
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
-    const populate = await buildCreateOrUpdatePopulate(uid);
+    const populate = await buildDeepPopulate(uid);
 
     const params = { data, populate };
 
