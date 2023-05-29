@@ -7,8 +7,8 @@ const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
-const isMorphRelation = (attribute) =>
-  isRelation(attribute) && attribute.relation.includes('morph');
+const isMorphToRelation = (attribute) =>
+  isRelation(attribute) && attribute.relation.includes('morphTo');
 const isMedia = propEq('type', 'media');
 const isRelation = propEq('type', 'relation');
 const isComponent = propEq('type', 'component');
@@ -235,7 +235,7 @@ const getQueryPopulate = async (uid, query) => {
      */
     ({ key, attribute, path }) => {
       // TODO: handle dynamic zones and morph relations
-      if (!attribute || isDynamicZone(attribute) || isMorphRelation(attribute)) {
+      if (!attribute || isDynamicZone(attribute) || isMorphToRelation(attribute)) {
         return;
       }
 
