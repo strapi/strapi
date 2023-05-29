@@ -74,7 +74,7 @@ const getDisplayedFilters = ({ formatMessage, users, canReadUsers }) => {
       return user.email;
     };
 
-    const userOptions = users.results.map((user) => {
+    const userOptions = users.map((user) => {
       return {
         label: getDisplayNameFromUser(user),
         // Combobox expects a string value
