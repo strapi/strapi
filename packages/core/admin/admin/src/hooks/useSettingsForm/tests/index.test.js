@@ -3,6 +3,7 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
+import omit from 'lodash/omit';
 import useSettingsForm from '../index';
 
 const toggleNotification = jest.fn();
@@ -18,7 +19,21 @@ jest.mock('../../../utils', () => ({
   checkFormValidity: () => (null),
 }));
 
-const server = setupServer(
+jest.mock('lodash/omit');
+
+const handlers = [
+  rest.put('*/providers/options', (req, res, ctx) =>
+    res(
+      ctx.status(200),
+      ctx.json({
+        data: {
+          autoRegister: false,
+          defaultRole: "1",
+          ssoLockedRoles: ["1","2","3"]
+        }
+      })
+    )
+  ),
   rest.get('*/providers/options', (req, res, ctx) =>
     res(
       ctx.status(200),
@@ -30,22 +45,10 @@ const server = setupServer(
         }
       })
     )
-  ),
-  rest.put('*/providers/options', (req, res, ctx) => {
-    res(
-      ctx.status(200),
-      ctx.json({
-        data: {
-          data: {
-            autoRegister: false,
-            defaultRole: "1",
-            ssoLockedRoles: ["1","2","3"]
-          }
-        }
-      })
-    )
-  })
-);
+  )
+];
+
+const server = setupServer(...handlers);
 
 const setup = (...args) =>
   renderHook(() => useSettingsForm(...args), {
@@ -101,13 +104,22 @@ describe('useSettingsForm', () => {
     expect(result.current[0].showHeaderLoader).toBeFalsy();
   });
 
-  test('submit new providers options', async () => {
-    const cbSucc = jest.fn()
+  test('submit new providers options with duplications', async () => {
+    const cbSucc = jest.fn();
+    const ssoLockedRolesWithDuplications = [ '1', '2', '2', '3' ];
+    omit.mockReturnValueOnce({ 
+      autoRegister: false,
+      defaultRole: '1',
+      ssoLockedRoles: ssoLockedRolesWithDuplications 
+    });
+
     const { result, waitFor } = setup('/admin/providers/options', {}, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
     const e = { preventDefault: jest.fn() };
     await act(async () => {
       await result.current[2].handleSubmit(e);
     });
+
+    expect(result.current[0].modifiedData.ssoLockedRoles.length).not.toBe(ssoLockedRolesWithDuplications.length);
   });
 });

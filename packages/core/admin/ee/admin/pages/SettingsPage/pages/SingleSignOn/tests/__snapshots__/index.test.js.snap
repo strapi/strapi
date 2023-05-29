@@ -848,119 +848,115 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   class=""
                 >
                   <div
-                    class=""
+                    class="c23"
                   >
-                    <div
-                      class="c23"
+                    <label
+                      class="c8 c24 c25"
+                      for="5"
                     >
-                      <label
-                        class="c8 c24 c25"
-                        for="5"
-                      >
-                        Local authentication lock-out
-                      </label>
-                      <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-1"
-                        aria-describedby="5-hint 5-error"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-label="Local authentication lock-out"
-                        class="c47 c39 c40"
-                        data-state="closed"
-                        dir="ltr"
-                        id="5"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                      Local authentication lock-out
+                    </label>
+                    <div
+                      aria-autocomplete="none"
+                      aria-controls="radix-1"
+                      aria-describedby="5-hint 5-error"
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-label="Local authentication lock-out"
+                      class="c47 c39 c40"
+                      data-state="closed"
+                      dir="ltr"
+                      id="5"
+                      overflow="hidden"
+                      role="combobox"
+                      tabindex="0"
+                    >
+                      <span
+                        class="c41 c42"
                       >
                         <span
-                          class="c41 c42"
+                          class="c8 c43 c44"
                         >
                           <span
-                            class="c8 c43 c44"
+                            class="c45"
                           >
-                            <span
-                              class="c45"
+                            <button
+                              aria-disabled="false"
+                              class="c48 c11 c49"
+                              tabindex="-1"
                             >
-                              <button
-                                aria-disabled="false"
-                                class="c48 c11 c49"
-                                tabindex="-1"
+                              <span
+                                class="c8 c24 c50"
                               >
-                                <span
-                                  class="c8 c24 c50"
-                                >
-                                  Super Admin
-                                </span>
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 24 24"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
+                                Super Admin
+                              </span>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
                           </span>
                         </span>
-                        <span
-                          class="c42"
-                        >
-                          <button
-                            aria-disabled="false"
-                            aria-label="Clear"
-                            class="c51 c52"
-                            role="button"
-                            tabindex="0"
-                            title="Clear"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </button>
-                          <span
-                            aria-hidden="true"
-                            class="c46"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        </span>
-                      </div>
-                      <p
-                        class="c8 c37"
-                        id="5-hint"
+                      </span>
+                      <span
+                        class="c42"
                       >
-                        Select the roles for which you want to disable the local authentication
-                      </p>
+                        <button
+                          aria-disabled="false"
+                          aria-label="Clear"
+                          class="c51 c52"
+                          role="button"
+                          tabindex="0"
+                          title="Clear"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </button>
+                        <span
+                          aria-hidden="true"
+                          class="c46"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 14 8"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                              fill="#32324D"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      </span>
                     </div>
+                    <p
+                      class="c8 c37"
+                      id="5-hint"
+                    >
+                      Select the roles for which you want to disable the local authentication
+                    </p>
                   </div>
                 </div>
               </div>
