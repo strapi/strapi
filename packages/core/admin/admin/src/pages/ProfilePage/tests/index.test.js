@@ -25,25 +25,28 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
 }));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
 
-const App = (
-  <QueryClientProvider client={client}>
-    <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <ProfilePage />
-        </Theme>
-      </ThemeToggleProvider>
-    </IntlProvider>
-  </QueryClientProvider>
-);
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+const setup = (props) => render(<ProfilePage {...props} />, {
+  wrapper({ children }) {
+    return <QueryClientProvider client={client}>
+      <IntlProvider messages={{}} textComponent="span" locale="en">
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            {children}
+          </Theme>
+        </ThemeToggleProvider>
+      </IntlProvider>
+    </QueryClientProvider>
+  }
+})
 
 describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   beforeAll(() => server.listen());
@@ -61,7 +64,7 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   });
 
   it('renders and matches the snapshot', async () => {
-    const { container } = render(App);
+    const { container } = setup();
     await waitFor(() => {
       expect(screen.getByText('Interface language')).toBeInTheDocument();
     });
@@ -70,17 +73,19 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   });
 
   it('should display username if it exists', async () => {
-    render(App);
+    setup();
     await waitFor(() => {
       expect(screen.getByText('yolo')).toBeInTheDocument();
     });
   });
 
   it('should display the change password section and all its fields', async () => {
-    const { getByRole, getByTestId } = render(App);
+    const { getByRole, getByTestId, debug } =  setup();
     const changePasswordHeading = getByRole('heading', {
       name: 'Change password'
     });
+
+    debug();
     
     await waitFor(() => {
       expect(changePasswordHeading).toBeInTheDocument();
@@ -117,14 +122,14 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
   });
 
   it('should display username if it exists', async () => {
-    render(App);
+    setup();
     await waitFor(() => {
       expect(screen.getByText('yolo')).toBeInTheDocument();
     });
   });
 
   it('should not display the change password section and all the fields if the user role is Locked', async () => {
-    const { queryByRole, queryByTestId } = render(App);
+    const { queryByRole, queryByTestId } =  setup();
     const changePasswordHeading = queryByRole('heading', {
       name: 'Change password'
     });
