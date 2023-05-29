@@ -93,7 +93,7 @@ describe('Populate', () => {
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        relation: { fields: ['field'] },
+        relation: {},
       });
     });
 
@@ -102,7 +102,7 @@ describe('Populate', () => {
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        component: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
+        component: { populate: { compoRelation: {} } },
       });
     });
 
@@ -113,7 +113,7 @@ describe('Populate', () => {
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
+        repeatableComponent: { populate: { compoRelation: {} } },
       });
     });
 
@@ -127,8 +127,8 @@ describe('Populate', () => {
       const result = await getQueryPopulate(uid, query);
 
       expect(result).toEqual({
-        relation: { fields: ['field'], populate: { component: { fields: ['field'] } } },
-        repeatableComponent: { populate: { compoRelation: { fields: ['field'] } }, fields: [] },
+        relation: { populate: { component: {} } },
+        repeatableComponent: { populate: { compoRelation: {} } },
       });
     });
   });
