@@ -221,7 +221,7 @@ const getDeepPopulateDraftCount = (uid) => {
  * @returns {Object} populate object
  */
 const getQueryPopulate = async (uid, query) => {
-  const pathToPopulate = (path) => path.replaceAll('.', '.populate.');
+  const pathToPopulate = (path) => path.replace(/\./g, '.populate.');
   let populateQuery = {};
 
   await strapiUtils.traverse.traverseQueryFilters(
