@@ -111,11 +111,10 @@ module.exports = {
     for (const id of ids) {
       const webhook = await strapi.webhookStore.findWebhook(id);
 
-      // eslint-disable-next-line no-continue
-      if (!webhook) continue;
-
-      await strapi.webhookStore.deleteWebhook(id);
-      strapi.webhookRunner.remove(webhook);
+      if (webhook) {
+        await strapi.webhookStore.deleteWebhook(id);
+        strapi.webhookRunner.remove(webhook);
+      }
     }
 
     ctx.send({ data: ids });
