@@ -1,8 +1,20 @@
-import { Service, GenericService } from '../core-api/service';
-import { Controller, GenericController } from '../core-api/controller';
+import {
+  Service,
+  GenericService,
+  CollectionTypeService,
+  SingleTypeService,
+} from '../core-api/service';
+import {
+  CollectionTypeController,
+  SingleTypeController,
+  Controller,
+  GenericController,
+} from '../core-api/controller';
 import { Middleware } from '../middlewares';
 import { Policy } from '../core/registries/policies';
 import { Strapi } from './core/strapi';
+import { SchemaUID } from './utils';
+import { GenericService } from '../core-api/service/index';
 
 type ControllerConfig<T extends Controller = Controller> = T;
 
@@ -28,11 +40,12 @@ type CollectionTypeRouterConfig = {
   delete?: HandlerConfig;
 };
 
-type RouterConfig = {
+type RouterConfig<T = SingleTypeRouterConfig | CollectionTypeRouterConfig> = {
   prefix?: string;
+  // TODO Refactor when we have a controller registry
   only?: string[];
   except?: string[];
-  config: SingleTypeRouterConfig | CollectionTypeRouterConfig;
+  config: T;
 };
 
 interface Route {
@@ -49,12 +62,42 @@ type ControllerCallback<T extends GenericController = GenericController> = (para
 }) => T;
 type ServiceCallback<T extends GenericService = GenericService> = (params: { strapi: Strapi }) => T;
 
-export function createCoreRouter(uid: string, cfg?: RouterConfig = {}): () => Router;
-export function createCoreController<T extends GenericController = GenericController>(
-  uid: string,
-  cfg?: ControllerCallback<T> | T = {}
-): () => T & Controller;
-export function createCoreService<T extends GenericService = GenericService>(
-  uid: string,
-  cfg?: ServiceCallback<T> | T = {}
-): () => T;
+export declare function createCoreRouter<T extends SchemaUID>(
+  uid: T,
+  cfg?: RouterConfig<GetBaseConfig<T>> = {}
+): () => Router;
+
+export declare function createCoreController<
+  T extends SchemaUID,
+  S extends Partial<GetBaseSchemaController<T>>
+>(
+  uid: T,
+  cfg?: ControllerCallback<S> | S
+): () => Required<S & GetBaseSchemaController<GetBaseConfig<T>>>;
+
+export declare function createCoreService<
+  T extends SchemaUID,
+  S extends Partial<GetBaseSchemaService<T>>
+>(uid: T, cfg?: ServiceCallback<S> | S): () => Required<S & GetBaseSchemaService<T>>;
+
+type GetBaseSchemaController<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeController,
+  SingleTypeController
+> &
+  GenericController;
+
+type GetBaseSchemaService<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeService,
+  SingleTypeService
+> &
+  GenericService;
+
+type GetBaseConfig<T extends SchemaUID> = IsCollectionType<
+  T,
+  CollectionTypeRouterConfig,
+  SingleTypeRouterConfig
+>;
+
+type IsCollectionType<T, Y, N> = Strapi.Schemas[T]['kind'] extends 'collectionType' ? Y : N;

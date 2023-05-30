@@ -23,5 +23,5 @@ export interface CollectionTypeController extends Controller {
 }
 
 export type GenericController = Partial<Controller> & {
-  [method: string | number | symbol]: (ctx: Context) => unknown;
+  [method: string | number | symbol]: (ctx: Context, next?: Next) => unknown;
 };

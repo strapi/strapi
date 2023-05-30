@@ -18,8 +18,6 @@ export interface CollectionTypeService extends BaseService {
   delete?(entityId: string, params: object): Promise<Entity> | Entity;
 }
 
-export type Service = SingleTypeService | CollectionTypeService;
-
-export type GenericService = Partial<Service> & {
+export type GenericService = {
   [method: string | number | symbol]: (...args: any) => any;
 };
