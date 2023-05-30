@@ -7,16 +7,20 @@ const events = {
 };
 
 const getHeaders = () => {
-  return [{ id: 'TBD', defaultMessage: 'Stage Change' }];
+  return [{ id: 'workflows.updateEntryStage', defaultMessage: 'Stage Change' }];
 };
 
 export function EventTableEE() {
   return (
-    <EventTable.Root>
-      <EventTable.Headers />
-      <EventTable.Body extraEvents={events} />
-      <EventTable.Headers getHeaders={getHeaders} />
-      <EventTable.Body providedEvents={events} />
-    </EventTable.Root>
+    <EventTable.Root
+      renderChildren={({ isDraftAndPublish }) => (
+        <>
+          <EventTable.Headers isDraftAndPublish={isDraftAndPublish} />
+          <EventTable.Body isDraftAndPublish={isDraftAndPublish} extraEvents={events} />
+          <EventTable.Headers getHeaders={getHeaders} />
+          <EventTable.Body providedEvents={events} />
+        </>
+      )}
+    />
   );
 }

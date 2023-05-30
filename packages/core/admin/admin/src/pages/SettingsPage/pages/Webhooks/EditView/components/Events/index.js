@@ -84,7 +84,7 @@ const getCEEvents = (isDraftAndPublish) => {
   };
 };
 
-const Root = ({ children }) => {
+const Root = ({ renderChildren }) => {
   const { formatMessage } = useIntl();
   const { collectionTypes, isLoading } = useModels();
 
@@ -92,14 +92,6 @@ const Root = ({ children }) => {
     () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
     [collectionTypes]
   );
-
-  const childrenWithProps = React.Children.map(children, (child) => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child, { isDraftAndPublish });
-    }
-
-    return child;
-  });
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
@@ -117,13 +109,13 @@ const Root = ({ children }) => {
           })}
         </Loader>
       )}
-      <StyledTable>{childrenWithProps}</StyledTable>
+      <StyledTable>{renderChildren({ isDraftAndPublish })}</StyledTable>
     </Flex>
   );
 };
 
 Root.propTypes = {
-  children: PropTypes.node.isRequired,
+  renderChildren: PropTypes.func.isRequired,
 };
 
 const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
