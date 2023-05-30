@@ -70,7 +70,13 @@ export function AssigneeSelect() {
     }
   );
 
-  const formattedError = mutation.error && formatAPIError(mutation.error);
+  const formattedError =
+    (isError &&
+      formatMessage({
+        id: 'content-manager.reviewWorkflows.assignee.error',
+        defaultMessage: 'An error occurred while fetching users',
+      })) ||
+    (mutation.error && formatAPIError(mutation.error));
 
   return (
     <Field error={formattedError} name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
@@ -84,7 +90,7 @@ export function AssigneeSelect() {
 
         <ReactSelect
           components={{
-            LoadingIndicator: () => <Loader small />,
+            LoadingIndicator: () => <Loader data-testid="loader" small />,
           }}
           disabled={isError}
           error={formattedError}
