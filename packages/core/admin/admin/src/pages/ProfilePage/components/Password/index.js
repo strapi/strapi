@@ -12,6 +12,7 @@ import {
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { pxToRem } from '@strapi/helper-plugin';
 
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {
@@ -19,16 +20,16 @@ const PasswordInput = styled(TextInput)`
   }
 `;
 
+// Wrapper of the Eye Icon able to show or hide the Password inside the field
 const FieldActionWrapper = styled(FieldAction)`
   svg {
-    height: 1rem;
-    width: 1rem;
+    height: ${pxToRem(16)};
+    width: ${pxToRem(16)};
     path {
       fill: ${({ theme }) => theme.colors.neutral600};
     }
   }
 `;
-
 
 const Password = ({ errors, onChange, values }) => {
   const { formatMessage } = useIntl();
