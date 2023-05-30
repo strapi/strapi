@@ -12,11 +12,7 @@ import type {
   TransferStage,
 } from '../../../../types';
 import { Client, Server } from '../../../../types/remote/protocol';
-import {
-  ProviderInitializationError,
-  ProviderTransferError,
-  ProviderValidationError,
-} from '../../../errors/providers';
+import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
