@@ -184,10 +184,10 @@ const HeaderCheckboxCell = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * HeaderCheckboxCell
+ * HeaderHiddenActionsCell
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderActionsCell = () => {
+const HeaderHiddenActionsCell = () => {
   const { formatMessage } = useIntl();
 
   return (
@@ -390,7 +390,7 @@ const LoadingBody = () => {
         <Td colSpan={colCount}>
           <Flex justifyContent="center">
             <Box padding={11} background="neutral0">
-              <Loader>Loading content...</Loader>
+              <Loader>Loading content</Loader>
             </Box>
           </Flex>
         </Td>
@@ -428,7 +428,7 @@ const Table = {
   ActionBar,
   Head,
   HeaderCell,
-  HeaderActionsCell,
+  HeaderHiddenActionsCell,
   HeaderCheckboxCell,
   LoadingBody,
   EmptyBody,

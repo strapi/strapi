@@ -120,7 +120,7 @@ const ListViewTable = ({
             />
           ))}
           {/* Visually hidden header for actions */}
-          <Table.HeaderActionsCell />
+          <Table.HeaderHiddenActionsCell />
         </Table.Head>
         {/* Loading content */}
         <Table.LoadingBody />
