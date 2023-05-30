@@ -4,7 +4,8 @@
 
 'use strict';
 
-const { yup, validateYupSchema } = require('@strapi/utils');
+const { mapAsync } = require('@strapi/utils');
+const { ValidationError } = require('@strapi/utils').errors;
 
 const webhookModel = {
   uid: 'webhook',
@@ -49,8 +50,18 @@ const fromDBObject = (row) => {
   };
 };
 
-const webhookEventValidator = (allowedEvents) =>
-  yup.array().of(yup.string().oneOf(Array.from(allowedEvents.values())).required());
+const webhookEventValidator = async (allowedEvents, events) =>
+  mapAsync(
+    events,
+    (event) => {
+      if (Array.from(allowedEvents.values()).includes(event)) {
+        return;
+      }
+
+      throw new ValidationError(`Webhook event ${event} is not supported`);
+    },
+    {}
+  );
 
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
@@ -77,7 +88,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     async createWebhook(data) {
-      await validateYupSchema(webhookEventValidator(allowedEvents))(data.events);
+      await webhookEventValidator(allowedEvents, data.events);
 
       return webhookQueries
         .create({
@@ -87,7 +98,7 @@ const createWebhookStore = ({ db }) => {
     },
 
     async updateWebhook(id, data) {
-      await validateYupSchema(webhookEventValidator(allowedEvents))(data.events);
+      await webhookEventValidator(allowedEvents, data.events);
 
       const webhook = await webhookQueries.update({
         where: { id },
