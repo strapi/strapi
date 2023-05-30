@@ -129,6 +129,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -1135,103 +1136,99 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           class="c33"
         >
           <div
-            class=""
+            class="c34 c35"
+            tabindex="0"
           >
+            <button
+              aria-hidden="true"
+              aria-label="Folder 1"
+              class="c36"
+              tabindex="-1"
+              type="button"
+            />
             <div
-              class="c34 c35"
-              tabindex="0"
+              class="c37 c6"
             >
-              <button
-                aria-hidden="true"
-                aria-label="Folder 1"
-                class="c36"
-                tabindex="-1"
-                type="button"
-              />
               <div
-                class="c37 c6"
+                class="c38"
               >
-                <div
-                  class="c38"
+                <svg
+                  class="c39"
+                  fill="none"
+                  height="1.5rem"
+                  viewBox="0 0 24 24"
+                  width="1.5rem"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <svg
-                    class="c39"
-                    fill="none"
-                    height="1.5rem"
-                    viewBox="0 0 24 24"
-                    width="1.5rem"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-                      fill="#212134"
-                    />
-                  </svg>
-                </div>
-                <div
-                  class="c40 c41 c42"
-                  id="folder-1-1-title"
-                  overflow="hidden"
+                  <path
+                    d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c40 c41 c42"
+                id="folder-1-1-title"
+                overflow="hidden"
+              >
+                <button
+                  class="c43 c44"
+                  type="button"
                 >
-                  <button
-                    class="c43 c44"
-                    type="button"
+                  <h2
+                    class="c45 c46"
                   >
-                    <h2
-                      class="c45 c46"
+                    <span
+                      class="c9 c47 c48"
                     >
-                      <span
-                        class="c9 c47 c48"
-                      >
-                        Folder 1
-                        <div
-                          class="c20"
-                        >
-                          -
-                        </div>
-                      </span>
-                      <span
-                        class="c9 c49 c48"
-                      >
-                        1 folder, 1 asset
-                      </span>
-                    </h2>
-                  </button>
-                </div>
-                <div
-                  class="c50 c51"
-                >
-                  <div
-                    class="c52 c11 c53 c54"
-                  >
-                    <button
-                      aria-disabled="false"
-                      class="c17 c18 c7 c19"
-                      type="button"
-                    >
-                      <span
+                      Folder 1
+                      <div
                         class="c20"
                       >
-                        Edit folder
-                      </span>
-                      <svg
-                        aria-hidden="true"
-                        fill="none"
-                        focusable="false"
-                        height="1rem"
-                        viewBox="0 0 24 24"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                        -
+                      </div>
+                    </span>
+                    <span
+                      class="c9 c49 c48"
+                    >
+                      1 folder, 1 asset
+                    </span>
+                  </h2>
+                </button>
+              </div>
+              <div
+                class="c50 c51"
+              >
+                <div
+                  class="c52 c11 c53 c54"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c17 c18 c7 c19"
+                    type="button"
+                  >
+                    <span
+                      class="c20"
+                    >
+                      Edit folder
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      focusable="false"
+                      height="1rem"
+                      viewBox="0 0 24 24"
+                      width="1rem"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
+                        fill="#212134"
+                        fill-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

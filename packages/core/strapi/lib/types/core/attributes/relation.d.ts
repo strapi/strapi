@@ -1,48 +1,62 @@
-import { SchemaUID } from '../../utils';
-import { Attribute, ConfigurableOption, PrivateOption } from './base';
-import { GetAttributesByType, GetAttributesValues } from './utils';
+import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
-export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
+export type BasicRelationsType =
+  | 'oneToOne'
+  | 'oneToMany'
+  | 'manyToOne'
+  | 'manyToMany'
+  | 'morphOne'
+  | 'morphMany';
+export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany';
 export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
 
-export interface BasicRelationAttributeProperties<
-  S extends SchemaUID,
-  R extends RelationsType,
-  T extends SchemaUID
-> {
+export type BasicRelationProperties<
+  S extends Common.UID.Schema,
+  R extends BasicRelationsType,
+  T extends Common.UID.Schema
+> = {
   relation: R;
   target: T;
-  inversedBy?: RelationsKeysFromTo<T, S>;
-  mappedBy?: RelationsKeysFromTo<T, S>;
-}
+} & R extends `morph${string}`
+  ? {
+      morphBy?: Utils.Object.KeysBy<
+        Common.Schemas[T]['attributes'],
+        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationsType>
+      >;
+    }
+  : {
+      inversedBy?: RelationsKeysFromTo<T, S>;
+      mappedBy?: RelationsKeysFromTo<T, S>;
+    };
 
-export interface PolymorphicRelationAttributeProperties<R extends RelationsType> {
+export interface PolymorphicRelationProperties<R extends PolymorphicRelationsType> {
   relation: R;
 }
 
-export type RelationAttribute<
-  S extends SchemaUID,
-  R extends RelationsType,
-  T extends R extends PolymorphicRelationsType ? never : SchemaUID = never
-> = Attribute<'relation'> &
+export type Relation<
+  S extends Common.UID.Schema = Common.UID.Schema,
+  R extends RelationsType = RelationsType,
+  T extends R extends PolymorphicRelationsType ? never : Common.UID.Schema = never
+> = Attribute.Attribute<'relation'> &
   // Properties
   (R extends BasicRelationsType
-    ? BasicRelationAttributeProperties<S, R, T>
-    : PolymorphicRelationAttributeProperties<R>) &
+    ? BasicRelationProperties<S, R, T>
+    : R extends PolymorphicRelationsType
+    ? PolymorphicRelationProperties<R>
+    : {}) &
   // Options
-  ConfigurableOption &
-  PrivateOption;
+  Attribute.ConfigurableOption &
+  Attribute.PrivateOption;
 
 export type RelationsKeysFromTo<
-  TTarget extends SchemaUID,
-  TSource extends SchemaUID
+  TTarget extends Common.UID.Schema,
+  TSource extends Common.UID.Schema
 > = keyof PickRelationsFromTo<TTarget, TSource>;
 
 export type PickRelationsFromTo<
-  TTarget extends SchemaUID,
-  TSource extends SchemaUID
-> = GetAttributesByType<TTarget, 'relation', { target: TSource }>;
+  TTarget extends Common.UID.Schema,
+  TSource extends Common.UID.Schema
+> = Attribute.GetByType<TTarget, 'relation', { target: TSource }>;
 
 export type RelationPluralityModifier<
   TRelation extends RelationsType,
@@ -51,10 +65,10 @@ export type RelationPluralityModifier<
 
 export type RelationValue<
   TRelation extends RelationsType,
-  TTarget extends SchemaUID
-> = RelationPluralityModifier<TRelation, GetAttributesValues<TTarget>>;
+  TTarget extends Common.UID.Schema
+> = RelationPluralityModifier<TRelation, Attribute.GetValues<TTarget>>;
 
-export type GetRelationAttributeValue<T extends Attribute> = T extends RelationAttribute<
+export type GetRelationValue<T extends Attribute.Attribute> = T extends Relation<
   infer _TSource,
   infer TRelation,
   infer TTarget

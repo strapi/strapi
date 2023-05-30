@@ -1,6 +1,6 @@
 import baseModel from '../../../../../../../../../admin/src/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 
-const ssoInputsModel = strapi.features.isEnabled(strapi.features.SSO)
+const ssoInputsModel = window.strapi.features.isEnabled(window.strapi.features.SSO)
   ? {
       useSSORegistration: true,
     }

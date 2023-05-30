@@ -447,6 +447,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
           aria-required="true"
           class="c7"
           id="number"
+          inputmode="decimal"
           name="number"
           placeholder="Default placeholder"
           type="text"

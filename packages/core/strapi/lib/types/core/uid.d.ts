@@ -1,7 +1,7 @@
 import type * as Namespace from './namespace';
 import type * as Utils from '../utils';
 
-type StringSuffix<T extends string> = Utils.Suffix<T, string>;
+type StringSuffix<T extends string> = Utils.String.Suffix<T, string>;
 
 /**
  * Template for services' unique identifier
@@ -58,7 +58,7 @@ export type ContentType = StringSuffix<
  *
  * Warning: Can cause overlap with other UID formats.
  */
-export type Component = `${string}.${string}`;
+export type Component<T extends string = string, N extends string = string> = `${T}.${N}`;
 
 /**
  * Represents any UID
@@ -80,9 +80,9 @@ export interface Parsed<N extends Namespace.Any = Namespace.Any, E extends strin
 }
 
 /**
- * Parse an UID literal and returns a {@link Parsed} type.
+ * Parse a UID literal and returns a {@link Parsed} type.
  *
- * Warning: Using ParseUID with a union type might produce undesired results as it'll distribute every matching namespace parsing to every union members
+ * Warning: Using ParseUID with a union type might produce undesired results as it'll distribute every matching namespace parsing to every union member
  *
  * @example
  * type T = Parse<'admin::foo'>
@@ -108,16 +108,16 @@ export type Parse<U extends Any> = ExtractNamespace<U> extends infer B extends N
  * It returns N (the {@link Namespace.Any} literal) if there is a match, never otherwise.
  *
  * @example
- * type T = AssertNamespaceIs<'admin::foo', Namespace.Admin>
+ * type T = EnsureNamespaceMatches<'admin::foo', Namespace.Admin>
  * // ^ Namespace.Admin
  * @example
- * type T = AssertNamespaceIs<'foo.bar', Namespace.API>
+ * type T = EnsureNamespaceMatches<'foo.bar', Namespace.API>
  * // ^ never
  * @example
- * type T = AssertNamespaceIs<'api::foo.bar', Namespace.Plugin>
+ * type T = EnsureNamespaceMatches<'api::foo.bar', Namespace.Plugin>
  * // ^ never
  */
-export type AssertNamespaceIs<U extends Any, N extends Namespace.Any> = U extends StringSuffix<
+export type EnsureNamespaceMatches<U extends Any, N extends Namespace.Any> = U extends StringSuffix<
   Namespace.WithSeparator<N>
 >
   ? N
@@ -137,18 +137,18 @@ export type Select<U extends Any, P extends keyof Parse<U>> = Pick<Parse<U>, P>;
  * Extract the namespace literal from a given UID.
  *
  * @example
- * type T = AssertNamespaceIs<'admin::foo'>
+ * type T = ExtractNamespace<'admin::foo'>
  * // ^ Namespace.Admin
  * @example
- * type T = AssertNamespaceIs<'api::foo.bar'>
+ * type T = ExtractNamespace<'api::foo.bar'>
  * // ^ Namespace.API
  * @example
- * type T = AssertNamespaceIs<'admin::foo' | 'api::foo.bar'>
+ * type T = ExtractNamespace<'admin::foo' | 'api::foo.bar'>
  * // ^ Namespace.Admin | Namespace.API
  */
 export type ExtractNamespace<U extends Any> =
-  | AssertNamespaceIs<U, Namespace.Global>
-  | AssertNamespaceIs<U, Namespace.Admin>
-  | AssertNamespaceIs<U, Namespace.Strapi>
-  | AssertNamespaceIs<U, Namespace.API>
-  | AssertNamespaceIs<U, Namespace.Plugin>;
+  | EnsureNamespaceMatches<U, Namespace.Global>
+  | EnsureNamespaceMatches<U, Namespace.Admin>
+  | EnsureNamespaceMatches<U, Namespace.Strapi>
+  | EnsureNamespaceMatches<U, Namespace.API>
+  | EnsureNamespaceMatches<U, Namespace.Plugin>;
