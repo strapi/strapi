@@ -53,6 +53,10 @@ exports[`ADMIN | Pages | Profile page | without SSO lock renders and matches the
   border-style: none;
 }
 
+.c36 {
+  color: #4945ff;
+}
+
 .c37 {
   background: #ffffff;
   padding-right: 12px;
@@ -588,10 +592,6 @@ exports[`ADMIN | Pages | Profile page | without SSO lock renders and matches the
 
 .c0:focus-visible {
   outline: none;
-}
-
-.c36 {
-  color: #4945ff;
 }
 
 .c28::-ms-reveal {

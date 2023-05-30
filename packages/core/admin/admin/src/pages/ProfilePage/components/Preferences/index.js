@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import {
   Typography,
   Box,
@@ -12,10 +11,6 @@ import {
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
-
-const DocumentationLink = styled.a`
-  color: ${({ theme }) => theme.colors.primary600};
-`;
 
 const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) => {
   const { formatMessage } = useIntl();
@@ -50,7 +45,9 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
               },
               {
                 here: (
-                  <DocumentationLink
+                  <Box
+                    as="a"
+                    color="primary600"
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
@@ -59,7 +56,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                       id: 'Settings.profile.form.section.experience.here',
                       defaultMessage: 'here',
                     })}
-                  </DocumentationLink>
+                  </Box>
                 ),
               }
             )}
@@ -97,15 +94,13 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                 });
               }}
             >
-              {Object.keys(localeNames).map((language) => {
-                const langName = localeNames[language];
-
-                return (
+              {
+                Object.entries(localeNames).map(([ language, langName ]) => (
                   <Option value={language} key={language}>
-                    {langName}
+                    { langName }
                   </Option>
-                );
-              })}
+                ))
+              }
             </Select>
           </GridItem>
           <GridItem s={12} col={6}>
