@@ -80,13 +80,11 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   });
 
   it('should display the change password section and all its fields', async () => {
-    const { getByRole, getByTestId, debug } =  setup();
+    const { getByRole, getByTestId } =  setup();
     const changePasswordHeading = getByRole('heading', {
       name: 'Change password'
     });
 
-    debug();
-    
     await waitFor(() => {
       expect(changePasswordHeading).toBeInTheDocument();
     });
@@ -132,6 +130,10 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
     const { queryByRole, queryByTestId } =  setup();
     const changePasswordHeading = queryByRole('heading', {
       name: 'Change password'
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
     });
     
     await waitFor(() => {
