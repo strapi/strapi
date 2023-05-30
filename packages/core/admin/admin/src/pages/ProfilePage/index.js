@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
+import omit from 'lodash/omit';
 import { Helmet } from 'react-helmet';
 import {
   Main,
@@ -30,7 +31,6 @@ import Preferences from './components/Preferences';
 import Password from './components/Password';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { useThemeToggle } from '../../hooks';
-import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
 
@@ -44,11 +44,15 @@ const ProfilePage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
   const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
-  const { get } = useFetchClient();
+  const { get, put } = useFetchClient();
 
   useFocusWhenNavigate();
 
-  const { isLoading: isLoadingUser, data } = useQuery('user', fetchUser, {
+  const { isLoading: isLoadingUser, data } = useQuery('user',  async () => {
+    const { data } = await get('/admin/users/me');
+  
+    return data.data;
+  }, {
     onSuccess() {
       notifyStatus(
         formatMessage({
@@ -84,7 +88,12 @@ const ProfilePage = () => {
 
   const isLoading = isLoadingUser || isLoadingSSO;
 
-  const submitMutation = useMutation((body) => putUser(body), {
+  const submitMutation = useMutation(async (body) => {
+    const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
+    const { data } = await put('/admin/users/me', dataToSend);
+  
+    return { ...data.data, currentTheme: body.currentTheme };
+  }, {
     async onSuccess(data) {
       await queryClient.invalidateQueries('user');
 
