@@ -1,7 +1,7 @@
 'use strict';
 
 const { getService } = require('./utils');
-const { ALLOWED_SORT_STRINGS } = require('./constants');
+const { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } = require('./constants');
 
 module.exports = async ({ strapi }) => {
   const defaultConfig = {
@@ -49,10 +49,9 @@ module.exports = async ({ strapi }) => {
 };
 
 const registerWebhookEvents = async () =>
-  strapi.webhookStore.allowedEvents
-    .set('MEDIA_CREATE', 'media.create')
-    .set('MEDIA_UPDATE', 'media.update')
-    .set('MEDIA_DELETE', 'media.delete');
+  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+    strapi.webhookStore.addAllowedEvent(key, value);
+  });
 
 const registerPermissionActions = async () => {
   const actions = [

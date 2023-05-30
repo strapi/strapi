@@ -65,29 +65,31 @@ const webhookEventValidator = async (allowedEvents, events) => {
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
 
-  const allowedEvents = new Map([
-    ['ENTRY_CREATE', 'entry.create'],
-    ['ENTRY_UPDATE', 'entry.update'],
-    ['ENTRY_DELETE', 'entry.delete'],
-    ['ENTRY_PUBLISH', 'entry.publish'],
-    ['ENTRY_UNPUBLISH', 'entry.unpublish'],
-  ]);
-
   return {
-    allowedEvents,
+    allowedEvents: new Map([]),
+    addAllowedEvent(key, value) {
+      this.allowedEvents.set(key, value);
+    },
+    removeAllowedEvent(key) {
+      this.allowedEvents.delete(key);
+    },
+    listAllowedEvents() {
+      return Array.from(this.allowedEvents.keys());
+    },
+    getAllowedEvent(key) {
+      return this.allowedEvents.get(key);
+    },
     async findWebhooks() {
       const results = await webhookQueries.findMany();
 
       return results.map(fromDBObject);
     },
-
     async findWebhook(id) {
       const result = await webhookQueries.findOne({ where: { id } });
       return result ? fromDBObject(result) : null;
     },
-
     async createWebhook(data) {
-      await webhookEventValidator(allowedEvents, data.events);
+      await webhookEventValidator(this.allowedEvents, data.events);
 
       return webhookQueries
         .create({
@@ -95,9 +97,8 @@ const createWebhookStore = ({ db }) => {
         })
         .then(fromDBObject);
     },
-
     async updateWebhook(id, data) {
-      await webhookEventValidator(allowedEvents, data.events);
+      await webhookEventValidator(this.allowedEvents, data.events);
 
       const webhook = await webhookQueries.update({
         where: { id },
@@ -106,7 +107,6 @@ const createWebhookStore = ({ db }) => {
 
       return webhook ? fromDBObject(webhook) : null;
     },
-
     async deleteWebhook(id) {
       const webhook = await webhookQueries.delete({ where: { id } });
       return webhook ? fromDBObject(webhook) : null;

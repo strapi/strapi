@@ -109,7 +109,7 @@ function persistStagesJoinTables({ strapi }) {
 }
 
 const registerWebhookEvents = async ({ strapi }) =>
-  strapi.webhookStore.allowedEvents.set('WORKFLOW_UPDATE_STAGE', 'workflow.updateEntryStage');
+  strapi.webhookStore.addAllowedEvent('WORKFLOW_UPDATE_STAGE', 'workflow.updateEntryStage');
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });

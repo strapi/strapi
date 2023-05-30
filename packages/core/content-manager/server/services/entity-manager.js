@@ -7,14 +7,20 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
 const { getDeepRelationsCount } = require('./utils/count');
 const { sumDraftCounts } = require('./utils/draft');
+const { ALLOWED_WEBHOOK_EVENTS } = require('../constants');
 
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
-const emitEvent = async (event, entity, modelUid) => {
-  const modelDef = strapi.getModel(modelUid);
+const emitEvent = async (uid, eventName, entity) => {
+  const event = ALLOWED_WEBHOOK_EVENTS[eventName];
+  if (!event) {
+    throw new ApplicationError(`The webhook event ${eventName} doesn't exist.`);
+  }
+
+  const modelDef = strapi.getModel(uid);
   const sanitizedEntity = await strapiUtils.sanitize.sanitizers.defaultSanitizeOutput(
     modelDef,
     entity
@@ -253,7 +259,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(strapi.webhookStore.allowedEvents.get('ENTRY_PUBLISH'), updatedEntity, uid);
+    await emitEvent(uid, 'ENTRY_PUBLISH', updatedEntity);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
@@ -282,7 +288,7 @@ module.exports = ({ strapi }) => ({
 
     const updatedEntity = await strapi.entityService.update(uid, entity.id, params);
 
-    await emitEvent(strapi.webhookStore.allowedEvents.get('ENTRY_UNPUBLISH'), updatedEntity, uid);
+    await emitEvent(uid, 'ENTRY_UNPUBLISH', updatedEntity);
 
     const mappedEntity = await this.mapEntity(updatedEntity, uid);
 
