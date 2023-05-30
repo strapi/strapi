@@ -29,6 +29,8 @@ const ListViewTable = ({
   layout,
   rows,
 }) => {
+  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
+
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options?.draftAndPublish ?? false;
   const { formatMessage } = useIntl();
@@ -122,32 +124,28 @@ const ListViewTable = ({
         </Table.Head>
         <Table.LoadingBody />
         <Table.EmptyBody contentType={contentTypeName} aciton={action} />
-        <Body.Root onConfirmDelete={onConfirmDelete}>
+        <Body.Root
+          onConfirmDelete={onConfirmDelete}
+          isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
+          setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+        >
           {rows.map((rowData, index) => {
-            const itemLineText = formatMessage(
-              {
-                id: 'content-manager.components.ListViewTable.row-line',
-                defaultMessage: 'item line {number}',
-              },
-              { number: index }
-            );
-
             return (
-              <Body.Row key={rowData.id} rowData={rowData}>
+              <Body.Row key={rowData.id} rowId={rowData.id}>
                 {/* Bulk action row checkbox */}
-                <Body.CheckboxDataCell rowData={rowData} />
+                <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                 {/* Field data */}
                 {tableHeaders.map(({ key, name, ...rest }) => {
                   if (name === 'publishedAt') {
                     return (
-                      <Body.FieldDataCell key={key}>
+                      <Body.DataCell key={key}>
                         <PublicationState isPublished={Boolean(rowData.publishedAt)} />
-                      </Body.FieldDataCell>
+                      </Body.DataCell>
                     );
                   }
 
                   return (
-                    <Body.FieldDataCell key={key}>
+                    <Body.DataCell key={key}>
                       <CellContent
                         content={rowData[name.split('.')[0]]}
                         name={name}
@@ -155,14 +153,15 @@ const ListViewTable = ({
                         {...rest}
                         rowId={rowData.id}
                       />
-                    </Body.FieldDataCell>
+                    </Body.DataCell>
                   );
                 })}
-                {/* Actions */}
+                {/* Actions: edit, duplicate, delete */}
                 {withEntityActions && (
                   <Body.EntityActionsDataCell
                     rowId={rowData.id}
-                    itemLineText={itemLineText}
+                    index={index}
+                    setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
                     canCreate={canCreate}
                     canDelete={canDelete}
                   />

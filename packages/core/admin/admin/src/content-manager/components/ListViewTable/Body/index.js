@@ -3,23 +3,22 @@ import PropTypes from 'prop-types';
 import { Link, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
-import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
+import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { useTracking, stopPropagation, onRowClick, useTableContext } from '@strapi/helper-plugin';
 
 import { usePluginsQueryParams } from '../../../hooks';
-import { getFullName } from '../../../../utils';
 import ConfirmDialogDelete from '../ConfirmDialogDelete';
 
 /* -------------------------------------------------------------------------------------------------
- * FieldDataCell
+ * DataCell
  * -----------------------------------------------------------------------------------------------*/
 
-const FieldDataCell = ({ children, ...props }) => {
+const DataCell = ({ children, ...props }) => {
   return <Td {...props}>{children}</Td>;
 };
 
-FieldDataCell.propTypes = {
+DataCell.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
@@ -27,53 +26,67 @@ FieldDataCell.propTypes = {
  * CheckboxDataCell
  * -----------------------------------------------------------------------------------------------*/
 
-const CheckboxDataCell = ({ rowId, firstName, lastName }) => {
+const CheckboxDataCell = ({ rowId, index }) => {
   const { selectedEntries } = useTableContext();
+  const { formatMessage } = useIntl();
   const isChecked = selectedEntries.findIndex((id) => id === rowId) !== -1;
   const { onSelectRow } = useTableContext();
-  const { formatMessage } = useIntl();
+  const ariaLabel = formatMessage(
+    {
+      id: 'app.component.table.select.one-entry',
+      defaultMessage: `Select {target}`,
+    },
+    { target: index + 1 }
+  );
 
   return (
-    <FieldDataCell {...stopPropagation}>
+    <DataCell {...stopPropagation}>
       <BaseCheckbox
-        aria-label={formatMessage(
-          {
-            id: 'app.component.table.select.one-entry',
-            defaultMessage: `Select {target}`,
-          },
-          { target: getFullName(firstName, lastName) }
-        )}
+        aria-label={ariaLabel}
         checked={isChecked}
         onChange={() => {
           onSelectRow({ name: rowId, value: !isChecked });
         }}
       />
-    </FieldDataCell>
+    </DataCell>
   );
 };
 
 CheckboxDataCell.propTypes = {
   rowId: PropTypes.number.isRequired,
-  firstName: PropTypes.string.isRequired,
-  lastName: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * EntityActionsDataCell
  * -----------------------------------------------------------------------------------------------*/
 
-const EntityActionsDataCell = ({ rowId, itemLineText, canCreate, canDelete }) => {
+const EntityActionsDataCell = ({
+  rowId,
+  index,
+  canCreate,
+  canDelete,
+  setIsConfirmDeleteRowOpen,
+}) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { setSelectedEntries, setIsConfirmDeleteOpen } = useTableContext();
+  const { setSelectedEntries } = useTableContext();
   const pluginsQueryParams = usePluginsQueryParams();
   const {
     location: { pathname },
   } = useHistory();
 
+  const itemLineText = formatMessage(
+    {
+      id: 'content-manager.components.ListViewTable.row-line',
+      defaultMessage: 'item line {number}',
+    },
+    { number: index + 1 }
+  );
+
   return (
-    <FieldDataCell>
-      <Flex justifyContent="end" {...stopPropagation}>
+    <DataCell>
+      <Flex gap={1} justifyContent="end" {...stopPropagation}>
         <IconButton
           forwardedAs={Link}
           onClick={() => {
@@ -93,46 +106,42 @@ const EntityActionsDataCell = ({ rowId, itemLineText, canCreate, canDelete }) =>
         />
 
         {canCreate && (
-          <Box paddingLeft={1}>
-            <IconButton
-              forwardedAs={Link}
-              to={{
-                pathname: `${pathname}/create/clone/${rowId}`,
-                state: { from: pathname },
-                search: pluginsQueryParams,
-              }}
-              label={formatMessage(
-                {
-                  id: 'app.component.table.duplicate',
-                  defaultMessage: 'Duplicate {target}',
-                },
-                { target: itemLineText }
-              )}
-              noBorder
-              icon={<Duplicate />}
-            />
-          </Box>
+          <IconButton
+            forwardedAs={Link}
+            to={{
+              pathname: `${pathname}/create/clone/${rowId}`,
+              state: { from: pathname },
+              search: pluginsQueryParams,
+            }}
+            label={formatMessage(
+              {
+                id: 'app.component.table.duplicate',
+                defaultMessage: 'Duplicate {target}',
+              },
+              { target: itemLineText }
+            )}
+            noBorder
+            icon={<Duplicate />}
+          />
         )}
 
         {canDelete && (
-          <Box paddingLeft={1}>
-            <IconButton
-              onClick={() => {
-                trackUsage('willDeleteEntryFromList');
-                setSelectedEntries([rowId]);
-                setIsConfirmDeleteOpen(true);
-              }}
-              label={formatMessage(
-                { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                { target: itemLineText }
-              )}
-              noBorder
-              icon={<Trash />}
-            />
-          </Box>
+          <IconButton
+            onClick={() => {
+              trackUsage('willDeleteEntryFromList');
+              setSelectedEntries([rowId]);
+              setIsConfirmDeleteRowOpen(true);
+            }}
+            label={formatMessage(
+              { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+              { target: itemLineText }
+            )}
+            noBorder
+            icon={<Trash />}
+          />
         )}
       </Flex>
-    </FieldDataCell>
+    </DataCell>
   );
 };
 
@@ -143,7 +152,8 @@ EntityActionsDataCell.defaultProps = {
 
 EntityActionsDataCell.propTypes = {
   rowId: PropTypes.number.isRequired,
-  itemLineText: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
+  setIsConfirmDeleteRowOpen: PropTypes.func.isRequired,
   canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
 };
@@ -152,7 +162,7 @@ EntityActionsDataCell.propTypes = {
  * Row
  * -----------------------------------------------------------------------------------------------*/
 
-const Row = ({ children, rowData }) => {
+const Row = ({ children, rowId }) => {
   const pluginsQueryParams = usePluginsQueryParams();
   const {
     push,
@@ -166,7 +176,7 @@ const Row = ({ children, rowData }) => {
         fn() {
           trackUsage('willEditEntryFromList');
           push({
-            pathname: `${pathname}/${rowData.id}`,
+            pathname: `${pathname}/${rowId}`,
             state: { from: pathname },
             search: pluginsQueryParams,
           });
@@ -181,15 +191,14 @@ const Row = ({ children, rowData }) => {
 
 Row.propTypes = {
   children: PropTypes.node.isRequired,
-  rowData: PropTypes.object.isRequired,
+  rowId: PropTypes.object.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, onConfirmDelete }) => {
-  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
+const Root = ({ children, onConfirmDelete, isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
@@ -197,12 +206,12 @@ const Root = ({ children, onConfirmDelete }) => {
     try {
       setIsLoading(true);
       await onConfirmDelete(selectedEntries[0]);
-      setIsConfirmDeleteOpen(false);
+      setIsConfirmDeleteRowOpen(false);
       setIsLoading(false);
       setSelectedEntries([]);
     } catch (error) {
       setIsLoading(false);
-      setIsConfirmDeleteOpen(false);
+      setIsConfirmDeleteRowOpen(false);
     }
   };
 
@@ -212,8 +221,8 @@ const Root = ({ children, onConfirmDelete }) => {
       <ConfirmDialogDelete
         isConfirmButtonLoading={isLoading}
         onConfirm={handleConfirmDelete}
-        onToggleDialog={() => setIsConfirmDeleteOpen(!isConfirmDeleteOpen)}
-        isOpen={isConfirmDeleteOpen}
+        onToggleDialog={() => setIsConfirmDeleteRowOpen(!isConfirmDeleteRowOpen)}
+        isOpen={isConfirmDeleteRowOpen}
       />
     </Tbody>
   );
@@ -222,6 +231,8 @@ const Root = ({ children, onConfirmDelete }) => {
 Root.propTypes = {
   children: PropTypes.node.isRequired,
   onConfirmDelete: PropTypes.func.isRequired,
+  isConfirmDeleteRowOpen: PropTypes.bool.isRequired,
+  setIsConfirmDeleteRowOpen: PropTypes.func.isRequired,
 };
 
-export const Body = { CheckboxDataCell, EntityActionsDataCell, FieldDataCell, Root, Row };
+export const Body = { CheckboxDataCell, EntityActionsDataCell, DataCell, Root, Row };
