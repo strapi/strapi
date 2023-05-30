@@ -62,7 +62,7 @@ describe('Entity service', () => {
 
       const fakeStrapi = {
         getModel: jest.fn(() => {
-          return { kind: 'singleType', privateAttributes: [] };
+          return { kind: 'singleType' };
         }),
       };
 
@@ -133,7 +133,6 @@ describe('Entity service', () => {
           uid: entityUID,
           kind: 'contentType',
           modelName: 'test-model',
-          privateAttributes: [],
           options: {},
           attributes: {
             attrStringDefaultRequired: {
@@ -467,7 +466,6 @@ describe('Entity service', () => {
           modelName: 'entity',
           collectionName: 'entity',
           uid: entityUID,
-          privateAttributes: [],
           options: {},
           info: {
             singularName: 'entity',
