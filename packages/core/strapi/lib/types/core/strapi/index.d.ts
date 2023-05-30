@@ -21,7 +21,7 @@ interface CustomFieldServerOptions {
    * The existing Strapi data type the custom field uses
    */
   type: string;
-  
+
   /**
    * Settings for the input size in the Admin UI
    */

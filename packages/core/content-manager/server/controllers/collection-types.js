@@ -3,7 +3,7 @@
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
-const { validateBulkDeleteInput } = require('./validation');
+const { validateBulkActionInput } = require('./validation');
 
 module.exports = {
   async find(ctx) {
@@ -181,6 +181,70 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(result);
   },
 
+  async bulkPublish(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body } = ctx.request;
+    const { ids } = body;
+
+    await validateBulkActionInput(body);
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.publish()) {
+      return ctx.forbidden();
+    }
+
+    const entityPromises = ids.map((id) => entityManager.findOneWithCreatorRoles(id, model));
+    const entities = await Promise.all(entityPromises);
+
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.publishMany(entities, model);
+    ctx.body = { count };
+  },
+
+  async bulkUnpublish(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body } = ctx.request;
+    const { ids } = body;
+
+    await validateBulkActionInput(body);
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.unpublish()) {
+      return ctx.forbidden();
+    }
+
+    const entityPromises = ids.map((id) => entityManager.findOneWithCreatorRoles(id, model));
+    const entities = await Promise.all(entityPromises);
+
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.unpublishMany(entities, model);
+    ctx.body = { count };
+  },
+
   async unpublish(ctx) {
     const { userAbility, user } = ctx.state;
     const { id, model } = ctx.params;
@@ -217,7 +281,7 @@ module.exports = {
     const { query, body } = ctx.request;
     const { ids } = body;
 
-    await validateBulkDeleteInput(body);
+    await validateBulkActionInput(body);
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });

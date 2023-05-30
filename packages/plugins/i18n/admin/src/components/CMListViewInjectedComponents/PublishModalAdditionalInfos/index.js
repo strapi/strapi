@@ -12,7 +12,7 @@ const Emphasis = (chunks) => {
   );
 };
 
-const DeleteModalAdditionalInfos = () => {
+const PublishModalAdditionalInfos = () => {
   const hasI18nEnabled = useHasI18n();
   const { formatMessage } = useIntl();
 
@@ -24,9 +24,9 @@ const DeleteModalAdditionalInfos = () => {
     <Typography textColor="danger500">
       {formatMessage(
         {
-          id: getTrad('Settings.list.actions.deleteAdditionalInfos'),
+          id: getTrad('Settings.list.actions.publishAdditionalInfos'),
           defaultMessage:
-            'This will delete the active locale versions <em>(from Internationalization)</em>',
+            'This will publish the active locale versions <em>(from Internationalization)</em>',
         },
         {
           em: Emphasis,
@@ -36,4 +36,4 @@ const DeleteModalAdditionalInfos = () => {
   );
 };
 
-export default DeleteModalAdditionalInfos;
+export default PublishModalAdditionalInfos;
