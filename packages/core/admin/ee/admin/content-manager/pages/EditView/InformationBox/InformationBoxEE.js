@@ -38,13 +38,10 @@ export function InformationBoxEE() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
 
-  const { workflows: { data: workflows, isLoading: isWorkflowLoading } = {} } = useReviewWorkflows(
-    undefined,
-    { filters: { contentTypes: uid } }
-  );
-
-  // Filtering will still return an array, which should contain only one workflow
-  const [workflow] = workflows ?? [];
+  const {
+    workflows: [workflow],
+    isLoading: isWorkflowLoading,
+  } = useReviewWorkflows({ filters: { contentTypes: uid } });
 
   const { error, isLoading, mutateAsync } = useMutation(
     async ({ entityId, stageId, uid }) => {

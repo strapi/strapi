@@ -687,39 +687,35 @@ describe('Email | Pages | Settings', () => {
                     <div
                       class="c17"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c12"
                           >
-                            <div
-                              class="c12"
+                            <label
+                              class="c5 c18 c19"
+                              for="7"
                             >
-                              <label
-                                class="c5 c18 c19"
-                                for="7"
-                              >
-                                Default sender email
-                              </label>
-                              <div
-                                class="c2 c20"
+                              Default sender email
+                            </label>
+                            <div
+                              class="c2 c20"
+                              disabled=""
+                            >
+                              <input
+                                aria-disabled="true"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c21"
+                                data-disabled=""
                                 disabled=""
-                              >
-                                <input
-                                  aria-disabled="true"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c21"
-                                  data-disabled=""
-                                  disabled=""
-                                  id="7"
-                                  name="shipper-email"
-                                  placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
-                                  value=""
-                                />
-                              </div>
+                                id="7"
+                                name="shipper-email"
+                                placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
+                                value=""
+                              />
                             </div>
                           </div>
                         </div>
@@ -728,39 +724,35 @@ describe('Email | Pages | Settings', () => {
                     <div
                       class="c17"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c12"
                           >
-                            <div
-                              class="c12"
+                            <label
+                              class="c5 c18 c19"
+                              for="9"
                             >
-                              <label
-                                class="c5 c18 c19"
-                                for="9"
-                              >
-                                Default response email
-                              </label>
-                              <div
-                                class="c2 c20"
+                              Default response email
+                            </label>
+                            <div
+                              class="c2 c20"
+                              disabled=""
+                            >
+                              <input
+                                aria-disabled="true"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c21"
+                                data-disabled=""
                                 disabled=""
-                              >
-                                <input
-                                  aria-disabled="true"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c21"
-                                  data-disabled=""
-                                  disabled=""
-                                  id="9"
-                                  name="response-email"
-                                  placeholder="ex: Strapi <example@strapi.io>"
-                                  value=""
-                                />
-                              </div>
+                                id="9"
+                                name="response-email"
+                                placeholder="ex: Strapi <example@strapi.io>"
+                                value=""
+                              />
                             </div>
                           </div>
                         </div>
@@ -773,67 +765,63 @@ describe('Email | Pages | Settings', () => {
                         class=""
                       >
                         <div
-                          class=""
+                          class="c12"
                         >
-                          <div
-                            class="c12"
+                          <label
+                            class="c5 c18 c19"
+                            for="11"
                           >
-                            <label
-                              class="c5 c18 c19"
-                              for="11"
-                            >
-                              Email provider
-                            </label>
-                            <div
-                              aria-autocomplete="none"
-                              aria-controls="radix-0"
-                              aria-describedby="11-hint 11-error"
-                              aria-disabled="true"
-                              aria-expanded="false"
-                              aria-label="Email provider"
-                              class="c22 c23 c24"
-                              data-disabled=""
-                              data-state="closed"
-                              dir="ltr"
-                              id="11"
-                              overflow="hidden"
-                              role="combobox"
+                            Email provider
+                          </label>
+                          <div
+                            aria-autocomplete="none"
+                            aria-controls="radix-0"
+                            aria-describedby="11-hint 11-error"
+                            aria-disabled="true"
+                            aria-expanded="false"
+                            aria-label="Email provider"
+                            class="c22 c23 c24"
+                            data-disabled=""
+                            data-state="closed"
+                            dir="ltr"
+                            id="11"
+                            overflow="hidden"
+                            role="combobox"
+                          >
+                            <span
+                              class="c25 c26"
                             >
                               <span
-                                class="c25 c26"
+                                class="c5 c27 c28"
                               >
                                 <span
-                                  class="c5 c27 c28"
+                                  class="c29"
+                                />
+                              </span>
+                            </span>
+                            <span
+                              class="c26"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="c30"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <span
-                                    class="c29"
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
                                   />
-                                </span>
+                                </svg>
                               </span>
-                              <span
-                                class="c26"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  class="c30"
-                                >
-                                  <svg
-                                    fill="none"
-                                    height="1rem"
-                                    viewBox="0 0 14 8"
-                                    width="1rem"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                      fill="#32324D"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </span>
-                              </span>
-                            </div>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -858,36 +846,32 @@ describe('Email | Pages | Settings', () => {
                     <div
                       class="c17"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c12"
                           >
-                            <div
-                              class="c12"
+                            <label
+                              class="c5 c18 c19"
+                              for="test-address-input"
                             >
-                              <label
-                                class="c5 c18 c19"
-                                for="test-address-input"
-                              >
-                                Recipient email
-                              </label>
-                              <div
-                                class="c2 c31"
-                              >
-                                <input
-                                  aria-disabled="false"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c32"
-                                  id="test-address-input"
-                                  name="test-address"
-                                  placeholder="ex: developer@example.com"
-                                  value=""
-                                />
-                              </div>
+                              Recipient email
+                            </label>
+                            <div
+                              class="c2 c31"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c32"
+                                id="test-address-input"
+                                name="test-address"
+                                placeholder="ex: developer@example.com"
+                                value=""
+                              />
                             </div>
                           </div>
                         </div>
@@ -896,47 +880,43 @@ describe('Email | Pages | Settings', () => {
                     <div
                       class="c33"
                     >
-                      <div
-                        class=""
+                      <button
+                        aria-disabled="true"
+                        class="c34 c35 c36 c37"
+                        disabled=""
+                        type="submit"
                       >
-                        <button
-                          aria-disabled="true"
-                          class="c34 c35 c36 c37"
-                          disabled=""
-                          type="submit"
+                        <div
+                          aria-hidden="true"
+                          class=""
                         >
-                          <div
-                            aria-hidden="true"
-                            class=""
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M0 2.8A.8.8 0 0 1 .8 2h22.4a.8.8 0 0 1 .8.8v2.71a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V2.8Z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873ZM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053Z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c5 c38"
-                          >
-                            Send test email
-                          </span>
-                        </button>
-                      </div>
+                            <path
+                              d="M0 2.8A.8.8 0 0 1 .8 2h22.4a.8.8 0 0 1 .8.8v2.71a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V2.8Z"
+                              fill="#32324D"
+                            />
+                            <path
+                              d="M1.922 7.991C.197 6.675 0 6.252 0 5.289h23.953c.305 1.363-1.594 2.506-2.297 3.125-1.953 1.363-6.253 4.36-7.828 5.45-1.575 1.09-3.031.455-3.562 0-2.063-1.41-6.62-4.557-8.344-5.873ZM22.8 18H1.2c-.663 0-1.2.471-1.2 1.053v1.894C0 21.529.537 22 1.2 22h21.6c.663 0 1.2-.471 1.2-1.053v-1.894c0-.582-.537-1.053-1.2-1.053Z"
+                              fill="#32324D"
+                            />
+                            <path
+                              d="M0 9.555v10.972h24V9.554c-2.633 1.95-8.367 6.113-9.96 7.166-1.595 1.052-3.352.438-4.032 0L0 9.555Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                        <span
+                          class="c5 c38"
+                        >
+                          Send test email
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
