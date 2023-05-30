@@ -5,7 +5,7 @@ import { Table, useStrapiApp } from '@strapi/helper-plugin';
 
 import { useSelector } from 'react-redux';
 
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/ListViewTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
@@ -14,7 +14,7 @@ import { PublicationState } from './CellContent/PublicationState/PublicationStat
 import BulkActionButtons from './BulkActionButtons';
 import CellContent from './CellContent';
 
-const DynamicTable = ({
+const ListViewTable = ({
   canCreate,
   canDelete,
   canPublish,
@@ -126,7 +126,7 @@ const DynamicTable = ({
           {rows.map((rowData, index) => {
             const itemLineText = formatMessage(
               {
-                id: 'content-manager.components.DynamicTable.row-line',
+                id: 'content-manager.components.ListViewTable.row-line',
                 defaultMessage: 'item line {number}',
               },
               { number: index }
@@ -176,11 +176,11 @@ const DynamicTable = ({
   );
 };
 
-DynamicTable.defaultProps = {
+ListViewTable.defaultProps = {
   action: undefined,
 };
 
-DynamicTable.propTypes = {
+ListViewTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canPublish: PropTypes.bool.isRequired,
@@ -207,4 +207,4 @@ DynamicTable.propTypes = {
   rows: PropTypes.array.isRequired,
 };
 
-export default DynamicTable;
+export default ListViewTable;

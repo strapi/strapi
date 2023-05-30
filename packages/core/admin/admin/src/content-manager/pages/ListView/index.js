@@ -38,7 +38,7 @@ import {
 import { ArrowLeft, Plus, Cog } from '@strapi/icons';
 import { useMutation } from 'react-query';
 
-import DynamicTable from '../../components/DynamicTable';
+import ListViewTable from '../../components/ListViewTable';
 import AttributeFilter from '../../components/AttributeFilter';
 import { InjectionZone } from '../../../shared/components';
 
@@ -439,7 +439,7 @@ function ListView({
       <ContentLayout>
         {canRead ? (
           <>
-            <DynamicTable
+            <ListViewTable
               canCreate={canCreate}
               canDelete={canDelete}
               canPublish={canPublish}

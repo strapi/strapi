@@ -246,12 +246,14 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
     <Th
       key={name}
       action={
-        <IconButton
-          label={sortLabel}
-          onClick={handleClickSort}
-          icon={<SortIcon isUp={isUp} />}
-          noBorder
-        />
+        isSorted && (
+          <IconButton
+            label={sortLabel}
+            onClick={handleClickSort}
+            icon={<SortIcon isUp={isUp} />}
+            noBorder
+          />
+        )
       }
     >
       <Tooltip label={isSortable ? sortLabel : label}>
