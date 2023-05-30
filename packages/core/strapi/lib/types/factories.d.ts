@@ -59,7 +59,7 @@ export declare function createCoreRouter<T extends UID.ContentType>(
 ): () => Router;
 
 export declare function createCoreController<
-  T extends UID.Controller,
+  T extends UID.ContentType,
   S extends Partial<GetBaseSchemaController<T>>
 >(uid: T, cfg?: ControllerCallback<S> | S): () => Required<S & GetBaseSchemaController<T>>;
 
@@ -68,7 +68,7 @@ export declare function createCoreService<
   S extends Partial<GetBaseSchemaService<T>>
 >(uid: T, cfg?: ServiceCallback<S> | S): () => Required<S & GetBaseSchemaService<T>>;
 
-type GetBaseSchemaController<T extends UID.Controller> = IsCollectionType<
+type GetBaseSchemaController<T extends UID.ContentType> = IsCollectionType<
   T,
   CollectionTypeController,
   SingleTypeController

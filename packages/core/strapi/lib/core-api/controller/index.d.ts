@@ -8,17 +8,17 @@ interface Controller {
 }
 
 export interface SingleTypeController extends Controller {
-  find?: ControllerHandler;
-  update?: ControllerHandler;
-  delete?: ControllerHandler;
+  find?: ControllerHandler<unknown>;
+  update?: ControllerHandler<unknown>;
+  delete?: ControllerHandler<unknown>;
 }
 
 export interface CollectionTypeController extends Controller {
-  find?: ControllerHandler;
-  findOne?: ControllerHandler;
-  create?: ControllerHandler;
-  update?: ControllerHandler;
-  delete?: ControllerHandler;
+  find?: ControllerHandler<unknown>;
+  findOne?: ControllerHandler<unknown>;
+  create?: ControllerHandler<unknown>;
+  update?: ControllerHandler<unknown>;
+  delete?: ControllerHandler<unknown>;
 }
 
 export type GenericController = Partial<Controller> & {
