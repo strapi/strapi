@@ -9,13 +9,7 @@ import serverLockedSSO from './utils/serverLockedSSO';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import Theme from '../../../components/Theme';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: {
-    en: 'English'
-  },
-  messages: ['test'],
-}));
+jest.mock('../../../components/LocalesProvider/useLocalesProvider');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -136,20 +130,12 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
       expect(queryByTestId('loader')).not.toBeInTheDocument();
     });
     
-    await waitFor(() => {
-      expect(changePasswordHeading).not.toBeInTheDocument();
-    });
+    expect(changePasswordHeading).not.toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(queryByTestId('test-current-password-input')).not.toBeInTheDocument()
-    });
-
-    await waitFor(() => {
-      expect(queryByTestId('test-new-password-input')).not.toBeInTheDocument()
-    });
-
-    await waitFor(() => {
-      expect(queryByTestId('test-confirmed-password-input')).not.toBeInTheDocument()
-    });
+    expect(queryByTestId('test-current-password-input')).not.toBeInTheDocument()
+    
+    expect(queryByTestId('test-new-password-input')).not.toBeInTheDocument()
+    
+    expect(queryByTestId('test-confirmed-password-input')).not.toBeInTheDocument()
   });
 });
