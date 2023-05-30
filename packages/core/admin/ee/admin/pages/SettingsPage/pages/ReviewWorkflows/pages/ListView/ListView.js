@@ -66,13 +66,13 @@ export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows, isLoading, refetch } = useReviewWorkflows();
   const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
   const { del } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
 
-  const { mutateAsync, isLoading } = useMutation(
+  const { mutateAsync, isLoading: isLoadingMutation } = useMutation(
     async ({ workflowId, stages }) => {
       const {
         data: { data },
@@ -112,7 +112,7 @@ export function ReviewWorkflowsListView() {
     try {
       const res = await mutateAsync({ workflowId: workflowToDelete });
 
-      await refetchWorkflow();
+      await refetch();
       setWorkflowToDelete(null);
 
       return res;
@@ -149,7 +149,7 @@ export function ReviewWorkflowsListView() {
       />
 
       <Layout.Root>
-        {workflowsData.status === 'loading' || isLoadingModels ? (
+        {isLoading || isLoadingModels ? (
           <Loader>
             {formatMessage({
               id: 'Settings.review-workflows.page.list.isLoading',
@@ -196,7 +196,7 @@ export function ReviewWorkflowsListView() {
             </Thead>
 
             <Tbody>
-              {workflowsData.data.map((workflow) => (
+              {workflows.map((workflow) => (
                 <Tr
                   {...onRowClick({
                     fn(event) {
@@ -246,7 +246,7 @@ export function ReviewWorkflowsListView() {
                           },
                           { name: 'Default workflow' }
                         )}
-                        disabled={workflowsData.data.length === 1}
+                        disabled={workflows.length === 1}
                         icon={<Trash />}
                         noBorder
                         onClick={() => {
@@ -267,7 +267,7 @@ export function ReviewWorkflowsListView() {
             defaultMessage:
               'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
           }}
-          isConfirmButtonLoading={isLoading}
+          isConfirmButtonLoading={isLoadingMutation}
           isOpen={!!workflowToDelete}
           onToggleDialog={toggleConfirmDeleteDialog}
           onConfirm={handleConfirmDeleteDialog}

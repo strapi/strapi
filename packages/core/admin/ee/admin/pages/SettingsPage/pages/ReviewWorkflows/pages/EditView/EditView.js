@@ -37,7 +37,11 @@ export function ReviewWorkflowsEditView() {
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflow, refetchWorkflow } = useReviewWorkflows(workflowId);
+  const {
+    workflows: [workflow],
+    status: workflowStatus,
+    refetch,
+  } = useReviewWorkflows({ id: workflowId });
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
     status,
@@ -88,7 +92,7 @@ export function ReviewWorkflowsEditView() {
 
   const submitForm = async () => {
     await updateWorkflow(currentWorkflow);
-    await refetchWorkflow();
+    await refetch();
 
     setIsConfirmDeleteDialogOpen(false);
   };
@@ -122,8 +126,8 @@ export function ReviewWorkflowsEditView() {
   }, []);
 
   React.useEffect(() => {
-    dispatch(setWorkflow({ status: workflow.status, data: workflow.data }));
-  }, [workflow.status, workflow.data, dispatch]);
+    dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
+  }, [workflowStatus, workflow, dispatch]);
 
   // TODO redirect back to list-view if workflow is not found?
 
@@ -158,14 +162,7 @@ export function ReviewWorkflowsEditView() {
               },
               { count: currentWorkflow?.stages?.length ?? 0 }
             )}
-            // TODO: Remove once the name migration is merged
-            title={
-              currentWorkflow?.name ??
-              formatMessage({
-                id: 'Settings.review-workflows.page.title',
-                defaultMessage: 'Edit Review Workflow',
-              })
-            }
+            title={currentWorkflow.name}
           />
 
           <Layout.Root>
