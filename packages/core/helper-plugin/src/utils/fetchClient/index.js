@@ -13,8 +13,6 @@ export const reqErrorInterceptor = (error) => {
   return Promise.reject(error);
 };
 
-export const resInterceptor = (response) => response;
-
 export const resErrorInterceptor = (error) => {
   // whatever you want to do with the error
   if (error?.response?.status === 401) {
@@ -25,12 +23,6 @@ export const resErrorInterceptor = (error) => {
   throw error;
 };
 
-export const addInterceptors = (instance) => {
-  instance.interceptors.request.use(reqInterceptor, reqErrorInterceptor);
-
-  instance.interceptors.response.use(resInterceptor, resErrorInterceptor);
-};
-
 export const fetchClient = () => {
   const instance = axios.create({
     headers: {
@@ -38,7 +30,8 @@ export const fetchClient = () => {
       'Content-Type': 'application/json',
     },
   });
-  addInterceptors(instance);
+
+  instance.interceptors.request.use(reqInterceptor, reqErrorInterceptor);
 
   return instance;
 };

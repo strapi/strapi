@@ -4,9 +4,10 @@
  *
  */
 import { useEffect, useRef, useMemo } from 'react';
-import getFetchClient from '../../utils/getFetchClient';
 
-const useFetchClient = () => {
+import { getFetchClient } from '../../utils/getFetchClient';
+
+export const useFetchClient = () => {
   const controller = useRef(null);
 
   if (controller.current === null) {
@@ -27,5 +28,3 @@ const useFetchClient = () => {
     []
   );
 };
-
-export default useFetchClient;
