@@ -39,6 +39,12 @@ module.exports = async ({ strapi }) => {
 
   await getService('weeklyMetrics').registerCron();
   getService('metrics').sendUploadPluginMetrics();
+
+  if (strapi.config.get('plugin.upload.signAdminURLsOnly', false)) {
+    getService('extensions').contentManager.entityManager.addSignedFileUrlsToAdmin();
+  } else {
+    getService('extensions').core.entityService.addSignedFileUrlsToEntityService();
+  }
 };
 
 const registerPermissionActions = async () => {

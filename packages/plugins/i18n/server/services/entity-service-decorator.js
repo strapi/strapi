@@ -2,7 +2,6 @@
 
 const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
-const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 
 const { getService } = require('../utils');
 
@@ -96,7 +95,7 @@ const decorator = (service) => ({
       return wrappedParams;
     }
 
-    return wrapParams(params, ctx);
+    return wrapParams(wrappedParams, ctx);
   },
 
   /**
@@ -156,7 +155,7 @@ const decorator = (service) => ({
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async findMany(uid, opts = {}) {
+  async findMany(uid, opts) {
     const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
@@ -167,18 +166,18 @@ const decorator = (service) => ({
 
     const { kind } = strapi.getModel(uid);
 
-    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-
-    const query = transformParamsToQuery(uid, wrappedParams);
-
     if (kind === 'singleType') {
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
-        return strapi.db.query(uid).findMany(query);
+        // TODO Fix so this won't break lower lying find many wrappers
+        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
+        return strapi.db.query(uid).findMany(wrappedParams);
       }
-      return strapi.db.query(uid).findOne(query);
+
+      // This one gets transformed into a findOne on a lower layer
+      return service.findMany.call(this, uid, opts);
     }
 
-    return strapi.db.query(uid).findMany(query);
+    return service.findMany.call(this, uid, opts);
   },
 });
 
