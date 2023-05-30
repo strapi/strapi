@@ -13,7 +13,6 @@ describe('Entity service triggers webhooks', () => {
       uid: 'api::test.test',
       kind: 'singleType',
       modelName: 'test-model',
-      privateAttributes: [],
       attributes: {
         attr: { type: 'string' },
       },
