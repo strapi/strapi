@@ -19,17 +19,16 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
 }));
 
-
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
 const setup = (props) => render(<ProfilePage {...props} />, {
   wrapper({ children }) {
+    const client = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
     return <QueryClientProvider client={client}>
       <IntlProvider messages={{}} textComponent="span" locale="en">
         <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
@@ -74,7 +73,12 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   });
 
   it('should display the change password section and all its fields', async () => {
-    const { getByRole, getByTestId } =  setup();
+    const { getByRole, getByTestId, queryByTestId } =  setup();
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
+    });
+
     const changePasswordHeading = getByRole('heading', {
       name: 'Change password'
     });
