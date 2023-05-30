@@ -1,9 +1,6 @@
-import * as React from 'react';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { IntlProvider } from 'react-intl';
-import omit from 'lodash/omit';
 import useSettingsForm from '../index';
 
 const toggleNotification = jest.fn();
@@ -18,8 +15,6 @@ jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
   checkFormValidity: () => (null),
 }));
-
-jest.mock('lodash/omit');
 
 const handlers = [
   rest.put('*/providers/options', (req, res, ctx) =>
@@ -51,15 +46,7 @@ const handlers = [
 const server = setupServer(...handlers);
 
 const setup = (...args) =>
-  renderHook(() => useSettingsForm(...args), {
-    wrapper({ children }) {
-      return (
-        <IntlProvider locale="en" messages={{}}>
-          {children}
-        </IntlProvider>
-      );
-    }
-  })
+  renderHook(() => useSettingsForm(...args));
 
 describe('useSettingsForm', () => {
   beforeAll(() => {
@@ -105,13 +92,23 @@ describe('useSettingsForm', () => {
   });
 
   test('submit new providers options with duplications', async () => {
-    const cbSucc = jest.fn();
     const ssoLockedRolesWithDuplications = [ '1', '2', '2', '3' ];
-    omit.mockReturnValueOnce({ 
-      autoRegister: false,
-      defaultRole: '1',
-      ssoLockedRoles: ssoLockedRolesWithDuplications 
-    });
+    server.use(
+      rest.get('*/providers/options', (req, res, ctx) =>
+        res.once(
+          ctx.status(200),
+          ctx.json({
+            data: {
+              autoRegister: false,
+              defaultRole: "1",
+              ssoLockedRoles: ssoLockedRolesWithDuplications
+            }
+          })
+        )
+      )
+    )
+
+    const cbSucc = jest.fn();
 
     const { result, waitFor } = setup('/admin/providers/options', {}, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
