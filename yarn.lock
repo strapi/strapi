@@ -7832,7 +7832,7 @@ __metadata:
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-is: ^17.0.2
-    react-query: 3.24.3
+    react-query: 3.39.3
     react-redux: 8.0.5
     react-refresh: 0.14.0
     react-router-dom: 5.3.4
@@ -8199,7 +8199,7 @@ __metadata:
     react-dom: ^17.0.2
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.3
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     redux: ^4.2.1
@@ -8299,7 +8299,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.3
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     redux: ^4.2.1
@@ -8366,7 +8366,7 @@ __metadata:
     react-dom: ^17.0.2
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.3
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     react-select: 5.7.0
@@ -8409,7 +8409,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-intl: 6.4.1
-    react-query: 3.24.3
+    react-query: 3.39.3
     react-redux: 8.0.5
     react-router-dom: 5.3.4
     styled-components: 5.3.3
@@ -28072,21 +28072,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-query@npm:3.24.3":
-  version: 3.24.3
-  resolution: "react-query@npm:3.24.3"
+"react-query@npm:3.39.3":
+  version: 3.39.3
+  resolution: "react-query@npm:3.39.3"
   dependencies:
     "@babel/runtime": ^7.5.5
     broadcast-channel: ^3.4.1
     match-sorter: ^6.0.2
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
   peerDependenciesMeta:
     react-dom:
       optional: true
     react-native:
       optional: true
-  checksum: 0b86a33b860c092d36e269db1331afbf0df5b720ea746c9093cd8241204a076ff404affb8b4dae08904e3714545d4bd8920babe2a6e5ee9660d94bbcdbeb8072
+  checksum: d2de6a0992dbf039ff2de564de1ae6361f8ac7310159dae42ec16f833b79c05caedced187235c42373ac331cc5f2fe9e2b31b14ae75a815e86d86e30ca9887ad
   languageName: node
   linkType: hard
 

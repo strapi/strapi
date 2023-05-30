@@ -46,7 +46,7 @@
     "react-dnd": "15.1.2",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
-    "react-query": "3.24.3",
+    "react-query": "3.39.3",
     "react-redux": "8.0.5",
     "react-select": "5.7.0",
     "sharp": "0.32.0",
