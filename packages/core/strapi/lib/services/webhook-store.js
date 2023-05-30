@@ -50,18 +50,17 @@ const fromDBObject = (row) => {
   };
 };
 
-const webhookEventValidator = async (allowedEvents, events) =>
-  mapAsync(
-    events,
-    (event) => {
-      if (Array.from(allowedEvents.values()).includes(event)) {
-        return;
-      }
+const webhookEventValidator = async (allowedEvents, events) => {
+  const allowedValues = Array.from(allowedEvents.values());
 
-      throw new ValidationError(`Webhook event ${event} is not supported`);
-    },
-    {}
-  );
+  await mapAsync(events, (event) => {
+    if (allowedValues.includes(event)) {
+      return;
+    }
+
+    throw new ValidationError(`Webhook event ${event} is not supported`);
+  });
+};
 
 const createWebhookStore = ({ db }) => {
   const webhookQueries = db.query('webhook');
