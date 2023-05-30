@@ -4,8 +4,8 @@ import { extname } from 'path';
 import { EOL } from 'os';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
-import type { Schema, Utils } from '@strapi/strapi';
 
+import type { Schema, Utils } from '@strapi/strapi';
 import type {
   IAsset,
   IDestinationProvider,
@@ -23,11 +23,12 @@ import type {
   TransferFilters,
   TransferFilterPreset,
   StreamItem,
+  SchemaDiffHandler,
+  SchemaDiffHandlerContext,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
 import { compareSchemas, validateProvider } from './validation';
-import { filter, map } from '../utils/stream';
 
 import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
@@ -36,6 +37,7 @@ import {
   ErrorDiagnosticSeverity,
 } from './diagnostic';
 import { DataTransferError } from '../errors';
+import * as utils from '../utils';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -103,6 +105,16 @@ class TransferEngine<
 
   diagnostics: IDiagnosticReporter;
 
+  #handlers: {
+    schemaDiff: SchemaDiffHandler[];
+  } = {
+    schemaDiff: [],
+  };
+
+  onSchemaDiff(handler: SchemaDiffHandler) {
+    this.#handlers?.schemaDiff?.push(handler);
+  }
+
   // Save the currently open stream so that we can access it at any time
   #currentStream?: Writable;
 
@@ -122,8 +134,8 @@ class TransferEngine<
   /**
    * Report a fatal error and throw it
    */
-  #panic(error: Error) {
-    this.#reportError(error, 'fatal');
+  panic(error: Error) {
+    this.reportError(error, 'fatal');
 
     throw error;
   }
@@ -131,7 +143,7 @@ class TransferEngine<
   /**
    * Report an error diagnostic
    */
-  #reportError(error: Error, severity: ErrorDiagnosticSeverity) {
+  reportError(error: Error, severity: ErrorDiagnosticSeverity) {
     this.diagnostics.report({
       kind: 'error',
       details: {
@@ -147,7 +159,7 @@ class TransferEngine<
   /**
    * Report a warning diagnostic
    */
-  #reportWarning(message: string, origin?: string) {
+  reportWarning(message: string, origin?: string) {
     this.diagnostics.report({
       kind: 'warning',
       details: { createdAt: new Date(), message, origin },
@@ -157,7 +169,7 @@ class TransferEngine<
   /**
    * Report an info diagnostic
    */
-  #reportInfo(message: string, params?: unknown) {
+  reportInfo(message: string, params?: unknown) {
     this.diagnostics.report({
       kind: 'info',
       details: { createdAt: new Date(), message, params },
@@ -183,11 +195,11 @@ class TransferEngine<
       const chainTransforms: StreamItem[] = [];
       for (const transform of transforms) {
         if ('filter' in transform) {
-          chainTransforms.push(filter(transform.filter));
+          chainTransforms.push(utils.stream.filter(transform.filter));
         }
 
         if ('map' in transform) {
-          chainTransforms.push(map(transform.map));
+          chainTransforms.push(utils.stream.map(transform.map));
         }
       }
       if (chainTransforms.length) {
@@ -397,11 +409,11 @@ class TransferEngine<
               const path = diff.path.join('.');
 
               if (diff.kind === 'added') {
-                return `${path} exists in destination schema but not in source schema`;
+                return `${path} exists in destination schema but not in source schema and the data will not be transferred.`;
               }
 
               if (diff.kind === 'deleted') {
-                return `${path} exists in source schema but not in destination schema`;
+                return `${path} exists in source schema but not in destination schema and the data will not be transferred.`;
               }
 
               if (diff.kind === 'modified') {
@@ -496,7 +508,7 @@ class TransferEngine<
 
       results.forEach((state) => {
         if (state.status === 'rejected') {
-          this.#reportWarning(state.reason, `transfer(${stage})`);
+          this.reportWarning(state.reason, `transfer(${stage})`);
         }
       });
 
@@ -523,7 +535,7 @@ class TransferEngine<
         .on('error', (e) => {
           updateEndTime();
           this.#emitStageUpdate('error', stage);
-          this.#reportError(e, 'error');
+          this.reportError(e, 'error');
           destination.destroy(e);
           reject(e);
         })
@@ -539,7 +551,11 @@ class TransferEngine<
 
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
-    this.#currentStream?.destroy(new TransferEngineError('fatal', 'Transfer aborted.'));
+    const err = new TransferEngineError('fatal', 'Transfer aborted.');
+    if (!this.#currentStream) {
+      throw err;
+    }
+    this.#currentStream.destroy(err);
   }
 
   async init(): Promise<void> {
@@ -566,7 +582,7 @@ class TransferEngine<
 
     results.forEach((result) => {
       if (result.status === 'rejected') {
-        this.#panic(result.reason);
+        this.panic(result.reason);
       }
     });
   }
@@ -582,7 +598,7 @@ class TransferEngine<
 
     results.forEach((result) => {
       if (result.status === 'rejected') {
-        this.#panic(result.reason);
+        this.panic(result.reason);
       }
     });
   }
@@ -626,15 +642,47 @@ class TransferEngine<
       );
     }
 
-    const { sourceSchema, destinationSchema } = await this.#getSchemas();
+    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
 
     try {
-      if (sourceSchema && destinationSchema) {
-        this.#assertSchemasMatching(sourceSchema, destinationSchema);
+      if (sourceSchemas && destinationSchemas) {
+        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        this.#panic(error);
+      // if this is a schema matching error, allow handlers to resolve it
+      if (error instanceof TransferEngineValidationError && error.details?.details?.diffs) {
+        const schemaDiffs = error.details?.details?.diffs as Record<string, Diff[]>;
+
+        const context: SchemaDiffHandlerContext = {
+          ignoredDiffs: {},
+          diffs: schemaDiffs,
+          source: this.sourceProvider,
+          destination: this.destinationProvider,
+        };
+
+        // if we don't have any handlers, throw the original error
+        if (isEmpty(this.#handlers.schemaDiff)) {
+          throw error;
+        }
+
+        await utils.middleware.runMiddleware<SchemaDiffHandlerContext>(
+          context,
+          this.#handlers.schemaDiff
+        );
+
+        // if there are any remaining diffs that weren't ignored
+        const unresolvedDiffs = utils.json.diff(context.diffs, context.ignoredDiffs);
+        if (unresolvedDiffs.length) {
+          this.panic(
+            new TransferEngineValidationError('Unresolved differences in schema', {
+              check: 'schema.changes',
+              unresolvedDiffs,
+            })
+          );
+        }
+
+        return;
       }
 
       throw error;
@@ -675,7 +723,7 @@ class TransferEngine<
         e instanceof Error &&
         (!lastDiagnostic || lastDiagnostic.kind !== 'error' || lastDiagnostic.details.error !== e)
       ) {
-        this.#reportError(e, (e as DataTransferError).severity || 'fatal');
+        this.reportError(e, (e as DataTransferError).severity || 'fatal');
       }
 
       // Rollback the destination provider if an exception is thrown during the transfer
@@ -699,9 +747,9 @@ class TransferEngine<
       } catch (error) {
         // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
-          this.#panic(error);
+          this.panic(error);
         } else {
-          this.#panic(
+          this.panic(
             new Error(`Unknwon error when executing "beforeTransfer" on the ${origin} provider`)
           );
         }
