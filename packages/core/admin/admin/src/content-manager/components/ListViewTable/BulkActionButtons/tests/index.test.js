@@ -2,15 +2,20 @@ import React from 'react';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Table } from '@strapi/helper-plugin';
+import { Table, useTableContext } from '@strapi/helper-plugin';
+
 import { IntlProvider } from 'react-intl';
-import BulkActionsBar from '../index';
+import BulkActionButtons from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: () => ({
     trackUsage: jest.fn(),
   }),
+  useTableContext: jest.fn(() => ({
+    selectedEntries: [1, 2],
+    setSelectedEntries: jest.fn(),
+  })),
 }));
 
 jest.mock('react-redux', () => ({
@@ -33,9 +38,9 @@ const setup = (props) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Table.Provider>
-          <BulkActionsBar {...props} />
-        </Table.Provider>
+        <Table.Root>
+          <BulkActionButtons {...props} />
+        </Table.Root>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -91,9 +96,9 @@ describe('BulkActionsBar', () => {
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([1, 2]);
   });
 
-  it.only('should not show publish button if selected entries are all published', () => {
+  it('should not show publish button if selected entries are all published', async () => {
+    useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
     setup({ showPublish: true });
-    user.click(screen.getByRole('checkbox', { name: 'Select 1' }));
 
     waitFor(() => {
       expect(screen.getByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
@@ -102,6 +107,7 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
+    useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
     setup({ showPublish: true });
 
     waitFor(() => {

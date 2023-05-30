@@ -191,7 +191,7 @@ const Row = ({ children, rowId }) => {
 
 Row.propTypes = {
   children: PropTypes.node.isRequired,
-  rowId: PropTypes.object.isRequired,
+  rowId: PropTypes.number.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
