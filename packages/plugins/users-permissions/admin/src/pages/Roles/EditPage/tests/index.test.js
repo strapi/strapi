@@ -113,7 +113,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border-radius: 4px;
         width: 100%;
         height: 6.5625rem;
-        line-height: 4;
+        line-height: 1.43;
       }
 
       .c33 {
@@ -122,7 +122,7 @@ describe('Admin | containers | RoleEditPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c36 {
+      .c35 {
         padding-top: 24px;
         padding-right: 32px;
         padding-bottom: 24px;
@@ -172,7 +172,7 @@ describe('Admin | containers | RoleEditPage', () => {
         width: 0.6875rem;
       }
 
-      .c56 {
+      .c55 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -676,12 +676,12 @@ describe('Admin | containers | RoleEditPage', () => {
         max-width: 100%;
       }
 
-      .c35 {
+      .c36 {
         grid-column: span 7;
         max-width: 100%;
       }
 
-      .c55 {
+      .c56 {
         grid-column: span 5;
         max-width: 100%;
       }
@@ -822,25 +822,25 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c35 {
+        .c36 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c35 {
+        .c36 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c55 {
+        .c56 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c55 {
+        .c56 {
           grid-column: span;
         }
       }
@@ -960,35 +960,31 @@ describe('Admin | containers | RoleEditPage', () => {
                     <div
                       class="c23"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c5 c24"
                           >
-                            <div
-                              class="c5 c24"
+                            <label
+                              class="c9 c25 c26"
+                              for="1"
                             >
-                              <label
-                                class="c9 c25 c26"
-                                for="1"
-                              >
-                                Name
-                              </label>
-                              <div
-                                class="c5 c6 c27"
-                              >
-                                <input
-                                  aria-disabled="false"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c28"
-                                  id="1"
-                                  name="name"
-                                  value="Authenticated"
-                                />
-                              </div>
+                              Name
+                            </label>
+                            <div
+                              class="c5 c6 c27"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c28"
+                                id="1"
+                                name="name"
+                                value="Authenticated"
+                              />
                             </div>
                           </div>
                         </div>
@@ -1001,30 +997,26 @@ describe('Admin | containers | RoleEditPage', () => {
                         class=""
                       >
                         <div
-                          class=""
+                          class="c5 c24"
                         >
-                          <div
-                            class="c5 c24"
+                          <label
+                            class="c9 c25 c26"
+                            for="description"
                           >
-                            <label
-                              class="c9 c25 c26"
-                              for="description"
+                            Description
+                          </label>
+                          <div
+                            class="c29 c30"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c31 c32"
+                              font-size="2"
+                              id="description"
                             >
-                              Description
-                            </label>
-                            <div
-                              class="c29 c30"
-                            >
-                              <textarea
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c31 c32"
-                                font-size="2"
-                                id="description"
-                              >
-                                Default role given to authenticated user.
-                              </textarea>
-                            </div>
+                              Default role given to authenticated user.
+                            </textarea>
                           </div>
                         </div>
                       </div>
@@ -1036,93 +1028,89 @@ describe('Admin | containers | RoleEditPage', () => {
                 class="c33 c34"
               >
                 <div
-                  class="c35"
+                  class="c35 c36"
                 >
                   <div
-                    class="c36"
+                    class="c5 c37"
                   >
                     <div
-                      class="c5 c37"
+                      class="c5 c38"
+                    >
+                      <h2
+                        class="c9 c21"
+                      >
+                        Permissions
+                      </h2>
+                      <p
+                        class="c9 c39"
+                      >
+                        Only actions bound by a route are listed below.
+                      </p>
+                    </div>
+                    <div
+                      class="c5 c24"
                     >
                       <div
-                        class="c5 c38"
-                      >
-                        <h2
-                          class="c9 c21"
-                        >
-                          Permissions
-                        </h2>
-                        <p
-                          class="c9 c39"
-                        >
-                          Only actions bound by a route are listed below.
-                        </p>
-                      </div>
-                      <div
-                        class="c5 c24"
+                        aria-disabled="false"
+                        class="c40 c41"
+                        data-strapi-expanded="false"
                       >
                         <div
-                          aria-disabled="false"
-                          class="c40 c41"
-                          data-strapi-expanded="false"
+                          class="c5 c42 c6 c43"
                         >
                           <div
-                            class="c5 c42 c6 c43"
+                            class="c5 c44 c45"
                           >
-                            <div
-                              class="c5 c44 c45"
+                            <button
+                              aria-controls="accordion-content-2"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-labelledby="accordion-label-2"
+                              class="c5 c46 c12 c47 c48"
+                              data-strapi-accordion-toggle="true"
+                              type="button"
                             >
-                              <button
-                                aria-controls="accordion-content-2"
-                                aria-disabled="false"
-                                aria-expanded="false"
-                                aria-labelledby="accordion-label-2"
-                                class="c5 c46 c12 c47 c48"
-                                data-strapi-accordion-toggle="true"
-                                type="button"
+                              <span
+                                class="c9 c49"
                               >
                                 <span
-                                  class="c9 c49"
+                                  class="c9 c50"
+                                  id="accordion-label-2"
                                 >
-                                  <span
-                                    class="c9 c50"
-                                    id="accordion-label-2"
-                                  >
-                                    Address
-                                  </span>
-                                  <p
-                                    class="c9 c39"
-                                    id="accordion-desc-2"
-                                  >
-                                    Define all allowed actions for the api::address plugin.
-                                  </p>
+                                  Address
                                 </span>
-                              </button>
-                              <div
-                                class="c5 c45"
+                                <p
+                                  class="c9 c39"
+                                  id="accordion-desc-2"
+                                >
+                                  Define all allowed actions for the api::address plugin.
+                                </p>
+                              </span>
+                            </button>
+                            <div
+                              class="c5 c45"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="c5 c51 c52"
+                                data-strapi-dropdown="true"
                               >
-                                <span
-                                  aria-hidden="true"
-                                  class="c5 c51 c52"
-                                  data-strapi-dropdown="true"
+                                <svg
+                                  class="c53 c54"
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <svg
-                                    class="c53 c54"
-                                    fill="none"
-                                    height="1rem"
-                                    viewBox="0 0 14 8"
-                                    width="1rem"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                      fill="#32324D"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </span>
-                              </div>
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1131,26 +1119,22 @@ describe('Admin | containers | RoleEditPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c55"
+                  class="c55 c56"
+                  style="min-height: 100%;"
                 >
                   <div
-                    class="c56"
-                    style="min-height: 100%;"
+                    class="c5 c38"
                   >
-                    <div
-                      class="c5 c38"
+                    <h3
+                      class="c9 c21"
                     >
-                      <h3
-                        class="c9 c21"
-                      >
-                        Advanced settings
-                      </h3>
-                      <p
-                        class="c9 c39"
-                      >
-                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
-                      </p>
-                    </div>
+                      Advanced settings
+                    </h3>
+                    <p
+                      class="c9 c39"
+                    >
+                      Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                    </p>
                   </div>
                 </div>
               </div>
