@@ -122,8 +122,11 @@ const ListViewTable = ({
           {/* Visually hidden header for actions */}
           <Table.HeaderActionsCell />
         </Table.Head>
+        {/* Loading content */}
         <Table.LoadingBody />
+        {/* Empty content */}
         <Table.EmptyBody contentType={contentTypeName} aciton={action} />
+        {/* Content */}
         <Body.Root
           onConfirmDelete={onConfirmDelete}
           isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
