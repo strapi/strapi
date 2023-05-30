@@ -211,7 +211,10 @@ const Notification = ({
         ) : undefined
       }
       onClose={handleClose}
-      closeLabel="Close"
+      closeLabel={formatMessage({
+        id: 'global.close',
+        defaultMessage: 'Close',
+      })}
       title={alertTitle}
       variant={variant}
     >
