@@ -1,8 +1,6 @@
-import * as React from 'react';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { IntlProvider } from 'react-intl';
 import useSettingsForm from '../index';
 
 const toggleNotification = jest.fn();
@@ -17,8 +15,6 @@ jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
   checkFormValidity: () => (null),
 }));
-
-// jest.mock('lodash/omit');
 
 const handlers = [
   rest.put('*/providers/options', (req, res, ctx) =>
@@ -50,15 +46,7 @@ const handlers = [
 const server = setupServer(...handlers);
 
 const setup = (...args) =>
-  renderHook(() => useSettingsForm(...args), {
-    wrapper({ children }) {
-      return (
-        <IntlProvider locale="en" messages={{}}>
-          {children}
-        </IntlProvider>
-      );
-    }
-  })
+  renderHook(() => useSettingsForm(...args));
 
 describe('useSettingsForm', () => {
   beforeAll(() => {
