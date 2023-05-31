@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import axios from 'axios';
 
 import { useAppInfo } from '../AppInfo';
@@ -16,7 +16,7 @@ jest.mock('axios', () => ({
 
 const setup = (props) =>
   renderHook(() => useTracking(), {
-    wrapper: ({ children }) => (
+    wrapper: ({ children, ...restProps }) => (
       <TrackingProvider
         value={{
           uuid: '1',
@@ -24,12 +24,13 @@ const setup = (props) =>
             nestedProperty: true,
           },
           deviceId: 'someTestDeviceId',
-          ...props,
+          ...restProps,
         }}
       >
         {children}
       </TrackingProvider>
     ),
+    initialProps: props,
   });
 
 describe('useTracking', () => {

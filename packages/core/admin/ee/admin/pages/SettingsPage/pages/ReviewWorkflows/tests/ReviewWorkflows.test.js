@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Provider } from 'react-redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
@@ -15,11 +15,9 @@ import configureStore from '../../../../../../../admin/src/core/store/configureS
 import ReviewWorkflowsPage from '..';
 import { reducer } from '../reducer';
 
-const notificationMock = jest.fn();
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => notificationMock),
+  useNotification: jest.fn().mockReturnValue(jest.fn()),
   // eslint-disable-next-line react/prop-types
   CheckPagePermissions({ children }) {
     return children;
@@ -64,25 +62,27 @@ const client = new QueryClient({
   },
 });
 
+const ComponentFixture = () => {
+  const store = configureStore([], [reducer]);
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <QueryClientProvider client={client}>
+        <Provider store={store}>
+          <IntlProvider locale="en" messages={{}}>
+            <ThemeProvider theme={lightTheme}>
+              <ReviewWorkflowsPage />
+            </ThemeProvider>
+          </IntlProvider>
+        </Provider>
+      </QueryClientProvider>
+    </DndProvider>
+  );
+};
+
 const setup = (props) => {
   return {
-    ...render(<ReviewWorkflowsPage {...props} />, {
-      wrapper({ children }) {
-        const store = configureStore([], [reducer]);
-
-        return (
-          <DndProvider backend={HTML5Backend}>
-            <QueryClientProvider client={client}>
-              <Provider store={store}>
-                <IntlProvider locale="en" messages={{}}>
-                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-                </IntlProvider>
-              </Provider>
-            </QueryClientProvider>
-          </DndProvider>
-        );
-      },
-    }),
+    ...render(<ComponentFixture {...props} />),
     user: userEvent.setup(),
   };
 };
@@ -150,6 +150,7 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Successful Stage update', async () => {
+    const toggleNotification = useNotification();
     const { user, getByRole, queryByText } = setup();
 
     await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
@@ -160,19 +161,18 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
       })
     );
 
-    await user.type(getByRole('textbox', { name: /stage name/i }), 'stage-2');
+    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
+      target: { value: 'stage-2' },
+    });
 
-    /**
-     * @note using `user.click` does not fire the form onSubmit event.
-     */
-    fireEvent.click(getByRole('button', { name: /save/i }));
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /save/i }));
+    });
 
-    await waitFor(() =>
-      expect(notificationMock).toBeCalledWith({
-        type: 'success',
-        message: expect.any(Object),
-      })
-    );
+    expect(toggleNotification).toBeCalledWith({
+      type: 'success',
+      message: expect.any(Object),
+    });
   });
 
   test('Stage update with error', async () => {
@@ -188,16 +188,18 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
       })
     );
 
-    await user.type(getByRole('textbox', { name: /stage name/i }), 'stage-2');
+    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
+      target: { value: 'stage-2' },
+    });
 
-    fireEvent.click(getByRole('button', { name: /save/i }));
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /save/i }));
+    });
 
-    await waitFor(() =>
-      expect(toggleNotification).toBeCalledWith({
-        type: 'warning',
-        message: expect.any(String),
-      })
-    );
+    expect(toggleNotification).toBeCalledWith({
+      type: 'warning',
+      message: expect.any(String),
+    });
   });
 
   test('Does not show a delete button if only stage is left', async () => {
@@ -225,10 +227,10 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     await user.click(deleteButtons[0]);
 
-    fireEvent.click(getByRole('button', { name: /save/i }));
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /save/i }));
+    });
 
-    await waitFor(() =>
-      expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument()
-    );
+    expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument();
   });
 });

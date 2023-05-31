@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, act, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -37,7 +37,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  act(() => history.push(`/settings/${pluginId}/roles/1`));
+  history.push(`/settings/${pluginId}/roles/1`);
 
   return renderResult;
 }
@@ -99,7 +99,24 @@ describe('Admin | containers | RoleEditPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c32 {
+      .c29 {
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+      }
+
+      .c31 {
+        font-size: 0.875rem;
+        background: #ffffff;
+        color: #32324d;
+        padding: 16px;
+        border-radius: 4px;
+        width: 100%;
+        height: 6.5625rem;
+        line-height: 1.43;
+      }
+
+      .c33 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
@@ -112,11 +129,11 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-left: 32px;
       }
 
-      .c39 {
+      .c40 {
         border-radius: 4px;
       }
 
-      .c41 {
+      .c42 {
         background: #f6f6f9;
         padding-top: 24px;
         padding-right: 24px;
@@ -124,14 +141,14 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-left: 24px;
       }
 
-      .c43 {
+      .c44 {
         max-width: 100%;
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c45 {
+      .c46 {
         background: transparent;
         min-width: 0;
         -webkit-flex: 1;
@@ -139,7 +156,7 @@ describe('Admin | containers | RoleEditPage', () => {
         flex: 1;
       }
 
-      .c50 {
+      .c51 {
         background: #dcdce4;
         border-radius: 50%;
         width: 2rem;
@@ -150,7 +167,7 @@ describe('Admin | containers | RoleEditPage', () => {
         cursor: pointer;
       }
 
-      .c52 {
+      .c53 {
         color: #666687;
         width: 0.6875rem;
       }
@@ -174,6 +191,7 @@ describe('Admin | containers | RoleEditPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
+        line-height: 0;
         color: #ffffff;
       }
 
@@ -197,19 +215,19 @@ describe('Admin | containers | RoleEditPage', () => {
         color: #32324d;
       }
 
-      .c38 {
+      .c39 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c48 {
+      .c49 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #4945ff;
       }
 
-      .c49 {
+      .c50 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
@@ -312,7 +330,7 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 4px;
       }
 
-      .c36 {
+      .c37 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -327,7 +345,7 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 24px;
       }
 
-      .c37 {
+      .c38 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -342,7 +360,7 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 8px;
       }
 
-      .c44 {
+      .c45 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -357,7 +375,7 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 12px;
       }
 
-      .c51 {
+      .c52 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -378,45 +396,45 @@ describe('Admin | containers | RoleEditPage', () => {
         justify-content: center;
       }
 
-      .c40 {
+      .c41 {
         border: 1px solid #f6f6f9;
       }
 
-      .c40:hover:not([aria-disabled='true']) {
+      .c41:hover:not([aria-disabled='true']) {
         border: 1px solid #4945ff;
       }
 
-      .c40:hover:not([aria-disabled='true']) .c9 {
+      .c41:hover:not([aria-disabled='true']) .c9 {
         color: #4945ff;
       }
 
-      .c40:hover:not([aria-disabled='true']) > .c5 {
+      .c41:hover:not([aria-disabled='true']) > .c5 {
         background: #f0f0ff;
       }
 
-      .c40:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+      .c41:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
         background: #d9d8ff;
       }
 
-      .c46 {
+      .c47 {
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c46[aria-disabled='true'] {
+      .c47[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c46[aria-disabled='true'] svg path {
+      .c47[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c46 svg path {
+      .c47 svg path {
         fill: #4945ff;
       }
 
-      .c46:after {
+      .c47:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -431,11 +449,11 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid transparent;
       }
 
-      .c46:focus-visible {
+      .c47:focus-visible {
         outline: none;
       }
 
-      .c46:focus-visible:after {
+      .c47:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -446,33 +464,33 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c53 path {
+      .c54 path {
         fill: #666687;
       }
 
-      .c47 {
+      .c48 {
         text-align: left;
       }
 
-      .c47 > span {
+      .c48 > span {
         max-width: 100%;
       }
 
-      .c47 svg {
+      .c48 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c47 svg path {
+      .c48 svg path {
         fill: #8e8ea9;
       }
 
-      .c42 {
+      .c43 {
         min-height: 5.5rem;
         border-radius: 4px;
       }
 
-      .c42:hover svg path {
+      .c43:hover svg path {
         fill: #4945ff;
       }
 
@@ -648,7 +666,7 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 16px;
       }
 
-      .c33 {
+      .c34 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
       }
@@ -658,12 +676,12 @@ describe('Admin | containers | RoleEditPage', () => {
         max-width: 100%;
       }
 
-      .c34 {
+      .c36 {
         grid-column: span 7;
         max-width: 100%;
       }
 
-      .c54 {
+      .c56 {
         grid-column: span 5;
         max-width: 100%;
       }
@@ -673,13 +691,6 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       .c30 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        background: #ffffff;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -693,76 +704,41 @@ describe('Admin | containers | RoleEditPage', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c31 {
-        display: block;
-        width: 100%;
-        font-weight: 400;
-        font-size: 0.875rem;
+      .c32 {
         border: none;
-        color: #32324d;
         resize: none;
-        background: inherit;
       }
 
-      .c31::-webkit-input-placeholder {
+      .c32::-webkit-input-placeholder {
+        color: #8e8ea9;
+        font-size: 0.875rem;
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c31::-moz-placeholder {
+      .c32::-moz-placeholder {
+        color: #8e8ea9;
+        font-size: 0.875rem;
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c31:-ms-input-placeholder {
+      .c32:-ms-input-placeholder {
+        color: #8e8ea9;
+        font-size: 0.875rem;
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c31::placeholder {
+      .c32::placeholder {
+        color: #8e8ea9;
+        font-size: 0.875rem;
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c31:focus-within {
+      .c32:focus-within {
         outline: none;
-      }
-
-      .c29 textarea {
-        height: 5rem;
-        line-height: 1.25rem;
-      }
-
-      .c29 textarea::-webkit-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c29 textarea::-moz-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c29 textarea:-ms-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c29 textarea::placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
       }
 
       .c4 {
@@ -846,25 +822,25 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c34 {
+        .c36 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c34 {
+        .c36 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c54 {
+        .c56 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c54 {
+        .c56 {
           grid-column: span;
         }
       }
@@ -984,35 +960,31 @@ describe('Admin | containers | RoleEditPage', () => {
                     <div
                       class="c23"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c5 c24"
                           >
-                            <div
-                              class="c5 c24"
+                            <label
+                              class="c9 c25 c26"
+                              for="1"
                             >
-                              <label
-                                class="c9 c25 c26"
-                                for=":r0:"
-                              >
-                                Name
-                              </label>
-                              <div
-                                class="c5 c6 c27"
-                              >
-                                <input
-                                  aria-disabled="false"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c28"
-                                  id=":r0:"
-                                  name="name"
-                                  value="Authenticated"
-                                />
-                              </div>
+                              Name
+                            </label>
+                            <div
+                              class="c5 c6 c27"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c28"
+                                id="1"
+                                name="name"
+                                value="Authenticated"
+                              />
                             </div>
                           </div>
                         </div>
@@ -1025,38 +997,26 @@ describe('Admin | containers | RoleEditPage', () => {
                         class=""
                       >
                         <div
-                          class="c29"
+                          class="c5 c24"
                         >
-                          <div
-                            class=""
+                          <label
+                            class="c9 c25 c26"
+                            for="description"
                           >
-                            <div
-                              class="c5 c24"
+                            Description
+                          </label>
+                          <div
+                            class="c29 c30"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c31 c32"
+                              font-size="2"
+                              id="description"
                             >
-                              <div
-                                class="c5 c8"
-                              >
-                                <label
-                                  class="c9 c25 c26"
-                                  for=":r2:"
-                                >
-                                  Description
-                                </label>
-                              </div>
-                              <div
-                                class="c30"
-                              >
-                                <textarea
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c31"
-                                  id=":r2:"
-                                  name="description"
-                                >
-                                  Default role given to authenticated user.
-                                </textarea>
-                              </div>
-                            </div>
+                              Default role given to authenticated user.
+                            </textarea>
                           </div>
                         </div>
                       </div>
@@ -1065,96 +1025,92 @@ describe('Admin | containers | RoleEditPage', () => {
                 </div>
               </div>
               <div
-                class="c32 c33"
+                class="c33 c34"
               >
                 <div
-                  class="c34"
+                  class="c35 c36"
                 >
                   <div
-                    class="c35"
+                    class="c5 c37"
                   >
                     <div
-                      class="c5 c36"
+                      class="c5 c38"
+                    >
+                      <h2
+                        class="c9 c21"
+                      >
+                        Permissions
+                      </h2>
+                      <p
+                        class="c9 c39"
+                      >
+                        Only actions bound by a route are listed below.
+                      </p>
+                    </div>
+                    <div
+                      class="c5 c24"
                     >
                       <div
-                        class="c5 c37"
-                      >
-                        <h2
-                          class="c9 c21"
-                        >
-                          Permissions
-                        </h2>
-                        <p
-                          class="c9 c38"
-                        >
-                          Only actions bound by a route are listed below.
-                        </p>
-                      </div>
-                      <div
-                        class="c5 c24"
+                        aria-disabled="false"
+                        class="c40 c41"
+                        data-strapi-expanded="false"
                       >
                         <div
-                          aria-disabled="false"
-                          class="c39 c40"
-                          data-strapi-expanded="false"
+                          class="c5 c42 c6 c43"
                         >
                           <div
-                            class="c5 c41 c6 c42"
+                            class="c5 c44 c45"
                           >
-                            <div
-                              class="c5 c43 c44"
+                            <button
+                              aria-controls="accordion-content-2"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-labelledby="accordion-label-2"
+                              class="c5 c46 c12 c47 c48"
+                              data-strapi-accordion-toggle="true"
+                              type="button"
                             >
-                              <button
-                                aria-controls="accordion-content-:r4:"
-                                aria-disabled="false"
-                                aria-expanded="false"
-                                aria-labelledby="accordion-label-:r4:"
-                                class="c5 c45 c12 c46 c47"
-                                data-strapi-accordion-toggle="true"
-                                type="button"
+                              <span
+                                class="c9 c49"
                               >
                                 <span
-                                  class="c9 c48"
+                                  class="c9 c50"
+                                  id="accordion-label-2"
                                 >
-                                  <span
-                                    class="c9 c49"
-                                    id="accordion-label-:r4:"
-                                  >
-                                    Address
-                                  </span>
-                                  <p
-                                    class="c9 c38"
-                                    id="accordion-desc-:r4:"
-                                  >
-                                    Define all allowed actions for the api::address plugin.
-                                  </p>
+                                  Address
                                 </span>
-                              </button>
-                              <div
-                                class="c5 c44"
+                                <p
+                                  class="c9 c39"
+                                  id="accordion-desc-2"
+                                >
+                                  Define all allowed actions for the api::address plugin.
+                                </p>
+                              </span>
+                            </button>
+                            <div
+                              class="c5 c45"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="c5 c51 c52"
+                                data-strapi-dropdown="true"
                               >
-                                <span
-                                  aria-hidden="true"
-                                  class="c5 c50 c51"
-                                  data-strapi-dropdown="true"
+                                <svg
+                                  class="c53 c54"
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <svg
-                                    class="c52 c53"
-                                    fill="none"
-                                    height="1rem"
-                                    viewBox="0 0 14 8"
-                                    width="1rem"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                      fill="#32324D"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </span>
-                              </div>
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1163,26 +1119,22 @@ describe('Admin | containers | RoleEditPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c54"
+                  class="c55 c56"
+                  style="min-height: 100%;"
                 >
                   <div
-                    class="c55"
-                    style="min-height: 100%;"
+                    class="c5 c38"
                   >
-                    <div
-                      class="c5 c37"
+                    <h3
+                      class="c9 c21"
                     >
-                      <h3
-                        class="c9 c21"
-                      >
-                        Advanced settings
-                      </h3>
-                      <p
-                        class="c9 c38"
-                      >
-                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
-                      </p>
-                    </div>
+                      Advanced settings
+                    </h3>
+                    <p
+                      class="c9 c39"
+                    >
+                      Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1226,7 +1178,7 @@ describe('Admin | containers | RoleEditPage', () => {
   it('can toggle the permissions accordions and actions', async () => {
     const user = userEvent.setup();
     // Create app and wait for loading
-    const { getByLabelText, getByRole, queryByText, getByTestId, getByText, getAllByRole } =
+    const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
       makeAndRenderApp();
     const loader = getByTestId('loader');
     await waitForElementToBeRemoved(loader);
@@ -1243,16 +1195,13 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(getByText('POST')).toBeInTheDocument();
     expect(getByText('/addresses')).toBeInTheDocument();
 
-    expect(getByRole('checkbox', { name: 'Select all' }).checked).toBe(false);
-
-    await user.click(getByRole('checkbox', { name: 'Select all' }));
-
-    getAllByRole('checkbox')
-      .slice(1, -1)
-      .forEach((actionCheckbox) => {
-        console.log(actionCheckbox.checked);
-        expect(actionCheckbox.checked).toBe(true);
-      });
+    // Select all actions with the "select all" checkbox
+    const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
+    expect(selectAllCheckbox.checked).toBe(false);
+    fireEvent.click(selectAllCheckbox);
+    actionCheckboxes.forEach((actionCheckbox) => {
+      expect(actionCheckbox.checked).toBe(true);
+    });
 
     // Close the collapse
     await user.click(collapse);

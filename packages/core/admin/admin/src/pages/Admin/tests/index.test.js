@@ -95,7 +95,7 @@ describe('<Admin />', () => {
 
     await waitFor(() => expect(screen.getByText('HomePage')).toBeInTheDocument());
 
-    // act(() => history.push('/plugins/documentation'));
+    // history.push('/plugins/documentation');
 
     // await waitFor(() => expect(screen.getByText('DOCUMENTATION PLUGIN')).toBeInTheDocument());
   });

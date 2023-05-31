@@ -19,6 +19,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 }
 
 .c6 {
+  display: grid;
   position: relative;
 }
 
@@ -29,7 +30,11 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   width: 100%;
 }
 
-.c10 {
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   height: 124px;
 }
 
@@ -89,7 +94,21 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c11 {
+.c9 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c12 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -142,12 +161,11 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 }
 
 .c7 {
-  display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
 }
 
-.c9 {
+.c10 {
   grid-area: slides;
 }
 
@@ -160,13 +178,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
 }
 
 .c18 {
@@ -189,13 +200,13 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
       >
         <label
           class="c3 c4"
-          for=":r0:"
+          for="1"
         >
           default
         </label>
         <div
           class=""
-          id=":r0:"
+          id="1"
         >
           <div
             class="c5"
@@ -204,16 +215,18 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
               aria-label="default"
               aria-roledescription="carousel"
               class="c6 c7"
+              display="grid"
             >
               <div
                 aria-live="polite"
-                class="c8 c9"
+                class="c8 c9 c10"
                 overflow="hidden"
               >
                 <div
                   aria-label="upload.mediaLibraryInput.slideCount"
                   aria-roledescription="slide"
-                  class="c10 c11 c12"
+                  class="c11 c12"
+                  display="flex"
                   role="group"
                 >
                   <button
