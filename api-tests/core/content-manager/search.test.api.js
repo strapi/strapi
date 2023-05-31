@@ -20,6 +20,9 @@ const bedModel = {
   singularName: 'bed',
   pluralName: 'beds',
   kind: 'collectionType',
+  options: {
+    reviewWorkflows: false,
+  },
   attributes: {
     name: {
       type: 'string',
