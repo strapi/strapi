@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import { auth, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import { getRequestUrl } from '../../../../admin/src/utils';
 
-const AuthResponse = () => {
+export const AuthResponse = () => {
   const {
     params: { authResponse },
   } = useRouteMatch('/auth/login/:authResponse');

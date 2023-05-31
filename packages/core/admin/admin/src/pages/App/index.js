@@ -17,20 +17,29 @@ import {
 } from '@strapi/helper-plugin';
 import { SkipToContent } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
-import routes from './utils/routes';
 import { useConfigurations } from '../../hooks';
+import { useEnterprise } from '../../hooks/useEnterprise';
+import { ROUTES_CE } from './constants';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
 );
 
 function App() {
+  const routes = useEnterprise(
+    ROUTES_CE,
+    async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
+    {
+      defaultValue: [],
+    }
+  );
   const toggleNotification = useNotification();
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
@@ -45,7 +54,7 @@ function App() {
     return makeUniqueRoutes(
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
-  }, []);
+  }, [routes]);
 
   const [telemetryProperties, setTelemetryProperties] = useState(null);
 
