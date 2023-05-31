@@ -4,10 +4,8 @@ import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
 
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { CardAction } from '@strapi/design-system/Card';
-import { Stack } from '@strapi/design-system/Stack';
-import Folder from '@strapi/icons/Folder';
+import { Box, CardAction, Flex } from '@strapi/design-system';
+import { Folder } from '@strapi/icons';
 
 import { FolderCardContext } from '../contexts/FolderCard';
 import useId from '../hooks/useId';
@@ -63,7 +61,7 @@ export const FolderCard = forwardRef(
             aria-hidden
           />
 
-          <Stack
+          <Flex
             hasRadius
             borderStyle="solid"
             borderWidth="1px"
@@ -71,8 +69,7 @@ export const FolderCard = forwardRef(
             background="neutral0"
             shadow="tableShadow"
             padding={3}
-            spacing={2}
-            horizontal
+            gap={2}
             cursor="pointer"
           >
             {startAction}
@@ -94,7 +91,7 @@ export const FolderCard = forwardRef(
             <CardActionDisplay>
               <CardAction right={4}>{cardActions}</CardAction>
             </CardActionDisplay>
-          </Stack>
+          </Flex>
         </Card>
       </FolderCardContext.Provider>
     );

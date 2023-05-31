@@ -322,7 +322,7 @@ module.exports = (db) => {
     };
   };
 
-  const diffSchemas = (srcSchema, destSchema) => {
+  const diffSchemas = async (srcSchema, destSchema) => {
     const addedTables = [];
     const updatedTables = [];
     const unchangedTables = [];
@@ -344,12 +344,36 @@ module.exports = (db) => {
       }
     }
 
+    const parsePersistedTable = (persistedTable) => {
+      if (typeof persistedTable === 'string') {
+        return persistedTable;
+      }
+      return persistedTable.name;
+    };
+
+    const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
+      ? (await strapi.store.get({
+          type: 'core',
+          key: 'persisted_tables',
+        })) ?? []
+      : [];
+
+    const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
+
     for (const srcTable of srcSchema.tables) {
-      if (
-        !helpers.hasTable(destSchema, srcTable.name) &&
-        !RESERVED_TABLE_NAMES.includes(srcTable.name)
-      ) {
-        removedTables.push(srcTable);
+      if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
+        const dependencies = persistedTables
+          .filter((table) => {
+            const dependsOn = table?.dependsOn;
+            if (_.isNil(dependsOn)) return;
+            // FIXME: The array parse should not be necessary
+            return _.toArray(dependsOn).some((table) => table.name === srcTable.name);
+          })
+          .map((dependsOnTable) => {
+            return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
+          });
+
+        removedTables.push(srcTable, ...dependencies);
       }
     }
 

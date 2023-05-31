@@ -4,12 +4,11 @@ import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
-import InputJSON from '../InputJSON';
 import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 
@@ -250,7 +249,6 @@ function Inputs({
   }
 
   const customInputs = {
-    json: InputJSON,
     uid: InputUID,
     media: fields.media,
     wysiwyg: Wysiwyg,

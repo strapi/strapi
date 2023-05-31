@@ -2,11 +2,10 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { bindActionCreators, compose } from 'redux';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import get from 'lodash/get';
 import { stringify } from 'qs';
 import axios from 'axios';
 
@@ -14,26 +13,28 @@ import {
   NoPermissions,
   CheckPermissions,
   SearchURLQuery,
+  useFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBACProvider,
   useTracking,
   Link,
+  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
 
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Button } from '@strapi/design-system/Button';
+import {
+  IconButton,
+  Main,
+  Box,
+  ActionLayout,
+  ContentLayout,
+  HeaderLayout,
+  useNotifyAT,
+  Button,
+} from '@strapi/design-system';
 
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Plus from '@strapi/icons/Plus';
-import Cog from '@strapi/icons/Cog';
-
-import { axiosInstance } from '../../../core/utils';
+import { ArrowLeft, Plus, Cog } from '@strapi/icons';
 
 import DynamicTable from '../../components/DynamicTable';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -72,12 +73,11 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
+  const { contentType } = layout;
   const {
-    contentType: {
-      metadatas,
-      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-    },
-  } = layout;
+    metadatas,
+    settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+  } = contentType;
 
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -85,6 +85,7 @@ function ListView({
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
 
   useFocusWhenNavigate();
 
@@ -95,8 +96,9 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const contentType = layout.contentType;
-  const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
+  const fetchClient = useFetchClient();
+  const { post, del } = fetchClient;
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -109,10 +111,9 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
-
         const {
           data: { results, pagination: paginationResult },
-        } = await axiosInstance.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, opts);
 
         notifyStatus(
           formatMessage(
@@ -132,7 +133,7 @@ function ListView({
           return;
         }
 
-        const resStatus = get(err, 'response.status', null);
+        const resStatus = err?.response?.status ?? null;
 
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
@@ -147,20 +148,19 @@ function ListView({
           return;
         }
 
-        console.error(err);
         toggleNotification({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification]
+    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
   );
 
   const handleConfirmDeleteAllData = useCallback(
     async (ids) => {
       try {
-        await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
         });
 
@@ -170,17 +170,17 @@ function ListView({
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: formatAPIError(err),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification]
+    [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
-        await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
         fetchData(requestUrl);
@@ -190,19 +190,13 @@ function ListView({
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message: formatAPIError(err),
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage]
+    [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
   useEffect(() => {
@@ -221,7 +215,6 @@ function ListView({
 
       source.cancel('Operation canceled by the user.');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const defaultHeaderLayoutTitle = formatMessage({

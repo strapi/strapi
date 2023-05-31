@@ -1,7 +1,7 @@
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { difference } from '@strapi/helper-plugin';
-import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system/Tabs';
+import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';

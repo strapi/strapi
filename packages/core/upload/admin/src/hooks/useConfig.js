@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useTracking, useFetchClient } from '@strapi/helper-plugin';
 
-import { axiosInstance } from '../utils';
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}/configuration`;
@@ -11,11 +10,12 @@ export const useConfig = () => {
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
+  const { get, put } = useFetchClient();
 
   const config = useQuery(
     queryKey,
     async () => {
-      const res = await axiosInstance.get(endpoint);
+      const res = await get(endpoint);
 
       return res.data.data;
     },
@@ -26,10 +26,14 @@ export const useConfig = () => {
           message: { id: 'notification.error' },
         });
       },
+      /**
+       * We're cementing that we always expect an object to be returned.
+       */
+      select: (data) => (!data ? {} : data),
     }
   );
 
-  const putMutation = useMutation(async (body) => axiosInstance.put(endpoint, body), {
+  const putMutation = useMutation(async (body) => put(endpoint, body), {
     onSuccess() {
       trackUsage('didEditMediaLibraryConfig');
       queryClient.refetchQueries(queryKey, { active: true });

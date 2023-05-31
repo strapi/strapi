@@ -1,6 +1,6 @@
 'use strict';
 
-const { assignDefaultLocale, syncLocalizations, syncNonLocalizedAttributes } =
+const { assignDefaultLocaleToEntries, syncLocalizations, syncNonLocalizedAttributes } =
   require('../localizations')();
 
 const locales = require('../locales')();
@@ -65,20 +65,25 @@ const setGlobalStrapi = () => {
         },
       },
     },
+    db: {
+      dialect: {
+        client: 'sqlite',
+      },
+    },
   };
 };
 
 describe('localizations service', () => {
-  describe('assignDefaultLocale', () => {
-    test('Does not change the input if locale is already defined', async () => {
+  describe('assignDefaultLocaleToEntries', () => {
+    test('Does not change the input if locale is already defined (single entry)', async () => {
       setGlobalStrapi();
       const input = { locale: 'myLocale' };
-      await assignDefaultLocale(input);
+      await assignDefaultLocaleToEntries(input);
 
       expect(input).toStrictEqual({ locale: 'myLocale' });
     });
 
-    test('Use default locale to set the locale on the input data', async () => {
+    test('Use default locale to set the locale on the input data (single entry)', async () => {
       setGlobalStrapi();
 
       const getDefaultLocaleMock = jest.fn(() => 'defaultLocale');
@@ -86,9 +91,31 @@ describe('localizations service', () => {
       global.strapi.plugins.i18n.services.locales.getDefaultLocale = getDefaultLocaleMock;
 
       const input = {};
-      await assignDefaultLocale(input);
+      await assignDefaultLocaleToEntries(input);
 
       expect(input).toStrictEqual({ locale: 'defaultLocale' });
+      expect(getDefaultLocaleMock).toHaveBeenCalled();
+    });
+
+    test('Does not change the input if locale is already defined (multiple entries)', async () => {
+      setGlobalStrapi();
+      const input = [{ locale: 'myLocale' }, { locale: 'mylocalebis' }];
+      await assignDefaultLocaleToEntries(input);
+
+      expect(input).toStrictEqual([{ locale: 'myLocale' }, { locale: 'mylocalebis' }]);
+    });
+
+    test('Use default locale to set the locale on the entries missing it (multiple entries)', async () => {
+      setGlobalStrapi();
+
+      const getDefaultLocaleMock = jest.fn(() => 'defaultLocale');
+
+      global.strapi.plugins.i18n.services.locales.getDefaultLocale = getDefaultLocaleMock;
+
+      const input = [{ locale: 'mylocale' }, {}];
+      await assignDefaultLocaleToEntries(input);
+
+      expect(input).toStrictEqual([{ locale: 'mylocale' }, { locale: 'defaultLocale' }]);
       expect(getDefaultLocaleMock).toHaveBeenCalled();
     });
   });

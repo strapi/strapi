@@ -55,10 +55,8 @@
   "plugin.description.short": "此外掛程式允許您從管理面板和 API 建立、讀取、更新不同語言的內容。",
   "plugin.name": "國際化",
   "plugin.schema.i18n.ensure-unique-localization": "唯一欄位必須本地化",
-  "plugin.schema.i18n.localized.description": "讓您的內容有多種地區設定",
   "plugin.schema.i18n.localized.description-content-type": "讓您的內容有多種地區設定",
   "plugin.schema.i18n.localized.description-field": "此欄位在各個地區設定中可以有不同數值",
-  "plugin.schema.i18n.localized.label": "為此內容型別啟用本地化",
   "plugin.schema.i18n.localized.label-content-type": "為此內容型別啟用本地化",
   "plugin.schema.i18n.localized.label-field": "為此欄位啟用本地化"
 }

@@ -1,0 +1,283 @@
+---
+title: Using Permissions
+tags:
+  - permissions
+  - RBAC
+  - useRBAC
+---
+
+Currently, there are a few different ways to use permissions in the application. This document will explain the different ways, how to use them and suggestions
+on when is best to use them. It's advised that you've read [how they work](/core/permissions/how-they-work) and [fetching permissions](/core/permissions/frontend/fetching-permissions)
+before reading this document so you have the full context.
+
+## useRBACProvider
+
+In [fetching permissions](/core/permissions/frontend/fetching-permissions) we briefly mentioned the `useRBACProvider` hook which is used to access the [context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
+that contains the permissions. This is very low level and does nothing but give you access to _every_ permission for the user and a way to refetch them from the API.
+
+### Usage
+
+Because this hook is so low level, it's recommended you use one of the other hooks or the wrapper components instead which use this inside and expose the methods
+of this hook.
+
+```jsx
+import { useRBACProvider } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const { allPermissions, refetchPermissions } = useRBACProvider();
+
+  const handleClick = async () => {
+    await refetchPermissions();
+  };
+
+  const canSeeMyComponent = allPermissions.some(
+    // this string will declared in the backend.
+    (permission) => permission.action === 'plugins::my-plugin.my-component.read'
+  );
+
+  return (
+    <div>
+      <button type="button" onClick={handleClick}>
+        Refetch permissions
+      </button>
+      {canSeeMyComponent ? <p>aha you found me</p> : null}
+    </div>
+  );
+};
+```
+
+### Typescript
+
+```ts
+interface Permission {
+  id: number;
+  action: string;
+  subject: string | null;
+  // This can be custom defined to the needs of the plugin/application
+  properties: Record<string, any>;
+  conditions: Array<string>;
+}
+
+type UseRBACProvider = () => {
+  allPermissions: Permission[];
+  // This is the `refetch` method from react-query's useQueries hook
+  refetchPermissions: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
+};
+```
+
+## Components
+
+There are two different wrapper components available to use. They are very similar but have different use cases. They are both
+available in the `@strapi/helper-plugin`.
+
+### CheckPagePermissions
+
+Used to apply RBAC to a view/page of the application. If the user does not have the permissions to access this page they will
+be redirect to the homepage.
+
+#### Usage
+
+```tsx
+import { CheckPagePermissions } from '@strapi/helper-plugin';
+
+const permissions = [{ action: 'plugins::my-plugin.access', subject: null }];
+
+const MyPage = () => {
+  return (
+    <CheckPagePermissions permissions={permissions}>
+      <h1>aha you found me</h1>
+    </CheckPagePermissions>
+  );
+};
+```
+
+#### Typescript
+
+```ts
+interface Permission {
+  id: number;
+  action: string;
+  subject: string | null;
+  // This can be custom defined to the needs of the plugin/application
+  properties: Record<string, any>;
+  conditions: Array<string>;
+}
+
+type CheckPagePermissionsProps = {
+  permissions: Permission[];
+  children: React.ReactNode;
+};
+
+type CheckPagePermissions = (props: CheckPagePermissionsProps) => JSX.Element;
+```
+
+### CheckPermissions
+
+Used to apply RBAC to a specific component. If the user does not have the permissions to access this component it will not be rendered.
+This would be useful in the content-manager when you're trying to hide fields based on permissions.
+
+#### Usage
+
+```tsx
+import { CheckPermissions } from '@strapi/helper-plugin';
+
+const permissions = [{ action: 'plugins::my-plugin.access', subject: null }];
+
+const MyComponent = () => {
+  return (
+    <CheckPermissions permissions={permissions}>
+      <h1>aha you found me</h1>
+    </CheckPermissions>
+  );
+};
+```
+
+#### Typescript
+
+```ts
+interface Permission {
+  id: number;
+  action: string;
+  subject: string | null;
+  // This can be custom defined to the needs of the plugin/application
+  properties: Record<string, any>;
+  conditions: Array<string>;
+}
+
+type CheckPermissionsProps = {
+  permissions: Permission[];
+  children: React.ReactNode;
+};
+
+type CheckPermissions = (props: CheckPermissionsProps) => JSX.Element;
+```
+
+## useRBAC
+
+Is a wrapper around the [`hasPermissions`](#haspermissions) function which calls the `/admin/permissions/check` endpoint with a provided
+list of permissions to assertain if a user can do a specific action. This hook is typically used with plugin permissions alongside the
+global permissions object generated from the [`useRBACProvider`](#userbacprovider) hook which can either be passed or will be accessed internally.
+
+Because it's fetching, we also provide a `isLoading` state which can be used to show a loading state while the permissions are being fetched.
+If the hook is unmouted before the fetch request completes, the request will be cancelled via an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController).
+
+### Usage
+
+In the below example, we're checking if a user can "create" a post from the content-manager list view. If they can't, the button is `disabled`.
+
+```tsx
+import { useRBAC } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const { isLoading, allowedActions } = useRBAC({
+    create: [
+      {
+        action: 'plugin::content-manager.explorer.create',
+        subject: 'api::post.post',
+      },
+    ],
+  });
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  return <button disabled={!allowedActions.canCreate}>create entry</button>;
+};
+```
+
+### Typescript
+
+```ts
+interface Permission {
+  id: number;
+  action: string;
+  subject: string | null;
+  // This can be custom defined to the needs of the plugin/application
+  properties: Record<string, any>;
+  conditions: Array<string>;
+}
+
+interface PluginPermissions {
+  create: Permission[];
+  read: Permission[];
+  update: Permission[];
+  delete: Permission[];
+  publish: Permission[];
+}
+
+type UseRBAC = (
+  pluginPermissions: PluginPermissions,
+  permissions?: Permission[]
+) => {
+  isLoading: boolean;
+  setIsLoading: () => void;
+  allowedActions: {
+    canCreate: boolean;
+    canRead: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+    canPublish: boolean;
+  };
+};
+```
+
+---
+
+## useSyncRBAC
+
+:::note
+This hook is only available in the content-manager.
+:::
+
+This hook because it's only used in the content-manager, has specific redux dependencies on the injected reducers for the content-manager.
+It sets / resets and provides the permissions based on the specific view of the content-manager you're in e.g. the listView (known as the explorer)
+in conjunction with the content-type you're viewing e.g. `api::post.post`.
+
+### Usage
+
+In the below example, we use the hook to only get the permissions for the `api::post.post` content-type.
+
+:::caution
+While it is required to pass three arguments, only the middle argument is currently used.
+:::
+
+```tsx
+import { useQueryParams } from '@strapi/helper-plugin';
+import { useSyncRBAC } from 'path/to/conent-manager/hooks';
+
+const MyComponent = () => {
+  const [{ query }] = useQueryParams();
+
+  const permissions = useSyncRBAC(query, 'api::post.post', 'explorer');
+
+  return !permissions ? (
+    <p>Loading...</p>
+  ) : (
+    <CheckPagePermissions permissions={permissions}>
+      <h1>aha you found me</h1>
+    </CheckPagePermissions>
+  );
+};
+```
+
+### Typescript
+
+```ts
+interface Permission {
+  id: number;
+  action: string;
+  subject: string | null;
+  // This can be custom defined to the needs of the plugin/application
+  properties: Record<string, any>;
+  conditions: Array<string>;
+}
+
+type UseSyncRBAC = (
+  query: Record<string, string> | undefined,
+  contentTypeUID: string,
+  viewId?: string
+) => Permission[];
+```

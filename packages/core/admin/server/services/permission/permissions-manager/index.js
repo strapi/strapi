@@ -34,11 +34,15 @@ module.exports = ({ ability, action, model }) => ({
 
   addPermissionsQueryTo(query = {}, action) {
     const newQuery = cloneDeep(query);
-    const permissionQuery = this.getQuery(action);
+    const permissionQuery = this.getQuery(action) ?? undefined;
 
-    newQuery.filters = isPlainObject(query.filters)
-      ? { $and: [query.filters, permissionQuery] }
-      : permissionQuery;
+    if (isPlainObject(query.filters)) {
+      newQuery.filters = permissionQuery
+        ? { $and: [query.filters, permissionQuery] }
+        : query.filters;
+    } else {
+      newQuery.filters = permissionQuery;
+    }
 
     return newQuery;
   },

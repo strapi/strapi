@@ -123,14 +123,14 @@ module.exports = ({ strapi }) => {
         // ...uniqueAttributes,
       },
 
-      async resolve(parent, args) {
+      async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType });
 
         const { delete: deleteResolver } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const value = await deleteResolver(parent, args);
+        const value = await deleteResolver(parent, args, ctx);
 
         return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },

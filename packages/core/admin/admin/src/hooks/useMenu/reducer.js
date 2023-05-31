@@ -1,8 +1,6 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import Cog from '@strapi/icons/Cog';
-import Puzzle from '@strapi/icons/Puzzle';
-import ShoppingCart from '@strapi/icons/ShoppingCart';
+import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import adminPermissions from '../../permissions';
 
 const initialState = {

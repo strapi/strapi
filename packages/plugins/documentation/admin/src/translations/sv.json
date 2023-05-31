@@ -4,11 +4,11 @@
   "components.Row.regenerate": "Återskapa",
   "containers.HomePage.Block.title": "Versioner",
   "containers.HomePage.Button.update": "Uppdatera",
-  "containers.HomePage.PluginHeader.title": "Dokumentation - Inställningar",
+  "containers.HomePage.PluginHeader.title": "Dokumentation — Inställningar",
   "containers.HomePage.PopUpWarning.confirm": "Jag förstår",
   "containers.HomePage.PopUpWarning.message": "Är du säker på att du vill ta bort denna versionen?",
   "containers.HomePage.copied": "Token har kopierats till urklipp",
-  "containers.HomePage.form.jwtToken": "Hämta din jwt-token",
+  "containers.HomePage.form.jwtToken": "Hämta din JWT-token",
   "containers.HomePage.form.jwtToken.description": "Kopiera denna token och använd den i swagger för att göra förfrågningar",
   "containers.HomePage.form.password": "Lösenord",
   "containers.HomePage.form.password.inputDescription": "Ställ in lösenordet som ska behövas för att komma åt dokumentationen",
@@ -33,7 +33,7 @@
   "pages.SettingsPage.header.save": "Spara",
   "pages.SettingsPage.toggle.hint": "Gör dokumentationensrutten privat",
   "pages.SettingsPage.toggle.label": "Begränsad åtkomst",
-  "plugin.description.long": "Skapa ett OpenAPI-dokument och visualisera din API med SWAGGER UI.",
-  "plugin.description.short": "Skapa ett OpenAPI-dokument och visualisera din API med SWAGGER UI.",
+  "plugin.description.long": "Skapa ett OpenAPI-dokument och visualisera din API med Swagger UI.",
+  "plugin.description.short": "Skapa ett OpenAPI-dokument och visualisera din API med Swagger UI.",
   "plugin.name": "Dokumentation"
 }

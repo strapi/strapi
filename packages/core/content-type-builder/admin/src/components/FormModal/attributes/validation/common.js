@@ -1,6 +1,7 @@
 import * as yup from 'yup';
-import { get, toNumber } from 'lodash';
+import toNumber from 'lodash/toNumber';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+
 import getTrad from '../../../../utils/getTrad';
 
 const NAME_REGEX = /^[A-Za-z][_0-9A-Za-z]*$/;
@@ -20,7 +21,7 @@ const alreadyUsedAttributeNames = (usedNames) => {
 };
 
 const getUsedContentTypeAttributeNames = (ctShema, isEdition, attributeNameToEdit) => {
-  const attributes = get(ctShema, ['schema', 'attributes'], {});
+  const attributes = ctShema?.schema?.attributes ?? {};
 
   return Object.keys(attributes).filter((attr) => {
     if (isEdition) {

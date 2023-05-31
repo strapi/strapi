@@ -1,5 +1,10 @@
 import type { Strapi as StrapiInterface } from './types/core';
-import type { CollectionTypeSchema, SingleTypeSchema, ComponentSchema, ContentTypeSchema } from './types/core/schemas';
+import type {
+  CollectionTypeSchema,
+  SingleTypeSchema,
+  ComponentSchema,
+  ContentTypeSchema,
+} from './types/core/schemas';
 import type { KeysBy } from './types/utils';
 
 declare global {
@@ -7,7 +12,7 @@ declare global {
     /**
      * Map of UID / schemas used as a schemas database for other types.
      * It must be extended by the user application or plugins.
-     * 
+     *
      * @example
      * ```ts
      * declare global {
@@ -39,12 +44,12 @@ declare global {
     /**
      * Literal union type of every component registered in Strapi.Schemas
      */
-     type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;
+    type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;
 
-     /**
-      * Global shorthand to access the `StrapiInterface` type
-      */
-     type Strapi = StrapiInterface;
+    /**
+     * Global shorthand to access the `StrapiInterface` type
+     */
+    type Strapi = StrapiInterface;
   }
 
   /**

@@ -8,10 +8,16 @@ const registerModelsHooks = () => {
     .map((contentType) => contentType.uid);
 
   if (i18nModelUIDs.length > 0) {
+    // TODO V5 : to remove ?
+    // Should this code exist? It's putting business logic on the query engine
+    // whereas it should maybe stay on the entity service layer ?
     strapi.db.lifecycles.subscribe({
       models: i18nModelUIDs,
       async beforeCreate(event) {
-        await getService('localizations').assignDefaultLocale(event.params.data);
+        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
+      },
+      async beforeCreateMany(event) {
+        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
       },
     });
   }

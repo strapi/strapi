@@ -4,19 +4,18 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 
 import { usePersistentState } from '@strapi/helper-plugin';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { IconButton } from '@strapi/design-system/IconButton';
-import PencilIcon from '@strapi/icons/Pencil';
-import PlusIcon from '@strapi/icons/Plus';
-import Grid from '@strapi/icons/Grid';
-import List from '@strapi/icons/List';
+import {
+  Button,
+  Flex,
+  Box,
+  Divider,
+  BaseCheckbox,
+  GridItem,
+  Typography,
+  IconButton,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil, Plus, Grid, List } from '@strapi/icons';
 
 import {
   FolderDefinition,
@@ -40,17 +39,6 @@ import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
-
-const StartBlockActions = styled(Flex)`
-  & > * + * {
-    margin-left: ${({ theme }) => theme.spaces[2]};
-  }
-  margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
-`;
-
-const EndBlockActions = styled(StartBlockActions)`
-  flex-shrink: 0;
-`;
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
@@ -132,7 +120,7 @@ export const BrowseStep = ({
         <Box paddingBottom={4}>
           <Flex justifyContent="space-between" alignItems="flex-start">
             {(assetCount > 0 || folderCount > 0 || isFiltering) && (
-              <StartBlockActions wrap="wrap">
+              <Flex gap={2} wrap="wrap">
                 {multiple && isGridView && (
                   <Flex
                     paddingLeft={2}
@@ -158,11 +146,11 @@ export const BrowseStep = ({
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
                 />
-              </StartBlockActions>
+              </Flex>
             )}
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <EndBlockActions pullRight>
+              <Flex marginLeft="auto" shrink={0}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     icon={isGridView ? <List /> : <Grid />}
@@ -181,7 +169,7 @@ export const BrowseStep = ({
                   />
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-              </EndBlockActions>
+              </Flex>
             )}
           </Flex>
         </Box>
@@ -211,7 +199,7 @@ export const BrowseStep = ({
               canCreate &&
               !isFiltering &&
               !isSearching && (
-                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                <Button variant="secondary" startIcon={<Plus />} onClick={onAddAsset}>
                   {formatMessage({
                     id: getTrad('header.actions.add-assets'),
                     defaultMessage: 'Add new assets',
@@ -286,7 +274,7 @@ export const BrowseStep = ({
                       cardActions={
                         onEditFolder && (
                           <IconButton
-                            icon={<PencilIcon />}
+                            icon={<Pencil />}
                             aria-label={formatMessage({
                               id: getTrad('list.folder.edit'),
                               defaultMessage: 'Edit folder',

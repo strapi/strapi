@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex } from '@strapi/design-system/Flex';
-import FileIcon from '@strapi/icons/File';
-import FilePdfIcon from '@strapi/icons/FilePdf';
+import { Flex } from '@strapi/design-system';
+import { File, FilePdf } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 
 import { AssetCardBase } from './AssetCardBase';
@@ -28,7 +27,7 @@ export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
         justifyContent="center"
       >
         <IconWrapper>
-          {extension === 'pdf' ? <FilePdfIcon aria-label={name} /> : <FileIcon aria-label={name} />}
+          {extension === 'pdf' ? <FilePdf aria-label={name} /> : <File aria-label={name} />}
         </IconWrapper>
       </CardAsset>
     </AssetCardBase>

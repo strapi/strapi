@@ -2,4 +2,4 @@ import './global';
 
 export * from './types';
 
-export default function(opts): Strapi;
+export default function (opts): Strapi;

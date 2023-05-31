@@ -11,11 +11,10 @@ import {
   CardTitle,
   CardSubtitle,
   CardBadge,
-} from '@strapi/design-system/Card';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
+  Typography,
+  Box,
+  Flex,
+} from '@strapi/design-system';
 
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
@@ -86,7 +85,7 @@ export const UploadingAssetCard = ({
   };
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
@@ -126,7 +125,7 @@ export const UploadingAssetCard = ({
           )}
         </Typography>
       ) : undefined}
-    </Stack>
+    </Flex>
   );
 };
 

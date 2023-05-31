@@ -2,13 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Icon } from '@strapi/design-system/Icon';
-import { Divider } from '@strapi/design-system/Divider';
-import { Stack } from '@strapi/design-system/Stack';
-import Github from '@strapi/icons/Github';
-import Download from '@strapi/icons/Download';
-import Star from '@strapi/icons/Star';
+import { Typography, Icon, Divider, Flex } from '@strapi/design-system';
+import { Github, Download, Star } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 
 const VerticalDivider = styled(Divider)`
@@ -20,7 +15,7 @@ const PackageStats = ({ githubStars, npmDownloads, npmPackageType }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack horizontal spacing={1}>
+    <Flex gap={1}>
       {!!githubStars && (
         <>
           <Icon as={Github} height={pxToRem(12)} width={pxToRem(12)} aria-hidden />
@@ -61,7 +56,7 @@ const PackageStats = ({ githubStars, npmDownloads, npmPackageType }) => {
           {npmDownloads}
         </Typography>
       </p>
-    </Stack>
+    </Flex>
   );
 };
 

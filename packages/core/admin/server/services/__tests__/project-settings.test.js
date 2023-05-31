@@ -58,6 +58,15 @@ global.strapi = {
         size: 123,
         provider: 'local',
       },
+      authLogo: {
+        name: 'name',
+        url: 'file/url',
+        width: 100,
+        height: 100,
+        ext: 'png',
+        size: 123,
+        provider: 'local',
+      },
     }),
     set: storeSet,
   }),
@@ -75,10 +84,30 @@ describe('Project setting', () => {
           name: 'file.png',
           type: 'image/png',
         },
+        authLogo: {
+          size: 123,
+          path: '/tmp/filename_123',
+          name: 'file.png',
+          type: 'image/png',
+        },
       };
 
       const expectedOutput = {
         menuLogo: {
+          name: 'filename.png',
+          alternativeText: null,
+          caption: null,
+          hash: 'filename_123',
+          ext: '.png',
+          mime: 'image/png',
+          provider: 'local',
+          size: 123,
+          stream: null,
+          width: 100,
+          height: 100,
+          tmpPath: '/tmp/filename_123',
+        },
+        authLogo: {
           name: 'filename.png',
           alternativeText: null,
           caption: null,
@@ -121,6 +150,14 @@ describe('Project setting', () => {
           ext: 'png',
           size: 123,
         },
+        authLogo: {
+          name: 'name',
+          url: 'file/url',
+          width: 100,
+          height: 100,
+          ext: 'png',
+          size: 123,
+        },
       };
 
       expect(projectSettings).toStrictEqual(expectedOutput);
@@ -131,10 +168,17 @@ describe('Project setting', () => {
     it('Does not delete when there was no previous file', async () => {
       const previousSettings = {
         menuLogo: null,
+        authLogo: null,
       };
 
       const newSettings = {
         menuLogo: {
+          size: 24085,
+          name: 'file.png',
+          type: 'image/png',
+          url: 'file/url',
+        },
+        authLogo: {
           size: 24085,
           name: 'file.png',
           type: 'image/png',
@@ -150,6 +194,13 @@ describe('Project setting', () => {
     it('Does not delete when there is no new file uploaded', async () => {
       const previousSettings = {
         menuLogo: {
+          size: 24085,
+          name: 'file.png',
+          type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
+        },
+        authLogo: {
           size: 24085,
           name: 'file.png',
           type: 'image/png',
@@ -174,18 +225,33 @@ describe('Project setting', () => {
           provider: 'local',
           url: 'file/url',
         },
+        authLogo: {
+          size: 24085,
+          name: 'file.png',
+          type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
+        },
       };
 
-      const newSettings = { menuLogo: null };
+      const newSettings = { menuLogo: null, authLogo: null };
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(providerDelete).toBeCalledTimes(1);
+      expect(providerDelete).toBeCalledTimes(2);
     });
 
     it('Deletes when new files are uploaded', async () => {
       const previousSettings = {
         menuLogo: {
+          size: 24085,
+          name: 'file.png',
+          type: 'image/png',
+          provider: 'local',
+          url: 'file/url',
+          hash: '123',
+        },
+        authLogo: {
           size: 24085,
           name: 'file.png',
           type: 'image/png',
@@ -200,11 +266,15 @@ describe('Project setting', () => {
           ...previousSettings.menuLogo,
           hash: '456',
         },
+        authLogo: {
+          ...previousSettings.menuLogo,
+          hash: '456',
+        },
       };
 
       await deleteOldFiles({ previousSettings, newSettings });
 
-      expect(providerDelete).toBeCalledTimes(1);
+      expect(providerDelete).toBeCalledTimes(2);
     });
   });
 
@@ -213,6 +283,20 @@ describe('Project setting', () => {
       const body = {};
       const files = {
         menuLogo: {
+          name: 'filename.png',
+          alternativeText: null,
+          caption: null,
+          hash: 'filename_123',
+          ext: '.png',
+          mime: 'image/png',
+          size: 123,
+          stream: null,
+          width: 100,
+          height: 100,
+          tmpPath: '/tmp/filename_123',
+          url: '/uploads/filename_123.png',
+        },
+        authLogo: {
           name: 'filename.png',
           alternativeText: null,
           caption: null,
@@ -238,6 +322,15 @@ describe('Project setting', () => {
           ext: '.png',
           size: 123,
         },
+        authLogo: {
+          name: 'filename.png',
+          hash: 'filename_123',
+          url: '/uploads/filename_123.png',
+          width: 100,
+          height: 100,
+          ext: '.png',
+          size: 123,
+        },
       };
 
       await updateProjectSettings({ ...body, ...files });
@@ -250,11 +343,12 @@ describe('Project setting', () => {
     });
 
     it('Updates the project settings (delete)', async () => {
-      const body = { menuLogo: '' };
+      const body = { menuLogo: '', authLogo: '' };
       const files = {};
 
       const expectedOutput = {
         menuLogo: null,
+        authLogo: null,
       };
 
       await updateProjectSettings({ ...body, ...files });
@@ -272,6 +366,15 @@ describe('Project setting', () => {
 
       const expectedOutput = {
         menuLogo: {
+          name: 'name',
+          url: 'file/url',
+          width: 100,
+          height: 100,
+          ext: 'png',
+          size: 123,
+          provider: 'local',
+        },
+        authLogo: {
           name: 'name',
           url: 'file/url',
           width: 100,

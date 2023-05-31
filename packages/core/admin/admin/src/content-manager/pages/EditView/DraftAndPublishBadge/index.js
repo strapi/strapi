@@ -2,15 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import Bullet from '@strapi/icons/Dot';
+import { Box, Flex, Typography } from '@strapi/design-system';
+import { Dot } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, select } from './utils';
 
-const CustomBullet = styled(Bullet)`
+const CustomBullet = styled(Dot)`
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   * {

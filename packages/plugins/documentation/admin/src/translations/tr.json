@@ -4,7 +4,7 @@
   "components.Row.regenerate": "Yeniden üret",
   "containers.HomePage.Block.title": "Versiyonlar",
   "containers.HomePage.Button.update": "Güncelle",
-  "containers.HomePage.PluginHeader.title": "Dokümantasyon - Ayarlar",
+  "containers.HomePage.PluginHeader.title": "Dokümantasyon — Ayarlar",
   "containers.HomePage.PopUpWarning.confirm": "Anladım",
   "containers.HomePage.PopUpWarning.message": "Bu versiyonu silmek istediğinden emin misin?",
   "containers.HomePage.copied": "Token panoya kopyalandı",
@@ -33,7 +33,7 @@
   "pages.SettingsPage.header.save": "Kaydet",
   "pages.SettingsPage.toggle.hint": "Dokümantasyon uç noktasını gizli yap",
   "pages.SettingsPage.toggle.label": "Kısıtlı Erişim",
-  "plugin.description.long": "Bir OpenAPI Dokümanı oluştur ve SWAGGER UI ile APIni görselleştir.",
-  "plugin.description.short": "Bir OpenAPI Dokümanı oluştur ve SWAGGER UI ile APIni görselleştir.",
+  "plugin.description.long": "Bir OpenAPI Dokümanı oluştur ve Swagger UI ile APIni görselleştir.",
+  "plugin.description.short": "Bir OpenAPI Dokümanı oluştur ve Swagger UI ile APIni görselleştir.",
   "plugin.name": "Dokümantasyon"
 }

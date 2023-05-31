@@ -4,12 +4,8 @@ import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 import { useLocation } from 'react-router-dom';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Link } from '@strapi/design-system/Link';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Plus from '@strapi/icons/Plus';
+import { HeaderLayout, Button, Flex, Link } from '@strapi/design-system';
+import { ArrowLeft, Plus } from '@strapi/icons';
 import { getTrad } from '../../../utils';
 import { FolderDefinition, BreadcrumbsDefinition } from '../../../constants';
 import { Breadcrumbs } from '../../../components/Breadcrumbs';
@@ -64,7 +60,7 @@ export const Header = ({
       }
       primaryAction={
         canCreate && (
-          <Stack horizontal spacing={2}>
+          <Flex gap={2}>
             <Button startIcon={<Plus />} variant="secondary" onClick={onToggleEditFolderDialog}>
               {formatMessage({
                 id: getTrad('header.actions.add-folder'),
@@ -78,7 +74,7 @@ export const Header = ({
                 defaultMessage: 'Add new assets',
               })}
             </Button>
-          </Stack>
+          </Flex>
         )
       }
     />

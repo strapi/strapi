@@ -1,0 +1,66 @@
+<!--- GenericInput.stories.mdx --->
+
+import { useState } from 'react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
+import { Grid, GridItem } from '@strapi/design-system';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system';
+import { Main } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
+import { Box } from '@strapi/design-system';
+import set from 'lodash/set';
+import GenericInput from './index';
+import layout from './storyUtils/layout';
+
+<Meta title="components/GenericInput" component={GenericInput} />
+
+# GenericInput
+
+This is the doc of the `GenericInput` component
+
+## GenericInput
+
+Description...
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [state, setState] = useState({
+        firstname: 'ee',
+        email: '',
+        private: null,
+        isNullable: null,
+        isActiveByDefault: true,
+        isInactiveByDefault: false,
+      });
+      return (
+        <ContentLayout>
+          <Flex direction="column" alignItems="stretch" gap={4}>
+            {layout.map((row, rowIndex) => {
+              return (
+                <Box key={rowIndex}>
+                  <Grid gap={4}>
+                    {row.map((input) => {
+                      return (
+                        <GridItem key={input.name} {...input.size}>
+                          <GenericInput
+                            {...input}
+                            value={state[input.name]}
+                            onChange={({ target: { name, value } }) => {
+                              setState((prev) => {
+                                return { ...prev, [name]: value };
+                              });
+                            }}
+                          />
+                        </GridItem>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+              );
+            })}
+          </Flex>
+        </ContentLayout>
+      );
+    }}
+  </Story>
+</Canvas>

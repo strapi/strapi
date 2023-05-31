@@ -1,6 +1,8 @@
 'use strict';
 
-const { UnauthorizedError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { UnauthorizedError },
+} = require('@strapi/utils');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenStrategy = require('../api-token');
 
@@ -152,6 +154,13 @@ describe('API Token Auth Strategy', () => {
       })),
     };
 
+    const strapiMock = {
+      container,
+      telemetry: {
+        send: jest.fn(),
+      },
+    };
+
     // mock ability.can (since normally it only gets added to credentials in authenticate)
     const ability = {
       can: jest.fn((ability) => {
@@ -161,9 +170,7 @@ describe('API Token Auth Strategy', () => {
     };
 
     test('Verify read-only access', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -174,9 +181,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify full-access access', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -187,9 +192,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify custom access', async () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -200,9 +203,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify with expiration in future', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -218,9 +219,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws with expired token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(() => {
         apiTokenStrategy.verify(
@@ -236,9 +235,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if trying to access a `full-access` action with a read only access key', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -253,9 +250,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if trying to access an action with a custom access key without the permission', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -270,9 +265,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if the credentials are not passed in the auth object', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -284,17 +277,13 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('A `full-access` token is needed when no scope is passed', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(apiTokenStrategy.verify({ credentials: fullAccessApiToken }, {})).toBeUndefined();
     });
 
     test('Throws an error if no scope is passed with a `read-only` token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -306,9 +295,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if no scope is passed with a `custom` token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 

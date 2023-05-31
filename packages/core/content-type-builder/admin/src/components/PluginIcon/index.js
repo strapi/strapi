@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import Layout from '@strapi/icons/Layout';
+import { Layout } from '@strapi/icons';
 
 const PluginIcon = () => <Layout />;
 

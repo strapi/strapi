@@ -1,15 +1,17 @@
 import omit from 'lodash/omit';
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const fetchUser = async () => {
-  const { data } = await axiosInstance.get('/admin/users/me');
+  const { get } = getFetchClient();
+  const { data } = await get('/admin/users/me');
 
   return data.data;
 };
 
 const putUser = async (body) => {
   const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
-  const { data } = await axiosInstance.put('/admin/users/me', dataToSend);
+  const { put } = getFetchClient();
+  const { data } = await put('/admin/users/me', dataToSend);
 
   return { ...data.data, currentTheme: body.currentTheme };
 };

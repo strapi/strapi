@@ -1,0 +1,56 @@
+{
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.test.js",
+      "!{projectRoot}/**/*.test.api.js",
+      "!{projectRoot}/**/__mocks__/**",
+      "!{projectRoot}/**/__tests__/**",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/jest.config.js",
+      "!{projectRoot}/jest.config.front.js",
+      "!{projectRoot}/tsconfig.eslint.json",
+      "!{projectRoot}/.eslintignore",
+      "!{projectRoot}/.eslintrc.js"
+    ]
+  },
+  "cli": {
+    "packageManager": "yarn"
+  },
+  "targetDefaults": {
+    "build": {
+      "inputs": ["production", "^production"],
+      "dependsOn": ["^build"]
+    },
+    "build:ts": {
+      "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
+      "dependsOn": ["^build:ts"]
+    },
+    "test:unit": {
+      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"]
+    },
+    "test:front": {
+      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"]
+    },
+    "lint": {
+      "inputs": [
+        "{projectRoot}/**/*.js",
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/.eslintrc.js",
+        "{projectRoot}/.eslintignore",
+        "{projectRoot}/tsconfig.eslint.json",
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+      ]
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
+      }
+    }
+  }
+}

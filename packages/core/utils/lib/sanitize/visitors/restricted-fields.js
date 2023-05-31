@@ -4,7 +4,7 @@ const { isArray } = require('lodash/fp');
 
 module.exports =
   (restrictedFields = null) =>
-  ({ key, path }, { remove }) => {
+  ({ key, path: { attribute: path } }, { remove }) => {
     // Remove all fields
     if (restrictedFields === null) {
       remove(key);

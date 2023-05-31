@@ -6,42 +6,52 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-
+  Grid,
+  GridItem,
+  Breadcrumbs,
+  Crumb,
+  Box,
+  Button,
+  Flex,
+  Typography,
+} from '@strapi/design-system';
 import { Formik } from 'formik';
-import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
-import { useQueryClient, useMutation } from 'react-query';
+import {
+  Form,
+  GenericInput,
+  useNotification,
+  useOverlayBlocker,
+  useFetchClient,
+} from '@strapi/helper-plugin';
+import { useMutation } from 'react-query';
+
 import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
-import { axiosInstance } from '../../../../../../core/utils';
+
 import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
 
-const ModalForm = ({ queryName, onToggle }) => {
+const ModalForm = ({ onSuccess, onToggle }) => {
   const [currentStep, setStep] = useState('create');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationToken, setRegistrationToken] = useState(null);
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { post } = useFetchClient();
   const postMutation = useMutation(
     (body) => {
-      return axiosInstance.post('/admin/users', body);
+      return post('/admin/users', body);
     },
     {
       async onSuccess({ data }) {
         setRegistrationToken(data.data.registrationToken);
-        await queryClient.invalidateQueries(queryName);
+
+        await onSuccess();
+
         goNext();
         setIsSubmitting(false);
       },
@@ -117,7 +127,7 @@ const ModalForm = ({ queryName, onToggle }) => {
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
                     <Typography variant="beta" as="h2">
@@ -127,7 +137,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                       })}
                     </Typography>
                     <Box paddingTop={4}>
-                      <Stack spacing={1}>
+                      <Flex direction="column" alignItems="stretch" gap={1}>
                         <Grid gap={5}>
                           {layout.map((row) => {
                             return row.map((input) => {
@@ -145,7 +155,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                             });
                           })}
                         </Grid>
-                      </Stack>
+                      </Flex>
                     </Box>
                   </Box>
                   <Box>
@@ -182,7 +192,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                       </Grid>
                     </Box>
                   </Box>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={
@@ -205,7 +215,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
 ModalForm.propTypes = {
   onToggle: PropTypes.func.isRequired,
-  queryName: PropTypes.array.isRequired,
+  onSuccess: PropTypes.func.isRequired,
 };
 
 export default ModalForm;

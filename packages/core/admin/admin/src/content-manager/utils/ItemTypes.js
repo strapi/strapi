@@ -1,7 +1,7 @@
 export default {
   COMPONENT: 'component',
   EDIT_FIELD: 'editField',
-  EDIT_RELATION: 'editRelation',
   FIELD: 'field',
+  DYNAMIC_ZONE: 'dynamicZone',
   RELATION: 'relation',
 };

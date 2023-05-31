@@ -8,10 +8,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Plus } from '@strapi/icons';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import useDataManager from '../../hooks/useDataManager';
@@ -39,7 +37,7 @@ const FixedBox = styled(Box)`
   left: 0;
 `;
 
-const ScrollableStack = styled(Stack)`
+const ScrollableStack = styled(Flex)`
   width: 100%;
   overflow-x: auto;
 `;
@@ -48,7 +46,7 @@ const ComponentContentBox = styled(Box)`
   padding-top: ${pxToRem(90)};
 `;
 
-const ComponentStack = styled(Stack)`
+const ComponentStack = styled(Flex)`
   flex-shrink: 0;
   width: ${pxToRem(140)};
   height: ${pxToRem(80)};
@@ -75,10 +73,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
     <Tr className="dynamiczone-row" isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
-          <ScrollableStack horizontal spacing={2}>
+          <ScrollableStack gap={2}>
             {isInDevelopmentMode && (
               <button type="button" onClick={handleClickAdd}>
-                <ComponentStack spacing={1}>
+                <ComponentStack direction="column" alignItems="stretch" gap={1}>
                   <StyledAddIcon />
                   <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({

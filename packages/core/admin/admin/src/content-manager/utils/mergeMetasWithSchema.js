@@ -1,4 +1,4 @@
-import { set } from 'lodash';
+import set from 'lodash/set';
 
 const mergeMetasWithSchema = (data, schemas, mainSchemaKey) => {
   const findSchema = (refUid) => schemas.find((obj) => obj.uid === refUid);

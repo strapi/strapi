@@ -1,10 +1,6 @@
 'use strict';
 
-const baseConfig = require('../../../jest.base-config');
-const pkg = require('./package.json');
-
 module.exports = {
-  ...baseConfig,
-  displayName: pkg.name,
-  roots: [__dirname],
+  preset: '../../../jest-preset.unit.js',
+  displayName: 'S3 upload provider',
 };

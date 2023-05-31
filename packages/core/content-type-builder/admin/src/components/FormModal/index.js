@@ -13,14 +13,21 @@ import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { isEqual } from 'lodash';
+import {
+  Box,
+  Button,
+  Divider,
+  ModalLayout,
+  ModalBody,
+  ModalFooter,
+  Tabs,
+  Tab,
+  TabGroup,
+  TabPanels,
+  TabPanel,
+  Flex,
+} from '@strapi/design-system';
+import isEqual from 'lodash/isEqual';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
@@ -28,6 +35,7 @@ import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
+import ReviewWorkflowsToggle from '../ReviewWorkflowsToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
 import FormModalSubHeader from '../FormModalSubHeader';
@@ -183,6 +191,7 @@ const FormModal = () => {
           actionType,
           data: {
             draftAndPublish: true,
+            reviewWorkflows: false,
           },
           pluginOptions: {},
         });
@@ -190,16 +199,20 @@ const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
-          {
-            displayName: null,
-            pluginOptions: {},
-            singularName: null,
-            pluralName: null,
-          }
-        );
+        const {
+          displayName,
+          draftAndPublish,
+          kind,
+          pluginOptions,
+          pluralName,
+          reviewWorkflows,
+          singularName,
+        } = get(allDataSchema, [...pathToSchema, 'schema'], {
+          displayName: null,
+          pluginOptions: {},
+          singularName: null,
+          pluralName: null,
+        });
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -211,6 +224,10 @@ const FormModal = () => {
             kind,
             pluginOptions,
             pluralName,
+            // because review-workflows is an EE feature the attribute does
+            // not always exist, but the component prop-types expect a boolean,
+            // so we have to ensure undefined is casted to false
+            reviewWorkflows: reviewWorkflows ?? false,
             singularName,
           },
         });
@@ -908,6 +925,7 @@ const FormModal = () => {
       'select-number': SelectNumber,
       'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
+      'toggle-review-workflows': ReviewWorkflowsToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
@@ -1042,7 +1060,7 @@ const FormModal = () => {
               <Box paddingTop={6}>
                 <TabPanels>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={baseForm}
                         formErrors={formErrors}
@@ -1050,10 +1068,10 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={advancedForm}
                         formErrors={formErrors}
@@ -1061,7 +1079,7 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                 </TabPanels>
               </Box>

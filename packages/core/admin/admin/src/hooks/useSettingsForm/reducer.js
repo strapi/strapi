@@ -1,6 +1,8 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { pick, set, unset } from 'lodash';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
+import unset from 'lodash/unset';
 
 const initialState = {
   fieldsToPick: [],

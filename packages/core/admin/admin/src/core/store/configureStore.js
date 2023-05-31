@@ -1,5 +1,4 @@
-import { createStore, applyMiddleware, compose } from 'redux';
-import createReducer from './createReducer';
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
 
 const configureStore = (appMiddlewares, appReducers) => {
   let composeEnhancers = compose;
@@ -19,11 +18,30 @@ const configureStore = (appMiddlewares, appReducers) => {
     composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({});
   }
 
-  return createStore(
-    createReducer(appReducers),
+  const store = createStore(
+    createReducer(appReducers, {}),
     {},
     composeEnhancers(applyMiddleware(...middlewares))
   );
+
+  // Add a dictionary to keep track of the registered async reducers
+  store.asyncReducers = {};
+
+  // Create an inject reducer function
+  // This function adds the async reducer, and creates a new combined reducer
+  store.injectReducer = (key, asyncReducer) => {
+    store.asyncReducers[key] = asyncReducer;
+    store.replaceReducer(createReducer(appReducers, store.asyncReducers));
+  };
+
+  return store;
+};
+
+const createReducer = (appReducers, asyncReducers) => {
+  return combineReducers({
+    ...appReducers,
+    ...asyncReducers,
+  });
 };
 
 export default configureStore;

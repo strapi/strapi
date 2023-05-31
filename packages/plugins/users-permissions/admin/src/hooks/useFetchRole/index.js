@@ -1,13 +1,13 @@
 import { useCallback, useReducer, useEffect, useRef } from 'react';
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
-import axiosInstance from '../../utils/axiosInstance';
 import pluginId from '../../pluginId';
 
 const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
   const isMounted = useRef(null);
+  const { get } = useFetchClient();
 
   useEffect(() => {
     isMounted.current = true;
@@ -29,7 +29,7 @@ const useFetchRole = (id) => {
     try {
       const {
         data: { role },
-      } = await axiosInstance.get(`/${pluginId}/roles/${roleId}`);
+      } = await get(`/${pluginId}/roles/${roleId}`);
 
       // Prevent updating state on an unmounted component
       if (isMounted.current) {

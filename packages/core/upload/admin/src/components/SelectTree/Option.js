@@ -4,12 +4,9 @@ import { useIntl } from 'react-intl';
 import { components } from 'react-select';
 import styled from 'styled-components';
 
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
+import { Flex, Icon, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
-import ChevronUp from '@strapi/icons/ChevronUp';
-import ChevronDown from '@strapi/icons/ChevronDown';
+import { ChevronUp, ChevronDown } from '@strapi/icons';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;

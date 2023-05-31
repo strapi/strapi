@@ -1,12 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Table, Th, Thead, Tr } from '@strapi/design-system/Table';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import {
+  BaseCheckbox,
+  IconButton,
+  Table,
+  Th,
+  Thead,
+  Tr,
+  Tooltip,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { CarretDown, CarretUp } from '@strapi/icons';
 
 import { getTrad } from '../../utils';

@@ -9,12 +9,11 @@ import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Layout, Main, Box, Grid, GridItem } from '@strapi/design-system';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+
 import cornerOrnamentPath from './assets/corner-ornament.svg';
-import { useModels } from '../../hooks';
+import { useContentTypes } from '../../hooks/useContentTypes';
 import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
 import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
 import SocialLinks from './SocialLinks';
@@ -33,8 +32,9 @@ const LogoContainer = styled(Box)`
 
 const HomePage = () => {
   // Temporary until we develop the menu API
-  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
+  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  useLicenseLimitNotification();
 
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;

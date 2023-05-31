@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { get } from 'lodash';
-import { useNotification } from '@strapi/helper-plugin';
-import { axiosInstance } from '../../core/utils';
+import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
 
-const useRegenerate = (id, onRegenerate) => {
+const useRegenerate = (url, id, onRegenerate, onError) => {
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const toggleNotification = useNotification();
+  const { post } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
 
   const regenerateData = async () => {
     try {
@@ -13,15 +13,20 @@ const useRegenerate = (id, onRegenerate) => {
         data: {
           data: { accessKey },
         },
-      } = await axiosInstance.post(`/admin/api-tokens/${id}/regenerate`);
+      } = await post(`${url}${id}/regenerate`);
       setIsLoadingConfirmation(false);
       onRegenerate(accessKey);
     } catch (error) {
       setIsLoadingConfirmation(false);
-      toggleNotification({
-        type: 'warning',
-        message: get(error, 'response.data.message', 'notification.error'),
-      });
+
+      if (onError) {
+        onError(error);
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      }
     }
   };
 

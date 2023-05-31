@@ -2,11 +2,8 @@ import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Tag } from '@strapi/design-system/Tag';
-import Cross from '@strapi/icons/Cross';
-import Filter from '@strapi/icons/Filter';
+import { Box, Button, Tag } from '@strapi/design-system';
+import { Cross, Filter } from '@strapi/icons';
 import FiltersPopover from './FiltersPopover';
 
 const FilterTag = ({ name, handleRemove }) => {

@@ -1,15 +1,19 @@
 import React, { memo, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { get, groupBy, set, size } from 'lodash';
+import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import set from 'lodash/set';
+import size from 'lodash/size';
 import {
   LoadingIndicatorPage,
   useTracking,
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
-  useAppInfos,
+  useAppInfo,
   useRBACProvider,
   useGuidedTour,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -17,7 +21,6 @@ import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import axiosInstance from '../../utils/axiosInstance';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
@@ -71,7 +74,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const { autoReload } = useAppInfos();
+  const { autoReload } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -81,6 +84,8 @@ const DataManagerProvider = ({
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
+  const fetchClient = useFetchClient();
+  const { put, post, del } = fetchClient;
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
@@ -107,8 +112,7 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
-          // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-          return axiosInstance.get(endPoint);
+          return fetchClient.get(`/${pluginId}/${endPoint}`);
         })
       );
 
@@ -253,7 +257,7 @@ const DataManagerProvider = ({
 
   const deleteCategory = async (categoryUid) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
@@ -265,8 +269,8 @@ const DataManagerProvider = ({
 
       if (userConfirm) {
         lockAppWithAutoreload();
-        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-        await axiosInstance.delete(requestURL);
+
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -289,7 +293,7 @@ const DataManagerProvider = ({
 
   const deleteData = async () => {
     try {
-      const requestURL = `/${endPoint}/${currentUid}`;
+      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
@@ -315,8 +319,8 @@ const DataManagerProvider = ({
         }
 
         lockAppWithAutoreload();
-        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-        await axiosInstance.delete(requestURL);
+
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -340,7 +344,7 @@ const DataManagerProvider = ({
 
   const editCategory = async (categoryUid, body) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
       onCloseModal();
@@ -349,8 +353,7 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
-      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
-      await axiosInstance.put(requestURL, body);
+      await put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -503,14 +506,13 @@ const DataManagerProvider = ({
       // Lock the app
       lockAppWithAutoreload();
 
-      const baseURL = `/${endPoint}`;
+      const baseURL = `/${pluginId}/${endPoint}`;
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
-      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from getFetchClient
       if (isCreating) {
-        await axiosInstance.post(requestURL, body);
+        await post(requestURL, body);
       } else {
-        await axiosInstance.put(requestURL, body);
+        await put(requestURL, body);
       }
 
       // Make sure the server has restarted

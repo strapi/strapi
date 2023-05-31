@@ -7,13 +7,8 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Popover } from '@strapi/design-system/Popover';
-import { Stack } from '@strapi/design-system/Stack';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Select, Option } from '@strapi/design-system/Select';
-import Plus from '@strapi/icons/Plus';
+import { Button, Box, Popover, Flex, Select, Option } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
@@ -192,66 +187,64 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
 
   return (
-    <Popover source={source} padding={3} spacing={4}>
-      <FocusTrap onEscape={onToggle}>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={1} style={{ minWidth: 184 }}>
-            <Box>
-              <Select
-                aria-label={formatMessage({
-                  id: 'app.utils.select-field',
-                  defaultMessage: 'Select field',
-                })}
-                name="name"
-                size="M"
-                onChange={handleChangeFilterField}
-                value={modifiedData.name}
-              >
-                {displayedFilters.map((filter) => {
-                  return (
-                    <Option key={filter.name} value={filter.name}>
-                      {filter.metadatas.label}
-                    </Option>
-                  );
-                })}
-              </Select>
-            </Box>
-            <Box>
-              <Select
-                aria-label={formatMessage({
-                  id: 'app.utils.select-filter',
-                  defaultMessage: 'Select filter',
-                })}
-                name="filter"
-                size="M"
-                value={modifiedData.filter}
-                onChange={handleChangeOperator}
-              >
-                {getFilterList(appliedFilter).map((option) => {
-                  return (
-                    <Option key={option.value} value={option.value}>
-                      {formatMessage(option.intlLabel)}
-                    </Option>
-                  );
-                })}
-              </Select>
-            </Box>
-            <Box>
-              <FilterValueInput
-                {...appliedFilter.metadatas}
-                {...appliedFilter.fieldSchema}
-                value={modifiedData.value}
-                onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
-              />
-            </Box>
-            <Box>
-              <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
-                {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-              </Button>
-            </Box>
-          </Stack>
-        </form>
-      </FocusTrap>
+    <Popover onDismiss={onToggle} source={source} padding={3} spacing={4}>
+      <form onSubmit={handleSubmit}>
+        <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
+          <Box>
+            <Select
+              aria-label={formatMessage({
+                id: 'app.utils.select-field',
+                defaultMessage: 'Select field',
+              })}
+              name="name"
+              size="M"
+              onChange={handleChangeFilterField}
+              value={modifiedData.name}
+            >
+              {displayedFilters.map((filter) => {
+                return (
+                  <Option key={filter.name} value={filter.name}>
+                    {filter.metadatas.label}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Box>
+          <Box>
+            <Select
+              aria-label={formatMessage({
+                id: 'app.utils.select-filter',
+                defaultMessage: 'Select filter',
+              })}
+              name="filter"
+              size="M"
+              value={modifiedData.filter}
+              onChange={handleChangeOperator}
+            >
+              {getFilterList(appliedFilter).map((option) => {
+                return (
+                  <Option key={option.value} value={option.value}>
+                    {formatMessage(option.intlLabel)}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Box>
+          <Box>
+            <FilterValueInput
+              {...appliedFilter.metadatas}
+              {...appliedFilter.fieldSchema}
+              value={modifiedData.value}
+              onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
+            />
+          </Box>
+          <Box>
+            <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
+              {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+            </Button>
+          </Box>
+        </Flex>
+      </form>
     </Popover>
   );
 };

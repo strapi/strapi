@@ -1,5 +1,5 @@
 export { default as useConfigurations } from './useConfigurations';
-export { default as useModels } from './useModels';
+export { useContentTypes } from './useContentTypes';
 export { default as useFetchPermissionsLayout } from './useFetchPermissionsLayout';
 export { default as useFetchRole } from './useFetchRole';
 export { default as useMenu } from './useMenu';
@@ -10,4 +10,5 @@ export { default as usePermissionsDataManager } from './usePermissionsDataManage
 export { default as useReleaseNotification } from './useReleaseNotification';
 export { default as useThemeToggle } from './useThemeToggle';
 export { default as useRegenerate } from './useRegenerate';
-export { default as useFetchClient } from './useFetchClient';
+export { default as useLicenseLimit } from './useLicenseLimits';
+export { default as useLicenseLimitNotification } from './useLicenseLimitNotification';

@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ConditionsModal/ActionRow/utils/constants';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { MultiSelectNested } from '@strapi/design-system/Select';
+import { Box, Flex, Typography, MultiSelectNested } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getNestedOptions, getSelectedValues, getNewStateFromChangedValues } from './utils/options';
@@ -55,7 +51,7 @@ const ActionRow = ({
           onChange={handleChange}
           value={getSelectedValues(value)}
           options={getNestedOptions(arrayOfOptionsGroupedByCategory)}
-          disabled={isFormDisabled || IS_DISABLED}
+          disabled={isFormDisabled}
         />
       </Box>
     </Flex>

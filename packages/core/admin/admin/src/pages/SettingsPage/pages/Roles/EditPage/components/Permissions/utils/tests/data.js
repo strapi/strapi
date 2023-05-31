@@ -51,12 +51,6 @@ const permissionsLayout = {
         category: 'plugins and marketplace',
         subCategory: 'marketplace',
       },
-      {
-        displayName: 'Install (only for dev env)',
-        action: 'admin::marketplace.plugins.install',
-        category: 'plugins and marketplace',
-        subCategory: 'plugins',
-      },
     ],
   },
 };

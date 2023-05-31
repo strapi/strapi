@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
+import { Box } from '@strapi/design-system';
 
 const StyledBox = styled(Box)`
   transform: translate(-4px, -12px);

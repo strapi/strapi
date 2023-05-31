@@ -14,4 +14,4 @@ interface EntityManager {
   unpublish(): any;
 }
 
-export default function(opts: { strapi: Strapi }): EntityManager;
+export default function (opts: { strapi: Strapi }): EntityManager;

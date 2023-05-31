@@ -1,7 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import permissions from '../../../permissions';
@@ -43,7 +42,7 @@ const CollectionTypeRecursivePath = ({
     return { rawContentTypeLayout, rawComponentsLayouts };
   }, [layout]);
 
-  const uid = get(layout, ['contentType', 'uid'], null);
+  const uid = layout?.contentType?.uid ?? null;
 
   // This statement is needed in order to prevent the CollectionTypeFormWrapper effects clean up phase to be run twice.
   // What can happen is that when navigating from one entry to another the cleanup phase of the fetch data effect is run twice : once when

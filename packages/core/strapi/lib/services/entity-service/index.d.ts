@@ -88,7 +88,7 @@ export interface EntityService {
   ): Promise<any>;
 }
 
-export default function(opts: {
+export default function (opts: {
   strapi: Strapi;
   db: Database;
   // TODO: define types

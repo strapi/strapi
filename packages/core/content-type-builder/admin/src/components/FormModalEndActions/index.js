@@ -7,8 +7,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import Plus from '@strapi/icons/Plus';
+import { Button } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { getTrad } from '../../utils';
 
 const FormModalEndActions = ({

@@ -1,4 +1,4 @@
-import { Typography } from '@strapi/design-system/Typography';
+import { Typography } from '@strapi/design-system';
 import CarretIcon from '../CollapsePropertyMatrix/CarretIcon';
 
 const activeStyle = (theme) => `

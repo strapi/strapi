@@ -140,6 +140,14 @@
     "name":"Assamese (India) (as-IN)"
   },
   {
+    "code":"ast",
+    "name":"Asturian (ast)"
+  },
+  {
+    "code":"ast-ES",
+    "name":"Asturian (Spain) (ast-ES)"
+  },
+  {
     "code":"asa",
     "name":"Asu (asa)"
   },
@@ -345,7 +353,7 @@
   },
   {
     "code":"zh-Hans-HK",
-    "name":"Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK) "
+    "name":"Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK)"
   },
   {
     "code":"zh-Hans-MO",
@@ -630,6 +638,10 @@
   {
     "code":"en-KI",
     "name":"English (Kiribati) (en-KI)"
+  },
+  {
+    "code":"en-KW",
+    "name":"English (Kuwait) (en-KW)"
   },
   {
     "code":"en-LS",
@@ -1052,6 +1064,10 @@
     "name":"French (Saint Martin) (fr-MF)"
   },
   {
+    "code":"fr-MU",
+    "name":"French (Mauritius) (fr-MU)"
+  },
+  {
     "code":"fr-SN",
     "name":"French (Senegal) (fr-SN)"
   },
@@ -1078,6 +1094,10 @@
   {
     "code":"gl-ES",
     "name":"Galician (Spain) (gl-ES)"
+  },
+  {
+    "code":"lao",
+    "name":"Laotian (Laos) (lao)"
   },
   {
     "code":"lg",

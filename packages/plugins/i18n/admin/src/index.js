@@ -102,12 +102,12 @@ export default {
                 name: 'pluginOptions.i18n.localized',
                 description: {
                   id: getTrad('plugin.schema.i18n.localized.description-content-type'),
-                  defaultMessage: 'Allow you to have content in different locales',
+                  defaultMessage: 'Allows translating an entry into different languages',
                 },
                 type: 'checkboxConfirmation',
                 intlLabel: {
                   id: getTrad('plugin.schema.i18n.localized.label-content-type'),
-                  defaultMessage: 'Enable localization for this Content-Type',
+                  defaultMessage: 'Localization',
                 },
               },
             ];

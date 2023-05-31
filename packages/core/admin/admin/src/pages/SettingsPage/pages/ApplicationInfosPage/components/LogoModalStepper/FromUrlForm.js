@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
+import { Box, Button, TextInput, ModalFooter } from '@strapi/design-system';
 import urlToFile from '../../utils/urlToFile';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
 import { SIZE, DIMENSION } from '../../utils/constants';

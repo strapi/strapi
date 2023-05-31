@@ -95,12 +95,12 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 **Database:**
 
-| Database   | Minimum | Recommended |
-| ---------- | ------- | ----------- |
-| MySQL      | 5.7.8   | 8.0         |
-| MariaDB    | 10.3    | 10.6        |
-| PostgreSQL | 11.0    | 14.0        |
-| SQLite     | 3       | 3           |
+| Database   | Recommended | Minimum |
+| ---------- | ----------- | ------- |
+| MySQL      | 8.0         | 5.7.8   |
+| MariaDB    | 10.6        | 10.3    |
+| PostgreSQL | 14.0        | 11.0    |
+| SQLite     | 3           | 3       |
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 

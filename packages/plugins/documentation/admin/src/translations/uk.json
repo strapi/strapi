@@ -3,7 +3,7 @@
   "components.Row.regenerate": "Згенерувати",
   "containers.HomePage.Block.title": "Версії",
   "containers.HomePage.Button.update": "Оновити",
-  "containers.HomePage.PluginHeader.title": "Документація - Налаштування",
+  "containers.HomePage.PluginHeader.title": "Документація — Налаштування",
   "containers.HomePage.PopUpWarning.confirm": "Я усвідомлюю",
   "containers.HomePage.PopUpWarning.message": "Ви впевнені, що хочете видалити цю версію?",
   "containers.HomePage.copied": "Токен скопійовано у буфер обміну",

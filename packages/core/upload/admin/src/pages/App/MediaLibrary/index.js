@@ -14,20 +14,21 @@ import {
   CheckPermissions,
   usePersistentState,
 } from '@strapi/helper-plugin';
-import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Typography } from '@strapi/design-system/Typography';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import Pencil from '@strapi/icons/Pencil';
-import Cog from '@strapi/icons/Cog';
-import Grid from '@strapi/icons/Grid';
-import List from '@strapi/icons/List';
+import {
+  Layout,
+  ContentLayout,
+  ActionLayout,
+  Main,
+  Box,
+  Divider,
+  BaseCheckbox,
+  IconButton,
+  Typography,
+  GridItem,
+  Flex,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Pencil, Cog, Grid, List } from '@strapi/icons';
 
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
@@ -277,11 +278,11 @@ export const MediaLibrary = () => {
                   label={
                     isGridView
                       ? formatMessage({
-                          id: 'view-switch.list',
+                          id: getTrad('view-switch.list'),
                           defaultMessage: 'List View',
                         })
                       : formatMessage({
-                          id: 'view-switch.grid',
+                          id: getTrad('view-switch.grid'),
                           defaultMessage: 'Grid View',
                         })
                   }

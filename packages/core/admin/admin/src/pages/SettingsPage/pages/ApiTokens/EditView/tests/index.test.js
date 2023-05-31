@@ -5,7 +5,6 @@ import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import EditView from '../index';
@@ -15,7 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useRBAC: jest.fn(() => ({
     allowedActions: {
       canCreate: true,
@@ -32,26 +30,28 @@ jest.mock('@strapi/helper-plugin', () => ({
     lockApp: jest.fn(),
     unlockApp: jest.fn(),
   })),
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockImplementation((path) => {
+      if (path === '/admin/content-api/permissions') {
+        return { data };
+      }
+
+      return {
+        data: {
+          data: {
+            id: '1',
+            name: 'My super token',
+            description: 'This describe my super token',
+            type: 'read-only',
+            createdAt: '2021-11-15T00:00:00.000Z',
+            permissions: [],
+          },
+        },
+      };
+    }),
+  }),
 }));
 
-jest.spyOn(axiosInstance, 'get').mockImplementation((path) => {
-  if (path === '/admin/content-api/permissions') {
-    return { data };
-  }
-
-  return {
-    data: {
-      data: {
-        id: '1',
-        name: 'My super token',
-        description: 'This describe my super token',
-        type: 'read-only',
-        createdAt: '2021-11-15T00:00:00.000Z',
-        permissions: [],
-      },
-    },
-  };
-});
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
 const client = new QueryClient({

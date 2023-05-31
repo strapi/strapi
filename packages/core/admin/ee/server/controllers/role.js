@@ -1,14 +1,11 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils').errors;
 const {
   validateRoleCreateInput,
   validateRoleDeleteInput,
   validateRolesDeleteInput,
 } = require('../validation/role');
 const { getService } = require('../../../server/utils');
-const { validatedUpdatePermissionsInput } = require('../validation/permission');
-const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
 
 module.exports = {
   /**
@@ -62,42 +59,6 @@ module.exports = {
 
     return ctx.deleted({
       data: sanitizedRoles,
-    });
-  },
-
-  /**
-   * Updates the permissions assigned to a role
-   * @param {KoaContext} ctx - koa context
-   */
-  async updatePermissions(ctx) {
-    const { id } = ctx.params;
-    const { body: input } = ctx.request;
-
-    const roleService = getService('role');
-    const permissionService = getService('permission');
-
-    const role = await roleService.findOne({ id });
-
-    if (!role) {
-      return ctx.notFound('role.notFound');
-    }
-
-    if (role.code === SUPER_ADMIN_CODE) {
-      throw new ApplicationError("Super admin permissions can't be edited.");
-    }
-
-    await validatedUpdatePermissionsInput(input);
-
-    if (!role) {
-      return ctx.notFound('role.notFound');
-    }
-
-    const permissions = await roleService.assignPermissions(role.id, input.permissions);
-
-    const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
-
-    return ctx.send({
-      data: sanitizedPermissions,
     });
   },
 };

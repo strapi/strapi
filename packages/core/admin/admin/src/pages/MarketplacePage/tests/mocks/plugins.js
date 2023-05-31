@@ -1,50 +1,6 @@
 const plugins = {
   data: [
     {
-      id: 'recQHmaveQknjaIdv',
-      attributes: {
-        name: 'Cloudflare pages',
-        description: 'This plugin lets you easily trigger Cloudflare Pages builds from Strapi.',
-        slug: 'strapi-plugin-cloudflare-pages',
-        npmPackageName: 'strapi-plugin-cloudflare-pages',
-        npmPackageUrl: 'https://www.npmjs.com/package/strapi-plugin-cloudflare-pages',
-        repositoryUrl: 'https://github.com/sarhugo/strapi-plugin-cloudflare-pages',
-        logo: {
-          id: 'attzLRKpax5MIrMtq',
-          width: 160,
-          height: 160,
-          url: 'https://dl.airtable.com/.attachments/3e586bbcdd7dc2effc3770fd49506aa6/ddbb2540/cf-logo-v-rgb.jpg',
-          filename: 'cf-logo-v-rgb.jpg',
-          size: 25615,
-          type: 'image/jpeg',
-          thumbnails: {
-            small: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/aa98b52525fdeb5767cf554563a9df14/7a03d156',
-              width: 36,
-              height: 36,
-            },
-            large: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/a0e91d3564a0f41d89799e352b06c8ee/3d45329e',
-              width: 160,
-              height: 160,
-            },
-            full: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/20b4afecf2bf8bc081c54eae92a7f599/d1e10f39',
-              width: 3000,
-              height: 3000,
-            },
-          },
-        },
-        developerName: 'Hugo Sarti',
-        validated: false,
-        madeByStrapi: false,
-        strapiCompatibility: 'v3',
-        strapiVersion: '^4.0.0',
-        githubStars: 23,
-        npmDownloads: 5623,
-      },
-    },
-    {
       id: 'recWQXzTM5e6Friiq',
       attributes: {
         name: 'Comments',
@@ -408,49 +364,6 @@ const plugins = {
       },
     },
     {
-      id: 'recqR0rWAw5gZHc1c',
-      attributes: {
-        name: 'Documentation v3',
-        description: 'Create an OpenAPI Document and visualize your API with SWAGGER UI',
-        slug: 'strapi-plugin-documentation',
-        npmPackageName: 'strapi-plugin-documentation',
-        npmPackageUrl: 'https://www.npmjs.com/package/strapi-plugin-documentation',
-        repositoryUrl:
-          'https://github.com/strapi/strapi/tree/v3.6.9/packages/strapi-plugin-documentation',
-        logo: {
-          id: 'att22dETRlzkfVWAl',
-          width: 225,
-          height: 225,
-          url: 'https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png',
-          filename: 'swagger.png',
-          size: 6052,
-          type: 'image/png',
-          thumbnails: {
-            small: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/71a6b03e03a6b26647991a617478cdfa/8e1d8d2b',
-              width: 36,
-              height: 36,
-            },
-            large: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/c249c4953d5bb0e2f58ed7174afecc2f/796dca09',
-              width: 225,
-              height: 225,
-            },
-            full: {
-              url: 'https://dl.airtable.com/.attachmentThumbnails/4b7bc3a765f3927b9fcd12809ddf82a8/d3a4b97b',
-              width: 3000,
-              height: 3000,
-            },
-          },
-        },
-        developerName: 'Strapi team',
-        validated: true,
-        madeByStrapi: false,
-        strapiCompatibility: 'v3',
-        strapiVersion: '^4.3.0',
-      },
-    },
-    {
       id: 'rec5s49X99wA67Ubj',
       attributes: {
         name: 'Transformer',
@@ -505,6 +418,12 @@ const plugins = {
       'Custom fields': 4,
       Deployment: 2,
       Monitoring: 1,
+    },
+    pagination: {
+      page: 1,
+      pageSize: 24,
+      pageCount: 4,
+      total: 96,
     },
   },
 };

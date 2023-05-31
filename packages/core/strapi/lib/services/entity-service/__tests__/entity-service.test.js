@@ -57,6 +57,7 @@ describe('Entity service', () => {
 
       const fakeDB = {
         query: jest.fn(() => fakeQuery),
+        transaction: (cb) => cb(),
       };
 
       const fakeStrapi = {
@@ -185,6 +186,7 @@ describe('Entity service', () => {
         });
 
         const fakeDB = {
+          transaction: (cb) => cb(),
           query: jest.fn((uid) => fakeQuery(uid)),
         };
 
@@ -364,7 +366,16 @@ describe('Entity service', () => {
 
         const fakeStrapi = {
           getModel: jest.fn((modelName) => fakeModels[modelName]),
+          query: jest.fn(() => fakeQuery),
+          db: {
+            dialect: {
+              client: 'sqlite',
+            },
+          },
         };
+
+        global.strapi = fakeStrapi;
+
         instance = createEntityService({
           strapi: fakeStrapi,
           db: fakeDB,

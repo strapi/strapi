@@ -1,4 +1,7 @@
-import { isObject, has, omit } from 'lodash';
+import isObject from 'lodash/isObject';
+import has from 'lodash/has';
+import omit from 'lodash/omit';
+
 import { createArrayOfValues } from '../../utils';
 
 /**

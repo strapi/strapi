@@ -83,11 +83,10 @@ export type GetAttributeValueByKey<
 export type GetAttributesValues<T extends SchemaUID> = {
   // Handle required attributes
   [key in GetAttributesRequiredKeys<T>]-?: GetAttributeValueByKey<T, key>;
-} &
-  {
-    // Handle optional attributes
-    [key in GetAttributesOptionalKeys<T>]?: GetAttributeValueByKey<T, key>;
-  };
+} & {
+  // Handle optional attributes
+  [key in GetAttributesOptionalKeys<T>]?: GetAttributeValueByKey<T, key>;
+};
 
 export type GetAttributesRequiredKeys<T extends SchemaUID> = KeysBy<
   GetAttributes<T>,

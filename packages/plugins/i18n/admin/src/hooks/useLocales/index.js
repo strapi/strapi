@@ -1,24 +1,7 @@
 import { useEffect } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import { RESOLVE_LOCALES } from '../constants';
-
-const fetchLocalesList = async (toggleNotification) => {
-  try {
-    const data = await request('/i18n/locales', {
-      method: 'GET',
-    });
-
-    return data;
-  } catch (e) {
-    toggleNotification({
-      type: 'warning',
-      message: { id: 'notification.error' },
-    });
-
-    return e;
-  }
-};
 
 const useLocales = () => {
   const dispatch = useDispatch();
@@ -26,11 +9,27 @@ const useLocales = () => {
   const locales = useSelector((state) => state.i18n_locales.locales);
   const isLoading = useSelector((state) => state.i18n_locales.isLoading);
 
+  const { get } = useFetchClient();
+
   useEffect(() => {
-    fetchLocalesList(toggleNotification).then((locales) =>
-      dispatch({ type: RESOLVE_LOCALES, locales })
-    );
-  }, [dispatch, toggleNotification]);
+    get('/i18n/locales')
+      .then(({ data }) => dispatch({ type: RESOLVE_LOCALES, locales: data }))
+      .catch((err) => {
+        /**
+         * TODO: this should be refactored.
+         *
+         * In fact it should be refactored to use react-query?
+         */
+        if ('code' in err && err?.code === 'ERR_CANCELED') {
+          return;
+        }
+
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      });
+  }, [dispatch, get, toggleNotification]);
 
   return { locales, isLoading };
 };

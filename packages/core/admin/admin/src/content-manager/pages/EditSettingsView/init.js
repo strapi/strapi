@@ -1,4 +1,6 @@
-import { cloneDeep, set } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import set from 'lodash/set';
+
 import { createLayout, formatLayout } from './utils/layout';
 
 const init = (initialState, mainLayout, components) => {

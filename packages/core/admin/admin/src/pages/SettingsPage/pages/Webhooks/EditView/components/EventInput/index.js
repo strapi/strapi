@@ -1,13 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { FieldLabel, Flex, Typography } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import EventRow from './EventRow';
-import formatValue from './utils/formatValue';
+
+export const formatValue = (value) =>
+  value.reduce((acc, curr) => {
+    const key = curr.split('.')[0];
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(curr);
+
+    return acc;
+  }, {});
 
 const StyledTable = styled.table`
   td {
@@ -99,7 +108,7 @@ const EventInput = ({ isDraftAndPublish }) => {
   };
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.events',
@@ -118,7 +127,7 @@ const EventInput = ({ isDraftAndPublish }) => {
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
-                        'This event only exists for contents with Draft/Publish system enabled',
+                        'This event only exists for content with draft & publish enabled',
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
@@ -154,7 +163,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           })}
         </tbody>
       </StyledTable>
-    </Stack>
+    </Flex>
   );
 };
 

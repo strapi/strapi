@@ -33,15 +33,14 @@ module.exports = (strapi) => {
 const registerAdminRoutes = (strapi) => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
-  strapi.admin.routes.forEach((route) => {
-    generateRouteScope(route);
-    route.info = { pluginName: 'admin' };
-  });
-
-  strapi.server.routes({
-    type: 'admin',
-    prefix: '/admin',
-    routes: strapi.admin.routes,
+  _.forEach(strapi.admin.routes, (router) => {
+    router.type = router.type || 'admin';
+    router.prefix = router.prefix || `/admin`;
+    router.routes.forEach((route) => {
+      generateRouteScope(route);
+      route.info = { pluginName: 'admin' };
+    });
+    strapi.server.routes(router);
   });
 };
 
@@ -69,7 +68,7 @@ const registerPluginRoutes = (strapi) => {
     } else {
       _.forEach(plugin.routes, (router) => {
         router.type = router.type || 'admin';
-        router.prefix = `/${pluginName}`;
+        router.prefix = router.prefix || `/${pluginName}`;
         router.routes.forEach((route) => {
           generateRouteScope(route);
           route.info = { pluginName };

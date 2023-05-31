@@ -1,5 +1,7 @@
 'use strict';
 
+const { pipeAsync } = require('@strapi/utils');
+
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
   create: 'plugin::content-manager.explorer.create',
@@ -31,6 +33,10 @@ const createPermissionChecker =
       return permissionsManager.sanitizeOutput(data, { subject: toSubject(data), action });
     };
 
+    const sanitizeQuery = (query, { action = ACTIONS.read } = {}) => {
+      return permissionsManager.sanitizeQuery(query, { subject: model, action });
+    };
+
     const sanitizeInput = (action, data, entity) => {
       return permissionsManager.sanitizeInput(data, {
         subject: entity ? toSubject(entity) : model,
@@ -41,25 +47,43 @@ const createPermissionChecker =
     const sanitizeCreateInput = (data) => sanitizeInput(ACTIONS.create, data);
     const sanitizeUpdateInput = (entity) => (data) => sanitizeInput(ACTIONS.update, data, entity);
 
-    const buildPermissionQuery = (query, action) =>
-      permissionsManager.addPermissionsQueryTo(query, action);
+    const buildPermissionQuery = (query, action) => {
+      return permissionsManager.addPermissionsQueryTo(query, action);
+    };
 
-    const buildReadQuery = (query) => buildPermissionQuery(query, ACTIONS.read);
-    const buildDeleteQuery = (query) => buildPermissionQuery(query, ACTIONS.delete);
+    /**
+     * @param {string} query
+     * @param {keyof typeof ACTIONS} action
+     */
+    const sanitizedQuery = (query, action) => {
+      return pipeAsync(
+        (q) => sanitizeQuery(q, action),
+        (q) => buildPermissionQuery(q, action)
+      )(query);
+    };
 
+    // Sanitized queries shortcuts
+    Object.keys(ACTIONS).forEach((action) => {
+      sanitizedQuery[action] = (query) => sanitizedQuery(query, ACTIONS[action]);
+    });
+
+    // Permission utils shortcuts
     Object.keys(ACTIONS).forEach((action) => {
       can[action] = (...args) => can(ACTIONS[action], ...args);
       cannot[action] = (...args) => cannot(ACTIONS[action], ...args);
     });
 
     return {
+      // Permission utils
       can,
       cannot,
+      // Sanitizers
       sanitizeOutput,
+      sanitizeQuery,
       sanitizeCreateInput,
       sanitizeUpdateInput,
-      buildReadQuery,
-      buildDeleteQuery,
+      // Queries Builder
+      sanitizedQuery,
     };
   };
 

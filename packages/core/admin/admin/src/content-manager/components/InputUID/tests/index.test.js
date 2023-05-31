@@ -1,283 +1,240 @@
-/**
- *
- * Tests for InputIUD
- *
- */
-
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+
 import InputUID from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn(() => ({
-    modifiedData: {},
-    initialData: {},
+    modifiedData: {
+      target: 'source-string',
+    },
+    initialData: {
+      name: 'initial-data',
+    },
   })),
+  useNotification: jest.fn().mockReturnValue(() => {}),
 }));
 
-describe('<InputUID />', () => {
-  const props = {
-    attribute: {
-      required: false,
-    },
-    contentTypeUID: 'api::test.test',
-    intlLabel: {
-      id: 'test',
-      defaultMessage: 'test',
-    },
-    name: 'test',
-    onChange: jest.fn(),
-    value: 'michka',
-  };
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
-  it('renders and matches the snapshot', async () => {
-    const { container, getByText } = render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <InputUID {...props} />
-        </IntlProvider>
-      </ThemeProvider>
+const server = setupServer(
+  rest.post('*/uid/generate', async (req, res, ctx) => {
+    const body = await req.json();
+
+    return res(
+      ctx.json({
+        data: body?.data?.target ?? 'regenerated',
+      })
     );
+  }),
 
-    await waitFor(() => {
-      expect(getByText('test')).toBeInTheDocument();
+  rest.post('*/uid/check-availability', async (req, res, ctx) => {
+    const body = await req.json();
+
+    return res(
+      ctx.json({
+        isAvailable: body?.value === 'available',
+      })
+    );
+  })
+);
+
+const ComponentFixture = (props) => (
+  <ThemeProvider theme={lightTheme}>
+    <IntlProvider locale="en" messages={{}}>
+      <InputUID
+        attribute={{ targetField: 'target', required: true }}
+        contentTypeUID="api::test.test"
+        intlLabel={{
+          id: 'test',
+          defaultMessage: 'Label',
+        }}
+        name="name"
+        onChange={jest.fn()}
+        {...props}
+      />
+    </IntlProvider>
+  </ThemeProvider>
+);
+
+function setup(props) {
+  return new Promise((resolve) => {
+    act(() => {
+      resolve(render(<ComponentFixture {...props} />));
+    });
+  });
+}
+
+describe('Content-Manager | <InputUID />', () => {
+  beforeAll(() => {
+    server.listen();
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  test('renders', async () => {
+    const { getByText, getByRole } = await setup({
+      hint: 'hint',
+      value: 'test',
+      required: true,
+      labelAction: <>action</>,
     });
 
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      .c7 {
-        padding-right: 12px;
-        padding-left: 8px;
-      }
+    expect(getByText('Label')).toBeInTheDocument();
+    expect(getByText('*')).toBeInTheDocument();
+    expect(getByText('action')).toBeInTheDocument();
+    expect(getByText('hint')).toBeInTheDocument();
+    expect(getByRole('textbox')).toHaveValue('test');
+  });
 
-      .c0 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
+  test('renders an error', async () => {
+    const { getByText } = await setup({
+      error: 'error',
+    });
 
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
+    expect(getByText('error')).toBeInTheDocument();
+  });
 
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
+  test('Hides the regenerate label when disabled', async () => {
+    const { queryByRole } = await setup({ disabled: true, value: 'test' });
 
-      .c2 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
+    expect(queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument();
+  });
 
-      .c1 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
+  test('Calls onChange handler', async () => {
+    const spy = jest.fn();
+    const { getByRole } = await setup({ value: 'test', onChange: spy });
 
-      .c1 > * + * {
-        margin-top: 4px;
-      }
+    fireEvent.change(getByRole('textbox'), { target: { value: 'test-new' } });
 
-      .c6 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 0;
-        padding-top: 0.65625rem;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
 
-      .c6::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
+  test('Regenerates the value based on the target field', async () => {
+    const user = userEvent.setup();
+    const spy = jest.fn();
+    const { getByRole, queryByTestId } = await setup({ onChange: spy, value: '' });
 
-      .c6::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
+    await act(async () => {
+      await user.click(getByRole('button', { name: /regenerate/i }));
+    });
 
-      .c6:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-      .c6::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
+    expect(spy).toHaveBeenCalledWith(
+      {
+        target: {
+          name: 'name',
+          type: 'text',
+          value: 'source-string',
+        },
+      },
+      true
+    );
+  });
 
-      .c6[aria-disabled='true'] {
-        color: inherit;
-      }
+  test('If the field is required and the value is empty it should automatically fill it', async () => {
+    const spy = jest.fn();
 
-      .c6:focus {
-        outline: none;
-        box-shadow: none;
-      }
+    const { queryByTestId } = await setup({
+      value: '',
+      required: true,
+      onChange: spy,
+    });
 
-      .c5 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-      .c5:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
+    expect(spy).toHaveBeenCalledWith(
+      {
+        target: {
+          name: 'name',
+          type: 'text',
+          value: 'source-string',
+        },
+      },
+      true
+    );
+  });
 
-      .c9 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
+  test('If the field is required and the value is not empty it should not automatically fill it', async () => {
+    const spy = jest.fn();
 
-      .c8 {
-        position: relative;
-      }
+    const { queryByTestId } = await setup({
+      value: 'test',
+      required: true,
+      onChange: spy,
+    });
 
-      .c10 svg {
-        height: 1rem;
-        width: 1rem;
-      }
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-      .c10 svg path {
-        fill: #a5a5ba;
-      }
+    expect(spy).not.toHaveBeenCalled();
+  });
 
-      .c10 svg:hover path {
-        fill: #4945ff;
-      }
+  test('Checks the initial availability (isAvailable)', async () => {
+    const spy = jest.fn();
 
-      .c11 {
-        -webkit-animation: gzYjWD 2s infinite linear;
-        animation: gzYjWD 2s infinite linear;
-      }
+    const { getByText, queryByText, queryByTestId } = await setup({
+      value: 'available',
+      required: true,
+      onChange: spy,
+    });
 
-      <div>
-        <div>
-          <div
-            class="c0 c1"
-            spacing="1"
-          >
-            <label
-              class="c2"
-              for="textinput-1"
-            >
-              <div
-                class="c3"
-              >
-                test
-              </div>
-            </label>
-            <div
-              class="c4 c5"
-            >
-              <input
-                aria-disabled="false"
-                aria-invalid="false"
-                aria-required="false"
-                class="c6"
-                id="textinput-1"
-                name="test"
-                placeholder=""
-                value="michka"
-              />
-              <div
-                class="c7"
-              >
-                <div
-                  class="c8"
-                >
-                  <button
-                    aria-label="regenerate"
-                    class="c9 c10"
-                    type="button"
-                  >
-                    <div
-                      class="c3 c11"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M12.057 18c.552 0 1 .451 1 .997v4.006a1 1 0 01-.941.995l-.059.002c-.552 0-1-.451-1-.997v-4.006a1 1 0 01.941-.995l.06-.002zm-3.06-.736l.055.03c.478.276.64.89.367 1.364l-2.002 3.468a1 1 0 01-1.31.394l-.055-.03a1.002 1.002 0 01-.368-1.363l2.003-3.469a1 1 0 011.31-.394zm7.42.394l2.002 3.468a1 1 0 01-.314 1.331l-.053.033a1.002 1.002 0 01-1.365-.363l-2.003-3.469a1 1 0 01.314-1.33l.054-.034a1.002 1.002 0 011.364.364zm-9.548-2.66l.033.054c.276.478.11 1.091-.364 1.364L3.07 18.42a1 1 0 01-1.331-.314l-.033-.053a1.001 1.001 0 01.364-1.365l3.468-2.003a1 1 0 011.33.314zm11.79-.313l3.468 2.002a1 1 0 01.393 1.31l-.03.055c-.276.478-.89.64-1.363.367l-3.469-2.003a1 1 0 01-.394-1.309l.03-.055c.276-.479.89-.64 1.364-.367zm4.344-3.628a1 1 0 01.995.941l.002.06c0 .551-.451 1-.997 1h-4.006a1 1 0 01-.995-.942L18 12.057c0-.552.451-1 .997-1h4.006zm-18 0a1 1 0 01.995.941l.002.06c0 .551-.451 1-.998 1H.998a1 1 0 01-.996-.942L0 12.057c0-.552.451-1 .998-1h4.004zm17.454-5.059l.033.054c.277.478.11 1.091-.363 1.365l-3.469 2.002a1 1 0 01-1.33-.314l-.034-.053a1.002 1.002 0 01.364-1.365l3.468-2.003a1 1 0 011.331.314zM3.07 5.684l3.468 2.003a1 1 0 01.394 1.31l-.03.055c-.276.478-.89.64-1.364.367L2.07 7.417a1 1 0 01-.394-1.31l.03-.055c.276-.479.89-.64 1.364-.368zm14.926-4.008l.056.03c.478.276.64.89.367 1.364l-2.003 3.468a1 1 0 01-1.309.394l-.055-.03a1.002 1.002 0 01-.367-1.364l2.002-3.468a1 1 0 011.31-.394zm-10.58.394L9.42 5.538a1 1 0 01-.314 1.33l-.053.034a1.002 1.002 0 01-1.365-.364L5.684 3.07a1 1 0 01.314-1.331l.054-.033a1.002 1.002 0 011.365.364zM12.058 0c.552 0 1 .451 1 .998v4.004a1 1 0 01-.941.996L12.057 6c-.552 0-1-.451-1-.998V.998a1 1 0 01.941-.996l.06-.002z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+
+    expect(getByText('Available')).toBeInTheDocument();
+
+    await sleep(4500);
+
+    expect(queryByText('Available')).not.toBeInTheDocument();
+  });
+
+  test('Checks the initial availability (!isAvailable)', async () => {
+    const spy = jest.fn();
+
+    const { getByText, queryByTestId, queryByText } = await setup({
+      value: 'not-available',
+      required: true,
+      onChange: spy,
+    });
+
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+
+    expect(getByText('Unavailable')).toBeInTheDocument();
+
+    await sleep(4500);
+
+    expect(queryByText('Available')).not.toBeInTheDocument();
+  });
+
+  test('Does not check the initial availability without a value', async () => {
+    const spy = jest.fn();
+
+    const { queryByText, queryByTestId } = await setup({
+      value: '',
+      required: true,
+      onChange: spy,
+    });
+
+    await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+
+    expect(queryByText('Available')).not.toBeInTheDocument();
+    expect(queryByText('Unavailable')).not.toBeInTheDocument();
   });
 });

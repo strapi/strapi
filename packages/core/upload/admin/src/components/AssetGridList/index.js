@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Grid, GridItem, KeyboardNavigable, Typography } from '@strapi/design-system';
 
 import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
@@ -34,8 +31,8 @@ export const AssetGridList = ({
 
           if (onReorderAsset) {
             return (
-              <GridItem col={3} height="100%">
-                <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
+              <GridItem key={asset.id} col={3} height="100%">
+                <Draggable index={index} moveItem={onReorderAsset} id={asset.id}>
                   <AssetCard
                     allowedTypes={allowedTypes}
                     asset={asset}

@@ -21,12 +21,12 @@ import {
   getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
-import { getTrad, removeKeyInObject } from '../../utils';
+import { getTrad } from '../../utils';
 
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema, recursivelyFindPathsBasedOnCondition } from './utils';
+import { cleanData, createYupSchema } from './utils';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import { usePrev } from '../../hooks';
 
@@ -166,39 +166,11 @@ const EditViewDataManagerProvider = ({
       currentContentTypeLayout?.attributes &&
       !isEqual(previousInitialValues, initialValues)
     ) {
-      /**
-       * This will return an array of paths:
-       * ['many_to_one', 'one_to_many', 'one_to_one']
-       * it can also return a path to a relation:
-       * ['relation_component.categories']
-       */
-      const relationalFieldPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'relation'
-      )(currentContentTypeLayout.attributes);
-
-      const componentPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'component' && !value.repeatable
-      )(currentContentTypeLayout.attributes);
-
-      const repeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'component' && value.repeatable
-      )(currentContentTypeLayout.attributes);
-
-      const dynamicZonePaths = recursivelyFindPathsBasedOnCondition(
-        components,
-        (value) => value.type === 'dynamiczone'
-      )(currentContentTypeLayout.attributes);
-
       dispatch({
         type: 'INIT_FORM',
         initialValues,
-        relationalFieldPaths,
-        componentPaths,
-        repeatableComponentPaths,
-        dynamicZonePaths,
+        components,
+        attributes: currentContentTypeLayout.attributes,
         setModifiedDataOnly,
       });
 
@@ -252,7 +224,7 @@ const EditViewDataManagerProvider = ({
   /**
    * @type {({ name: string, value: Relation, toOneRelation: boolean}) => void}
    */
-  const connectRelation = useCallback(({ name, value, toOneRelation }) => {
+  const relationConnect = useCallback(({ name, value, toOneRelation }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
@@ -261,10 +233,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const loadRelation = useCallback(({ target: { name, value } }) => {
+  const relationLoad = useCallback(({ target: { initialDataPath, modifiedDataPath, value } }) => {
     dispatch({
       type: 'LOAD_RELATION',
-      keys: name.split('.'),
+      modifiedDataPath,
+      initialDataPath,
       value,
     });
   }, []);
@@ -360,11 +333,9 @@ const EditViewDataManagerProvider = ({
 
   const createFormData = useCallback(
     (modifiedData, initialData) => {
-      // First we need to remove the added keys needed for the dnd
-      const preparedData = removeKeyInObject(cloneDeep(modifiedData), '__temp_key__');
       // Then we need to apply our helper
       const cleanedData = cleanData(
-        { browserState: preparedData, serverState: initialData },
+        { browserState: modifiedData, serverState: initialData },
         currentContentTypeLayout,
         allLayoutData.components
       );
@@ -534,20 +505,39 @@ const EditViewDataManagerProvider = ({
     [shouldCheckDZErrors]
   );
 
-  const moveComponentField = useCallback((pathToComponent, dragIndex, hoverIndex) => {
+  const moveComponentField = useCallback(({ name, newIndex, currentIndex }) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
-      pathToComponent,
-      dragIndex,
-      hoverIndex,
+      keys: name.split('.'),
+      newIndex,
+      oldIndex: currentIndex,
     });
   }, []);
 
-  const disconnectRelation = useCallback(({ name, id }) => {
+  const relationDisconnect = useCallback(({ name, id }) => {
     dispatch({
       type: 'DISCONNECT_RELATION',
       keys: name.split('.'),
       id,
+    });
+  }, []);
+
+  /**
+   * @typedef Payload
+   * @type {object}
+   * @property {string} name - The name of the field in `modifiedData`
+   * @property {number} oldIndex - The relation's current index
+   * @property {number} newIndex - The relation's new index
+   *
+   *
+   * @type {(payload: Payload) => void}
+   */
+  const relationReorder = useCallback(({ name, oldIndex, newIndex }) => {
+    dispatch({
+      type: 'REORDER_RELATION',
+      keys: name.split('.'),
+      oldIndex,
+      newIndex,
     });
   }, []);
 
@@ -601,7 +591,6 @@ const EditViewDataManagerProvider = ({
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
-        connectRelation,
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
@@ -614,20 +603,28 @@ const EditViewDataManagerProvider = ({
         shouldNotRunValidations,
         status,
         layout: currentContentTypeLayout,
-        loadRelation,
         modifiedData,
-        moveComponentDown,
         moveComponentField,
+        /**
+         * @deprecated use `moveComponentField` instead. This will be removed in v5.
+         */
+        moveComponentDown,
+        /**
+         * @deprecated use `moveComponentField` instead. This will be removed in v5.
+         */
         moveComponentUp,
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
-        disconnectRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
+        relationConnect,
+        relationDisconnect,
+        relationLoad,
+        relationReorder,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,

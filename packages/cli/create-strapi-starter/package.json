@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "4.5.6",
+  "version": "4.10.7",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-starter",
@@ -30,22 +30,32 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./index.js",
-  "bin": {
-    "create-strapi-starter": "./index.js"
-  },
+  "bin": "./bin/index.js",
+  "files": [
+    "./dist",
+    "./bin"
+  ],
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "build": "run -T tsc",
+    "build:ts": "run -T tsc",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/generate-new": "4.5.6",
-    "chalk": "4.1.1",
-    "ci-info": "3.5.0",
-    "commander": "8.2.0",
+    "@strapi/generate-new": "4.10.7",
+    "chalk": "4.1.2",
+    "ci-info": "3.8.0",
+    "commander": "8.3.0",
     "execa": "5.1.1",
     "fs-extra": "10.0.0",
-    "inquirer": "8.2.4",
+    "inquirer": "8.2.5",
     "ora": "5.4.1"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "4.10.7",
+    "tsconfig": "4.10.7"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

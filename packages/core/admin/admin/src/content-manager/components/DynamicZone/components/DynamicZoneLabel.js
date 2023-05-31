@@ -9,9 +9,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+import { Box, Flex, Typography } from '@strapi/design-system';
 
 const StyledBox = styled(Box)`
   border-radius: ${pxToRem(26)};

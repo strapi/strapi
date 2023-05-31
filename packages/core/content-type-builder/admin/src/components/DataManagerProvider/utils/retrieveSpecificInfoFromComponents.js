@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 import makeUnique from '../../../utils/makeUnique';
 
 const retrieveSpecificInfoFromComponents = (allComponents, keysToRetrieve) => {

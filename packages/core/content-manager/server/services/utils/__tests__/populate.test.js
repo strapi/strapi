@@ -90,8 +90,15 @@ describe('Populate', () => {
 
       expect(result).toEqual({
         dynZoneAttrName: {
-          populate: {
-            componentAttrName: {
+          on: {
+            component: {
+              populate: {
+                componentAttrName: {
+                  populate: {},
+                },
+              },
+            },
+            empty: {
               populate: {},
             },
           },

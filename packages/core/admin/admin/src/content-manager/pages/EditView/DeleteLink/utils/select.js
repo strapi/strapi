@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {

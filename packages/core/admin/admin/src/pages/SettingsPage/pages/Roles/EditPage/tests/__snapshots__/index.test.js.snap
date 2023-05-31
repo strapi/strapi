@@ -1,25 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<EditPage /> renders and matches the snapshot 1`] = `
-.c37 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c38 {
-  -webkit-animation: gzYjWD 1s infinite linear;
-  animation: gzYjWD 1s infinite linear;
-  will-change: transform;
-}
-
-.c2 {
+.c1 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 56px;
@@ -27,27 +9,104 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   padding-left: 56px;
 }
 
-.c3 {
+.c2 {
   padding-bottom: 8px;
 }
 
-.c5 {
-  padding-right: 8px;
+.c6 {
+  min-width: 0;
 }
 
-.c17 {
+.c11 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c16 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c20 {
+.c18 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
+.c31 {
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+}
+
+.c33 {
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #32324d;
+  padding: 16px;
+  border-radius: 4px;
+  width: 100%;
+  height: 6.5625rem;
+  line-height: 1.43;
+}
+
 .c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c15 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c20 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c21 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c27 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c5 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -65,7 +124,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c10 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -79,7 +138,22 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c18 {
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c17 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -91,6 +165,37 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 24px;
+}
+
+.c19 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c26 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .c35 {
@@ -111,126 +216,26 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   justify-content: space-around;
 }
 
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c16 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c22 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 1.14;
-  color: #32324d;
-}
-
-.c29 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c19 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c19 > * + * {
-  margin-top: 24px;
-}
-
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 16px;
-}
-
-.c28 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c28 > * + * {
-  margin-top: 4px;
-}
-
-.c12 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c12 > * + * {
-  margin-left: 8px;
-}
-
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c12 {
   position: relative;
   outline: none;
 }
 
-.c13 svg {
+.c12 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c13 svg > g,
-.c13 svg path {
+.c12 > svg > g,
+.c12 > svg path {
   fill: #ffffff;
 }
 
-.c13[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c13:after {
+.c12:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -245,11 +250,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c13:focus-visible {
+.c12:focus-visible {
   outline: none;
 }
 
-.c13:focus-visible:after {
+.c12:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -260,89 +265,123 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c37 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c13 {
   height: 2.5rem;
-  padding-left: 16px;
-  padding-right: 16px;
 }
 
-.c14 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c14 .c7 {
-  color: #ffffff;
-}
-
-.c14[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true'] .c7 {
+.c13[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c14[aria-disabled='true'] svg > g,.c14[aria-disabled='true'] svg path {
+.c13[aria-disabled='true'] svg > g,.c13[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c14[aria-disabled='true']:active {
+.c13[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c14[aria-disabled='true']:active .c7 {
+.c13[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c14[aria-disabled='true']:active svg > g,.c14[aria-disabled='true']:active svg path {
+.c13[aria-disabled='true']:active svg > g,.c13[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c14:hover {
+.c13:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c14:active {
+.c13:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c13 svg > g,
+.c13 svg path {
   fill: #ffffff;
 }
 
-.c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  background-color: #4945ff;
-  border: 1px solid #4945ff;
+.c22 {
   height: 2rem;
-  padding-left: 16px;
-  padding-right: 16px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c24 .c1 {
+.c22[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c22[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c22[aria-disabled='true'] svg > g,.c22[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c22[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c22[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c22[aria-disabled='true']:active svg > g,.c22[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c22:hover {
+  background-color: #ffffff;
+}
+
+.c22:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c22:active .c8 {
+  color: #4945ff;
+}
+
+.c22:active svg > g,
+.c22:active svg path {
+  fill: #4945ff;
+}
+
+.c22 .c8 {
+  color: #271fe0;
+}
+
+.c22 svg > g,
+.c22 svg path {
+  fill: #271fe0;
+}
+
+.c28 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -353,64 +392,13 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c24 .c7 {
-  color: #ffffff;
+.c38 {
+  -webkit-animation: gzYjWD 1s infinite linear;
+  animation: gzYjWD 1s infinite linear;
+  will-change: transform;
 }
 
-.c24[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c24[aria-disabled='true'] .c7 {
-  color: #666687;
-}
-
-.c24[aria-disabled='true'] svg > g,.c24[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c24[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c24[aria-disabled='true']:active .c7 {
-  color: #666687;
-}
-
-.c24[aria-disabled='true']:active svg > g,.c24[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c24:hover {
-  background-color: #ffffff;
-}
-
-.c24:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c24:active .c7 {
-  color: #4945ff;
-}
-
-.c24:active svg > g,
-.c24:active svg path {
-  fill: #4945ff;
-}
-
-.c24 .c7 {
-  color: #271fe0;
-}
-
-.c24 svg > g,
-.c24 svg path {
-  fill: #271fe0;
-}
-
-.c31 {
+.c30 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -425,36 +413,36 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c31::-webkit-input-placeholder {
+.c30::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c31::-moz-placeholder {
+.c30::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c31:-ms-input-placeholder {
+.c30:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c31::placeholder {
+.c30::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c31[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   color: inherit;
 }
 
-.c31:focus {
+.c30:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c30 {
+.c29 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -466,12 +454,84 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c30:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c24 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c25 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c32 {
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c32:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c34 {
+  border: none;
+  resize: none;
+}
+
+.c34::-webkit-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34::-moz-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34:-ms-input-placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34::placeholder {
+  color: #8e8ea9;
+  font-size: 0.875rem;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c34:focus-within {
+  outline: none;
+}
+
 .c4 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c3 {
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -482,19 +542,28 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   align-items: center;
   -webkit-text-decoration: none;
   text-decoration: none;
+  gap: 8px;
   position: relative;
   outline: none;
 }
 
-.c4 svg path {
-  fill: #4945ff;
-}
-
-.c4 svg {
+.c3 svg {
   font-size: 0.625rem;
 }
 
-.c4:after {
+.c3 svg path {
+  fill: #4945ff;
+}
+
+.c3:hover {
+  color: #7b79ff;
+}
+
+.c3:active {
+  color: #271fe0;
+}
+
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -509,11 +578,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -524,133 +593,18 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
 .c36 {
   height: 100vh;
 }
 
-.c26 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c27 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c0:focus-visible {
-  outline: none;
-}
-
-.c33 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c33:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c34 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-  background: inherit;
-}
-
-.c34::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c34:focus-within {
-  outline: none;
-}
-
-.c32 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c32 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c32 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c32 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c32 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
 @media (max-width:68.75rem) {
-  .c27 {
+  .c25 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c27 {
+  .c25 {
     grid-column: span;
   }
 }
@@ -663,66 +617,62 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
     tabindex="-1"
   >
     <form>
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
-          class="c1 c2"
+          class="c1"
           data-strapi-header="true"
         >
           <div
-            class="c1 c3"
+            class="c2"
           >
             <a
               aria-current="page"
-              class="c4 active"
+              class="c3 active"
               href="/settings/roles"
             >
-              <span
-                aria-hidden="true"
-                class="c1 c5 c6"
+              <svg
+                fill="none"
+                height="1rem"
+                viewBox="0 0 24 24"
+                width="1rem"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
-                    fill="#212134"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
+                  fill="#212134"
+                />
+              </svg>
               <span
-                class="c7 c8"
+                class="c4"
               >
                 Back
               </span>
             </a>
           </div>
           <div
-            class="c1 c9"
+            class="c5"
           >
             <div
-              class="c1 c10"
+              class="c6 c7"
             >
               <h1
-                class="c7 c11"
+                class="c8 c9"
               >
                 Edit a role
               </h1>
             </div>
             <div
-              class="c1 c10 c12"
-              spacing="2"
+              class="c10"
             >
               <button
                 aria-disabled="false"
-                class="c13 c14"
+                class="c11 c10 c12 c13"
                 type="button"
               >
                 <span
-                  class="c7 c15"
+                  class="c8 c14"
                 >
                   Save
                 </span>
@@ -730,143 +680,119 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             </div>
           </div>
           <p
-            class="c7 c16"
+            class="c8 c15"
           >
             Define the rights given to the role
           </p>
         </div>
       </div>
       <div
-        class="c1 c17"
+        class="c16"
       >
         <div
-          class="c1 c18 c19"
-          spacing="6"
+          class="c17"
         >
           <div
-            class="c1 c20"
+            class="c18"
           >
             <div
-              class="c1 c18 c21"
-              spacing="4"
+              class="c19"
             >
               <div
-                class="c1 c9"
+                class="c5"
               >
                 <div
-                  class="c1 "
+                  class=""
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c7 c22"
+                      class="c8 c20"
                     />
                   </div>
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <span
-                      class="c7 c23"
+                      class="c8 c21"
                     />
                   </div>
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c13 c24"
+                  class="c11 c10 c12 c22"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="c7 c25"
+                    class="c8 c23"
                   >
                     NaN users with this role
                   </span>
                 </button>
               </div>
               <div
-                class="c1 c26"
+                class="c24"
               >
                 <div
-                  class="c27"
+                  class="c25"
                 >
-                  <div
-                    class="c1 "
-                  >
-                    <div>
-                      <div>
-                        <div
-                          class="c1 c18 c28"
-                          spacing="1"
+                  <div>
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c26"
+                      >
+                        <label
+                          class="c8 c27 c28"
+                          for="1"
                         >
-                          <label
-                            class="c7 c29"
-                            for="textinput-1"
-                          >
-                            <div
-                              class="c1 c10"
-                            >
-                              Name
-                            </div>
-                          </label>
-                          <div
-                            class="c1 c9 c30"
-                          >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c31"
-                              id="textinput-1"
-                              name="name"
-                              value=""
-                            />
-                          </div>
+                          Name
+                        </label>
+                        <div
+                          class="c5 c29"
+                        >
+                          <input
+                            aria-disabled="false"
+                            aria-invalid="false"
+                            aria-required="false"
+                            class="c30"
+                            id="1"
+                            name="name"
+                            value=""
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c27"
+                  class="c25"
                 >
                   <div
-                    class="c1 "
+                    class=""
                   >
                     <div
-                      class="c32"
+                      class="c26"
                     >
-                      <div>
-                        <div
-                          class="c1 c18 c28"
-                          spacing="1"
-                        >
-                          <div
-                            class="c1 c10"
-                          >
-                            <label
-                              class="c7 c29"
-                              for="textarea-2"
-                            >
-                              <div
-                                class="c1 c10"
-                              >
-                                Description
-                              </div>
-                            </label>
-                          </div>
-                          <div
-                            class="c33"
-                          >
-                            <textarea
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c34"
-                              id="textarea-2"
-                              name="description"
-                            />
-                          </div>
-                        </div>
+                      <label
+                        class="c8 c27 c28"
+                        for="description"
+                      >
+                        Description
+                      </label>
+                      <div
+                        class="c31 c32"
+                      >
+                        <textarea
+                          aria-invalid="false"
+                          aria-required="false"
+                          class="c33 c34"
+                          font-size="2"
+                          id="description"
+                        />
                       </div>
                     </div>
                   </div>
@@ -875,10 +801,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c1 c20"
+            class="c18"
           >
             <div
-              class="c1 c35 c36"
+              class="c35 c36"
               data-testid="loader"
             >
               <div

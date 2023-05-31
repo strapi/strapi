@@ -4,15 +4,10 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import Pencil from '@strapi/icons/Pencil';
-import Cross from '@strapi/icons/Cross';
-import Drag from '@strapi/icons/Drag';
-import CardPreview from './CardPreview';
-import ellipsisCardTitle from '../utils/ellipsisCardTitle';
+import { Flex, Box, Typography } from '@strapi/design-system';
+import { Pencil, Cross, Drag } from '@strapi/icons';
+
+import { CardDragPreview } from '../../App/components/CardDragPreview';
 import { getTrad, ItemTypes } from '../../../utils';
 
 const ActionButton = styled.button`
@@ -90,7 +85,6 @@ const DraggableCard = ({
   const dropRef = useRef(null);
   const [, forceRerenderAfterDnd] = useState(false);
   const editButtonRef = useRef();
-  const cardEllipsisTitle = ellipsisCardTitle(labelField);
 
   const handleClickEditRow = () => {
     if (editButtonRef.current) {
@@ -98,6 +92,7 @@ const DraggableCard = ({
     }
   };
 
+  // TODO: this can be simplified a lot by using the useDragAndDrop() hook
   const [, drop] = useDrop({
     accept: ItemTypes.FIELD,
     hover(item, monitor) {
@@ -181,8 +176,8 @@ const DraggableCard = ({
 
   return (
     <FieldWrapper ref={refs ? refs.dropRef : null}>
-      {isDragging && <CardPreview transparent labelField={cardEllipsisTitle} />}
-      {!isDragging && isDraggingSibling && <CardPreview isSibling labelField={cardEllipsisTitle} />}
+      {isDragging && <CardDragPreview transparent labelField={labelField} />}
+      {!isDragging && isDraggingSibling && <CardDragPreview isSibling labelField={labelField} />}
 
       {!isDragging && !isDraggingSibling && (
         <FieldContainer
@@ -193,7 +188,7 @@ const DraggableCard = ({
           onClick={handleClickEditRow}
           isDragging={isDragging}
         >
-          <Stack horizontal spacing={3}>
+          <Flex gap={3}>
             <DragButton
               as="span"
               aria-label={formatMessage(
@@ -209,8 +204,8 @@ const DraggableCard = ({
             >
               <Drag />
             </DragButton>
-            <Typography fontWeight="bold">{cardEllipsisTitle}</Typography>
-          </Stack>
+            <Typography fontWeight="bold">{labelField}</Typography>
+          </Flex>
           <Flex paddingLeft={3}>
             <ActionButton
               ref={editButtonRef}

@@ -46,4 +46,4 @@ export interface SchemaProvider {
   drop(): Promise<void>;
 }
 
-export default function(db: Database): SchemaProvider;
+export default function (db: Database): SchemaProvider;

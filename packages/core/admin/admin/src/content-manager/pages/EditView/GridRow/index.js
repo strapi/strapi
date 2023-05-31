@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Grid, GridItem } from '@strapi/design-system';
 import Inputs from '../../../components/Inputs';
 import FieldComponent from '../../../components/FieldComponent';
 

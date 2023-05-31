@@ -49,31 +49,7 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c40 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c28 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c2 {
+      .c1 {
         background: #f6f6f9;
         padding-top: 40px;
         padding-right: 56px;
@@ -81,8 +57,19 @@ describe('Upload | SettingsPage', () => {
         padding-left: 56px;
       }
 
-      .c9 {
-        padding-right: 8px;
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
       }
 
       .c13 {
@@ -94,7 +81,7 @@ describe('Upload | SettingsPage', () => {
         padding-bottom: 56px;
       }
 
-      .c19 {
+      .c18 {
         background: #ffffff;
         padding: 24px;
         border-radius: 4px;
@@ -120,70 +107,6 @@ describe('Upload | SettingsPage', () => {
         border-radius: 4px;
       }
 
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c17 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c32 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
       .c6 {
         font-weight: 600;
         font-size: 2rem;
@@ -195,8 +118,8 @@ describe('Upload | SettingsPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 1.14;
-        color: #32324d;
+        line-height: 0;
+        color: #ffffff;
       }
 
       .c12 {
@@ -205,14 +128,14 @@ describe('Upload | SettingsPage', () => {
         color: #666687;
       }
 
-      .c21 {
+      .c20 {
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c26 {
+      .c25 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -249,58 +172,136 @@ describe('Upload | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 16px;
-      }
-
-      .c25 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c25 > * + * {
-        margin-top: 4px;
-      }
-
-      .c7 {
+      .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 12;
+      }
+
+      .c19 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .c24 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .c32 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c9 {
         position: relative;
         outline: none;
       }
 
-      .c7 svg {
+      .c9 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c9 > svg > g,
+      .c9 > svg path {
         fill: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c9[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c7:after {
+      .c9:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -315,11 +316,11 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid transparent;
       }
 
-      .c7:focus-visible {
+      .c9:focus-visible {
         outline: none;
       }
 
-      .c7:focus-visible:after {
+      .c9:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -330,23 +331,64 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
+      .c28 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c10 {
-        height: 100%;
-      }
-
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
         height: 2rem;
-        padding-left: 16px;
-        padding-right: 16px;
       }
 
-      .c8 .c1 {
+      .c10[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c10[aria-disabled='true'] .c5 {
+        color: #666687;
+      }
+
+      .c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c10[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c10[aria-disabled='true']:active .c5 {
+        color: #666687;
+      }
+
+      .c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c10:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c10:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c10 svg > g,
+      .c10 svg path {
+        fill: #ffffff;
+      }
+
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -357,49 +399,28 @@ describe('Upload | SettingsPage', () => {
         align-items: center;
       }
 
-      .c8 .c5 {
-        color: #ffffff;
+      .c21 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 24px;
       }
 
-      .c8[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
+      .c22 {
+        grid-column: span 6;
+        max-width: 100%;
       }
 
-      .c8[aria-disabled='true'] .c5 {
-        color: #666687;
+      .c14 {
+        display: grid;
+        grid-template-columns: 1fr;
       }
 
-      .c8[aria-disabled='true'] svg > g,.c8[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c16 {
+        overflow-x: hidden;
       }
 
-      .c8[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c8[aria-disabled='true']:active .c5 {
-        color: #666687;
-      }
-
-      .c8[aria-disabled='true']:active svg > g,.c8[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c8:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c8:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #ffffff;
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c27 {
@@ -469,42 +490,18 @@ describe('Upload | SettingsPage', () => {
         width: 100%;
       }
 
-      .c24 {
+      .c23 {
         max-width: 320px;
       }
 
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c22 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 24px;
-      }
-
-      .c23 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c14 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c16 {
-        overflow-x: hidden;
-      }
-
       @media (max-width:68.75rem) {
-        .c23 {
+        .c22 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c23 {
+        .c22 {
           grid-column: span;
         }
       }
@@ -521,14 +518,14 @@ describe('Upload | SettingsPage', () => {
               style="height: 0px;"
             >
               <div
-                class="c1 c2"
+                class="c1"
                 data-strapi-header="true"
               >
                 <div
-                  class="c1 c3"
+                  class="c2"
                 >
                   <div
-                    class="c1 c4"
+                    class="c3 c4"
                   >
                     <h1
                       class="c5 c6"
@@ -538,24 +535,24 @@ describe('Upload | SettingsPage', () => {
                   </div>
                   <button
                     aria-disabled="true"
-                    class="c7 c8"
+                    class="c7 c8 c9 c10"
                     data-testid="save-button"
                     disabled=""
                     type="submit"
                   >
                     <div
                       aria-hidden="true"
-                      class="c1 c9 c10"
+                      class=""
                     >
                       <svg
                         fill="none"
-                        height="1em"
+                        height="1rem"
                         viewBox="0 0 24 24"
-                        width="1em"
+                        width="1rem"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                          d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                           fill="#212134"
                         />
                       </svg>
@@ -575,279 +572,253 @@ describe('Upload | SettingsPage', () => {
               </div>
             </div>
             <div
-              class="c1 c13"
+              class="c13"
             >
               <div
-                class="c1 c14"
+                class="c14"
               >
                 <div
-                  class="c1 c15 c16"
+                  class="c15 c16"
                 >
                   <div
-                    class="c1 c17 c18"
-                    spacing="12"
+                    class="c17"
                   >
                     <div
-                      class="c1 c19"
+                      class="c18"
                     >
                       <div
-                        class="c1 c17 c20"
-                        spacing="4"
+                        class="c19"
                       >
                         <div
-                          class="c1 c4"
+                          class="c4"
                         >
                           <h2
-                            class="c5 c21"
+                            class="c5 c20"
                           >
                             Asset management
                           </h2>
                         </div>
                         <div
-                          class="c1 c22"
+                          class="c21"
                         >
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c1 "
+                              class="c23"
                             >
                               <div
                                 class="c24"
                               >
                                 <div
-                                  class="c1 c17 c25"
-                                  spacing="1"
+                                  class="c4"
+                                >
+                                  <label
+                                    class="c5 c25 c26"
+                                    for="1"
+                                  >
+                                    Responsive friendly upload
+                                  </label>
+                                </div>
+                                <label
+                                  class="c27"
                                 >
                                   <div
-                                    class="c1 c4"
+                                    class="c28"
                                   >
-                                    <label
-                                      class="c5 c26"
-                                      for="toggleinput-1"
-                                    >
-                                      <div
-                                        class="c1 c4"
-                                      >
-                                        Responsive friendly upload
-                                      </div>
-                                    </label>
+                                    Responsive friendly upload
                                   </div>
-                                  <label
-                                    class="c27"
+                                  <div
+                                    class="c29 c30"
+                                    display="flex"
                                   >
                                     <div
-                                      class="c28"
+                                      aria-hidden="true"
+                                      class="c31 c32 c33"
                                     >
-                                      Responsive friendly upload
+                                      <span
+                                        class="c5 c34"
+                                      >
+                                        Off
+                                      </span>
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
-                                      display="flex"
+                                      aria-hidden="true"
+                                      class="c31 c32 c35"
                                     >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c33"
+                                      <span
+                                        class="c5 c36"
                                       >
-                                        <span
-                                          class="c5 c34"
-                                        >
-                                          Off
-                                        </span>
-                                      </div>
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c35"
-                                      >
-                                        <span
-                                          class="c5 c36"
-                                        >
-                                          On
-                                        </span>
-                                      </div>
-                                      <input
-                                        aria-disabled="false"
-                                        aria-label="responsiveDimensions"
-                                        aria-required="false"
-                                        checked=""
-                                        class="c37"
-                                        data-testid="responsiveDimensions"
-                                        id="toggleinput-1"
-                                        name="responsiveDimensions"
-                                        type="checkbox"
-                                      />
+                                        On
+                                      </span>
                                     </div>
-                                  </label>
-                                  <p
-                                    class="c5 c38"
-                                    id="toggleinput-1-hint"
-                                  >
-                                    Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
-                                  </p>
-                                </div>
+                                    <input
+                                      aria-describedby="1-hint"
+                                      aria-disabled="false"
+                                      aria-label="responsiveDimensions"
+                                      aria-required="false"
+                                      checked=""
+                                      class="c37"
+                                      data-testid="responsiveDimensions"
+                                      id="1"
+                                      name="responsiveDimensions"
+                                      type="checkbox"
+                                    />
+                                  </div>
+                                </label>
+                                <p
+                                  class="c5 c38"
+                                  id="1-hint"
+                                >
+                                  Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
+                                </p>
                               </div>
                             </div>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c1 "
+                              class="c23"
                             >
                               <div
                                 class="c24"
                               >
                                 <div
-                                  class="c1 c17 c25"
-                                  spacing="1"
+                                  class="c4"
+                                >
+                                  <label
+                                    class="c5 c25 c26"
+                                    for="3"
+                                  >
+                                    Size optimization
+                                  </label>
+                                </div>
+                                <label
+                                  class="c27"
                                 >
                                   <div
-                                    class="c1 c4"
+                                    class="c28"
                                   >
-                                    <label
-                                      class="c5 c26"
-                                      for="toggleinput-2"
-                                    >
-                                      <div
-                                        class="c1 c4"
-                                      >
-                                        Size optimization
-                                      </div>
-                                    </label>
+                                    Size optimization
                                   </div>
-                                  <label
-                                    class="c27"
+                                  <div
+                                    class="c29 c30"
+                                    display="flex"
                                   >
                                     <div
-                                      class="c28"
+                                      aria-hidden="true"
+                                      class="c31 c32 c35"
                                     >
-                                      Size optimization
+                                      <span
+                                        class="c5 c39"
+                                      >
+                                        Off
+                                      </span>
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
-                                      display="flex"
+                                      aria-hidden="true"
+                                      class="c31 c32 c33"
                                     >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c35"
+                                      <span
+                                        class="c5 c34"
                                       >
-                                        <span
-                                          class="c5 c39"
-                                        >
-                                          Off
-                                        </span>
-                                      </div>
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c33"
-                                      >
-                                        <span
-                                          class="c5 c34"
-                                        >
-                                          On
-                                        </span>
-                                      </div>
-                                      <input
-                                        aria-disabled="false"
-                                        aria-label="sizeOptimization"
-                                        aria-required="false"
-                                        class="c37"
-                                        data-testid="sizeOptimization"
-                                        id="toggleinput-2"
-                                        name="sizeOptimization"
-                                        type="checkbox"
-                                      />
+                                        On
+                                      </span>
                                     </div>
-                                  </label>
-                                  <p
-                                    class="c5 c38"
-                                    id="toggleinput-2-hint"
-                                  >
-                                    Enabling this option will reduce the image size and slightly reduce its quality.
-                                  </p>
-                                </div>
+                                    <input
+                                      aria-describedby="3-hint"
+                                      aria-disabled="false"
+                                      aria-label="sizeOptimization"
+                                      aria-required="false"
+                                      class="c37"
+                                      data-testid="sizeOptimization"
+                                      id="3"
+                                      name="sizeOptimization"
+                                      type="checkbox"
+                                    />
+                                  </div>
+                                </label>
+                                <p
+                                  class="c5 c38"
+                                  id="3-hint"
+                                >
+                                  Enabling this option will reduce the image size and slightly reduce its quality.
+                                </p>
                               </div>
                             </div>
                           </div>
                           <div
-                            class="c23"
+                            class="c22"
                           >
                             <div
-                              class="c1 "
+                              class="c23"
                             >
                               <div
                                 class="c24"
                               >
                                 <div
-                                  class="c1 c17 c25"
-                                  spacing="1"
+                                  class="c4"
+                                >
+                                  <label
+                                    class="c5 c25 c26"
+                                    for="5"
+                                  >
+                                    Auto orientation
+                                  </label>
+                                </div>
+                                <label
+                                  class="c27"
                                 >
                                   <div
-                                    class="c1 c4"
+                                    class="c28"
                                   >
-                                    <label
-                                      class="c5 c26"
-                                      for="toggleinput-3"
-                                    >
-                                      <div
-                                        class="c1 c4"
-                                      >
-                                        Auto orientation
-                                      </div>
-                                    </label>
+                                    Auto orientation
                                   </div>
-                                  <label
-                                    class="c27"
+                                  <div
+                                    class="c29 c30"
+                                    display="flex"
                                   >
                                     <div
-                                      class="c28"
+                                      aria-hidden="true"
+                                      class="c31 c32 c33"
                                     >
-                                      Auto orientation
+                                      <span
+                                        class="c5 c34"
+                                      >
+                                        Off
+                                      </span>
                                     </div>
                                     <div
-                                      class="c1 c29 c30"
-                                      display="flex"
+                                      aria-hidden="true"
+                                      class="c31 c32 c35"
                                     >
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c33"
+                                      <span
+                                        class="c5 c36"
                                       >
-                                        <span
-                                          class="c5 c34"
-                                        >
-                                          Off
-                                        </span>
-                                      </div>
-                                      <div
-                                        aria-hidden="true"
-                                        class="c1 c31 c32 c35"
-                                      >
-                                        <span
-                                          class="c5 c36"
-                                        >
-                                          On
-                                        </span>
-                                      </div>
-                                      <input
-                                        aria-disabled="false"
-                                        aria-label="autoOrientation"
-                                        aria-required="false"
-                                        checked=""
-                                        class="c37"
-                                        data-testid="autoOrientation"
-                                        id="toggleinput-3"
-                                        name="autoOrientation"
-                                        type="checkbox"
-                                      />
+                                        On
+                                      </span>
                                     </div>
-                                  </label>
-                                  <p
-                                    class="c5 c38"
-                                    id="toggleinput-3-hint"
-                                  >
-                                    Enabling this option will automatically rotate the image according to EXIF orientation tag.
-                                  </p>
-                                </div>
+                                    <input
+                                      aria-describedby="5-hint"
+                                      aria-disabled="false"
+                                      aria-label="autoOrientation"
+                                      aria-required="false"
+                                      checked=""
+                                      class="c37"
+                                      data-testid="autoOrientation"
+                                      id="5"
+                                      name="autoOrientation"
+                                      type="checkbox"
+                                    />
+                                  </div>
+                                </label>
+                                <p
+                                  class="c5 c38"
+                                  id="5-hint"
+                                >
+                                  Enabling this option will automatically rotate the image according to EXIF orientation tag.
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -861,7 +832,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c40"
+          class="c28"
         >
           <p
             aria-live="polite"

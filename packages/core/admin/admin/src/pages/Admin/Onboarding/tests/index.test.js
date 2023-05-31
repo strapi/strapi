@@ -1,13 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import Onboarding from '../index';
 
-jest.mock('../../../../hooks', () => ({
-  useConfigurations: jest.fn(() => {
-    return { showTutorials: true };
-  }),
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useAppInfo: jest.fn(() => ({ communityEdition: true })),
 }));
 
 const App = (
@@ -19,18 +20,45 @@ const App = (
 );
 
 describe('Onboarding', () => {
-  it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+  test.each([
+    'watch more videos',
+    'build a content architecture',
+    'add & manage content',
+    'manage media',
+    'documentation',
+    'cheatsheet',
+    'get help',
+  ])('should display %s link', async (link) => {
+    const user = userEvent.setup();
+    const { getByRole } = render(App);
 
-    expect(firstChild).toMatchSnapshot();
+    await user.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 
-  it('should open links when button is clicked', () => {
-    render(App);
+  test('should display discord link for CE edition', async () => {
+    const user = userEvent.setup();
+    const { getByRole } = render(App);
 
-    fireEvent.click(document.querySelector('#onboarding'));
-    expect(screen.getByText('Documentation')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
+      'href',
+      'https://discord.strapi.io'
+    );
+  });
+
+  test('should display support link for EE edition', async () => {
+    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
+    const user = userEvent.setup();
+    const { getByRole } = render(App);
+
+    await user.click(getByRole('button', { name: /open help menu/i }));
+
+    expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
+      'href',
+      'https://support.strapi.io/support/home'
+    );
   });
 });

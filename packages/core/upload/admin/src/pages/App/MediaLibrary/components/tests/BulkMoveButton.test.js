@@ -139,13 +139,13 @@ describe('BulkMoveButton', () => {
       response: {
         data: {
           error: {
+            name: 'ValidationError',
             details: {
               errors: [
                 {
-                  key: 'destination',
                   path: [],
                   message: FIXTURE_ERROR_MESSAGE,
-                  defaultMessage: FIXTURE_ERROR_MESSAGE,
+                  name: 'ValidationError',
                 },
               ],
             },

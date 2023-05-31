@@ -6,6 +6,7 @@ const { getService, pickWritableAttributes } = require('../utils');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
+
   const entity = await entityManager.find(query, model);
   return entityManager.assocCreatorRoles(entity);
 };
@@ -22,7 +23,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
     const entity = await findEntity(permissionQuery, model);
 
@@ -54,7 +55,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     const pickWritables = pickWritableAttributes({ model });
 
@@ -70,7 +73,9 @@ module.exports = {
 
     if (!entity) {
       const sanitizedBody = await sanitizeFn(body);
-      const newEntity = await entityManager.create(sanitizedBody, model, { params: query });
+      const newEntity = await entityManager.create(sanitizedBody, model, {
+        params: sanitizedQuery,
+      });
       ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', {
@@ -100,7 +105,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -127,7 +134,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -158,7 +167,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();

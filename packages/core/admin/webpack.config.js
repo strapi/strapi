@@ -8,8 +8,9 @@ const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const browserslist = require('browserslist');
+const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
@@ -52,6 +53,11 @@ module.exports = ({
 
   const excludeRegex = createPluginsExcludePath(pluginsPath);
 
+  // Ensure we use the config in this directory, even if run with a different
+  // working directory
+  const browserslistConfig = browserslist.loadConfig({ path: __dirname });
+  const buildTarget = browserslistToEsbuild(browserslistConfig);
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
@@ -72,7 +78,7 @@ module.exports = ({
       minimize: optimize,
       minimizer: [
         new ESBuildMinifyPlugin({
-          target: 'es2015',
+          target: buildTarget,
           css: true, // Apply minification to CSS assets
         }),
       ],
@@ -88,7 +94,7 @@ module.exports = ({
           exclude: excludeRegex,
           options: {
             loader: 'tsx',
-            target: 'es2015',
+            target: buildTarget,
           },
         },
         {
@@ -152,7 +158,7 @@ module.exports = ({
                 loader: require.resolve('esbuild-loader'),
                 options: {
                   loader: 'jsx',
-                  target: 'es2015',
+                  target: buildTarget,
                 },
               },
             },
@@ -165,7 +171,7 @@ module.exports = ({
             loader: require.resolve('esbuild-loader'),
             options: {
               loader: 'jsx',
-              target: 'es2015',
+              target: buildTarget,
             },
           },
         },
@@ -219,7 +225,7 @@ module.exports = ({
       alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
-      mainFields: ['browser', 'jsnext:main', 'main'],
+      mainFields: ['browser', 'module', 'jsnext:main', 'main'],
       modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
     plugins: [
@@ -228,8 +234,6 @@ module.exports = ({
         template: path.resolve(__dirname, 'index.html'),
       }),
       new webpack.DefinePlugin(envVariables),
-
-      new NodePolyfillPlugin(),
 
       new ForkTsCheckerPlugin({
         typescript: {

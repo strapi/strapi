@@ -1,33 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTable renders and matches the snapshot 1`] = `
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c0 {
   padding-top: 16px;
 }
 
-.c9 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c11 {
+.c7 {
+  background: #ffffff;
+  padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
 }
 
-.c14 {
+.c10 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c16 {
   padding-left: 8px;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: revert;
+  color: #32324d;
+}
+
+.c26 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  line-height: revert;
+  color: #32324d;
 }
 
 .c1 {
@@ -74,9 +108,10 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c7 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -88,72 +123,68 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  gap: 16px;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
-.c10 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c18 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.c21 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #32324d;
-}
-
-.c4 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c6 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
-.c6:focus {
-  outline: none;
-}
-
-.c6[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c5 {
-  position: relative;
+.c9 {
   border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
   min-height: 2rem;
   outline: none;
   box-shadow: 0;
@@ -163,53 +194,50 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c5:focus-within {
+.c9[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c12 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
+.c15 > svg {
+  width: 0.375rem;
 }
 
-.c12 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c12 svg path {
+.c15 > svg > path {
   fill: #666687;
 }
 
 .c13 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c14 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: none;
-  border: none;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-.c13 svg {
-  width: 0.375rem;
+.c28[data-state='checked'] .c4 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
-.c8 {
-  width: 100%;
-}
-
-.c16 > * + * {
-  margin-left: 4px;
-}
-
-.c23 {
-  line-height: revert;
-}
-
-.c17 {
+.c19 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -222,7 +250,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c17:after {
+.c19:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -237,11 +265,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c17:focus-visible {
+.c19:focus-visible {
   outline: none;
 }
 
-.c17:focus-visible:after {
+.c19:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -252,7 +280,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c20 {
+.c22 {
   padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
@@ -266,7 +294,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c20:after {
+.c22:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -281,11 +309,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c20:focus-visible {
+.c22:focus-visible {
   outline: none;
 }
 
-.c20:focus-visible:after {
+.c22:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -296,47 +324,47 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c21 {
+.c23 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c21:hover {
+.c23:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c24 {
+.c25 {
   color: #32324d;
 }
 
-.c24:hover {
+.c25:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c18 {
-  font-size: 0.7rem;
+.c20 {
+  font-size: 0.6875rem;
   pointer-events: none;
 }
 
-.c18 svg path {
+.c20 svg path {
   fill: #c0c0cf;
 }
 
-.c18:focus svg path,
-.c18:hover svg path {
+.c20:focus svg path,
+.c20:hover svg path {
   fill: #c0c0cf;
 }
 
-.c26 {
-  font-size: 0.7rem;
+.c27 {
+  font-size: 0.6875rem;
 }
 
-.c26 svg path {
+.c27 svg path {
   fill: #666687;
 }
 
-.c26:focus svg path,
-.c26:hover svg path {
+.c27:focus svg path,
+.c27:hover svg path {
   fill: #4a4a6a;
 }
 
@@ -350,75 +378,73 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       <div
         class="c2"
       >
-        <div>
+        <div
+          class=""
+        >
           <div
-            class="c3 c4"
+            class="c3"
           >
+            <label
+              class="c4 c5 c6"
+              for="1"
+            />
             <div
-              class="c2 c5"
+              aria-autocomplete="none"
+              aria-controls="radix-0"
+              aria-describedby="1-hint 1-error"
+              aria-expanded="false"
+              class="c7 c8 c9"
+              data-state="closed"
+              dir="ltr"
+              id="1"
+              overflow="hidden"
+              role="combobox"
+              tabindex="0"
             >
-              <button
-                aria-disabled="false"
-                aria-expanded="false"
-                aria-haspopup="listbox"
-                aria-label="Entries per page"
-                aria-labelledby="select-1-label select-1-content"
-                class="c6"
-                id="select-1"
-                type="button"
-              />
-              <div
-                class="c7 c8"
+              <span
+                class="c10 c11"
               >
-                <div
-                  class="c2"
+                <span
+                  class="c4 c12 c13"
                 >
-                  <div
-                    class="c9"
+                  <span
+                    class="c14"
                   >
-                    <span
-                      class="c10"
-                      id="select-1-content"
-                    >
-                      10
-                    </span>
-                  </div>
-                </div>
-                <div
-                  class="c2"
+                    10
+                  </span>
+                </span>
+              </span>
+              <span
+                class="c11"
+              >
+                <span
+                  aria-hidden="true"
+                  class="c15"
                 >
-                  <button
-                    aria-hidden="true"
-                    class="c11 c12 c13"
-                    tabindex="-1"
-                    title="Carret Down Button"
-                    type="button"
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 14 8"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+                    <path
+                      clip-rule="evenodd"
+                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                      fill="#32324D"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </span>
             </div>
           </div>
         </div>
         <div
-          class="c14"
+          class="c16"
         >
           <label
-            class="c15"
+            class="c4 c17"
             for="page-size"
           >
             Entries per page
@@ -426,35 +452,35 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
         </div>
       </div>
       <nav
-        aria-label="pagination"
+        aria-label="Pagination"
         class=""
       >
-        <ul
-          class="c2 c16"
+        <ol
+          class="c18"
         >
           <li>
             <a
               aria-current="page"
               aria-disabled="true"
-              class="c17 c18 active"
+              class="c19 c20 active"
               href="/settings/user"
               tabindex="-1"
             >
               <div
-                class="c19"
+                class="c21"
               >
                 Go to previous page
               </div>
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                  d="M9.88 14.12 3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88Z"
                   fill="#32324D"
                 />
               </svg>
@@ -463,17 +489,17 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           <li>
             <a
               aria-current="page"
-              class="c20 c21 active"
+              class="c22 c23 active"
               href="/settings/user?pageSize=10&page=1&sort=firstname"
             >
               <div
-                class="c19"
+                class="c21"
               >
                 Go to page 1
               </div>
               <span
                 aria-hidden="true"
-                class="c22 c23"
+                class="c4 c24"
               >
                 1
               </span>
@@ -482,17 +508,17 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           <li>
             <a
               aria-current="page"
-              class="c17 c24 active"
+              class="c19 c25 active"
               href="/settings/user?pageSize=10&page=2&sort=firstname"
             >
               <div
-                class="c19"
+                class="c21"
               >
                 Go to page 2
               </div>
               <span
                 aria-hidden="true"
-                class="c25 c23"
+                class="c4 c26"
               >
                 2
               </span>
@@ -502,35 +528,35 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
             <a
               aria-current="page"
               aria-disabled="false"
-              class="c17 c26 active"
+              class="c19 c27 active"
               href="/settings/user?pageSize=10&page=2&sort=firstname"
             >
               <div
-                class="c19"
+                class="c21"
               >
                 Go to next page
               </div>
               <svg
                 aria-hidden="true"
                 fill="none"
-                height="1em"
+                height="1rem"
                 viewBox="0 0 10 16"
-                width="1em"
+                width="1rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  d="M0 1.88 6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88Z"
                   fill="#32324D"
                 />
               </svg>
             </a>
           </li>
-        </ul>
+        </ol>
       </nav>
     </div>
   </div>
   <div
-    class="c19"
+    class="c21"
   >
     <p
       aria-live="polite"

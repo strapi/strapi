@@ -3,11 +3,7 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
-import {
-  Crumb,
-  CrumbLink,
-  Breadcrumbs as BaseBreadcrumbs,
-} from '@strapi/design-system/v2/Breadcrumbs';
+import { Crumb, CrumbLink, Breadcrumbs as BaseBreadcrumbs } from '@strapi/design-system/v2';
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 import { BreadcrumbsDefinition } from '../../constants';
 

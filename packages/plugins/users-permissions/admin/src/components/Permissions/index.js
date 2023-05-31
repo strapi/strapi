@@ -1,8 +1,6 @@
 import React, { useReducer } from 'react';
-import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
+import { Accordion, AccordionToggle, AccordionContent, Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
 import PermissionRow from './PermissionRow';
@@ -23,7 +21,7 @@ const Permissions = () => {
     });
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       {collapses.map((collapse, index) => (
         <Accordion
           expanded={collapse.isOpen}
@@ -49,7 +47,7 @@ const Permissions = () => {
           </AccordionContent>
         </Accordion>
       ))}
-    </Stack>
+    </Flex>
   );
 };
 

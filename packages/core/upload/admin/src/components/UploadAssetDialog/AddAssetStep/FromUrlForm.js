@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Textarea } from '@strapi/design-system/Textarea';
+import { Box, ModalFooter, Textarea, Button } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
 import { Form, useTracking } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import getTrad from '../../../utils/getTrad';
@@ -50,7 +47,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
           <Box paddingLeft={8} paddingRight={8} paddingBottom={6} paddingTop={6}>
             <Textarea
               label={formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
-              name="urls"
+              id="urls"
               hint={formatMessage({
                 id: getTrad('input.url.description'),
                 defaultMessage: 'Separate your URL links by a carriage return.',
@@ -62,9 +59,8 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
                   : undefined)
               }
               onChange={handleChange}
-            >
-              {values.urls}
-            </Textarea>
+              value={values.urls}
+            />
           </Box>
 
           <ModalFooter

@@ -115,7 +115,7 @@
   "form.button.single-type.description": "Ideálne pre jednorazové inštancie ako sú napríklad domovská stránka, atď.",
   "from": "od",
   "modalForm.attribute.form.base.name.description": "Medzery nie sú povolené v názve políčka",
-  "modalForm.attribute.form.base.name.placeholder": "napr. slug, SEO URL, kanonická URL",
+  "modalForm.attribute.form.base.name.placeholder": "napr. slug, seoUrl, kanonickáUrl",
   "modalForm.attribute.target-field": "Priložené políčko",
   "modalForm.attributes.select-component": "Vyberte komponent",
   "modalForm.attributes.select-components": "Vyberte komponenty",

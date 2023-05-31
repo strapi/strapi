@@ -113,7 +113,7 @@
   "form.button.single-type.description": "Підходить для поодиноких об'єктів, як-то домашня сторінка, про нас тощо",
   "from": "з",
   "modalForm.attribute.form.base.name.description": "Для назви атрибута не допускається пробілів",
-  "modalForm.attribute.form.base.name.placeholder": "наприклад, Slug, SEO URL, Canonical URL",
+  "modalForm.attribute.form.base.name.placeholder": "наприклад, slug, seoUrl, canonicalUrl",
   "modalForm.attribute.target-field": "Пов'язане поле",
   "modalForm.attributes.select-component": "Виберіть компонент",
   "modalForm.attributes.select-components": "Виберіть компоненти",

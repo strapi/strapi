@@ -44,6 +44,19 @@ describe('<DraftAndPublishBadge />', () => {
         padding-left: 12px;
       }
 
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #2f6846;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #2f6846;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -56,19 +69,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #2f6846;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #2f6846;
       }
 
       .c2 {
@@ -84,14 +84,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-ehIJor wxhvj"
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect
@@ -144,6 +144,19 @@ describe('<DraftAndPublishBadge />', () => {
         padding-left: 12px;
       }
 
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #006096;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #006096;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -156,19 +169,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #006096;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #006096;
       }
 
       .c2 {
@@ -184,14 +184,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-ehIJor wxhvj"
+          class="c1 sc-bdvvtL deFIGY"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect

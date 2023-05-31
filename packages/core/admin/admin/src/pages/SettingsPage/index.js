@@ -12,7 +12,7 @@
 import React, { memo, useMemo } from 'react';
 import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import { Switch, Redirect, Route, useParams } from 'react-router-dom';
-import { Layout } from '@strapi/design-system/Layout';
+import { Layout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useSettingsMenu } from '../../hooks';

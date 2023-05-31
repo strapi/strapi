@@ -1,10 +1,10 @@
 'use strict';
 
-const { isArray, toPath } = require('lodash/fp');
+const { isArray, isNil, toPath } = require('lodash/fp');
 
 module.exports =
   (allowedFields = null) =>
-  ({ key, path }, { remove }) => {
+  ({ key, path: { attribute: path } }, { remove }) => {
     // All fields are allowed
     if (allowedFields === null) {
       return;
@@ -12,6 +12,10 @@ module.exports =
 
     // Ignore invalid formats
     if (!isArray(allowedFields)) {
+      return;
+    }
+
+    if (isNil(path)) {
       return;
     }
 

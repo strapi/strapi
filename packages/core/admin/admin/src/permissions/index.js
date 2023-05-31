@@ -1,4 +1,4 @@
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import customPermissions from 'ee_else_ce/permissions/customPermissions';
 import defaultPermissions from './defaultPermissions';
 

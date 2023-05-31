@@ -198,7 +198,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       expect(result).toEqual({
         component: {
           relation: {
-            connect: [{ id: 1 }],
+            connect: [{ id: 1, position: { end: true } }],
             disconnect: [],
           },
         },
@@ -254,7 +254,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
         component: {
           component2: {
             relation: {
-              connect: [{ id: 1 }],
+              connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
           },
@@ -407,10 +407,10 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       const result = cleanData(
         {
           browserState: {
-            relation: [{ id: 1, something: true }],
+            relation: [{ id: 1, __temp_key__: 'a1', something: true }],
           },
           serverState: {
-            relation: [{ id: 2, something: true }],
+            relation: [{ id: 2, __temp_key__: 'a0', something: true }],
           },
         },
         schema,
@@ -419,7 +419,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          connect: [{ id: 1 }],
+          connect: [{ id: 1, position: { end: true } }],
           disconnect: [{ id: 2 }],
         },
       });
@@ -429,7 +429,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       const result = cleanData(
         {
           browserState: {
-            relation: [{ id: 1, something: true }],
+            relation: [{ id: 1, __temp_key__: 'a0', something: true }],
           },
           serverState: {
             relation: [],
@@ -441,7 +441,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          connect: [{ id: 1 }],
+          connect: [{ id: 1, position: { end: true } }],
           disconnect: [],
         },
       });
@@ -454,7 +454,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             relation: [],
           },
           serverState: {
-            relation: [{ id: 1, something: true }],
+            relation: [{ id: 1, __temp_key__: 'a0', something: true }],
           },
         },
         schema,
@@ -477,13 +477,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               {
                 id: 1,
                 relation_component: {
-                  relation: [{ id: 1 }],
+                  relation: [{ id: 1, __temp_key__: 'a0' }],
                 },
               },
               {
                 id: 2,
                 relation_component: {
-                  relation: [{ id: 2 }],
+                  relation: [{ id: 2, __temp_key__: 'a0' }],
                 },
               },
             ],
@@ -510,7 +510,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             relation_component: {
               relation: {
                 disconnect: [],
-                connect: [{ id: 1 }],
+                connect: [{ id: 1, position: { end: true } }],
               },
             },
           },
@@ -519,7 +519,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             relation_component: {
               relation: {
                 disconnect: [],
-                connect: [{ id: 2 }],
+                connect: [{ id: 2, position: { end: true } }],
               },
             },
           },
@@ -541,7 +541,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               {
                 id: 2,
                 relation_component: {
-                  relation: [{ id: 2 }],
+                  relation: [{ id: 2, __temp_key__: 'a0' }],
                 },
               },
             ],
@@ -551,13 +551,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               {
                 id: 1,
                 relation_component: {
-                  relation: [{ id: 1 }],
+                  relation: [{ id: 1, __temp_key__: 'a0' }],
                 },
               },
               {
                 id: 2,
                 relation_component: {
-                  relation: [{ id: 2 }],
+                  relation: [{ id: 2, __temp_key__: 'a0' }],
                 },
               },
             ],
@@ -599,13 +599,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               {
                 __component: 'basic.relation',
                 id: 1,
-                relation: [{ id: 1 }],
+                relation: [{ id: 1, __temp_key__: 'a0' }],
               },
               {
                 __component: 'basic.nested-relation',
                 id: 2,
                 relation_component: {
-                  relation: [{ id: 2 }],
+                  relation: [{ id: 2, __temp_key__: 'a0' }],
                 },
               },
               {
@@ -615,7 +615,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                   {
                     __component: 'basic.relation',
                     id: 1,
-                    relation: [{ id: 3 }],
+                    relation: [{ id: 3, __temp_key__: 'a0' }],
                   },
                 ],
               },
@@ -659,7 +659,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             __component: 'basic.relation',
             id: 1,
             relation: {
-              connect: [{ id: 1 }],
+              connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
           },
@@ -668,7 +668,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                connect: [{ id: 2 }],
+                connect: [{ id: 2, position: { end: true } }],
                 disconnect: [],
               },
             },
@@ -681,7 +681,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 __component: 'basic.relation',
                 id: 1,
                 relation: {
-                  connect: [{ id: 3 }],
+                  connect: [{ id: 3, position: { end: true } }],
                   disconnect: [],
                 },
               },
@@ -715,7 +715,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                   {
                     __component: 'basic.relation',
                     id: 1,
-                    relation: [{ id: 3 }],
+                    relation: [{ id: 3, __temp_key__: 'a0' }],
                   },
                   {
                     __component: 'basic.relation',
@@ -731,13 +731,13 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
               {
                 __component: 'basic.relation',
                 id: 1,
-                relation: [{ id: 1 }],
+                relation: [{ id: 1, __temp_key__: 'a0' }],
               },
               {
                 __component: 'basic.nested-relation',
                 id: 2,
                 relation_component: {
-                  relation: [{ id: 2 }],
+                  relation: [{ id: 2, __temp_key__: 'a0' }],
                 },
               },
               {
@@ -747,12 +747,12 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                   {
                     __component: 'basic.relation',
                     id: 1,
-                    relation: [{ id: 3 }],
+                    relation: [{ id: 3, __temp_key__: 'a0' }],
                   },
                   {
                     __component: 'basic.relation',
                     id: 2,
-                    relation: [{ id: 4 }],
+                    relation: [{ id: 4, __temp_key__: 'a0' }],
                   },
                 ],
               },
@@ -806,6 +806,357 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             ],
           },
         ],
+      });
+    });
+
+    test('given that a relation is reordered it should be in the connect array with its new position', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [
+              { id: 1, __temp_key__: 'Zz' },
+              { id: 2, __temp_key__: 'a0' },
+            ],
+          },
+          serverState: {
+            relation: [
+              { id: 2, __temp_key__: 'a0' },
+              { id: 1, __temp_key__: 'a1' },
+            ],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [{ id: 1, position: { before: 2 } }],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given a relation is not in the serverState but is added and then re-ordered to another position, it should appear in the connect array with the correct position', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [
+              { id: 3, __temp_key__: 'Zz' },
+              { id: 1, __temp_key__: 'a0' },
+              { id: 2, __temp_key__: 'a1' },
+            ],
+          },
+          serverState: {
+            relation: [
+              { id: 1, __temp_key__: 'a0' },
+              { id: 2, __temp_key__: 'a1' },
+            ],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 3,
+              position: { before: 1 },
+            },
+          ],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given relations are added that are infront of the existing relations, it should only return the new relations', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [
+              { id: 1, __temp_key__: 'a0' },
+              { id: 2, __temp_key__: 'a1' },
+              { id: 3, __temp_key__: 'a2' },
+              { id: 4, __temp_key__: 'a3' },
+            ],
+          },
+          serverState: {
+            relation: [
+              { id: 1, __temp_key__: 'a0' },
+              { id: 2, __temp_key__: 'a1' },
+            ],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 4,
+              position: { end: true },
+            },
+            {
+              id: 3,
+              position: { before: 4 },
+            },
+          ],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given a complicated list of reorderd relations it should only contain the items that moved', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [
+              {
+                id: 3,
+                __temp_key__: 'Zw',
+              },
+              {
+                id: 2,
+                __temp_key__: 'Zx',
+              },
+              {
+                id: 4,
+                __temp_key__: 'Zwl',
+              },
+              {
+                id: 1,
+                __temp_key__: 'ZwV',
+              },
+              {
+                id: 5,
+                __temp_key__: 'Zy',
+              },
+              {
+                id: 7,
+                __temp_key__: 'Zz',
+              },
+              {
+                id: 10,
+                __temp_key__: 'ZzV',
+              },
+              {
+                id: 6,
+                __temp_key__: 'a0',
+              },
+              {
+                id: 9,
+                __temp_key__: 'a0G',
+              },
+              {
+                id: 8,
+                __temp_key__: 'a0V',
+              },
+            ],
+          },
+          serverState: {
+            relation: [
+              {
+                id: 1,
+                __temp_key__: 'Zv',
+              },
+              {
+                id: 3,
+                __temp_key__: 'Zw',
+              },
+              {
+                id: 2,
+                __temp_key__: 'Zx',
+              },
+              {
+                id: 5,
+                __temp_key__: 'Zy',
+              },
+              {
+                id: 4,
+                __temp_key__: 'Zz',
+              },
+              {
+                id: 6,
+                __temp_key__: 'a0',
+              },
+              {
+                id: 7,
+                __temp_key__: 'a1',
+              },
+              {
+                id: 8,
+                __temp_key__: 'a2',
+              },
+              {
+                id: 9,
+                __temp_key__: 'a3',
+              },
+              {
+                id: 10,
+                __temp_key__: 'a4',
+              },
+            ],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 8,
+              position: {
+                end: true,
+              },
+            },
+            {
+              id: 9,
+              position: {
+                before: 8,
+              },
+            },
+            {
+              id: 10,
+              position: {
+                before: 6,
+              },
+            },
+            {
+              id: 7,
+              position: {
+                before: 10,
+              },
+            },
+            {
+              id: 1,
+              position: {
+                before: 5,
+              },
+            },
+            {
+              id: 4,
+              position: {
+                before: 1,
+              },
+            },
+          ],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given a long list of relations and i move the first to the last, only that item should be in the payload', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [
+              {
+                id: 10,
+                __temp_key__: 'Zu',
+              },
+              {
+                id: 1,
+                __temp_key__: 'Zv',
+              },
+              {
+                id: 3,
+                __temp_key__: 'Zw',
+              },
+              {
+                id: 2,
+                __temp_key__: 'Zx',
+              },
+              {
+                id: 5,
+                __temp_key__: 'Zy',
+              },
+              {
+                id: 4,
+                __temp_key__: 'Zz',
+              },
+              {
+                id: 6,
+                __temp_key__: 'a0',
+              },
+              {
+                id: 7,
+                __temp_key__: 'a1',
+              },
+              {
+                id: 8,
+                __temp_key__: 'a2',
+              },
+              {
+                id: 9,
+                __temp_key__: 'a3',
+              },
+            ],
+          },
+          serverState: {
+            relation: [
+              {
+                id: 1,
+                __temp_key__: 'Zv',
+              },
+              {
+                id: 3,
+                __temp_key__: 'Zw',
+              },
+              {
+                id: 2,
+                __temp_key__: 'Zx',
+              },
+              {
+                id: 5,
+                __temp_key__: 'Zy',
+              },
+              {
+                id: 4,
+                __temp_key__: 'Zz',
+              },
+              {
+                id: 6,
+                __temp_key__: 'a0',
+              },
+              {
+                id: 7,
+                __temp_key__: 'a1',
+              },
+              {
+                id: 8,
+                __temp_key__: 'a2',
+              },
+              {
+                id: 9,
+                __temp_key__: 'a3',
+              },
+              {
+                id: 10,
+                __temp_key__: 'a4',
+              },
+            ],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 10,
+              position: { before: 1 },
+            },
+          ],
+          disconnect: [],
+        },
       });
     });
   });

@@ -1,19 +1,19 @@
 const webpack = require('webpack');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const browserslistToEsbuild = require('browserslist-to-esbuild');
 
 const packageJson = require('./package.json');
 
 const nodeModules = [];
-[
-  ...Object.keys(packageJson.dependencies || {}),
-  ...Object.keys(packageJson.peerDependencies || {}),
-  ...Object.keys(packageJson.devDependencies || {}),
-].forEach((module) => {
-  nodeModules.push(new RegExp(`^${module}(/.+)?$`));
-});
+[...Object.keys(packageJson.dependencies), ...Object.keys(packageJson.peerDependencies)].forEach(
+  (module) => {
+    nodeModules.push(new RegExp(`^${module}(/.+)?$`));
+  }
+);
 
-module.exports = {
-  entry: `${__dirname}/lib/src/index.js`,
+/** @type {Omit<import('webpack').Configuration, 'output'>} */
+const baseConfig = {
+  entry: `${__dirname}/src/index.js`,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
   devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',
@@ -21,18 +21,9 @@ module.exports = {
     minimize: process.env.NODE_ENV === 'production',
     minimizer: [
       new ESBuildMinifyPlugin({
-        target: 'es2015',
+        target: browserslistToEsbuild(),
       }),
     ],
-  },
-  output: {
-    path: `${__dirname}/build`,
-    filename: `helper-plugin.${process.env.NODE_ENV}.js`,
-    library: {
-      name: 'helperPlugin',
-      type: 'umd',
-    },
-    umdNamedDefine: true,
   },
   module: {
     rules: [
@@ -42,7 +33,7 @@ module.exports = {
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: 'jsx',
-            target: 'es2015',
+            target: browserslistToEsbuild(),
           },
         },
       },
@@ -57,13 +48,39 @@ module.exports = {
       },
     ],
   },
-  resolve: {
-    extensions: ['*', '.js'],
-    cacheWithContext: false,
-  },
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
     }),
   ],
 };
+
+/** @type {import('webpack').Configuration[]} */
+const config = [
+  {
+    ...baseConfig,
+    output: {
+      path: `${__dirname}/build`,
+      filename: `helper-plugin.esm.js`,
+      library: {
+        type: 'module',
+      },
+      environment: { module: true },
+    },
+    experiments: {
+      outputModule: true,
+    },
+  },
+  {
+    ...baseConfig,
+    output: {
+      path: `${__dirname}/build`,
+      filename: `helper-plugin.js`,
+      library: {
+        type: 'commonjs',
+      },
+    },
+  },
+];
+
+module.exports = config;

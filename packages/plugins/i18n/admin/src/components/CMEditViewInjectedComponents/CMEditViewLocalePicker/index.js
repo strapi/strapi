@@ -1,11 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
+import { Box, Divider, Select, Option, Typography, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
@@ -105,7 +101,7 @@ const CMEditViewLocalePicker = ({
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
-      <Stack spacing={2}>
+      <Flex direction="column" alignItems="stretch" gaps={2}>
         <Box>
           <Select
             label={formatMessage({
@@ -142,7 +138,7 @@ const CMEditViewLocalePicker = ({
             readPermissions={readPermissions}
           />
         </Box>
-      </Stack>
+      </Flex>
     </Box>
   );
 };

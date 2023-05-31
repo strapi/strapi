@@ -3,7 +3,6 @@ name: 'Nightly Releases'
 on:
   schedule:
     - cron: '0 0 * * 2-6'
-  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -23,5 +22,5 @@ jobs:
       - run: yarn
       - run: ./scripts/pre-publish.sh --yes
         env:
-          VERSION: '0.0.0-${{ github.sha }}'
-          DIST_TAG: experimental
+          VERSION: '0.0.0-next.${{ github.sha }}'
+          DIST_TAG: next

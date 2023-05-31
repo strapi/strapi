@@ -89,6 +89,14 @@ class PolicyError extends ForbiddenError {
   }
 }
 
+class NotImplementedError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'NotImplementedError';
+    this.message = message || 'This feature is not implemented yet';
+  }
+}
+
 module.exports = {
   HttpError,
   ApplicationError,
@@ -101,4 +109,5 @@ module.exports = {
   RateLimitError,
   PayloadTooLargeError,
   PolicyError,
+  NotImplementedError,
 };

@@ -1,6 +1,6 @@
 import * as yup from 'yup';
-import { toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+
 import getTrad from '../../../utils/getTrad';
 import { createUid } from '../utils/createUid';
 
@@ -9,6 +9,7 @@ const createContentTypeSchema = ({
   reservedModels = [],
   singularNames = [],
   pluralNames = [],
+  collectionNames = [],
 }) => {
   const shape = {
     displayName: yup
@@ -34,7 +35,7 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),
@@ -49,6 +50,17 @@ const createContentTypeSchema = ({
           }
 
           return !pluralNames.includes(value);
+        },
+      })
+      .test({
+        name: 'pluralNameAlreadyUsedAsSingular',
+        message: getTrad('error.contentType.pluralName-equals-singularName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !singularNames.includes(value);
         },
       })
       .test({
@@ -70,7 +82,18 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
+        },
+      })
+      .test({
+        name: 'pluralNameNotAlreadyUsedInCollectionName',
+        message: getTrad('error.contentType.pluralName-equals-collectionName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !collectionNames.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),
@@ -85,6 +108,17 @@ const createContentTypeSchema = ({
           }
 
           return !singularNames.includes(value);
+        },
+      })
+      .test({
+        name: 'singularNameAlreadyUsedAsPlural',
+        message: getTrad('error.contentType.singularName-equals-pluralName'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !pluralNames.includes(value);
         },
       })
       .test({
@@ -106,12 +140,13 @@ const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(toLower(trim(value)));
+          return !reservedModels.includes(value?.trim()?.toLowerCase());
         },
       })
       .required(errorsTrads.required),
     draftAndPublish: yup.boolean(),
     kind: yup.string().oneOf(['singleType', 'collectionType']),
+    reviewWorkflows: yup.boolean(),
   };
 
   return yup.object(shape);

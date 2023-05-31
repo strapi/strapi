@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 
 const getActionsIds = (array) => array.map(({ actionId }) => actionId);

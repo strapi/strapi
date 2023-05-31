@@ -6,16 +6,18 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 import {
+  Button,
+  Flex,
+  Breadcrumbs,
+  Crumb,
+  Grid,
+  GridItem,
   ModalLayout,
   ModalHeader,
   ModalFooter,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';
@@ -56,7 +58,7 @@ const FormModal = ({
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={1}>
+                <Flex direction="column" alignItems="stretch" gap={1}>
                   <Grid gap={5}>
                     {layout.form.map((row) => {
                       return row.map((input) => {
@@ -74,7 +76,7 @@ const FormModal = ({
                       });
                     })}
                   </Grid>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={

@@ -24,7 +24,7 @@ const config = {
     },
   },
   tutorials: false,
-  notifications: { release: false },
+  notifications: { releases: false },
 };
 
 const bootstrap = (app) => {

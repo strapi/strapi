@@ -7,27 +7,37 @@ import pick from 'lodash/pick';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
+import {
+  useNotification,
+  useTracking,
+  ConfirmDialog,
+  Link,
+  useFetchClient,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Check from '@strapi/icons/Check';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
+import {
+  Box,
+  Divider,
+  Layout,
+  HeaderLayout,
+  ContentLayout,
+  Main,
+  Button,
+} from '@strapi/design-system';
+import { Check, ArrowLeft } from '@strapi/icons';
+
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
-import putCMSettingsLV from './utils/api';
 import Settings from './components/Settings';
 import SortDisplayedFields from './components/SortDisplayedFields';
 import EditFieldForm from './components/EditFieldForm';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
+import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 
 const ListSettingsView = ({ layout, slug }) => {
+  const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
@@ -124,20 +134,24 @@ const ListSettingsView = ({ layout, slug }) => {
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
+    handleCloseModal();
   };
 
-  const submitMutation = useMutation((body) => putCMSettingsLV(body, slug), {
-    onSuccess() {
-      trackUsage('didEditListSettings');
-      refetchData();
-    },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    },
-  });
+  const submitMutation = useMutation(
+    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
+    {
+      onSuccess() {
+        trackUsage('didEditListSettings');
+        refetchData();
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleChangeEditLabel = ({ target: { name, value } }) => {
@@ -149,29 +163,16 @@ const ListSettingsView = ({ layout, slug }) => {
   };
 
   const listRemainingFields = Object.entries(attributes)
-    .reduce((acc, cur) => {
-      const [attrName, fieldSchema] = cur;
-
-      const isDisplayable = checkIfAttributeIsDisplayable(fieldSchema);
-      const isAlreadyDisplayed = displayedFields.includes(attrName);
-
-      if (isDisplayable && !isAlreadyDisplayed) {
-        acc.push(attrName);
-      }
-
-      return acc;
-    }, [])
+    .filter(
+      ([name, attribute]) =>
+        checkIfAttributeIsDisplayable(attribute) && !displayedFields.includes(name)
+    )
+    .map(([name]) => name)
     .sort();
 
-  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
-    const [name, { type }] = cur;
-
-    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
-      acc.push(name);
-    }
-
-    return acc;
-  }, []);
+  const sortOptions = Object.entries(attributes)
+    .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
+    .map(([name]) => name);
 
   const move = (originalIndex, atIndex) => {
     dispatch({

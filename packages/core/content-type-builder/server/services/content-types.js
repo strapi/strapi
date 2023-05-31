@@ -35,18 +35,18 @@ const getRestrictRelationsTo = (contentType = {}) => {
  * @param {Object} contentType
  */
 const formatContentType = (contentType) => {
-  const { uid, kind, modelName, plugin, collectionName, info, options } = contentType;
+  const { uid, kind, modelName, plugin, collectionName, info } = contentType;
 
   return {
     uid,
     plugin,
     apiID: modelName,
     schema: {
+      ...contentTypesUtils.getOptions(contentType),
       displayName: info.displayName,
       singularName: info.singularName,
       pluralName: info.pluralName,
       description: _.get(info, 'description', ''),
-      draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       pluginOptions: contentType.pluginOptions,
       kind: kind || 'collectionType',
       collectionName,
@@ -119,6 +119,8 @@ const createContentType = async ({ contentType, components = [] }, options = {})
   if (!options.defaultBuilder) {
     await builder.writeFiles();
   }
+
+  strapi.eventHub.emit('content-type.create', { contentType: newContentType });
 
   return newContentType;
 };
@@ -208,6 +210,9 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   }
 
   await builder.writeFiles();
+
+  strapi.eventHub.emit('content-type.update', { contentType: updatedContentType });
+
   return updatedContentType;
 };
 
@@ -251,6 +256,8 @@ const deleteContentType = async (uid, defaultBuilder = undefined) => {
       await apiHandler.rollback(uid);
     }
   }
+
+  strapi.eventHub.emit('content-type.delete', { contentType });
 
   return contentType;
 };

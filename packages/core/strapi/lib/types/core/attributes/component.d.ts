@@ -25,13 +25,10 @@ export type ComponentAttribute<
   PrivateOption &
   RequiredOption;
 
-export type ComponentValue<T extends Strapi.ComponentUIDs, R extends boolean> = GetAttributesValues<
-  T
-> extends infer V
-  ? R extends true
-    ? V[]
-    : V
-  : never;
+export type ComponentValue<
+  T extends Strapi.ComponentUIDs,
+  R extends boolean
+> = GetAttributesValues<T> extends infer V ? (R extends true ? V[] : V) : never;
 
 export type GetComponentAttributeValue<T extends Attribute> = T extends ComponentAttribute<
   infer U,

@@ -1,20 +1,14 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../../../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
 
-const CenteredStack = styled(Stack)`
-  align-items: center;
-  justify-content: center;
+const CenteredStack = styled(Flex)`
   width: ${cellWidth};
   flex-shrink: 0;
 `;
@@ -33,10 +27,16 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
-      <Stack horizontal spacing={0}>
+      <Flex gap={0}>
         {displayedActions.map(({ label, actionId }) => {
           return (
-            <CenteredStack key={actionId} spacing={3}>
+            <CenteredStack
+              direction="column"
+              alignItems="center"
+              justifyContent="center"
+              key={actionId}
+              gap={3}
+            >
               <Typography variant="sigma" textColor="neutral500">
                 {formatMessage({
                   id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
@@ -44,7 +44,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                 })}
               </Typography>
               <BaseCheckbox
-                disabled={isFormDisabled || IS_DISABLED}
+                disabled={isFormDisabled}
                 onValueChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}
@@ -67,7 +67,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
             </CenteredStack>
           );
         })}
-      </Stack>
+      </Flex>
     </Box>
   );
 };

@@ -3,20 +3,18 @@
  * EditView
  *
  */
-import React, { useCallback, useMemo } from 'react';
+import * as React from 'react';
 import {
   LoadingIndicatorPage,
-  request,
   SettingsPageTitle,
-  to,
   useNotification,
   useOverlayBlocker,
+  useFetchClient,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
+import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { useModels } from '../../../../../hooks';
-import { axiosInstance } from '../../../../../core/utils';
+import { useContentTypes } from '../../../../../hooks/useContentTypes';
 import WebhookForm from './components/WebhookForm';
 import cleanData from './utils/formatData';
 
@@ -29,19 +27,21 @@ const EditView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
+  const { isLoading: isLoadingForModels, collectionTypes } = useContentTypes();
+  const { put, get, post } = useFetchClient();
 
   const isCreating = id === 'create';
 
-  const fetchWebhook = useCallback(
-    async (id) => {
-      const [err, { data }] = await to(
-        request(`/admin/webhooks/${id}`, {
-          method: 'GET',
-        })
-      );
+  const { isLoading, data } = useQuery(
+    ['get-webhook', id],
+    async () => {
+      try {
+        const {
+          data: { data },
+        } = await get(`/admin/webhooks/${id}`);
 
-      if (err) {
+        return data;
+      } catch (err) {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
@@ -49,22 +49,18 @@ const EditView = () => {
 
         return null;
       }
-
-      return data;
     },
-    [toggleNotification]
+    {
+      enabled: !isCreating,
+    }
   );
-
-  const { isLoading, data } = useQuery(['get-webhook', id], () => fetchWebhook(id), {
-    enabled: !isCreating,
-  });
 
   const {
     isLoading: isTriggering,
     data: triggerResponse,
     isIdle: isTriggerIdle,
     mutate,
-  } = useMutation(() => axiosInstance.post(`/admin/webhooks/${id}/trigger`));
+  } = useMutation(() => post(`/admin/webhooks/${id}/trigger`));
 
   const triggerWebhook = () =>
     mutate(null, {
@@ -76,25 +72,15 @@ const EditView = () => {
       },
     });
 
-  const createWebhookMutation = useMutation((body) =>
-    request('/admin/webhooks', {
-      method: 'POST',
-      body,
-    })
-  );
+  const createWebhookMutation = useMutation((body) => post('/admin/webhooks', body));
 
-  const updateWebhookMutation = useMutation(({ id, body }) =>
-    request(`/admin/webhooks/${id}`, {
-      method: 'PUT',
-      body,
-    })
-  );
+  const updateWebhookMutation = useMutation(({ id, body }) => put(`/admin/webhooks/${id}`, body));
 
   const handleSubmit = async (data) => {
     if (isCreating) {
       lockApp();
       createWebhookMutation.mutate(cleanData(data), {
-        onSuccess(result) {
+        onSuccess({ data: result }) {
           toggleNotification({
             type: 'success',
             message: { id: 'Settings.webhooks.created' },
@@ -137,7 +123,7 @@ const EditView = () => {
     }
   };
 
-  const isDraftAndPublishEvents = useMemo(
+  const isDraftAndPublishEvents = React.useMemo(
     () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),
     [collectionTypes]
   );

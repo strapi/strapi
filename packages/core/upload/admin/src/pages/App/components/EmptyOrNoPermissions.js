@@ -2,9 +2,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';
 
-import { Button } from '@strapi/design-system/Button';
-import EmptyPermissions from '@strapi/icons/EmptyPermissions';
-import Plus from '@strapi/icons/Plus';
+import { Button } from '@strapi/design-system';
+import { EmptyPermissions, Plus } from '@strapi/icons';
 
 import { EmptyAssets } from '../../../components/EmptyAssets';
 import { getTrad } from '../../../utils';

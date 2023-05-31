@@ -4,6 +4,17 @@ const isoDateRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
 jest.setTimeout(60000);
 
+jest.mock('@strapi/provider-audit-logs-local', () => {
+  return {
+    register: jest.fn().mockResolvedValue({
+      saveEvent: jest.fn(),
+      findMany: jest.fn(),
+      deleteExpiredEvents: jest.fn(),
+      findOne: jest.fn(),
+    }),
+  };
+});
+
 expect.extend({
   stringOrNull(received) {
     const pass = typeof received === 'string' || received === null;

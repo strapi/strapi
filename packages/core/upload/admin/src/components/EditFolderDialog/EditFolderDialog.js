@@ -4,15 +4,19 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
+import {
+  Button,
+  Grid,
+  GridItem,
+  ModalLayout,
+  ModalBody,
+  ModalFooter,
+  FieldLabel,
+  Flex,
+  Loader,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import { Form, useNotification, getAPIInnerErrors, useTracking } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
@@ -203,7 +207,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </GridItem>
 
                   <GridItem xs={12} col={6}>
-                    <Stack spacing={1}>
+                    <Flex direction="column" alignItems="stretch" gap={1}>
                       <FieldLabel htmlFor="folder-parent">
                         {formatMessage({
                           id: getTrad('form.input.label.folder-location'),
@@ -236,7 +240,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                           {errors.parent}
                         </Typography>
                       )}
-                    </Stack>
+                    </Flex>
                   </GridItem>
                 </Grid>
               </ModalBody>
@@ -248,7 +252,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </Button>
                 }
                 endActions={
-                  <Stack horizontal spacing={2}>
+                  <Flex gap={2}>
                     {isEditing && canUpdate && (
                       <Button
                         type="button"
@@ -276,7 +280,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                           : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                       )}
                     </Button>
-                  </Stack>
+                  </Flex>
                 }
               />
             </Form>

@@ -1,9 +1,11 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render, act } from '@testing-library/react';
+import { fireEvent, render, act, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useRelation } from '../../../hooks/useRelation';
@@ -28,7 +30,6 @@ jest.mock('../../../hooks/useRelation', () => ({
       isSuccess: true,
       status: 'success',
     },
-
     search: {
       data: {
         pages: [
@@ -69,12 +70,14 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
@@ -84,20 +87,23 @@ jest.mock('@strapi/helper-plugin', () => ({
       relation: [
         {
           id: 1,
+          __temp_key__: 1,
           mainField: 'Relation 1',
           name: 'Relation 1',
         },
 
         {
           id: 2,
+          __temp_key__: 2,
           mainField: 'Relation 2',
           name: 'Relation 2',
         },
       ],
     },
-    loadRelation: jest.fn(),
-    connectRelation: jest.fn(),
-    disconnectRelation: jest.fn(),
+    relationLoad: jest.fn(),
+    relationConnect: jest.fn(),
+    relationDisconnect: jest.fn(),
+    relationReorder: jest.fn(),
   }),
 }));
 
@@ -105,34 +111,36 @@ const RelationInputDataManagerComponent = (props) => (
   <MemoryRouter>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en">
-          <RelationInputDataManager
-            description="Description"
-            intlLabel={{
-              id: 'label',
-              defaultMessage: 'Label',
-            }}
-            labelAction={<>Action</>}
-            mainField={{
-              name: 'relation',
-              schema: {
-                type: 'relation',
-              },
-            }}
-            name="relation"
-            placeholder={{
-              id: 'placeholder',
-              defaultMessage: 'Placeholder',
-            }}
-            relationType="oneToOne"
-            size={6}
-            targetModel="something"
-            queryInfos={{
-              shouldDisplayRelationLink: true,
-            }}
-            {...props}
-          />
-        </IntlProvider>
+        <DndProvider backend={HTML5Backend}>
+          <IntlProvider locale="en">
+            <RelationInputDataManager
+              description="Description"
+              intlLabel={{
+                id: 'label',
+                defaultMessage: 'Label',
+              }}
+              labelAction={<>Action</>}
+              mainField={{
+                name: 'relation',
+                schema: {
+                  type: 'relation',
+                },
+              }}
+              name="relation"
+              placeholder={{
+                id: 'placeholder',
+                defaultMessage: 'Placeholder',
+              }}
+              relationType="oneToOne"
+              size={6}
+              targetModel="something"
+              queryInfos={{
+                shouldDisplayRelationLink: true,
+              }}
+              {...props}
+            />
+          </IntlProvider>
+        </DndProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </MemoryRouter>
@@ -181,7 +189,7 @@ describe('RelationInputDataManager', () => {
     });
 
     expect(useRelation).toBeCalledWith(
-      expect.any(String),
+      expect.arrayContaining([expect.any(String)]),
       expect.objectContaining({
         search: expect.objectContaining({
           pageParams: expect.objectContaining({
@@ -222,7 +230,8 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      modifiedData: {},
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup({
@@ -241,7 +250,8 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      modifiedData: {},
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup({
@@ -262,7 +272,8 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      modifiedData: {},
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup();
@@ -293,14 +304,14 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Disconnect new entity', async () => {
-    const { disconnectRelation } = useCMEditViewDataManager();
+    const { relationDisconnect } = useCMEditViewDataManager();
     const { findByTestId } = setup();
 
     await act(async () => {
       fireEvent.click(await findByTestId('remove-relation-1'));
     });
 
-    expect(disconnectRelation).toBeCalledWith(
+    expect(relationDisconnect).toBeCalledWith(
       expect.objectContaining({
         id: 1,
       })
@@ -323,7 +334,8 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: ['relation'],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      modifiedData: {},
+      relationLoad: jest.fn(),
     });
 
     const { queryByText } = setup();
@@ -351,7 +363,7 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Connect new entity', async () => {
-    const { connectRelation } = useCMEditViewDataManager();
+    const { relationConnect } = useCMEditViewDataManager();
     const { container, findByText } = setup({
       mainField: {
         name: 'title',
@@ -373,7 +385,7 @@ describe('RelationInputDataManager', () => {
       fireEvent.click(searchResult);
     });
 
-    expect(connectRelation).toBeCalledWith(
+    expect(relationConnect).toBeCalledWith(
       expect.objectContaining({
         name: expect.any(String),
         toOneRelation: expect.any(Boolean),
@@ -382,6 +394,76 @@ describe('RelationInputDataManager', () => {
         }),
       })
     );
+  });
+
+  test('Reorder an entity', () => {
+    const { relationReorder } = useCMEditViewDataManager();
+    setup({ relationType: 'manyToMany' });
+
+    const [draggedItem, dropZone] = screen.getAllByText('Drag');
+
+    fireEvent.dragStart(draggedItem);
+    fireEvent.dragEnter(dropZone);
+    fireEvent.dragOver(dropZone);
+    fireEvent.drop(dropZone);
+
+    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 1, oldIndex: 0 });
+  });
+
+  describe('Accessibility', () => {
+    it('should have have description text', () => {
+      setup({ relationType: 'manyToMany' });
+
+      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+    });
+
+    it('should update the live text when an item has been grabbed', async () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(
+        screen.queryByText(
+          /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been moved', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+
+      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been dropped', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text after the reordering interaction has been cancelled', () => {
+      setup({ relationType: 'manyToMany' });
+
+      const [draggedItem] = screen.getAllByText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+
+      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
+    });
   });
 
   describe('Counting relations', () => {
@@ -487,6 +569,26 @@ describe('RelationInputDataManager', () => {
       const { queryByText } = setup();
 
       expect(queryByText(/\(8\)/)).toBeInTheDocument();
+    });
+
+    it('should not crash, if the field is not set in modifiedData (e.g. in components)', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+        modifiedData: {},
+      }));
+
+      expect(setup).not.toThrow();
     });
 
     it('should correct calculate browser mutations when there are relations from useRelation', async () => {
