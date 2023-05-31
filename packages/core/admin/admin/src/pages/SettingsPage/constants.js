@@ -1,8 +1,8 @@
-const defaultRoutes = [
+export const ROUTES_CE = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-roles-list" */ '../pages/Roles/ProtectedListPage'
+        /* webpackChunkName: "admin-roles-list" */ './pages/Roles/ProtectedListPage'
       );
 
       return component;
@@ -13,7 +13,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
       );
 
       return component;
@@ -24,7 +24,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/CreatePage'
+        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/CreatePage'
       );
 
       return component;
@@ -35,7 +35,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-roles-page" */ './pages/Roles/ProtectedEditPage'
       );
 
       return component;
@@ -46,7 +46,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-users" */ '../pages/Users/ProtectedListPage'
+        /* webpackChunkName: "admin-users" */ './pages/Users/ProtectedListPage'
       );
 
       return component;
@@ -57,7 +57,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "admin-edit-users" */ '../pages/Users/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-users" */ './pages/Users/ProtectedEditPage'
       );
 
       return component;
@@ -68,7 +68,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedCreateView'
+        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedCreateView'
       );
 
       return component;
@@ -79,7 +79,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedEditView'
+        /* webpackChunkName: "webhook-edit-page" */ './pages/Webhooks/ProtectedEditView'
       );
 
       return component;
@@ -90,7 +90,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ '../pages/Webhooks/ProtectedListView'
+        /* webpackChunkName: "webhook-list-page" */ './pages/Webhooks/ProtectedListView'
       );
 
       return component;
@@ -101,7 +101,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedListView'
+        /* webpackChunkName: "api-tokens-list-page" */ './pages/ApiTokens/ProtectedListView'
       );
 
       return component;
@@ -112,7 +112,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-create-page" */ '../pages/ApiTokens/ProtectedCreateView'
+        /* webpackChunkName: "api-tokens-create-page" */ './pages/ApiTokens/ProtectedCreateView'
       );
 
       return component;
@@ -123,7 +123,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "api-tokens-edit-page" */ '../pages/ApiTokens/ProtectedEditView'
+        /* webpackChunkName: "api-tokens-edit-page" */ './pages/ApiTokens/ProtectedEditView'
       );
 
       return component;
@@ -134,7 +134,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-create-page" */ '../pages/TransferTokens/ProtectedCreateView'
+        /* webpackChunkName: "transfer-tokens-create-page" */ './pages/TransferTokens/ProtectedCreateView'
       );
 
       return component;
@@ -145,7 +145,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-list-page" */ '../pages/TransferTokens/ProtectedListView'
+        /* webpackChunkName: "transfer-tokens-list-page" */ './pages/TransferTokens/ProtectedListView'
       );
 
       return component;
@@ -156,7 +156,7 @@ const defaultRoutes = [
   {
     async Component() {
       const component = await import(
-        /* webpackChunkName: "transfer-tokens-edit-page" */ '../pages/TransferTokens/ProtectedEditView'
+        /* webpackChunkName: "transfer-tokens-edit-page" */ './pages/TransferTokens/ProtectedEditView'
       );
 
       return component;
@@ -165,5 +165,3 @@ const defaultRoutes = [
     exact: true,
   },
 ];
-
-export default defaultRoutes;
