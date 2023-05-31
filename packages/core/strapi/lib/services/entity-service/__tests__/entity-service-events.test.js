@@ -22,13 +22,7 @@ describe('Entity service triggers webhooks', () => {
       strapi: {
         getModel: () => model,
         webhookStore: {
-          allowedEvents: new Map([
-            ['ENTRY_CREATE', 'entry.create'],
-            ['ENTRY_UPDATE', 'entry.update'],
-            ['ENTRY_DELETE', 'entry.delete'],
-            ['ENTRY_PUBLISH', 'entry.publish'],
-            ['ENTRY_UNPUBLISH', 'entry.unpublish'],
-          ]),
+          addAllowedEvent: jest.fn(),
         },
       },
       db: {

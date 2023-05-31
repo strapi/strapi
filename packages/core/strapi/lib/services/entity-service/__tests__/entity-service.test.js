@@ -18,20 +18,18 @@ describe('Entity service', () => {
       },
     },
     query: jest.fn(() => ({})),
-  };
-
-  beforeEach(() => {
-    global.strapi.webhookStore = {
+    webhookStore: {
       allowedEvents: new Map([['ENTRY_CREATE', 'entry.create']]),
-    };
-  });
+      addAllowedEvent: jest.fn(),
+    },
+  };
 
   describe('Decorator', () => {
     test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
       'Can decorate',
       async (method) => {
         const instance = createEntityService({
-          strapi: {},
+          strapi: global.strapi,
           db: {},
           eventHub: new EventEmitter(),
         });
@@ -67,6 +65,7 @@ describe('Entity service', () => {
       };
 
       const fakeStrapi = {
+        ...global.strapi,
         getModel: jest.fn(() => {
           return { kind: 'singleType', privateAttributes: [] };
         }),
@@ -383,10 +382,13 @@ describe('Entity service', () => {
           },
         };
 
-        global.strapi = fakeStrapi;
+        global.strapi = {
+          ...global.strapi,
+          ...fakeStrapi,
+        };
 
         instance = createEntityService({
-          strapi: fakeStrapi,
+          strapi: global.strapi,
           db: fakeDB,
           eventHub: new EventEmitter(),
           entityValidator,
@@ -533,6 +535,7 @@ describe('Entity service', () => {
         };
 
         global.strapi = {
+          ...global.strapi,
           getModel: jest.fn((uid) => {
             return fakeModels[uid];
           }),

@@ -69,7 +69,7 @@ describe('Upload plugin bootstrap function', () => {
         };
       },
       webhookStore: {
-        allowedEvents: new Map([]),
+        addAllowedEvent: jest.fn(),
       },
     };
 

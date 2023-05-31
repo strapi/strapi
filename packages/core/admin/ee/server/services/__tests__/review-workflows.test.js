@@ -72,7 +72,7 @@ const strapiMock = {
     }
   },
   webhookStore: {
-    allowedEvents: new Map([]),
+    addAllowedEvent: jest.fn(),
   },
 };
 

@@ -338,7 +338,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
 module.exports = (ctx) => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-    strapi.webhookStore.addAllowedEvent(key, value);
+    ctx.strapi.webhookStore.addAllowedEvent(key, value);
   });
 
   const implementation = createDefaultImplementation(ctx);
