@@ -24,7 +24,7 @@ const isValidName = {
 
 const isValidIcon = {
   name: 'isValidIcon',
-  message: `\${path} must match the following regex: ${ICON_REGEX}`,
+  message: `\${path} is not a valid icon name. Make sure your icon name starts with an alphanumeric character and only includes alphanumeric characters or dashes.`,
   test: (val) => val === '' || ICON_REGEX.test(val),
 };
 
