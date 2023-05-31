@@ -30,6 +30,8 @@ const moduleNameMapper = {
 module.exports = {
   rootDir: __dirname,
   moduleNameMapper,
+  /* Tells jest to ignore duplicated manual mock files, such as index.js */
+  modulePathIgnorePatterns: ['.*__mocks__.*'],
   testPathIgnorePatterns: ['node_modules/', '__tests__'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/environment'],

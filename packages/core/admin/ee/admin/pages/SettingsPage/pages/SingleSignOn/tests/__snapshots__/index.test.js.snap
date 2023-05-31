@@ -87,6 +87,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
+  line-height: 0;
   color: #ffffff;
 }
 
@@ -637,77 +638,73 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                 class="c21"
               >
                 <div
-                  class=""
+                  class="c22"
                 >
                   <div
-                    class="c22"
+                    class="c23"
                   >
                     <div
-                      class="c23"
+                      class="c7"
+                    >
+                      <label
+                        class="c8 c24 c25"
+                        for="1"
+                      >
+                        Auto-registration
+                      </label>
+                    </div>
+                    <label
+                      class="c26"
                     >
                       <div
-                        class="c7"
+                        class="c27"
                       >
-                        <label
-                          class="c8 c24 c25"
-                          for="1"
-                        >
-                          Auto-registration
-                        </label>
+                        Auto-registration
                       </div>
-                      <label
-                        class="c26"
+                      <div
+                        class="c28 c29"
+                        display="flex"
                       >
                         <div
-                          class="c27"
+                          aria-hidden="true"
+                          class="c30 c31 c32"
                         >
-                          Auto-registration
+                          <span
+                            class="c8 c33"
+                          >
+                            Off
+                          </span>
                         </div>
                         <div
-                          class="c28 c29"
-                          display="flex"
+                          aria-hidden="true"
+                          class="c30 c31 c34"
                         >
-                          <div
-                            aria-hidden="true"
-                            class="c30 c31 c32"
+                          <span
+                            class="c8 c35"
                           >
-                            <span
-                              class="c8 c33"
-                            >
-                              Off
-                            </span>
-                          </div>
-                          <div
-                            aria-hidden="true"
-                            class="c30 c31 c34"
-                          >
-                            <span
-                              class="c8 c35"
-                            >
-                              On
-                            </span>
-                          </div>
-                          <input
-                            aria-describedby="1-hint"
-                            aria-disabled="false"
-                            aria-label="autoRegister"
-                            aria-required="false"
-                            checked=""
-                            class="c36"
-                            data-testid="autoRegister"
-                            id="1"
-                            name="autoRegister"
-                            type="checkbox"
-                          />
+                            On
+                          </span>
                         </div>
-                      </label>
-                      <p
-                        class="c8 c37"
-                        id="1-hint"
-                      >
-                        Create new user on SSO login if no account exists
-                      </p>
-                    </div>
+                        <input
+                          aria-describedby="1-hint"
+                          aria-disabled="false"
+                          aria-label="autoRegister"
+                          aria-required="false"
+                          checked=""
+                          class="c36"
+                          data-testid="autoRegister"
+                          id="1"
+                          name="autoRegister"
+                          type="checkbox"
+                        />
+                      </div>
+                    </label>
+                    <p
+                      class="c8 c37"
+                      id="1-hint"
+                    >
+                      Create new user on SSO login if no account exists
+                    </p>
                   </div>
                 </div>
               </div>
@@ -718,76 +715,72 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                   class=""
                 >
                   <div
-                    class=""
+                    class="c23"
                   >
-                    <div
-                      class="c23"
+                    <label
+                      class="c8 c24 c25"
+                      for="3"
                     >
-                      <label
-                        class="c8 c24 c25"
-                        for="3"
-                      >
-                        Default role
-                      </label>
-                      <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-0"
-                        aria-describedby="3-hint 3-error"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-label="Default role"
-                        class="c38 c39 c40"
-                        data-state="closed"
-                        dir="ltr"
-                        id="3"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                      Default role
+                    </label>
+                    <div
+                      aria-autocomplete="none"
+                      aria-controls="radix-0"
+                      aria-describedby="3-hint 3-error"
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-label="Default role"
+                      class="c38 c39 c40"
+                      data-state="closed"
+                      dir="ltr"
+                      id="3"
+                      overflow="hidden"
+                      role="combobox"
+                      tabindex="0"
+                    >
+                      <span
+                        class="c41 c42"
                       >
                         <span
-                          class="c41 c42"
+                          class="c8 c43 c44"
                         >
                           <span
-                            class="c8 c43 c44"
+                            class="c45"
                           >
-                            <span
-                              class="c45"
-                            >
-                              Editor
-                            </span>
+                            Editor
                           </span>
                         </span>
-                        <span
-                          class="c42"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="c46"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        </span>
-                      </div>
-                      <p
-                        class="c8 c37"
-                        id="3-hint"
+                      </span>
+                      <span
+                        class="c42"
                       >
-                        It will attach the new authenticated user to the selected role
-                      </p>
+                        <span
+                          aria-hidden="true"
+                          class="c46"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 14 8"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                              fill="#32324D"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      </span>
                     </div>
+                    <p
+                      class="c8 c37"
+                      id="3-hint"
+                    >
+                      It will attach the new authenticated user to the selected role
+                    </p>
                   </div>
                 </div>
               </div>

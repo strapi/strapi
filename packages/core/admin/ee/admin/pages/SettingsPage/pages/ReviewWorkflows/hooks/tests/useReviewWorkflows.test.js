@@ -1,137 +1,111 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
-
-import { useFetchClient } from '@strapi/helper-plugin';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
 import { useReviewWorkflows } from '../useReviewWorkflows';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({ data: {} }),
+const STAGE_FIXTURE = {
+  id: 1,
+  name: 'Stage 1',
+};
+
+const server = setupServer(
+  rest.get('*/review-workflows/workflows', (req, res, ctx) => {
+    const populate = req.url.searchParams.get('populate');
+
+    return res(
+      ctx.json({
+        data: [
+          {
+            id: 1,
+            stages: populate === 'stages' ? [STAGE_FIXTURE] : [],
+          },
+        ],
+      })
+    );
   }),
-}));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
+  rest.get('*/review-workflows/workflows/1', (req, res, ctx) => {
+    const populate = req.url.searchParams.get('populate');
 
-// eslint-disable-next-line react/prop-types
-const ComponentFixture = ({ children }) => (
-  <IntlProvider locale="en" messages={{}}>
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  </IntlProvider>
+    return res(
+      ctx.json({
+        data: {
+          id: 1,
+          stages: populate === 'stages' ? [STAGE_FIXTURE] : [],
+        },
+      })
+    );
+  })
 );
 
 function setup(id) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useReviewWorkflows(id), { wrapper: ComponentFixture }));
-    });
+  return renderHook(() => useReviewWorkflows(id), {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <IntlProvider locale="en" messages={{}}>
+          <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        </IntlProvider>
+      );
+    },
   });
 }
 
 describe('useReviewWorkflows', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
+    server.listen();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   test('fetch all workflows when calling the hook without a workflow id', async () => {
-    const { get } = useFetchClient();
+    const { result, waitFor } = setup();
 
-    get.mockResolvedValue({
-      data: {
-        data: [
-          {
-            id: 1,
-            stages: [],
-          },
+    expect(result.current.isLoading).toBe(true);
 
-          {
-            id: 2,
-            stages: [],
-          },
-        ],
-      },
-    });
-
-    const { result, waitFor } = await setup();
-
-    expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith('/admin/review-workflows/workflows/', {
-      params: { populate: 'stages' },
-    });
-
-    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
-        workflows: expect.objectContaining({
-          data: expect.arrayContaining([{ id: expect.any(Number), stages: expect.any(Array) }]),
-        }),
+        status: 'success',
+        workflows: [{ id: expect.any(Number), stages: expect.any(Array) }],
       })
     );
   });
 
   test('fetch a single workflow when calling the hook with a workflow id', async () => {
-    const { get } = useFetchClient();
-    const idFixture = 1;
+    const { result, waitFor } = setup({ id: 1 });
 
-    get.mockResolvedValue({
-      data: {
-        data: {
-          id: idFixture,
-          stages: [],
-        },
-      },
-    });
+    expect(result.current.isLoading).toBe(true);
 
-    const { result, waitFor } = await setup(idFixture);
-
-    expect(result.current.workflows.isLoading).toBe(true);
-    expect(get).toBeCalledWith(
-      `/admin/review-workflows/workflows/${idFixture}`,
-      expect.any(Object)
-    );
-
-    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
-        workflows: expect.objectContaining({
-          data: expect.objectContaining({ id: expect.any(Number), stages: expect.any(Array) }),
-        }),
+        workflows: [expect.objectContaining({ id: 1, stages: expect.any(Array) })],
       })
     );
   });
 
-  test('refetchWorkflow() re-fetches the loaded default workflow', async () => {
-    const { result } = await setup();
+  test('refetch() re-fetches the loaded workflow(s)', async () => {
+    const { result, waitFor } = setup();
 
-    const spy = jest.spyOn(client, 'refetchQueries');
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await result.current.refetch();
 
-    await act(async () => {
-      result.current.refetchWorkflow();
-    });
-
-    expect(spy).toBeCalledWith(['review-workflows', 'default']);
-  });
-
-  test('refetchWorkflow() re-fetches the loaded workflow id', async () => {
-    const { result } = await setup(1);
-
-    const spy = jest.spyOn(client, 'refetchQueries');
-
-    await act(async () => {
-      result.current.refetchWorkflow();
-    });
-
-    expect(spy).toBeCalledWith(['review-workflows', 1]);
+    expect(result.all.length).toBe(2 * 2); // number of calls * number of states (loading, success)
   });
 });

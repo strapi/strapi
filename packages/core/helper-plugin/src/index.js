@@ -67,6 +67,7 @@ export * from './hooks/useAPIErrorHandler';
 export { useFilter } from './hooks/useFilter';
 export { useCollator } from './hooks/useCollator';
 export { useCallbackRef } from './hooks/useCallbackRef';
+export { useClipboard } from './hooks/useClipboard';
 
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useRBAC } from './hooks/useRBAC';

@@ -76,5 +76,12 @@ module.exports = {
         ],
       },
     ],
+    'no-restricted-globals': [
+      'error',
+      {
+        name: 'strapi',
+        message: 'Use window.strapi instead.',
+      },
+    ],
   },
 };

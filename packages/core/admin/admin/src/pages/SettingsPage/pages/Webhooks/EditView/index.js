@@ -9,8 +9,7 @@ import {
 import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-
-import { useModels } from '../../../../../hooks';
+import { useContentTypes } from '../../../../../hooks/useContentTypes';
 import WebhookForm from './components/WebhookForm';
 
 const cleanData = (data) => ({
@@ -34,7 +33,7 @@ const EditView = () => {
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingForModels } = useModels();
+  const { isLoading: isLoadingForModels } = useContentTypes();
   const { put, get, post } = useFetchClient();
 
   const {
