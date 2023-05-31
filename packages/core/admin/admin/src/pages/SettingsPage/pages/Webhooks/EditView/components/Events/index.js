@@ -18,7 +18,7 @@ import {
   RawTbody as Tbody,
 } from '@strapi/design-system';
 
-import { useModels } from '../../../../../../../hooks';
+import { useContentTypes } from '../../../../../../../hooks/useContentTypes';
 
 export const formatValue = (value) =>
   value.reduce((acc, curr) => {
@@ -86,7 +86,7 @@ const getCEEvents = (isDraftAndPublish) => {
 
 const Root = ({ renderChildren }) => {
   const { formatMessage } = useIntl();
-  const { collectionTypes, isLoading } = useModels();
+  const { collectionTypes, isLoading } = useContentTypes();
 
   const isDraftAndPublish = React.useMemo(
     () => collectionTypes.some((ct) => ct.options.draftAndPublish === true),

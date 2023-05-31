@@ -9,10 +9,10 @@ import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleP
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-import { useModels } from '../../../../../../../../hooks';
+import { useContentTypes } from '../../../../../../../../hooks/useContentTypes';
 
 jest.mock('../../../../../../../../hooks', () => ({
-  useModels: jest.fn(),
+  useContentTypes: jest.fn(),
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
@@ -33,7 +33,7 @@ const makeApp = (component) => {
 };
 
 describe('Create Webhook', () => {
-  useModels.mockImplementation(() => ({
+  useContentTypes.mockImplementation(() => ({
     isLoading: false,
     collectionTypes: [],
     singleTypes: [],
