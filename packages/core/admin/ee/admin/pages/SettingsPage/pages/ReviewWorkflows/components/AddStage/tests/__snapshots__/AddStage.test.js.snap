@@ -1,13 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Admin | Settings | Review Workflow | AddStage should render a list of stages 1`] = `
-.c0 {
-  background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+.c7 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c6 {
@@ -15,6 +18,15 @@ exports[`Admin | Settings | Review Workflow | AddStage should render a list of s
   line-height: 1.33;
   font-weight: 600;
   color: #8e8ea9;
+}
+
+.c0 {
+  background: #ffffff;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c2 {
@@ -30,18 +42,6 @@ exports[`Admin | Settings | Review Workflow | AddStage should render a list of s
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c7 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c4 > circle {
