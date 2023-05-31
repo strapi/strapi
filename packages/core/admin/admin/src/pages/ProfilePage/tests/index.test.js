@@ -79,25 +79,16 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
       expect(queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    const changePasswordHeading = getByRole('heading', {
+    expect(getByRole('heading', {
       name: 'Change password'
-    });
+    })).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(changePasswordHeading).toBeInTheDocument();
-    });
+    expect(getByTestId('test-current-password-input')).toBeInTheDocument()
 
-    await waitFor(() => {
-      expect(getByTestId('test-current-password-input')).toBeInTheDocument()
-    });
 
-    await waitFor(() => {
-      expect(getByTestId('test-new-password-input')).toBeInTheDocument()
-    });
+    expect(getByTestId('test-new-password-input')).toBeInTheDocument()
 
-    await waitFor(() => {
-      expect(getByTestId('test-confirmed-password-input')).toBeInTheDocument()
-    });
+    expect(getByTestId('test-confirmed-password-input')).toBeInTheDocument()
   });
 });
 

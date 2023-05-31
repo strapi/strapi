@@ -90,7 +90,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           type: 'ON_SUBMIT',
         });
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
- 
+
         if (cleanedData.roles) {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
         }

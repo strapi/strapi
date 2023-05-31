@@ -215,4 +215,4 @@ Password.defaultProps = {
   },
 };
 
-export default Password
+export default Password;
