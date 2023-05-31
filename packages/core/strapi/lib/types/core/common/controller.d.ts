@@ -1,8 +1,8 @@
-import type koa from 'koa';
+import type { ExtendableContext, Next } from 'koa';
 
 export type ControllerHandler = <T>(
-  context: koa.ExtendableContext,
-  next: koa.Next
+  context: ExtendableContext,
+  next: Next
 ) => Promise<T | void> | T | void;
 
 export type Controller = Record<string, ControllerHandler>;

@@ -3,8 +3,8 @@
 const { factory } = require('typescript');
 const _ = require('lodash/fp');
 
-const { addImport } = require('./imports');
-const { getTypeNode, toTypeLiteral } = require('./utils');
+const { addImport } = require('../imports');
+const { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } = require('./utils');
 const mappers = require('./mappers');
 
 /**
@@ -26,7 +26,8 @@ const getAttributeType = (attributeName, attribute, uid) => {
 
   const [attributeType, typeParams] = mappers[attribute.type]({ uid, attribute, attributeName });
 
-  addImport(attributeType);
+  // Make sure the attribute namespace is imported
+  addImport(NAMESPACES.attribute);
 
   return getTypeNode(attributeType, typeParams);
 };
@@ -42,38 +43,36 @@ const getAttributeModifiers = (attribute) => {
 
   // Required
   if (attribute.required) {
-    addImport('RequiredAttribute');
-
-    modifiers.push(factory.createTypeReferenceNode(factory.createIdentifier('RequiredAttribute')));
+    modifiers.push(
+      factory.createTypeReferenceNode(factory.createIdentifier(withAttributeNamespace('Required')))
+    );
   }
 
   // Private
   if (attribute.private) {
-    addImport('PrivateAttribute');
-
-    modifiers.push(factory.createTypeReferenceNode(factory.createIdentifier('PrivateAttribute')));
+    modifiers.push(
+      factory.createTypeReferenceNode(factory.createIdentifier(withAttributeNamespace('Private')))
+    );
   }
 
   // Unique
   if (attribute.unique) {
-    addImport('UniqueAttribute');
-
-    modifiers.push(factory.createTypeReferenceNode(factory.createIdentifier('UniqueAttribute')));
+    modifiers.push(
+      factory.createTypeReferenceNode(factory.createIdentifier(withAttributeNamespace('Unique')))
+    );
   }
 
   // Configurable
   if (attribute.configurable) {
-    addImport('ConfigurableAttribute');
-
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('ConfigurableAttribute'))
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('Configurable'))
+      )
     );
   }
 
   // Custom field
   if (attribute.customField) {
-    addImport('CustomField');
-
     const customFieldUid = factory.createStringLiteral(attribute.customField);
     const typeArguments = [customFieldUid];
 
@@ -82,17 +81,18 @@ const getAttributeModifiers = (attribute) => {
     }
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('CustomField'), typeArguments)
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('CustomField')),
+        typeArguments
+      )
     );
   }
 
   // Plugin Options
   if (!_.isEmpty(attribute.pluginOptions)) {
-    addImport('SetPluginOptions');
-
     modifiers.push(
       factory.createTypeReferenceNode(
-        factory.createIdentifier('SetPluginOptions'),
+        factory.createIdentifier(withAttributeNamespace('SetPluginOptions')),
         // Transform the pluginOptions object into an object literal expression
         [toTypeLiteral(attribute.pluginOptions)]
       )
@@ -102,38 +102,37 @@ const getAttributeModifiers = (attribute) => {
   // Min / Max
   // TODO: Always provide a second type argument for min/max (ie: resolve the attribute scalar type with a `GetAttributeType<${mappers[attribute][0]}>` (useful for biginter (string values)))
   if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
-    addImport('SetMinMax');
-
     const minMaxProperties = _.pick(['min', 'max'], attribute);
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('SetMinMax'), [
-        toTypeLiteral(minMaxProperties),
-      ])
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('SetMinMax')),
+        [toTypeLiteral(minMaxProperties)]
+      )
     );
   }
 
   // Min length / Max length
   if (!_.isNil(attribute.minLength) || !_.isNil(attribute.maxLength)) {
-    addImport('SetMinMaxLength');
-
     const minMaxProperties = _.pick(['minLength', 'maxLength'], attribute);
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('SetMinMaxLength'), [
-        toTypeLiteral(minMaxProperties),
-      ])
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('SetMinMaxLength')),
+        [toTypeLiteral(minMaxProperties)]
+      )
     );
   }
 
   // Default
   if (!_.isNil(attribute.default)) {
-    addImport('DefaultTo');
-
     const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('DefaultTo'), [defaultLiteral])
+      factory.createTypeReferenceNode(
+        factory.createIdentifier(withAttributeNamespace('DefaultTo')),
+        [defaultLiteral]
+      )
     );
   }
 

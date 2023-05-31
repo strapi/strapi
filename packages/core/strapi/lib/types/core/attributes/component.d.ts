@@ -1,9 +1,8 @@
-import { Attribute, ConfigurableOption, MinMaxOption, PrivateOption, RequiredOption } from './base';
-import { GetAttributesValues } from './utils';
+import type { Common, Attribute } from '@strapi/strapi';
 
-export interface ComponentAttributeProperties<
+export interface ComponentProperties<
   // Targeted component
-  T extends Strapi.ComponentUIDs,
+  T extends Common.UID.Component,
   // Repeatable
   R extends boolean = false
 > {
@@ -11,28 +10,25 @@ export interface ComponentAttributeProperties<
   repeatable?: R;
 }
 
-export type ComponentAttribute<
+export type Component<
   // Targeted component
-  T extends Strapi.ComponentUIDs,
+  T extends Common.UID.Component = Common.UID.Component,
   // Repeatable
   R extends boolean = false
-> = Attribute<'component'> &
+> = Attribute.Attribute<'component'> &
   // Component Properties
-  ComponentAttributeProperties<T, R> &
+  ComponentProperties<T, R> &
   // Options
-  ConfigurableOption &
-  MinMaxOption &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.MinMaxOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type ComponentValue<
-  T extends Strapi.ComponentUIDs,
+  T extends Common.UID.Component,
   R extends boolean
-> = GetAttributesValues<T> extends infer V ? (R extends true ? V[] : V) : never;
+> = Attribute.GetValues<T> extends infer V ? (R extends true ? V[] : V) : never;
 
-export type GetComponentAttributeValue<T extends Attribute> = T extends ComponentAttribute<
-  infer U,
-  infer R
->
+export type GetComponentValue<T extends Attribute.Attribute> = T extends Component<infer U, infer R>
   ? ComponentValue<U, R>
   : never;

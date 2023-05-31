@@ -67,7 +67,7 @@ export type GetSeparator<T extends Any = Any> = T extends Scoped
  * type T = WithSeparator<Admin> | WithSeparator<API>
  * // ^ 'admin::' | 'api::{string}.'
  */
-export type WithSeparator<N extends Any> = Utils.Suffix<N, GetSeparator<N>>;
+export type WithSeparator<N extends Any> = Utils.String.Suffix<N, GetSeparator<N>>;
 
 /**
  * Represents namespaces composed of an origin and a name, separated by colons

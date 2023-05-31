@@ -1,11 +1,10 @@
-import { Attribute, ConfigurableOption, PrivateOption, RequiredOption } from './base';
-import { Media } from './common';
+import type { Attribute } from '@strapi/strapi';
 
 export type AllowedMediaTypes = 'images' | 'videos' | 'files' | 'audios';
 
-export interface MediaAttributeProperties<
+export interface MediaProperties<
   // Media Type
-  T extends AllowedMediaTypes = undefined,
+  T extends AllowedMediaTypes | undefined = undefined,
   // Multiple
   U extends boolean = false
 > {
@@ -13,24 +12,21 @@ export interface MediaAttributeProperties<
   multiple?: U;
 }
 
-export type MediaAttribute<
+export type Media<
   // Media Type
-  T extends AllowedMediaTypes = undefined,
+  T extends AllowedMediaTypes | undefined = undefined,
   // Multiple
   U extends boolean = false
-> = Attribute<'media'> &
+> = Attribute.Attribute<'media'> &
   // Properties
-  MediaAttributeProperties<T, U> &
+  MediaProperties<T, U> &
   // Options
-  ConfigurableOption &
-  RequiredOption &
-  PrivateOption;
+  Attribute.ConfigurableOption &
+  Attribute.RequiredOption &
+  Attribute.PrivateOption;
 
-export type MediaValue<T extends boolean = false> = T extends true ? Media[] : Media;
+export type MediaValue<T extends boolean = false> = T extends true ? any[] : any;
 
-export type GetMediaAttributeValue<T extends Attribute> = T extends MediaAttribute<
-  infer _U,
-  infer S
->
+export type GetMediaValue<T extends Attribute.Attribute> = T extends Media<infer _U, infer S>
   ? MediaValue<S>
   : never;

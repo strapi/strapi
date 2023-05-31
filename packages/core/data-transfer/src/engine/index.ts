@@ -1,13 +1,11 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
+import Chain, { chain } from 'stream-chain';
 import { extname } from 'path';
 import { EOL } from 'os';
-import { isEmpty, uniq, last, isNumber, difference, omit, set } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
-import type { Schema } from '@strapi/strapi';
-import { chain } from 'stream-chain';
-import type Chain from 'stream-chain';
-import * as utils from '../utils';
 
+import type { Schema, Utils } from '@strapi/strapi';
 import type {
   IAsset,
   IDestinationProvider,
@@ -24,15 +22,13 @@ import type {
   IProvider,
   TransferFilters,
   TransferFilterPreset,
+  StreamItem,
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
-  SchemaMap,
-  StreamItem,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
 import { compareSchemas, validateProvider } from './validation';
-import { filter, map } from '../utils/stream';
 
 import { TransferEngineError, TransferEngineValidationError } from './errors';
 import {
@@ -41,7 +37,7 @@ import {
   ErrorDiagnosticSeverity,
 } from './diagnostic';
 import { DataTransferError } from '../errors';
-import { runMiddleware } from '../utils/middleware';
+import * as utils from '../utils';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -82,9 +78,8 @@ export const TransferGroupPresets: TransferGroupFilter = {
 export const DEFAULT_VERSION_STRATEGY = 'ignore';
 export const DEFAULT_SCHEMA_STRATEGY = 'strict';
 
-/**
- * Transfer Engine Class
- */
+type SchemaMap = Utils.String.Dict<Schema.Schema>;
+
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -200,11 +195,11 @@ class TransferEngine<
       const chainTransforms: StreamItem[] = [];
       for (const transform of transforms) {
         if ('filter' in transform) {
-          chainTransforms.push(filter(transform.filter));
+          chainTransforms.push(utils.stream.filter(transform.filter));
         }
 
         if ('map' in transform) {
-          chainTransforms.push(map(transform.map));
+          chainTransforms.push(utils.stream.map(transform.map));
         }
       }
       if (chainTransforms.length) {
@@ -399,7 +394,7 @@ class TransferEngine<
       const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
 
       if (schemaDiffs.length) {
-        diffs[key] = schemaDiffs as Diff<Schema>[];
+        diffs[key] = schemaDiffs as Diff<Schema.Schema>[];
       }
     });
 
@@ -647,11 +642,12 @@ class TransferEngine<
       );
     }
 
-    const { sourceSchema, destinationSchema } = await this.#getSchemas();
+    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
+    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
 
     try {
-      if (sourceSchema && destinationSchema) {
-        this.#assertSchemasMatching(sourceSchema, destinationSchema);
+      if (sourceSchemas && destinationSchemas) {
+        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
       }
     } catch (error) {
       // if this is a schema matching error, allow handlers to resolve it
@@ -670,7 +666,10 @@ class TransferEngine<
           throw error;
         }
 
-        await runMiddleware<SchemaDiffHandlerContext>(context, this.#handlers.schemaDiff);
+        await utils.middleware.runMiddleware<SchemaDiffHandlerContext>(
+          context,
+          this.#handlers.schemaDiff
+        );
 
         // if there are any remaining diffs that weren't ignored
         const unresolvedDiffs = utils.json.diff(context.diffs, context.ignoredDiffs);
@@ -768,7 +767,9 @@ class TransferEngine<
     const destination = await this.destinationProvider.createSchemasWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
-    const tracker = this.#progressTracker(stage, { key: (value: Schema) => value.modelType });
+    const tracker = this.#progressTracker(stage, {
+      key: (value: Schema.Schema) => value.modelType,
+    });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
   }
@@ -801,7 +802,7 @@ class TransferEngine<
           }
 
           const { type, data } = entity;
-          const attributes = (schemas[type] as Record<string, unknown>).attributes as object;
+          const attributes = schemas[type].attributes;
 
           const attributesToRemove = difference(Object.keys(data), Object.keys(attributes));
           const updatedEntity = set('data', omit(attributesToRemove, data), entity);

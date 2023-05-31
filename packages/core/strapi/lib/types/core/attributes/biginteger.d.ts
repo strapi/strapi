@@ -1,22 +1,15 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type BigIntegerAttribute = Attribute<'biginteger'> &
+export type BigInteger = Attribute.Attribute<'biginteger'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<BigIntegerValue> &
-  MinMaxOption<string> &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<BigIntegerValue> &
+  Attribute.MinMaxOption<string> &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type BigIntegerValue = string;
 
-export type GetBigIntegerAttributeValue<T extends Attribute> = T extends BigIntegerAttribute
+export type GetBigIntegerValue<T extends Attribute.Attribute> = T extends BigInteger
   ? BigIntegerValue
   : never;
