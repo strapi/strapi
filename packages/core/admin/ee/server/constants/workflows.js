@@ -6,4 +6,5 @@ module.exports = {
   STAGE_MODEL_UID: 'admin::workflow-stage',
   STAGE_DEFAULT_COLOR: '#4945FF',
   ENTITY_STAGE_ATTRIBUTE: 'strapi_reviewWorkflows_stage',
+  ENTITY_ASSIGNEE_ATTRIBUTE: 'strapi_assignee',
 };
