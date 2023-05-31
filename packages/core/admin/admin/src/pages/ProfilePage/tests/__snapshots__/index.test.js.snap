@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
+exports[`ADMIN | Pages | Profile page | without SSO lock renders and matches the snapshot 1`] = `
 .c1 {
   background: #f6f6f9;
   padding-top: 40px;
@@ -51,6 +51,10 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
 .c30 {
   background: transparent;
   border-style: none;
+}
+
+.c36 {
+  color: #4945ff;
 }
 
 .c37 {
@@ -590,10 +594,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c36 {
-  color: #4945ff;
-}
-
 .c28::-ms-reveal {
   display: none;
 }
@@ -894,6 +894,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-invalid="false"
                             aria-required="false"
                             class="c27 c28"
+                            data-testid="test-current-password-input"
                             id="1"
                             name="currentPassword"
                             type="password"
@@ -961,6 +962,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-required="false"
                             autocomplete="new-password"
                             class="c27 c28"
+                            data-testid="test-new-password-input"
                             id="3"
                             name="password"
                             type="password"
@@ -1024,6 +1026,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-required="false"
                             autocomplete="new-password"
                             class="c27 c28"
+                            data-testid="test-confirmed-password-input"
                             id="5"
                             name="confirmPassword"
                             type="password"
@@ -1134,7 +1137,9 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                           >
                             <span
                               class="c44"
-                            />
+                            >
+                              English
+                            </span>
                           </span>
                         </span>
                         <span
