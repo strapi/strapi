@@ -1,6 +1,5 @@
 import { Database } from '@strapi/database';
 import type { ID } from '@strapi/database';
-
 import { Strapi } from '../../';
 
 type EntityServiceAction =
