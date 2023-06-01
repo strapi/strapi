@@ -41,7 +41,7 @@ const EditView = () => {
     data: webhookData,
     error: webhookError,
   } = useQuery(
-    ['get-webhook', id],
+    ['webhooks', id],
     async () => {
       const {
         data: { data },
