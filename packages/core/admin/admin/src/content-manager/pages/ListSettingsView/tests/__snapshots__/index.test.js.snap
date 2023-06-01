@@ -1137,74 +1137,139 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       class=""
                     >
                       <div
-                        class=""
+                        class="c26"
                       >
-                        <div
-                          class="c26"
+                        <label
+                          class="c11 c27 c28"
+                          for=":r6:"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":r6:"
-                          >
-                            Entries per page
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:r9:"
-                            aria-describedby=":r6:-hint :r6:-error"
-                            aria-expanded="false"
-                            aria-label="Entries per page"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":r6:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
+                          Entries per page
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-:r9:"
+                          aria-describedby=":r6:-hint :r6:-error"
+                          aria-expanded="false"
+                          aria-label="Entries per page"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":r6:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c45 c46"
                           >
                             <span
-                              class="c45 c46"
+                              class="c11 c47 c48"
                             >
                               <span
-                                class="c11 c47 c48"
+                                class="c49"
                               >
-                                <span
-                                  class="c49"
-                                >
-                                  10
-                                </span>
+                                10
                               </span>
                             </span>
-                            <span
-                              class="c46"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </span>
-                          </div>
-                          <p
-                            class="c11 c51"
-                            id=":r6:-hint"
+                          </span>
+                          <span
+                            class="c46"
                           >
-                            Note: You can override this value in the Collection Type settings page.
-                          </p>
+                            <span
+                              aria-hidden="true"
+                              class="c50"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
+                        <p
+                          class="c11 c51"
+                          id=":r6:-hint"
+                        >
+                          Note: You can override this value in the Collection Type settings page.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c52"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c26"
+                      >
+                        <label
+                          class="c11 c27 c28"
+                          for=":ra:"
+                        >
+                          Default sort attribute
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-:rd:"
+                          aria-describedby=":ra:-hint :ra:-error"
+                          aria-expanded="false"
+                          aria-label="Default sort attribute"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":ra:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c45 c46"
+                          >
+                            <span
+                              class="c11 c47 c48"
+                            >
+                              <span
+                                class="c49"
+                              >
+                                id
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c46"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c50"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1216,141 +1281,64 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       class=""
                     >
                       <div
-                        class=""
+                        class="c26"
                       >
-                        <div
-                          class="c26"
+                        <label
+                          class="c11 c27 c28"
+                          for=":re:"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":ra:"
-                          >
-                            Default sort attribute
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:rd:"
-                            aria-describedby=":ra:-hint :ra:-error"
-                            aria-expanded="false"
-                            aria-label="Default sort attribute"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":ra:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
-                          >
-                            <span
-                              class="c45 c46"
-                            >
-                              <span
-                                class="c11 c47 c48"
-                              >
-                                <span
-                                  class="c49"
-                                >
-                                  id
-                                </span>
-                              </span>
-                            </span>
-                            <span
-                              class="c46"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c52"
-                  >
-                    <div
-                      class=""
-                    >
-                      <div
-                        class=""
-                      >
+                          Default sort order
+                        </label>
                         <div
-                          class="c26"
+                          aria-autocomplete="none"
+                          aria-controls="radix-:rh:"
+                          aria-describedby=":re:-hint :re:-error"
+                          aria-expanded="false"
+                          aria-label="Default sort order"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":re:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":re:"
-                          >
-                            Default sort order
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:rh:"
-                            aria-describedby=":re:-hint :re:-error"
-                            aria-expanded="false"
-                            aria-label="Default sort order"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":re:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
+                          <span
+                            class="c45 c46"
                           >
                             <span
-                              class="c45 c46"
+                              class="c11 c47 c48"
                             >
                               <span
-                                class="c11 c47 c48"
+                                class="c49"
                               >
-                                <span
-                                  class="c49"
-                                >
-                                  ASC
-                                </span>
+                                ASC
                               </span>
                             </span>
+                          </span>
+                          <span
+                            class="c46"
+                          >
                             <span
-                              class="c46"
+                              aria-hidden="true"
+                              class="c50"
                             >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </span>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -2800,74 +2788,139 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       class=""
                     >
                       <div
-                        class=""
+                        class="c26"
                       >
-                        <div
-                          class="c26"
+                        <label
+                          class="c11 c27 c28"
+                          for=":r24:"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":r24:"
-                          >
-                            Entries per page
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:r27:"
-                            aria-describedby=":r24:-hint :r24:-error"
-                            aria-expanded="false"
-                            aria-label="Entries per page"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":r24:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
+                          Entries per page
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-:r27:"
+                          aria-describedby=":r24:-hint :r24:-error"
+                          aria-expanded="false"
+                          aria-label="Entries per page"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":r24:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c45 c46"
                           >
                             <span
-                              class="c45 c46"
+                              class="c11 c47 c48"
                             >
                               <span
-                                class="c11 c47 c48"
+                                class="c49"
                               >
-                                <span
-                                  class="c49"
-                                >
-                                  10
-                                </span>
+                                10
                               </span>
                             </span>
-                            <span
-                              class="c46"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </span>
-                          </div>
-                          <p
-                            class="c11 c51"
-                            id=":r24:-hint"
+                          </span>
+                          <span
+                            class="c46"
                           >
-                            Note: You can override this value in the Collection Type settings page.
-                          </p>
+                            <span
+                              aria-hidden="true"
+                              class="c50"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
+                        <p
+                          class="c11 c51"
+                          id=":r24:-hint"
+                        >
+                          Note: You can override this value in the Collection Type settings page.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c52"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c26"
+                      >
+                        <label
+                          class="c11 c27 c28"
+                          for=":r28:"
+                        >
+                          Default sort attribute
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-:r2b:"
+                          aria-describedby=":r28:-hint :r28:-error"
+                          aria-expanded="false"
+                          aria-label="Default sort attribute"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":r28:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c45 c46"
+                          >
+                            <span
+                              class="c11 c47 c48"
+                            >
+                              <span
+                                class="c49"
+                              >
+                                id
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c46"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c50"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -2879,141 +2932,64 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       class=""
                     >
                       <div
-                        class=""
+                        class="c26"
                       >
-                        <div
-                          class="c26"
+                        <label
+                          class="c11 c27 c28"
+                          for=":r2c:"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":r28:"
-                          >
-                            Default sort attribute
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:r2b:"
-                            aria-describedby=":r28:-hint :r28:-error"
-                            aria-expanded="false"
-                            aria-label="Default sort attribute"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":r28:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
-                          >
-                            <span
-                              class="c45 c46"
-                            >
-                              <span
-                                class="c11 c47 c48"
-                              >
-                                <span
-                                  class="c49"
-                                >
-                                  id
-                                </span>
-                              </span>
-                            </span>
-                            <span
-                              class="c46"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c52"
-                  >
-                    <div
-                      class=""
-                    >
-                      <div
-                        class=""
-                      >
+                          Default sort order
+                        </label>
                         <div
-                          class="c26"
+                          aria-autocomplete="none"
+                          aria-controls="radix-:r2f:"
+                          aria-describedby=":r2c:-hint :r2c:-error"
+                          aria-expanded="false"
+                          aria-label="Default sort order"
+                          class="c43 c23 c44"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":r2c:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
                         >
-                          <label
-                            class="c11 c27 c28"
-                            for=":r2c:"
-                          >
-                            Default sort order
-                          </label>
-                          <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-:r2f:"
-                            aria-describedby=":r2c:-hint :r2c:-error"
-                            aria-expanded="false"
-                            aria-label="Default sort order"
-                            class="c43 c23 c44"
-                            data-state="closed"
-                            dir="ltr"
-                            id=":r2c:"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
+                          <span
+                            class="c45 c46"
                           >
                             <span
-                              class="c45 c46"
+                              class="c11 c47 c48"
                             >
                               <span
-                                class="c11 c47 c48"
+                                class="c49"
                               >
-                                <span
-                                  class="c49"
-                                >
-                                  ASC
-                                </span>
+                                ASC
                               </span>
                             </span>
+                          </span>
+                          <span
+                            class="c46"
+                          >
                             <span
-                              class="c46"
+                              aria-hidden="true"
+                              class="c50"
                             >
-                              <span
-                                aria-hidden="true"
-                                class="c50"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </span>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>

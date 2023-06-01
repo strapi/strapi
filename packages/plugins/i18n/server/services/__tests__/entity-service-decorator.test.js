@@ -45,6 +45,8 @@ const models = {
   'localized-single-type-model': singleTypeModel,
 };
 
+const testModels = [['test-model'], ['non-localized-model'], ['localized-single-type-model']];
+
 describe('Entity service decorator', () => {
   beforeAll(() => {
     global.strapi = {
@@ -62,6 +64,9 @@ describe('Entity service decorator', () => {
           create() {},
           update() {},
         };
+      },
+      entityService: {
+        findOne() {},
       },
       getModel(uid) {
         return models[uid || 'test-model'];
@@ -136,6 +141,16 @@ describe('Entity service decorator', () => {
       ['delete', { filters: [{ id: { $in: [1] } }] }],
     ];
 
+    test.each(testModels)('Always uses original wrapParams in output - %s', async (modelName) => {
+      const defaultService = {
+        wrapParams: jest.fn(() => Promise.resolve({ Test: 'Test' })),
+      };
+      const service = decorator(defaultService);
+
+      const output = await service.wrapParams({}, { uid: modelName, action: 'findMany' });
+
+      expect(output.Test).toEqual('Test');
+    });
     test.each(testData)(
       "Doesn't add locale param when the params contain id or id_in - %s",
       async (action, params) => {
@@ -321,6 +336,7 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         wrapParams: jest.fn(() => Promise.resolve(entry)),
+        findMany: jest.fn(() => Promise.resolve(entry)),
       };
 
       const service = decorator(defaultService);
@@ -329,8 +345,7 @@ describe('Entity service decorator', () => {
       await service.findMany('test-model', input);
 
       expect(global.strapi.getModel).toHaveBeenCalledWith('test-model');
-      expect(global.strapi.db.query).toHaveBeenCalledWith('test-model');
-      expect(findManySpy).toHaveBeenCalled();
+      expect(defaultService.findMany).toBeCalled();
     });
 
     describe('single types', () => {
@@ -341,6 +356,7 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         wrapParams: jest.fn(() => Promise.resolve(entry)),
+        findMany: jest.fn(() => Promise.resolve(entry)),
       };
 
       const service = decorator(defaultService);
@@ -361,12 +377,11 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(global.strapi.db.query).toHaveBeenCalledWith('localized-single-type-model');
-        expect(findManySpy).toHaveBeenCalled();
+        expect(global.strapi.db.query).toBeCalled();
       });
 
       test('calls db.findMany for single type with no local param', async () => {
-        const findOneSpy = jest.fn();
+        const findOneSpy = jest.fn(() => Promise.resolve(entry));
         const db = {
           query: jest.fn(() => ({
             findOne: findOneSpy,
@@ -381,8 +396,9 @@ describe('Entity service decorator', () => {
         await service.findMany('localized-single-type-model', input);
 
         expect(global.strapi.getModel).toHaveBeenCalledWith('localized-single-type-model');
-        expect(global.strapi.db.query).toHaveBeenCalledWith('localized-single-type-model');
-        expect(findOneSpy).toHaveBeenCalled();
+        expect(defaultService.findMany).toHaveBeenCalledWith('localized-single-type-model', {
+          data: { title: 'title ' },
+        });
       });
     });
   });
