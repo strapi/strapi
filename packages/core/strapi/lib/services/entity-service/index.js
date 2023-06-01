@@ -5,7 +5,7 @@ const delegate = require('delegates');
 const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
   require('@strapi/database').errors;
 const { contentTypes: contentTypesUtils, sanitize } = require('@strapi/utils');
-const { ValidationError, ApplicationError } = require('@strapi/utils').errors;
+const { ValidationError } = require('@strapi/utils').errors;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
@@ -62,12 +62,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return result;
   },
 
-  async emitEvent(uid, eventName, entity) {
-    const event = ALLOWED_WEBHOOK_EVENTS[eventName];
-    if (!event) {
-      throw new ApplicationError(`The webhook event ${eventName} is not supported.`);
-    }
-
+  async emitEvent(uid, event, entity) {
     // Ignore audit log events to prevent infinite loops
     if (uid === 'admin::audit-log') {
       return;
@@ -184,7 +179,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entity = await this.wrapResult(entity, { uid, action: 'create' });
 
-    await this.emitEvent(uid, 'ENTRY_CREATE', entity);
+    const { ENTRY_CREATE } = ALLOWED_WEBHOOK_EVENTS;
+    await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
   },
@@ -237,7 +233,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entity = await this.wrapResult(entity, { uid, action: 'update' });
 
-    await this.emitEvent(uid, 'ENTRY_UPDATE', entity);
+    const { ENTRY_UPDATE } = ALLOWED_WEBHOOK_EVENTS;
+    await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
     return entity;
   },
@@ -264,7 +261,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entityToDelete = await this.wrapResult(entityToDelete, { uid, action: 'delete' });
 
-    await this.emitEvent(uid, 'ENTRY_DELETE', entityToDelete);
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
+    await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
     return entityToDelete;
   },
@@ -294,9 +292,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     entitiesToDelete = await this.wrapResult(entitiesToDelete, { uid, action: 'delete' });
 
     // Trigger webhooks. One for each entity
-    await Promise.all(
-      entitiesToDelete.map((entity) => this.emitEvent(uid, 'ENTRY_DELETE', entity))
-    );
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
+    await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
     return deletedEntities;
   },

@@ -21,7 +21,10 @@ const {
   file: { bytesToKbytes },
 } = require('@strapi/utils');
 
-const { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } = require('../constants');
+const {
+  FILE_MODEL_UID,
+  ALLOWED_WEBHOOK_EVENTS: { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE },
+} = require('../constants');
 const { getService } = require('../utils');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -59,12 +62,7 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
 };
 
 module.exports = ({ strapi }) => ({
-  async emitEvent(eventName, data) {
-    const event = ALLOWED_WEBHOOK_EVENTS[eventName];
-    if (!event) {
-      throw new ApplicationError(`The webhook event ${eventName} doesn't exist.`);
-    }
-
+  async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
     const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
 
@@ -349,7 +347,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
-    await this.emitEvent('MEDIA_UPDATE', res);
+    await this.emitEvent(MEDIA_UPDATE, res);
 
     return res;
   },
@@ -365,7 +363,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
-    await this.emitEvent('MEDIA_CREATE', res);
+    await this.emitEvent(MEDIA_CREATE, res);
 
     return res;
   },
@@ -402,7 +400,7 @@ module.exports = ({ strapi }) => ({
       where: { id: file.id },
     });
 
-    await this.emitEvent('MEDIA_DELETE', media);
+    await this.emitEvent(MEDIA_DELETE, media);
 
     return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
   },
