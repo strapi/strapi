@@ -1,6 +1,6 @@
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import useSettingsForm from '../index';
 
 const toggleNotification = jest.fn();
@@ -57,7 +57,7 @@ describe('useSettingsForm', () => {
     server.close();
   });
   test('fetches all the providers options', async () => {
-    const { result, waitFor } = setup('/admin/providers/options', {
+    const { result } = setup('/admin/providers/options', {
       validate: jest.fn()
     }, jest.fn(), ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
 
@@ -110,7 +110,7 @@ describe('useSettingsForm', () => {
 
     const cbSucc = jest.fn();
 
-    const { result, waitFor } = setup('/admin/providers/options', {}, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
+    const { result } = setup('/admin/providers/options', {}, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
     const e = { preventDefault: jest.fn() };
     await act(async () => {
