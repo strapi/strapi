@@ -1,14 +1,20 @@
 'use strict';
 
-const { set, forEach, pipe, map } = require('lodash/fp');
+const { filter, set, forEach, pipe, map, stubTrue, cond } = require('lodash/fp');
 const { getService } = require('../../utils');
-const { getVisibleContentTypesUID } = require('../../utils/review-workflows');
+const { getVisibleContentTypesUID, hasStageAttribute } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
+
+const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
+// The longest index name that Strapi can create is prefixed with '_strapi_reviewWorkflow_stage_links_inv_fk', so the content type name  should be no longer than this.
+const MAX_JOIN_TABLE_NAME_SUFFIX =
+  1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
+const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
 
 async function initDefaultWorkflow({ workflowsService, stagesService }) {
   const wfCount = await workflowsService.count();
@@ -28,6 +34,14 @@ async function initDefaultWorkflow({ workflowsService, stagesService }) {
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
+    const assertContentTypeCompatibility = (contentType) =>
+      contentType.collectionName.length <= MAX_CONTENT_TYPE_NAME_LEN;
+    const incompatibleContentTypeAlert = (contentType) => {
+      strapi.log.warn(
+        `Review Workflow cannot be activated for the content type with the name '${contentType.info.displayName}' because the name exceeds the maximum length of ${MAX_CONTENT_TYPE_NAME_LEN} characters.`
+      );
+      return contentType;
+    };
     const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
       writable: true,
       private: false,
@@ -38,7 +52,12 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       relation: 'oneToOne',
       target: 'admin::workflow-stage',
     });
-    strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
+
+    const extendContentTypeIfCompatible = cond([
+      [assertContentTypeCompatibility, setStageAttribute],
+      [stubTrue, incompatibleContentTypeAlert],
+    ]);
+    strapi.container.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
   };
 
   pipe([
@@ -57,9 +76,11 @@ function persistStagesJoinTables({ strapi }) {
       return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
-    const joinTablesToPersist = pipe([getVisibleContentTypesUID, map(getStageTableToPersist)])(
-      contentTypes
-    );
+    const joinTablesToPersist = pipe([
+      getVisibleContentTypesUID,
+      filter(hasStageAttribute),
+      map(getStageTableToPersist),
+    ])(contentTypes);
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
     await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');

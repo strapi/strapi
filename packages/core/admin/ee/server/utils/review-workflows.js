@@ -1,16 +1,22 @@
 'use strict';
 
-const { get, keys, pickBy, pipe } = require('lodash/fp');
+const { getOr, keys, pickBy, pipe, has } = require('lodash/fp');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../constants/workflows');
 
 const getVisibleContentTypesUID = pipe([
-  // FIXME: Swap with the commented line below when figure out how to shorten strapi_reviewWorkflows_stage
-  pickBy(get('options.reviewWorkflows')),
-  // Pick only content-types visible in the content-manager
-  // pickBy(getOr(true, 'pluginOptions.content-manager.visible')),
+  // Pick only content-types visible in the content-manager and option is not false
+  pickBy(
+    (value) =>
+      getOr(true, 'pluginOptions.content-manager.visible', value) &&
+      getOr(true, 'options.reviewWorkflows', value) !== false
+  ),
   // Get UIDs
   keys,
 ]);
 
+const hasStageAttribute = has(['attributes', ENTITY_STAGE_ATTRIBUTE]);
+
 module.exports = {
   getVisibleContentTypesUID,
+  hasStageAttribute,
 };

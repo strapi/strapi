@@ -1,7 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
-const { getVisibleContentTypesUID } = require('../utils/review-workflows');
+const { hasStageAttribute } = require('../utils/review-workflows');
 
 const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
@@ -33,8 +33,10 @@ const validateContentTypes = yup.array().of(
       message: (value) =>
         `Content type ${value.originalValue} does not have review workflow enabled`,
       test(uid) {
-        // It's not a valid  content type if it's not visible in the content manager
-        return getVisibleContentTypesUID({ [uid]: strapi.getModel(uid) }).includes(uid);
+        const model = strapi.getModel(uid);
+
+        // It's not a valid content type if it doesn't have the stage attribute
+        return hasStageAttribute(model);
       },
     })
 );
