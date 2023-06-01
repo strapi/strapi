@@ -12,10 +12,12 @@ import {
   Checkbox,
   Loader,
   RawTable as Table,
+  RawTh as Th,
   RawTd as Td,
   RawTr as Tr,
   RawThead as Thead,
   RawTbody as Tbody,
+  VisuallyHidden,
 } from '@strapi/design-system';
 
 import { useContentTypes } from '../../../../../../../hooks/useContentTypes';
@@ -32,12 +34,13 @@ export const formatValue = (value) =>
     return acc;
   }, {});
 
+// TODO check whether we want to move alternating background colour tables to the design system
 const StyledTable = styled(Table)`
   tbody tr:nth-child(odd) {
     background: ${({ theme }) => theme.colors.neutral100};
   }
 
-  thead td span {
+  thead th span {
     color: ${({ theme }) => theme.colors.neutral500};
   }
 
@@ -52,7 +55,9 @@ const StyledTable = styled(Table)`
   }
 
   tbody tr td:first-child {
-    padding-left: ${({ theme }) => theme.spaces[7]};
+    // Add padding to the start of the first column to avoid the checkbox appearing
+    // too close to the edge of the table
+    padding-inline-start: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
@@ -125,11 +130,18 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
   return (
     <Thead>
       <Tr>
-        <Td />
+        <Th>
+          <VisuallyHidden>
+            {formatMessage({
+              id: 'Settings.webhooks.event.select',
+              defaultMessage: 'Select event',
+            })}
+          </VisuallyHidden>
+        </Th>
         {headers.map((header) => {
-          if (header.id === 'app.utils.publish' || header.id === 'app.utils.unpublish') {
+          if (['app.utils.publish', 'app.utils.unpublish'].includes(header.id)) {
             return (
-              <Td
+              <Th
                 key={header.id}
                 title={formatMessage({
                   id: 'Settings.webhooks.event.publish-tooltip',
@@ -139,16 +151,16 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage(header)}
                 </Typography>
-              </Td>
+              </Th>
             );
           }
 
           return (
-            <Td key={header.id}>
+            <Th key={header.id}>
               <Typography variant="sigma" textColor="neutral600">
                 {formatMessage(header)}
               </Typography>
-            </Td>
+            </Th>
           );
         })}
       </Tr>
@@ -176,7 +188,7 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
 
   const formattedValue = formatValue(inputValue);
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleSelect = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
 
     if (value) {
@@ -187,7 +199,7 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
 
-  const handleChangeAll = ({ target: { name, value } }) => {
+  const handleSelectAll = ({ target: { name, value } }) => {
     let set = new Set(inputValue);
 
     if (value) {
@@ -212,8 +224,8 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
             name={event}
             events={value}
             inputValue={formattedValue[event]}
-            handleChange={handleChange}
-            handleChangeAll={handleChangeAll}
+            handleChange={handleSelect}
+            handleChangeAll={handleSelectAll}
           />
         );
       })}
