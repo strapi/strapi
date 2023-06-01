@@ -44,14 +44,13 @@ const StyledTable = styled(Table)`
     color: ${({ theme }) => theme.colors.neutral500};
   }
 
-  td {
+  td,
+  th {
+    padding-block-start: ${({ theme }) => theme.spaces[3]};
+    padding-block-end: ${({ theme }) => theme.spaces[3]};
     width: 10%;
     vertical-align: middle;
     text-align: center;
-  }
-
-  tr {
-    height: 52px;
   }
 
   tbody tr td:first-child {
