@@ -49,13 +49,13 @@ This means at any place where the UI displays a stage, it has to be prepared to 
 
 ## List view
 
-The information which stage is current assigned to an entity is send as part of the content-type response payload for each entity in the attribute `strapi_reviewWorkflows_stage`.
+The information which stage is current assigned to an entity is send as part of the content-type response payload for each entity in the attribute `strapi_stage`.
 Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
 
 ```ts
 {
   // ... entity attributes
-  strapi_reviewWorkflows_stage?: Stage | null
+  strapi_stage?: Stage | null
 }
 ```
 
@@ -66,13 +66,13 @@ add an additional check if the feature toggle returned in `http://localhost:1337
 
 ## Edit View
 
-The information which stage is current assigned to an entity is send as part of the entity response payload in the attribute `strapi_reviewWorkflows_stage`.
+The information which stage is current assigned to an entity is send as part of the entity response payload in the attribute `strapi_stage`.
 Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
 
 ```ts
 {
   // ... entity attributes
-  strapi_reviewWorkflows_stage?: Stage | null
+  strapi_stage?: Stage | null
 }
 ```
 

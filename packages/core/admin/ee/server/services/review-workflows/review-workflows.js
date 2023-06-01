@@ -11,7 +11,7 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 
 const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
-// The longest index name that Strapi can create is prefixed with '_strapi_reviewWorkflow_stage_links_inv_fk', so the content type name  should be no longer than this.
+// The longest index name that Strapi can create is prefixed with '_strapi_stage_links_inv_fk', so the content type name  should be no longer than this.
 const MAX_JOIN_TABLE_NAME_SUFFIX =
   1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
 const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
@@ -83,7 +83,7 @@ function persistStagesJoinTables({ strapi }) {
     ])(contentTypes);
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
-    await removePersistedTablesWithSuffix('_strapi_review_workflows_stage_links');
+    await removePersistedTablesWithSuffix('_strapi_stage_links');
     await persistTables(joinTablesToPersist);
   };
 }

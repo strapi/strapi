@@ -10,7 +10,7 @@ import { createStore } from 'redux';
 import { InformationBoxEE } from '../InformationBoxEE';
 import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 
-const STAGE_ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
+const STAGE_ATTRIBUTE_NAME = 'strapi_stage';
 const STAGE_FIXTURE = {
   id: 1,
   color: '#4945FF',
