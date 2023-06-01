@@ -29,9 +29,12 @@
     "mysql2": "3.3.0",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.8.0",
-    "react": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-intl": "6.4.1",
-    "sqlite3": "5.1.2"
+    "react-router-dom": "5.3.4",
+    "sqlite3": "5.1.2",
+    "styled-components": "5.3.3"
   },
   "strapi": {
     "uuid": "getstarted"

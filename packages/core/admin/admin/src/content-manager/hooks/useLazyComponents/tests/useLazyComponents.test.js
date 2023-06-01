@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import useLazyComponents from '../index';
 
 const mockCustomField = {
@@ -36,7 +36,7 @@ describe('useLazyComponents', () => {
   });
 
   it('lazy loads the components', async () => {
-    const { result, waitFor } = renderHook(() => useLazyComponents(['plugin::test.test']));
+    const { result } = renderHook(() => useLazyComponents(['plugin::test.test']));
 
     cleanup = result.current.cleanup;
 
@@ -49,19 +49,17 @@ describe('useLazyComponents', () => {
   });
 
   test('assuming the store has been initialised before hand, other hooks called should be able to access the global cache', async () => {
-    const { result: initialResult, waitFor } = renderHook(() =>
-      useLazyComponents(['plugin::test.test'])
-    );
+    const { result: initialResult } = renderHook(() => useLazyComponents(['plugin::test.test']));
 
     await waitFor(() =>
       expect(initialResult.current.lazyComponentStore['plugin::test.test']).toBeDefined()
     );
 
-    const { result: actualResult, waitFor: secondWaitFor } = renderHook(() => useLazyComponents());
+    const { result: actualResult } = renderHook(() => useLazyComponents());
 
     cleanup = actualResult.current.cleanup;
 
-    await secondWaitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
+    await waitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
 
     expect(actualResult.current.lazyComponentStore['plugin::test.test']).toBeDefined();
   });
@@ -74,32 +72,29 @@ describe('useLazyComponents', () => {
   });
 
   test('assuming the store has been initialised before hand, other hooks called should be able to modify the global cache and access it', async () => {
-    const { result: initialResult, waitFor } = renderHook(() =>
-      useLazyComponents(['plugin::test.color'])
-    );
+    const { result: initialResult } = renderHook(() => useLazyComponents(['plugin::test.color']));
 
     await waitFor(() =>
       expect(initialResult.current.lazyComponentStore['plugin::test.color']).toBeDefined()
     );
 
-    const { result: actualResult, waitFor: secondWaitFor } = renderHook(() =>
-      useLazyComponents(['plugin::test.hex'])
-    );
+    const { result: actualResult } = renderHook(() => useLazyComponents(['plugin::test.hex']));
 
     cleanup = actualResult.current.cleanup;
 
-    await secondWaitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
+    await waitFor(() => expect(actualResult.current.isLazyLoading).toBe(false));
 
     expect(actualResult.current.lazyComponentStore['plugin::test.hex']).toBeDefined();
     expect(actualResult.current.lazyComponentStore['plugin::test.color']).toBeDefined();
   });
 
   test('if the argument for component uids change and it contains new ones, these should be added to the store', async () => {
-    const {
-      result: initialResult,
-      waitFor,
-      rerender,
-    } = renderHook(() => useLazyComponents(['plugin::test.color']));
+    const { result: initialResult, rerender } = renderHook(
+      (components) => useLazyComponents(components),
+      {
+        initialProps: ['plugin::test.color'],
+      }
+    );
 
     await waitFor(() =>
       expect(initialResult.current.lazyComponentStore['plugin::test.color']).toBeDefined()
@@ -109,7 +104,9 @@ describe('useLazyComponents', () => {
 
     await waitFor(() => expect(initialResult.current.isLazyLoading).toBe(false));
 
-    expect(initialResult.current.lazyComponentStore['plugin::test.hex']).toBeDefined();
+    await waitFor(() =>
+      expect(initialResult.current.lazyComponentStore['plugin::test.hex']).toBeDefined()
+    );
     expect(initialResult.current.lazyComponentStore['plugin::test.color']).toBeDefined();
   });
 });
