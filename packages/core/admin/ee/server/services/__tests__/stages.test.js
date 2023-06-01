@@ -94,9 +94,9 @@ const strapiMock = {
       get: () => ({
         tableName: 'test',
         attributes: {
-          strapi_reviewWorkflows_stage: {
+          strapi_stage: {
             joinColumn: {
-              name: 'strapi_reviewWorkflows_stage_id',
+              name: 'strapi_stage_id',
             },
           },
         },

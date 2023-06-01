@@ -22,8 +22,8 @@ export default (layout) => {
   }
 
   return {
-    key: '__strapi_reviewWorkflows_stage_temp_key__',
-    name: 'strapi_reviewWorkflows_stage',
+    key: '__strapi_stage_temp_key__',
+    name: 'strapi_stage',
     fieldSchema: {
       type: 'relation',
     },
@@ -41,14 +41,14 @@ export default (layout) => {
         },
       },
     },
-    cellFormatter({ strapi_reviewWorkflows_stage }) {
+    cellFormatter({ strapi_stage }) {
       // if entities are created e.g. through lifecycle methods
       // they may not have a stage assigned
-      if (!strapi_reviewWorkflows_stage) {
+      if (!strapi_stage) {
         return <Typography textColor="neutral800">-</Typography>;
       }
 
-      const { color, name } = strapi_reviewWorkflows_stage;
+      const { color, name } = strapi_stage;
 
       return <ReviewWorkflowsStage color={color ?? STAGE_COLOR_DEFAULT} name={name} />;
     },

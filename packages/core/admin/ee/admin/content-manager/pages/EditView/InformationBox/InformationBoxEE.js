@@ -15,7 +15,7 @@ import { OptionColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflow
 import { SingleValueColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/Stages/Stage/components/SingleValueColor';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
 
-const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
+const ATTRIBUTE_NAME = 'strapi_stage';
 
 export function InformationBoxEE() {
   const {
