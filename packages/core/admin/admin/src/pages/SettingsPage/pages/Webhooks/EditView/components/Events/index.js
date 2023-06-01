@@ -97,14 +97,14 @@ const Root = ({ renderChildren }) => {
     [collectionTypes]
   );
 
+  const label = formatMessage({
+    id: 'Settings.webhooks.form.events',
+    defaultMessage: 'Events',
+  });
+
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
-      <FieldLabel>
-        {formatMessage({
-          id: 'Settings.webhooks.form.events',
-          defaultMessage: 'Events',
-        })}
-      </FieldLabel>
+      <FieldLabel aria-hidden={label}>{label}</FieldLabel>
       {isLoading && (
         <Loader>
           {formatMessage({
@@ -113,7 +113,7 @@ const Root = ({ renderChildren }) => {
           })}
         </Loader>
       )}
-      <StyledTable>{renderChildren({ isDraftAndPublish })}</StyledTable>
+      <StyledTable aria-label={label}>{renderChildren({ isDraftAndPublish })}</StyledTable>
     </Flex>
   );
 };
