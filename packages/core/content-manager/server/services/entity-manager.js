@@ -231,7 +231,7 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.deleteMany(uid, params);
   },
 
-  async publish(entity, body = {}, uid) {
+  async publish(entity, uid, body = {}) {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.published');
     }
@@ -268,7 +268,7 @@ module.exports = ({ strapi }) => ({
     return mappedEntity;
   },
 
-  async unpublish(entity, body = {}, uid) {
+  async unpublish(entity, uid, body = {}) {
     if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw new ApplicationError('already.draft');
     }
