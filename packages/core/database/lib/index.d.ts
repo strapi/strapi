@@ -54,6 +54,7 @@ interface FindParams<T> {
     | { [K in Sortables<T>]?: Direction }[];
   // TODO: define nested obj
   populate?: (keyof T)[];
+  fre;
 }
 
 interface CreateParams<T> {
@@ -84,7 +85,7 @@ interface EntityManager {
   createMany<K extends keyof AllTypes>(
     uid: K,
     params: CreateManyParams<AllTypes[K]>
-  ): Promise<{ count: number }>;
+  ): Promise<{ count: number; ids: ID[] }>;
 
   update<K extends keyof AllTypes>(uid: K, params: any): Promise<any>;
   updateMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
@@ -119,7 +120,7 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
 
   create(params: CreateParams<AllTypes[T]>): Promise<any>;
-  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number }>;
+  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number; ids: ID[] }>;
 
   update(params: any): Promise<any>;
   updateMany(params: any): Promise<{ count: number }>;
