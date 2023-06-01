@@ -54,7 +54,6 @@ interface FindParams<T> {
     | { [K in Sortables<T>]?: Direction }[];
   // TODO: define nested obj
   populate?: (keyof T)[];
-  fre;
 }
 
 interface CreateParams<T> {
