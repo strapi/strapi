@@ -3,6 +3,8 @@ import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvider } from './schema';
 
+type ID = number | string;
+
 type LogicalOperators<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
