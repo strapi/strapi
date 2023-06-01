@@ -2,14 +2,17 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+
 import en from '../../../../../../../../translations/en.json';
 import Theme from '../../../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-import { useContentTypes } from '../../../../../../../../hooks/useContentTypes';
+import { useContentTypes } from '../../../../../../../../hooks';
 
 jest.mock('../../../../../../../../hooks', () => ({
   useContentTypes: jest.fn(),
@@ -17,22 +20,44 @@ jest.mock('../../../../../../../../hooks', () => ({
 }));
 
 const makeApp = (component) => {
+  const queryClient = new QueryClient();
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };
 
   return (
-    <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <Router history={history}>{component}</Router>
-        </Theme>
-      </ThemeToggleProvider>
-    </LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <Router history={history}>
+              <NotificationsProvider toggleNotification={() => {}}>
+                {component}
+              </NotificationsProvider>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
   );
 };
 
+const originalError = console.error;
+
 describe('Create Webhook', () => {
+  beforeAll(() => {
+    console.error = (...args) => {
+      if (args[0] instanceof Error && args[0].name.includes('CanceledError')) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
+
   useContentTypes.mockImplementation(() => ({
     isLoading: false,
     collectionTypes: [],
