@@ -11,10 +11,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: () => ({ lockApp: jest.fn(), unlockApp: jest.fn() }),
 }));
 
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
-  checkFormValidity: () => (null),
-}));
+const mockSchema = {
+  validate: () => true 
+}
 
 const handlers = [
   rest.put('*/providers/options', (req, res, ctx) =>
@@ -57,9 +56,7 @@ describe('useSettingsForm', () => {
     server.close();
   });
   test('fetches all the providers options', async () => {
-    const { result } = setup('/admin/providers/options', {
-      validate: jest.fn()
-    }, jest.fn(), ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
+    const { result } = setup('/admin/providers/options', mockSchema, jest.fn(), ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
 
     expect(result.current[0].isLoading).toBe(true);
     expect(result.current[0].formErrors).toStrictEqual({});
@@ -110,8 +107,9 @@ describe('useSettingsForm', () => {
 
     const cbSucc = jest.fn();
 
-    const { result } = setup('/admin/providers/options', {}, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
+    const { result } = setup('/admin/providers/options', mockSchema, cbSucc, ['autoRegister', 'defaultRole', 'ssoLockedRoles'] );
     await waitFor(() => expect(result.current[0].isLoading).toBe(false));
+    // call the handleSubmit handler to see if the data provided in modified data are cleaned without duplicates in the ssoLockedRoles list
     const e = { preventDefault: jest.fn() };
     await act(async () => {
       await result.current[2].handleSubmit(e);

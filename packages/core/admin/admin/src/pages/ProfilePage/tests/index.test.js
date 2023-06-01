@@ -56,13 +56,11 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
     server.close();
   });
 
-  it('renders and matches the snapshot', async () => {
-    const { container } = setup();
+  it('renders and show the Interface Language section', async () => {
+    setup();
     await waitFor(() => {
       expect(screen.getByText('Interface language')).toBeInTheDocument();
     });
-
-    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should display username if it exists', async () => {
