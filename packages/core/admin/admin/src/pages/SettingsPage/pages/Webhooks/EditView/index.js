@@ -108,7 +108,7 @@ const EditView = () => {
       { id, body: cleanData(data) },
       {
         onSuccess() {
-          queryClient.invalidateQueries(['get-webhook', id]);
+          queryClient.invalidateQueries(['webhooks', id]);
           toggleNotification({
             type: 'success',
             message: { id: 'notification.form.success.fields' },
