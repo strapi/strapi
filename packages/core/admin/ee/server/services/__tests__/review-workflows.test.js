@@ -71,6 +71,9 @@ const strapiMock = {
         return null;
     }
   },
+  webhookStore: {
+    addAllowedEvent: jest.fn(),
+  },
 };
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
