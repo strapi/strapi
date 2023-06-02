@@ -434,6 +434,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   height: 2rem;
 }
 
+.c14 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -479,6 +484,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c67 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c67[aria-disabled='true'] {
@@ -1973,6 +1983,11 @@ exports[`EditSettingsView should add field 1`] = `
   height: 2rem;
 }
 
+.c14 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -2018,6 +2033,11 @@ exports[`EditSettingsView should add field 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c67 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c67[aria-disabled='true'] {

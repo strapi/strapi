@@ -347,6 +347,11 @@ describe('Upload | SettingsPage', () => {
         height: 2rem;
       }
 
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c10[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;

@@ -417,6 +417,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -464,6 +469,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c15 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c15[aria-disabled='true'] {
@@ -521,6 +531,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c16 {
   height: 2rem;
+}
+
+.c16 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c16[aria-disabled='true'] {

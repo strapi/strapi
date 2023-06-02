@@ -318,6 +318,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -364,6 +369,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c35 {
         height: 2rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {

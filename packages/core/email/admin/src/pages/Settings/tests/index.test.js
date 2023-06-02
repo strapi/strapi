@@ -331,6 +331,11 @@ describe('Email | Pages | Settings', () => {
         height: 2rem;
       }
 
+      .c37 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c37[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
