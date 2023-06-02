@@ -7,13 +7,9 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 
 import en from '../../../../../../../../translations/en.json';
-import Theme from '../../../../../../../../components/Theme';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-jest.mock('../../../../../../../../hooks', () => ({
-  useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
-}));
 jest.mock('../../../../../../../../hooks/useContentTypes');
 
 const makeApp = (component) => {
@@ -26,13 +22,9 @@ const makeApp = (component) => {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <ThemeProvider theme={lightTheme}>
-          <Theme>
-            <Router history={history}>
-              <NotificationsProvider toggleNotification={() => {}}>
-                {component}
-              </NotificationsProvider>
-            </Router>
-          </Theme>
+          <Router history={history}>
+            <NotificationsProvider toggleNotification={() => {}}>{component}</NotificationsProvider>
+          </Router>
         </ThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>
