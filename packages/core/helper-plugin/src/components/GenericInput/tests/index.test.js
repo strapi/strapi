@@ -1,7 +1,7 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import GenericInput from '../index';
@@ -21,7 +21,7 @@ function setup(props) {
       {
         wrapper: ({ children }) => (
           <IntlProvider locale="en" messages={{}}>
-            <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            <DesignSystemProvider locale="en-GB">{children}</DesignSystemProvider>
           </IntlProvider>
         ),
       }
@@ -148,29 +148,26 @@ describe('GenericInput', () => {
     test('renders the datetime picker with the correct value for date and time', async () => {
       const { getByRole, user } = setupDatetimePicker();
 
-      await user.click(getByRole('textbox', { name: 'datetime picker' }));
-      await act(async () => {
-        await user.click(getByRole('button', { name: /15/ }));
-      });
+      await user.click(getByRole('combobox', { name: 'Choose date' }));
+      await user.click(getByRole('gridcell', { name: /15/ }));
 
-      const today = new Date();
-      const month = today.getMonth() + 1;
-      const year = today.getFullYear();
-      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue(`${month}/15/${year}`);
-      expect(getByRole('combobox')).toHaveTextContent('00:00');
+      const today = new Date().setDate(15);
+      const formattedDate = new Intl.DateTimeFormat('en-GB').format(today);
+      expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue(formattedDate);
+      expect(getByRole('combobox', { name: 'Choose time' })).toHaveValue('00:00');
     });
 
     test('simulate clicking on the Clear button in the date and check if the date and time are empty', async () => {
-      const { getByRole, user } = setupDatetimePicker();
-      const btnDate = getByRole('textbox', { name: /datetime picker/i });
-      await user.click(btnDate);
-      await act(async () => {
-        await user.click(getByRole('button', { name: /15/ }));
-      });
-      await user.click(getByRole('button', { name: /clear date/i }));
+      const user = userEvent.setup();
+      const { getByRole } = setupDatetimePicker();
 
-      expect(getByRole('textbox', { name: 'datetime picker' })).toHaveValue('');
-      expect(getByRole('combobox')).not.toHaveValue();
+
+      await user.click(getByRole('combobox', { name: 'Choose date' }));
+      await user.click(getByRole('gridcell', { name: /15/ }));
+      await user.click(getByRole('button', { name: 'Clear date' }));
+
+      expect(getByRole('combobox', { name: 'Choose date' })).toHaveValue('');
+      expect(getByRole('combobox', { name: 'Choose time' })).toHaveValue('');
     });
   });
 

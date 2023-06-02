@@ -1,6 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
+.c19 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -48,20 +74,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   margin-bottom: 12px;
   width: 30px;
   height: 24px;
-}
-
-.c3 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
 }
 
 .c1 {
@@ -146,18 +158,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 
 .c16 path {
   fill: #4945ff;
-}
-
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c7 {

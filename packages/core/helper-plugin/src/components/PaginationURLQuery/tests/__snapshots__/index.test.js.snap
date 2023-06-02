@@ -1,6 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
+.c3 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c5 {
   font-size: 0.75rem;
   line-height: 1.33;
@@ -29,18 +41,6 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 4px;
-}
-
-.c3 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c1 {
@@ -355,6 +355,18 @@ exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 `;
 
 exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
+.c3 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c6 {
   font-size: 0.75rem;
   line-height: 1.33;
@@ -383,18 +395,6 @@ exports[`<PaginationURLQuery /> should work when the pageCount is inferior or eq
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 4px;
-}
-
-.c3 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c1 {

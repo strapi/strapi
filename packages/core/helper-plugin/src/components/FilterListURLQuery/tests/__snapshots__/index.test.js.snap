@@ -1,6 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c4 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   padding: 4px;
 }
@@ -17,13 +36,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   height: 2rem;
 }
 
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
 .c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -37,18 +49,6 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c6 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 > svg {

@@ -1,6 +1,78 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BrowseStep renders and match snapshot 1`] = `
+.c20 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c31 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c58 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c65 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c70 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -123,66 +195,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c69 {
   padding-left: 8px;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c31 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c58 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c65 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c70 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
 }
 
 .c1 {
@@ -459,18 +471,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c20 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c8 {
   height: 2rem;
   border: 1px solid #dcdce4;
@@ -543,22 +543,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c12 svg {
-  height: 4px;
-  width: 6px;
 }
 
 .c62 {
@@ -643,6 +627,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c19[aria-disabled='true'] svg path {
   fill: #666687;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 svg {
+  height: 4px;
+  width: 6px;
 }
 
 .c25 {
@@ -1136,99 +1136,103 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           class="c33"
         >
           <div
-            class="c34 c35"
-            tabindex="0"
+            class=""
           >
-            <button
-              aria-hidden="true"
-              aria-label="Folder 1"
-              class="c36"
-              tabindex="-1"
-              type="button"
-            />
             <div
-              class="c37 c6"
+              class="c34 c35"
+              tabindex="0"
             >
+              <button
+                aria-hidden="true"
+                aria-label="Folder 1"
+                class="c36"
+                tabindex="-1"
+                type="button"
+              />
               <div
-                class="c38"
-              >
-                <svg
-                  class="c39"
-                  fill="none"
-                  height="1.5rem"
-                  viewBox="0 0 24 24"
-                  width="1.5rem"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-                    fill="#212134"
-                  />
-                </svg>
-              </div>
-              <div
-                class="c40 c41 c42"
-                id="folder-1-1-title"
-                overflow="hidden"
-              >
-                <button
-                  class="c43 c44"
-                  type="button"
-                >
-                  <h2
-                    class="c45 c46"
-                  >
-                    <span
-                      class="c9 c47 c48"
-                    >
-                      Folder 1
-                      <div
-                        class="c20"
-                      >
-                        -
-                      </div>
-                    </span>
-                    <span
-                      class="c9 c49 c48"
-                    >
-                      1 folder, 1 asset
-                    </span>
-                  </h2>
-                </button>
-              </div>
-              <div
-                class="c50 c51"
+                class="c37 c6"
               >
                 <div
-                  class="c52 c11 c53 c54"
+                  class="c38"
+                >
+                  <svg
+                    class="c39"
+                    fill="none"
+                    height="1.5rem"
+                    viewBox="0 0 24 24"
+                    width="1.5rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <div
+                  class="c40 c41 c42"
+                  id="folder-1-1-title"
+                  overflow="hidden"
                 >
                   <button
-                    aria-disabled="false"
-                    class="c17 c18 c7 c19"
+                    class="c43 c44"
                     type="button"
                   >
-                    <span
-                      class="c20"
+                    <h2
+                      class="c45 c46"
                     >
-                      Edit folder
-                    </span>
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      focusable="false"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
-                        fill="#212134"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
+                      <span
+                        class="c9 c47 c48"
+                      >
+                        Folder 1
+                        <div
+                          class="c20"
+                        >
+                          -
+                        </div>
+                      </span>
+                      <span
+                        class="c9 c49 c48"
+                      >
+                        1 folder, 1 asset
+                      </span>
+                    </h2>
                   </button>
+                </div>
+                <div
+                  class="c50 c51"
+                >
+                  <div
+                    class="c52 c11 c53 c54"
+                  >
+                    <button
+                      aria-disabled="false"
+                      class="c17 c18 c7 c19"
+                      type="button"
+                    >
+                      <span
+                        class="c20"
+                      >
+                        Edit folder
+                      </span>
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="1rem"
+                        viewBox="0 0 24 24"
+                        width="1rem"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
+                          fill="#212134"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1250,17 +1254,17 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           >
             <label
               class="c9 c58 c59"
-              for="4"
+              for="5"
             />
             <div
               aria-autocomplete="none"
               aria-controls="radix-0"
-              aria-describedby="4-hint 4-error"
+              aria-describedby="5-hint 5-error"
               aria-expanded="false"
               class="c60 c61 c62"
               data-state="closed"
               dir="ltr"
-              id="4"
+              id="5"
               overflow="hidden"
               role="combobox"
               tabindex="0"

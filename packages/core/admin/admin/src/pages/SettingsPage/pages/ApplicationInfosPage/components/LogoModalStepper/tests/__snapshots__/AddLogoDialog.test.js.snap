@@ -1,6 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and match snapshot 1`] = `
+.c30 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c7 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c17 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c25 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c0 {
   padding-right: 40px;
   padding-left: 40px;
@@ -64,43 +113,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   padding-right: 20px;
   padding-bottom: 16px;
   padding-left: 20px;
-}
-
-.c5 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c7 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c17 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c25 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c11 {
@@ -220,18 +232,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c30 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c22 {
@@ -557,6 +557,49 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
 `;
 
 exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and match snapshot 1`] = `
+.c25 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c7 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   padding-right: 40px;
   padding-left: 40px;
@@ -594,37 +637,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   padding-right: 20px;
   padding-bottom: 16px;
   padding-left: 20px;
-}
-
-.c7 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c5 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c23 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c12 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c19 {
@@ -722,18 +734,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c25 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c24 {
@@ -841,6 +841,15 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   align-items: center;
 }
 
+.c9 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
 .c16 {
   border: none;
   border-radius: 4px;
@@ -900,15 +909,6 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
 .c15:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c9 {
-  height: 1px;
-  border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  margin: 0;
 }
 
 .c18 {

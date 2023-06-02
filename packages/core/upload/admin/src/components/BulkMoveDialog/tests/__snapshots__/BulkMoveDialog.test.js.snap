@@ -1,6 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
+.c2 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c11 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c29 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -60,28 +94,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
-}
-
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c29 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
 }
 
 .c1 {
@@ -212,18 +224,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c2 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c28 {
@@ -519,81 +519,85 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                     class="c18"
                   >
                     <div
-                      class="c19"
+                      class=""
                     >
-                      <label
-                        class="c10 c20 c21"
-                        for="folder-destination"
-                      >
-                        Location
-                      </label>
                       <div
-                        class=" css-1iyvlxg-container"
+                        class="c19"
                       >
-                        <span
-                          class="css-1f43avz-a11yText-A11yText"
-                          id="react-select-2-live-region"
-                        />
-                        <span
-                          aria-atomic="false"
-                          aria-live="polite"
-                          aria-relevant="additions text"
-                          class="css-1f43avz-a11yText-A11yText"
-                        />
-                        <div
-                          class=" css-1ckpxei-control"
+                        <label
+                          class="c10 c20 c21"
+                          for="folder-destination"
                         >
+                          Location
+                        </label>
+                        <div
+                          class=" css-1iyvlxg-container"
+                        >
+                          <span
+                            class="css-1f43avz-a11yText-A11yText"
+                            id="react-select-2-live-region"
+                          />
+                          <span
+                            aria-atomic="false"
+                            aria-live="polite"
+                            aria-relevant="additions text"
+                            class="css-1f43avz-a11yText-A11yText"
+                          />
                           <div
-                            class=" css-onz4xi-ValueContainer"
+                            class=" css-1ckpxei-control"
                           >
                             <div
-                              class=" css-1ryi7up-singleValue"
+                              class=" css-onz4xi-ValueContainer"
                             >
-                              Media Library
-                            </div>
-                            <input
-                              aria-autocomplete="list"
-                              aria-expanded="false"
-                              aria-haspopup="true"
-                              aria-invalid="false"
-                              aria-readonly="true"
-                              class="css-mohuvp-dummyInput-DummyInput"
-                              id="folder-destination"
-                              inputmode="none"
-                              role="combobox"
-                              tabindex="0"
-                              value=""
-                            />
-                          </div>
-                          <div
-                            class=" css-1hb7zxy-IndicatorsContainer"
-                          >
-                            <div
-                              aria-hidden="true"
-                              class="c22 c23 c24"
-                            >
-                              <svg
-                                fill="none"
-                                height="1rem"
-                                viewBox="0 0 14 8"
-                                width="1rem"
-                                xmlns="http://www.w3.org/2000/svg"
+                              <div
+                                class=" css-1ryi7up-singleValue"
                               >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
+                                Media Library
+                              </div>
+                              <input
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-invalid="false"
+                                aria-readonly="true"
+                                class="css-mohuvp-dummyInput-DummyInput"
+                                id="folder-destination"
+                                inputmode="none"
+                                role="combobox"
+                                tabindex="0"
+                                value=""
+                              />
+                            </div>
+                            <div
+                              class=" css-1hb7zxy-IndicatorsContainer"
+                            >
+                              <div
+                                aria-hidden="true"
+                                class="c22 c23 c24"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </div>
                             </div>
                           </div>
+                          <input
+                            name="destination"
+                            type="hidden"
+                            value=""
+                          />
                         </div>
-                        <input
-                          name="destination"
-                          type="hidden"
-                          value=""
-                        />
                       </div>
                     </div>
                   </div>
