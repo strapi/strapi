@@ -223,8 +223,8 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
             name={event}
             events={value}
             inputValue={formattedValue[event]}
-            handleChange={handleSelect}
-            handleChangeAll={handleSelectAll}
+            handleSelect={handleSelect}
+            handleSelectAll={handleSelectAll}
           />
         );
       })}
@@ -255,7 +255,7 @@ const removeHyphensAndTitleCase = (str) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
-const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
+const EventRow = ({ disabledEvents, name, events, inputValue, handleSelect, handleSelectAll }) => {
   const { formatMessage } = useIntl();
   const enabledCheckboxes = events.filter((event) => !disabledEvents.includes(event));
 
@@ -265,7 +265,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
   const onChangeAll = ({ target: { name } }) => {
     const valueToSet = !areAllCheckboxesSelected;
 
-    handleChangeAll({
+    handleSelectAll({
       target: { name, value: valueToSet },
     });
   };
@@ -297,7 +297,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
               aria-label={event}
               name={event}
               value={inputValue.includes(event)}
-              onValueChange={(value) => handleChange({ target: { name: event, value } })}
+              onValueChange={(value) => handleSelect({ target: { name: event, value } })}
             />
           </Td>
         );
@@ -311,16 +311,16 @@ EventRow.defaultProps = {
   disabledEvents: [],
   events: [],
   inputValue: [],
-  handleChange() {},
-  handleChangeAll() {},
+  handleSelect() {},
+  handleSelectAll() {},
 };
 
 EventRow.propTypes = {
   disabledEvents: PropTypes.array,
   events: PropTypes.array,
   inputValue: PropTypes.array,
-  handleChange: PropTypes.func,
-  handleChangeAll: PropTypes.func,
+  handleSelect: PropTypes.func,
+  handleSelectAll: PropTypes.func,
   name: PropTypes.string.isRequired,
 };
 
