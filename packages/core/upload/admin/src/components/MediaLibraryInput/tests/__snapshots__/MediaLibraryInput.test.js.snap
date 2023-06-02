@@ -35,7 +35,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  width: 100%;
   height: 124px;
 }
 
