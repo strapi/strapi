@@ -23,6 +23,7 @@ import {
   Tbody,
   Tr,
   Td,
+  TFooter,
   Th,
   Typography,
   VisuallyHidden,
@@ -157,7 +158,19 @@ export function ReviewWorkflowsListView() {
             })}
           </Loader>
         ) : (
-          <Table colCount={3} rowCount={1}>
+          <Table
+            colCount={3}
+            // TODO: we should be able to use a link here instead of an (inaccessible onClick) handler
+            footer={
+              <TFooter icon={<Plus />} onClick={() => push('/settings/review-workflows/create')}>
+                {formatMessage({
+                  id: 'Settings.review-workflows.list.page.create',
+                  defaultMessage: 'Create new workflow',
+                })}
+              </TFooter>
+            }
+            rowCount={1}
+          >
             <Thead>
               <Tr>
                 <Th>
