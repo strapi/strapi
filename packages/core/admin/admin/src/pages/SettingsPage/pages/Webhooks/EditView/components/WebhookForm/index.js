@@ -16,7 +16,7 @@ import {
 } from '@strapi/design-system';
 
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
-import schema from '../utils/schema';
+import { getWebhookValidationSchema } from './utils/getWebhookValidationSchema';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
 
@@ -52,7 +52,7 @@ const WebhookForm = ({
       events: data?.events || [],
     },
     onSubmit: handleSubmit,
-    validationSchema: schema,
+    validationSchema: getWebhookValidationSchema({ formatMessage }),
     validateOnChange: false,
     validateOnBlur: false,
   });
@@ -125,7 +125,7 @@ const WebhookForm = ({
                     <Field
                       as={TextInput}
                       name="name"
-                      error={formik.errors.name && formatMessage({ id: formik.errors.name })}
+                      error={formik?.errors?.name && formik.errors.name}
                       label={formatMessage({
                         id: 'global.name',
                         defaultMessage: 'Name',
@@ -137,7 +137,7 @@ const WebhookForm = ({
                     <Field
                       as={TextInput}
                       name="url"
-                      error={formik.errors.url && formatMessage({ id: formik.errors.url })}
+                      error={formik?.errors?.url && formik.errors.url}
                       label={formatMessage({
                         id: 'Settings.roles.form.input.url',
                         defaultMessage: 'Url',

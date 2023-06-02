@@ -44,13 +44,7 @@ const HeadersInput = () => {
                         id: 'Settings.webhooks.key',
                         defaultMessage: 'Key',
                       })}
-                      error={
-                        errors.headers?.[index]?.key &&
-                        formatMessage({
-                          id: errors.headers[index].key,
-                          defaultMessage: errors.headers[index].key,
-                        })
-                      }
+                      error={errors.headers?.[index]?.key && errors.headers[index].key}
                     />
                   </GridItem>
                   <GridItem col={6}>
@@ -64,13 +58,7 @@ const HeadersInput = () => {
                             id: 'Settings.webhooks.value',
                             defaultMessage: 'Value',
                           })}
-                          error={
-                            errors.headers?.[index]?.value &&
-                            formatMessage({
-                              id: errors.headers[index].value,
-                              defaultMessage: errors.headers[index].value,
-                            })
-                          }
+                          error={errors.headers?.[index]?.value && errors.headers[index].value}
                         />
                       </Box>
                       <Flex
