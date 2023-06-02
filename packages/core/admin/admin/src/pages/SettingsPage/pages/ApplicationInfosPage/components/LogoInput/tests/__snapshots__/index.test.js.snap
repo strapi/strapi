@@ -26,6 +26,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
@@ -1001,6 +1002,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
@@ -1920,6 +1922,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
