@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
+import getReviewWorkflowsColumns from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumns';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
@@ -78,11 +78,8 @@ const DynamicTable = ({
     // a future iteration we need to find a better pattern.
 
     // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
-
-    if (reviewWorkflowColumn) {
-      formattedHeaders.push(reviewWorkflowColumn);
-    }
+    const reviewWorkflowColumns = getReviewWorkflowsColumns(layout);
+    reviewWorkflowColumns.forEach((header) => formattedHeaders.push(header));
 
     return formattedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
