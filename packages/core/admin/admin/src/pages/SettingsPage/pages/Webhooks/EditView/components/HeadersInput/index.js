@@ -78,6 +78,7 @@ const HeadersInput = () => {
                         paddingTop={errors.headers?.[index]?.value ? 0 : 5}
                       >
                         <RemoveRoundedButton
+                          disabled={values.headers.length === 1}
                           onClick={() => values.headers.length !== 1 && remove(index)}
                           label={formatMessage(
                             {
