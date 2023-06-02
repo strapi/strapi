@@ -8071,16 +8071,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/icons@npm:1.7.7":
-  version: 1.7.7
-  resolution: "@strapi/icons@npm:1.7.7"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  checksum: a5cbe96d46f400c2f6f969081f360cbf6cccc79db558195189cd10a4e393b945227dd7719daa8de56a27881044e5a8ce3da5bcccc4497ba5dff95c4bf27017be
-  languageName: node
-  linkType: hard
-
 "@strapi/logger@4.10.7, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
@@ -8320,7 +8310,7 @@ __metadata:
     "@sentry/node": 6.19.7
     "@strapi/design-system": 1.7.10
     "@strapi/helper-plugin": 4.10.7
-    "@strapi/icons": 1.7.7
+    "@strapi/icons": 1.7.10
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
