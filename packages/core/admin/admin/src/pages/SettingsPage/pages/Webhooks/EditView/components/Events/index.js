@@ -104,7 +104,7 @@ const Root = ({ renderChildren }) => {
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
-      <FieldLabel aria-hidden={label}>{label}</FieldLabel>
+      <FieldLabel aria-hidden>{label}</FieldLabel>
       {isLoading && (
         <Loader>
           {formatMessage({
