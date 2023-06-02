@@ -14,29 +14,39 @@ const useAllowedAttributes = (contentType, slug) => {
     },
   ]);
 
+  const canReadAdminUsers =
+    findMatchingPermissions(allPermissions, [
+      {
+        action: 'admin::users.read',
+        subject: null,
+      },
+    ]).length > 0;
+
   const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
   const attributesArray = Object.keys(get(contentType, ['attributes']), {});
-  const allowedAttributes = attributesArray
-    .filter((attr) => {
-      const current = get(contentType, ['attributes', attr], {});
+  const allowedAttributes = attributesArray.filter((attr) => {
+    const current = get(contentType, ['attributes', attr], {});
 
-      if (!current.type) {
-        return false;
-      }
+    if (!current.type) {
+      return false;
+    }
 
-      if (NOT_ALLOWED_FILTERS.includes(current.type)) {
-        return false;
-      }
+    if (NOT_ALLOWED_FILTERS.includes(current.type)) {
+      return false;
+    }
 
-      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
-        return false;
-      }
+    if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
+      return false;
+    }
 
-      return true;
-    })
-    .sort();
+    return true;
+  });
 
-  return allowedAttributes;
+  if (canReadAdminUsers) {
+    allowedAttributes.push('createdBy', 'updatedBy');
+  }
+
+  return allowedAttributes.sort();
 };
 
 export default useAllowedAttributes;
