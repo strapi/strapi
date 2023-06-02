@@ -299,6 +299,11 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
+.c15 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -354,6 +359,11 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 
 .c17 {
   height: 2.5rem;
+}
+
+.c17 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c17[aria-disabled='true'] {

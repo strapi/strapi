@@ -309,6 +309,11 @@ describe('Plugin | Documentation | PluginPage', () => {
         height: 2rem;
       }
 
+      .c13 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;

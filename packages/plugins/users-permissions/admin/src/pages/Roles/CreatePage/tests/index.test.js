@@ -548,6 +548,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         height: 2rem;
       }
 
+      .c11 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c11[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
