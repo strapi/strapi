@@ -289,21 +289,21 @@ module.exports = ({ strapi }) => ({
     const entitiesToPublish = entities
       .filter((entity) => !entity[PUBLISHED_AT_ATTRIBUTE])
       .map((entity) => entity.id);
-    const where = { id: { $in: entitiesToPublish } };
+
+    const filters = { id: { $in: entitiesToPublish } };
     const data = {
       [PUBLISHED_AT_ATTRIBUTE]: new Date(),
     };
     const populate = isRelationsPopulateEnabled(uid)
       ? getDeepPopulate(uid, {})
       : getDeepPopulate(uid, { countMany: true, countOne: true });
-
     // Everything is valid, publish
     const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-      where,
+      where: filters,
       data,
     });
     // Get the updated entities since updateMany only returns the count
-    const publishedEntities = await strapi.entityService.findMany(uid, { where, populate });
+    const publishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
     // Emit the publish event for all updated entities
     await Promise.all(publishedEntities.map((entity) => emitEvent(ENTRY_PUBLISH, entity, uid)));
 
@@ -315,9 +315,13 @@ module.exports = ({ strapi }) => ({
     if (!entities.length) {
       return null;
     }
-    // Unpublish everything regardles of publish draft state
-    const entitiesToUnpublish = entities.map((entity) => entity.id);
-    const where = { id: { $in: entitiesToUnpublish } };
+
+    // Only unpublish entities with a published_at date
+    const entitiesToUnpublish = entities
+      .filter((entity) => entity[PUBLISHED_AT_ATTRIBUTE])
+      .map((entity) => entity.id);
+
+    const filters = { id: { $in: entitiesToUnpublish } };
     const data = {
       [PUBLISHED_AT_ATTRIBUTE]: null,
     };
@@ -327,11 +331,11 @@ module.exports = ({ strapi }) => ({
 
     // No need to validate, unpublish
     const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
-      where,
+      where: filters,
       data,
     });
     // Get the updated entities since updateMany only returns the count
-    const unpublishedEntities = await strapi.entityService.findMany(uid, { where, populate });
+    const unpublishedEntities = await strapi.entityService.findMany(uid, { filters, populate });
     // Emit the unpublish event for all updated entities
     await Promise.all(unpublishedEntities.map((entity) => emitEvent(ENTRY_UNPUBLISH, entity, uid)));
 
