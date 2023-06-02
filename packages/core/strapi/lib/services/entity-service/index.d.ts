@@ -1,4 +1,4 @@
-import { Database, ID } from '@strapi/database';
+import type { Database, ID } from '@strapi/database';
 import { Strapi } from '../../';
 
 type EntityServiceAction =
