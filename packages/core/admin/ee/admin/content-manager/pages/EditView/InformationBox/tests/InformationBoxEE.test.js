@@ -100,7 +100,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       layout: { uid: 'api::articles:articles' },
     });
 
-    expect(useReviewWorkflows).toHaveBeenCalledWith(undefined, {
+    expect(useReviewWorkflows).toHaveBeenCalledWith({
       filters: { contentTypes: 'api::articles:articles' },
     });
   });

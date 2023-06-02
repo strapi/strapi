@@ -4,7 +4,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { IntlProvider } from 'react-intl';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import { useFetchClient } from '@strapi/helper-plugin';
 
 import { useReviewWorkflows } from '../useReviewWorkflows';
 
@@ -73,14 +72,11 @@ describe('useReviewWorkflows', () => {
   });
 
   test('fetch all workflows when calling the hook without a workflow id', async () => {
-    const { get } = useFetchClient();
     const { result, waitFor } = setup();
 
-    expect(result.current.workflows.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
 
-    await waitFor(() => expect(result.current.workflows.isLoading).toBe(false));
-
-    expect(get).toBeCalledWith('/admin/review-workflows/workflows/?populate=stages&sort=name:asc');
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
