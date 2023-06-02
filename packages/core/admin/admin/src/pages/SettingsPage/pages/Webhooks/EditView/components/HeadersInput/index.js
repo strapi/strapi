@@ -33,7 +33,8 @@ const HeadersInput = () => {
           render={({ push, remove }) => (
             <Grid gap={4}>
               {values.headers.map((header, index) => (
-                <React.Fragment key={header.key}>
+                // eslint-disable-next-line
+                <React.Fragment key={`${index}.${header.key}`}>
                   <GridItem col={6}>
                     <Field
                       as={Combobox}
@@ -93,22 +94,20 @@ const HeadersInput = () => {
                   </GridItem>
                 </React.Fragment>
               ))}
-              {values.headers.at(-1).key && (
-                <GridItem col={12}>
-                  <TextButton
-                    type="button"
-                    onClick={() => {
-                      push({ key: '', value: '' });
-                    }}
-                    startIcon={<Plus />}
-                  >
-                    {formatMessage({
-                      id: 'Settings.webhooks.create.header',
-                      defaultMessage: 'Create new header',
-                    })}
-                  </TextButton>
-                </GridItem>
-              )}
+              <GridItem col={12}>
+                <TextButton
+                  type="button"
+                  onClick={() => {
+                    push({ key: '', value: '' });
+                  }}
+                  startIcon={<Plus />}
+                >
+                  {formatMessage({
+                    id: 'Settings.webhooks.create.header',
+                    defaultMessage: 'Create new header',
+                  })}
+                </TextButton>
+              </GridItem>
             </Grid>
           )}
         />

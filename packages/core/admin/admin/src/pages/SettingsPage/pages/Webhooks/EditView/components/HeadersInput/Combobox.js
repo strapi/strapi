@@ -62,7 +62,7 @@ const Combobox = ({ name, onChange, value, ...props }) => {
   const handleCreateOption = (value) => {
     setOptions((prev) => [...prev, value]);
 
-    onChange({ target: { name, value } });
+    handleChange(value);
   };
 
   return (
