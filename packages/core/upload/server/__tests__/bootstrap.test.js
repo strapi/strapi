@@ -68,6 +68,9 @@ describe('Upload plugin bootstrap function', () => {
           set: setStore,
         };
       },
+      webhookStore: {
+        addAllowedEvent: jest.fn(),
+      },
     };
 
     await bootstrap({ strapi });

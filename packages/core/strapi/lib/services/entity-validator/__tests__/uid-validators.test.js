@@ -26,7 +26,6 @@ describe('UID validator', () => {
     kind: 'contentType',
     modelName: 'test-model',
     uid: 'test-uid',
-    privateAttributes: [],
     options: {},
     attributes: {
       attrUidUnique: { type: 'uid' },
