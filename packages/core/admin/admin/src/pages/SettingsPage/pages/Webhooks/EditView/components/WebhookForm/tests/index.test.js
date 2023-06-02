@@ -3,12 +3,11 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 
 import en from '../../../../../../../../translations/en.json';
 import Theme from '../../../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
@@ -26,7 +25,7 @@ const makeApp = (component) => {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider messages={messages} localeNames={localeNames}>
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <ThemeProvider theme={lightTheme}>
           <Theme>
             <Router history={history}>
               <NotificationsProvider toggleNotification={() => {}}>
@@ -34,7 +33,7 @@ const makeApp = (component) => {
               </NotificationsProvider>
             </Router>
           </Theme>
-        </ThemeToggleProvider>
+        </ThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
