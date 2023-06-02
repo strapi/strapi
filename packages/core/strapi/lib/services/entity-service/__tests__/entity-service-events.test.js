@@ -20,6 +20,9 @@ describe('Entity service triggers webhooks', () => {
     instance = createEntityService({
       strapi: {
         getModel: () => model,
+        webhookStore: {
+          addAllowedEvent: jest.fn(),
+        },
       },
       db: {
         transaction: (cb) => cb(),
@@ -39,9 +42,6 @@ describe('Entity service triggers webhooks', () => {
 
     global.strapi = {
       getModel: () => model,
-      config: {
-        get: () => [],
-      },
     };
   });
 

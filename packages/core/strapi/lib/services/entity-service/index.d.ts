@@ -1,7 +1,5 @@
-import { Database } from '@strapi/database';
+import type { Database, ID } from '@strapi/database';
 import { Strapi } from '../../';
-
-type ID = number | string;
 
 type EntityServiceAction =
   | 'findMany'
