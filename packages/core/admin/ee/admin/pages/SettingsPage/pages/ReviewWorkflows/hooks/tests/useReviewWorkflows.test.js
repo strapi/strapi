@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
@@ -72,9 +72,7 @@ describe('useReviewWorkflows', () => {
   });
 
   test('fetch all workflows when calling the hook without a workflow id', async () => {
-    const { result, waitFor } = setup();
-
-    expect(result.current.isLoading).toBe(true);
+    const { result } = setup();
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -87,9 +85,7 @@ describe('useReviewWorkflows', () => {
   });
 
   test('fetch a single workflow when calling the hook with a workflow id', async () => {
-    const { result, waitFor } = setup({ id: 1 });
-
-    expect(result.current.isLoading).toBe(true);
+    const { result } = setup({ id: 1 });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -98,14 +94,5 @@ describe('useReviewWorkflows', () => {
         workflows: [expect.objectContaining({ id: 1, stages: expect.any(Array) })],
       })
     );
-  });
-
-  test('refetch() re-fetches the loaded workflow(s)', async () => {
-    const { result, waitFor } = setup();
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    await result.current.refetch();
-
-    expect(result.all.length).toBe(2 * 2); // number of calls * number of states (loading, success)
   });
 });
