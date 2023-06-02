@@ -79,7 +79,7 @@ const HeadersInput = () => {
                       >
                         <RemoveRoundedButton
                           disabled={values.headers.length === 1}
-                          onClick={() => values.headers.length !== 1 && remove(index)}
+                          onClick={() => remove(index)}
                           label={formatMessage(
                             {
                               id: 'Settings.webhooks.headers.remove',
@@ -93,20 +93,22 @@ const HeadersInput = () => {
                   </GridItem>
                 </React.Fragment>
               ))}
-              <GridItem col={12}>
-                <TextButton
-                  type="button"
-                  onClick={() => {
-                    push({ key: '', value: '' });
-                  }}
-                  startIcon={<Plus />}
-                >
-                  {formatMessage({
-                    id: 'Settings.webhooks.create.header',
-                    defaultMessage: 'Create new header',
-                  })}
-                </TextButton>
-              </GridItem>
+              {values.headers.at(-1).key && (
+                <GridItem col={12}>
+                  <TextButton
+                    type="button"
+                    onClick={() => {
+                      push({ key: '', value: '' });
+                    }}
+                    startIcon={<Plus />}
+                  >
+                    {formatMessage({
+                      id: 'Settings.webhooks.create.header',
+                      defaultMessage: 'Create new header',
+                    })}
+                  </TextButton>
+                </GridItem>
+              )}
             </Grid>
           )}
         />

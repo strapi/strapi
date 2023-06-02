@@ -68,6 +68,7 @@ const Combobox = ({ name, onChange, value, ...props }) => {
   return (
     <CreatableCombobox
       {...props}
+      onClear={() => handleChange('')}
       onChange={handleChange}
       onCreateOption={handleCreateOption}
       placeholder=""
