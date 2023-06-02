@@ -12,12 +12,10 @@ import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleP
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-import { useContentTypes } from '../../../../../../../../hooks';
-
 jest.mock('../../../../../../../../hooks', () => ({
-  useContentTypes: jest.fn(),
   useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
+jest.mock('../../../../../../../../hooks/useContentTypes');
 
 const makeApp = (component) => {
   const queryClient = new QueryClient();
@@ -42,28 +40,7 @@ const makeApp = (component) => {
   );
 };
 
-const originalError = console.error;
-
 describe('Create Webhook', () => {
-  beforeAll(() => {
-    console.error = (...args) => {
-      if (args[0] instanceof Error && args[0].name.includes('CanceledError')) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-  });
-
-  useContentTypes.mockImplementation(() => ({
-    isLoading: false,
-    collectionTypes: [],
-    singleTypes: [],
-  }));
-
   it('renders without crashing', () => {
     const triggerWebhook = jest.fn();
     triggerWebhook.cancel = jest.fn();
