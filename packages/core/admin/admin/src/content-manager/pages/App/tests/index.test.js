@@ -552,7 +552,7 @@ describe('Content manager | App | main', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="0"
+                  aria-labelledby=":r1:"
                   class="c6 c7 c8 c9"
                   tabindex="0"
                   type="button"
@@ -631,7 +631,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="2"
+                    id=":r3:"
                   >
                     <li>
                       <a
@@ -708,7 +708,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="3"
+                    id=":r4:"
                   >
                     <li>
                       <a
