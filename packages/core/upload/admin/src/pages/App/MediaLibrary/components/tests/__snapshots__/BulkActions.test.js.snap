@@ -112,6 +112,11 @@ exports[`BulkActions renders 1`] = `
   background: #fcecea;
 }
 
+.c6 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c6[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -169,6 +174,11 @@ exports[`BulkActions renders 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c8 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c8[aria-disabled='true'] {

@@ -337,6 +337,11 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   height: 2.5rem;
 }
 
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;

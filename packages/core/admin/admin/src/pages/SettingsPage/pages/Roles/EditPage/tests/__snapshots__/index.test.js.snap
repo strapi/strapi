@@ -281,6 +281,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   height: 2.5rem;
 }
 
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -326,6 +331,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c22[aria-disabled='true'] {

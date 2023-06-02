@@ -263,6 +263,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   height: 2rem;
 }
 
+.c35 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c35[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -308,6 +313,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c38 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c38[aria-disabled='true'] {
@@ -937,6 +947,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   height: 2rem;
 }
 
+.c36 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c36[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -982,6 +997,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c34 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c34[aria-disabled='true'] {

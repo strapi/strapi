@@ -409,6 +409,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   background: #ffffff;
 }
 
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -454,6 +459,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 
 .c15 {
   height: 2rem;
+}
+
+.c15 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c15[aria-disabled='true'] {

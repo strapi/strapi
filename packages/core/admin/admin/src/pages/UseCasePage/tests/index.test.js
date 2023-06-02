@@ -447,6 +447,11 @@ describe('Admin | UseCasePage', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -493,6 +498,11 @@ describe('Admin | UseCasePage', () => {
 
       .c35 {
         height: 2.5rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
