@@ -7849,7 +7849,7 @@ __metadata:
     speed-measure-webpack-plugin: 1.5.0
     style-loader: 3.3.1
     styled-components: 5.3.3
-    typescript: 5.0.4
+    typescript: 5.1.3
     webpack: ^5.82.0
     webpack-bundle-analyzer: ^4.8.0
     webpack-cli: ^5.1.0
@@ -7907,7 +7907,7 @@ __metadata:
     stream-json: 1.7.4
     tar: 6.1.13
     tar-stream: 2.2.0
-    typescript: 5.0.4
+    typescript: 5.1.3
     ws: 8.13.0
   languageName: unknown
   linkType: soft
@@ -8048,7 +8048,7 @@ __metadata:
     react-select: 5.7.0
     rimraf: 3.0.2
     styled-components: 5.3.3
-    typescript: 5.0.4
+    typescript: 5.1.3
     webpack: ^5.82.0
     webpack-cli: ^5.1.0
   peerDependencies:
@@ -8575,7 +8575,7 @@ __metadata:
     semver: 7.3.8
     statuses: 2.0.1
     supertest: 6.3.3
-    typescript: 5.0.4
+    typescript: 5.1.3
   bin:
     strapi: ./bin/strapi.js
   languageName: unknown
@@ -8590,7 +8590,7 @@ __metadata:
     fs-extra: 10.0.1
     lodash: 4.17.21
     prettier: 2.8.4
-    typescript: 5.0.4
+    typescript: 5.1.3
   languageName: unknown
   linkType: soft
 
@@ -30500,7 +30500,7 @@ __metadata:
     stylelint-processor-styled-components: 1.10.0
     supertest: 6.3.3
     ts-jest: 29.0.3
-    typescript: 5.0.4
+    typescript: 5.1.3
     yargs: 17.7.2
   languageName: unknown
   linkType: soft
@@ -32092,13 +32092,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.0.4":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
+"typescript@npm:5.1.3":
+  version: 5.1.3
+  resolution: "typescript@npm:5.1.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 82b94da3f4604a8946da585f7d6c3025fff8410779e5bde2855ab130d05e4fd08938b9e593b6ebed165bda6ad9292b230984f10952cf82f0a0ca07bbeaa08172
+  checksum: d9d51862d98efa46534f2800a1071a613751b1585dc78884807d0c179bcd93d6e9d4012a508e276742f5f33c480adefc52ffcafaf9e0e00ab641a14cde9a31c7
   languageName: node
   linkType: hard
 
@@ -32122,13 +32122,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.0.4#~builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"
+"typescript@patch:typescript@5.1.3#~builtin<compat/typescript>":
+  version: 5.1.3
+  resolution: "typescript@patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: bb309d320c59a26565fb3793dba550576ab861018ff3fd1b7fccabbe46ae4a35546bc45f342c0a0b6f265c801ccdf64ffd68f548f117ceb7f0eac4b805cd52a9
+  checksum: 32a25b2e128a4616f999d4ee502aabb1525d5647bc8955e6edf05d7fbc53af8aa98252e2f6ba80bcedfc0260c982b885f3c09cfac8bb65d2924f3133ad1e1e62
   languageName: node
   linkType: hard
 

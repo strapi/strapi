@@ -67,7 +67,7 @@
     "knex": "2.4.0",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
-    "typescript": "5.0.4"
+    "typescript": "5.1.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
