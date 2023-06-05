@@ -21,7 +21,7 @@ export function InformationBoxEE() {
   const {
     initialData,
     isCreatingEntry,
-    layout: { uid },
+    layout: { uid, options },
     isSingleType,
     onChange,
   } = useCMEditViewDataManager();
@@ -30,10 +30,7 @@ export function InformationBoxEE() {
   // be updated at the same time when modifiedData is updated, otherwise
   // the entity is flagged as modified
   const activeWorkflowStage = initialData?.[ATTRIBUTE_NAME] ?? null;
-  const hasReviewWorkflowsEnabled = Object.prototype.hasOwnProperty.call(
-    initialData,
-    ATTRIBUTE_NAME
-  );
+  const hasReviewWorkflowsEnabled = options.reviewWorkflows ?? false;
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
