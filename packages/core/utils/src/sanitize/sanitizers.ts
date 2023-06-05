@@ -35,7 +35,7 @@ const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
   );
 };
 
-const defaultSanitizeFilters = curry((schema: Model, filters) => {
+const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
     // Remove dynamic zones from filters
     traverseQueryFilters(removeDynamicZones, { schema }),
@@ -57,7 +57,7 @@ const defaultSanitizeFilters = curry((schema: Model, filters) => {
   )(filters);
 });
 
-const defaultSanitizeSort = curry((schema: Model, sort) => {
+const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
   return pipeAsync(
     // Remove non attribute keys
     traverseQuerySort(
@@ -94,11 +94,11 @@ const defaultSanitizeSort = curry((schema: Model, sort) => {
   )(sort);
 });
 
-const defaultSanitizeFields = curry((schema: Model, fields) => {
+const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
-      ({ key, attribute }: , { remove }) => {
+      ({ key, attribute }, { remove }) => {
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           remove(key);
         }
@@ -114,7 +114,7 @@ const defaultSanitizeFields = curry((schema: Model, fields) => {
   )(fields);
 });
 
-const defaultSanitizePopulate = curry((schema: Model, populate) => {
+const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
   return pipeAsync(
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {

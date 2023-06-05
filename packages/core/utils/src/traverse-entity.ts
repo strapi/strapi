@@ -1,6 +1,6 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import { Attribute, Model } from './types';
-import { isRelationalAttribute, isMediaAttribute } from './content-types';
+import { isRelationalAttribute, isMediaAttribute, isComponentAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
@@ -154,7 +154,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (attribute.type === 'component') {
+    if (isComponentAttribute(attribute)) {
       const targetSchema = strapi.getModel(attribute.component);
 
       if (isArray(value)) {

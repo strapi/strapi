@@ -14,6 +14,14 @@ export interface Attribute {
 
 export interface RelationalAttribute extends Attribute {
   relation: string;
+  target: string;
+}
+export interface ComponentAttribute extends Attribute {
+  component: string;
+  repeatable?: boolean;
+}
+export interface DynamicZoneAttribute extends Attribute {
+  components: string[];
 }
 
 export type Kind = 'singleType' | 'collectionType';

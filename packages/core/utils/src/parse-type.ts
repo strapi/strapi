@@ -7,7 +7,7 @@ const isDate = (v: unknown): v is Date => {
   return dates.isDate(v);
 };
 
-const parseTime = (value: string | Date) => {
+const parseTime = (value: string | Date): string => {
   if (isDate(value)) {
     return dates.format(value, 'HH:mm:ss.SSS');
   }
@@ -61,8 +61,20 @@ const parseDateTimeOrTimestamp = (value: string | Date) => {
   }
 };
 
+type TypeMap = {
+  boolean: boolean;
+  integer: number;
+  biginteger: number;
+  float: number;
+  decimal: number;
+  time: string;
+  date: string;
+  timestamp: Date;
+  datetime: Date;
+};
+
 interface ParseTypeOptions {
-  type: string;
+  type: keyof TypeMap;
   value: any;
   forceCast?: boolean;
 }
@@ -70,10 +82,14 @@ interface ParseTypeOptions {
 /**
  * Cast basic values based on attribute type
  */
-const parseType = ({ type, value, forceCast = false }: ParseTypeOptions) => {
+const parseType = (options: ParseTypeOptions) => {
+  const { type, value, forceCast = false } = options;
+
   switch (type) {
     case 'boolean': {
-      if (typeof value === 'boolean') return value;
+      if (typeof value === 'boolean') {
+        return value;
+      }
 
       if (['true', 't', '1', 1].includes(value)) {
         return true;
@@ -110,4 +126,4 @@ const parseType = ({ type, value, forceCast = false }: ParseTypeOptions) => {
   }
 };
 
-module.exports = parseType;
+export default parseType;

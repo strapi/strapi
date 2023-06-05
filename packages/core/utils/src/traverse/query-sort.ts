@@ -26,6 +26,8 @@ const isObjectArray = (value: unknown): value is object[] =>
 const isNestedSorts = (value: unknown): value is string =>
   isString(value) && value.split(',').length > 1;
 
+const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
+
 const sort = traverseFactory()
   .intercept(
     // String with chained sorts (foo,bar,foobar) => split, map(recurse), then recompose
@@ -98,7 +100,8 @@ const sort = traverseFactory()
       },
 
       keys(data) {
-        return [first(tokenize(data))];
+        const v = first(tokenize(data));
+        return v ? [v] : [];
       },
 
       get(key, data) {
@@ -109,7 +112,7 @@ const sort = traverseFactory()
     };
   })
   // Parse object values
-  .parse(isObject, () => ({
+  .parse(isObj, () => ({
     transform: cloneDeep,
 
     remove(key, data) {

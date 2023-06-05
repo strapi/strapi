@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
 import _ from 'lodash';
-import { defaults } from 'lodash/fp';
+import { defaults, isNumber, isInteger } from 'lodash/fp';
 import * as utils from './string-formatting';
 import { YupValidationError } from './errors';
 import printValue from './print-value';
@@ -65,46 +65,64 @@ class StrapiIDSchema extends MixedSchemaType {
     super({ type: 'strapiID' });
   }
 
-  _typeCheck(value) {
-    return typeof value === 'string' || (Number.isInteger(value) && value >= 0);
+  _typeCheck(value: unknown): value is string | number {
+    return typeof value === 'string' || (isNumber(value) && isInteger(value) && value >= 0);
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 yup.strapiID = () => new StrapiIDSchema();
 
-const handleYupError = (error, errorMessage) => {
+const handleYupError = (error: yup.ValidationError, errorMessage: string) => {
   throw new YupValidationError(error, errorMessage);
 };
 
 const defaultValidationParam = { strict: true, abortEarly: false };
 
 const validateYupSchema =
-  (schema, options = {}) =>
-  async (body, errorMessage) => {
+  (schema: yup.AnySchema, options = {}) =>
+  async (body: unknown, errorMessage: string) => {
     try {
       const optionsWithDefaults = defaults(defaultValidationParam, options);
       const result = await schema.validate(body, optionsWithDefaults);
       return result;
     } catch (e) {
-      handleYupError(e, errorMessage);
+      if (e instanceof yup.ValidationError) {
+        handleYupError(e, errorMessage);
+      }
+
+      throw e;
     }
   };
 
 const validateYupSchemaSync =
-  (schema, options = {}) =>
-  (body, errorMessage) => {
+  (schema: yup.AnySchema, options = {}) =>
+  (body: unknown, errorMessage: string) => {
     try {
       const optionsWithDefaults = defaults(defaultValidationParam, options);
       return schema.validateSync(body, optionsWithDefaults);
     } catch (e) {
-      handleYupError(e, errorMessage);
+      if (e instanceof yup.ValidationError) {
+        handleYupError(e, errorMessage);
+      }
+
+      throw e;
     }
   };
+
+interface NoTypeOptions {
+  path: string;
+  type: string;
+  value: unknown;
+  originalValue: unknown;
+}
 
 // Temporary fix of this issue : https://github.com/jquense/yup/issues/616
 yup.setLocale({
   mixed: {
-    notType({ path, type, value, originalValue }) {
+    notType(options: NoTypeOptions) {
+      const { path, type, value, originalValue } = options;
       const isCast = originalValue != null && originalValue !== value;
       const msg =
         `${path} must be a \`${type}\` type, ` +

@@ -1,3 +1,4 @@
+import { CurriedFunction1 } from 'lodash';
 import { isArray, cloneDeep } from 'lodash/fp';
 
 import { getNonWritableAttributes } from '../content-types';
@@ -5,13 +6,24 @@ import { pipeAsync } from '../async';
 
 import * as visitors from './visitors';
 import * as sanitizers from './sanitizers';
-import traverseEntity from '../traverse-entity';
+import traverseEntity, { Data } from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import { Model } from '../types';
 
+interface Options {
+  auth?: unknown;
+}
+
+interface Sanitizer {
+  (schema: Model): CurriedFunction1<Data, Promise<Data>>;
+}
+export interface SanitizeFunc {
+  (data: unknown, schema: Model, options?: Options): Promise<unknown>;
+}
+
 const createContentAPISanitizers = () => {
-  const sanitizeInput = (data, schema: Model, { auth } = {}) => {
+  const sanitizeInput: SanitizeFunc = (data: unknown, schema: Model, { auth } = {}) => {
     if (isArray(data)) {
       return Promise.all(data.map((entry) => sanitizeInput(entry, schema, { auth })));
     }
@@ -31,12 +43,12 @@ const createContentAPISanitizers = () => {
     // Apply sanitizers from registry if exists
     strapi.sanitizers
       .get('content-api.input')
-      .forEach((sanitizer) => transforms.push(sanitizer(schema)));
+      .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
     return pipeAsync(...transforms)(data);
   };
 
-  const sanitizeOutput = async (data, schema: Model, { auth } = {}) => {
+  const sanitizeOutput: SanitizeFunc = async (data, schema: Model, { auth } = {}) => {
     if (isArray(data)) {
       const res = new Array(data.length);
       for (let i = 0; i < data.length; i += 1) {
@@ -45,7 +57,7 @@ const createContentAPISanitizers = () => {
       return res;
     }
 
-    const transforms = [(data) => sanitizers.defaultSanitizeOutput(schema, data)];
+    const transforms = [(data: Data) => sanitizers.defaultSanitizeOutput(schema, data)];
 
     if (auth) {
       transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
@@ -54,12 +66,16 @@ const createContentAPISanitizers = () => {
     // Apply sanitizers from registry if exists
     strapi.sanitizers
       .get('content-api.output')
-      .forEach((sanitizer) => transforms.push(sanitizer(schema)));
+      .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
     return pipeAsync(...transforms)(data);
   };
 
-  const sanitizeQuery = async (query, schema, { auth } = {}) => {
+  const sanitizeQuery = async (
+    query: Record<string, unknown>,
+    schema: Model,
+    { auth }: Options = {}
+  ) => {
     const { filters, sort, fields, populate } = query;
 
     const sanitizedQuery = cloneDeep(query);
@@ -83,7 +99,7 @@ const createContentAPISanitizers = () => {
     return sanitizedQuery;
   };
 
-  const sanitizeFilters = (filters, schema: Model, { auth } = {}) => {
+  const sanitizeFilters: SanitizeFunc = (filters, schema: Model, { auth } = {}) => {
     if (isArray(filters)) {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
@@ -97,7 +113,7 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(filters);
   };
 
-  const sanitizeSort = (sort, schema: Model, { auth } = {}) => {
+  const sanitizeSort: SanitizeFunc = (sort, schema: Model, { auth } = {}) => {
     const transforms = [sanitizers.defaultSanitizeSort(schema)];
 
     if (auth) {
@@ -107,13 +123,13 @@ const createContentAPISanitizers = () => {
     return pipeAsync(...transforms)(sort);
   };
 
-  const sanitizeFields = (fields, schema: Model) => {
+  const sanitizeFields: SanitizeFunc = (fields, schema: Model) => {
     const transforms = [sanitizers.defaultSanitizeFields(schema)];
 
     return pipeAsync(...transforms)(fields);
   };
 
-  const sanitizePopulate = (populate, schema: Model, { auth } = {}) => {
+  const sanitizePopulate: SanitizeFunc = (populate, schema: Model, { auth } = {}) => {
     const transforms = [sanitizers.defaultSanitizePopulate(schema)];
 
     if (auth) {

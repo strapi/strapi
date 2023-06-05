@@ -1,6 +1,13 @@
 import _ from 'lodash';
 import { has } from 'lodash/fp';
-import type { Model, Kind, Attribute, RelationalAttribute } from './types';
+import type {
+  Model,
+  Kind,
+  Attribute,
+  RelationalAttribute,
+  ComponentAttribute,
+  DynamicZoneAttribute,
+} from './types';
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -113,10 +120,11 @@ const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
-const isComponentAttribute = (attribute: Attribute) =>
+const isComponentAttribute = (attribute: Attribute): attribute is ComponentAttribute =>
   ['component', 'dynamiczone'].includes(attribute?.type);
 
-const isDynamicZoneAttribute = (attribute: Attribute) => attribute?.type === 'dynamiczone';
+const isDynamicZoneAttribute = (attribute: Attribute): attribute is DynamicZoneAttribute =>
+  attribute?.type === 'dynamiczone';
 const isMorphToRelationalAttribute = (attribute: Attribute) => {
   return isRelationalAttribute(attribute) && attribute?.relation?.startsWith?.('morphTo');
 };

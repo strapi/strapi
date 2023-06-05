@@ -1,8 +1,8 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit, prop } from 'lodash/fp';
+import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
 import traverseFactory from './factory';
 
-import { VisitorOptions } from '../../traverse-entity';
+const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const filters = traverseFactory()
   .intercept(
@@ -13,7 +13,9 @@ const filters = traverseFactory()
         filters.map((filter, i) => {
           // In filters, only operators such as $and, $in, $notIn or $or and implicit operators like [...]
           // can have a value array, thus we can update the raw path but not the attribute one
-          const newPath = { ...options.path, raw: `${options.path.raw}[${i}]` };
+          const newPath = options.path
+            ? { ...options.path, raw: `${options.path.raw}[${i}]` }
+            : options.path;
 
           return recurse(visitor, { ...options, path: newPath }, filter);
         })
@@ -23,34 +25,31 @@ const filters = traverseFactory()
   )
   .intercept(
     // Ignore non object filters and return the value as-is
-    (filters) => !isObject(filters),
+    (filters): filters is unknown => !isObject(filters),
     (_, __, filters) => {
       return filters;
     }
   )
   // Parse object values
-  .parse(
-    (value) => typeof value === 'object',
-    () => ({
-      transform: cloneDeep,
+  .parse(isObj, () => ({
+    transform: cloneDeep,
 
-      remove(key, data) {
-        return omit(key, data);
-      },
+    remove(key, data) {
+      return omit(key, data);
+    },
 
-      set(key, value, data) {
-        return { ...data, [key]: value };
-      },
+    set(key, value, data) {
+      return { ...data, [key]: value };
+    },
 
-      keys(data) {
-        return Object.keys(data);
-      },
+    keys(data) {
+      return Object.keys(data);
+    },
 
-      get(key, data) {
-        return prop(key, data);
-      },
-    })
-  )
+    get(key, data) {
+      return data[key];
+    },
+  }))
   // Ignore null or undefined values
   .ignore(({ value }) => isNil(value))
   // Recursion on operators (non attributes)

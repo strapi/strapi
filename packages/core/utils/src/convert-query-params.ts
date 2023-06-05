@@ -1,35 +1,87 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-classes-per-file */
-
-'use strict';
 
 /**
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
-const {
+import {
   isNil,
   toNumber,
   isInteger,
   has,
   isEmpty,
   isObject,
-  isPlainObject,
   cloneDeep,
   get,
   mergeAll,
-} = require('lodash/fp');
-const _ = require('lodash');
-const parseType = require('./parse-type');
-const contentTypesUtils = require('./content-types');
-const { PaginationError } = require('./errors');
-const {
+  isArray,
+  isString,
+} from 'lodash/fp';
+import _ from 'lodash';
+import parseType from './parse-type';
+import * as contentTypesUtils from './content-types';
+import { PaginationError } from './errors';
+import {
   isMediaAttribute,
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
-} = require('./content-types');
+} from './content-types';
+import { Model } from './types';
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+
+type SortOrder = 'asc' | 'desc';
+
+interface SortMap {
+  [key: string]: SortOrder | SortMap;
+}
+
+type SortQuery = string | string[] | object;
+
+type FieldsQuery = string | string[];
+interface FiltersQuery {}
+
+type PopulateParams = {
+  sort?: SortQuery;
+  fields?: FieldsQuery;
+  filters?: FiltersQuery;
+  populate?: PopulateQuery;
+  on: {
+    [key: string]: PopulateParams;
+  };
+};
+
+type PopulateQuery = string | string[] | PopulateParams;
+
+interface Query {
+  sort?: SortQuery;
+  fields?: FieldsQuery;
+  filters?: FiltersQuery;
+  populate?: PopulateQuery;
+  count: boolean;
+  ordering: unknown;
+  _q?: string;
+  limit?: number | string;
+  start?: number | string;
+  page?: number | string;
+  pageSize?: number | string;
+}
+
+interface ConvertedQuery {
+  orderBy?: SortQuery;
+  select?: FieldsQuery;
+  where?: FiltersQuery;
+  populate?: PopulateQuery;
+  count: boolean;
+  ordering: unknown;
+  _q?: string;
+  limit?: number;
+  offset?: number;
+  page?: number;
+  pageSize?: number;
+}
 
 class InvalidOrderError extends Error {
   constructor() {
@@ -45,41 +97,47 @@ class InvalidSortError extends Error {
   }
 }
 
-const validateOrder = (order) => {
+function validateOrder(order: string): asserts order is SortOrder {
   if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
-};
+}
 
-const convertCountQueryParams = (countQuery) => {
+const convertCountQueryParams = (countQuery: unknown): boolean => {
   return parseType({ type: 'boolean', value: countQuery });
 };
 
-const convertOrderingQueryParams = (ordering) => {
+const convertOrderingQueryParams = (ordering: unknown) => {
   return ordering;
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> => _.isPlainObject(value);
+const isStringArray = (value: unknown): value is string[] =>
+  isArray(value) && value.every(isString);
+
 /**
  * Sort query parser
- * @param {string} sortQuery - ex: id:asc,price:desc
  */
-const convertSortQueryParams = (sortQuery) => {
+const convertSortQueryParams = (sortQuery: SortQuery): SortMap | SortMap[] => {
   if (typeof sortQuery === 'string') {
-    return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value));
+    return convertStringSortQueryParam(sortQuery);
+  }
+  if (isStringArray(sortQuery)) {
+    return sortQuery.flatMap((sortValue: string) => convertStringSortQueryParam(sortValue));
   }
 
-  if (Array.isArray(sortQuery)) {
-    return sortQuery.flatMap((sortValue) => convertSortQueryParams(sortValue));
-  }
-
-  if (_.isPlainObject(sortQuery)) {
+  if (isPlainObject(sortQuery)) {
     return convertNestedSortQueryParam(sortQuery);
   }
 
   throw new InvalidSortError();
 };
 
-const convertSingleSortQueryParam = (sortQuery) => {
+const convertStringSortQueryParam = (sortQuery: string): SortMap[] => {
+  return sortQuery.split(',').map((value) => convertSingleSortQueryParam(value));
+};
+
+const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
   // split field and order param with default order to ascending
   const [field, order = 'asc'] = sortQuery.split(':');
 
@@ -92,17 +150,19 @@ const convertSingleSortQueryParam = (sortQuery) => {
   return _.set({}, field, order);
 };
 
-const convertNestedSortQueryParam = (sortQuery) => {
-  const transformedSort = {};
+const convertNestedSortQueryParam = (sortQuery: Record<string, unknown>): SortMap => {
+  const transformedSort: SortMap = {};
   for (const field of Object.keys(sortQuery)) {
     const order = sortQuery[field];
 
     // this is a deep sort
-    if (_.isPlainObject(order)) {
+    if (isPlainObject(order)) {
       transformedSort[field] = convertNestedSortQueryParam(order);
-    } else {
+    } else if (typeof order === 'string') {
       validateOrder(order);
       transformedSort[field] = order;
+    } else {
+      throw Error(`Invalid sort type expected object or string got ${typeof order}`);
     }
   }
 
@@ -111,9 +171,8 @@ const convertNestedSortQueryParam = (sortQuery) => {
 
 /**
  * Start query parser
- * @param {string} startQuery
  */
-const convertStartQueryParams = (startQuery) => {
+const convertStartQueryParams = (startQuery: unknown): number => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
@@ -125,21 +184,22 @@ const convertStartQueryParams = (startQuery) => {
 
 /**
  * Limit query parser
- * @param {string} limitQuery
  */
-const convertLimitQueryParams = (limitQuery) => {
+const convertLimitQueryParams = (limitQuery: unknown): number | undefined => {
   const limitAsANumber = _.toNumber(limitQuery);
 
   if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
     throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
   }
 
-  if (limitAsANumber === -1) return null;
+  if (limitAsANumber === -1) {
+    return undefined;
+  }
 
   return limitAsANumber;
 };
 
-const convertPageQueryParams = (page) => {
+const convertPageQueryParams = (page: unknown): number => {
   const pageVal = toNumber(page);
 
   if (!isInteger(pageVal) || pageVal <= 0) {
@@ -151,7 +211,7 @@ const convertPageQueryParams = (page) => {
   return pageVal;
 };
 
-const convertPageSizeQueryParams = (pageSize, page) => {
+const convertPageSizeQueryParams = (pageSize: unknown, page: unknown): number => {
   const pageSizeVal = toNumber(pageSize);
 
   if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
@@ -163,7 +223,12 @@ const convertPageSizeQueryParams = (pageSize, page) => {
   return pageSizeVal;
 };
 
-const validatePaginationParams = (page, pageSize, start, limit) => {
+const validatePaginationParams = (
+  page: unknown,
+  pageSize: unknown,
+  start: unknown,
+  limit: unknown
+) => {
   const isPagePagination = !isNil(page) || !isNil(pageSize);
   const isOffsetPagination = !isNil(start) || !isNil(limit);
 
@@ -183,7 +248,7 @@ class InvalidPopulateError extends Error {
 }
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
-const convertPopulateQueryParams = (populate, schema, depth = 0) => {
+const convertPopulateQueryParams = (populate: PopulateQuery, schema: Model, depth = 0) => {
   if (depth === 0 && populate === '*') {
     return true;
   }
@@ -212,7 +277,7 @@ const convertPopulateQueryParams = (populate, schema, depth = 0) => {
   throw new InvalidPopulateError();
 };
 
-const convertPopulateObject = (populate, schema) => {
+const convertPopulateObject = (populate: PopulateParams, schema: Model) => {
   if (!schema) {
     return {};
   }
@@ -252,7 +317,7 @@ const convertPopulateObject = (populate, schema) => {
 
     // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
     //       Removing it could break existing user queries but it should be removed in V5.
-    if (attribute.type === 'dynamiczone') {
+    if (isDynamicZoneAttribute(attribute)) {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))
         .map((schema) => convertNestedPopulate(subPopulate, schema))
@@ -303,7 +368,7 @@ const convertPopulateObject = (populate, schema) => {
   }, {});
 };
 
-const convertNestedPopulate = (subPopulate, schema) => {
+const convertNestedPopulate = (subPopulate: PopulateQuery, schema: Model) => {
   if (_.isString(subPopulate)) {
     return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
@@ -319,7 +384,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
     subPopulate;
 
-  const query = {};
+  const query: ConvertedQuery = {};
 
   if (sort) {
     query.orderBy = convertSortQueryParams(sort);
@@ -368,7 +433,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   return query;
 };
 
-const convertFieldsQueryParams = (fields, depth = 0) => {
+const convertFieldsQueryParams = (fields: FieldsQuery, depth = 0): string[] | undefined => {
   if (depth === 0 && fields === '*') {
     return undefined;
   }
@@ -378,16 +443,19 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
     return _.uniq(['id', ...fieldsValues]);
   }
 
-  if (Array.isArray(fields)) {
+  if (isStringArray(fields)) {
     // map convert
-    const fieldsValues = fields.flatMap((value) => convertFieldsQueryParams(value, depth + 1));
+    const fieldsValues = fields
+      .flatMap((value) => convertFieldsQueryParams(value, depth + 1))
+      .filter((v) => !isNil(v)) as string[];
+
     return _.uniq(['id', ...fieldsValues]);
   }
 
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = (filters, schema) => {
+const convertFiltersQueryParams = (filters: FiltersQuery, schema: Model) => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
   if (!isObject(filters)) {
@@ -400,7 +468,7 @@ const convertFiltersQueryParams = (filters, schema) => {
   return convertAndSanitizeFilters(filtersCopy, schema);
 };
 
-const convertAndSanitizeFilters = (filters, schema) => {
+const convertAndSanitizeFilters = (filters: FiltersQuery, schema: Model) => {
   if (!isPlainObject(filters)) {
     return filters;
   }
@@ -415,7 +483,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
     );
   }
 
-  const removeOperator = (operator) => delete filters[operator];
+  const removeOperator = (operator: string) => delete filters[operator];
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
@@ -494,11 +562,11 @@ const convertPublicationStateParams = (type, params = {}, query = {}) => {
   }
 };
 
-const transformParamsToQuery = (uid, params) => {
+const transformParamsToQuery = (uid: string, params: Query) => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
   const schema = strapi.getModel(uid);
 
-  const query = {};
+  const query: ConvertedQuery = {};
 
   const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
 
@@ -545,7 +613,7 @@ const transformParamsToQuery = (uid, params) => {
   return query;
 };
 
-module.exports = {
+export = {
   convertSortQueryParams,
   convertStartQueryParams,
   convertLimitQueryParams,

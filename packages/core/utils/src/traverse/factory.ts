@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
 import { isNil, pick } from 'lodash/fp';
-import { Attribute, Model, RelationalAttribute } from '../types';
+import {
+  Attribute,
+  ComponentAttribute,
+  DynamicZoneAttribute,
+  Model,
+  RelationalAttribute,
+} from '../types';
 
 export interface Path {
   raw: string | null;
@@ -89,6 +95,8 @@ interface State {
   };
 }
 
+const DEFAULT_PATH = { raw: null, attribute: null };
+
 export default () => {
   const state: State = {
     parsers: [],
@@ -100,8 +108,8 @@ export default () => {
     },
   };
 
-  const traverse: Traverse = async (visitor, options: TraverseOptions, data) => {
-    const { path = { raw: null, attribute: null }, schema } = options ?? {};
+  const traverse: Traverse = async (visitor, options, data) => {
+    const { path = DEFAULT_PATH, schema } = options ?? {};
 
     // interceptors
     for (const { predicate, handler } of state.interceptors) {
@@ -233,11 +241,11 @@ export default () => {
       return this.onAttribute(({ attribute }) => attribute?.type === 'media', handler);
     },
 
-    onComponent(handler: AttributeHandler<RelationalAttribute>['handler']) {
+    onComponent(handler: AttributeHandler<ComponentAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'component', handler);
     },
 
-    onDynamicZone(handler: AttributeHandler<RelationalAttribute>['handler']) {
+    onDynamicZone(handler: AttributeHandler<DynamicZoneAttribute>['handler']) {
       return this.onAttribute(({ attribute }) => attribute?.type === 'dynamiczone', handler);
     },
   };

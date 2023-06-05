@@ -11,10 +11,12 @@ import {
   cloneDeep,
   join,
   first,
+  omit,
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
 import { Attribute } from '../types';
+import { isMorphToRelationalAttribute } from '../content-types';
 
 const isKeyword = (keyword: string) => {
   return ({ key, attribute }: { key: string; attribute: Attribute }) => {
@@ -24,6 +26,8 @@ const isKeyword = (keyword: string) => {
 
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
+
+const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const populate = traverseFactory()
   // Array of strings ['foo', 'foo.bar'] => map(recurse), then filter out empty items
@@ -57,7 +61,8 @@ const populate = traverseFactory()
       },
 
       keys(data) {
-        return [first(tokenize(data))];
+        const v = first(tokenize(data));
+        return v ? [v] : [];
       },
 
       get(key, data) {
@@ -68,7 +73,7 @@ const populate = traverseFactory()
     };
   })
   // Parse object values
-  .parse(isObject, () => ({
+  .parse(isObj, () => ({
     transform: cloneDeep,
 
     remove(key, data) {
@@ -102,7 +107,11 @@ const populate = traverseFactory()
     }
   )
   .on(isKeyword('on'), async ({ key, visitor, path, value }, { set, recurse }) => {
-    const newOn = {};
+    const newOn: Record<string, unknown> = {};
+
+    if (!isObj(value)) {
+      return;
+    }
 
     for (const [uid, subPopulate] of Object.entries(value)) {
       const model = strapi.getModel(uid);
@@ -117,16 +126,14 @@ const populate = traverseFactory()
   })
   // Handle populate on relation
   .onRelation(async ({ key, value, attribute, visitor, path, schema }, { set, recurse }) => {
-    const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
-
-    if (isMorphRelation) {
+    if (isMorphToRelationalAttribute(attribute)) {
       // Don't traverse values that cannot be parsed
-      if (!isObject(value) || !isObject(value?.on)) {
+      if (!isObject(value) || !('on' in value && isObject(value?.on))) {
         return;
       }
 
       // If there is a populate fragment defined, traverse it
-      const newValue = await recurse(visitor, { schema, path }, { on: value.on });
+      const newValue = await recurse(visitor, { schema, path }, { on: value?.on });
 
       set(key, { on: newValue });
     }
@@ -159,12 +166,11 @@ const populate = traverseFactory()
   .onDynamicZone(async ({ key, value, attribute, schema, visitor, path }, { set, recurse }) => {
     if (isObject(value)) {
       const { components } = attribute;
-      const { on, ...properties } = value;
 
       const newValue = {};
 
       // Handle legacy DZ params
-      let newProperties = properties;
+      let newProperties: unknown = omit('on', value);
 
       for (const componentUID of components) {
         const componentSchema = strapi.getModel(componentUID);
@@ -174,8 +180,8 @@ const populate = traverseFactory()
       Object.assign(newValue, newProperties);
 
       // Handle new morph fragment syntax
-      if (on) {
-        const newOn = await recurse(visitor, { schema, path }, { on });
+      if ('on' in value && value.on) {
+        const newOn = await recurse(visitor, { schema, path }, { on: value.on });
 
         // Recompose both syntaxes
         Object.assign(newValue, newOn);

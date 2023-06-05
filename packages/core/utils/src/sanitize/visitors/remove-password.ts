@@ -1,4 +1,4 @@
-import type { Visitor } from '../../traverse-entity';
+import type { Visitor } from '../../traverse/factory';
 
 const visitor: Visitor = ({ key, attribute }, { remove }) => {
   if (attribute?.type === 'password') {

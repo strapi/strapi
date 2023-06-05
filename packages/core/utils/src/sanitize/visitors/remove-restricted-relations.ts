@@ -1,8 +1,10 @@
 import * as contentTypeUtils from '../../content-types';
-import type { Visitor } from '../../traverse-entity';
+import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
+
+type MorphArray = Array<{ __type: string }>;
 
 export default (auth: unknown): Visitor =>
   async ({ data, key, attribute, schema }, { remove, set }) => {
@@ -19,7 +21,7 @@ export default (auth: unknown): Visitor =>
     const handleMorphRelation = async () => {
       const newMorphValue: Record<string, unknown>[] = [];
 
-      for (const element of data[key]) {
+      for (const element of (data as Record<string, MorphArray>)[key]) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
