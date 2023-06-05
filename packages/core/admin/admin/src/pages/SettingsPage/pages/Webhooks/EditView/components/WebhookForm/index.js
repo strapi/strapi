@@ -16,7 +16,7 @@ import {
 } from '@strapi/design-system';
 
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
-import { getWebhookValidationSchema } from './utils/getWebhookValidationSchema';
+import { makeWebhookValidationSchema } from './utils/makeWebhookValidationSchema';
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
 
@@ -52,7 +52,7 @@ const WebhookForm = ({
       events: data?.events || [],
     },
     onSubmit: handleSubmit,
-    validationSchema: getWebhookValidationSchema({ formatMessage }),
+    validationSchema: makeWebhookValidationSchema({ formatMessage }),
     validateOnChange: false,
     validateOnBlur: false,
   });

@@ -4,7 +4,7 @@ import { translatedErrors } from '@strapi/helper-plugin';
 const NAME_REGEX = /(^$)|(^[A-Za-z][_0-9A-Za-z ]*$)/;
 const URL_REGEX = /(^$)|((https?:\/\/.*)(d*)\/?(.*))/;
 
-export const getWebhookValidationSchema = ({ formatMessage }) =>
+export const makeWebhookValidationSchema = ({ formatMessage }) =>
   yup.object().shape({
     name: yup
       .string()
