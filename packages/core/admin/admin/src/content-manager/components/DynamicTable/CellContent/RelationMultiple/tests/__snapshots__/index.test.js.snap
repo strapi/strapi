@@ -172,6 +172,11 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   background: transparent;
 }
 
+.c3 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c3[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -244,7 +249,7 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   >
     <div>
       <button
-        aria-controls="0"
+        aria-controls=":r0:"
         aria-disabled="false"
         aria-expanded="false"
         aria-haspopup="true"

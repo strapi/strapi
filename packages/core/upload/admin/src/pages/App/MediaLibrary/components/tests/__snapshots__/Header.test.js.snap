@@ -167,6 +167,11 @@ exports[`Header renders 1`] = `
   background: #f0f0ff;
 }
 
+.c14 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -222,6 +227,11 @@ exports[`Header renders 1`] = `
 
 .c16 {
   height: 2rem;
+}
+
+.c16 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c16[aria-disabled='true'] {

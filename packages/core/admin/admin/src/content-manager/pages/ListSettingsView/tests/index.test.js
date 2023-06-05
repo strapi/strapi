@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { act, render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
@@ -125,9 +125,11 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
     const history = createMemoryHistory();
-    history.push(
-      '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
-    );
+    act(() => {
+      history.push(
+        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
+      );
+    });
 
     const { container } = render(makeApp(history));
     await waitFor(() =>

@@ -1,11 +1,11 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render, screen } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
 
 import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
 
-import DynamicZoneLabel from '../DynamicZoneLabel';
+import { DynamicZoneLabel } from '../DynamicZoneLabel';
 
 const LabelAction = () => {
   return (
@@ -26,50 +26,50 @@ describe('DynamicZoneLabel', () => {
     </ThemeProvider>
   );
 
-  const setup = (props) => render(<Component {...props} />);
+  const render = (props) => renderRTL(<Component {...props} />);
 
   it('should render the label by default', () => {
-    setup();
+    const { getByText } = render();
 
-    expect(screen.getByText(/dynamic zone/)).toBeInTheDocument();
+    expect(getByText(/dynamic zone/)).toBeInTheDocument();
   });
 
   it('should render the name of the zone when there is no label', () => {
-    setup({ label: '' });
+    const { getByText } = render({ label: '' });
 
-    expect(screen.getByText(/test/)).toBeInTheDocument();
+    expect(getByText(/test/)).toBeInTheDocument();
   });
 
   it('should always render the amount of components no matter the value', () => {
-    const { rerender } = setup({ numberOfComponents: 0 });
+    const { rerender, getByText } = render({ numberOfComponents: 0 });
 
-    expect(screen.getByText(/0/)).toBeInTheDocument();
+    expect(getByText(/0/)).toBeInTheDocument();
 
     rerender(<Component numberOfComponents={2} />);
 
-    expect(screen.getByText(/2/)).toBeInTheDocument();
+    expect(getByText(/2/)).toBeInTheDocument();
   });
 
   it('should render an asteriks when the required prop is true', () => {
-    setup({ required: true });
+    const { getByText } = render({ required: true });
 
-    expect(screen.getByText(/\*/)).toBeInTheDocument();
+    expect(getByText(/\*/)).toBeInTheDocument();
   });
 
   it('should render the labelAction when it is provided', () => {
-    setup({ labelAction: <LabelAction /> });
+    const { getByLabelText } = render({ labelAction: <LabelAction /> });
 
-    expect(screen.getByLabelText(/i18n/)).toBeInTheDocument();
+    expect(getByLabelText(/i18n/)).toBeInTheDocument();
   });
 
   it('should render a description if passed as a prop', () => {
-    setup({
+    const { getByText } = render({
       intlDescription: {
         id: 'description',
         defaultMessage: 'description',
       },
     });
 
-    expect(screen.getByText(/description/)).toBeInTheDocument();
+    expect(getByText(/description/)).toBeInTheDocument();
   });
 });
