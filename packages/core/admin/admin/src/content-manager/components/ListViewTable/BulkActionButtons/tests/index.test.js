@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Table, useTableContext } from '@strapi/helper-plugin';
@@ -96,24 +96,20 @@ describe('BulkActionsBar', () => {
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([1, 2]);
   });
 
-  it('should not show publish button if selected entries are all published', async () => {
+  it('should not show publish button if selected entries are all published', () => {
     useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
     setup({ showPublish: true });
 
-    waitFor(() => {
-      expect(screen.getByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
-    });
+    expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
     useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
     setup({ showPublish: true });
 
-    waitFor(() => {
-      expect(screen.getByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
-    });
+    expect(screen.queryByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
 
   it('should show publish modal if publish button is clicked', async () => {

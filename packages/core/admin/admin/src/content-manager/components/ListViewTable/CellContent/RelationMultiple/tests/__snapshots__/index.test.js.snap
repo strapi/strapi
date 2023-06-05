@@ -1,6 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ListViewTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+.c14 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c0 {
   background: #4945ff;
   padding: 8px;
@@ -17,21 +45,6 @@ exports[`ListViewTable / Cellcontent / RelationMultiple renders and matches the 
   padding-right: 8px;
   padding-left: 8px;
   min-width: 20px;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
 }
 
 .c1 {
@@ -151,18 +164,6 @@ exports[`ListViewTable / Cellcontent / RelationMultiple renders and matches the 
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c14 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 {
