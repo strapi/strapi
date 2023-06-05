@@ -1,4 +1,5 @@
 import set from 'lodash/set';
+import merge from 'lodash/merge';
 
 const mergeMetasWithSchema = (data, schemas, mainSchemaKey) => {
   const findSchema = (refUid) => schemas.find((obj) => obj.uid === refUid);
@@ -6,7 +7,7 @@ const mergeMetasWithSchema = (data, schemas, mainSchemaKey) => {
   const mainUID = data[mainSchemaKey].uid;
   const mainSchema = findSchema(mainUID);
 
-  set(merged, [mainSchemaKey], { ...data[mainSchemaKey], ...mainSchema });
+  set(merged, [mainSchemaKey], merge({}, mainSchema, data[mainSchemaKey]));
 
   Object.keys(data.components).forEach((compoUID) => {
     const compoSchema = findSchema(compoUID);
