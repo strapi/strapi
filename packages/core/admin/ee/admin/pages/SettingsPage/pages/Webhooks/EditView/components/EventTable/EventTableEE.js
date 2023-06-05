@@ -13,17 +13,11 @@ const events = {
 
 export function EventTableEE() {
   return (
-    <EventTable.Root
-      renderChildren={({ isDraftAndPublish }) => {
-        return (
-          <>
-            <EventTable.Headers isDraftAndPublish={isDraftAndPublish} />
-            <EventTable.Body isDraftAndPublish={isDraftAndPublish} extraEvents={events} />
-            {/* <EventTable.Headers getHeaders={getHeaders} />
-            <EventTable.Body providedEvents={events} /> */}
-          </>
-        );
-      }}
-    />
+    <EventTable.Root>
+      <EventTable.Headers />
+      <EventTable.Body extraEvents={events} />
+      {/* <EventTable.Headers getHeaders={getHeaders} />
+        <EventTable.Body providedEvents={events} /> */}
+    </EventTable.Root>
   );
 }

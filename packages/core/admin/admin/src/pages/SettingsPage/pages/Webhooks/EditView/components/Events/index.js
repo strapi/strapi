@@ -88,7 +88,9 @@ const getCEEvents = (isDraftAndPublish) => {
   };
 };
 
-const Root = ({ renderChildren }) => {
+const WebhookEventContext = React.createContext();
+
+const Root = ({ children }) => {
   const { formatMessage } = useIntl();
   const { collectionTypes, isLoading } = useContentTypes();
 
@@ -103,26 +105,30 @@ const Root = ({ renderChildren }) => {
   });
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={1}>
-      <FieldLabel aria-hidden>{label}</FieldLabel>
-      {isLoading && (
-        <Loader>
-          {formatMessage({
-            id: 'Settings.webhooks.events.isLoading',
-            defaultMessage: 'Events loading',
-          })}
-        </Loader>
-      )}
-      <StyledTable aria-label={label}>{renderChildren({ isDraftAndPublish })}</StyledTable>
-    </Flex>
+    <WebhookEventContext.Provider value={{ isDraftAndPublish }}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <FieldLabel aria-hidden>{label}</FieldLabel>
+        {isLoading && (
+          <Loader>
+            {formatMessage({
+              id: 'Settings.webhooks.events.isLoading',
+              defaultMessage: 'Events loading',
+            })}
+          </Loader>
+        )}
+        <StyledTable aria-label={label}>{children}</StyledTable>
+      </Flex>
+    </WebhookEventContext.Provider>
   );
 };
 
 Root.propTypes = {
-  renderChildren: PropTypes.func.isRequired,
+  children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]).isRequired,
 };
 
-const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
+const Headers = ({ getHeaders = getCEHeaders }) => {
+  const { isDraftAndPublish } = React.useContext(WebhookEventContext);
+
   const { formatMessage } = useIntl();
   const headers = getHeaders(isDraftAndPublish);
 
@@ -169,15 +175,15 @@ const Headers = ({ getHeaders = getCEHeaders, isDraftAndPublish = false }) => {
 
 Headers.defaultProps = {
   getHeaders: getCEHeaders,
-  isDraftAndPublish: false,
 };
 
 Headers.propTypes = {
   getHeaders: PropTypes.func,
-  isDraftAndPublish: PropTypes.bool,
 };
 
-const Body = ({ providedEvents, isDraftAndPublish }) => {
+const Body = ({ providedEvents }) => {
+  const { isDraftAndPublish } = React.useContext(WebhookEventContext);
+
   const events = providedEvents || getCEEvents(isDraftAndPublish);
   const { values, handleChange: onChange } = useFormikContext();
 
@@ -234,12 +240,10 @@ const Body = ({ providedEvents, isDraftAndPublish }) => {
 
 Body.defaultProps = {
   providedEvents: null,
-  isDraftAndPublish: false,
 };
 
 Body.propTypes = {
   providedEvents: PropTypes.object,
-  isDraftAndPublish: PropTypes.bool,
 };
 
 /**
