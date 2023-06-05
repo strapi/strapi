@@ -12,6 +12,14 @@ exports[`BulkMoveButton renders 1`] = `
   cursor: pointer;
 }
 
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -27,25 +35,18 @@ exports[`BulkMoveButton renders 1`] = `
   gap: 8px;
 }
 
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c2 {
   position: relative;
   outline: none;
 }
 
-.c2 svg {
+.c2 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c2 svg > g,
-.c2 svg path {
+.c2 > svg > g,
+.c2 > svg path {
   fill: #ffffff;
 }
 
@@ -99,6 +100,11 @@ exports[`BulkMoveButton renders 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c3 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c3[aria-disabled='true'] {

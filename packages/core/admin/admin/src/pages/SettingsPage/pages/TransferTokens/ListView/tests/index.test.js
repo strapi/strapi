@@ -167,6 +167,54 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         padding-left: 4px;
       }
 
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c26 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c36 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c37 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c38 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -235,66 +283,18 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         justify-content: end;
       }
 
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c26 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c37 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c38 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c30 {
         position: relative;
         outline: none;
       }
 
-      .c30 svg {
+      .c30 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c30 svg > g,
-      .c30 svg path {
+      .c30 > svg > g,
+      .c30 > svg path {
         fill: #ffffff;
       }
 
@@ -514,18 +514,80 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         flex-direction: row;
       }
 
+      .c40 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        gap: 8px;
+        position: relative;
+        outline: none;
+      }
+
+      .c40 svg {
+        font-size: 0.625rem;
+      }
+
+      .c40 svg path {
+        fill: #4945ff;
+      }
+
+      .c40:hover {
+        color: #7b79ff;
+      }
+
+      .c40:active {
+        color: #271fe0;
+      }
+
+      .c40:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c40:focus-visible {
+        outline: none;
+      }
+
+      .c40:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
       .c9 {
         position: relative;
         outline: none;
       }
 
-      .c9 svg {
+      .c9 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c9 > svg > g,
+      .c9 > svg path {
         fill: #ffffff;
       }
 
@@ -553,59 +615,6 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       }
 
       .c9:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c40 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c40 svg path {
-        fill: #4945ff;
-      }
-
-      .c40 svg {
-        font-size: 0.625rem;
-      }
-
-      .c40:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c40:focus-visible {
-        outline: none;
-      }
-
-      .c40:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -776,7 +785,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="0"
+                              aria-labelledby=":r0:"
                               class="c5 c26"
                               label="Name"
                               tabindex="-1"
@@ -790,7 +799,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="1"
+                                aria-labelledby=":r2:"
                                 class="c28 c29 c30 c31"
                                 tabindex="-1"
                                 type="button"
@@ -832,7 +841,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="2"
+                              aria-labelledby=":r4:"
                               class="c5 c26"
                               label="Description"
                               tabindex="-1"
@@ -855,7 +864,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="3"
+                              aria-labelledby=":r6:"
                               class="c5 c26"
                               label="Created at"
                               tabindex="-1"
@@ -878,7 +887,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="4"
+                              aria-labelledby=":r8:"
                               class="c5 c26"
                               label="Last used"
                               tabindex="-1"
@@ -1009,7 +1018,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="5"
+                                aria-labelledby=":ra:"
                                 class="c28 c29 c30 c31"
                                 name="delete"
                                 tabindex="-1"

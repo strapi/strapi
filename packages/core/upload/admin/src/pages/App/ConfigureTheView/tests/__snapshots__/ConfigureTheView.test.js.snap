@@ -17,11 +17,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   padding-bottom: 8px;
 }
 
-.c11 {
+.c9 {
   min-width: 0;
 }
 
-.c15 {
+.c13 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -32,12 +32,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   cursor: pointer;
 }
 
-.c21 {
+.c19 {
   padding-right: 56px;
   padding-left: 56px;
 }
 
-.c22 {
+.c20 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -47,16 +47,68 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c31 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c33 {
+.c26 {
+  background: #ffffff;
+  padding-right: 12px;
   padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
 }
 
-.c10 {
+.c29 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c12 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -74,7 +126,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   justify-content: space-between;
 }
 
-.c12 {
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -88,7 +140,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-direction: row;
 }
 
-.c16 {
+.c14 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -103,7 +155,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   gap: 8px;
 }
 
-.c25 {
+.c23 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -118,69 +170,60 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   gap: 4px;
 }
 
-.c14 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c19 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
+.c30 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
 }
 
-.c20 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c26 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c17 {
+.c15 {
   position: relative;
   outline: none;
 }
 
-.c17 svg {
+.c15 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c17 svg > g,
-.c17 svg path {
+.c15 > svg > g,
+.c15 > svg path {
   fill: #ffffff;
 }
 
-.c17[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c17:after {
+.c15:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -195,11 +238,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid transparent;
 }
 
-.c17:focus-visible {
+.c15:focus-visible {
   outline: none;
 }
 
-.c17:focus-visible:after {
+.c15:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -210,7 +253,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c37 {
+.c36 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -222,52 +265,57 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   width: 1px;
 }
 
-.c18 {
+.c16 {
   height: 2rem;
 }
 
-.c18[aria-disabled='true'] {
+.c16 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c18[aria-disabled='true'] .c13 {
+.c16[aria-disabled='true'] .c11 {
   color: #666687;
 }
 
-.c18[aria-disabled='true'] svg > g,.c18[aria-disabled='true'] svg path {
+.c16[aria-disabled='true'] svg > g,.c16[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c18[aria-disabled='true']:active {
+.c16[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c18[aria-disabled='true']:active .c13 {
+.c16[aria-disabled='true']:active .c11 {
   color: #666687;
 }
 
-.c18[aria-disabled='true']:active svg > g,.c18[aria-disabled='true']:active svg path {
+.c16[aria-disabled='true']:active svg > g,.c16[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c18:hover {
+.c16:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c18:active {
+.c16:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c18 svg > g,
-.c18 svg path {
+.c16 svg > g,
+.c16 svg path {
   fill: #ffffff;
 }
 
-.c27 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -279,12 +327,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c28 {
-  position: relative;
   border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
   min-height: 2.5rem;
   outline: none;
   box-shadow: 0;
@@ -294,70 +337,56 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   transition-duration: 0.2s;
 }
 
+.c28[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c28:focus-visible {
+  outline: none;
+}
+
 .c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c34 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
+.c34 > svg {
+  width: 0.375rem;
 }
 
-.c34 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c34 svg path {
+.c34 > svg > path {
   fill: #666687;
 }
 
-.c35 {
+.c32 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c33 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: none;
-  border: none;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
-.c35 svg {
-  width: 0.375rem;
+.c37[data-state='checked'] .c11 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
-.c29 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c29:focus {
-  outline: none;
-}
-
-.c29[data-disabled] {
-  cursor: not-allowed;
-}
-
-.c30 {
-  width: 100%;
-}
-
-.c23 {
+.c21 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c24 {
+.c22 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -376,10 +405,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c7 {
-  padding-right: 8px;
-}
-
-.c9 {
   font-size: 0.875rem;
   line-height: 1.43;
   color: #4945ff;
@@ -396,16 +421,25 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   align-items: center;
   -webkit-text-decoration: none;
   text-decoration: none;
+  gap: 8px;
   position: relative;
   outline: none;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
 }
 
 .c6 svg path {
   fill: #4945ff;
 }
 
-.c6 svg {
-  font-size: 0.625rem;
+.c6:hover {
+  color: #7b79ff;
+}
+
+.c6:active {
+  color: #271fe0;
 }
 
 .c6:after {
@@ -438,21 +472,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
 @media (max-width:68.75rem) {
-  .c24 {
+  .c22 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c24 {
+  .c22 {
     grid-column: span;
   }
 }
@@ -486,45 +513,40 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                   href="/plugins/upload"
                   id="go-back"
                 >
-                  <span
-                    aria-hidden="true"
-                    class="c7 c8"
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
-                        fill="#212134"
-                      />
-                    </svg>
-                  </span>
+                    <path
+                      d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
+                      fill="#212134"
+                    />
+                  </svg>
                   <span
-                    class="c9"
+                    class="c7"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c10"
+                class="c8"
               >
                 <div
-                  class="c11 c12"
+                  class="c9 c10"
                 >
                   <h1
-                    class="c13 c14"
+                    class="c11 c12"
                   >
                     Configure the view - Media Library
                   </h1>
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c15 c16 c17 c18"
+                  class="c13 c14 c15 c16"
                   disabled=""
                   type="submit"
                 >
@@ -546,205 +568,175 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     </svg>
                   </div>
                   <span
-                    class="c13 c19"
+                    class="c11 c17"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c13 c20"
+                class="c11 c18"
               >
                 Define the view settings of the media library.
               </p>
             </div>
           </div>
           <div
-            class="c21"
+            class="c19"
           >
             <div
-              class="c22"
+              class="c20"
             >
               <div
-                class="c23"
+                class="c21"
               >
                 <div
-                  class="c24"
+                  class="c22"
                 >
                   <div
                     class=""
                   >
                     <div
-                      class=""
+                      class="c23"
                     >
-                      <div
-                        class="c25"
+                      <label
+                        class="c11 c24 c25"
+                        for=":r0:"
                       >
-                        <label
-                          class="c13 c26 c27"
-                          for="1"
+                        Entries per page
+                      </label>
+                      <div
+                        aria-autocomplete="none"
+                        aria-controls="radix-:r3:"
+                        aria-describedby=":r0:-hint :r0:-error"
+                        aria-expanded="false"
+                        aria-label="Entries per page"
+                        class="c26 c27 c28"
+                        data-state="closed"
+                        dir="ltr"
+                        id=":r0:"
+                        overflow="hidden"
+                        role="combobox"
+                        tabindex="0"
+                      >
+                        <span
+                          class="c29 c30"
                         >
-                          Entries per page
-                        </label>
-                        <div
-                          class="c12 c28"
-                        >
-                          <button
-                            aria-describedby="1-hint"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="1 1-label 1-content"
-                            aria-required="false"
-                            class="c29"
-                            data-testid="pageSize-select"
-                            id="1"
-                            name="pageSize"
-                            role="combobox"
-                            type="button"
-                            value="10"
-                          />
-                          <div
-                            class="c10 c30"
+                          <span
+                            class="c11 c31 c32"
                           >
-                            <div
-                              class="c12"
+                            <span
+                              class="c33"
                             >
-                              <div
-                                class="c31"
-                              >
-                                <span
-                                  class="c13 c32"
-                                  id="1-content"
-                                >
-                                  10
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              class="c12"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c33 c34 c35"
-                                tabindex="-1"
-                                title="Carret Down Button"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <p
-                          class="c13 c36"
-                          id="1-hint"
+                              10
+                            </span>
+                          </span>
+                        </span>
+                        <span
+                          class="c30"
                         >
-                          Number of assets displayed by default in the Media Library
-                        </p>
+                          <span
+                            aria-hidden="true"
+                            class="c34"
+                          >
+                            <svg
+                              fill="none"
+                              height="1rem"
+                              viewBox="0 0 14 8"
+                              width="1rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        </span>
                       </div>
+                      <p
+                        class="c11 c35"
+                        id=":r0:-hint"
+                      >
+                        Number of assets displayed by default in the Media Library
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="c24"
+                  class="c22"
                 >
                   <div
                     class=""
                   >
                     <div
-                      class=""
+                      class="c23"
                     >
-                      <div
-                        class="c25"
+                      <label
+                        class="c11 c24 c25"
+                        for=":r4:"
                       >
-                        <label
-                          class="c13 c26 c27"
-                          for="3"
+                        Default sort order
+                      </label>
+                      <div
+                        aria-autocomplete="none"
+                        aria-controls="radix-:r7:"
+                        aria-describedby=":r4:-hint :r4:-error"
+                        aria-expanded="false"
+                        aria-label="Default sort order"
+                        class="c26 c27 c28"
+                        data-state="closed"
+                        dir="ltr"
+                        id=":r4:"
+                        overflow="hidden"
+                        role="combobox"
+                        tabindex="0"
+                      >
+                        <span
+                          class="c29 c30"
                         >
-                          Default sort order
-                        </label>
-                        <div
-                          class="c12 c28"
-                        >
-                          <button
-                            aria-describedby="3-hint"
-                            aria-expanded="false"
-                            aria-haspopup="listbox"
-                            aria-labelledby="3 3-label 3-content"
-                            aria-required="false"
-                            class="c29"
-                            data-testid="sort-select"
-                            id="3"
-                            name="sort"
-                            role="combobox"
-                            type="button"
-                            value="createdAt:DESC"
-                          />
-                          <div
-                            class="c10 c30"
+                          <span
+                            class="c11 c31 c32"
                           >
-                            <div
-                              class="c12"
+                            <span
+                              class="c33"
                             >
-                              <div
-                                class="c31"
-                              >
-                                <span
-                                  class="c13 c32"
-                                  id="3-content"
-                                >
-                                  createdAt:DESC
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              class="c12"
-                            >
-                              <button
-                                aria-hidden="true"
-                                class="c33 c34 c35"
-                                tabindex="-1"
-                                title="Carret Down Button"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <p
-                          class="c13 c36"
-                          id="3-hint"
+                              createdAt:DESC
+                            </span>
+                          </span>
+                        </span>
+                        <span
+                          class="c30"
                         >
-                          Note: You can override this value in the media library.
-                        </p>
+                          <span
+                            aria-hidden="true"
+                            class="c34"
+                          >
+                            <svg
+                              fill="none"
+                              height="1rem"
+                              viewBox="0 0 14 8"
+                              width="1rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        </span>
                       </div>
+                      <p
+                        class="c11 c35"
+                        id=":r4:-hint"
+                      >
+                        Note: You can override this value in the media library.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -756,7 +748,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
     </div>
   </div>
   <div
-    class="c37"
+    class="c36"
   >
     <p
       aria-live="polite"

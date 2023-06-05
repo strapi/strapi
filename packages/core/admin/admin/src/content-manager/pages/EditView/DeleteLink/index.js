@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import isEqual from 'react-fast-compare';
+import isEqual from 'lodash/isEqual';
 import { Button } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { ConfirmDialog, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';

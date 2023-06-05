@@ -21,9 +21,10 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+  width: 51.875rem;
 }
 
-.c8 {
+.c7 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -31,7 +32,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-left: 20px;
 }
 
-.c13 {
+.c12 {
   background: #ffffff;
   padding: 8px;
   border-radius: 4px;
@@ -42,15 +43,15 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c16 {
+.c15 {
   padding: 32px;
 }
 
-.c25 {
+.c24 {
   padding-right: 12px;
 }
 
-.c31 {
+.c29 {
   background: #4945ff;
   padding: 8px;
   padding-right: 16px;
@@ -59,6 +60,28 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
+}
+
+.c11 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c31 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
 }
 
 .c1 {
@@ -94,7 +117,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c10 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -112,7 +135,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c20 {
+.c19 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -127,21 +150,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c29 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c32 {
+.c28 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -156,47 +165,26 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c12 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c21 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c34 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c14 {
+.c13 {
   position: relative;
   outline: none;
 }
 
-.c14 svg {
+.c13 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c13 > svg > g,
+.c13 > svg path {
   fill: #ffffff;
 }
 
-.c14[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c14:after {
+.c13:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -211,11 +199,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c14:focus-visible {
+.c13:focus-visible {
   outline: none;
 }
 
-.c14:focus-visible:after {
+.c13:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -238,101 +226,111 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c33 {
+.c30 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c33[aria-disabled='true'] {
+.c30 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true'] .c11 {
+.c30[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c33[aria-disabled='true'] svg > g,.c33[aria-disabled='true'] svg path {
+.c30[aria-disabled='true'] svg > g,.c30[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c33[aria-disabled='true']:active {
+.c30[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c33[aria-disabled='true']:active .c11 {
+.c30[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c33[aria-disabled='true']:active svg > g,.c33[aria-disabled='true']:active svg path {
+.c30[aria-disabled='true']:active svg > g,.c30[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c33:hover {
+.c30:hover {
   background-color: #f6f6f9;
 }
 
-.c33:active {
+.c30:active {
   background-color: #eaeaef;
 }
 
-.c33 .c11 {
+.c30 .c10 {
   color: #32324d;
 }
 
-.c33 svg > g,
-.c33 svg path {
+.c30 svg > g,
+.c30 svg path {
   fill: #32324d;
 }
 
-.c35 {
+.c32 {
   height: 2rem;
 }
 
-.c35[aria-disabled='true'] {
+.c32 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true'] .c11 {
+.c32[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c35[aria-disabled='true'] svg > g,.c35[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c35[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c35[aria-disabled='true']:active .c11 {
+.c32[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c35[aria-disabled='true']:active svg > g,.c35[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c35:hover {
+.c32:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c35:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c35 svg > g,
-.c35 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #ffffff;
 }
 
-.c22 {
+.c21 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -343,7 +341,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c24 {
+.c23 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -358,36 +356,36 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c24::-webkit-input-placeholder {
+.c23::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c24::-moz-placeholder {
+.c23::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c24:-ms-input-placeholder {
+.c23:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c24::placeholder {
+.c23::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c24[aria-disabled='true'] {
+.c23[aria-disabled='true'] {
   color: inherit;
 }
 
-.c24:focus {
+.c23:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c23 {
+.c22 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -399,86 +397,78 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c23:focus-within {
+.c22:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c18 {
+.c17 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c19 {
+.c18 {
   grid-column: span 6;
   max-width: 100%;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c14 svg > g,
+.c14 svg path {
   fill: #8e8ea9;
 }
 
-.c15:hover svg > g,
-.c15:hover svg path {
+.c14:hover svg > g,
+.c14:hover svg path {
   fill: #666687;
 }
 
-.c15:active svg > g,
-.c15:active svg path {
+.c14:active svg > g,
+.c14:active svg path {
   fill: #a5a5ba;
 }
 
-.c15[aria-disabled='true'] svg path {
+.c14[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
 .c5 {
-  inset: 0;
   background: #32324d1F;
+  inset: 0;
 }
 
-.c7 {
-  width: 51.875rem;
-}
-
-.c9 {
+.c8 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c28 {
+.c27 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c30 > * + * {
-  margin-left: 8px;
-}
-
-.c17 {
+.c16 {
   overflow: auto;
   max-height: 60vh;
 }
 
-.c26 {
+.c25 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c26 svg {
+.c25 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c26 svg path {
+.c25 svg path {
   fill: #666687;
 }
 
-.c27 {
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -487,18 +477,18 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c27 svg {
+.c26 svg {
   width: 0.5625rem;
 }
 
 @media (max-width:68.75rem) {
-  .c19 {
+  .c18 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c19 {
+  .c18 {
     grid-column: span 12;
   }
 }
@@ -534,7 +524,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    data-react-portal="true"
+    class=""
   >
     <div
       class="c3 c4 c5"
@@ -544,7 +534,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c6 c7"
+            class="c6"
             role="dialog"
           >
             <form
@@ -552,20 +542,20 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
               novalidate=""
             >
               <div
-                class="c8 c9"
+                class="c7 c8"
               >
                 <div
-                  class="c10"
+                  class="c9"
                 >
                   <h2
-                    class="c11 c12"
+                    class="c10 c11"
                     id="title"
                   >
                     Add new folder
                   </h2>
                   <button
                     aria-disabled="false"
-                    class="c13 c4 c14 c15"
+                    class="c12 c4 c13 c14"
                     type="button"
                   >
                     <span
@@ -591,172 +581,164 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c16 c17"
+                class="c15 c16"
               >
                 <div
-                  class="c18"
+                  class="c17"
                 >
                   <div
-                    class="c19"
+                    class="c18"
                   >
-                    <div
-                      class=""
-                    >
-                      <div>
+                    <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class=""
+                          class="c19"
                         >
-                          <div
-                            class="c20"
+                          <label
+                            class="c10 c20 c21"
+                            for=":r0:"
                           >
-                            <label
-                              class="c11 c21 c22"
-                              for="1"
-                            >
-                              Name
-                            </label>
-                            <div
-                              class="c10 c23"
-                            >
-                              <input
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c24"
-                                id="1"
-                                name="name"
-                                value=""
-                              />
-                            </div>
+                            Name
+                          </label>
+                          <div
+                            class="c9 c22"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c23"
+                              id=":r0:"
+                              name="name"
+                              value=""
+                            />
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div
-                    class="c19"
+                    class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
-                      <div
-                        class="c20"
+                      <label
+                        class="c10 c20 c21"
+                        for="folder-parent"
                       >
-                        <label
-                          class="c11 c21 c22"
-                          for="folder-parent"
-                        >
-                          Location
-                        </label>
+                        Location
+                      </label>
+                      <div
+                        class=" css-1iyvlxg-container"
+                      >
+                        <span
+                          class="css-1f43avz-a11yText-A11yText"
+                          id="react-select-2-live-region"
+                        />
+                        <span
+                          aria-atomic="false"
+                          aria-live="polite"
+                          aria-relevant="additions text"
+                          class="css-1f43avz-a11yText-A11yText"
+                        />
                         <div
-                          class=" css-1iyvlxg-container"
+                          class=" css-1ckpxei-control"
                         >
-                          <span
-                            class="css-1f43avz-a11yText-A11yText"
-                            id="react-select-2-live-region"
-                          />
-                          <span
-                            aria-atomic="false"
-                            aria-live="polite"
-                            aria-relevant="additions text"
-                            class="css-1f43avz-a11yText-A11yText"
-                          />
                           <div
-                            class=" css-1ckpxei-control"
+                            class=" css-onz4xi-ValueContainer"
                           >
                             <div
-                              class=" css-onz4xi-ValueContainer"
+                              class=" css-1ryi7up-singleValue"
                             >
-                              <div
-                                class=" css-1ryi7up-singleValue"
-                              >
-                                Media Library
-                              </div>
-                              <input
-                                aria-autocomplete="list"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-invalid="false"
-                                aria-readonly="true"
-                                class="css-mohuvp-dummyInput-DummyInput"
-                                id="folder-parent"
-                                inputmode="none"
-                                role="combobox"
-                                tabindex="0"
-                                value=""
-                              />
+                              Media Library
                             </div>
+                            <input
+                              aria-autocomplete="list"
+                              aria-expanded="false"
+                              aria-haspopup="true"
+                              aria-invalid="false"
+                              aria-readonly="true"
+                              class="css-mohuvp-dummyInput-DummyInput"
+                              id="folder-parent"
+                              inputmode="none"
+                              role="combobox"
+                              tabindex="0"
+                              value=""
+                            />
+                          </div>
+                          <div
+                            class=" css-1hb7zxy-IndicatorsContainer"
+                          >
                             <div
-                              class=" css-1hb7zxy-IndicatorsContainer"
+                              aria-hidden="true"
+                              class="c24 c25 c26"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c25 c26 c27"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </div>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </div>
                           </div>
-                          <input
-                            name="parent"
-                            type="hidden"
-                            value=""
-                          />
                         </div>
+                        <input
+                          name="parent"
+                          type="hidden"
+                          value=""
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div
-                class="c8 c28"
+                class="c7 c27"
               >
                 <div
-                  class="c10"
+                  class="c9"
                 >
                   <div
-                    class="c29 c30"
+                    class="c28"
                   >
                     <button
                       aria-disabled="false"
-                      class="c31 c32 c14 c33"
+                      class="c29 c28 c13 c30"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c11 c34"
+                        class="c10 c31"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c29 c30"
+                    class="c28"
                   >
                     <div
-                      class="c32"
+                      class="c28"
                     >
                       <button
                         aria-disabled="false"
-                        class="c31 c32 c14 c35"
+                        class="c29 c28 c13 c32"
                         name="submit"
                         type="submit"
                       >
                         <span
-                          class="c11 c34"
+                          class="c10 c31"
                         >
                           Create
                         </span>

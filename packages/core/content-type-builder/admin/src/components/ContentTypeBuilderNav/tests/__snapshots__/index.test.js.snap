@@ -20,6 +20,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-bottom: 56px;
 }
 
+.c41 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
 .c37 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -33,16 +39,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
-}
-
-.c41 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c40 path {
-  fill: #666687;
 }
 
 .c38 {
@@ -91,6 +87,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
+}
+
+.c40 path {
+  fill: #666687;
 }
 
 .c51 {
@@ -352,13 +352,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c8 svg {
+.c8 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c8 svg > g,
-.c8 svg path {
+.c8 > svg > g,
+.c8 > svg path {
   fill: #ffffff;
 }
 
@@ -594,7 +594,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby="0"
+              aria-labelledby=":r1:"
               class="c6 c7 c8 c9"
               tabindex="0"
               type="button"
@@ -648,7 +648,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls="2"
+                    aria-controls=":r3:"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -694,7 +694,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="2"
+                id=":r3:"
               >
                 <li>
                   <a
@@ -808,7 +808,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls="3"
+                    aria-controls=":r4:"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -854,7 +854,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="3"
+                id=":r4:"
               >
                 <li>
                   <a
@@ -933,7 +933,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls="6"
+                    aria-controls=":r5:"
                     aria-expanded="true"
                     class="c21 c22 c23"
                   >
@@ -979,7 +979,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id="6"
+                id=":r5:"
               >
                 <li>
                   <div
@@ -992,7 +992,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c44"
                       >
                         <button
-                          aria-controls="4"
+                          aria-controls=":r6:"
                           aria-expanded="true"
                           class="c45"
                         >
@@ -1028,7 +1028,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id="4"
+                      id=":r6:"
                     >
                       <li>
                         <a
@@ -1079,7 +1079,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         class="c44"
                       >
                         <button
-                          aria-controls="5"
+                          aria-controls=":r7:"
                           aria-expanded="true"
                           class="c45"
                         >
@@ -1115,7 +1115,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <ul
-                      id="5"
+                      id=":r7:"
                     >
                       <li>
                         <a

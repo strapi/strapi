@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import readline from 'node:readline';
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 import * as sentry from '@sentry/node';
 import hasYarn from './utils/has-yarn';
 import checkRequirements from './utils/check-requirements';
@@ -15,13 +14,13 @@ import type { Scope, NewOptions } from './types';
 
 export { default as checkInstallPath } from './utils/check-install-path';
 
-sentry.init({
-  dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
-});
-
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {
+  sentry.init({
+    dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
+  });
+
   checkRequirements();
 
   const rootPath = resolve(projectDirectory);
@@ -44,7 +43,7 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
       template: options.template,
       starter: options.starter,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuidv4(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + crypto.randomUUID(),
     docker: process.env.DOCKER === 'true',
     deviceId: machineID(),
     tmpPath,

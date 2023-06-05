@@ -20,9 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
-  pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -141,8 +139,8 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
-    const categoriesButton = screen.getByTestId('Categories-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
+    const categoriesButton = screen.getByRole('combobox', { name: 'Categories' });
 
     expect(collectionsButton).toBeVisible();
     expect(categoriesButton).toBeVisible();
@@ -152,7 +150,7 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const mockedServerCollections = {
@@ -172,7 +170,7 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const categoriesButton = screen.getByTestId('Categories-button');
+    const categoriesButton = screen.getByRole('combobox', { name: 'Categories' });
     await user.click(categoriesButton);
 
     const mockedServerCategories = {
@@ -191,11 +189,15 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -214,11 +216,15 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const categoriesButton = screen.getByTestId('Categories-button');
+    const categoriesButton = screen.getByRole('combobox', { name: 'Categories' });
     await user.click(categoriesButton);
 
     const option = screen.getByTestId('Custom fields-4');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Custom fields' });
@@ -237,22 +243,31 @@ describe('Marketplace page - plugins tab', () => {
     // When a user clicks the filters button
     await user.click(screen.getByTestId('filters-button'));
     // They should see a select button for collections with no options selected
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     // When they click the select button
     await user.click(collectionsButton);
     // They should see a Made by Strapi option
     const collectionOption = screen.getByTestId('Made by Strapi-13');
     // When they click the option
     await user.click(collectionOption);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+    await user.click(screen.getByTestId('filters-button'));
     // They should see the collections button indicating 1 option selected
-    await user.click(
-      screen.getByRole('combobox', { name: 'Collections 1 collection selected Made by Strapi' })
+    expect(screen.getByRole('combobox', { name: 'Collections' })).toHaveTextContent(
+      '1 collection selected'
     );
     // They should the categories button with no options selected
-    const categoriesButton = screen.getByTestId('Categories-button');
+    const categoriesButton = screen.getByRole('combobox', { name: 'Categories' });
     await user.click(categoriesButton);
     const categoryOption = screen.getByTestId('Custom fields-4');
     await user.click(categoryOption);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
     // When the page reloads they should see a tag for the selected option
     await waitForReload();
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -276,15 +291,23 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters multiple collection options', async () => {
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByTestId('Collections-button'));
+    await user.click(screen.getByRole('combobox', { name: 'Collections' }));
     await user.click(screen.getByTestId('Made by Strapi-13'));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     await waitForReload();
 
-    await user.click(
-      screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
-    );
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('combobox', { name: `Collections` }));
     await user.click(screen.getByRole('option', { name: `Verified (29)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+
     await waitForReload();
 
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -299,15 +322,22 @@ describe('Marketplace page - plugins tab', () => {
 
   it('filters multiple category options', async () => {
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByTestId('Categories-button'));
+    await user.click(screen.getByRole('combobox', { name: 'Categories' }));
     await user.click(screen.getByRole('option', { name: `Custom fields (4)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     await waitForReload();
 
-    await user.click(
-      screen.getByRole('combobox', { name: `Categories 1 category selected Custom fields` })
-    );
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('combobox', { name: `Categories` }));
     await user.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     await waitForReload();
 
@@ -325,11 +355,16 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -345,11 +380,15 @@ describe('Marketplace page - plugins tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-13');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
@@ -368,19 +407,15 @@ describe('Marketplace page - plugins tab', () => {
 
     await user.click(sortButton);
 
-    const alphabeticalOption = screen.getByText('Alphabetical order').closest('li');
-    const newestOption = screen.getByText('Newest').closest('li');
-
-    expect(alphabeticalOption).toBeVisible();
-    expect(newestOption).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Alphabetical order' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Newest' })).toBeVisible();
   });
 
   it('changes the url on sort option select', async () => {
     const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
-    const newestOption = screen.getByText('Newest').closest('li');
-    await user.click(newestOption);
+    await user.click(screen.getByRole('option', { name: 'Newest' }));
     expect(history.location.search).toEqual('?sort=submissionDate:desc&page=1');
   });
 

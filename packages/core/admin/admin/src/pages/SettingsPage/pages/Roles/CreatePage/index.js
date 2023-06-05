@@ -219,7 +219,7 @@ const CreatePage = () => {
                               id: 'global.description',
                               defaultMessage: 'Description',
                             })}
-                            name="description"
+                            id="description"
                             error={errors.description && formatMessage({ id: errors.description })}
                             onChange={handleChange}
                           >

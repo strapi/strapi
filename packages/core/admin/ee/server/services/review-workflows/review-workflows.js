@@ -94,7 +94,7 @@ function persistStagesJoinTables({ strapi }) {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID);
       const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
-      return { name: joinTableName, dependsOn: { name: tableName } };
+      return { name: joinTableName, dependsOn: [{ name: tableName }] };
     };
 
     const joinTablesToPersist = pipe([
@@ -108,12 +108,16 @@ function persistStagesJoinTables({ strapi }) {
   };
 }
 
+const registerWebhookEvents = async ({ strapi }) =>
+  strapi.webhookStore.addAllowedEvent('WORKFLOW_UPDATE_STAGE', 'workflow.updateEntryStage');
+
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
 
   return {
     async bootstrap() {
+      await registerWebhookEvents({ strapi });
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
     async register() {

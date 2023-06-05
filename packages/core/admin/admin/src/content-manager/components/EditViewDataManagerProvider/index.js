@@ -8,6 +8,7 @@ import set from 'lodash/set';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
+import { flushSync } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Main } from '@strapi/design-system';
@@ -54,6 +55,7 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  const [isSaving, setIsSaving] = React.useState(false);
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -193,14 +195,21 @@ const EditViewDataManagerProvider = ({
 
   const dispatchAddComponent = useCallback(
     (type) =>
-      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+      (
+        keys,
+        componentLayoutData,
+        allComponents,
+        shouldCheckErrors = false,
+        position = undefined
+      ) => {
         trackUsageRef.current('didAddComponentToDynamicZone');
 
         dispatch({
           type,
           keys: keys.split('.'),
+          position,
           componentLayoutData,
-          allComponents: components,
+          allComponents,
           shouldCheckErrors,
         });
       },
@@ -375,14 +384,20 @@ const EditViewDataManagerProvider = ({
       try {
         if (isEmpty(errors)) {
           const formData = createFormData(modifiedData, initialData);
+          flushSync(() => {
+            setIsSaving(true);
+          });
 
           if (isCreatingEntry) {
             await onPost(formData, trackerProperty);
           } else {
             await onPut(formData, trackerProperty);
           }
+
+          setIsSaving(false);
         }
       } catch (err) {
+        setIsSaving(false);
         errors = {
           ...errors,
           ...getAPIInnerErrors(err, { getTrad }),
@@ -444,9 +459,14 @@ const EditViewDataManagerProvider = ({
 
     try {
       if (isEmpty(errors)) {
+        flushSync(() => {
+          setIsSaving(true);
+        });
         await onPublish();
+        setIsSaving(false);
       }
     } catch (err) {
+      setIsSaving(false);
       errors = {
         ...errors,
         ...getAPIInnerErrors(err, { getTrad }),
@@ -638,10 +658,12 @@ const EditViewDataManagerProvider = ({
         </Main>
       ) : (
         <>
-          <Prompt
-            when={!isEqual(modifiedData, initialData)}
-            message={formatMessage({ id: 'global.prompt.unsaved' })}
-          />
+          {!isSaving ? (
+            <Prompt
+              when={!isEqual(modifiedData, initialData)}
+              message={formatMessage({ id: 'global.prompt.unsaved' })}
+            />
+          ) : null}
           <form noValidate onSubmit={handleSubmit}>
             {children}
           </form>

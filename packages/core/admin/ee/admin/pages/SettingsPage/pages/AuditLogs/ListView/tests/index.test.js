@@ -2,7 +2,7 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -156,12 +156,11 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { container } = render(App);
+    render(App);
 
-    const pagination = await waitFor(() => container.querySelector('nav[aria-label="pagination"]'));
-
-    expect(pagination).toBeInTheDocument();
-    expect(screen.getByText(/go to page 1/i).closest('a')).toHaveClass('active');
+    await waitFor(() =>
+      expect(screen.getByText(/go to page 1/i).closest('a')).toHaveClass('active')
+    );
   });
 
   it('should paginate the results', async () => {
@@ -269,7 +268,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     await user.click(screen.getByRole('option', { name: /create entry/i }));
     // Apply the filter
     const addFilterButton = screen.getByRole('button', { name: /add filter/i });
-    await user.click(addFilterButton);
+    fireEvent.click(addFilterButton);
 
     expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create&page=1');
   });

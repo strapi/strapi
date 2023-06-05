@@ -10,7 +10,7 @@ const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, cust
   return (
     <Select
       data-testid={`${message}-button`}
-      aria-label={message}
+      label={message}
       placeholder={message}
       size="M"
       onChange={onChange}

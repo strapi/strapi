@@ -14,9 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
   useRBAC: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({
-    trackUsage: jest.fn(),
-  })),
 }));
 
 const client = new QueryClient({
@@ -116,6 +113,27 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         cursor: pointer;
       }
 
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c20 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c24 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -166,27 +184,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         justify-content: center;
       }
 
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c20 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c24 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c23 path {
         fill: #666687;
       }
@@ -196,13 +193,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         outline: none;
       }
 
-      .c27 svg {
+      .c27 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c27 svg > g,
-      .c27 svg path {
+      .c27 > svg > g,
+      .c27 > svg path {
         fill: #ffffff;
       }
 
@@ -521,7 +518,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="0"
+                            aria-labelledby=":r0:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"
@@ -601,7 +598,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="1"
+                            aria-labelledby=":r2:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"

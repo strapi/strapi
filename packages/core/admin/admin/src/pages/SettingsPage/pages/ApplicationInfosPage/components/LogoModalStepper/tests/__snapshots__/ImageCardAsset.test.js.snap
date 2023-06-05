@@ -28,6 +28,27 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   min-width: 20px;
 }
 
+.c9 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c16 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -76,27 +97,6 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-}
-
-.c9 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c16 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
 }
 
 .c14 {
@@ -161,7 +161,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
 
 <div>
   <article
-    aria-labelledby="0-title"
+    aria-labelledby=":r0:-title"
     class="c0"
     tabindex="0"
   >
@@ -189,7 +189,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
         >
           <div
             class="c9"
-            id="0-title"
+            id=":r0:-title"
           >
             asset.jpeg
           </div>

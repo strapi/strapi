@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { has } from 'lodash/fp';
+import { has, getOr, union } from 'lodash/fp';
 import type {
   Model,
   Kind,
@@ -101,16 +101,24 @@ const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
 const isKind = (kind: Kind) => (model: Model) => model.kind === kind;
 
-const getPrivateAttributes = (model: Model) => {
+const getStoredPrivateAttributes = (model) =>
+  union(
+    strapi?.config?.get('api.responses.privateAttributes', []) ?? [],
+    getOr([], 'options.privateAttributes', model)
+  );
+
+const getPrivateAttributes = (model = {}) => {
   return _.union(
-    strapi.config.get('api.responses.privateAttributes', []),
-    _.get(model, 'options.privateAttributes', []),
+    getStoredPrivateAttributes(model),
     _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 
-const isPrivateAttribute = (model: Model, attributeName: string) => {
-  return model?.privateAttributes?.includes(attributeName) ?? false;
+const isPrivateAttribute = (model, attributeName) => {
+  if (model?.attributes?.[attributeName]?.private === true) {
+    return true;
+  }
+  return getStoredPrivateAttributes(model).includes(attributeName);
 };
 
 const isScalarAttribute = (attribute: Attribute) => {
