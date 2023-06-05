@@ -61,6 +61,47 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c34 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c1 {
         padding-bottom: 56px;
       }
@@ -121,34 +162,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c32 {
         padding-bottom: 24px;
-      }
-
-      .c9 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c15 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c34 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-        text-align: center;
       }
 
       .c5 {
@@ -334,18 +347,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c13 {

@@ -1,6 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = `
+.c27 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c15 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c19 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c24 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c33 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c35 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c37 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c43 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
 .c1 {
   padding-bottom: 56px;
 }
@@ -74,72 +153,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c15 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c19 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c24 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c33 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c37 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c43 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
 }
 
 .c5 {
@@ -318,18 +331,6 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c27 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c13 {
@@ -725,21 +726,21 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     >
                       <label
                         class="c8 c24 c25"
-                        for="3"
+                        for="4"
                       >
                         Default role
                       </label>
                       <div
                         aria-autocomplete="none"
                         aria-controls="radix-0"
-                        aria-describedby="3-hint 3-error"
+                        aria-describedby="4-hint 4-error"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-label="Default role"
                         class="c38 c39 c40"
                         data-state="closed"
                         dir="ltr"
-                        id="3"
+                        id="4"
                         overflow="hidden"
                         role="combobox"
                         tabindex="0"
@@ -783,7 +784,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                       </div>
                       <p
                         class="c8 c37"
-                        id="3-hint"
+                        id="4-hint"
                       >
                         It will attach the new authenticated user to the selected role
                       </p>

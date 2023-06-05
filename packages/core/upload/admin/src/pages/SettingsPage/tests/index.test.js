@@ -49,6 +49,83 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c28 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c20 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c34 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c36 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #4945ff;
+        text-transform: uppercase;
+      }
+
+      .c38 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c39 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -105,70 +182,6 @@ describe('Upload | SettingsPage', () => {
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
-      }
-
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c20 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c36 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #4945ff;
-        text-transform: uppercase;
-      }
-
-      .c38 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c39 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
       }
 
       .c2 {
@@ -328,18 +341,6 @@ describe('Upload | SettingsPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c28 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c10 {

@@ -1,6 +1,100 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
+.c30 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c12 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c22 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c27 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c36 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c38 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c40 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #b72b1a;
+  text-transform: uppercase;
+}
+
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c51 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c66 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c1 {
   padding-bottom: 56px;
 }
@@ -130,87 +224,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 2rem;
   height: 2rem;
   cursor: pointer;
-}
-
-.c12 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c22 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c27 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c38 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c40 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #b72b1a;
-  text-transform: uppercase;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c51 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c66 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c8 {
@@ -389,18 +402,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c30 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c16 {
@@ -1143,20 +1144,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="7"
+                            for="8"
                           >
                             Entries per page
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-0"
-                            aria-describedby="7-hint 7-error"
+                            aria-describedby="8-hint 8-error"
                             aria-expanded="false"
                             aria-label="Entries per page"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="7"
+                            id="8"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -1200,7 +1201,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           </div>
                           <p
                             class="c11 c51"
-                            id="7-hint"
+                            id="8-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -1222,20 +1223,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="9"
+                            for="11"
                           >
                             Default sort attribute
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-1"
-                            aria-describedby="9-hint 9-error"
+                            aria-describedby="11-hint 11-error"
                             aria-expanded="false"
                             aria-label="Default sort attribute"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="9"
+                            id="11"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -1295,20 +1296,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="11"
+                            for="14"
                           >
                             Default sort order
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-2"
-                            aria-describedby="11-hint 11-error"
+                            aria-describedby="14-hint 14-error"
                             aria-expanded="false"
                             aria-label="Default sort order"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="11"
+                            id="14"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -1596,11 +1597,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   <div>
                     <span>
                       <button
-                        aria-controls="13"
+                        aria-controls="16"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="true"
-                        aria-labelledby="12"
+                        aria-labelledby="15"
                         class="c70 c34 c15 c71"
                         data-testid="add-field"
                         tabindex="0"
@@ -1662,6 +1663,100 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 `;
 
 exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
+.c30 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c12 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c22 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c27 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c36 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+  text-transform: uppercase;
+}
+
+.c38 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+  text-transform: uppercase;
+}
+
+.c40 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #b72b1a;
+  text-transform: uppercase;
+}
+
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c51 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c66 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c1 {
   padding-bottom: 56px;
 }
@@ -1791,87 +1886,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 2rem;
   height: 2rem;
   cursor: pointer;
-}
-
-.c12 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c22 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c27 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c36 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-  text-transform: uppercase;
-}
-
-.c38 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-  text-transform: uppercase;
-}
-
-.c40 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #b72b1a;
-  text-transform: uppercase;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c51 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c66 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c8 {
@@ -2050,18 +2064,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c30 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c16 {
@@ -2479,7 +2481,9 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 <div>
   <div
+    aria-hidden="true"
     class="c0"
+    data-aria-hidden="true"
   >
     <div
       class="c1 c2"
@@ -2803,20 +2807,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="45"
+                            for="46"
                           >
                             Entries per page
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-24"
-                            aria-describedby="45-hint 45-error"
+                            aria-describedby="46-hint 46-error"
                             aria-expanded="false"
                             aria-label="Entries per page"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="45"
+                            id="46"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -2860,7 +2864,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           </div>
                           <p
                             class="c11 c51"
-                            id="45-hint"
+                            id="46-hint"
                           >
                             Note: You can override this value in the Collection Type settings page.
                           </p>
@@ -2882,20 +2886,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="47"
+                            for="49"
                           >
                             Default sort attribute
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-25"
-                            aria-describedby="47-hint 47-error"
+                            aria-describedby="49-hint 49-error"
                             aria-expanded="false"
                             aria-label="Default sort attribute"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="47"
+                            id="49"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -2955,20 +2959,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="49"
+                            for="52"
                           >
                             Default sort order
                           </label>
                           <div
                             aria-autocomplete="none"
                             aria-controls="radix-26"
-                            aria-describedby="49-hint 49-error"
+                            aria-describedby="52-hint 52-error"
                             aria-expanded="false"
                             aria-label="Default sort order"
                             class="c43 c23 c44"
                             data-state="closed"
                             dir="ltr"
-                            id="49"
+                            id="52"
                             overflow="hidden"
                             role="combobox"
                             tabindex="0"
@@ -3359,11 +3363,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   <div>
                     <span>
                       <button
-                        aria-controls="51"
+                        aria-controls="54"
                         aria-disabled="false"
                         aria-expanded="true"
                         aria-haspopup="true"
-                        aria-labelledby="50"
+                        aria-labelledby="53"
                         class="c70 c34 c15 c71"
                         data-testid="add-field"
                         tabindex="0"

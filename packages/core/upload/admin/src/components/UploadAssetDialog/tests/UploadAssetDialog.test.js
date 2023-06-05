@@ -146,7 +146,7 @@ describe('UploadAssetDialog', () => {
     });
 
     it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
-      render();
+      const { debug } = render();
       fireEvent.click(screen.getByText('From url'));
 
       const urls = [
@@ -197,6 +197,8 @@ describe('UploadAssetDialog', () => {
           rawFile: new File([''], 'something/weird'),
         },
       ];
+
+      debug(undefined, 100000);
 
       await waitFor(() =>
         expect(

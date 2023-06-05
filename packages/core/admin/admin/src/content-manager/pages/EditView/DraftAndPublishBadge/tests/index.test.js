@@ -29,6 +29,19 @@ describe('<DraftAndPublishBadge />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #2f6846;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #2f6846;
+      }
+
       .c0 {
         background: #eafbe7;
         padding-top: 16px;
@@ -42,19 +55,6 @@ describe('<DraftAndPublishBadge />', () => {
 
       .c3 {
         padding-left: 12px;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #2f6846;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #2f6846;
       }
 
       .c1 {
@@ -84,7 +84,7 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-bdvvtL deFIGY"
+          class="c1 sc-hKwDye edbsOG"
         >
           <svg
             class="c2"
@@ -129,6 +129,19 @@ describe('<DraftAndPublishBadge />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #006096;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #006096;
+      }
+
       .c0 {
         background: #eaf5ff;
         padding-top: 16px;
@@ -142,19 +155,6 @@ describe('<DraftAndPublishBadge />', () => {
 
       .c3 {
         padding-left: 12px;
-      }
-
-      .c4 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #006096;
-      }
-
-      .c5 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 600;
-        color: #006096;
       }
 
       .c1 {
@@ -184,7 +184,7 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 sc-bdvvtL deFIGY"
+          class="c1 sc-hKwDye edbsOG"
         >
           <svg
             class="c2"

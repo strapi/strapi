@@ -1,6 +1,78 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BrowseStep renders and match snapshot 1`] = `
+.c20 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c10 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c31 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c47 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c58 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c65 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c70 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -123,65 +195,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c69 {
   padding-left: 8px;
-}
-
-.c10 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c31 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c58 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c65 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c70 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
 }
 
 .c1 {
@@ -458,18 +471,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c20 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c8 {
   height: 2rem;
   border: 1px solid #dcdce4;
@@ -542,22 +543,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c12 svg {
-  height: 4px;
-  width: 6px;
 }
 
 .c62 {
@@ -642,6 +627,22 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c19[aria-disabled='true'] svg path {
   fill: #666687;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c12 svg {
+  height: 4px;
+  width: 6px;
 }
 
 .c25 {
@@ -1253,17 +1254,17 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           >
             <label
               class="c9 c58 c59"
-              for="4"
+              for="5"
             />
             <div
               aria-autocomplete="none"
               aria-controls="radix-0"
-              aria-describedby="4-hint 4-error"
+              aria-describedby="5-hint 5-error"
               aria-expanded="false"
               class="c60 c61 c62"
               data-state="closed"
               dir="ltr"
-              id="4"
+              id="5"
               overflow="hidden"
               role="combobox"
               tabindex="0"

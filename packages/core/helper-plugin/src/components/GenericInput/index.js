@@ -236,11 +236,6 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           value={value && new Date(value)}
-          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-          selectButtonTitle={formatMessage({
-            id: 'selectButtonTitle',
-            defaultMessage: 'Select',
-          })}
         />
       );
     }
@@ -409,14 +404,12 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={(event) => onChange({ target: { name, value: event.target.value, type } })}
           required={required}
           placeholder={formattedPlaceholder}
           type={type}
           value={valueWithEmptyStringFallback}
-        >
-          {value}
-        </Textarea>
+        />
       );
     }
     case 'time': {
@@ -425,9 +418,8 @@ const GenericInput = ({
       // The backend send a value which has the following format: '00:45:00.000'
       // or the time picker only supports hours & minutes so we need to mutate the value
       if (value && value.split(':').length > 2) {
-        time = time.split(':');
-        time.pop();
-        time = time.join(':');
+        const [hour, minute] = value.split(':');
+        time = `${hour}:${minute}`;
       }
 
       return (

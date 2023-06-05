@@ -35,6 +35,18 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(history));
 
     expect(container).toMatchInlineSnapshot(`
+      .c4 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 8px;
@@ -119,18 +131,6 @@ describe('<SearchURLQuery />', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c4 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c3 svg > g,
@@ -218,9 +218,16 @@ describe('<SearchURLQuery />', () => {
     fireEvent.click(container.querySelector('button[type="button"]'));
 
     expect(container).toMatchInlineSnapshot(`
-      .c7 {
-        padding-right: 8px;
-        padding-left: 12px;
+      .c1 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c2 {
@@ -228,6 +235,11 @@ describe('<SearchURLQuery />', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
+      }
+
+      .c7 {
+        padding-right: 8px;
+        padding-left: 12px;
       }
 
       .c5 {
@@ -248,32 +260,6 @@ describe('<SearchURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c1 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c3 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -285,7 +271,7 @@ describe('<SearchURLQuery />', () => {
         align-items: center;
       }
 
-      .c11 {
+      .c10 {
         border: none;
         border-radius: 4px;
         padding-bottom: 0.40625rem;
@@ -300,31 +286,31 @@ describe('<SearchURLQuery />', () => {
         background: inherit;
       }
 
-      .c11::-webkit-input-placeholder {
+      .c10::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c11::-moz-placeholder {
+      .c10::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c11:-ms-input-placeholder {
+      .c10:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c11::placeholder {
+      .c10::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c11[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c11:focus {
+      .c10:focus {
         outline: none;
         box-shadow: none;
       }
@@ -346,11 +332,11 @@ describe('<SearchURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c10 {
+      .c9 {
         font-size: 0.8rem;
       }
 
-      .c10 svg path {
+      .c9 path {
         fill: #32324d;
       }
 
@@ -365,7 +351,7 @@ describe('<SearchURLQuery />', () => {
         transition-duration: 0.2s;
       }
 
-      .c0:focus-within .c8 svg path {
+      .c0:focus-within .c8 path {
         fill: #4945ff;
       }
 
@@ -405,31 +391,28 @@ describe('<SearchURLQuery />', () => {
                   <div
                     class="c7"
                   >
-                    <div
-                      class="c8 c9 c10"
+                    <svg
+                      aria-hidden="true"
+                      class="c8 c9"
+                      fill="none"
+                      height="1rem"
+                      viewBox="0 0 24 24"
+                      width="1rem"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 24 24"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
-                          fill="#32324D"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                      <path
+                        clip-rule="evenodd"
+                        d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
+                        fill="#32324D"
+                        fill-rule="evenodd"
+                      />
+                    </svg>
                   </div>
                   <input
                     aria-disabled="false"
                     aria-invalid="false"
                     aria-required="false"
-                    class="c11"
+                    class="c10"
                     id="4"
                     name="search"
                     value=""

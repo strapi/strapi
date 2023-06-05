@@ -56,6 +56,75 @@ describe('Plugin | Documentation | SettingsPage', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c16 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c21 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c30 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
+      .c32 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c34 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -111,62 +180,6 @@ describe('Plugin | Documentation | SettingsPage', () => {
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
-      }
-
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c16 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c21 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c30 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
-      .c32 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
       }
 
       .c2 {
@@ -311,18 +324,6 @@ describe('Plugin | Documentation | SettingsPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c10 {

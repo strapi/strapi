@@ -1,6 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c0 {
   background: #ffffff;
   padding-top: 24px;
@@ -26,29 +61,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-}
-
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c12 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c16 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c3 {
@@ -98,18 +110,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   -ms-flex-direction: row;
   flex-direction: row;
   gap: 12px;
-}
-
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c6 {
@@ -221,20 +221,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             >
               <label
                 class="c4 c5 c6"
-                for="1"
+                for="2"
               >
                 Entries per page
               </label>
               <div
                 aria-autocomplete="none"
                 aria-controls="radix-0"
-                aria-describedby="1-hint 1-error"
+                aria-describedby="2-hint 2-error"
                 aria-expanded="false"
                 aria-label="Entries per page"
                 class="c7 c8 c9"
                 data-state="closed"
                 dir="ltr"
-                id="1"
+                id="2"
                 overflow="hidden"
                 role="combobox"
                 tabindex="0"
@@ -278,7 +278,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c4 c16"
-                id="1-hint"
+                id="2-hint"
               >
                 Number of assets displayed by default in the Media Library
               </p>
@@ -300,20 +300,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             >
               <label
                 class="c4 c5 c6"
-                for="3"
+                for="5"
               >
                 Default sort order
               </label>
               <div
                 aria-autocomplete="none"
                 aria-controls="radix-1"
-                aria-describedby="3-hint 3-error"
+                aria-describedby="5-hint 5-error"
                 aria-expanded="false"
                 aria-label="Default sort order"
                 class="c7 c8 c9"
                 data-state="closed"
                 dir="ltr"
-                id="3"
+                id="5"
                 overflow="hidden"
                 role="combobox"
                 tabindex="0"
@@ -357,7 +357,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
               </div>
               <p
                 class="c4 c16"
-                id="3-hint"
+                id="5-hint"
               >
                 Note: You can override this value in the media library.
               </p>

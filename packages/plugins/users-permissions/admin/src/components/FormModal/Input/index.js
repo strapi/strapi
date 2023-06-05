@@ -23,7 +23,9 @@ const Input = ({
 }) => {
   const { formatMessage } = useIntl();
   const inputValue =
-    name === 'noName' ? `${strapi.backendURL}/api/connect/${providerToEditName}/callback` : value;
+    name === 'noName'
+      ? `${window.strapi.backendURL}/api/connect/${providerToEditName}/callback`
+      : value;
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
