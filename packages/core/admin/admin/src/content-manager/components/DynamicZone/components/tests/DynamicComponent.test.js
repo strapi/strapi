@@ -144,10 +144,10 @@ describe('DynamicComponent', () => {
 
       await user.click(getByRole('button', { name: 'More actions' }));
 
-      expect(getByRole('menuitem', { name: 'Add item above' })).toBeInTheDocument();
-      expect(getByRole('menuitem', { name: 'Add item below' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'Add component above' })).toBeInTheDocument();
+      expect(getByRole('menuitem', { name: 'Add component below' })).toBeInTheDocument();
 
-      await user.click(getByRole('menuitem', { name: 'Add item above' }));
+      await user.click(getByRole('menuitem', { name: 'Add component above' }));
 
       expect(getByText('myComponents')).toBeInTheDocument();
       expect(getByText('otherComponents')).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe('DynamicComponent', () => {
       expect(getByRole('menuitem', { name: 'component2' })).toBeInTheDocument();
       expect(getByRole('menuitem', { name: 'component3' })).toBeInTheDocument();
 
-      await user.click(getByRole('menuitem', { name: 'Add item below' }));
+      await user.click(getByRole('menuitem', { name: 'Add component below' }));
 
       expect(getByText('myComponents')).toBeInTheDocument();
       expect(getByText('otherComponents')).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe('DynamicComponent', () => {
       const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
 
       await user.click(getByRole('button', { name: 'More actions' }));
-      await user.click(getByRole('menuitem', { name: 'Add item above' }));
+      await user.click(getByRole('menuitem', { name: 'Add component above' }));
 
       /**
        * @note – for some reason, user.click() doesn't work here
@@ -186,7 +186,7 @@ describe('DynamicComponent', () => {
       const { getByRole, user } = render({ dynamicComponentsByCategory, onAddComponent, index: 0 });
 
       await user.click(getByRole('button', { name: 'More actions' }));
-      await user.click(getByRole('menuitem', { name: 'Add item below' }));
+      await user.click(getByRole('menuitem', { name: 'Add component below' }));
 
       /**
        * @note – for some reason, user.click() doesn't work here

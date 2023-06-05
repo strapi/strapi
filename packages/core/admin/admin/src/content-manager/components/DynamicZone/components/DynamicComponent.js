@@ -148,7 +148,7 @@ export const DynamicComponent = ({
             <Menu.SubTrigger>
               {formatMessage({
                 id: getTrad('components.DynamicZone.add-item-above'),
-                defaultMessage: 'Add item above',
+                defaultMessage: 'Add component above',
               })}
             </Menu.SubTrigger>
             <Menu.SubContent>
@@ -171,7 +171,7 @@ export const DynamicComponent = ({
             <Menu.SubTrigger>
               {formatMessage({
                 id: getTrad('components.DynamicZone.add-item-below'),
-                defaultMessage: 'Add item below',
+                defaultMessage: 'Add component below',
               })}
             </Menu.SubTrigger>
             <Menu.SubContent>
