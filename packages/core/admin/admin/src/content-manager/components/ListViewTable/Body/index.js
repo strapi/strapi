@@ -5,10 +5,12 @@ import { useIntl } from 'react-intl';
 
 import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
-import { useTracking, stopPropagation, onRowClick, useTableContext } from '@strapi/helper-plugin';
+import { useTracking, onRowClick, useTableContext } from '@strapi/helper-plugin';
 
 import { usePluginsQueryParams } from '../../../hooks';
 import ConfirmDialogDelete from '../ConfirmDialogDelete';
+
+const stopPropagation = (e) => e.stopPropagation();
 
 /* -------------------------------------------------------------------------------------------------
  * CheckboxDataCell
@@ -28,7 +30,7 @@ const CheckboxDataCell = ({ rowId, index }) => {
   );
 
   return (
-    <Td {...stopPropagation}>
+    <Td onClick={stopPropagation}>
       <BaseCheckbox
         aria-label={ariaLabel}
         checked={isChecked}
@@ -74,7 +76,7 @@ const EntityActionsDataCell = ({
 
   return (
     <Td>
-      <Flex gap={1} justifyContent="end" {...stopPropagation}>
+      <Flex gap={1} justifyContent="end" onClick={stopPropagation}>
         <IconButton
           forwardedAs={Link}
           onClick={() => {
