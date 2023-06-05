@@ -1,7 +1,7 @@
 import type { Attribute } from '@strapi/strapi';
 
 export type JSON = Attribute.Attribute<'json'> &
-  //Options
+  // Options
   Attribute.ConfigurableOption &
   Attribute.RequiredOption &
   Attribute.PrivateOption;
