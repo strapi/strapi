@@ -7,6 +7,9 @@ const mergeMetasWithSchema = (data, schemas, mainSchemaKey) => {
   const mainUID = data[mainSchemaKey].uid;
   const mainSchema = findSchema(mainUID);
 
+  // TODO
+  // In order to merge all the layers of the schema objects, we used the Lodash function "merge".
+  // If the destructuration is used, it will only merge the first layer of properties and overwrite the nested objects.
   set(merged, [mainSchemaKey], merge({}, mainSchema, data[mainSchemaKey]));
 
   Object.keys(data.components).forEach((compoUID) => {
