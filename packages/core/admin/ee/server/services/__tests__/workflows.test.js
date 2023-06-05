@@ -29,8 +29,21 @@ const entityServiceMock = {
   findMany: jest.fn(() => [workflowMock]),
 };
 
+const contentManagerServicesMock = {
+  'content-types': {
+    updateConfiguration: jest.fn(() => Promise.resolve()),
+  },
+};
+
+const pluginsMock = {
+  'content-manager': {
+    service: jest.fn((name) => contentManagerServicesMock[name]),
+  },
+};
+
 const strapiMock = {
   entityService: entityServiceMock,
+  plugin: jest.fn((name) => pluginsMock[name]),
 };
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
