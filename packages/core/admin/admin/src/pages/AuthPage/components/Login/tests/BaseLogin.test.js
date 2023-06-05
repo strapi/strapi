@@ -366,6 +366,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         height: 2rem;
       }
 
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c35[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -700,7 +705,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="1"
+                      for=":r0:"
                     >
                       Email
                       <span
@@ -717,7 +722,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c19"
-                        id="1"
+                        id=":r0:"
                         name="email"
                         placeholder="kai@doe.com"
                         value=""
@@ -735,7 +740,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="3"
+                      for=":r2:"
                     >
                       Password
                       <span
@@ -752,7 +757,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c20 c21"
-                        id="3"
+                        id=":r2:"
                         name="password"
                         type="password"
                         value=""
@@ -804,7 +809,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-label="rememberMe"
                         class="c30"
-                        id="5"
+                        id=":r4:"
                         name="rememberMe"
                         type="checkbox"
                       />

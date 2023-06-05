@@ -177,6 +177,11 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   background: transparent;
 }
 
+.c10 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c10[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -267,9 +272,9 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11 sc-ehIJor c10"
+          class="c7 c8 c9 c10 c11 sc-itWPBs c10"
           data-state="closed"
-          id="radix-0"
+          id="radix-:r1:"
           label="..."
           type="button"
         >

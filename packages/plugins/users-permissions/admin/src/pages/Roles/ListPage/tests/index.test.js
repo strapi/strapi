@@ -387,6 +387,11 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         height: 2rem;
       }
 
+      .c13 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -552,7 +557,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="0"
+                    aria-labelledby=":r0:"
                     class="c19 c20 c12 c21"
                     tabindex="0"
                     type="button"

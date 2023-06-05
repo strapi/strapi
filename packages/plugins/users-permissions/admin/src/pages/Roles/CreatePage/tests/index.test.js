@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
@@ -36,7 +36,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/new`);
+  act(() => history.push(`/settings/${pluginId}/roles/new`));
 
   return renderResult;
 }
@@ -548,6 +548,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         height: 2rem;
       }
 
+      .c11 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c11[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -875,7 +880,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                           >
                             <label
                               class="c6 c22 c23"
-                              for="1"
+                              for=":r0:"
                             >
                               Name
                             </label>
@@ -887,7 +892,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c25"
-                                id="1"
+                                id=":r0:"
                                 name="name"
                                 value=""
                               />
@@ -966,10 +971,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                             class="c2 c41 c42"
                           >
                             <button
-                              aria-controls="accordion-content-2"
+                              aria-controls="accordion-content-:r4:"
                               aria-disabled="false"
                               aria-expanded="false"
-                              aria-labelledby="accordion-label-2"
+                              aria-labelledby="accordion-label-:r4:"
                               class="c2 c43 c9 c44 c45"
                               data-strapi-accordion-toggle="true"
                               type="button"
@@ -979,13 +984,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                               >
                                 <span
                                   class="c6 c47"
-                                  id="accordion-label-2"
+                                  id="accordion-label-:r4:"
                                 >
                                   Address
                                 </span>
                                 <p
                                   class="c6 c36"
-                                  id="accordion-desc-2"
+                                  id="accordion-desc-:r4:"
                                 >
                                   Define all allowed actions for the api::address plugin.
                                 </p>

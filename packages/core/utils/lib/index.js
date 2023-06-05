@@ -28,7 +28,6 @@ const { removeUndefined, keysDeep } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
-const webhook = require('./webhook');
 const env = require('./env-helper');
 const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
@@ -76,7 +75,6 @@ module.exports = {
   isCamelCase,
   toKebabCase,
   contentTypes,
-  webhook,
   env,
   relations,
   setCreatorFields,

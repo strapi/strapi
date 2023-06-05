@@ -212,6 +212,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -368,7 +373,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="0"
+                aria-controls=":r0:"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
