@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as renderRTL, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
@@ -41,21 +41,25 @@ const mockHeaders = [
 
 const mockRows = [{ id: 1 }, { id: 2 }];
 
-const BaseTestComponent = (props) => {
-  return (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        {/* eslint-disable-next-line react/prop-types */}
-        <Table.Root {...props}>{props.children}</Table.Root>
-      </IntlProvider>
-    </ThemeProvider>
-  );
-};
+// eslint-disable-next-line react/prop-types
+const Wrapper = ({ children }) => (
+  <ThemeProvider theme={lightTheme}>
+    <IntlProvider locale="en" messages={{}} defaultLocale="en">
+      {children}
+    </IntlProvider>
+  </ThemeProvider>
+);
+
+const render = (props) => ({
+  ...renderRTL(<Table.Root {...props} />, {
+    wrapper: Wrapper,
+  }),
+});
 
 describe('Table', () => {
   it('should render with content', () => {
-    render(
-      <BaseTestComponent>
+    render({
+      children: (
         <Table.Content contentType="Test">
           <tbody>
             <tr>
@@ -63,40 +67,45 @@ describe('Table', () => {
             </tr>
           </tbody>
         </Table.Content>
-      </BaseTestComponent>
-    );
+      ),
+    });
 
     expect(screen.getByRole('cell', { name: 'content' })).toBeInTheDocument();
     expect(screen.queryByText('Loading content')).toBeNull();
   });
 
-  it('should renders with loading body', () => {
-    render(
-      <BaseTestComponent isLoading>
+  it('should render with loading body', () => {
+    render({
+      isLoading: true,
+      children: (
         <Table.Content>
           <Table.LoadingBody />
         </Table.Content>
-      </BaseTestComponent>
-    );
+      ),
+    });
 
     expect(screen.getByText('Loading content')).toBeInTheDocument();
   });
 
   it('should render with empty body', () => {
-    render(
-      <BaseTestComponent rows={[]} colCount={1}>
+    render({
+      rows: [],
+      colCount: 1,
+      children: (
         <Table.Content>
           <Table.EmptyBody contentType="Test" />
         </Table.Content>
-      </BaseTestComponent>
-    );
+      ),
+    });
 
     expect(screen.getByText('No content found')).toBeInTheDocument();
   });
 
   it('should render headers with checkbox and visually hidden actions', () => {
-    render(
-      <BaseTestComponent rows={mockRows} colCount={1}>
+    render({
+      rows: mockRows,
+      colCount: 1,
+      children: (
         <Table.Content>
           <Table.Head>
             {/* Bulk action select all checkbox */}
@@ -115,8 +124,8 @@ describe('Table', () => {
             <Table.HeaderHiddenActionsCell />
           </Table.Head>
         </Table.Content>
-      </BaseTestComponent>
-    );
+      ),
+    });
 
     expect(screen.getByRole('button', { name: 'Sort on id' })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Select all entries' })).toBeInTheDocument();
@@ -126,12 +135,14 @@ describe('Table', () => {
   it('should render the bulk action bar with bulk delete button after updating the selectedEntries state', () => {
     const { result } = renderHook(() => useTableContext(), {
       wrapper: ({ children }) => (
-        <BaseTestComponent rows={mockRows} colCount={1}>
-          <Table.ActionBar>
-            <Table.BulkDeleteButton onConfirmDeleteAll={() => jest.fn()} />
-          </Table.ActionBar>
-          {children}
-        </BaseTestComponent>
+        <Wrapper>
+          <Table.Root row={mockRows} colCount={1}>
+            <Table.ActionBar>
+              <Table.BulkDeleteButton onConfirmDeleteAll={() => jest.fn()} />
+            </Table.ActionBar>
+            {children}
+          </Table.Root>
+        </Wrapper>
       ),
     });
 
