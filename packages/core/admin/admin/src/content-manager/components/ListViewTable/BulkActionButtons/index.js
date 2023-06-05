@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
@@ -186,8 +186,8 @@ const BulkActionButtons = ({
   const { data } = useSelector(listViewDomain());
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
-  const [dialogToOpen, setDialogToOpen] = useState(null);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
+  const [dialogToOpen, setDialogToOpen] = React.useState(null);
 
   // Filters for Bulk actions
   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));

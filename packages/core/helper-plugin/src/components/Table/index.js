@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -21,9 +21,8 @@ import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
 
 import useQueryParams from '../../hooks/useQueryParams';
-import { useTracking } from '../../features/Tracking';
-import ConfirmDialog from '../ConfirmDialog';
 import SortIcon from '../../icons/SortIcon';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyStateLayout from '../EmptyStateLayout';
 
 /* -------------------------------------------------------------------------------------------------
@@ -79,9 +78,8 @@ ActionBar.propTypes = {
 const BulkDeleteButton = ({ onConfirmDeleteAll }) => {
   const { selectedEntries, setSelectedEntries } = useTableContext();
   const { formatMessage } = useIntl();
-  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
-  const { trackUsage } = useTracking();
+  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = React.useState(false);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
 
   const handleConfirmDeleteAll = async () => {
     try {
@@ -97,10 +95,6 @@ const BulkDeleteButton = ({ onConfirmDeleteAll }) => {
   };
 
   const handleToggleConfirmDeleteAll = () => {
-    if (!showConfirmDeleteAll) {
-      trackUsage('willBulkDeleteEntries');
-    }
-
     setShowConfirmDeleteAll((prev) => !prev);
   };
 
@@ -289,7 +283,7 @@ HeaderCell.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const Root = ({ children, rows, isLoading, colCount }) => {
-  const [selectedEntries, setSelectedEntries] = useState([]);
+  const [selectedEntries, setSelectedEntries] = React.useState([]);
   const rowCount = rows.length + 1;
 
   const onSelectRow = React.useCallback(({ name, value }) => {
@@ -374,7 +368,7 @@ EmptyBody.propTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * EmptyBody
+ * LoadingBody
  * -----------------------------------------------------------------------------------------------*/
 
 const LoadingBody = () => {
