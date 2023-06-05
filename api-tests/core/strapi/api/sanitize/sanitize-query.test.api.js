@@ -142,7 +142,10 @@ describe('Core API - Sanitize', () => {
             notAnAttribute: '', // doesn't exist on schema
             t0: { createdBy: { id: { $lt: '1' } } }, // join table name
             t1: { createdBy: { id: { $lt: '1' } } }, // join table name
+            t0: { updatedBy: { id: { $lt: '1' } } }, // join table name
+            t1: { updatedBy: { id: { $lt: '1' } } }, // join table name
             $fakeOp: false,
+            id: { $STARTSWITH: '123' }, // wrong casing for operator
           };
 
           const res = await rq.get('/api/documents', { qs: { filters } });
