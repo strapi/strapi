@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Table, useStrapiApp } from '@strapi/helper-plugin';
+import { Td } from '@strapi/design-system';
 
 import { useSelector } from 'react-redux';
 
@@ -36,7 +37,7 @@ const ListViewTable = ({
   const { formatMessage } = useIntl();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
 
-  const tableHeaders = useMemo(() => {
+  const tableHeaders = React.useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
       displayedHeaders,
       layout,
@@ -141,14 +142,14 @@ const ListViewTable = ({
                 {tableHeaders.map(({ key, name, ...rest }) => {
                   if (name === 'publishedAt') {
                     return (
-                      <Body.DataCell key={key}>
+                      <Td key={key}>
                         <PublicationState isPublished={Boolean(rowData.publishedAt)} />
-                      </Body.DataCell>
+                      </Td>
                     );
                   }
 
                   return (
-                    <Body.DataCell key={key}>
+                    <Td key={key}>
                       <CellContent
                         content={rowData[name.split('.')[0]]}
                         name={name}
@@ -156,7 +157,7 @@ const ListViewTable = ({
                         {...rest}
                         rowId={rowData.id}
                       />
-                    </Body.DataCell>
+                    </Td>
                   );
                 })}
                 {/* Actions: edit, duplicate, delete */}

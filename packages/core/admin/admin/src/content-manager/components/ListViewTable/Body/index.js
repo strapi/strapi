@@ -11,18 +11,6 @@ import { usePluginsQueryParams } from '../../../hooks';
 import ConfirmDialogDelete from '../ConfirmDialogDelete';
 
 /* -------------------------------------------------------------------------------------------------
- * DataCell
- * -----------------------------------------------------------------------------------------------*/
-
-const DataCell = ({ children, ...props }) => {
-  return <Td {...props}>{children}</Td>;
-};
-
-DataCell.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-/* -------------------------------------------------------------------------------------------------
  * CheckboxDataCell
  * -----------------------------------------------------------------------------------------------*/
 
@@ -40,7 +28,7 @@ const CheckboxDataCell = ({ rowId, index }) => {
   );
 
   return (
-    <DataCell {...stopPropagation}>
+    <Td {...stopPropagation}>
       <BaseCheckbox
         aria-label={ariaLabel}
         checked={isChecked}
@@ -48,7 +36,7 @@ const CheckboxDataCell = ({ rowId, index }) => {
           onSelectRow({ name: rowId, value: !isChecked });
         }}
       />
-    </DataCell>
+    </Td>
   );
 };
 
@@ -85,7 +73,7 @@ const EntityActionsDataCell = ({
   );
 
   return (
-    <DataCell>
+    <Td>
       <Flex gap={1} justifyContent="end" {...stopPropagation}>
         <IconButton
           forwardedAs={Link}
@@ -141,7 +129,7 @@ const EntityActionsDataCell = ({
           />
         )}
       </Flex>
-    </DataCell>
+    </Td>
   );
 };
 
@@ -235,4 +223,4 @@ Root.propTypes = {
   setIsConfirmDeleteRowOpen: PropTypes.func.isRequired,
 };
 
-export const Body = { CheckboxDataCell, EntityActionsDataCell, DataCell, Root, Row };
+export const Body = { CheckboxDataCell, EntityActionsDataCell, Root, Row };
