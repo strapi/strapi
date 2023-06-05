@@ -26,6 +26,9 @@ describe('Content-Manager', () => {
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
         },
+        webhookStore: {
+          allowedEvents: new Map([['ENTRY_PUBLISH', 'entry.publish']]),
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
@@ -37,7 +40,7 @@ describe('Content-Manager', () => {
     test('Publish a content-type', async () => {
       const uid = 'api::test.test';
       const entity = { id: 1, publishedAt: null };
-      await entityManager.publish(entity, {}, uid);
+      await entityManager.publish(entity, uid, {});
 
       expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
         data: { publishedAt: expect.any(Date) },
@@ -58,6 +61,9 @@ describe('Content-Manager', () => {
         config: {
           get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
         },
+        webhookStore: {
+          allowedEvents: new Map([['ENTRY_UNPUBLISH', 'entry.unpublish']]),
+        },
       };
       entityManager = entityManagerLoader({ strapi });
     });
@@ -69,7 +75,7 @@ describe('Content-Manager', () => {
     test('Unpublish a content-type', async () => {
       const uid = 'api::test.test';
       const entity = { id: 1, publishedAt: new Date() };
-      await entityManager.unpublish(entity, {}, uid);
+      await entityManager.unpublish(entity, uid, {});
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
         data: { publishedAt: null },

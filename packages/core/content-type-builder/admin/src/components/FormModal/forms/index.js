@@ -191,12 +191,18 @@ const forms = {
         return get(contentType, ['schema', 'collectionName'], '');
       });
 
-      const takenCollectionNames = isEditing ? collectionNames.filter((collectionName) => {
-        const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
-        const currentCollectionName = get(contentTypes, [ctUid, 'schema', 'collectionName'], '');
+      const takenCollectionNames = isEditing
+        ? collectionNames.filter((collectionName) => {
+            const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
+            const currentCollectionName = get(
+              contentTypes,
+              [ctUid, 'schema', 'collectionName'],
+              ''
+            );
 
-        return collectionName !== currentPluralName || collectionName !== currentCollectionName;
-      }) : collectionNames;
+            return collectionName !== currentPluralName || collectionName !== currentCollectionName;
+          })
+        : collectionNames;
 
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,

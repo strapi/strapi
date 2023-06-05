@@ -309,6 +309,11 @@ describe('Plugin | Documentation | PluginPage', () => {
         height: 2rem;
       }
 
+      .c13 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -641,7 +646,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="2"
+                                  aria-labelledby=":r2:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -676,7 +681,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="3"
+                                  aria-labelledby=":r4:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -707,7 +712,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="4"
+                                  aria-labelledby=":r6:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -775,7 +780,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="5"
+                                  aria-labelledby=":r8:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -810,7 +815,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="6"
+                                  aria-labelledby=":ra:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"

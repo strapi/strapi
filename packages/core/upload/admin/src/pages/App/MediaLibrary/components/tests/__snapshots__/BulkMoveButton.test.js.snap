@@ -102,6 +102,11 @@ exports[`BulkMoveButton renders 1`] = `
   background: #f0f0ff;
 }
 
+.c3 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c3[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
