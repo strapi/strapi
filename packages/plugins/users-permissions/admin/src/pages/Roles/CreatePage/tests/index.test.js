@@ -161,7 +161,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border-radius: 4px;
         width: 100%;
         height: 6.5625rem;
-        line-height: 4;
+        line-height: 1.43;
       }
 
       .c8 {
@@ -181,7 +181,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c33 {
+      .c32 {
         padding-top: 24px;
         padding-right: 32px;
         padding-bottom: 24px;
@@ -231,7 +231,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         width: 0.6875rem;
       }
 
-      .c53 {
+      .c52 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -548,6 +548,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         height: 2rem;
       }
 
+      .c11 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c11[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -677,12 +682,12 @@ describe('Admin | containers | RoleCreatePage', () => {
         max-width: 100%;
       }
 
-      .c32 {
+      .c33 {
         grid-column: span 7;
         max-width: 100%;
       }
 
-      .c52 {
+      .c53 {
         grid-column: span 5;
         max-width: 100%;
       }
@@ -755,25 +760,25 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c32 {
+        .c33 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c32 {
+        .c33 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c52 {
+        .c53 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c52 {
+        .c53 {
           grid-column: span;
         }
       }
@@ -866,35 +871,31 @@ describe('Admin | containers | RoleCreatePage', () => {
                     <div
                       class="c20"
                     >
-                      <div
-                        class=""
-                      >
-                        <div>
+                      <div>
+                        <div
+                          class=""
+                        >
                           <div
-                            class=""
+                            class="c2 c21"
                           >
-                            <div
-                              class="c2 c21"
+                            <label
+                              class="c6 c22 c23"
+                              for="1"
                             >
-                              <label
-                                class="c6 c22 c23"
-                                for="1"
-                              >
-                                Name
-                              </label>
-                              <div
-                                class="c2 c3 c24"
-                              >
-                                <input
-                                  aria-disabled="false"
-                                  aria-invalid="false"
-                                  aria-required="false"
-                                  class="c25"
-                                  id="1"
-                                  name="name"
-                                  value=""
-                                />
-                              </div>
+                              Name
+                            </label>
+                            <div
+                              class="c2 c3 c24"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c25"
+                                id="1"
+                                name="name"
+                                value=""
+                              />
                             </div>
                           </div>
                         </div>
@@ -907,28 +908,24 @@ describe('Admin | containers | RoleCreatePage', () => {
                         class=""
                       >
                         <div
-                          class=""
+                          class="c2 c21"
                         >
-                          <div
-                            class="c2 c21"
+                          <label
+                            class="c6 c22 c23"
+                            for="description"
                           >
-                            <label
-                              class="c6 c22 c23"
-                              for="description"
-                            >
-                              Description
-                            </label>
-                            <div
-                              class="c26 c27"
-                            >
-                              <textarea
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c28 c29"
-                                font-size="2"
-                                id="description"
-                              />
-                            </div>
+                            Description
+                          </label>
+                          <div
+                            class="c26 c27"
+                          >
+                            <textarea
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c28 c29"
+                              font-size="2"
+                              id="description"
+                            />
                           </div>
                         </div>
                       </div>
@@ -940,93 +937,89 @@ describe('Admin | containers | RoleCreatePage', () => {
                 class="c30 c31"
               >
                 <div
-                  class="c32"
+                  class="c32 c33"
                 >
                   <div
-                    class="c33"
+                    class="c2 c34"
                   >
                     <div
-                      class="c2 c34"
+                      class="c2 c35"
+                    >
+                      <h2
+                        class="c6 c18"
+                      >
+                        Permissions
+                      </h2>
+                      <p
+                        class="c6 c36"
+                      >
+                        Only actions bound by a route are listed below.
+                      </p>
+                    </div>
+                    <div
+                      class="c2 c21"
                     >
                       <div
-                        class="c2 c35"
-                      >
-                        <h2
-                          class="c6 c18"
-                        >
-                          Permissions
-                        </h2>
-                        <p
-                          class="c6 c36"
-                        >
-                          Only actions bound by a route are listed below.
-                        </p>
-                      </div>
-                      <div
-                        class="c2 c21"
+                        aria-disabled="false"
+                        class="c37 c38"
+                        data-strapi-expanded="false"
                       >
                         <div
-                          aria-disabled="false"
-                          class="c37 c38"
-                          data-strapi-expanded="false"
+                          class="c2 c39 c3 c40"
                         >
                           <div
-                            class="c2 c39 c3 c40"
+                            class="c2 c41 c42"
                           >
-                            <div
-                              class="c2 c41 c42"
+                            <button
+                              aria-controls="accordion-content-2"
+                              aria-disabled="false"
+                              aria-expanded="false"
+                              aria-labelledby="accordion-label-2"
+                              class="c2 c43 c9 c44 c45"
+                              data-strapi-accordion-toggle="true"
+                              type="button"
                             >
-                              <button
-                                aria-controls="accordion-content-2"
-                                aria-disabled="false"
-                                aria-expanded="false"
-                                aria-labelledby="accordion-label-2"
-                                class="c2 c43 c9 c44 c45"
-                                data-strapi-accordion-toggle="true"
-                                type="button"
+                              <span
+                                class="c6 c46"
                               >
                                 <span
-                                  class="c6 c46"
+                                  class="c6 c47"
+                                  id="accordion-label-2"
                                 >
-                                  <span
-                                    class="c6 c47"
-                                    id="accordion-label-2"
-                                  >
-                                    Address
-                                  </span>
-                                  <p
-                                    class="c6 c36"
-                                    id="accordion-desc-2"
-                                  >
-                                    Define all allowed actions for the api::address plugin.
-                                  </p>
+                                  Address
                                 </span>
-                              </button>
-                              <div
-                                class="c2 c42"
+                                <p
+                                  class="c6 c36"
+                                  id="accordion-desc-2"
+                                >
+                                  Define all allowed actions for the api::address plugin.
+                                </p>
+                              </span>
+                            </button>
+                            <div
+                              class="c2 c42"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="c2 c48 c49"
+                                data-strapi-dropdown="true"
                               >
-                                <span
-                                  aria-hidden="true"
-                                  class="c2 c48 c49"
-                                  data-strapi-dropdown="true"
+                                <svg
+                                  class="c50 c51"
+                                  fill="none"
+                                  height="1rem"
+                                  viewBox="0 0 14 8"
+                                  width="1rem"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  <svg
-                                    class="c50 c51"
-                                    fill="none"
-                                    height="1rem"
-                                    viewBox="0 0 14 8"
-                                    width="1rem"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                      fill="#32324D"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </span>
-                              </div>
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1035,26 +1028,22 @@ describe('Admin | containers | RoleCreatePage', () => {
                   </div>
                 </div>
                 <div
-                  class="c52"
+                  class="c52 c53"
+                  style="min-height: 100%;"
                 >
                   <div
-                    class="c53"
-                    style="min-height: 100%;"
+                    class="c2 c35"
                   >
-                    <div
-                      class="c2 c35"
+                    <h3
+                      class="c6 c18"
                     >
-                      <h3
-                        class="c6 c18"
-                      >
-                        Advanced settings
-                      </h3>
-                      <p
-                        class="c6 c36"
-                      >
-                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
-                      </p>
-                    </div>
+                      Advanced settings
+                    </h3>
+                    <p
+                      class="c6 c36"
+                    >
+                      Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                    </p>
                   </div>
                 </div>
               </div>

@@ -305,6 +305,11 @@ describe('GuidedTour Homepage', () => {
         background: #ffffff;
       }
 
+      .c28 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c28[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;

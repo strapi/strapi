@@ -238,6 +238,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   height: 2rem;
 }
 
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c22[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -283,6 +288,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c29 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c29[aria-disabled='true'] {
@@ -740,6 +750,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   height: 2rem;
 }
 
+.c24 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c24[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -785,6 +800,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c22[aria-disabled='true'] {

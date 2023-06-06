@@ -106,6 +106,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
@@ -412,6 +413,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   height: 2rem;
 }
 
+.c51 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c51[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -457,6 +463,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c56 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c56[aria-disabled='true'] {
@@ -1068,6 +1079,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
@@ -1311,6 +1323,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   height: 2rem;
 }
 
+.c48 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -1356,6 +1373,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c46 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c46[aria-disabled='true'] {
@@ -1949,6 +1971,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
