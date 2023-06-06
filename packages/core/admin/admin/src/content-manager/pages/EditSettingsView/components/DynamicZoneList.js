@@ -25,12 +25,19 @@ const CustomLink = styled(Flex)`
     > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
     }
   }
 `;
 
 const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
+
 
   return (
     <Flex gap={2} overflow="scroll hidden" padding={3}>
@@ -49,7 +56,7 @@ const DynamicZoneList = ({ components }) => {
           as={Link}
           to={`/content-manager/components/${componentUid}/configurations/edit`}
         >
-          <ComponentIcon />
+          <ComponentIcon icon={componentLayouts?.[componentUid]?.info?.icon} />
 
           <Box paddingTop={1}>
             <Typography fontSize={1} textColor="neutral600" fontWeight="bold">
