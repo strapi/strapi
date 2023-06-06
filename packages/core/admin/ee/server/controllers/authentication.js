@@ -7,8 +7,6 @@ const { ValidationError } = require('@strapi/utils').errors;
 const { validateProviderOptionsUpdate } = require('../validation/authentication');
 const { middlewares, utils } = require('./authentication/index');
 
-const { isSsoLocked } = require('../utils/sso-lock');
-
 const toProviderDTO = pick(['uid', 'displayName', 'icon']);
 const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 
@@ -62,16 +60,5 @@ module.exports = {
     }
 
     return providerAuthenticationFlow(ctx, next);
-  },
-
-  async isSSOLocked(ctx) {
-    const { user } = ctx.state;
-    const isSSOLocked = await isSsoLocked(user);
-
-    ctx.body = {
-      data: {
-        isSSOLocked,
-      },
-    };
   },
 };
