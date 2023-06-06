@@ -332,7 +332,6 @@ const EmptyBody = ({ contentType, ...rest }) => {
   const { rows, colCount } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
-
   const content = hasFilters
     ? {
         id: 'content-manager.components.TableEmpty.withFilters',
