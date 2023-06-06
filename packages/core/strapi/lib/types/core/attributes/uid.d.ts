@@ -32,7 +32,7 @@ export type UID<
   U extends TargetAttributeByUID<T> = TargetAttributeByUID<T>,
   // UID options
   S extends UIDOptions = UIDOptions
-> = Attribute.Attribute<'uid'> &
+> = Attribute.OfType<'uid'> &
   // Properties
   (T extends Common.UID.Schema ? UIDProperties<T, U, S> : GenericUIDProperties<S>) &
   // Options

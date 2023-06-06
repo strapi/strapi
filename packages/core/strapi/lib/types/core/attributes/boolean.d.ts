@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Boolean = Attribute.Attribute<'boolean'> &
+export type Boolean = Attribute.OfType<'boolean'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<BooleanValue> &

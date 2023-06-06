@@ -1,18 +1,18 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type PickTypes<T extends Attribute.Type> = T;
+export type PickTypes<T extends Attribute.Kind> = T;
 
 export type GetKeysByType<
   T extends Common.UID.Schema,
-  U extends Attribute.Type,
+  U extends Attribute.Kind,
   P = never
-> = Utils.Object.KeysBy<GetAll<T>, Attribute.Attribute<U> & Utils.Guard.Never<P, unknown>>;
+> = Utils.Object.KeysBy<GetAll<T>, Attribute.OfType<U> & Utils.Guard.Never<P, unknown>>;
 
 export type GetByType<
   T extends Common.UID.Schema,
-  U extends Attribute.Type,
+  U extends Attribute.Kind,
   P = never
-> = Utils.Object.PickBy<GetAll<T>, Attribute.Attribute<U> & Utils.Guard.Never<P, unknown>>;
+> = Utils.Object.PickBy<GetAll<T>, Attribute.OfType<U> & Utils.Guard.Never<P, unknown>>;
 
 export type Get<T extends Common.UID.Schema, U extends GetKeys<T>> = Utils.Get<GetAll<T>, U>;
 

@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type RichText = Attribute.Attribute<'richtext'> &
+export type RichText = Attribute.OfType<'richtext'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<RichTextValue> &

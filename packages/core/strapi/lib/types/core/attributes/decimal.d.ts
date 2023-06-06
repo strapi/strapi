@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Decimal = Attribute.Attribute<'decimal'> &
+export type Decimal = Attribute.OfType<'decimal'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<DecimalValue> &

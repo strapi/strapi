@@ -15,7 +15,7 @@ export type Component<
   T extends Common.UID.Component = Common.UID.Component,
   // Repeatable
   R extends boolean = false
-> = Attribute.Attribute<'component'> &
+> = Attribute.OfType<'component'> &
   // Component Properties
   ComponentProperties<T, R> &
   // Options

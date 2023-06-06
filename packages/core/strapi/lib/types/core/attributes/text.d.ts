@@ -4,7 +4,7 @@ export interface TextProperties {
   regex?: RegExp;
 }
 
-export type Text = Attribute.Attribute<'text'> &
+export type Text = Attribute.OfType<'text'> &
   // Properties
   TextProperties &
   // Options

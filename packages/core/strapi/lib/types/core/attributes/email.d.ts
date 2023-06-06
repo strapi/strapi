@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Email = Attribute.Attribute<'email'> &
+export type Email = Attribute.OfType<'email'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<EmailValue> &

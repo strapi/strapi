@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type JSON = Attribute.Attribute<'json'> &
+export type JSON = Attribute.OfType<'json'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.RequiredOption &

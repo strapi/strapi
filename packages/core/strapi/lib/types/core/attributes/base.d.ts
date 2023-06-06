@@ -1,7 +1,7 @@
 /**
  * List of all the Strapi attribute types
  */
-export type Type =
+export type Kind =
   | 'string'
   | 'text'
   | 'richtext'
@@ -27,7 +27,7 @@ export type Type =
 /**
  * Most basic shape of a schema attribute
  */
-export interface Attribute<T extends Type = Type> {
+export interface Attribute<T extends Kind = Kind> {
   /**
    * Type of the attribute
    */
@@ -38,6 +38,8 @@ export interface Attribute<T extends Type = Type> {
    */
   pluginOptions?: object;
 }
+
+export type OfType<T extends Kind> = Attribute<T>;
 
 // Common attributes Options
 

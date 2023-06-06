@@ -4,7 +4,7 @@ export interface EnumerationProperties<T extends string[] = []> {
   enum: T;
 }
 
-export type Enumeration<T extends string[] = []> = Attribute.Attribute<'enumeration'> &
+export type Enumeration<T extends string[] = []> = Attribute.OfType<'enumeration'> &
   EnumerationProperties<T> &
   // Options
   Attribute.ConfigurableOption &

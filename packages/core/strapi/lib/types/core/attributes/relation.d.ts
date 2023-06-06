@@ -37,7 +37,7 @@ export type Relation<
   S extends Common.UID.Schema = Common.UID.Schema,
   R extends RelationsType = RelationsType,
   T extends R extends PolymorphicRelationsType ? never : Common.UID.Schema = never
-> = Attribute.Attribute<'relation'> &
+> = Attribute.OfType<'relation'> &
   // Properties
   (R extends BasicRelationsType
     ? BasicRelationProperties<S, R, T>

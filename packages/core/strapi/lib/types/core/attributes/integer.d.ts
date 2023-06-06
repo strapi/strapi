@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Integer = Attribute.Attribute<'integer'> &
+export type Integer = Attribute.OfType<'integer'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<IntegerValue> &

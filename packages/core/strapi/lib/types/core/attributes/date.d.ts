@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Date = Attribute.Attribute<'date'> &
+export type Date = Attribute.OfType<'date'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<DateValue> &

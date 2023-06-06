@@ -17,7 +17,7 @@ export type Media<
   T extends AllowedMediaTypes | undefined = undefined,
   // Multiple
   U extends boolean = false
-> = Attribute.Attribute<'media'> &
+> = Attribute.OfType<'media'> &
   // Properties
   MediaProperties<T, U> &
   // Options
