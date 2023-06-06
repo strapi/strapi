@@ -48,74 +48,84 @@ const ProfilePage = () => {
 
   useFocusWhenNavigate();
 
-  const { isLoading: isLoadingUser, data } = useQuery('user',  async () => {
-    const { data } = await get('/admin/users/me');
-  
-    return data.data;
-  }, {
-    onSuccess() {
-      notifyStatus(
-        formatMessage({
-          id: 'Settings.profile.form.notify.data.loaded',
-          defaultMessage: 'Your profile data has been loaded',
-        })
-      );
+  const { isLoading: isLoadingUser, data } = useQuery(
+    'user',
+    async () => {
+      const { data } = await get('/admin/users/me');
+
+      return data.data;
     },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
+    {
+      onSuccess() {
+        notifyStatus(
+          formatMessage({
+            id: 'Settings.profile.form.notify.data.loaded',
+            defaultMessage: 'Your profile data has been loaded',
+          })
+        );
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
+
+  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(
+    ['providers', 'isSSOLocked'],
+    async () => {
+      const {
+        data: { data },
+      } = await get('/admin/providers/isSSOLocked');
+
+      return data;
     },
-  });
-  const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(['providers', 'options'], async () => {
-    const { 
-      data: {
-        data
-      }
-    } = await get('/admin/providers/options');
-  
-    return data;
-  }, {
-    onSuccess() {},
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'Settings.permissions.users.sso.provider.error' },
-      });
-    },
-  });
+    {
+      onSuccess() {},
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'Settings.permissions.users.sso.provider.error' },
+        });
+      },
+    }
+  );
 
   const isLoading = isLoadingUser || isLoadingSSO;
 
-  const submitMutation = useMutation(async (body) => {
-    const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
-    const { data } = await put('/admin/users/me', dataToSend);
-  
-    return { ...data.data, currentTheme: body.currentTheme };
-  }, {
-    async onSuccess(data) {
-      await queryClient.invalidateQueries('user');
+  const submitMutation = useMutation(
+    async (body) => {
+      const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
+      const { data } = await put('/admin/users/me', dataToSend);
 
-      auth.setUserInfo(
-        pick(data, ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'])
-      );
-      const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
-      setUserDisplayName(userDisplayName);
-      changeLocale(data.preferedLanguage);
-      onChangeTheme(data.currentTheme);
-      trackUsage('didChangeMode', { newMode: data.currentTheme });
+      return { ...data.data, currentTheme: body.currentTheme };
+    },
+    {
+      async onSuccess(data) {
+        await queryClient.invalidateQueries('user');
 
-      toggleNotification({
-        type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
-      });
-    },
-    onSettled() {
-      unlockApp();
-    },
-    refetchActive: true,
-  });
+        auth.setUserInfo(
+          pick(data, ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'])
+        );
+        const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
+        setUserDisplayName(userDisplayName);
+        changeLocale(data.preferedLanguage);
+        onChangeTheme(data.currentTheme);
+        trackUsage('didChangeMode', { newMode: data.currentTheme });
+
+        toggleNotification({
+          type: 'success',
+          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        });
+      },
+      onSettled() {
+        unlockApp();
+      },
+      refetchActive: true,
+    }
+  );
 
   const { isLoading: isSubmittingForm } = submitMutation;
 
@@ -175,8 +185,7 @@ const ProfilePage = () => {
     );
   }
 
-  const currentUserRoles = (data?.roles ?? []).map(role => role.id);
-  const hasLockedRole = (dataSSO?.ssoLockedRoles ?? []).some((roleId) => currentUserRoles.includes(Number(roleId)));
+  const hasLockedRole = dataSSO?.isSSOLocked;
 
   return (
     <Main aria-busy={isSubmittingForm}>
@@ -207,21 +216,11 @@ const ProfilePage = () => {
               <Box paddingBottom={10}>
                 <ContentLayout>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    <UserInfo 
-                      errors={errors}
-                      onChange={handleChange}
-                      values={values}
-                    />
-                    {
-                      !hasLockedRole && (
-                        <Password
-                          errors={errors}
-                          onChange={handleChange}
-                          values={values}
-                        />
-                      )
-                    }
-                    <Preferences 
+                    <UserInfo errors={errors} onChange={handleChange} values={values} />
+                    {!hasLockedRole && (
+                      <Password errors={errors} onChange={handleChange} values={values} />
+                    )}
+                    <Preferences
                       allApplicationThemes={allApplicationThemes}
                       onChange={handleChange}
                       values={values}
