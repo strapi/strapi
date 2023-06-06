@@ -20,6 +20,7 @@ const formatComponent = (component) => {
     schema: {
       displayName: _.get(info, 'displayName'),
       description: _.get(info, 'description', ''),
+      icon: _.get(info, 'icon'),
       connection,
       collectionName,
       pluginOptions: component.pluginOptions,

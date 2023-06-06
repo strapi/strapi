@@ -404,6 +404,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   height: 2rem;
 }
 
+.c18 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c18[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -449,6 +454,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c56 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c56[aria-disabled='true'] {

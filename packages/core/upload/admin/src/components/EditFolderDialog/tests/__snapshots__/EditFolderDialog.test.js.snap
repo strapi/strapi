@@ -232,6 +232,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
+.c30 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -277,6 +282,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 
 .c32 {
   height: 2rem;
+}
+
+.c32 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c32[aria-disabled='true'] {

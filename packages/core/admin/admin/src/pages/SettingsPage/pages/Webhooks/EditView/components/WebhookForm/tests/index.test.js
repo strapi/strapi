@@ -2,26 +2,32 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { QueryClientProvider, QueryClient } from 'react-query';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+
 import en from '../../../../../../../../translations/en.json';
-import Theme from '../../../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
+jest.mock('../../../../../../../../hooks/useContentTypes');
+
 const makeApp = (component) => {
+  const queryClient = new QueryClient();
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };
 
   return (
-    <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <Router history={history}>{component}</Router>
-        </Theme>
-      </ThemeToggleProvider>
-    </LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
+        <ThemeProvider theme={lightTheme}>
+          <Router history={history}>
+            <NotificationsProvider toggleNotification={() => {}}>{component}</NotificationsProvider>
+          </Router>
+        </ThemeProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -36,7 +42,6 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
         data={{
           name: '',
@@ -59,7 +64,6 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
         data={{
           name: '',

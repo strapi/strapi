@@ -266,6 +266,11 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   background: #f0f0ff;
 }
 
+.c10 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c10[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -325,6 +330,11 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   background: #ffffff;
 }
 
+.c31 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c31[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -370,6 +380,11 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
 
 .c32 {
   height: 2rem;
+}
+
+.c32 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c32[aria-disabled='true'] {

@@ -340,6 +340,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
+.c46 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c46[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -387,6 +392,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c48 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c48[aria-disabled='true'] {
@@ -444,6 +454,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c49 {
   height: 2rem;
+}
+
+.c49 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c49[aria-disabled='true'] {

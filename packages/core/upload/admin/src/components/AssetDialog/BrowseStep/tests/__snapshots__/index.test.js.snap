@@ -477,6 +477,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   background: #ffffff;
 }
 
+.c8 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c8[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;

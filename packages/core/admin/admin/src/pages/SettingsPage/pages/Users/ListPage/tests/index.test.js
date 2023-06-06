@@ -658,6 +658,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         height: 2rem;
       }
 
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c10[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -703,6 +708,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         height: 2rem;
         border: 1px solid #dcdce4;
         background: #ffffff;
+      }
+
+      .c23 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c23[aria-disabled='true'] {

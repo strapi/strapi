@@ -195,14 +195,21 @@ const EditViewDataManagerProvider = ({
 
   const dispatchAddComponent = useCallback(
     (type) =>
-      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+      (
+        keys,
+        componentLayoutData,
+        allComponents,
+        shouldCheckErrors = false,
+        position = undefined
+      ) => {
         trackUsageRef.current('didAddComponentToDynamicZone');
 
         dispatch({
           type,
           keys: keys.split('.'),
+          position,
           componentLayoutData,
-          allComponents: components,
+          allComponents,
           shouldCheckErrors,
         });
       },
