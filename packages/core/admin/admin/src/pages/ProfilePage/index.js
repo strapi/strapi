@@ -76,8 +76,6 @@ const ProfilePage = () => {
   const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(
     ['providers', 'isSSOLocked'],
     async () => {
-      console.log(window.strapi.isEE);
-
       if (window.strapi.isEE) {
         const {
           data: { data },
