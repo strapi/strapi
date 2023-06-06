@@ -76,11 +76,19 @@ const ProfilePage = () => {
   const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(
     ['providers', 'isSSOLocked'],
     async () => {
-      const {
-        data: { data },
-      } = await get('/admin/providers/isSSOLocked');
+      console.log(window.strapi.isEE);
 
-      return data;
+      if (window.strapi.isEE) {
+        const {
+          data: { data },
+        } = await get('/admin/providers/isSSOLocked');
+
+        return data;
+      }
+
+      return {
+        isSSOLocked: false,
+      };
     },
     {
       onSuccess() {},
