@@ -46,8 +46,8 @@ const generate = async (config = {}) => {
   const generatorConfig = { strapi, pwd: registryPwd, logger };
 
   const returnWithMessage = () => {
-    const nbWarnings = chalk.yellow(maybePlural('warning', logger.warnings));
-    const nbErrors = chalk.red(maybePlural('error', logger.errors));
+    const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);
+    const nbErrors = chalk.red(`${logger.errors} error(s)`);
 
     const status = logger.errors > 0 ? chalk.red('errored') : chalk.green('completed successfully');
 
@@ -118,7 +118,5 @@ const generate = async (config = {}) => {
 
   return returnWithMessage();
 };
-
-const maybePlural = (word, n) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
 module.exports = { generate };
