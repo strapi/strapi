@@ -1,27 +1,27 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type BasicRelationsType =
+export type BasicRelationType =
   | 'oneToOne'
   | 'oneToMany'
   | 'manyToOne'
   | 'manyToMany'
   | 'morphOne'
   | 'morphMany';
-export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany';
-export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
+export type PolymorphicRelationType = 'morphToOne' | 'morphToMany';
+export type RelationType = BasicRelationType | PolymorphicRelationType;
 
 export type BasicRelationProperties<
   S extends Common.UID.Schema,
-  R extends BasicRelationsType,
+  R extends BasicRelationType,
   T extends Common.UID.Schema
 > = {
   relation: R;
   target: T;
-} & R extends `morph${string}`
+} & R extends Utils.String.Suffix<'morph', 'One' | 'Many'>
   ? {
       morphBy?: Utils.Object.KeysBy<
         Common.Schemas[T]['attributes'],
-        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationsType>
+        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationType>
       >;
     }
   : {
@@ -29,19 +29,19 @@ export type BasicRelationProperties<
       mappedBy?: RelationsKeysFromTo<T, S>;
     };
 
-export interface PolymorphicRelationProperties<R extends PolymorphicRelationsType> {
+export interface PolymorphicRelationProperties<R extends PolymorphicRelationType> {
   relation: R;
 }
 
 export type Relation<
   S extends Common.UID.Schema = Common.UID.Schema,
-  R extends RelationsType = RelationsType,
-  T extends R extends PolymorphicRelationsType ? never : Common.UID.Schema = never
+  R extends RelationType = RelationType,
+  T extends R extends PolymorphicRelationType ? never : Common.UID.Schema = never
 > = Attribute.OfType<'relation'> &
   // Properties
-  (R extends BasicRelationsType
+  (R extends BasicRelationType
     ? BasicRelationProperties<S, R, T>
-    : R extends PolymorphicRelationsType
+    : R extends PolymorphicRelationType
     ? PolymorphicRelationProperties<R>
     : {}) &
   // Options
@@ -59,12 +59,12 @@ export type PickRelationsFromTo<
 > = Attribute.GetByType<TTarget, 'relation', { target: TSource }>;
 
 export type RelationPluralityModifier<
-  TRelation extends RelationsType,
+  TRelation extends RelationType,
   TValue extends Record<string, unknown>
 > = TRelation extends `${string}Many` ? TValue[] : TValue;
 
 export type RelationValue<
-  TRelation extends RelationsType,
+  TRelation extends RelationType,
   TTarget extends Common.UID.Schema
 > = RelationPluralityModifier<TRelation, Attribute.GetValues<TTarget>>;
 
