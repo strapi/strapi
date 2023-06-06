@@ -3,6 +3,7 @@ export * as Guard from './guard';
 export * as Object from './object';
 export * as String from './string';
 export * as Tuple from './tuple';
+export * as Expression from './expression';
 
 /**
  * Get the type of a specific key `TKey` in `TValue`

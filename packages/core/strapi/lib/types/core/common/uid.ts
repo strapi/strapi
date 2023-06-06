@@ -40,3 +40,13 @@ export type Schema = Registry.Keys<
   Common.Schemas,
   UID.ContentType | UID.Component<ComponentCategory>
 >;
+
+export type IsCollectionType<TContentTypeUID extends ContentType> = Utils.Expression.Extends<
+  Shared.ContentTypes[TContentTypeUID],
+  SchemaNamespace.CollectionType
+>;
+
+export type IsSingleType<TContentTypeUID extends ContentType> = Utils.Expression.Extends<
+  Shared.ContentTypes[TContentTypeUID],
+  SchemaNamespace.SingleType
+>;

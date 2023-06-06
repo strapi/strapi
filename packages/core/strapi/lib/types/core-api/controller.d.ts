@@ -1,4 +1,4 @@
-import type { Common, Schema, Shared } from '@strapi/strapi';
+import type { Common, CoreApi, Utils } from '@strapi/strapi';
 import type { ExtendableContext } from 'koa';
 
 /**
@@ -41,17 +41,10 @@ export type SingleType = Base & {
   delete?: Common.ControllerHandler;
 };
 
-export type ContentType<T extends Common.UID.ContentType> =
-  // Checks that the content type exists in the shared registry
-  Shared.ContentTypes[T] extends infer S extends Schema.Schema
-    ? S extends Schema.CollectionType
-      ? CollectionType
-      : S extends Schema.SingleType
-      ? SingleType
-      : // This should never happen. It would mean a schema (other than collection type
-        // or a single type has been registered to the shared content-type registry)
-        never
-    : // If it doesn't exist, return a base controller
-      Base;
+export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.IfElse<
+  Common.UID.IsCollectionType<T>,
+  CollectionType,
+  SingleType
+>;
 
 export type Extendable<T extends Common.UID.ContentType> = ContentType<T> & Generic;
