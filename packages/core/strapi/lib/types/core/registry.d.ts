@@ -3,7 +3,7 @@ import type * as UID from './uid';
 /**
  * Extract valid keys from a given registry.
  *
- * It looks for {@link UID.Any} by default but the search can be narrowed to any UID subset using the `U` generic.
+ * It looks for {@link UID.Any} by default but the search can be narrowed to any UID subset using the `TUidFormat` generic.
  *
  * @example
  * interface Registry {
@@ -20,14 +20,17 @@ import type * as UID from './uid';
  * type T = Keys<Registry, UID.Service>
  * // ^ 'api::foo.bar'
  */
-export type Keys<R, U extends UID.Any = UID.Any> = Extract<keyof R, U>;
+export type Keys<TRegistry, TUidFormat extends UID.Any = UID.Any> = Extract<
+  keyof TRegistry,
+  TUidFormat
+>;
 
 /**
- * Performs a `Q` filtering operation on the given `T` registry.
+ * Performs a `TQuery` filtering operation on the given `TRegistry` registry.
  *
- * `Q` needs to be a partial representation of a {@link UID.Parsed}
+ * `TQuery` needs to be a partial representation of a {@link UID.Parsed}
  *
- * Note: For additional filtering, the registry keys' type can be passed as the third generic.
+ * Note: For additional filtering, the registry keys' type can be passed as the third parameter.
  *
  * @example
  * interface Registry {
@@ -54,6 +57,12 @@ export type Keys<R, U extends UID.Any = UID.Any> = Extract<keyof R, U>;
  * type T = keyof WhereKeys<Registry, { namespace: Namespace.API; name: Utils.Includes<'b'> }>;
  * // ^ "api::foo.bar" | "api::foo.baz"
  */
-export type WhereKeys<T, Q extends Partial<UID.Parsed>, U extends UID.Any = UID.Any> = {
-  [uid in Keys<T, U> as UID.Parse<uid> extends Q ? uid : never]: T[uid];
+export type WhereKeys<
+  TRegistry,
+  TQuery extends Partial<UID.Parsed>,
+  TUidFormat extends UID.Any = UID.Any
+> = {
+  [uid in Keys<TRegistry, TUidFormat> as UID.Parse<uid> extends TQuery
+    ? uid
+    : never]: TRegistry[uid];
 };

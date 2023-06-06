@@ -43,7 +43,7 @@ export type Any = API | Plugin | Admin | Strapi | Global;
  * type S = GetSeparator<Admin | API>
  * // ^ '.' | '::'
  */
-export type GetSeparator<T extends Any = Any> = T extends Scoped
+export type GetSeparator<TNamespace extends Any = Any> = TNamespace extends Scoped
   ? // 'api::foo' | 'plugin::bar' => '.'
     DotSeparator
   : // 'admin' | 'strapi' | 'global' => '::'
@@ -67,23 +67,28 @@ export type GetSeparator<T extends Any = Any> = T extends Scoped
  * type T = WithSeparator<Admin> | WithSeparator<API>
  * // ^ 'admin::' | 'api::{string}.'
  */
-export type WithSeparator<N extends Any> = Utils.String.Suffix<N, GetSeparator<N>>;
+export type WithSeparator<TNamespace extends Any> = Utils.String.Suffix<
+  TNamespace,
+  GetSeparator<TNamespace>
+>;
 
 /**
- * Represents namespaces composed of an origin and a name, separated by colons
+ * Represents namespaces composed of an origin and a scope, separated by colons
  */
-export type Scoped<O extends string = string, S extends string = string> = Any &
-  `${O}${ColonsSeparator}${S}`;
+export type Scoped<TOrigin extends string = string, TScope extends string = string> = Any &
+  `${TOrigin}${ColonsSeparator}${TScope}`;
 
 /**
  * Extract the scope from the given scoped namespace
  */
-export type ExtractScope<T> = T extends `${string}${ColonsSeparator}${infer S}` ? S : never;
+export type ExtractScope<TNamespace> =
+  TNamespace extends `${string}${ColonsSeparator}${infer TScope}` ? TScope : never;
 
 /**
  * Extract the origin from the given scoped namespace
  */
-export type ExtractOrigin<T> = T extends `${infer S}${ColonsSeparator}${string}` ? S : never;
+export type ExtractOrigin<TNamespace> =
+  TNamespace extends `${infer TOrigin}${ColonsSeparator}${string}` ? TOrigin : never;
 
 /**
  * Separators used to join the different parts of a namespace (e.g. building a uid)

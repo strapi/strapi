@@ -26,7 +26,9 @@ export type SingleType = Extract<
 >;
 
 export type Component = Registry.Keys<Shared.Components, UID.Component>;
-export type ComponentCategory = Component extends UID.Component<infer A> ? A : never;
+export type ComponentCategory = Component extends UID.Component<infer TCategory>
+  ? TCategory
+  : never;
 
 export type Schema = Registry.Keys<
   Common.Schemas,

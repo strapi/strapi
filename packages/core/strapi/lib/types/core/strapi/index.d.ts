@@ -1,4 +1,4 @@
-import { Database } from '@strapi/database';
+import type { Database } from '@strapi/database';
 
 import type { Shared } from '@strapi/strapi';
 import type { GenericController } from '../../../core-api/controller';
@@ -73,7 +73,7 @@ export interface Strapi {
   /**
    * Find a service using its unique identifier
    */
-  service<T extends GenericService = GenericService>(uid: string): T | undefined;
+  service<TService extends GenericService = GenericService>(uid: string): TService | undefined;
 
   /**
    * Getter for the Strapi controllers container

@@ -5,7 +5,7 @@ export * as String from './string';
 export * as Tuple from './tuple';
 
 /**
- * Get the type of a specific key `U` in `T`
+ * Get the type of a specific key `TKey` in `TValue`
  *
  * @example
  *
@@ -15,4 +15,4 @@ export * as Tuple from './tuple';
  * type X = Get<{ foo: 'bar', 'bar': 'foo' }, 'bar'>
  * // 'foo'
  */
-export type Get<T, U extends keyof T> = T[U];
+export type Get<TValue, TKey extends keyof TValue> = TValue[TKey];

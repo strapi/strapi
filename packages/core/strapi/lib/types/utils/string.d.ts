@@ -6,7 +6,7 @@ export type Literal = string | number | bigint | boolean;
 /**
  * Used to check if a string includes a given literal
  */
-export type Includes<S extends Literal> = `${string}${S}${string}`;
+export type Includes<T extends Literal> = `${string}${T}${string}`;
 
 /**
  * Used to make sure the given string is not empty
@@ -14,23 +14,26 @@ export type Includes<S extends Literal> = `${string}${S}${string}`;
 export type NonEmpty<T extends string> = T extends '' ? never : T;
 
 /**
- * Split the given string into a tuple using the given `S` literal
+ * Split the given string into a tuple using the given `TSeparator` literal
  */
-export type Split<T extends string, S extends Literal> = T extends `${infer A}${S}${infer B}`
-  ? [A, ...Split<B, S>]
-  : T extends ''
+export type Split<
+  TValue extends string,
+  TSeparator extends Literal
+> = TValue extends `${infer TLeft}${TSeparator}${infer TRight}`
+  ? [TLeft, ...Split<TRight, TSeparator>]
+  : TValue extends ''
   ? []
-  : [T];
+  : [TValue];
 
 /**
- * Add a literal suffix (`S`) at the end of the given string
+ * Add a literal suffix (`TSuffix`) at the end of the given string
  */
-export type Suffix<T extends string, S extends Literal> = `${T}${S}`;
+export type Suffix<TValue extends string, TSuffix extends Literal> = `${TValue}${TSuffix}`;
 
 /**
- * Add a literal prefix (`S`) at the beginning of the given string
+ * Add a literal prefix (`TPrefix`) at the beginning of the given string
  */
-export type Prefix<T extends string, S extends Literal> = `${S}${T}`;
+export type Prefix<TValue extends string, TPrefix extends Literal> = `${TPrefix}${TValue}`;
 
 /**
  * Creates a record where every key is a string and every value is `T`

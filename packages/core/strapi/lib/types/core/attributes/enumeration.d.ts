@@ -1,19 +1,18 @@
 import type { Attribute, Utils } from '@strapi/strapi';
 
-export interface EnumerationProperties<T extends string[] = []> {
-  enum: T;
+export interface EnumerationProperties<TValues extends string[] = []> {
+  enum: TValues;
 }
 
-export type Enumeration<T extends string[] = []> = Attribute.OfType<'enumeration'> &
-  EnumerationProperties<T> &
+export type Enumeration<TValues extends string[] = []> = Attribute.OfType<'enumeration'> &
+  EnumerationProperties<TValues> &
   // Options
   Attribute.ConfigurableOption &
-  Attribute.DefaultOption<T> &
+  Attribute.DefaultOption<TValues> &
   Attribute.PrivateOption &
   Attribute.RequiredOption;
 
-export type EnumerationValue<T extends string[]> = Utils.Array.Values<T>;
+export type EnumerationValue<TValues extends string[]> = Utils.Array.Values<TValues>;
 
-export type GetEnumerationValue<T extends Attribute.Attribute> = T extends Enumeration<infer U>
-  ? EnumerationValue<U>
-  : never;
+export type GetEnumerationValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Enumeration<infer TValues> ? EnumerationValue<TValues> : never;
