@@ -56,7 +56,14 @@ export type ContentType = StringSuffix<
 /**
  * Template for components' unique identifier
  *
- * Warning: Can cause overlap with other UID formats.
+ * @example
+ * 'default.foo' extends Component => true (T = 'default', N = 'foo')
+ *
+ * @example
+ * // /!\ Warning: Can cause overlap with other UID formats:
+ * // 'api::foo.bar' both extends ContentType and Component
+ * 'api::foo.bar' extends ContentType => true (N = 'api', S='::', T='foo')
+ * 'api::foo.bar' extends Component   => true (T = 'api::foo', N = 'bar')
  */
 export type Component<T extends string = string, N extends string = string> = `${T}.${N}`;
 
