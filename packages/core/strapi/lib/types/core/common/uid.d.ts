@@ -16,12 +16,18 @@ export type Policy = Registry.Keys<Shared.Policies, UID.Policy>;
 export type Middleware = Registry.Keys<Shared.Middlewares, UID.Middleware>;
 
 export type ContentType = Registry.Keys<Shared.ContentTypes, UID.ContentType>;
-export type CollectionType = Extract<
-  Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.CollectionType>,
+
+export type CollectionType = Utils.Guard.Never<
+  // extract uids only for collection types
+  Extract<Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.CollectionType>, ContentType>,
+  // if no collection type is found (never), fallback to a generic content type uid
   ContentType
 >;
-export type SingleType = Extract<
-  Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.SingleType>,
+
+export type SingleType = Utils.Guard.Never<
+  // extract uids only for single types
+  Extract<Utils.Object.KeysBy<Shared.ContentTypes, SchemaNamespace.SingleType>, ContentType>,
+  // if no single type is found (never), fallback to a generic content type uid
   ContentType
 >;
 
