@@ -139,16 +139,6 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   font-weight: bold;
 }
 
-.c10[data-state='checked'] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c10[data-highlighted] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
 <div
   class=""
 >

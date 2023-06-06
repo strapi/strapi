@@ -175,16 +175,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 .c21[data-state='checked'] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c21[data-highlighted] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c22[data-state='checked'] .c1 {
   font-weight: bold;
   color: #4945ff;
 }
@@ -254,15 +244,17 @@ exports[`DateTimePicker snapshots the component 1`] = `
 }
 
 .c10 {
-  -webkit-flex: 1 0 70%;
-  -ms-flex: 1 0 70%;
-  flex: 1 0 70%;
+  -webkit-flex: 1 1 70%;
+  -ms-flex: 1 1 70%;
+  flex: 1 1 70%;
+  min-width: 120px;
 }
 
 .c14 {
-  -webkit-flex: 1 0 30%;
-  -ms-flex: 1 0 30%;
-  flex: 1 0 30%;
+  -webkit-flex: 1 1 30%;
+  -ms-flex: 1 1 30%;
+  flex: 1 1 30%;
+  min-width: 120px;
 }
 
 <fieldset

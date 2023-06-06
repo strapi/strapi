@@ -85,66 +85,54 @@ exports[`ContextInfo renders 1`] = `
         class="c2"
       >
         <div
-          class=""
+          class="c3"
         >
-          <div
-            class="c3"
+          <span
+            class="c4"
           >
-            <span
-              class="c4"
-            >
-              Label 1
-            </span>
-            <span
-              class="c5"
-            >
-              value1
-            </span>
-          </div>
+            Label 1
+          </span>
+          <span
+            class="c5"
+          >
+            value1
+          </span>
         </div>
       </div>
       <div
         class="c2"
       >
         <div
-          class=""
+          class="c3"
         >
-          <div
-            class="c3"
+          <span
+            class="c4"
           >
-            <span
-              class="c4"
-            >
-              Label 2
-            </span>
-            <span
-              class="c5"
-            >
-              value2
-            </span>
-          </div>
+            Label 2
+          </span>
+          <span
+            class="c5"
+          >
+            value2
+          </span>
         </div>
       </div>
       <div
         class="c2"
       >
         <div
-          class=""
+          class="c3"
         >
-          <div
-            class="c3"
+          <span
+            class="c4"
           >
-            <span
-              class="c4"
-            >
-              Label 3
-            </span>
-            <span
-              class="c5"
-            >
-              value3
-            </span>
-          </div>
+            Label 3
+          </span>
+          <span
+            class="c5"
+          >
+            value3
+          </span>
         </div>
       </div>
     </div>

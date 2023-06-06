@@ -344,6 +344,11 @@ describe('<GuidedTourModal />', () => {
         height: 2rem;
       }
 
+      .c27 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c27[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -389,6 +394,11 @@ describe('<GuidedTourModal />', () => {
         height: 2rem;
         border: 1px solid #dcdce4;
         background: #ffffff;
+      }
+
+      .c29 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c29[aria-disabled='true'] {

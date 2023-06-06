@@ -201,6 +201,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         height: 2rem;
       }
 
+      .c12 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c12[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
