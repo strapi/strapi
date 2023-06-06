@@ -128,7 +128,7 @@ const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject
       pwd: appDir,
       rootDir: undefined,
       logger: { silent: true, debug: false },
-      artefacts: { contentTypes: true, components: true },
+      artifacts: { contentTypes: true, components: true },
     });
   }
 
