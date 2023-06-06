@@ -22,7 +22,7 @@ const createProviderHooksMap = () => ({
   didDelete: createAsyncParallelHook(),
 });
 
-interface Options {
+export interface Options {
   throwOnDuplicates?: boolean;
 }
 
@@ -113,4 +113,4 @@ const providerFactory = (options: Options = {}) => {
   };
 };
 
-export = providerFactory;
+export default providerFactory;

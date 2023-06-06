@@ -1,16 +1,13 @@
-'use strict';
-
 /**
  * Export shared utilities
  */
-const { buildQuery, hasDeepFilters } = require('./build-query');
-const parseMultipartData = require('./parse-multipart');
-const parseType = require('./parse-type');
-const policy = require('./policy');
-const templateConfiguration = require('./template-configuration');
-const { yup, handleYupError, validateYupSchema, validateYupSchemaSync } = require('./validators');
-const errors = require('./errors');
-const {
+import parseMultipartData from './parse-multipart';
+import parseType from './parse-type';
+import * as policy from './policy';
+import templateConfiguration from './template-configuration';
+import { yup, handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
+import * as errors from './errors';
+import {
   nameToSlug,
   nameToCollectionName,
   getCommonBeginning,
@@ -23,33 +20,31 @@ const {
   startsWithANumber,
   joinBy,
   toKebabCase,
-} = require('./string-formatting');
-const { removeUndefined, keysDeep } = require('./object-formatting');
-const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
-const { generateTimestampCode } = require('./code-generator');
-const contentTypes = require('./content-types');
-const env = require('./env-helper');
-const relations = require('./relations');
-const setCreatorFields = require('./set-creator-fields');
-const hooks = require('./hooks');
-const providerFactory = require('./provider-factory');
-const pagination = require('./pagination');
-const sanitize = require('./sanitize');
-const traverseEntity = require('./traverse-entity');
-const { pipeAsync, mapAsync, reduceAsync, forEachAsync } = require('./async');
-const convertQueryParams = require('./convert-query-params');
-const importDefault = require('./import-default');
-const template = require('./template');
-const file = require('./file');
-const traverse = require('./traverse');
+} from './string-formatting';
+import { removeUndefined, keysDeep } from './object-formatting';
+import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from './config';
+import { generateTimestampCode } from './code-generator';
+import * as contentTypes from './content-types';
+import env from './env-helper';
+import * as relations from './relations';
+import setCreatorFields from './set-creator-fields';
+import * as hooks from './hooks';
+import providerFactory from './provider-factory';
+import * as pagination from './pagination';
+import sanitize from './sanitize';
+import traverseEntity from './traverse-entity';
+import { pipeAsync, mapAsync, reduceAsync, forEachAsync } from './async';
+import convertQueryParams from './convert-query-params';
+import importDefault from './import-default';
+import * as template from './template';
+import * as file from './file';
+import * as traverse from './traverse';
 
-module.exports = {
+export {
   yup,
   handleYupError,
   policy,
   templateConfiguration,
-  buildQuery,
-  hasDeepFilters,
   parseMultipartData,
   sanitize,
   traverseEntity,
@@ -92,3 +87,53 @@ module.exports = {
   file,
   traverse,
 };
+
+const utils = {
+  yup,
+  handleYupError,
+  policy,
+  templateConfiguration,
+  parseMultipartData,
+  sanitize,
+  traverseEntity,
+  parseType,
+  nameToSlug,
+  toRegressedEnumValue,
+  startsWithANumber,
+  joinBy,
+  nameToCollectionName,
+  getCommonBeginning,
+  getConfigUrls,
+  escapeQuery,
+  removeUndefined,
+  keysDeep,
+  getAbsoluteAdminUrl,
+  getAbsoluteServerUrl,
+  generateTimestampCode,
+  stringIncludes,
+  stringEquals,
+  template,
+  isKebabCase,
+  isCamelCase,
+  toKebabCase,
+  contentTypes,
+  env,
+  relations,
+  setCreatorFields,
+  hooks,
+  providerFactory,
+  pagination,
+  pipeAsync,
+  mapAsync,
+  reduceAsync,
+  forEachAsync,
+  errors,
+  validateYupSchema,
+  validateYupSchemaSync,
+  convertQueryParams,
+  importDefault,
+  file,
+  traverse,
+};
+
+export default utils;

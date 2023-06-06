@@ -11,7 +11,7 @@ import traverseEntity, { Data } from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 import { Model } from '../types';
 
-interface Options {
+export interface Options {
   auth?: unknown;
 }
 
@@ -45,7 +45,7 @@ const createContentAPISanitizers = () => {
       .get('content-api.input')
       .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
-    return pipeAsync(...transforms)(data);
+    return pipeAsync(...transforms)(data as Data);
   };
 
   const sanitizeOutput: SanitizeFunc = async (data, schema: Model, { auth } = {}) => {
@@ -68,7 +68,7 @@ const createContentAPISanitizers = () => {
       .get('content-api.output')
       .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
-    return pipeAsync(...transforms)(data);
+    return pipeAsync(...transforms)(data as Data);
   };
 
   const sanitizeQuery = async (

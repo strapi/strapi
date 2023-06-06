@@ -92,7 +92,7 @@ const findPolicy = (name: string, policyContext: PolicyContext) => {
   throw new Error(`Could not find policy "${name}"`);
 };
 
-const getPolicy = (policyConfig: PolicyConfig, policyContext: PolicyContext) => {
+const getPolicy = (policyConfig: PolicyConfig, policyContext?: PolicyContext) => {
   const { pluginName, apiName } = policyContext ?? {};
 
   if (typeof policyConfig === 'function') {

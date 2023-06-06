@@ -73,7 +73,7 @@ type TypeMap = {
   datetime: Date;
 };
 
-interface ParseTypeOptions {
+export interface ParseTypeOptions {
   type: keyof TypeMap;
   value: any;
   forceCast?: boolean;

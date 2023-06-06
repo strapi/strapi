@@ -1,6 +1,4 @@
-'use strict';
-
-const { pipeAsync, mapAsync, reduceAsync } = require('../async');
+import { pipeAsync, mapAsync, reduceAsync } from '../async';
 
 describe('Async utils', () => {
   describe('pipeAsync', () => {

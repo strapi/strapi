@@ -1,6 +1,4 @@
-'use strict';
-
-const { yup } = require('../validators');
+import { yup } from '../validators';
 
 describe('validators', () => {
   describe('strapiID', () => {

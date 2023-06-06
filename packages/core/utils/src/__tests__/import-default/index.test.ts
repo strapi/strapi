@@ -1,7 +1,5 @@
-'use strict';
-
-const path = require('path');
-const importDefault = require('../../import-default');
+import path from 'node:path';
+import importDefault from '../../import-default';
 
 const getPath = (file) => path.resolve(__dirname, file);
 

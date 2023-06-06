@@ -1,6 +1,4 @@
-'use strict';
-
-const {
+import {
   isPrivateAttribute,
   isTypedAttribute,
   getPrivateAttributes,
@@ -8,7 +6,7 @@ const {
   getNonWritableAttributes,
   getScalarAttributes,
   constants,
-} = require('../content-types');
+} from '../content-types';
 
 const createModelWithPrivates = (privateAttributes = []) => ({
   uid: 'myModel',

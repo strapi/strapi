@@ -1,6 +1,4 @@
-'use strict';
-
-const {
+import {
   escapeQuery,
   stringIncludes,
   stringEquals,
@@ -8,7 +6,7 @@ const {
   getCommonPath,
   toRegressedEnumValue,
   joinBy,
-} = require('../string-formatting');
+} from '../string-formatting';
 
 describe('string-formatting', () => {
   describe('Escape Query', () => {
@@ -140,7 +138,8 @@ describe('string-formatting', () => {
       [['/', 'a//', '//b//', '//c'], 'a/b/c'],
       [['/', '///a///', '///b///', '///c///'], '///a/b/c///'],
     ])('%s => %s', (args, expectedResult) => {
-      expect(joinBy(...args)).toBe(expectedResult);
+      const [joint, ...rest] = args;
+      expect(joinBy(joint, ...rest)).toBe(expectedResult);
     });
   });
 });

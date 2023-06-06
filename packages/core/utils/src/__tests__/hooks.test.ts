@@ -1,6 +1,4 @@
-'use strict';
-
-const hooks = require('../hooks');
+import * as hooks from '../hooks';
 
 describe('Hooks Module', () => {
   describe('Internals', () => {
@@ -16,7 +14,7 @@ describe('Hooks Module', () => {
 
       test('Call is not implemented by default', async () => {
         const hook = hooks.internals.createHook();
-        const doCall = () => hook.call('foo');
+        const doCall = () => hook.call();
 
         expect(doCall).toThrowError('Method not implemented');
       });

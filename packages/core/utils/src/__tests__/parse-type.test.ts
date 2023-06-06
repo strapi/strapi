@@ -1,7 +1,5 @@
-'use strict';
-
-const format = require('date-fns/format');
-const parseType = require('../parse-type');
+import format from 'date-fns/format';
+import parseType from '../parse-type';
 
 describe('parseType', () => {
   describe('boolean', () => {

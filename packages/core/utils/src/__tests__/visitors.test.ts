@@ -1,8 +1,8 @@
-'use strict';
+import * as visitors from '../sanitize/visitors';
+import * as contentTypeUtils from '../content-types';
+import type { Model } from '../types';
 
-const visitors = require('../sanitize/visitors');
-
-const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = require('../content-types').constants;
+const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
 
 describe('Sanitize visitors util', () => {
   describe('removeRestrictedRelations', () => {
@@ -25,7 +25,20 @@ describe('Sanitize visitors util', () => {
             data,
             key,
             attribute,
-            schema: { options: { populateCreatorFields: true } },
+            schema: {
+              kind: 'collectionType',
+              info: {
+                singularName: 'test',
+                pluralName: 'tests',
+              },
+              options: { populateCreatorFields: true },
+              attributes: {},
+            },
+            value: {},
+            path: {
+              attribute: null,
+              raw: null,
+            },
           },
           { remove, set }
         );
@@ -45,7 +58,20 @@ describe('Sanitize visitors util', () => {
             data,
             key,
             attribute,
-            schema: { options: { populateCreatorFields: false } },
+            schema: {
+              kind: 'collectionType',
+              info: {
+                singularName: 'test',
+                pluralName: 'tests',
+              },
+              options: { populateCreatorFields: false },
+              attributes: {},
+            },
+            value: {},
+            path: {
+              attribute: null,
+              raw: null,
+            },
           },
           { remove, set }
         );

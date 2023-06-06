@@ -26,7 +26,7 @@ export interface Path {
   attribute: string | null;
 }
 
-interface TraverseOptions {
+export interface TraverseOptions {
   path?: Path;
   schema: Model;
 }

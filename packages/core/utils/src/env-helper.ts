@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-function env<T>(key: string, defaultValue?: T): string | T | undefined {
+function envFn<T>(key: string, defaultValue?: T): string | T | undefined {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
 
@@ -9,24 +9,24 @@ function getKey(key: string) {
 }
 
 const utils = {
-  int(key: string, defaultValue?: number): number {
-    if (!_.has(process.env, key) && defaultValue) {
+  int(key: string, defaultValue?: number): number | undefined {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
     return parseInt(getKey(key), 10);
   },
 
-  float(key: string, defaultValue?: number): number {
-    if (!_.has(process.env, key) && defaultValue) {
+  float(key: string, defaultValue?: number): number | undefined {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
     return parseFloat(getKey(key));
   },
 
-  bool(key: string, defaultValue?: boolean): boolean {
-    if (!_.has(process.env, key) && defaultValue) {
+  bool(key: string, defaultValue?: boolean): boolean | undefined {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
@@ -34,7 +34,7 @@ const utils = {
   },
 
   json(key: string, defaultValue?: object) {
-    if (!_.has(process.env, key) && defaultValue) {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
@@ -49,8 +49,8 @@ const utils = {
     }
   },
 
-  array(key: string, defaultValue?: string[]): string[] {
-    if (!_.has(process.env, key) && defaultValue) {
+  array(key: string, defaultValue?: string[]): string[] | undefined {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
@@ -65,8 +65,8 @@ const utils = {
     });
   },
 
-  date(key: string, defaultValue?: Date): Date {
-    if (!_.has(process.env, key) && defaultValue) {
+  date(key: string, defaultValue?: Date): Date | undefined {
+    if (!_.has(process.env, key)) {
       return defaultValue;
     }
 
@@ -94,6 +94,6 @@ const utils = {
   },
 };
 
-Object.assign(env, utils);
+const env = Object.assign(envFn, utils);
 
-export = env;
+export default env;

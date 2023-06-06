@@ -26,7 +26,7 @@ const getCommonPath = (...paths: string[]) => {
   );
 };
 
-const escapeQuery = (query: string, charsToEscape: string[], escapeChar = '\\') => {
+const escapeQuery = (query: string, charsToEscape: string, escapeChar = '\\') => {
   return query
     .split('')
     .reduce(

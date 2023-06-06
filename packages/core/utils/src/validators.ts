@@ -70,10 +70,6 @@ class StrapiIDSchema extends MixedSchemaType {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-yup.strapiID = () => new StrapiIDSchema();
-
 const handleYupError = (error: yup.ValidationError, errorMessage: string) => {
   throw new YupValidationError(error, errorMessage);
 };
@@ -140,4 +136,14 @@ yup.setLocale({
   },
 });
 
-export { yup, handleYupError, validateYupSchema, validateYupSchemaSync };
+const customYup = Object.assign(yup, {
+  strapiID: (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema(),
+});
+
+export {
+  customYup as yup,
+  StrapiIDSchema,
+  handleYupError,
+  validateYupSchema,
+  validateYupSchemaSync,
+};

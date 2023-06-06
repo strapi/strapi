@@ -34,16 +34,16 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 type SortOrder = 'asc' | 'desc';
 
-interface SortMap {
+export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
 type SortQuery = string | string[] | object;
-
 type FieldsQuery = string | string[];
-interface FiltersQuery {}
 
-type PopulateParams = {
+export interface FiltersQuery {}
+
+export interface PopulateParams {
   sort?: SortQuery;
   fields?: FieldsQuery;
   filters?: FiltersQuery;
@@ -51,11 +51,11 @@ type PopulateParams = {
   on: {
     [key: string]: PopulateParams;
   };
-};
+}
 
-type PopulateQuery = string | string[] | PopulateParams;
+type PopulateQuery = boolean | string | string[] | PopulateParams;
 
-interface Query {
+export interface Query {
   sort?: SortQuery;
   fields?: FieldsQuery;
   filters?: FiltersQuery;
@@ -67,15 +67,18 @@ interface Query {
   start?: number | string;
   page?: number | string;
   pageSize?: number | string;
+  publicationState?: 'live' | 'preview';
 }
 
-interface ConvertedQuery {
+export interface ConvertedQuery {
   orderBy?: SortQuery;
   select?: FieldsQuery;
   where?: FiltersQuery;
+  // NOTE: those are internal DB filters do not modify
+  filters?: any;
   populate?: PopulateQuery;
-  count: boolean;
-  ordering: unknown;
+  count?: boolean;
+  ordering?: unknown;
   _q?: string;
   limit?: number;
   offset?: number;
@@ -248,7 +251,11 @@ class InvalidPopulateError extends Error {
 }
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
-const convertPopulateQueryParams = (populate: PopulateQuery, schema: Model, depth = 0) => {
+const convertPopulateQueryParams = (
+  populate: PopulateQuery,
+  schema: Model,
+  depth = 0
+): PopulateQuery => {
   if (depth === 0 && populate === '*') {
     return true;
   }
@@ -539,8 +546,12 @@ const convertAndSanitizeFilters = (filters: FiltersQuery, schema: Model) => {
   return filters;
 };
 
-const convertPublicationStateParams = (type, params = {}, query = {}) => {
-  if (!type) {
+const convertPublicationStateParams = (
+  schema: Model,
+  params: { publicationState?: 'live' | 'preview' } = {},
+  query: ConvertedQuery = {}
+) => {
+  if (!schema) {
     return;
   }
 
@@ -554,7 +565,7 @@ const convertPublicationStateParams = (type, params = {}, query = {}) => {
     }
 
     // NOTE: this is the query layer filters not the entity service filters
-    query.filters = ({ meta }) => {
+    query.filters = ({ meta }: { meta: Model }) => {
       if (publicationState === 'live' && has(PUBLISHED_AT_ATTRIBUTE, meta.attributes)) {
         return { [PUBLISHED_AT_ATTRIBUTE]: { $notNull: true } };
       }
@@ -613,7 +624,7 @@ const transformParamsToQuery = (uid: string, params: Query) => {
   return query;
 };
 
-export = {
+export default {
   convertSortQueryParams,
   convertStartQueryParams,
   convertLimitQueryParams,

@@ -3,7 +3,7 @@ import * as contentTypes from './content-types';
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
 
-interface Options {
+export interface Options {
   user: User;
   isEdition?: boolean;
 }
@@ -12,7 +12,7 @@ interface User {
   id: string | number;
 }
 
-export = ({ user, isEdition = false }: Options) =>
+export default ({ user, isEdition = false }: Options) =>
   (data: object) => {
     if (isEdition) {
       return assoc(UPDATED_BY_ATTRIBUTE, user.id, data);

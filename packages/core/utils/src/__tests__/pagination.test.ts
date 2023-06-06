@@ -1,6 +1,4 @@
-'use strict';
-
-const { withDefaultPagination } = require('../pagination');
+import { withDefaultPagination } from '../pagination';
 
 const defaultLimit = 20;
 const defaults = {

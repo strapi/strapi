@@ -53,7 +53,10 @@ const withNoLimit = (pagination: Pagination, maxLimit = -1) => ({
   limit: pagination.limit === -1 ? maxLimit : pagination.limit,
 });
 
-const withDefaultPagination = (args: PaginationArgs, { defaults = {}, maxLimit = -1 } = {}) => {
+const withDefaultPagination = (
+  args: Partial<PaginationArgs>,
+  { defaults = {}, maxLimit = -1 } = {}
+) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
 
   const usePagePagination = !isNil(args.page) || !isNil(args.pageSize);
@@ -87,7 +90,7 @@ const withDefaultPagination = (args: PaginationArgs, { defaults = {}, maxLimit =
   if (usePagePagination) {
     const { page, pageSize } = merge(defaultValues.page, {
       ...args,
-      pageSize: Math.max(1, args.pageSize),
+      pageSize: Math.max(1, args.pageSize ?? 0),
     });
 
     Object.assign(pagination, {

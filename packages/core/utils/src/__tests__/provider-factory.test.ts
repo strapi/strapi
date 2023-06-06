@@ -1,6 +1,4 @@
-'use strict';
-
-const providerFactory = require('../provider-factory');
+import providerFactory from '../provider-factory';
 
 const providerMethods = [
   'register',
@@ -143,7 +141,7 @@ describe('Provider Factory', () => {
 
         expect(provider.get(key)).toBe(item);
 
-        await provider.delete(key, item);
+        await provider.delete(key);
 
         expect(provider.get(key)).toBeUndefined();
       });

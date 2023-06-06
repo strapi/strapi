@@ -1,56 +1,57 @@
 import pMap from 'p-map';
 import { curry, curryN } from 'lodash/fp';
-import type { CurriedFunction3 } from 'lodash';
 
-interface MapOptions {
-  concurrency?: number;
-}
+type AnyFunc = (...args: any) => any;
 
-type MapFunc<T = unknown, R = unknown> = (element: T, index: number) => R | Promise<R>;
+type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends [
+  (arg: any) => infer B
+]
+  ? [(arg: PrevReturn) => B]
+  : F extends [(arg: any) => infer B, ...infer Tail]
+  ? Tail extends AnyFunc[]
+    ? [(arg: PrevReturn) => B, ...PipeArgs<Tail, B>]
+    : []
+  : [];
 
-export type ReduceAsync<T = unknown, V = T, R = V> = CurriedFunction3<
-  T[],
-  (accumulator: V | R, current: Awaited<T>, index: number) => R | Promise<R>,
-  V,
-  Promise<R>
->;
+export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
+  ...fns: PipeArgs<F> extends F ? F : PipeArgs<F>
+) {
+  type Args = Parameters<FirstFn>;
+  type ReturnT = F extends [...AnyFunc[], (...arg: any) => infer R]
+    ? R extends Promise<infer R>
+      ? R
+      : R
+    : never;
 
-type CurriedMapAsync<T = unknown, R = unknown> = CurriedFunction3<
-  T[],
-  MapFunc<T, R>,
-  MapOptions,
-  Promise<R[]>
->;
+  const [firstFn, ...fnRest] = fns;
 
-interface Method {
-  (...args: any[]): any;
-}
+  return async (...args: Args): Promise<ReturnT> => {
+    let res: ReturnT = firstFn(args);
 
-function pipeAsync(...methods: Method[]) {
-  return async (data: unknown) => {
-    let res = data;
-    for (let i = 0; i < methods.length; i += 1) {
-      res = await methods[i](res);
+    for (let i = 0; i < fnRest.length; i += 1) {
+      res = await fnRest[i](res);
     }
 
     return res;
   };
 }
 
-const mapAsync: CurriedMapAsync = curry(pMap);
+export const mapAsync = curry(pMap);
 
-const reduceAsync: ReduceAsync = curryN(2, async (mixedArray, iteratee, initialValue) => {
-  let acc = initialValue;
-  for (let i = 0; i < mixedArray.length; i += 1) {
-    acc = await iteratee(acc, await mixedArray[i], i);
-  }
-  return acc;
-});
+export const reduceAsync =
+  (mixedArray: any[]) =>
+  async <T>(iteratee: AnyFunc, initialValue?: T) => {
+    let acc = initialValue;
+    for (let i = 0; i < mixedArray.length; i += 1) {
+      acc = await iteratee(acc, await mixedArray[i], i);
+    }
+    return acc;
+  };
 
-const forEachAsync = curry(
-  async <T = unknown, R = unknown>(array: T[], func: MapFunc<T, R>, options: MapOptions) => {
-    await mapAsync(array, func, options);
-  }
-);
-
-export { mapAsync, reduceAsync, forEachAsync, pipeAsync };
+export const forEachAsync = async <T, R>(
+  array: T[],
+  func: pMap.Mapper<T, R>,
+  options: pMap.Options
+) => {
+  await pMap(array, func, options);
+};

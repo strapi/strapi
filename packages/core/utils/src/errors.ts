@@ -24,7 +24,7 @@ class ValidationError extends ApplicationError {
 }
 
 class YupValidationError extends ValidationError {
-  constructor(yupError: yup.ValidationError, message: string) {
+  constructor(yupError: yup.ValidationError, message?: string) {
     super('Validation');
     const { errors, message: yupMessage } = formatYupErrors(yupError);
     this.message = message || yupMessage;

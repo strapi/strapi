@@ -101,20 +101,20 @@ const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
 const isKind = (kind: Kind) => (model: Model) => model.kind === kind;
 
-const getStoredPrivateAttributes = (model) =>
+const getStoredPrivateAttributes = (model: Model) =>
   union(
-    strapi?.config?.get('api.responses.privateAttributes', []) ?? [],
+    (strapi?.config?.get('api.responses.privateAttributes', []) ?? []) as Array<string>,
     getOr([], 'options.privateAttributes', model)
   );
 
-const getPrivateAttributes = (model = {}) => {
+const getPrivateAttributes = (model: Model) => {
   return _.union(
     getStoredPrivateAttributes(model),
     _.keys(_.pickBy(model.attributes, (attr) => !!attr.private))
   );
 };
 
-const isPrivateAttribute = (model, attributeName) => {
+const isPrivateAttribute = (model: Model, attributeName: string) => {
   if (model?.attributes?.[attributeName]?.private === true) {
     return true;
   }

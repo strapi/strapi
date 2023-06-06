@@ -1,8 +1,6 @@
-'use strict';
-
-const { yup } = require('../validators');
-const { formatYupErrors } = require('../format-yup-error');
-const { YupValidationError } = require('../errors');
+import { yup } from '../validators';
+import { formatYupErrors } from '../format-yup-error';
+import { YupValidationError } from '../errors';
 
 describe('formatYupErrors', () => {
   test('Error message is sanitized', async () => {

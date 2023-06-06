@@ -1,6 +1,4 @@
-'use strict';
-
-const envHelper = require('../env-helper');
+import envHelper from '../env-helper';
 
 describe('Env helper', () => {
   describe('env without cast', () => {

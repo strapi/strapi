@@ -5,6 +5,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  testMatch: ['<rootDir>/**/*.test.js'],
+  testMatch: ['<rootDir>/**/*.test.(j|t)s'],
   displayName: 'Core utils',
 };

@@ -1,6 +1,4 @@
-'use strict';
-
-const policyUtils = require('../policy');
+import * as policyUtils from '../policy';
 
 describe('Policy util', () => {
   describe('Get policy', () => {
