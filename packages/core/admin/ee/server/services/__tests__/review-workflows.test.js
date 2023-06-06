@@ -1,7 +1,7 @@
 'use strict';
 
 const reviewWorkflowsServiceFactory = require('../review-workflows/review-workflows');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
 
 const workflowMock = {
   id: 1,
@@ -115,7 +115,7 @@ describe('Review workflows service', () => {
     });
   });
   describe('register', () => {
-    test('Content types with review workflows options should have a new attribute', async () => {
+    test('Content types with review workflows options should have new attributes for assignee and stage relations', async () => {
       await reviewWorkflowsService.register();
       expect(containerMock.extend).toHaveBeenCalledTimes(1);
       expect(containerMock.extend).not.toHaveBeenCalledWith('test1', expect.any(Function));
@@ -128,6 +128,11 @@ describe('Review workflows service', () => {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({
             relation: 'oneToOne',
             target: 'admin::workflow-stage',
+            type: 'relation',
+          }),
+          [ENTITY_ASSIGNEE_ATTRIBUTE]: expect.objectContaining({
+            relation: 'oneToOne',
+            target: 'admin::user',
             type: 'relation',
           }),
         },
