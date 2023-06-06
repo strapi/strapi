@@ -38,7 +38,7 @@
     "fs-extra": "10.0.0",
     "knex": "2.4.0",
     "lodash": "4.17.21",
-    "semver": "7.3.8",
+    "semver": "7.5.1",
     "umzug": "3.2.1"
   },
   "engines": {
