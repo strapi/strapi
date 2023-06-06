@@ -9,32 +9,28 @@ export interface UIDOptions {
 }
 
 export interface UIDProperties<
-  // Own Schema Reference
-  T extends Common.UID.Schema,
-  // Target attribute
-  U extends TargetAttributeByUID<T>,
-  // UID options
-  S extends UIDOptions = UIDOptions
+  TOrigin extends Common.UID.Schema,
+  TTargetAttribute extends AllowedTargetAttributes<TOrigin>,
+  TOptions extends UIDOptions = UIDOptions
 > {
-  targetField: U;
-  options: UIDOptions & S;
+  targetField: TTargetAttribute;
+  options: UIDOptions & TOptions;
 }
 
-export interface GenericUIDProperties<S extends UIDOptions = UIDOptions> {
+export interface GenericUIDProperties<TOptions extends UIDOptions = UIDOptions> {
   targetField?: string;
-  options: UIDOptions & S;
+  options: TOptions & UIDOptions;
 }
 
 export type UID<
-  // Own Schema Reference
-  T extends Common.UID.Schema | undefined = undefined,
-  // Target attribute
-  U extends TargetAttributeByUID<T> = TargetAttributeByUID<T>,
-  // UID options
-  S extends UIDOptions = UIDOptions
-> = Attribute.Attribute<'uid'> &
+  TOrigin extends Common.UID.Schema | undefined = undefined,
+  TTargetAttribute extends AllowedTargetAttributes<TOrigin> = AllowedTargetAttributes<TOrigin>,
+  TOptions extends UIDOptions = UIDOptions
+> = Attribute.OfType<'uid'> &
   // Properties
-  (T extends Common.UID.Schema ? UIDProperties<T, U, S> : GenericUIDProperties<S>) &
+  (TOrigin extends Common.UID.Schema
+    ? UIDProperties<TOrigin, TTargetAttribute, TOptions>
+    : GenericUIDProperties<TOptions>) &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<UIDValue> &
@@ -42,12 +38,16 @@ export type UID<
   Attribute.PrivateOption &
   Attribute.RequiredOption;
 
-type TargetAttributeByUID<T extends Common.UID.Schema | undefined> = T extends Common.UID.Schema
-  ? Utils.Guard.Never<Attribute.GetKeysByType<T, 'string' | 'text'>, string>
-  : never;
+type AllowedTargetAttributes<TOrigin extends Common.UID.Schema | undefined> =
+  TOrigin extends Common.UID.Schema
+    ? Utils.Guard.Never<Attribute.GetKeysByType<TOrigin, 'string' | 'text'>, string>
+    : never;
 
 export type UIDValue = string;
 
-export type GetUIDValue<T extends Attribute.Attribute> = T extends UID<infer _U, infer _P>
+export type GetUIDValue<TAttribute extends Attribute.Attribute> = TAttribute extends UID<
+  infer _TOrigin,
+  infer _TTargetAttribute
+>
   ? UIDValue
   : never;

@@ -1,23 +1,19 @@
 import type { Common, Attribute } from '@strapi/strapi';
 
 export interface ComponentProperties<
-  // Targeted component
-  T extends Common.UID.Component,
-  // Repeatable
-  R extends boolean = false
+  TComponentUID extends Common.UID.Component,
+  TRepeatable extends boolean = false
 > {
-  component: T;
-  repeatable?: R;
+  component: TComponentUID;
+  repeatable?: TRepeatable;
 }
 
 export type Component<
-  // Targeted component
-  T extends Common.UID.Component = Common.UID.Component,
-  // Repeatable
-  R extends boolean = false
-> = Attribute.Attribute<'component'> &
+  TComponentUID extends Common.UID.Component = Common.UID.Component,
+  TRepeatable extends boolean = false
+> = Attribute.OfType<'component'> &
   // Component Properties
-  ComponentProperties<T, R> &
+  ComponentProperties<TComponentUID, TRepeatable> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.MinMaxOption &
@@ -25,10 +21,15 @@ export type Component<
   Attribute.RequiredOption;
 
 export type ComponentValue<
-  T extends Common.UID.Component,
-  R extends boolean
-> = Attribute.GetValues<T> extends infer V ? (R extends true ? V[] : V) : never;
-
-export type GetComponentValue<T extends Attribute.Attribute> = T extends Component<infer U, infer R>
-  ? ComponentValue<U, R>
+  TComponentUID extends Common.UID.Component,
+  TRepeatable extends boolean
+> = Attribute.GetValues<TComponentUID> extends infer TValues
+  ? TRepeatable extends true
+    ? TValues[]
+    : TValues
   : never;
+
+export type GetComponentValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Component<infer TComponentUID, infer TRepeatable>
+    ? ComponentValue<TComponentUID, TRepeatable>
+    : never;

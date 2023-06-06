@@ -1,5 +1,5 @@
 /**
- * Assign a default value `U` to `T` if `T` is of type `never`
+ * Assign a default value `TDefault` to `TValue` if `TValue` is of type `never`
  *
  * @example
  * type X = Never<{ foo: 'bar' }, string>
@@ -11,4 +11,4 @@
  * type X = Never<never, string>
  * // string
  */
-export type Never<T, U = unknown> = [T] extends [never] ? U : T;
+export type Never<TValue, TDefault = unknown> = [TValue] extends [never] ? TDefault : TValue;

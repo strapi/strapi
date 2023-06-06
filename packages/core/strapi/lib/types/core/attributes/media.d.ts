@@ -1,32 +1,33 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type AllowedMediaTypes = 'images' | 'videos' | 'files' | 'audios';
+export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
 
 export interface MediaProperties<
-  // Media Type
-  T extends AllowedMediaTypes | undefined = undefined,
-  // Multiple
-  U extends boolean = false
+  TKind extends MediaKind | undefined = undefined,
+  TMultiple extends boolean = false
 > {
-  allowedTypes?: T;
-  multiple?: U;
+  allowedTypes?: TKind;
+  multiple?: TMultiple;
 }
 
 export type Media<
-  // Media Type
-  T extends AllowedMediaTypes | undefined = undefined,
-  // Multiple
-  U extends boolean = false
-> = Attribute.Attribute<'media'> &
+  TKind extends MediaKind | undefined = undefined,
+  TMultiple extends boolean = false
+> = Attribute.OfType<'media'> &
   // Properties
-  MediaProperties<T, U> &
+  MediaProperties<TKind, TMultiple> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.RequiredOption &
   Attribute.PrivateOption;
 
-export type MediaValue<T extends boolean = false> = T extends true ? any[] : any;
+// TODO: Introduce a real type for the media values
+export type MediaValue<TMultiple extends boolean = false> = TMultiple extends true ? any[] : any;
 
-export type GetMediaValue<T extends Attribute.Attribute> = T extends Media<infer _U, infer S>
-  ? MediaValue<S>
+export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
+  // Unused as long as the media value is any
+  infer _TKind,
+  infer TMultiple
+>
+  ? MediaValue<TMultiple>
   : never;

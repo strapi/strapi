@@ -25,19 +25,19 @@ export type Configurable = { configurable: true };
 export type NonConfigurable = { configurable: false };
 
 // custom field
-export type CustomField<T extends string, P extends object | undefined = undefined> = {
-  customField: T;
-  options?: P;
+export type CustomField<TKind extends string, TOptions extends object | undefined = undefined> = {
+  customField: TKind;
+  options?: TOptions;
 };
 
 // min/max
-export type SetMinMax<T extends Attribute.MinMaxOption<U>, U = number> = T;
+export type SetMinMax<TConfig extends Attribute.MinMaxOption<TType>, TType = number> = TConfig;
 
 // minLength/maxLength
-export type SetMinMaxLength<T extends Attribute.MinMaxLengthOption> = T;
+export type SetMinMaxLength<TConfig extends Attribute.MinMaxLengthOption> = TConfig;
 
 // pluginOptions
-export type SetPluginOptions<T extends object = object> = { pluginOptions?: T };
+export type SetPluginOptions<TConfig extends object = object> = { pluginOptions?: TConfig };
 
 // default
 export type DefaultTo<T> = { default: T };
@@ -56,7 +56,7 @@ export type Any =
   | Attribute.Float
   | Attribute.Integer
   | Attribute.JSON
-  | Attribute.Media<Attribute.AllowedMediaTypes | undefined, boolean>
+  | Attribute.Media<Attribute.MediaKind | undefined, boolean>
   | Attribute.Password
   | Attribute.Relation
   | Attribute.RichText

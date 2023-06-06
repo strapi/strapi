@@ -70,7 +70,7 @@ export interface Strapi {
   /**
    * Find a service using its unique identifier
    */
-  service<T extends Common.Service = Common.Service>(uid: string): T | undefined;
+  service<TService extends Common.Service = Common.Service>(uid: string): TService | undefined;
 
   /**
    * Getter for the Strapi controllers container

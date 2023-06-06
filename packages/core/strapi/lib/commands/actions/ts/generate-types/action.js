@@ -22,7 +22,7 @@ module.exports = async ({ debug, silent, verbose, outDir }) => {
       // TODO V5: verbose is deprecated and should be removed
       debug: debug || verbose,
     },
-    artefacts: { contentTypes: true, components: true },
+    artifacts: { contentTypes: true, components: true },
   });
 
   app.destroy();

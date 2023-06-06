@@ -90,8 +90,7 @@ export type IProviderTransferResults = {};
 export type ISourceProviderTransferResults = {};
 export type IDestinationProviderTransferResults = {};
 
-export type KnexTransaction = Knex.Transaction;
-export type TransactionCallback = (trx?: KnexTransaction) => Promise<void>;
+export type TransactionCallback = (trx?: Knex.Transaction) => Promise<void>;
 export type Transaction = {
   attach<T = undefined>(callback: TransactionCallback): Promise<T | undefined>;
   end(): boolean;

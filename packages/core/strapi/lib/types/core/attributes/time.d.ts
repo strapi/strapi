@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Time = Attribute.Attribute<'time'> &
+export type Time = Attribute.OfType<'time'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<TimeValue> &

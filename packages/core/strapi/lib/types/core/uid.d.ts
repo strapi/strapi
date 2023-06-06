@@ -56,9 +56,19 @@ export type ContentType = StringSuffix<
 /**
  * Template for components' unique identifier
  *
- * Warning: Can cause overlap with other UID formats.
+ * @example
+ * 'default.foo' extends Component => true (T = 'default', N = 'foo')
+ *
+ * @example
+ * // /!\ Warning: Can cause overlap with other UID formats:
+ * // 'api::foo.bar' both extends ContentType and Component
+ * 'api::foo.bar' extends ContentType => true (N = 'api', S='::', T='foo')
+ * 'api::foo.bar' extends Component   => true (T = 'api::foo', N = 'bar')
  */
-export type Component<T extends string = string, N extends string = string> = `${T}.${N}`;
+export type Component<
+  TCategory extends string = string,
+  TName extends string = string
+> = `${TCategory}.${TName}`;
 
 /**
  * Represents any UID
@@ -70,13 +80,16 @@ export type Any = Service | Controller | Policy | Middleware | ContentType | Com
  *
  * The separator type is automatically inferred from the given namespace
  */
-export interface Parsed<N extends Namespace.Any = Namespace.Any, E extends string = string> {
-  raw: `${N}${Namespace.GetSeparator<N>}${E}`;
-  namespace: N;
-  origin: N extends Namespace.Scoped ? Namespace.ExtractOrigin<N> : N;
-  scope: N extends Namespace.Scoped ? Namespace.ExtractScope<N> : never;
-  separator: Namespace.GetSeparator<N>;
-  name: E;
+export interface Parsed<
+  TNamespace extends Namespace.Any = Namespace.Any,
+  TName extends string = string
+> {
+  raw: `${TNamespace}${Namespace.GetSeparator<TNamespace>}${TName}`;
+  namespace: TNamespace;
+  origin: TNamespace extends Namespace.Scoped ? Namespace.ExtractOrigin<TNamespace> : TNamespace;
+  scope: TNamespace extends Namespace.Scoped ? Namespace.ExtractScope<TNamespace> : never;
+  separator: Namespace.GetSeparator<TNamespace>;
+  name: TName;
 }
 
 /**
@@ -94,18 +107,19 @@ export interface Parsed<N extends Namespace.Any = Namespace.Any, E extends strin
  * type T = Parse<'admin::foo' | 'api::foo.bar'>
  * // ^ { namespace: 'admin' | 'api::foo' ; separator: '.' | '::'; name: 'foo' | 'bar' | 'foo.bar'; }
  */
-export type Parse<U extends Any> = ExtractNamespace<U> extends infer B extends Namespace.Any
-  ? Namespace.GetSeparator<B> extends infer S extends Namespace.Separator
-    ? U extends `${infer N extends B}${S}${infer E extends string}`
-      ? Parsed<N, E>
+export type Parse<TUid extends Any> =
+  ExtractNamespace<TUid> extends infer TExtractedNamespace extends Namespace.Any
+    ? Namespace.GetSeparator<TExtractedNamespace> extends infer TSeparator extends Namespace.Separator
+      ? TUid extends `${infer TInferredNamespace extends TExtractedNamespace}${TSeparator}${infer TName extends string}`
+        ? Parsed<TInferredNamespace, TName>
+        : never
       : never
-    : never
-  : never;
+    : never;
 
 /**
  * Determines if the UID's namespace matches the given one.
  *
- * It returns N (the {@link Namespace.Any} literal) if there is a match, never otherwise.
+ * It returns TNamespace (the {@link Namespace.Any} literal) if there is a match, never otherwise.
  *
  * @example
  * type T = EnsureNamespaceMatches<'admin::foo', Namespace.Admin>
@@ -117,21 +131,20 @@ export type Parse<U extends Any> = ExtractNamespace<U> extends infer B extends N
  * type T = EnsureNamespaceMatches<'api::foo.bar', Namespace.Plugin>
  * // ^ never
  */
-export type EnsureNamespaceMatches<U extends Any, N extends Namespace.Any> = U extends StringSuffix<
-  Namespace.WithSeparator<N>
->
-  ? N
-  : never;
+export type EnsureNamespaceMatches<
+  TUid extends Any,
+  TNamespace extends Namespace.Any
+> = TUid extends StringSuffix<Namespace.WithSeparator<TNamespace>> ? TNamespace : never;
 
 /**
  * Get parsed properties from a given raw UID
  */
-export type Get<U extends Any, P extends keyof Parsed> = Parse<U>[P];
+export type Get<TUid extends Any, TKey extends keyof Parsed> = Parse<TUid>[TKey];
 
 /**
  * Pick parsed properties from a given raw UID
  */
-export type Select<U extends Any, P extends keyof Parse<U>> = Pick<Parse<U>, P>;
+export type Select<TUid extends Any, TKey extends keyof Parse<TUid>> = Pick<Parse<TUid>, TKey>;
 
 /**
  * Extract the namespace literal from a given UID.
@@ -146,9 +159,9 @@ export type Select<U extends Any, P extends keyof Parse<U>> = Pick<Parse<U>, P>;
  * type T = ExtractNamespace<'admin::foo' | 'api::foo.bar'>
  * // ^ Namespace.Admin | Namespace.API
  */
-export type ExtractNamespace<U extends Any> =
-  | EnsureNamespaceMatches<U, Namespace.Global>
-  | EnsureNamespaceMatches<U, Namespace.Admin>
-  | EnsureNamespaceMatches<U, Namespace.Strapi>
-  | EnsureNamespaceMatches<U, Namespace.API>
-  | EnsureNamespaceMatches<U, Namespace.Plugin>;
+export type ExtractNamespace<TUid extends Any> =
+  | EnsureNamespaceMatches<TUid, Namespace.Global>
+  | EnsureNamespaceMatches<TUid, Namespace.Admin>
+  | EnsureNamespaceMatches<TUid, Namespace.Strapi>
+  | EnsureNamespaceMatches<TUid, Namespace.API>
+  | EnsureNamespaceMatches<TUid, Namespace.Plugin>;

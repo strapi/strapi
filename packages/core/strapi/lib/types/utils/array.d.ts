@@ -3,4 +3,6 @@
  * Extract the array values into an union type
  *
  **/
-export type Values<T extends Array<unknown>> = T extends Array<infer U> ? U : never;
+export type Values<TCollection extends Array<unknown>> = TCollection extends Array<infer TValues>
+  ? TValues
+  : never;

@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Float = Attribute.Attribute<'float'> &
+export type Float = Attribute.OfType<'float'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<FloatValue> &

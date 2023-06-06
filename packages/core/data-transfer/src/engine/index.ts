@@ -626,8 +626,8 @@ class TransferEngine<
     }
 
     return {
-      sourceSchema: this.#schema.source,
-      destinationSchema: this.#schema.destination,
+      sourceSchemas: this.#schema.source,
+      destinationSchemas: this.#schema.destination,
     };
   }
 
@@ -642,8 +642,7 @@ class TransferEngine<
       );
     }
 
-    const sourceSchemas = (await this.sourceProvider.getSchemas?.()) as SchemaMap;
-    const destinationSchemas = (await this.destinationProvider.getSchemas?.()) as SchemaMap;
+    const { sourceSchemas, destinationSchemas } = await this.#getSchemas();
 
     try {
       if (sourceSchemas && destinationSchemas) {
@@ -785,7 +784,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (entity: IEntity, _encoding, callback) => {
-          const { destinationSchema: schemas } = await this.#getSchemas();
+          const { destinationSchemas: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, entity);
@@ -828,7 +827,7 @@ class TransferEngine<
       new Transform({
         objectMode: true,
         transform: async (link: ILink, _encoding, callback) => {
-          const { destinationSchema: schemas } = await this.#getSchemas();
+          const { destinationSchemas: schemas } = await this.#getSchemas();
 
           if (!schemas) {
             return callback(null, link);

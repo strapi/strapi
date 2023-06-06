@@ -18,13 +18,13 @@ const GENERATORS = {
  *
  * @property {object} strapi
  * @property {boolean} pwd
- * @property {object} [artefacts]
- * @property {boolean} [artefacts.contentTypes]
- * @property {boolean} [artefacts.components]
- * @property {boolean} [artefacts.services]
- * @property {boolean} [artefacts.controllers]
- * @property {boolean} [artefacts.policies]
- * @property {boolean} [artefacts.middlewares]
+ * @property {object} [artifacts]
+ * @property {boolean} [artifacts.contentTypes]
+ * @property {boolean} [artifacts.components]
+ * @property {boolean} [artifacts.services]
+ * @property {boolean} [artifacts.controllers]
+ * @property {boolean} [artifacts.policies]
+ * @property {boolean} [artifacts.middlewares]
  * @property {object} [logger]
  * @property {boolean} [logger.silent]
  * @property {boolean} [logger.debug]
@@ -37,7 +37,7 @@ const GENERATORS = {
  * @param {GenerateConfig} [config]
  */
 const generate = async (config = {}) => {
-  const { pwd, rootDir = TYPES_ROOT_DIR, strapi, artefacts = {}, logger: loggerConfig } = config;
+  const { pwd, rootDir = TYPES_ROOT_DIR, strapi, artifacts = {}, logger: loggerConfig } = config;
   const reports = {};
   const logger = createLogger(loggerConfig);
   const psTimer = timer().start();
@@ -46,8 +46,8 @@ const generate = async (config = {}) => {
   const generatorConfig = { strapi, pwd: registryPwd, logger };
 
   const returnWithMessage = () => {
-    const nbWarnings = chalk.yellow(maybePlural('warning', logger.warnings));
-    const nbErrors = chalk.red(maybePlural('error', logger.errors));
+    const nbWarnings = chalk.yellow(`${logger.warnings} warning(s)`);
+    const nbErrors = chalk.red(`${logger.errors} error(s)`);
 
     const status = logger.errors > 0 ? chalk.red('errored') : chalk.green('completed successfully');
 
@@ -58,57 +58,57 @@ const generate = async (config = {}) => {
     return reports;
   };
 
-  const enabledArtefacts = Object.keys(artefacts).filter((p) => artefacts[p] === true);
+  const enabledArtifacts = Object.keys(artifacts).filter((p) => artifacts[p] === true);
 
   logger.info('Starting the type generation process');
-  logger.debug(`Enabled artefacts: ${enabledArtefacts.join(', ')}`);
+  logger.debug(`Enabled artifacts: ${enabledArtifacts.join(', ')}`);
 
-  for (const artefact of enabledArtefacts) {
-    const boldArtefact = chalk.bold(artefact); // used for log messages
+  for (const artifact of enabledArtifacts) {
+    const boldArtifact = chalk.bold(artifact); // used for log messages
 
-    logger.info(`Generating types for ${boldArtefact}`);
+    logger.info(`Generating types for ${boldArtifact}`);
 
-    if (artefact in GENERATORS) {
-      const generator = GENERATORS[artefact];
+    if (artifact in GENERATORS) {
+      const generator = GENERATORS[artifact];
 
       try {
-        const artefactGenTimer = timer().start();
+        const artifactGenTimer = timer().start();
 
-        reports[artefact] = await generator(generatorConfig);
+        reports[artifact] = await generator(generatorConfig);
 
-        artefactGenTimer.end();
+        artifactGenTimer.end();
 
-        logger.debug(`Generated ${boldArtefact} in ${artefactGenTimer.duration}s`);
+        logger.debug(`Generated ${boldArtifact} in ${artifactGenTimer.duration}s`);
       } catch (e) {
         logger.error(
-          `Failed to generate types for ${boldArtefact}: ${e.message ?? e.toString()}. Exiting`
+          `Failed to generate types for ${boldArtifact}: ${e.message ?? e.toString()}. Exiting`
         );
         return returnWithMessage();
       }
     } else {
-      logger.warn(`The types generator for ${boldArtefact} is not implemented, skipping`);
+      logger.warn(`The types generator for ${boldArtifact} is not implemented, skipping`);
     }
   }
 
-  for (const artefact of Object.keys(reports)) {
-    const boldArtefact = chalk.bold(artefact); // used for log messages
+  for (const artifact of Object.keys(reports)) {
+    const boldArtifact = chalk.bold(artifact); // used for log messages
 
-    const artefactFsTimer = timer().start();
+    const artifactFsTimer = timer().start();
 
-    const report = reports[artefact];
-    const filename = `${artefact}.d.ts`;
+    const report = reports[artifact];
+    const filename = `${artifact}.d.ts`;
 
     try {
       const outPath = await saveDefinitionToFileSystem(registryPwd, filename, report.output);
       const relativeOutPath = path.relative(__dirname, outPath);
 
-      artefactFsTimer.end();
+      artifactFsTimer.end();
 
-      logger.info(`Saved ${boldArtefact} types in ${chalk.bold(relativeOutPath)}`);
-      logger.debug(`Saved ${boldArtefact} in ${artefactFsTimer.duration}s`);
+      logger.info(`Saved ${boldArtifact} types in ${chalk.bold(relativeOutPath)}`);
+      logger.debug(`Saved ${boldArtifact} in ${artifactFsTimer.duration}s`);
     } catch (e) {
       logger.error(
-        `An error occurred while saving ${boldArtefact} types to the filesystem: ${
+        `An error occurred while saving ${boldArtifact} types to the filesystem: ${
           e.message ?? e.toString()
         }. Exiting`
       );
@@ -118,7 +118,5 @@ const generate = async (config = {}) => {
 
   return returnWithMessage();
 };
-
-const maybePlural = (word, n) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
 module.exports = { generate };

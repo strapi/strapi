@@ -1,48 +1,48 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
-export type BasicRelationsType =
+export type BasicRelationType =
   | 'oneToOne'
   | 'oneToMany'
   | 'manyToOne'
   | 'manyToMany'
   | 'morphOne'
   | 'morphMany';
-export type PolymorphicRelationsType = 'morphToOne' | 'morphToMany';
-export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
+export type PolymorphicRelationType = 'morphToOne' | 'morphToMany';
+export type RelationType = BasicRelationType | PolymorphicRelationType;
 
 export type BasicRelationProperties<
-  S extends Common.UID.Schema,
-  R extends BasicRelationsType,
-  T extends Common.UID.Schema
+  TOrigin extends Common.UID.Schema,
+  TRelationType extends BasicRelationType,
+  TTarget extends Common.UID.Schema
 > = {
-  relation: R;
-  target: T;
-} & R extends `morph${string}`
+  relation: TRelationType;
+  target: TTarget;
+} & TRelationType extends Utils.String.Suffix<'morph', 'One' | 'Many'>
   ? {
       morphBy?: Utils.Object.KeysBy<
-        Common.Schemas[T]['attributes'],
-        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationsType>
+        Common.Schemas[TTarget]['attributes'],
+        Attribute.Relation<Common.UID.Schema, Attribute.PolymorphicRelationType>
       >;
     }
   : {
-      inversedBy?: RelationsKeysFromTo<T, S>;
-      mappedBy?: RelationsKeysFromTo<T, S>;
+      inversedBy?: RelationsKeysFromTo<TTarget, TOrigin>;
+      mappedBy?: RelationsKeysFromTo<TTarget, TOrigin>;
     };
 
-export interface PolymorphicRelationProperties<R extends PolymorphicRelationsType> {
-  relation: R;
+export interface PolymorphicRelationProperties<TRelationType extends PolymorphicRelationType> {
+  relation: TRelationType;
 }
 
 export type Relation<
-  S extends Common.UID.Schema = Common.UID.Schema,
-  R extends RelationsType = RelationsType,
-  T extends R extends PolymorphicRelationsType ? never : Common.UID.Schema = never
-> = Attribute.Attribute<'relation'> &
+  TOrigin extends Common.UID.Schema = Common.UID.Schema,
+  TRelationType extends RelationType = RelationType,
+  TTarget extends TRelationType extends PolymorphicRelationType ? never : Common.UID.Schema = never
+> = Attribute.OfType<'relation'> &
   // Properties
-  (R extends BasicRelationsType
-    ? BasicRelationProperties<S, R, T>
-    : R extends PolymorphicRelationsType
-    ? PolymorphicRelationProperties<R>
+  (TRelationType extends BasicRelationType
+    ? BasicRelationProperties<TOrigin, TRelationType, TTarget>
+    : TRelationType extends PolymorphicRelationType
+    ? PolymorphicRelationProperties<TRelationType>
     : {}) &
   // Options
   Attribute.ConfigurableOption &
@@ -50,28 +50,28 @@ export type Relation<
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,
-  TSource extends Common.UID.Schema
-> = keyof PickRelationsFromTo<TTarget, TSource>;
+  TOrigin extends Common.UID.Schema
+> = keyof PickRelationsFromTo<TTarget, TOrigin>;
 
 export type PickRelationsFromTo<
   TTarget extends Common.UID.Schema,
-  TSource extends Common.UID.Schema
-> = Attribute.GetByType<TTarget, 'relation', { target: TSource }>;
+  TOrigin extends Common.UID.Schema
+> = Attribute.GetByType<TTarget, 'relation', { target: TOrigin }>;
 
 export type RelationPluralityModifier<
-  TRelation extends RelationsType,
-  TValue extends Record<string, unknown>
-> = TRelation extends `${string}Many` ? TValue[] : TValue;
+  TRelationType extends RelationType,
+  TValue
+> = TRelationType extends Utils.String.Suffix<string, 'Many'> ? TValue[] : TValue;
 
 export type RelationValue<
-  TRelation extends RelationsType,
+  TRelationType extends RelationType,
   TTarget extends Common.UID.Schema
-> = RelationPluralityModifier<TRelation, Attribute.GetValues<TTarget>>;
+> = RelationPluralityModifier<TRelationType, Attribute.GetValues<TTarget>>;
 
-export type GetRelationValue<T extends Attribute.Attribute> = T extends Relation<
-  infer _TSource,
-  infer TRelation,
+export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
+  infer _TOrigin,
+  infer TRelationType,
   infer TTarget
 >
-  ? RelationValue<TRelation, TTarget>
+  ? RelationValue<TRelationType, TTarget>
   : never;

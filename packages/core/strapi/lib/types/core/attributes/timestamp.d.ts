@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Timestamp = Attribute.Attribute<'timestamp'> &
+export type Timestamp = Attribute.OfType<'timestamp'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<TimestampValue> &

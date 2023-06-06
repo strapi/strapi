@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type Password = Attribute.Attribute<'password'> &
+export type Password = Attribute.OfType<'password'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<PasswordValue> &

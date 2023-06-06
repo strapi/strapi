@@ -1,6 +1,6 @@
 import type { Attribute } from '@strapi/strapi';
 
-export type BigInteger = Attribute.Attribute<'biginteger'> &
+export type BigInteger = Attribute.OfType<'biginteger'> &
   // Options
   Attribute.ConfigurableOption &
   Attribute.DefaultOption<BigIntegerValue> &
