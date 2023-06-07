@@ -1,7 +1,7 @@
 'use strict';
 
 const { mapAsync } = require('@strapi/utils');
-const { difference } = require('lodash/fp');
+const { difference, merge } = require('lodash/fp');
 const { getService } = require('../../../utils');
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 
@@ -9,6 +9,8 @@ module.exports = ({ strapi }) => {
   const contentManagerContentTypeService = strapi
     .plugin('content-manager')
     .service('content-types');
+  const stagesService = getService('stages', { strapi });
+  const workflowsService = getService('workflows', { strapi });
 
   return {
     /**
@@ -23,31 +25,32 @@ module.exports = ({ strapi }) => {
 
       await mapAsync(created, async (uid) => {
         // If it was assigned to another workflow, transfer it from the previous workflow
-        const srcWorkflow = await getService('workflows').getAssignedWorkflow(uid);
+        const srcWorkflow = await workflowsService.getAssignedWorkflow(uid);
         if (srcWorkflow) {
           // Updates all existing entities stages links to the new stage
-          await getService('stages').updateEntitiesStage(uid, { toStageId: stageId });
+          await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
           return this.transferContentType(srcWorkflow, uid);
         }
-
+        const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
         await contentManagerContentTypeService.updateConfiguration(
           { uid },
-          { options: { reviewWorkflows: true } }
+          { options: merge(modelConfig.options, { reviewWorkflows: true }) }
         );
 
         // Create new stages links to the new stage
-        return getService('stages').updateEntitiesStage(uid, {
+        return stagesService.updateEntitiesStage(uid, {
           fromStageId: null,
           toStageId: stageId,
         });
       });
 
       await mapAsync(deleted, async (uid) => {
+        const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
         await contentManagerContentTypeService.updateConfiguration(
           { uid },
-          { options: { reviewWorkflows: false } }
+          { options: merge(modelConfig.options, { reviewWorkflows: false }) }
         );
-        await getService('stages').deleteAllEntitiesStage(uid, {});
+        await stagesService.deleteAllEntitiesStage(uid, {});
       });
     },
 
