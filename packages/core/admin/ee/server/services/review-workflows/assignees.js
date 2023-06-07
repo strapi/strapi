@@ -5,7 +5,7 @@ const { isNil } = require('lodash/fp');
 const { ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
-module.exports = () => {
+module.exports = ({ strapi }) => {
   return {
     /**
      * Update the assignee of an entity
@@ -15,7 +15,7 @@ module.exports = () => {
         return this.deleteEntityAssignee(id, model);
       }
 
-      const userExists = await getService('user').exists({ id: assigneeId });
+      const userExists = await getService('user', { strapi }).exists({ id: assigneeId });
 
       if (!userExists) {
         throw new ApplicationError(`Selected user does not exist`);
