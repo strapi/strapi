@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -56,14 +56,13 @@ const Password = ({ errors, onChange, values }) => {
         </Typography>
         <Grid gap={5}>
           <GridItem s={12} col={6}>
-            <PasswordInput
-              data-testid ="test-current-password-input"
+            <TextInput
               error={
                 errors.currentPassword
                   ? formatMessage({
-                    id: errors.currentPassword,
-                    defaultMessage: errors.currentPassword,
-                  })
+                      id: errors.currentPassword,
+                      defaultMessage: errors.currentPassword,
+                    })
                   : ''
               }
               onChange={onChange}
@@ -101,7 +100,6 @@ const Password = ({ errors, onChange, values }) => {
         <Grid gap={5}>
           <GridItem s={12} col={6}>
             <PasswordInput
-              data-testid ="test-new-password-input"
               error={
                 errors.password
                   ? formatMessage({
@@ -144,7 +142,6 @@ const Password = ({ errors, onChange, values }) => {
           </GridItem>
           <GridItem s={12} col={6}>
             <PasswordInput
-              data-testid ="test-confirmed-password-input"
               error={
                 errors.confirmPassword
                   ? formatMessage({

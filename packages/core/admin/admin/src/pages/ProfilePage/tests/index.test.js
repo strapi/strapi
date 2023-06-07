@@ -73,7 +73,7 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   });
 
   it('should display the change password section and all its fields', async () => {
-    const { getByRole, getByTestId, queryByTestId } = setup();
+    const { getByRole, queryByTestId, getByLabelText } = setup();
 
     await waitFor(() => {
       expect(queryByTestId('loader')).not.toBeInTheDocument();
@@ -85,11 +85,11 @@ describe('ADMIN | Pages | Profile page | without SSO lock', () => {
       })
     ).toBeInTheDocument();
 
-    expect(getByTestId('test-current-password-input')).toBeInTheDocument();
+    expect(getByLabelText('Current Password')).toBeInTheDocument();
 
-    expect(getByTestId('test-new-password-input')).toBeInTheDocument();
+    expect(getByLabelText('Password')).toBeInTheDocument();
 
-    expect(getByTestId('test-confirmed-password-input')).toBeInTheDocument();
+    expect(getByLabelText('Password confirmation')).toBeInTheDocument();
   });
 });
 
@@ -117,7 +117,7 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
   });
 
   it('should not display the change password section and all the fields if the user role is Locked', async () => {
-    const { queryByRole, queryByTestId } = setup();
+    const { queryByRole, queryByTestId, queryByLabelText } = setup();
     const changePasswordHeading = queryByRole('heading', {
       name: 'Change password',
     });
@@ -128,10 +128,10 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
 
     expect(changePasswordHeading).not.toBeInTheDocument();
 
-    expect(queryByTestId('test-current-password-input')).not.toBeInTheDocument();
+    expect(queryByLabelText('Current Password')).not.toBeInTheDocument();
 
-    expect(queryByTestId('test-new-password-input')).not.toBeInTheDocument();
+    expect(queryByLabelText('Password')).not.toBeInTheDocument();
 
-    expect(queryByTestId('test-confirmed-password-input')).not.toBeInTheDocument();
+    expect(queryByLabelText('Password confirmation')).not.toBeInTheDocument();
   });
 });
