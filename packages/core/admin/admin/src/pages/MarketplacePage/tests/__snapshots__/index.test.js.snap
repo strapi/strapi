@@ -2345,17 +2345,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 >
                   <label
                     class="c8 c30 c31"
-                    for="9"
+                    for=":rk:"
                   />
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-5"
-                    aria-describedby="9-hint 9-error"
+                    aria-controls="radix-:rn:"
+                    aria-describedby=":rk:-hint :rk:-error"
                     aria-expanded="false"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
-                    id="9"
+                    id=":rk:"
                     overflow="hidden"
                     role="combobox"
                     tabindex="0"

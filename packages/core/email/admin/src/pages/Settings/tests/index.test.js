@@ -701,7 +701,7 @@ describe('Email | Pages | Settings', () => {
                           >
                             <label
                               class="c5 c18 c19"
-                              for="8"
+                              for=":rb:"
                             >
                               Default sender email
                             </label>
@@ -716,7 +716,7 @@ describe('Email | Pages | Settings', () => {
                                 class="c21"
                                 data-disabled=""
                                 disabled=""
-                                id="8"
+                                id=":rb:"
                                 name="shipper-email"
                                 placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
                                 value=""
@@ -738,7 +738,7 @@ describe('Email | Pages | Settings', () => {
                           >
                             <label
                               class="c5 c18 c19"
-                              for="10"
+                              for=":rd:"
                             >
                               Default response email
                             </label>
@@ -753,7 +753,7 @@ describe('Email | Pages | Settings', () => {
                                 class="c21"
                                 data-disabled=""
                                 disabled=""
-                                id="10"
+                                id=":rd:"
                                 name="response-email"
                                 placeholder="ex: Strapi <example@strapi.io>"
                                 value=""
@@ -774,18 +774,22 @@ describe('Email | Pages | Settings', () => {
                         >
                           <label
                             class="c5 c18 c19"
-                            for="13"
+                            for=":rf:"
                           >
                             Email provider
                           </label>
                           <div
                             aria-autocomplete="none"
-                            aria-controls="radix-0"
-                            aria-describedby="13-hint 13-error"
+                            aria-controls="radix-:ri:"
+                            aria-describedby=":rf:-hint :rf:-error"
+                            aria-disabled="true"
+                            aria-expanded="false"
+                            aria-label="Email provider"
+                            class="c22 c23 c24"
                             data-disabled=""
                             data-state="closed"
                             dir="ltr"
-                            id="13"
+                            id=":rf:"
                             overflow="hidden"
                             role="combobox"
                           >
