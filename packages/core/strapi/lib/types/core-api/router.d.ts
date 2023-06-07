@@ -41,15 +41,15 @@ export type CollectionTypeRouterConfig = Generic & {
   delete?: HandlerConfig;
 };
 
-export type RouterConfig<T extends Common.UID.ContentType> = {
+export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
   prefix?: string;
   // TODO Refactor when we have a controller registry
   only?: string[];
   except?: string[];
   config: Utils.Expression.MatchFirst<
     [
-      Utils.Expression.Test<Common.UID.IsCollectionType<T>, CollectionTypeRouterConfig>,
-      Utils.Expression.Test<Common.UID.IsSingleType<T>, SingleTypeRouterConfig>
+      Utils.Expression.Test<Common.UID.IsCollectionType<TContentTypeUID>, CollectionTypeRouterConfig>,
+      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>
     ],
     Generic
   >;
