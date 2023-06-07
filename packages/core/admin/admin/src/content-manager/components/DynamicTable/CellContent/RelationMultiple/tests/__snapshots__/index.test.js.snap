@@ -1,22 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
-.c0 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c8 {
-  background: #eaeaef;
-  padding-right: 8px;
-  padding-left: 8px;
-  min-width: 20px;
+.c14 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c6 {
@@ -33,6 +27,24 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   line-height: 1.45;
   text-transform: uppercase;
   color: #666687;
+}
+
+.c0 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c8 {
+  background: #eaeaef;
+  padding-right: 8px;
+  padding-left: 8px;
+  min-width: 20px;
 }
 
 .c1 {
@@ -152,18 +164,6 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c14 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c3 {
