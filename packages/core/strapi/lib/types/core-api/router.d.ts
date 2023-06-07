@@ -46,10 +46,12 @@ export type RouterConfig<T extends Common.UID.ContentType> = {
   // TODO Refactor when we have a controller registry
   only?: string[];
   except?: string[];
-  config: Utils.Expression.If<
-    Common.UID.IsCollectionType<T>,
-    CollectionTypeRouterConfig,
-    SingleTypeRouterConfig
+  config: Utils.Expression.MatchFirst<
+    [
+      Utils.Expression.Test<Common.UID.IsCollectionType<T>, CollectionTypeRouterConfig>,
+      Utils.Expression.Test<Common.UID.IsSingleType<T>, SingleTypeRouterConfig>
+    ],
+    Generic
   >;
 };
 

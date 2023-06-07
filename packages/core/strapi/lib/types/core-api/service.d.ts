@@ -37,10 +37,12 @@ export type SingleType = Base & {
   delete?(params: object): Promise<Entity> | Entity;
 };
 
-export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.If<
-  Common.UID.IsCollectionType<T>,
-  CollectionType,
-  SingleType
+export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
+  [
+    Utils.Expression.Test<Common.UID.IsCollectionType<T>, CollectionType>,
+    Utils.Expression.Test<Common.UID.IsSingleType<T>, SingleType>
+  ],
+  Base
 >;
 
 export type Extendable<T extends Common.UID.ContentType> = ContentType<T> & Generic;
