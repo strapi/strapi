@@ -45,4 +45,4 @@ export type ContentType<TContentTypeUID extends Common.UID.ContentType> = Utils.
   Base
 >;
 
-export type Extendable<T extends Common.UID.ContentType> = ContentType<T> & Generic;
+export type Extendable<TContentTypeUID extends Common.UID.ContentType> = ContentType<TContentTypeUID> & Generic;
