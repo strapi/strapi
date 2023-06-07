@@ -38,28 +38,30 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-type SortQuery = string | string[] | object;
-type FieldsQuery = string | string[];
+type SortParams = string | string[] | object;
+type FieldsParams = string | string[];
 
-export interface FiltersQuery {}
+type FiltersParams = unknown;
 
-export interface PopulateParams {
-  sort?: SortQuery;
-  fields?: FieldsQuery;
-  filters?: FiltersQuery;
-  populate?: PopulateQuery;
-  on: {
-    [key: string]: PopulateParams;
-  };
+export interface PopulateAttributesParams {
+  [key: string]: PopulateObjectParams;
+}
+export interface PopulateObjectParams {
+  sort?: SortParams;
+  fields?: FieldsParams;
+  filters?: FiltersParams;
+  populate?: PopulateParams;
+  publicationState?: 'live' | 'preview';
+  on: PopulateAttributesParams;
 }
 
-type PopulateQuery = boolean | string | string[] | PopulateParams;
+type PopulateParams = string | string[] | PopulateAttributesParams;
 
-export interface Query {
-  sort?: SortQuery;
-  fields?: FieldsQuery;
-  filters?: FiltersQuery;
-  populate?: PopulateQuery;
+export interface Params {
+  sort?: SortParams;
+  fields?: FieldsParams;
+  filters?: FiltersParams;
+  populate?: PopulateParams;
   count: boolean;
   ordering: unknown;
   _q?: string;
@@ -70,12 +72,26 @@ export interface Query {
   publicationState?: 'live' | 'preview';
 }
 
-export interface ConvertedQuery {
-  orderBy?: SortQuery;
-  select?: FieldsQuery;
-  where?: FiltersQuery;
+type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
+type OrderByQuery = SortMap | SortMap[];
+type SelectQuery = string | string[];
+export interface WhereQuery {
+  [key: string]: any;
+}
+
+type PopulateQuery =
+  | boolean
+  | string[]
+  | {
+      [key: string]: PopulateQuery;
+    };
+
+export interface Query {
+  orderBy?: OrderByQuery;
+  select?: SelectQuery;
+  where?: WhereQuery;
   // NOTE: those are internal DB filters do not modify
-  filters?: any;
+  filters?: FiltersQuery;
   populate?: PopulateQuery;
   count?: boolean;
   ordering?: unknown;
@@ -121,7 +137,7 @@ const isStringArray = (value: unknown): value is string[] =>
 /**
  * Sort query parser
  */
-const convertSortQueryParams = (sortQuery: SortQuery): SortMap | SortMap[] => {
+const convertSortQueryParams = (sortQuery: SortParams): OrderByQuery => {
   if (typeof sortQuery === 'string') {
     return convertStringSortQueryParam(sortQuery);
   }
@@ -252,7 +268,7 @@ class InvalidPopulateError extends Error {
 
 // NOTE: we could support foo.* or foo.bar.* etc later on
 const convertPopulateQueryParams = (
-  populate: PopulateQuery,
+  populate: PopulateParams,
   schema: Model,
   depth = 0
 ): PopulateQuery => {
@@ -284,7 +300,7 @@ const convertPopulateQueryParams = (
   throw new InvalidPopulateError();
 };
 
-const convertPopulateObject = (populate: PopulateParams, schema: Model) => {
+const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model) => {
   if (!schema) {
     return {};
   }
@@ -375,7 +391,7 @@ const convertPopulateObject = (populate: PopulateParams, schema: Model) => {
   }, {});
 };
 
-const convertNestedPopulate = (subPopulate: PopulateQuery, schema: Model) => {
+const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema: Model) => {
   if (_.isString(subPopulate)) {
     return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
@@ -384,14 +400,14 @@ const convertNestedPopulate = (subPopulate: PopulateQuery, schema: Model) => {
     return subPopulate;
   }
 
-  if (!_.isPlainObject(subPopulate)) {
+  if (!isPlainObject(subPopulate)) {
     throw new Error(`Invalid nested populate. Expected '*' or an object`);
   }
 
   const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
     subPopulate;
 
-  const query: ConvertedQuery = {};
+  const query: Query = {};
 
   if (sort) {
     query.orderBy = convertSortQueryParams(sort);
@@ -440,7 +456,7 @@ const convertNestedPopulate = (subPopulate: PopulateQuery, schema: Model) => {
   return query;
 };
 
-const convertFieldsQueryParams = (fields: FieldsQuery, depth = 0): string[] | undefined => {
+const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery | undefined => {
   if (depth === 0 && fields === '*') {
     return undefined;
   }
@@ -462,7 +478,7 @@ const convertFieldsQueryParams = (fields: FieldsQuery, depth = 0): string[] | un
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
-const convertFiltersQueryParams = (filters: FiltersQuery, schema: Model) => {
+const convertFiltersQueryParams = (filters: FiltersParams, schema: Model): WhereQuery => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
   if (!isObject(filters)) {
@@ -475,9 +491,9 @@ const convertFiltersQueryParams = (filters: FiltersQuery, schema: Model) => {
   return convertAndSanitizeFilters(filtersCopy, schema);
 };
 
-const convertAndSanitizeFilters = (filters: FiltersQuery, schema: Model) => {
+const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): WhereQuery => {
   if (!isPlainObject(filters)) {
-    return filters;
+    return filters as WhereQuery;
   }
 
   if (Array.isArray(filters)) {
@@ -549,7 +565,7 @@ const convertAndSanitizeFilters = (filters: FiltersQuery, schema: Model) => {
 const convertPublicationStateParams = (
   schema: Model,
   params: { publicationState?: 'live' | 'preview' } = {},
-  query: ConvertedQuery = {}
+  query: Query = {}
 ) => {
   if (!schema) {
     return;
@@ -573,11 +589,11 @@ const convertPublicationStateParams = (
   }
 };
 
-const transformParamsToQuery = (uid: string, params: Query) => {
+const transformParamsToQuery = (uid: string, params: Params): Query => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
   const schema = strapi.getModel(uid);
 
-  const query: ConvertedQuery = {};
+  const query: Query = {};
 
   const { _q, sort, filters, fields, populate, page, pageSize, start, limit } = params;
 
