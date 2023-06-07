@@ -31,6 +31,7 @@ module.exports = ({ strapi }) => {
           await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
           return this.transferContentType(srcWorkflow, uid);
         }
+        // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
         const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
         await contentManagerContentTypeService.updateConfiguration(
           { uid },
@@ -45,6 +46,7 @@ module.exports = ({ strapi }) => {
       });
 
       await mapAsync(deleted, async (uid) => {
+        // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
         const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
         await contentManagerContentTypeService.updateConfiguration(
           { uid },
