@@ -13,8 +13,6 @@ import {
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import pick from 'lodash/pick';
-import omit from 'lodash/omit';
 import { Helmet } from 'react-helmet';
 import {
   Main,
@@ -102,7 +100,7 @@ const ProfilePage = () => {
 
   const submitMutation = useMutation(
     async (body) => {
-      const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
+      const { confirmPassword, currentTheme, ...dataToSend } = body;
       const { data } = await put('/admin/users/me', dataToSend);
 
       return { ...data.data, currentTheme: body.currentTheme };
@@ -110,10 +108,8 @@ const ProfilePage = () => {
     {
       async onSuccess(data) {
         await queryClient.invalidateQueries('user');
-
-        auth.setUserInfo(
-          pick(data, ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'])
-        );
+        const { email, firstname, lastname, username, preferedLanguage } = data;
+        auth.setUserInfo({ email, firstname, lastname, username, preferedLanguage });
         const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
         setUserDisplayName(userDisplayName);
         changeLocale(data.preferedLanguage);
@@ -157,16 +153,8 @@ const ProfilePage = () => {
     );
   };
 
-  const fieldsToPick = [
-    'currentTheme',
-    'email',
-    'firstname',
-    'lastname',
-    'username',
-    'preferedLanguage',
-  ];
-
-  const initialData = pick({ ...data, currentTheme }, fieldsToPick);
+  const { email, firstname, lastname, username, preferedLanguage } = data;
+  const initialData = { email, firstname, lastname, username, preferedLanguage, currentTheme };
 
   if (isLoading) {
     return (
