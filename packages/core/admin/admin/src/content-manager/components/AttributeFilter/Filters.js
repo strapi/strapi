@@ -49,7 +49,10 @@ Filters.propTypes = {
     PropTypes.shape({
       name: PropTypes.string.isRequired,
       metadatas: PropTypes.shape({ label: PropTypes.string }),
-      fieldSchema: PropTypes.shape({ type: PropTypes.string }),
+      fieldSchema: PropTypes.shape({
+        type: PropTypes.string,
+        mainField: PropTypes.shape({ name: PropTypes.string }),
+      }),
     })
   ).isRequired,
 };

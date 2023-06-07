@@ -1,44 +1,35 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import { Combobox, ComboboxOption } from '@strapi/design-system';
+import { getDisplayName } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 
 const AdminUsersFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();
-  const { users, isLoading } = useAdminUsers();
-
-  const getDisplayNameFromUser = (user) => {
-    if (user.username) {
-      return user.username;
-    }
-
-    if (user.firstname && user.lastname) {
-      return formatMessage(
-        {
-          id: 'content-manager.components.Filters.fullname',
-          defaultMessage: '{firstname} {lastname}',
-        },
-        {
-          firstname: user.firstname,
-          lastname: user.lastname,
-        }
-      );
-    }
-
-    return user.email;
-  };
+  const { users, isLoading } = useAdminUsers({}, { staleTime: 2 * (1000 * 60) });
 
   return (
     <Combobox value={value} onChange={onChange} loading={isLoading}>
       {users.map((user) => {
         return (
-          <ComboboxOption key={user.id} value={user.id}>
-            {getDisplayNameFromUser(user)}
+          <ComboboxOption key={user.id} value={user.id.toString()}>
+            {getDisplayName(user, formatMessage)}
           </ComboboxOption>
         );
       })}
     </Combobox>
   );
+};
+
+AdminUsersFilter.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
+};
+
+AdminUsersFilter.defaultProps = {
+  value: '',
 };
 
 export default AdminUsersFilter;
