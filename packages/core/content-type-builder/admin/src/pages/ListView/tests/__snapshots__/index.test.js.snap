@@ -69,7 +69,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   color: #4945ff;
 }
 
-.c61 {
+.c62 {
   font-size: 0.75rem;
   line-height: 1.33;
   display: block;

@@ -1146,20 +1146,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       >
                         <label
                           class="c11 c27 c28"
-                          for="8"
+                          for=":r6:"
                         >
                           Entries per page
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-0"
-                          aria-describedby="8-hint 8-error"
+                          aria-controls="radix-:r9:"
+                          aria-describedby=":r6:-hint :r6:-error"
                           aria-expanded="false"
                           aria-label="Entries per page"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="8"
+                          id=":r6:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1203,7 +1203,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         </div>
                         <p
                           class="c11 c51"
-                          id="8-hint"
+                          id=":r6:-hint"
                         >
                           Note: You can override this value in the Collection Type settings page.
                         </p>
@@ -1221,20 +1221,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       >
                         <label
                           class="c11 c27 c28"
-                          for="11"
+                          for=":ra:"
                         >
                           Default sort attribute
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-1"
-                          aria-describedby="11-hint 11-error"
+                          aria-controls="radix-:rd:"
+                          aria-describedby=":ra:-hint :ra:-error"
                           aria-expanded="false"
                           aria-label="Default sort attribute"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="11"
+                          id=":ra:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1290,20 +1290,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                       >
                         <label
                           class="c11 c27 c28"
-                          for="14"
+                          for=":re:"
                         >
                           Default sort order
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-2"
-                          aria-describedby="14-hint 14-error"
+                          aria-controls="radix-:rh:"
+                          aria-describedby=":re:-hint :re:-error"
                           aria-expanded="false"
                           aria-label="Default sort order"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="14"
+                          id=":re:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -1590,11 +1590,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                   <div>
                     <span>
                       <button
-                        aria-controls="16"
+                        aria-controls=":ri:"
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="true"
-                        aria-labelledby="15"
+                        aria-labelledby=":rj:"
                         class="c70 c34 c15 c71"
                         data-testid="add-field"
                         tabindex="0"
@@ -2802,20 +2802,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <label
                           class="c11 c27 c28"
-                          for="46"
+                          for=":r24:"
                         >
                           Entries per page
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-24"
-                          aria-describedby="46-hint 46-error"
+                          aria-controls="radix-:r27:"
+                          aria-describedby=":r24:-hint :r24:-error"
                           aria-expanded="false"
                           aria-label="Entries per page"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="46"
+                          id=":r24:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -2859,7 +2859,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         </div>
                         <p
                           class="c11 c51"
-                          id="46-hint"
+                          id=":r24:-hint"
                         >
                           Note: You can override this value in the Collection Type settings page.
                         </p>
@@ -2877,20 +2877,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <label
                           class="c11 c27 c28"
-                          for="49"
+                          for=":r28:"
                         >
                           Default sort attribute
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-25"
-                          aria-describedby="49-hint 49-error"
+                          aria-controls="radix-:r2b:"
+                          aria-describedby=":r28:-hint :r28:-error"
                           aria-expanded="false"
                           aria-label="Default sort attribute"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="49"
+                          id=":r28:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -2946,20 +2946,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                       >
                         <label
                           class="c11 c27 c28"
-                          for="52"
+                          for=":r2c:"
                         >
                           Default sort order
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-26"
-                          aria-describedby="52-hint 52-error"
+                          aria-controls="radix-:r2f:"
+                          aria-describedby=":r2c:-hint :r2c:-error"
                           aria-expanded="false"
                           aria-label="Default sort order"
                           class="c43 c23 c44"
                           data-state="closed"
                           dir="ltr"
-                          id="52"
+                          id=":r2c:"
                           overflow="hidden"
                           role="combobox"
                           tabindex="0"
@@ -3349,11 +3349,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                   <div>
                     <span>
                       <button
-                        aria-controls="54"
+                        aria-controls=":r2g:"
                         aria-disabled="false"
                         aria-expanded="true"
                         aria-haspopup="true"
-                        aria-labelledby="53"
+                        aria-labelledby=":r2h:"
                         class="c70 c34 c15 c71"
                         data-testid="add-field"
                         tabindex="0"
