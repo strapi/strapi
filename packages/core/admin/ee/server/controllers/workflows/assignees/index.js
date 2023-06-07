@@ -28,7 +28,9 @@ module.exports = {
       .service('permission-checker')
       .create({ userAbility: ctx.state.userAbility, model });
 
-    // TODO: check if user has update permission on the entity
+    if (permissionChecker.cannot.update()) {
+      return ctx.forbidden('You cannot update this entity assignee');
+    }
 
     const { id: assigneeId } = await validateUpdateAssigneeOnEntity(
       ctx.request?.body?.data,
@@ -39,8 +41,8 @@ module.exports = {
       throw new ApplicationError(`Review workflows is not activated on ${model}.`);
     }
 
-    const entity = await assigneeService.updateEntityAssignee(id, model, assigneeId);
-    const sanitizedEntity = await permissionChecker.sanitizeOutput(entity);
+    const updatedEntity = await assigneeService.updateEntityAssignee(id, model, assigneeId);
+    const sanitizedEntity = await permissionChecker.sanitizeOutput(updatedEntity);
 
     ctx.body = { data: sanitizedEntity };
   },
