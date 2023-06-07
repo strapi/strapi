@@ -653,7 +653,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     >
                       <label
                         class="c8 c24 c25"
-                        for="1"
+                        for=":r0:"
                       >
                         Auto-registration
                       </label>
@@ -691,14 +691,14 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                           </span>
                         </div>
                         <input
-                          aria-describedby="1-hint"
+                          aria-describedby=":r0:-hint"
                           aria-disabled="false"
                           aria-label="autoRegister"
                           aria-required="false"
                           checked=""
                           class="c36"
                           data-testid="autoRegister"
-                          id="1"
+                          id=":r0:"
                           name="autoRegister"
                           type="checkbox"
                         />
@@ -706,7 +706,7 @@ exports[`Admin | ee | SettingsPage | SSO renders and matches the snapshot 1`] = 
                     </label>
                     <p
                       class="c8 c37"
-                      id="1-hint"
+                      id=":r0:-hint"
                     >
                       Create new user on SSO login if no account exists
                     </p>

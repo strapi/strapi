@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -105,7 +105,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    act(() => history.push('/settings/api-tokens'));
     const app = makeApp(history);
 
     const { container, getByText } = render(app);
@@ -785,7 +785,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="0"
+                              aria-labelledby=":r0:"
                               class="c5 c26"
                               label="Name"
                               tabindex="-1"
@@ -799,7 +799,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="1"
+                                aria-labelledby=":r2:"
                                 class="c28 c29 c30 c31"
                                 tabindex="-1"
                                 type="button"
@@ -841,7 +841,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="2"
+                              aria-labelledby=":r4:"
                               class="c5 c26"
                               label="Description"
                               tabindex="-1"
@@ -864,7 +864,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="3"
+                              aria-labelledby=":r6:"
                               class="c5 c26"
                               label="Created at"
                               tabindex="-1"
@@ -887,7 +887,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="4"
+                              aria-labelledby=":r8:"
                               class="c5 c26"
                               label="Last used"
                               tabindex="-1"
@@ -1018,7 +1018,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="5"
+                                aria-labelledby=":ra:"
                                 class="c28 c29 c30 c31"
                                 name="delete"
                                 tabindex="-1"
@@ -1089,7 +1089,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    act(() => history.push('/settings/api-tokens'));
     const app = makeApp(history);
 
     const { container } = render(app);
@@ -1110,7 +1110,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     }));
     const history = createMemoryHistory();
-    history.push('/settings/api-tokens');
+    act(() => history.push('/settings/api-tokens'));
     const app = makeApp(history);
 
     const { container } = render(app);

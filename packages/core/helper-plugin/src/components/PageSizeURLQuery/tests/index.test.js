@@ -239,11 +239,7 @@ describe('<PageSizeURLQuery />', () => {
               role="combobox"
               tabindex="0"
             >
-              <span
                 class="c8 c9"
-              >
-                <span
-                  class="c2 c10 c11"
                 >
                   <span
                     class="c12"

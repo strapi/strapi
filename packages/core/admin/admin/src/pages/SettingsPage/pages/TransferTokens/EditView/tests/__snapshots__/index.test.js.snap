@@ -991,7 +991,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
     </form>
   </main>
   <div
-    class="c43"
+    class="c0"
   >
     <p
       aria-live="polite"
@@ -1965,7 +1965,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                       >
                         <label
                           class="c8 c30 c31"
-                          for="10"
+                          for=":r1:"
                         >
                           Name
                           <span
@@ -1982,7 +1982,7 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
                             aria-invalid="false"
                             aria-required="true"
                             class="c35"
-                            id="10"
+                            id=":r1:"
                             name="name"
                             value="My super token"
                           />

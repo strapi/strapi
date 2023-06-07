@@ -915,7 +915,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
         >
           <div>
             <button
-              aria-controls="0"
+              aria-controls=":r0:"
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="true"
@@ -994,7 +994,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
             <span>
               <button
                 aria-disabled="false"
-                aria-labelledby="1"
+                aria-labelledby=":r1:"
                 class="c17 c18 c7 c19"
                 tabindex="0"
                 type="button"
@@ -1024,7 +1024,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <span>
             <button
               aria-disabled="false"
-              aria-labelledby="2"
+              aria-labelledby=":r3:"
               class="c17 c18 c7 c19"
               tabindex="0"
               type="button"

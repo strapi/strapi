@@ -951,7 +951,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="1"
+                            for=":r0:"
                           >
                             Enable search
                           </label>
@@ -993,7 +993,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="1"
+                              id=":r0:"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -1016,7 +1016,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="3"
+                            for=":r2:"
                           >
                             Enable filters
                           </label>
@@ -1058,7 +1058,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="3"
+                              id=":r2:"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -1081,7 +1081,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         >
                           <label
                             class="c11 c27 c28"
-                            for="5"
+                            for=":r4:"
                           >
                             Enable bulk actions
                           </label>
@@ -1122,7 +1122,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                               aria-disabled="false"
                               aria-required="false"
                               class="c39"
-                              id="5"
+                              id=":r4:"
                               name="settings.bulkable"
                               type="checkbox"
                             />
@@ -2607,7 +2607,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="39"
+                            for=":r1u:"
                           >
                             Enable search
                           </label>
@@ -2649,7 +2649,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="39"
+                              id=":r1u:"
                               name="settings.searchable"
                               type="checkbox"
                             />
@@ -2672,7 +2672,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="41"
+                            for=":r20:"
                           >
                             Enable filters
                           </label>
@@ -2714,7 +2714,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-required="false"
                               checked=""
                               class="c39"
-                              id="41"
+                              id=":r20:"
                               name="settings.filterable"
                               type="checkbox"
                             />
@@ -2737,7 +2737,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         >
                           <label
                             class="c11 c27 c28"
-                            for="43"
+                            for=":r22:"
                           >
                             Enable bulk actions
                           </label>
@@ -2778,7 +2778,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                               aria-disabled="false"
                               aria-required="false"
                               class="c39"
-                              id="43"
+                              id=":r22:"
                               name="settings.bulkable"
                               type="checkbox"
                             />

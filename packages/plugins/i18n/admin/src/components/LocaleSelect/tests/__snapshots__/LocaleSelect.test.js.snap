@@ -181,7 +181,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         class="c6"
       >
         <button
-          aria-controls="radix-0"
+          aria-controls="radix-:r3:"
           aria-disabled="false"
           aria-expanded="false"
           aria-hidden="true"

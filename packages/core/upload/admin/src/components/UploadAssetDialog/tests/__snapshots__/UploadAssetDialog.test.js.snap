@@ -530,11 +530,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                   role="tablist"
                 >
                   <button
-                    aria-controls="0-0-tabpanel"
+                    aria-controls=":r0:-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c14"
-                    id="0-0-tab"
+                    id=":r0:-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -553,7 +553,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c14"
-                    id="0-1-tab"
+                    id=":r0:-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -575,8 +575,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="0-0-tab"
-                  id="0-0-tabpanel"
+                  aria-labelledby=":r0:-0-tab"
+                  id=":r0:-0-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1256,7 +1256,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c14"
-                    id="32-0-tab"
+                    id=":r10:-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -1272,11 +1272,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     </div>
                   </button>
                   <button
-                    aria-controls="32-1-tabpanel"
+                    aria-controls=":r10:-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c14"
-                    id="32-1-tab"
+                    id=":r10:-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -1298,8 +1298,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="32-1-tab"
-                  id="32-1-tabpanel"
+                  aria-labelledby=":r10:-1-tab"
+                  id=":r10:-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >

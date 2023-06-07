@@ -18,6 +18,10 @@ describe('Entity service', () => {
       },
     },
     query: jest.fn(() => ({})),
+    webhookStore: {
+      allowedEvents: new Map([['ENTRY_CREATE', 'entry.create']]),
+      addAllowedEvent: jest.fn(),
+    },
   };
 
   describe('Decorator', () => {
@@ -25,7 +29,7 @@ describe('Entity service', () => {
       'Can decorate',
       async (method) => {
         const instance = createEntityService({
-          strapi: {},
+          strapi: global.strapi,
           db: {},
           eventHub: new EventEmitter(),
         });
@@ -61,8 +65,9 @@ describe('Entity service', () => {
       };
 
       const fakeStrapi = {
+        ...global.strapi,
         getModel: jest.fn(() => {
-          return { kind: 'singleType', privateAttributes: [] };
+          return { kind: 'singleType' };
         }),
       };
 
@@ -98,12 +103,15 @@ describe('Entity service', () => {
       global.strapi.getModel.mockImplementation((modelName) => fakeModels[modelName]);
       global.strapi.query.mockImplementation(() => fakeQuery);
     });
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
+
     afterAll(() => {
       global.strapi.getModel.mockImplementation(() => ({}));
     });
+
     describe('assign default values', () => {
       let instance;
       const entityUID = 'api::entity.entity';
@@ -133,7 +141,6 @@ describe('Entity service', () => {
           uid: entityUID,
           kind: 'contentType',
           modelName: 'test-model',
-          privateAttributes: [],
           options: {},
           attributes: {
             attrStringDefaultRequired: {
@@ -374,10 +381,13 @@ describe('Entity service', () => {
           },
         };
 
-        global.strapi = fakeStrapi;
+        global.strapi = {
+          ...global.strapi,
+          ...fakeStrapi,
+        };
 
         instance = createEntityService({
-          strapi: fakeStrapi,
+          strapi: global.strapi,
           db: fakeDB,
           eventHub: new EventEmitter(),
           entityValidator,
@@ -467,7 +477,6 @@ describe('Entity service', () => {
           modelName: 'entity',
           collectionName: 'entity',
           uid: entityUID,
-          privateAttributes: [],
           options: {},
           info: {
             singularName: 'entity',
@@ -524,6 +533,7 @@ describe('Entity service', () => {
         };
 
         global.strapi = {
+          ...global.strapi,
           getModel: jest.fn((uid) => {
             return fakeModels[uid];
           }),

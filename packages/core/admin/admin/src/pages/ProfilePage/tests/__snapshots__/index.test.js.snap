@@ -887,7 +887,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for="1"
+                          for=":r8:"
                         >
                           Current Password
                         </label>
@@ -899,7 +899,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-invalid="false"
                             aria-required="false"
                             class="c27 c28"
-                            id="1"
+                            id=":r8:"
                             name="currentPassword"
                             type="password"
                             value=""
@@ -953,7 +953,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for="3"
+                          for=":ra:"
                         >
                           Password
                         </label>
@@ -966,7 +966,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-required="false"
                             autocomplete="new-password"
                             class="c27 c28"
-                            id="3"
+                            id=":ra:"
                             name="password"
                             type="password"
                             value=""
@@ -1016,7 +1016,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                       >
                         <label
                           class="c5 c21 c22"
-                          for="5"
+                          for=":rc:"
                         >
                           Password confirmation
                         </label>
@@ -1029,7 +1029,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                             aria-required="false"
                             autocomplete="new-password"
                             class="c27 c28"
-                            id="5"
+                            id=":rc:"
                             name="confirmPassword"
                             type="password"
                             value=""
