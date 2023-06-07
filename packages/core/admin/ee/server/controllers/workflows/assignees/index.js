@@ -21,20 +21,27 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const assigneeService = getService('assignees');
-    const { model_uid: modelUID, id: entityIdString } = ctx.params;
-    const entityId = Number(entityIdString);
+    const { model_uid: model, id } = ctx.params;
+
+    const permissionChecker = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility: ctx.state.userAbility, model });
+
+    // TODO: check if user has update permission on the entity
 
     const { id: assigneeId } = await validateUpdateAssigneeOnEntity(
       ctx.request?.body?.data,
-      'You should pass an id to the body of the put request.'
+      'You should pass a valid id to the body of the put request.'
     );
 
-    if (!hasReviewWorkflow({ strapi }, modelUID)) {
-      throw new ApplicationError(`Review workflows is not activated on ${modelUID}.`);
+    if (!hasReviewWorkflow({ strapi }, model)) {
+      throw new ApplicationError(`Review workflows is not activated on ${model}.`);
     }
 
-    const data = await assigneeService.updateEntity({ id: entityId, modelUID }, assigneeId);
+    const entity = await assigneeService.updateEntityAssignee(id, model, assigneeId);
+    const sanitizedEntity = await permissionChecker.sanitizeOutput(entity);
 
-    ctx.body = { data };
+    ctx.body = { data: sanitizedEntity };
   },
 };
