@@ -14,10 +14,17 @@ const validateUpdateStagesSchema = yup
   .required()
   .max(200, 'You can not create more than 200 stages');
 
-const validateEntityUpdate = yup
+const validateUpdateStageOnEntity = yup
   .object()
   .shape({
     id: yup.number().integer().min(1).required(),
+  })
+  .required();
+
+const validateUpdateAssigneeOnEntity = yup
+  .object()
+  .shape({
+    id: yup.number().integer().min(1),
   })
   .required();
 
@@ -26,6 +33,6 @@ module.exports = {
     strict: false,
     stripUnknown: true,
   }),
-  validateUpdateStageOnEntity: validateYupSchema(validateEntityUpdate),
-  validateUpdateAssigneeOnEntity: validateYupSchema(validateEntityUpdate),
+  validateUpdateStageOnEntity: validateYupSchema(validateUpdateStageOnEntity),
+  validateUpdateAssigneeOnEntity: validateYupSchema(validateUpdateAssigneeOnEntity),
 };
