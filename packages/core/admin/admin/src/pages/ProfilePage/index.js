@@ -89,7 +89,6 @@ const ProfilePage = () => {
       };
     },
     {
-      onSuccess() {},
       onError() {
         toggleNotification({
           type: 'warning',
