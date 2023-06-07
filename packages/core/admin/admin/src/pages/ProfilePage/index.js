@@ -153,9 +153,6 @@ const ProfilePage = () => {
     );
   };
 
-  const { email, firstname, lastname, username, preferedLanguage } = data;
-  const initialData = { email, firstname, lastname, username, preferedLanguage, currentTheme };
-
   if (isLoading) {
     return (
       <Main aria-busy="true">
@@ -179,6 +176,8 @@ const ProfilePage = () => {
   }
 
   const hasLockedRole = dataSSO?.isSSOLocked;
+  const { email, firstname, lastname, username, preferedLanguage } = data;
+  const initialData = { email, firstname, lastname, username, preferedLanguage, currentTheme };
 
   return (
     <Main aria-busy={isSubmittingForm}>
