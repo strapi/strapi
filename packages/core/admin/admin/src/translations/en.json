@@ -650,7 +650,6 @@
   "content-manager.components.FiltersPickWrapper.hide": "Hide",
   "content-manager.components.Filters.createdBy": "Created by",
   "content-manager.components.Filters.updatedBy": "Updated by",
-  "content-manager.components.Filters.fullname": "{firstname} {lastname}",
   "content-manager.components.LeftMenu.Search.label": "Search for a content type",
   "content-manager.components.LeftMenu.collection-types": "Collection Types",
   "content-manager.components.LeftMenu.single-types": "Single Types",
