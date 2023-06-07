@@ -7916,6 +7916,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
   dependencies:
+    "@strapi/utils": 4.10.7
     date-fns: 2.30.0
     debug: 4.3.4
     fs-extra: 10.0.0
