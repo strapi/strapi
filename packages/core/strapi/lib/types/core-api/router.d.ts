@@ -11,9 +11,9 @@ export interface PolicyContext extends ExtendableContext {
   type: string;
 }
 
-export type PolicyImplementation<T = unknown> = (
+export type PolicyImplementation<TCfg = unknown> = (
   ctx: PolicyContext,
-  cfg: T,
+  cfg: TCfg,
   { strapi }: { strapi: Strapi }
 ) => boolean | undefined;
 
