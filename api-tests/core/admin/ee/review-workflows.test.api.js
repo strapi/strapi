@@ -11,6 +11,7 @@ const {
   STAGE_MODEL_UID,
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
+  ENTITY_ASSIGNEE_ATTRIBUTE,
 } = require('../../../../packages/core/admin/ee/server/constants/workflows');
 
 const defaultStages = require('../../../../packages/core/admin/ee/server/constants/default-stages.json');
@@ -550,6 +551,80 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       for (const entry of productsAfter.results) {
         expect(entry[ENTITY_STAGE_ATTRIBUTE].name).toEqual(defaultStage.name);
       }
+    });
+  });
+
+  describe('Update assignee on an entity', () => {
+    describe('Review Workflow is enabled', () => {
+      beforeAll(async () => {
+        await updateContentType(productUID, {
+          components: [],
+          contentType: { ...model, reviewWorkflows: true },
+        });
+        await restart();
+      });
+
+      test('Should update the assignee on an entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+        const user = requests.admin.getLoggedUser();
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: user.id },
+          },
+        });
+
+        expect(response.status).toEqual(200);
+        const assignee = response.body.data[ENTITY_ASSIGNEE_ATTRIBUTE];
+        expect(assignee.id).toEqual(user.id);
+        expect(assignee).not.toHaveProperty('password');
+      });
+
+      test('Should throw an error if user does not exist', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: 1234 },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toEqual('ApplicationError');
+        expect(response.body.error.message).toEqual('Selected user does not exist');
+      });
+    });
+
+    describe('Review Workflow is disabled', () => {
+      beforeAll(async () => {
+        await updateContentType(productUID, {
+          components: [],
+          contentType: { ...model, reviewWorkflows: false },
+        });
+        await restart();
+      });
+
+      test('Should not update the entity', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+        const user = requests.admin.getLoggedUser();
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: user.id },
+          },
+        });
+
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toBe('ApplicationError');
+      });
     });
   });
 });
