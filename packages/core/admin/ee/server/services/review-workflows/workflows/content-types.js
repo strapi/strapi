@@ -12,6 +12,16 @@ module.exports = ({ strapi }) => {
   const stagesService = getService('stages', { strapi });
   const workflowsService = getService('workflows', { strapi });
 
+  const updateContentTypeConfig = async (uid, reviewWorkflowOption) => {
+    // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
+    const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
+
+    await contentManagerContentTypeService.updateConfiguration(
+      { uid },
+      { options: merge(modelConfig.options, { reviewWorkflows: reviewWorkflowOption }) }
+    );
+  };
+
   return {
     /**
      * Migrates entities stages. Used when a content type is assigned to a workflow.
@@ -31,12 +41,7 @@ module.exports = ({ strapi }) => {
           await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
           return this.transferContentType(srcWorkflow, uid);
         }
-        // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
-        const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
-        await contentManagerContentTypeService.updateConfiguration(
-          { uid },
-          { options: merge(modelConfig.options, { reviewWorkflows: true }) }
-        );
+        await updateContentTypeConfig(uid, true);
 
         // Create new stages links to the new stage
         return stagesService.updateEntitiesStage(uid, {
@@ -46,12 +51,7 @@ module.exports = ({ strapi }) => {
       });
 
       await mapAsync(deleted, async (uid) => {
-        // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
-        const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
-        await contentManagerContentTypeService.updateConfiguration(
-          { uid },
-          { options: merge(modelConfig.options, { reviewWorkflows: false }) }
-        );
+        await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
       });
     },
