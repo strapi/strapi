@@ -1,6 +1,5 @@
 ---
 title: Remote Strapi
-slug: /source-providers/remote-strapi
 tags:
   - providers
   - data-transfer

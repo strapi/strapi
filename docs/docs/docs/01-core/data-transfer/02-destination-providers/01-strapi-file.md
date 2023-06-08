@@ -1,6 +1,5 @@
 ---
-title: Strapi File
-slug: /destination-providers/strapi-file
+title: Strapi File=
 tags:
   - providers
   - data-transfer

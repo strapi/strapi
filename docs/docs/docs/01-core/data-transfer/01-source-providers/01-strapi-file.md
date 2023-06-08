@@ -1,6 +1,5 @@
 ---
 title: Strapi File
-slug: /source-providers/strapi-file
 tags:
   - providers
   - data-transfer

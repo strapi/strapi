@@ -1,6 +1,5 @@
 ---
-title: Local Strapi
-slug: /destination-providers/local-strapi
+title: Local Strapi=
 tags:
   - providers
   - data-transfer

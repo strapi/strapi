@@ -1,6 +1,5 @@
 ---
 title: Introduction
-slug: /data-transfer
 tags:
   - data-transfer
   - experimental
