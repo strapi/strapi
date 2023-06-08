@@ -53,6 +53,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
       toggleNotification({
         type: 'warning',
         message: location.state.error,
+        timeout: 5000,
       });
     }
   });
