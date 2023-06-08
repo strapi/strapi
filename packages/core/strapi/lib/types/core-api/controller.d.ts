@@ -24,22 +24,22 @@ export type Generic = {
 /**
  * Core-API collection type controller
  */
-export type CollectionType = Base & {
+export interface CollectionType extends Base {
   find?: Common.ControllerHandler<unknown>;
   findOne?: Common.ControllerHandler<unknown>;
   create?: Common.ControllerHandler<unknown>;
   update?: Common.ControllerHandler<unknown>;
   delete?: Common.ControllerHandler<unknown>;
-};
+}
 
 /**
  * Core-API single type controller
  */
-export type SingleType = Base & {
+export interface SingleType extends Base {
   find?: Common.ControllerHandler<unknown>;
   update?: Common.ControllerHandler<unknown>;
   delete?: Common.ControllerHandler<unknown>;
-};
+}
 
 export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
   [

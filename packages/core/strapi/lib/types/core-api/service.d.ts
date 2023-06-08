@@ -20,22 +20,22 @@ export type Generic = {
 /**
  * Core-API collection type service
  */
-export type CollectionType = Base & {
+export interface CollectionType extends Base {
   find?(params: object): Promise<Entity[]> | Entity;
   findOne?(entityId: string, params: object): Promise<Entity> | Entity;
   create?(params: object): Promise<Entity> | Entity;
   update?(entityId: string, params: object): Promise<Entity> | Entity;
   delete?(entityId: string, params: object): Promise<Entity> | Entity;
-};
+}
 
 /**
  * Core-API single type service
  */
-export type SingleType = Base & {
+export interface SingleType extends Base {
   find?(params: object): Promise<Entity> | Entity;
   createOrUpdate?(params: object): Promise<Entity> | Entity;
   delete?(params: object): Promise<Entity> | Entity;
-};
+}
 
 export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
   [

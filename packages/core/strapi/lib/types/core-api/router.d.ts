@@ -27,19 +27,19 @@ export type Generic = {
   [method: string | number | symbol]: HandlerConfig;
 };
 
-export type SingleTypeRouterConfig = Generic & {
+export interface SingleTypeRouterConfig extends Generic {
   find?: HandlerConfig;
   update?: HandlerConfig;
   delete?: HandlerConfig;
-};
+}
 
-export type CollectionTypeRouterConfig = Generic & {
+export interface CollectionTypeRouterConfig extends Generic {
   find?: HandlerConfig;
   findOne?: HandlerConfig;
   create?: HandlerConfig;
   update?: HandlerConfig;
   delete?: HandlerConfig;
-};
+}
 
 export type RouterConfig<T extends Common.UID.ContentType> = {
   prefix?: string;
