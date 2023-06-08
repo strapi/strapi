@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useQueryParams, getDisplayName } from '@strapi/helper-plugin';
-import { useQueryClient } from 'react-query';
 
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import useAllowedAttributes from './hooks/useAllowedAttributes';
@@ -47,7 +46,6 @@ const formatUsers = (users, formatMessage) => {
 const AttributeFilter = ({ contentType, slug, metadatas }) => {
   const { formatMessage } = useIntl();
   const allowedAttributes = useAllowedAttributes(contentType, slug);
-  const queryClient = useQueryClient();
   const [{ query }] = useQueryParams();
   const selectedUsers = getUsersSelected(query);
   const { users, isLoading } = useAdminUsers(
