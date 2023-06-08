@@ -55,7 +55,7 @@ export const TableRows = ({
   const handleCloneClick = (id) => async () => {
     try {
       const { data } = await post(
-        `/content-manager/collection-types/${contentType.uid}/clone/${id}?${pluginsQueryParams}`
+        `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
       );
 
       if ('id' in data) {
