@@ -27,13 +27,13 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },
           value: '$ne',
         },
-        // {
-        //   intlLabel: {
-        //     id: 'components.FilterOptions.FILTER_TYPES.$nei',
-        //     defaultMessage: 'is not (case insensitive)',
-        //   },
-        //   value: '$nei',
-        // },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$nei',
+            defaultMessage: 'is not (case insensitive)',
+          },
+          value: '$nei',
+        },
         {
           intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$null',

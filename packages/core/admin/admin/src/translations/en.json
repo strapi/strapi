@@ -564,6 +564,7 @@
   "components.FilterOptions.FILTER_TYPES.$lt": "is lower than",
   "components.FilterOptions.FILTER_TYPES.$lte": "is lower than or equal to",
   "components.FilterOptions.FILTER_TYPES.$ne": "is not",
+  "components.FilterOptions.FILTER_TYPES.$nei": "is not (case insensitive)",
   "components.FilterOptions.FILTER_TYPES.$notContains": "does not contain",
   "components.FilterOptions.FILTER_TYPES.$notContainsi": "does not contain (case insensitive)",
   "components.FilterOptions.FILTER_TYPES.$notNull": "is not null",
