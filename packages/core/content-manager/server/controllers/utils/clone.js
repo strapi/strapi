@@ -29,6 +29,8 @@ const hasProhibitedCloningFields = (uid) => {
         return (attribute.components || []).some((componentUID) =>
           hasProhibitedCloningFields(componentUID)
         );
+      case 'uid':
+        return true;
       default:
         return attribute?.unique ?? false;
     }
