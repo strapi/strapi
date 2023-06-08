@@ -82,7 +82,7 @@ export interface Strapi {
   /**
    * Find a controller using its unique identifier
    */
-  controller<T extends Common.UID.Controller>(uid: T): Shared.Controllers[T];
+  controller<TContentTypeUID extends Common.UID.Controller>(uid: TContentTypeUID): Shared.Controllers[TContentTypeUID];
 
   /**
    * Getter for the Strapi content types container
