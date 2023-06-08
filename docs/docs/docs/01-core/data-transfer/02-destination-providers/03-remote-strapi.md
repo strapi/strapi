@@ -1,5 +1,5 @@
 ---
-title: Remote Strapi=
+title: Remote Strapi
 tags:
   - providers
   - data-transfer

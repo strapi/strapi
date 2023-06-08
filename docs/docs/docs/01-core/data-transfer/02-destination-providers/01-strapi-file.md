@@ -1,5 +1,5 @@
 ---
-title: Strapi File=
+title: Strapi File
 tags:
   - providers
   - data-transfer
