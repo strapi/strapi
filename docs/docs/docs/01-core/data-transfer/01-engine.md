@@ -151,7 +151,7 @@ const diffHandler = async (context, next) => {
 engine.onSchemaDiff(diffHandler);
 ```
 
-After all the schemaDiffHandlers have been run, a diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
+After all the schemaDiffHandler middleware has been run, another diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
 
 ### Progress Tracking events
 
@@ -201,9 +201,52 @@ Transforms allow you to manipulate the data that is sent from the source before 
 
 ## Filter (excluding data)
 
-**TODO**
+Filters can be used to exclude data sent from the source before it is streamed to the destination. They are methods that accept an entity, link, schema, etc and return `true` to keep the entity and `false` to remove it.
+
+Here is an example that filters out all entities with an id higher than 100:
+
+```typescript
+const options = {
+  ...otherOptions,
+  transforms: {
+    entities: [
+      {
+        // exclude all ignored admin content types
+        filter(entity) {
+          return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+        },
+        // exclude all entities with an id higher than 100
+        filter(entity) {
+          return Number(entity.id) <= 100;
+        },
+      },
+    ],
+    links: [
+      {
+        // exclude all relations to ignored content types
+        filter(link) {
+          return (
+            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.left.type) &&
+            !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
+          );
+        },
+        // remember to exclude links as well or else an error will be thrown when attempting to link an entity we filtered
+        filter(entity) {
+          return Number(link.left.id) <= 100 || Number(link.right.id) <= 100)
+        },
+      },
+    ],
+  },
+};
+```
 
 ## Map (modifying data)
+
+Maps can be used to modify data sent from the source before it is streamed to the destination. They are methods that accept an entity, link, schema, etc and return the modified version of the object.
+
+This can be used, for example, to sanitize data between environments.
+
+Here is an example that removes a field called `somePrivateField` from a content type `privateThing`.
 
 ```typescript
 const options = {
@@ -228,6 +271,8 @@ const options = {
   },
 };
 ```
+
+By mapping schemas as well as entities, it's even possible (although complex!) to modify data structures between source and destination.
 
 ## Running a transfer
 
