@@ -32,4 +32,4 @@ AdminUsersFilter.defaultProps = {
   value: '',
 };
 
-export default AdminUsersFilter;
+export { AdminUsersFilter };

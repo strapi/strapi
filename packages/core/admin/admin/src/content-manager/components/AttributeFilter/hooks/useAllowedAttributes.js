@@ -43,6 +43,7 @@ const useAllowedAttributes = (contentType, slug) => {
   });
 
   if (canReadAdminUsers) {
+    // Author attributes are not listed on the contentType attributes, so we added them manually
     allowedAttributes.push('createdBy', 'updatedBy');
   }
 

@@ -102,7 +102,7 @@ export { default as getFileExtension } from './utils/getFileExtension/getFileExt
 export * from './utils/stopPropagation';
 export { default as difference } from './utils/difference';
 export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
-export { default as getDisplayName } from './utils/getDisplayName';
+export { getDisplayName } from './utils/getDisplayName';
 
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';

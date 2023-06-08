@@ -7,7 +7,7 @@ import { useQueryClient } from 'react-query';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import useAllowedAttributes from './hooks/useAllowedAttributes';
 import Filters from './Filters';
-import AdminUsersFilter from './AdminUsersFilter';
+import { AdminUsersFilter } from './AdminUsersFilter';
 
 const customOperators = [
   {
@@ -53,8 +53,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
   const { users, isLoading } = useAdminUsers(
     { filter: { id: { in: selectedUsers } } },
     {
-      enabled:
-        queryClient.getQueryData(['users', '', {}]) === undefined && selectedUsers.length > 0,
+      enabled: selectedUsers.length > 0,
     }
   );
 
