@@ -1,13 +1,12 @@
 import React from 'react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { getByRole, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { AdminUsersFilter } from '../AdminUsersFilter';
-import { act } from 'react-dom/test-utils';
 
 const server = setupServer(
   rest.get('*/admin/users', (req, res, ctx) => {
