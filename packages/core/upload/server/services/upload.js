@@ -17,9 +17,10 @@ const {
   sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  errors: { ApplicationError, NotFoundError },
+  errors: { NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
+const { mapAsync } = require('@strapi/utils');
 
 const {
   FILE_MODEL_UID,
@@ -33,7 +34,6 @@ const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
 const generateFileName = (name) => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
-
   return `${baseName}_${randomSuffix()}`;
 };
 
@@ -47,18 +47,13 @@ const sendMediaMetrics = (data) => {
   }
 };
 
-const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
-  const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+const createTmpFolder = async () => {
+  const tmpFolder = path.join(os.tmpdir(), 'strapi-upload-');
+  return fse.mkdtemp(tmpFolder);
+};
 
-  if (Array.isArray(files)) {
-    files.forEach((file) => {
-      file.tmpWorkingDirectory = tmpWorkingDirectory;
-    });
-  } else {
-    files.tmpWorkingDirectory = tmpWorkingDirectory;
-  }
-
-  return tmpWorkingDirectory;
+const assignTmpFolderToFiles = async (files, tmpWorkingDirectory) => {
+  return _.toArray(files).map((file) => ({ ...file, tmpWorkingDirectory }));
 };
 
 module.exports = ({ strapi }) => ({
@@ -129,55 +124,32 @@ module.exports = ({ strapi }) => ({
     );
     currentFile.getStream = () => fs.createReadStream(file.path);
 
-    const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
-      .plugin('upload')
-      .service('image-manipulation');
-
-    if (await isImage(currentFile)) {
-      if (await isFaultyImage(currentFile)) {
-        throw new ApplicationError('File is not a valid image');
-      }
-      if (await isOptimizableImage(currentFile)) {
-        return optimize(currentFile);
-      }
-    }
     return currentFile;
-  },
-
-  // TODO V5: remove enhanceFile
-  async enhanceFile(file, fileInfo = {}, metas = {}) {
-    process.emitWarning(
-      '[deprecated] In future versions, `enhanceFile` will be removed. Replace it with `enhanceAndValidateFile` instead.'
-    );
-    return this.enhanceAndValidateFile(file, fileInfo, metas);
   },
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
-
-    let uploadedFiles = [];
+    const tmpWorkingDirectory = await createTmpFolder();
 
     try {
       const { fileInfo, ...metas } = data;
 
-      const fileArray = Array.isArray(files) ? files : [files];
-      const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
+      // set temporary working directory to files
+      const _files = assignTmpFolderToFiles(files, tmpWorkingDirectory);
 
-      const doUpload = async (file, fileInfo) => {
+      const doUpload = async ([file, fileInfo]) => {
         const fileData = await this.enhanceAndValidateFile(file, fileInfo, metas);
         return this.uploadFileAndPersist(fileData, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
-      );
+      const filesAndInfo = _files.map((file, idx) => [file, _.toArray(fileInfo)[idx] || {}]);
+      return mapAsync(filesAndInfo, doUpload);
+    } catch {
+      return [];
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
     }
-
-    return uploadedFiles;
   },
 
   /**
@@ -238,10 +210,6 @@ module.exports = ({ strapi }) => ({
     await Promise.all(uploadPromises);
   },
 
-  /**
-   * Upload a file. If it is an image it will generate a thumbnail
-   * and responsive formats (if enabled).
-   */
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
     const { isImage } = getService('image-manipulation');
