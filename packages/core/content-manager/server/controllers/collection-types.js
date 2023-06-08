@@ -167,11 +167,9 @@ module.exports = {
 
   async autoClone(ctx) {
     const { model } = ctx.params;
-    const { body } = ctx.request;
 
-    // Trying to automatically clone the entity
-    // and model has unique or relational fields
-    if (isEmpty(body) && hasProhibitedCloningFields(model)) {
+    // Trying to automatically clone the entity and model has unique or relational fields
+    if (hasProhibitedCloningFields(model)) {
       throw new ApplicationError(
         'Entity could not be cloned as it has unique and/or relational fields. Please edit those fields manually and save to complete the cloning.'
       );
