@@ -3,8 +3,16 @@ import { stringify, parse } from 'qs';
 import getDefaultLocale from '../../utils/getDefaultLocale';
 
 const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permissions) => {
+  console.log('links', kind)
+
   return links.map((link) => {
     const contentTypeUID = link.to.split(`/${kind}/`)[1];
+
+    const currentURL = new URL(window.location.href);
+
+    console.log('window.location.href', window.location.href)
+
+    const currentLocale = currentURL.searchParams.get('plugins[i18n][locale]');
 
     const contentTypeSchema = contentTypeSchemas.find(({ uid }) => uid === contentTypeUID);
 
@@ -35,12 +43,14 @@ const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permis
       {}
     );
 
-    const defaultLocale = getDefaultLocale(contentTypeNeededPermissions, locales);
+    const defaultLocale = currentLocale !== null 
+      ? currentLocale 
+      : getDefaultLocale(contentTypeNeededPermissions, locales);
 
     if (!defaultLocale) {
       return { ...link, isDisplayed: false };
     }
-
+    console.log('link.plugins[i18n][locale]', link['plugins[i18n][locale]'])
     const linkParams = link.search ? parse(link.search) : {};
 
     const params = linkParams

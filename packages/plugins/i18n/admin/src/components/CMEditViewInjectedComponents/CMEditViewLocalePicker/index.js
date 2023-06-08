@@ -72,6 +72,11 @@ const CMEditViewLocalePicker = ({
     });
   };
 
+  const handleChangeAndReloadPage = (value) => {
+    handleChange(value);
+    location.reload();
+  }
+
   const options = createLocalesOption(appLocales, localizations).filter(({ status, value }) => {
     if (status === 'did-not-create-locale') {
       return createPermissions.find(({ properties }) =>
@@ -107,7 +112,7 @@ const CMEditViewLocalePicker = ({
             label={formatMessage({
               id: getTrad('Settings.locales.modal.locales.label'),
             })}
-            onChange={handleChange}
+            onChange={handleChangeAndReloadPage}
             value={value?.value}
           >
             <Option

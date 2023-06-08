@@ -66,6 +66,7 @@ const LocalePicker = () => {
         page: 1,
         plugins: { ...query.plugins, i18n: { locale: code } },
       });
+      location.reload();
     });
   };
 
