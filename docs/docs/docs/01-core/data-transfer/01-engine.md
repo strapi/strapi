@@ -12,6 +12,24 @@ The transfer engine manages the data transfer process by facilitating communicat
 
 `packages/core/data-transfer/src/engine/index.ts`
 
+## The transfer process
+
+A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
+
+After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
+
+Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff')`)before this feature is stable.
+
+Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The stages are:
+
+1. schemas - streams the content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
+2. entities - streams all entities (including media data) without their relations
+3. assets - streams the files from the /uploads folder
+4. links - streams the relations between entities
+5. configuration - streams the Strapi project configuration
+
+Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+
 ## Setting up the transfer engine
 
 A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](./source-providers/overview), a [destination provider](./destination-providers/overview), and an options object.
@@ -24,7 +42,7 @@ const engine = createTransferEngine(source, destination, options);
 
 ### Engine Options
 
-An example of every available option:
+An example using every available option:
 
 ```typescript
 const options = {
@@ -33,6 +51,8 @@ const options = {
   exclude: [], // exclude these classifications of data; see CLI documentation of `--exclude` for list
   only: [], // transfer only these classifications of data; see CLI documentation of `--only` for list
   throttle: 0, // add a delay of this many millseconds between each item transferred
+
+  // the keys of `transforms` are the stage names for which they are run
   transforms: {
     links: [
       {
@@ -43,6 +63,7 @@ const options = {
             !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
           );
         },
+        // Note: map exists for links but is not recommended
       },
     ],
     entities: [
@@ -50,6 +71,14 @@ const options = {
         // exclude all ignored content types
         filter(entity) {
           return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+        },
+        map(entity) {
+          // remove somePrivateField from privateThing entities
+          if (entity.type === 'api::privateThing.privateThing') {
+            entity.somePrivateField = undefined;
+          }
+
+          return entity;
         },
       },
     ],
@@ -59,17 +88,70 @@ const options = {
 
 #### versionStrategy
 
-**TODO**
+The following versionStrategy values may be used:
+
+"ignore" - allow transfer between any versions of Strapi
+"exact" - require an exact version match (including tags such as -alpha and -beta)
+"major" - require only the semver major version to match (but allow minor, patch, and tag to differ)
+"minor" - require only the semver major and minor versions to match (but allow patch to differ)
+"patch" - require only the semver major, minor, and patch version to match (but allow tag differences such as -alpha and -beta)
 
 #### schemaStrategy
 
-**TODO**
+The follow schemaStrategy values may be used:
+
+"ignore" - bypass schema validation (transfer will attempt to run but throw errors on incompatible data type inserts)
+"strict" - disallow mismatches that are expected to cause errors in the transfer, but allow certain non-data fields in the schema to differ
+"exact" - schema must be identical with no changes
+
+Note: The "strict" schema strategy is defined as "anything expected to cause errors in the transfer" and is the default method for the import, export, and transfer CLI commands. Therefore, the exact functionality will always be subject to change. If you need to find the definition for the current version of Strapi, see `packages/core/data-transfer/src/engine/validation/schemas/index.ts`
 
 ##### Handling Schema differences
 
-Instead of aborting on schema validation errors, the transfer engine allows you to add listeners for managing differences in schema between the source and destination using `engine.onSchemaDiff(handler)`
+When a schema diff is discovered with a given schemaStrategy, an error is throw. However, before throwing the error the engine checks to see if there are any schema diff handlers set via `engine.onSchemaDiff(handler)` which allows errors to be bypassed (for example, by prompting the user if they wish to proceed).
 
-**TODO**
+A diff handler is an optionally asynchronous middleware function that accepts a `context` and a `next` parameter.
+
+`context` is an object of type `SchemaDiffHandlerContext`
+
+```typescript
+// type Diff can be found in /packages/core/data-transfer/src/utils/json.ts
+type SchemaDiffHandlerContext = {
+  ignoredDiffs: Record<string, Diff[]>;
+  diffs: Record<string, Diff[]>;
+  source: ISourceProvider;
+  destination: IDestinationProvider;
+};
+```
+
+`next` is a function that is called, passing the modified `context` object, to proceed to the next middleware function.
+
+```typescript
+const diffHandler = async (context, next) => {
+  const ignoreThese = {};
+  // loop through the diffs
+  Object.entries(context.diffs).forEach(([uid, diffs]) => {
+    for (const [i, diff] of diffs) {
+      // get the path of the diff in the schema
+      const path = [uid].concat(diff.path).join('.');
+
+      // Allow a diff on the country schema displayName
+      if (path === 'api::country.country.info.displayName') {
+        if (!isArray(context.ignoredDiffs[uid])) {
+          context.ignoredDiffs[uid] = [];
+        }
+        context.ignoredDiffs[uid][i] = diff;
+      }
+    }
+  });
+
+  return next(context);
+};
+
+engine.onSchemaDiff(diffHandler);
+```
+
+After all the schemaDiffHandlers have been run, a diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
 
 ### Progress Tracking events
 
@@ -117,13 +199,35 @@ The following events are available:
 
 Transforms allow you to manipulate the data that is sent from the source before it reaches the destination.
 
-## Filters (excluding data)
+## Filter (excluding data)
 
 **TODO**
 
 ## Map (modifying data)
 
-**TODO**
+```typescript
+const options = {
+  ...otherOptions,
+  transforms: {
+    entities: [
+      {
+        // exclude all ignored content types
+        filter(entity) {
+          return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
+        },
+        map(entity) {
+          // remove somePrivateField from privateThing entities
+          if (entity.type === 'api::privateThing.privateThing') {
+            entity.somePrivateField = undefined;
+          }
+
+          return entity;
+        },
+      },
+    ],
+  },
+};
+```
 
 ## Running a transfer
 
