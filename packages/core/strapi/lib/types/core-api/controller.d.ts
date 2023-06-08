@@ -8,10 +8,10 @@ import type { ExtendableContext } from 'koa';
  */
 export interface Base {
   // TODO: Use actual entities instead of regular object
-  transformResponse<U, P>(data: U, meta: object): P;
-  sanitizeOutput<U>(data: U, ctx: ExtendableContext): Promise<U>;
-  sanitizeInput<U>(data: U, ctx: ExtendableContext): Promise<U>;
-  sanitizeQuery<U>(data: U, ctx: ExtendableContext): Promise<U>;
+  transformResponse<TData, TResponse>(data: TData, meta: object): TResponse;
+  sanitizeOutput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
+  sanitizeInput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
+  sanitizeQuery<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
 }
 
 /**
