@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../Theme';
 import ThemeToggleProvider from '../../../ThemeToggleProvider';
@@ -30,15 +30,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const App = (
-  <TrackingProvider>
+  <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
     <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
       <Theme>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-          <GuidedTourModal />
-        </IntlProvider>
+        <GuidedTourModal />
       </Theme>
     </ThemeToggleProvider>
-  </TrackingProvider>
+  </IntlProvider>
 );
 
 describe('<GuidedTourModal />', () => {
@@ -48,6 +46,55 @@ describe('<GuidedTourModal />', () => {
     expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
+      .c0 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c15 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #4945ff;
+      }
+
+      .c19 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c20 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c24 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c28 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
       .c1 {
         padding: 40px;
       }
@@ -115,43 +162,6 @@ describe('<GuidedTourModal />', () => {
         border-color: #4945ff;
         border: 1px solid #4945ff;
         cursor: pointer;
-      }
-
-      .c15 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #4945ff;
-      }
-
-      .c19 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c20 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c24 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c28 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
       }
 
       .c2 {
@@ -328,18 +338,6 @@ describe('<GuidedTourModal />', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c0 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c27 {

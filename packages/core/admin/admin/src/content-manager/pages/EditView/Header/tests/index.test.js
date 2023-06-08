@@ -53,6 +53,27 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
       .c0 {
         background: #f6f6f9;
         padding-top: 24px;
@@ -78,27 +99,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border-color: #4945ff;
         border: 1px solid #4945ff;
         cursor: pointer;
-      }
-
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c13 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c14 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
       }
 
       .c4 {

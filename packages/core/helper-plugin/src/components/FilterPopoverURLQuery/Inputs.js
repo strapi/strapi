@@ -54,7 +54,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         // check if date is not null or undefined
         onChange={(date) => onChange(date ? date.toISOString() : null)}
         onClear={() => onChange(null)}
-        value={value ? new Date(value) : null}
+        value={value ? new Date(value) : undefined}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
