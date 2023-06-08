@@ -9,9 +9,13 @@ import { useAdminUsers } from '../../../hooks/useAdminUsers';
 const AdminUsersFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();
   const { users, isLoading } = useAdminUsers({}, { staleTime: 2 * (1000 * 60) });
+  const ariaLabel = formatMessage({
+    id: 'content-manager.components.Filters.usersSelect.label',
+    defaultMessage: 'Search and select an user to filter',
+  });
 
   return (
-    <Combobox value={value} onChange={onChange} loading={isLoading}>
+    <Combobox value={value} aria-label={ariaLabel} onChange={onChange} loading={isLoading}>
       {users.map((user) => {
         return (
           <ComboboxOption key={user.id} value={user.id.toString()}>

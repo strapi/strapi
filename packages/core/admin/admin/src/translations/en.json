@@ -650,6 +650,7 @@
   "content-manager.components.FiltersPickWrapper.hide": "Hide",
   "content-manager.components.Filters.createdBy": "Created by",
   "content-manager.components.Filters.updatedBy": "Updated by",
+  "content-manager.components.Filters.usersSelect.label": "Search and select an user to filter by",
   "content-manager.components.LeftMenu.Search.label": "Search for a content type",
   "content-manager.components.LeftMenu.collection-types": "Collection Types",
   "content-manager.components.LeftMenu.single-types": "Single Types",
