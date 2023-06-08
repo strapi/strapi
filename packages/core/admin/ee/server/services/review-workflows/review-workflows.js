@@ -7,7 +7,11 @@ const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const {
+  ENTITY_STAGE_ATTRIBUTE,
+  ENTITY_ASSIGNEE_ATTRIBUTE,
+  STAGE_MODEL_UID,
+} = require('../../constants/workflows');
 
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
@@ -35,18 +39,26 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
-    const setStageAttribute = set(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, {
-      writable: true,
-      private: false,
-      configurable: false,
-      visible: false,
-      useJoinTable: true, // We want a join table to persist data when downgrading to CE
-      type: 'relation',
-      relation: 'oneToOne',
-      target: 'admin::workflow-stage',
-    });
-    strapi.container.get('content-types').extend(contentTypeUID, setStageAttribute);
+    const setRelation = (path, target) =>
+      set(path, {
+        writable: true,
+        private: false,
+        configurable: false,
+        visible: false,
+        useJoinTable: true, // We want a join table to persist data when downgrading to CE
+        type: 'relation',
+        relation: 'oneToOne',
+        target,
+      });
+
+    const setReviewWorkflowAttributes = pipe([
+      setRelation(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, STAGE_MODEL_UID),
+      setRelation(`attributes.${ENTITY_ASSIGNEE_ATTRIBUTE}`, 'admin::user'),
+    ]);
+
+    strapi.container.get('content-types').extend(contentTypeUID, setReviewWorkflowAttributes);
   };
+
   pipe([
     getContentTypeUIDsWithActivatedReviewWorkflows,
     // Iterate over UIDs to extend the content-type
