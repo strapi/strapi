@@ -7,7 +7,11 @@ const { getContentTypeUIDsWithActivatedReviewWorkflows } = require('../../utils/
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
-const { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } = require('../../constants/workflows');
+const {
+  ENTITY_STAGE_ATTRIBUTE,
+  ENTITY_ASSIGNEE_ATTRIBUTE,
+  STAGE_MODEL_UID,
+} = require('../../constants/workflows');
 
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
@@ -35,7 +39,7 @@ async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) 
 
 function extendReviewWorkflowContentTypes({ strapi }) {
   const extendContentType = (contentTypeUID) => {
-    const setAttribute = (path, target) =>
+    const setRelation = (path, target) =>
       set(path, {
         writable: true,
         private: false,
@@ -48,8 +52,8 @@ function extendReviewWorkflowContentTypes({ strapi }) {
       });
 
     const setReviewWorkflowAttributes = pipe([
-      setAttribute(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, 'admin::workflow-stage'),
-      setAttribute(`attributes.${ENTITY_ASSIGNEE_ATTRIBUTE}`, 'admin::user'),
+      setRelation(`attributes.${ENTITY_STAGE_ATTRIBUTE}`, STAGE_MODEL_UID),
+      setRelation(`attributes.${ENTITY_ASSIGNEE_ATTRIBUTE}`, 'admin::user'),
     ]);
 
     strapi.container.get('content-types').extend(contentTypeUID, setReviewWorkflowAttributes);
