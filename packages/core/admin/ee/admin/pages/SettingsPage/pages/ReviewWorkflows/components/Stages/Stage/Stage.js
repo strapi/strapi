@@ -14,9 +14,9 @@ import {
   IconButton,
   TextInput,
   VisuallyHidden,
-  Combobox,
-  ComboboxOption,
   Typography,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
 import { Drag, Trash } from '@strapi/icons';
@@ -174,8 +174,6 @@ export function Stage({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  const { themeColorName } = colorField.value ? getStageColorByHex(colorField.value) : {};
-
   // TODO: the .toUpperCase() conversion can be removed once the hex code is normalized in
   // the admin API
   const colorValue = colorOptions.find(({ value }) => value === colorField.value.toUpperCase());
@@ -258,7 +256,7 @@ export function Stage({
               </GridItem>
 
               <GridItem col={6}>
-                <Combobox
+                <SingleSelect
                   error={colorMeta?.error ?? false}
                   id={colorField.name}
                   required
@@ -266,18 +264,6 @@ export function Stage({
                     id: 'content-manager.reviewWorkflows.stage.color',
                     defaultMessage: 'Color',
                   })}
-                  startIcon={
-                    <Flex
-                      as="span"
-                      height={2}
-                      background={colorField.value}
-                      borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                      hasRadius
-                      shrink={0}
-                      width={2}
-                      marginRight="-3px"
-                    />
-                  }
                   defaultTextValue={colorValue?.label}
                   onChange={(value) => {
                     colorField.onChange({ target: { value } });
@@ -289,7 +275,7 @@ export function Stage({
                     const { themeColorName } = getStageColorByHex(color);
 
                     return (
-                      <ComboboxOption value={value} textValue={label}>
+                      <SingleSelectOption value={value} textValue={label}>
                         <Flex as="span" alignItems="center" gap={2}>
                           <Flex
                             as="span"
@@ -306,10 +292,10 @@ export function Stage({
                             {label}
                           </Typography>
                         </Flex>
-                      </ComboboxOption>
+                      </SingleSelectOption>
                     );
                   })}
-                </Combobox>
+                </SingleSelect>
               </GridItem>
             </Grid>
           </AccordionContent>
