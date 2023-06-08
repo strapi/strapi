@@ -5,7 +5,7 @@ interface BucketInfo {
   err?: string;
 }
 
-export function isUrlFromBucket(fileUrl: string, bucketName: string, bucketBaseUrl = '') {
+export function isUrlFromBucket(fileUrl: string, bucketName: string, bucketBaseUrl = ''): boolean {
   const url = new URL(fileUrl);
 
   // Check if the file URL is using a base URL (e.g. a CDN).
