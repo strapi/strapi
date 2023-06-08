@@ -35,6 +35,12 @@ describe('Populate', () => {
           relation: 'oneToMany',
           target: 'api::model.model',
         },
+        // Edge case: an attribute named "populate" should be populated
+        populate: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'api::model.model',
+        },
         component: {
           type: 'component',
           component: 'component',
@@ -94,6 +100,20 @@ describe('Populate', () => {
 
       expect(result).toEqual({
         relation: {},
+      });
+    });
+
+    test('one relational field named populate should be populated', async () => {
+      const query = getFilterQuery([{ populate: { populate: { field: 'value' } } }]);
+      const result = await getQueryPopulate(uid, query);
+
+      // Populate train! Choo choo!
+      expect(result).toEqual({
+        populate: {
+          populate: {
+            populate: {},
+          },
+        },
       });
     });
 
