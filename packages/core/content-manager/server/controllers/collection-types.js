@@ -171,7 +171,8 @@ module.exports = {
     // Trying to automatically clone the entity and model has unique or relational fields
     if (hasProhibitedCloningFields(model)) {
       throw new ApplicationError(
-        'Entity could not be cloned as it has unique and/or relational fields. Please edit those fields manually and save to complete the cloning.'
+        'Entity could not be cloned as it has unique and/or relational fields. ' +
+          'Please edit those fields manually and save to complete the cloning.'
       );
     }
 
