@@ -24,7 +24,7 @@ const engine = createTransferEngine(source, destination, options);
 
 ### Engine Options
 
-An example of every option:
+An example of every available option:
 
 ```typescript
 const options = {
@@ -65,19 +65,47 @@ const options = {
 
 **TODO**
 
-### Handling Schema differences
+##### Handling Schema differences
 
-The transfer engine allows you to add listeners for managing differences in schema between the source and destination using `engine.onSchemaDiff(handler)`
+Instead of aborting on schema validation errors, the transfer engine allows you to add listeners for managing differences in schema between the source and destination using `engine.onSchemaDiff(handler)`
 
 **TODO**
 
 ### Progress Tracking events
 
-The transfer engine allows you to add event listeners to track the progress of your transfer.
+The transfer engine allows tracking the progress of your transfer either directly with the engine.progress.data object, or with listeners using the engine.progress.stream PassThrough stream. The engine.progress.data object definition is of type TransferProgress.
+
+Here is an example that logs a message at the beginning and end of each stage, as well as a message after each item has been transferred
 
 ```typescript
-engine.progress.stream;
+const progress = engine.progress.stream;
+
+progress.on(`stage::start`, ({ stage, data }) => {
+  console.log(`${stage} has started at ${data[stage].startTime}`);
+});
+
+progress.on('stage::finish', ({ stage, data }) => {
+  console.log(`${stage} has finished at ${data[stage].endTime}`);
+});
+
+progress.on('stage::progress', ({ stage, data }) => {
+  console.log('Transferred ${data[stage].bytes} bytes / ${data[stage].count} entities');
+});
 ```
+
+Note: There is currently no way for a source provider to give a "total" number of records expected to be transferred, but it is expected in a future update.
+
+The following events are available:
+
+`stage::start` - at the start of each stage
+`stage::finish` - at the end of each stage
+`stage::progress` - after each entitity in that stage has been transferred
+`stage::skip` - when an entire stage is skipped (eg, when 'only' or 'exclude' are used)
+`stage::error` - when there is an error thrown during a stage
+`transfer::init` - at the very beginning of engine.transfer()
+`transfer::start` - after bootstrapping and initializing the providers, when the transfer is about to start
+`transfer::finish` - when the transfer has finished
+`transfer::error` - when there is an error thrown during the transfer
 
 ### Diagnostics events
 
