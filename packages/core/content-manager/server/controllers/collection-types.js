@@ -1,7 +1,6 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { isEmpty } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
