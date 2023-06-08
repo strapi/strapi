@@ -127,4 +127,17 @@ Transforms allow you to manipulate the data that is sent from the source before 
 
 ## Running a transfer
 
+Running a transfer simply involves calling the asynchrounous engine.transfer() method.
+
+```typescript
+const engine = createTransferEngine(source, destination, options);
+try {
+  await engine.transfer();
+} catch (e) {
+  console.error('Something went wrong: ', e?.message);
+}
+```
+
+Be aware that engine.transfer() throws on any fatal errors it encounters.
+
 Note: The transfer engine (and the providers) current only support a single `engine.transfer()` and must be re-instantiated if intended to run multiple times. In the future it is expected to allow them to be used for multiple transfers in a row, but that usage is untested and will result in unpredictable behavior.
