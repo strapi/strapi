@@ -56,6 +56,12 @@ module.exports = {
               "'request' has been deprecated. Please import 'useFetchClient' from '@strapi/helper-plugin' instead.",
           },
           {
+            name: '@strapi/helper-plugin',
+            importNames: ['ReactSelect'],
+            message:
+              "'ReactSelect' has been deprecated. You should use the components from '@strapi/design-system' instead.",
+          },
+          {
             name: 'lodash',
             message: 'Please use import [method] from lodash/[method]',
           },
