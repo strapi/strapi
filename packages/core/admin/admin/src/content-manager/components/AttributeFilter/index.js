@@ -68,10 +68,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
           }),
           customOperators,
           customInput: AdminUsersFilter,
-          options: formatUsers(
-            queryClient.getQueryData(['users', '', {}])?.results ?? users,
-            formatMessage
-          ),
+          options: formatUsers(users, formatMessage),
         },
         fieldSchema: { type: 'relation', mainField: { name: 'id' } },
         trackedEvent: {
