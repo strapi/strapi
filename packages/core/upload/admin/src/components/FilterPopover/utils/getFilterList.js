@@ -11,31 +11,17 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
       return [
         {
           intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$contains',
-            defaultMessage: 'contains',
+            id: 'components.FilterOptions.FILTER_TYPES.$eq',
+            defaultMessage: 'is',
           },
           value: '$contains',
         },
         {
           intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$containsi',
-            defaultMessage: 'contains (case insensitive)',
-          },
-          value: '$containsi',
-        },
-        {
-          intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$notContains',
-            defaultMessage: 'not contains',
+            id: 'components.FilterOptions.FILTER_TYPES.$ne',
+            defaultMessage: 'is not',
           },
           value: '$notContains',
-        },
-        {
-          intlLabel: {
-            id: 'components.FilterOptions.FILTER_TYPES.$notContainsi',
-            defaultMessage: 'not contains (case insensitive)',
-          },
-          value: '$notContainsi',
         },
       ];
     }
