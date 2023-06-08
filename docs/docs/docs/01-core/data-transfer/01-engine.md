@@ -72,6 +72,8 @@ const options = {
         filter(entity) {
           return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
         },
+      },
+      {
         map(entity) {
           // remove somePrivateField from privateThing entities
           if (entity.type === 'api::privateThing.privateThing') {
@@ -215,6 +217,8 @@ const options = {
         filter(entity) {
           return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
         },
+      },
+      {
         // exclude all entities with an id higher than 100
         filter(entity) {
           return Number(entity.id) <= 100;
@@ -230,6 +234,8 @@ const options = {
             !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
           );
         },
+      },
+      {
         // remember to exclude links as well or else an error will be thrown when attempting to link an entity we filtered
         filter(entity) {
           return Number(link.left.id) <= 100 || Number(link.right.id) <= 100)
@@ -258,6 +264,8 @@ const options = {
         filter(entity) {
           return !DEFAULT_IGNORED_CONTENT_TYPES.includes(entity.type);
         },
+      },
+      {
         map(entity) {
           // remove somePrivateField from privateThing entities
           if (entity.type === 'api::privateThing.privateThing') {
