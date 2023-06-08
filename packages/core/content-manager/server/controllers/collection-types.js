@@ -144,7 +144,7 @@ module.exports = {
     // and model has unique or relational fields
     if (isEmpty(body) && hasProhibitedCloningFields(model)) {
       throw new ApplicationError(
-        'Failed to clone entity. There are prohibited fields to be manually addressed.'
+        'Entity could not be cloned as it has unique and/or relational fields. Please edit those fields manually and save to complete the cloning.'
       );
     }
 
