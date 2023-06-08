@@ -18,7 +18,7 @@ A transfer starts by bootstrapping and initializing itself and the providers. Th
 
 After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
 
-Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff')`)before this feature is stable.
+Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
 
 Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The stages are:
 
@@ -63,8 +63,8 @@ const options = {
             !DEFAULT_IGNORED_CONTENT_TYPES.includes(link.right.type)
           );
         },
-        // Note: map exists for links but is not recommended
       },
+      // Note: map exists for links but is not recommended
     ],
     entities: [
       {
@@ -106,7 +106,7 @@ The follow schemaStrategy values may be used:
 "strict" - disallow mismatches that are expected to cause errors in the transfer, but allow certain non-data fields in the schema to differ
 "exact" - schema must be identical with no changes
 
-Note: The "strict" schema strategy is defined as "anything expected to cause errors in the transfer" and is the default method for the import, export, and transfer CLI commands. Therefore, the exact functionality will always be subject to change. If you need to find the definition for the current version of Strapi, see `packages/core/data-transfer/src/engine/validation/schemas/index.ts`
+Note: The "strict" schema strategy is defined as "anything expected to cause errors in the transfer" and is the default method for the import, export, and transfer CLI commands. Therefore, the technical functionality will always be subject to change. If you need to find the definition for the current version of Strapi, see `packages/core/data-transfer/src/engine/validation/schemas/index.ts`
 
 ##### Handling Schema differences
 
