@@ -10,7 +10,6 @@ module.exports = ({ strapi }) => {
     .plugin('content-manager')
     .service('content-types');
   const stagesService = getService('stages', { strapi });
-  const workflowsService = getService('workflows', { strapi });
 
   const updateContentTypeConfig = async (uid, reviewWorkflowOption) => {
     // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
@@ -31,6 +30,8 @@ module.exports = ({ strapi }) => {
      * @param {Workflow.Stage} options.stageId - The new stage to assign the entities to
      */
     async migrate({ srcContentTypes = [], destContentTypes, stageId }) {
+      // Workflows service is using this content-types service, to avoid an infinite loop, we need to get the service in the method
+      const workflowsService = getService('workflows', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
       await mapAsync(created, async (uid) => {
