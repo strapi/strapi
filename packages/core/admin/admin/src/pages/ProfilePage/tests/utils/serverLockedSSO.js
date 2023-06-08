@@ -14,7 +14,7 @@ const handlers = [
           preferedLanguage: 'en',
           roles: [
             {
-              id: 2,
+              id: 1,
             },
           ],
         },
@@ -26,13 +26,13 @@ const handlers = [
       ctx.status(200),
       ctx.json({
         data: {
-          isSSOLocked: false,
+          isSSOLocked: true,
         },
       })
     );
   }),
 ];
 
-const server = setupServer(...handlers);
+const serverLockedSSO = setupServer(...handlers);
 
-export default server;
+export default serverLockedSSO;
