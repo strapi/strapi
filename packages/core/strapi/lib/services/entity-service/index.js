@@ -312,6 +312,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
+    const { ENTRY_CREATE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
