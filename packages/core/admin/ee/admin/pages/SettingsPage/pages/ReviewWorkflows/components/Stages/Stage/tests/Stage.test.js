@@ -61,7 +61,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { container, getByRole, getByText, queryByRole } = setup();
+    const { container, getByRole, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
@@ -73,7 +73,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(getByRole('textbox').value).toBe('something');
     expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
 
-    expect(getByText(/blue/i)).toBeInTheDocument();
+    expect(getByRole('combobox')).toHaveValue('Blue');
 
     expect(
       queryByRole('button', {
