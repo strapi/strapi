@@ -2,6 +2,7 @@
 
 const { isNil, isNull } = require('lodash/fp');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { WORKFLOW_UPDATE_STAGE } = require('../../constants/webhookEvents');
 const { hasReviewWorkflow, getDefaultWorkflow } = require('../../utils/review-workflows');
 
 /**
@@ -45,7 +46,18 @@ const decorator = (service) => ({
       delete data[ENTITY_STAGE_ATTRIBUTE];
     }
 
-    return service.update.call(this, uid, entityId, { ...opts, data });
+    const entity = await service.findOne.call(this, uid, entityId, {
+      populate: [ENTITY_STAGE_ATTRIBUTE],
+    });
+    const previousStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id ?? null;
+
+    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
+
+    if (previousStageId && previousStageId !== data[ENTITY_STAGE_ATTRIBUTE]) {
+      await service.emitEvent.call(this, uid, WORKFLOW_UPDATE_STAGE, updatedEntity);
+    }
+
+    return updatedEntity;
   },
 });
 
