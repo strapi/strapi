@@ -20,6 +20,8 @@ import {
   Grid,
   GridItem,
   Flex,
+  MultiSelect,
+  MultiSelectOption,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
@@ -49,6 +51,7 @@ export const SingleSignOn = () => {
   ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
     'autoRegister',
     'defaultRole',
+    'ssoLockedRoles',
   ]);
   const { roles } = useRolesList(canReadRoles);
 
@@ -188,6 +191,48 @@ export const SingleSignOn = () => {
                         </Option>
                       ))}
                     </Select>
+                  </GridItem>
+                  <GridItem col={6} m={6} s={12}>
+                    <MultiSelect
+                      disabled={!canUpdate}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.description',
+                        defaultMessage:
+                          'Select the roles for which you want to disable the local authentication',
+                      })}
+                      error={
+                        formErrors.ssoLockedRoles
+                          ? formatMessage({
+                              id: formErrors.ssoLockedRoles.id,
+                              defaultMessage: formErrors.ssoLockedRoles.id,
+                            })
+                          : ''
+                      }
+                      label={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.label',
+                        defaultMessage: 'Local authentication lock-out',
+                      })}
+                      name="ssoLockedRoles"
+                      onChange={(value) => {
+                        handleChange({ target: { name: 'ssoLockedRoles', value } });
+                      }}
+                      placeholder={formatMessage({
+                        id: 'components.InputSelect.option.placeholder',
+                        defaultMessage: 'Choose here',
+                      })}
+                      onClear={() => {
+                        const emptyArray = [];
+                        handleChange({ target: { name: 'ssoLockedRoles', emptyArray } });
+                      }}
+                      value={modifiedData.ssoLockedRoles || []}
+                      withTags
+                    >
+                      {roles.map(({ id, name }) => (
+                        <MultiSelectOption key={id} value={id.toString()}>
+                          {name}
+                        </MultiSelectOption>
+                      ))}
+                    </MultiSelect>
                   </GridItem>
                 </Grid>
               </Flex>

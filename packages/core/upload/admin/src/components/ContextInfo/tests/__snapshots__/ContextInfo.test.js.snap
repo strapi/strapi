@@ -1,13 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContextInfo renders 1`] = `
-.c0 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 24px;
-  padding-bottom: 16px;
-  padding-left: 24px;
-  border-radius: 4px;
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c4 {
@@ -24,6 +27,15 @@ exports[`ContextInfo renders 1`] = `
   color: #4a4a6a;
 }
 
+.c0 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 24px;
+  padding-bottom: 16px;
+  padding-left: 24px;
+  border-radius: 4px;
+}
+
 .c3 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -37,18 +49,6 @@ exports[`ContextInfo renders 1`] = `
   -ms-flex-direction: column;
   flex-direction: column;
   gap: 4px;
-}
-
-.c6 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c1 {

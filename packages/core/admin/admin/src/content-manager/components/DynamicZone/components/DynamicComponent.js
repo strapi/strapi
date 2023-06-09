@@ -22,6 +22,7 @@ import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
 
 import FieldComponent from '../../FieldComponent';
+import { ComponentIcon } from '../../ComponentIcon';
 
 export const DynamicComponent = ({
   componentUid,
@@ -206,6 +207,7 @@ export const DynamicComponent = ({
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
+              startIcon={<ComponentIcon icon={icon} showBackground={false} size="S" />}
               action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"
