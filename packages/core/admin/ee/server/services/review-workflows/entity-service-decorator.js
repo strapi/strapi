@@ -54,7 +54,16 @@ const decorator = (service) => ({
 
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     if (previousStageId && previousStageId !== data[ENTITY_STAGE_ATTRIBUTE]) {
-      await service.emitEvent.call(this, uid, WORKFLOW_UPDATE_STAGE, updatedEntity);
+      const webhookPayload = {
+        entityId,
+        workflow: {
+          stages: {
+            from: previousStageId,
+            to: data[ENTITY_STAGE_ATTRIBUTE],
+          },
+        },
+      };
+      await service.emitEvent.call(this, uid, WORKFLOW_UPDATE_STAGE, webhookPayload);
     }
 
     return updatedEntity;
