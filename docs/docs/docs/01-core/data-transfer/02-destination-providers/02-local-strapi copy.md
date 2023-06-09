@@ -1,5 +1,5 @@
 ---
-title: Local Strapi=
+title: Local Strapi
 tags:
   - providers
   - data-transfer
