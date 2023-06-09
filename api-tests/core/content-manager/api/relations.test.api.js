@@ -921,7 +921,7 @@ describe('Relations', () => {
   });
 
   describe('Clone entity with relations', () => {
-    test('Clone entity with relations', async () => {
+    test('Auto cloning entity with relations should fail', async () => {
       const createdShop = await createEntry(
         'shop',
         {
@@ -943,7 +943,7 @@ describe('Relations', () => {
       // Clone with empty data
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/api::shop.shop/clone/${createdShop.id}`,
+        url: `/content-manager/collection-types/api::shop.shop/auto-clone/${createdShop.id}`,
         body: {},
       });
 

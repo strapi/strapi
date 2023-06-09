@@ -1,7 +1,6 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { isEmpty } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
@@ -165,14 +164,6 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    // Trying to automatically clone the entity
-    // and model has unique or relational fields
-    if (isEmpty(body) && hasProhibitedCloningFields(model)) {
-      throw new ApplicationError(
-        'Entity could not be cloned as it has unique and/or relational fields. Please edit those fields manually and save to complete the cloning.'
-      );
-    }
-
     const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
@@ -196,6 +187,20 @@ module.exports = {
     const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
+  },
+
+  async autoClone(ctx) {
+    const { model } = ctx.params;
+
+    // Trying to automatically clone the entity and model has unique or relational fields
+    if (hasProhibitedCloningFields(model)) {
+      throw new ApplicationError(
+        'Entity could not be cloned as it has unique and/or relational fields. ' +
+          'Please edit those fields manually and save to complete the cloning.'
+      );
+    }
+
+    this.clone(ctx);
   },
 
   async delete(ctx) {
