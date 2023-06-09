@@ -1,6 +1,7 @@
 'use strict';
 
 const { omit } = require('lodash/fp');
+const { WORKFLOW_UPDATE_STAGE } = require('../../../constants/webhookEvents');
 const { decorator } = require('../entity-service-decorator')();
 
 jest.mock('../../../utils');
@@ -80,6 +81,8 @@ describe('Entity service decorator', () => {
   });
 
   describe('Update', () => {
+    const uid = 'test-model';
+
     test('Calls original update for non review workflow content types', async () => {
       const entry = {
         id: 1,
@@ -105,15 +108,23 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         update: jest.fn(() => Promise.resolve(entry)),
+        findOne: jest.fn(() => {
+          return { strapi_reviewWorkflows_stage: { id: 2 } };
+        }),
+        emitEvent: jest.fn(),
       };
 
       const service = decorator(defaultService);
 
       const id = 1;
       const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: 1 } };
-      await service.update('test-model', id, input);
+      await service.update(uid, id, input);
 
-      expect(defaultService.update).toHaveBeenCalledWith('test-model', id, {
+      expect(defaultService.emitEvent).toHaveBeenCalledWith(uid, WORKFLOW_UPDATE_STAGE, {
+        id,
+      });
+
+      expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
         ...input,
         data: {
           ...input.data,
@@ -135,9 +146,9 @@ describe('Entity service decorator', () => {
 
       const id = 1;
       const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: null } };
-      await service.update('test-model', id, input);
+      await service.update(uid, id, input);
 
-      expect(defaultService.update).toHaveBeenCalledWith('test-model', id, {
+      expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
         ...input,
         data: {
           ...omit('strapi_reviewWorkflows_stage', input.data),

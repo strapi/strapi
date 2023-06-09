@@ -44,14 +44,15 @@ const decorator = (service) => ({
     const data = { ...opts.data };
     if (isNull(data[ENTITY_STAGE_ATTRIBUTE])) {
       delete data[ENTITY_STAGE_ATTRIBUTE];
+      return service.update.call(this, uid, entityId, { ...opts, data });
     }
+
+    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
 
     const entity = await service.findOne.call(this, uid, entityId, {
       populate: [ENTITY_STAGE_ATTRIBUTE],
     });
     const previousStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id ?? null;
-
-    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
 
     if (previousStageId && previousStageId !== data[ENTITY_STAGE_ATTRIBUTE]) {
       await service.emitEvent.call(this, uid, WORKFLOW_UPDATE_STAGE, updatedEntity);
