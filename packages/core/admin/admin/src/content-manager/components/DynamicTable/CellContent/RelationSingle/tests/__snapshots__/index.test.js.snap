@@ -1,16 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTabe / Cellcontent / RelationSingle renders and matches the snapshot 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
 .c2 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -21,6 +11,16 @@ exports[`DynamicTabe / Cellcontent / RelationSingle renders and matches the snap
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
 }
 
 .c1 {

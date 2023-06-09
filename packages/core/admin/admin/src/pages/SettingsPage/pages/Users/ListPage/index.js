@@ -47,7 +47,7 @@ const ListPage = () => {
     pagination,
     isError,
     isLoading,
-    refetchQueries: refetchAdminUsers,
+    refetch: refetchAdminUsers,
   } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
     enabled: canRead,
   });

@@ -61,6 +61,47 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c22 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c9 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c15 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c36 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c1 {
         padding-bottom: 56px;
       }
@@ -133,35 +174,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c35 {
         padding-bottom: 16px;
-      }
-
-      .c9 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c15 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c36 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-        text-align: center;
       }
 
       .c5 {
@@ -371,20 +383,13 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c22 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c13 {
         height: 2rem;
+      }
+
+      .c13 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c13[aria-disabled='true'] {
@@ -552,7 +557,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="0"
+                    aria-labelledby=":r0:"
                     class="c19 c20 c12 c21"
                     tabindex="0"
                     type="button"

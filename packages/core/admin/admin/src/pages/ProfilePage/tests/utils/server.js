@@ -4,7 +4,6 @@ import { rest } from 'msw';
 const handlers = [
   rest.get('*/me', (req, res, ctx) => {
     return res(
-      ctx.delay(100),
       ctx.status(200),
       ctx.json({
         data: {
@@ -13,6 +12,21 @@ const handlers = [
           lastname: 'ronronscelestes',
           username: 'yolo',
           preferedLanguage: 'en',
+          roles: [
+            {
+              id: 2,
+            },
+          ],
+        },
+      })
+    );
+  }),
+  rest.get('*/providers/isSSOLocked', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: {
+          isSSOLocked: false,
         },
       })
     );

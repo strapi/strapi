@@ -35,6 +35,18 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(history));
 
     expect(container).toMatchInlineSnapshot(`
+      .c4 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 8px;
@@ -121,18 +133,6 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c4 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c3 svg > g,
       .c3 svg path {
         fill: #8e8ea9;
@@ -156,7 +156,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="0"
+            aria-labelledby=":r0:"
             class="c0 c1 c2 c3"
             tabindex="0"
             type="button"
@@ -218,9 +218,16 @@ describe('<SearchURLQuery />', () => {
     fireEvent.click(container.querySelector('button[type="button"]'));
 
     expect(container).toMatchInlineSnapshot(`
-      .c7 {
-        padding-right: 8px;
-        padding-left: 12px;
+      .c1 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c2 {
@@ -228,6 +235,11 @@ describe('<SearchURLQuery />', () => {
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
+      }
+
+      .c7 {
+        padding-right: 8px;
+        padding-left: 12px;
       }
 
       .c5 {
@@ -246,18 +258,6 @@ describe('<SearchURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c1 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c3 {
@@ -380,7 +380,7 @@ describe('<SearchURLQuery />', () => {
                 >
                   <label
                     class="c2 c3"
-                    for="4"
+                    for=":r4:"
                   >
                     Search label
                   </label>
@@ -413,7 +413,7 @@ describe('<SearchURLQuery />', () => {
                     aria-invalid="false"
                     aria-required="false"
                     class="c10"
-                    id="4"
+                    id=":r4:"
                     name="search"
                     value=""
                   />

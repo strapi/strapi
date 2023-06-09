@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
@@ -36,7 +36,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/new`);
+  act(() => history.push(`/settings/${pluginId}/roles/new`));
 
   return renderResult;
 }
@@ -62,6 +62,64 @@ describe('Admin | containers | RoleCreatePage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c18 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c36 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c46 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c47 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #4a4a6a;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -179,64 +237,6 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-right: 32px;
         padding-bottom: 24px;
         padding-left: 32px;
-      }
-
-      .c7 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c13 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c18 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c46 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c47 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #4a4a6a;
       }
 
       .c3 {
@@ -546,6 +546,11 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c11 {
         height: 2rem;
+      }
+
+      .c11 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c11[aria-disabled='true'] {
@@ -875,7 +880,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                           >
                             <label
                               class="c6 c22 c23"
-                              for="1"
+                              for=":r0:"
                             >
                               Name
                             </label>
@@ -887,7 +892,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c25"
-                                id="1"
+                                id=":r0:"
                                 name="name"
                                 value=""
                               />
@@ -966,10 +971,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                             class="c2 c41 c42"
                           >
                             <button
-                              aria-controls="accordion-content-2"
+                              aria-controls="accordion-content-:r4:"
                               aria-disabled="false"
                               aria-expanded="false"
-                              aria-labelledby="accordion-label-2"
+                              aria-labelledby="accordion-label-:r4:"
                               class="c2 c43 c9 c44 c45"
                               data-strapi-accordion-toggle="true"
                               type="button"
@@ -979,13 +984,13 @@ describe('Admin | containers | RoleCreatePage', () => {
                               >
                                 <span
                                   class="c6 c47"
-                                  id="accordion-label-2"
+                                  id="accordion-label-:r4:"
                                 >
                                   Address
                                 </span>
                                 <p
                                   class="c6 c36"
-                                  id="accordion-desc-2"
+                                  id="accordion-desc-:r4:"
                                 >
                                   Define all allowed actions for the api::address plugin.
                                 </p>

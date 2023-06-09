@@ -135,6 +135,28 @@ describe('Core API - Sanitize', () => {
           checkAPIResultLength(res, 0);
         });
 
+        it('Successfully filters invalid attributes', async () => {
+          const document = data.document[2];
+          const filters = {
+            ID: document.id, // invalid casing on key 'id'
+            notAnAttribute: '', // doesn't exist on schema
+            t0: { createdBy: { id: { $lt: '1' } } }, // join table name
+            t1: { createdBy: { id: { $lt: '1' } } }, // join table name
+            t0: { updatedBy: { id: { $lt: '1' } } }, // join table name
+            t1: { updatedBy: { id: { $lt: '1' } } }, // join table name
+            $fakeOp: false,
+            id: { $STARTSWITH: '123' }, // wrong casing for operator
+          };
+
+          const res = await rq.get('/api/documents', { qs: { filters } });
+
+          // Should not return a 500 error from notAnAttribute or $fakeOp
+          expect(res.status).toEqual(200);
+
+          // Should receive all documents because createdBy was filtered out
+          checkAPIResultLength(res, documentsLength());
+        });
+
         it('Successfully filters on valid ID', async () => {
           const document = data.document[2];
           const res = await rq.get('/api/documents', { qs: { filters: { id: document.id } } });

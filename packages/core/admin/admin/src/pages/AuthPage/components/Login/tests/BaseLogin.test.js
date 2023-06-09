@@ -27,6 +27,58 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c27 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c10 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c13 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
+      }
+
+      .c28 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c36 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
       .c1 {
         background: #ffffff;
         padding-top: 48px;
@@ -74,46 +126,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c38 {
         padding-top: 16px;
-      }
-
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c10 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c13 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c15 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
-      }
-
-      .c28 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c36 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
       }
 
       .c3 {
@@ -350,20 +362,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background-color: #8e8ea9;
       }
 
-      .c27 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c35 {
         height: 2rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
@@ -700,7 +705,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="1"
+                      for=":r0:"
                     >
                       Email
                       <span
@@ -717,7 +722,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c19"
-                        id="1"
+                        id=":r0:"
                         name="email"
                         placeholder="kai@doe.com"
                         value=""
@@ -735,7 +740,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                   >
                     <label
                       class="c7 c13 c14"
-                      for="3"
+                      for=":r2:"
                     >
                       Password
                       <span
@@ -752,7 +757,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         aria-invalid="false"
                         aria-required="true"
                         class="c20 c21"
-                        id="3"
+                        id=":r2:"
                         name="password"
                         type="password"
                         value=""
@@ -804,7 +809,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       <input
                         aria-label="rememberMe"
                         class="c30"
-                        id="5"
+                        id=":r4:"
                         name="rememberMe"
                         type="checkbox"
                       />
