@@ -438,7 +438,8 @@ const cleanInverseOrderColumn = async ({ id, attribute, trx }) => {
         .as('t2');
 
       //  Update ids with the new inverse order
-      await con(`${joinTable.name} as t1`)
+      await strapi.db
+        .getConnection(`${joinTable.name} as t1`)
         .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
         .where(joinColumn.name, id)
         .update({
