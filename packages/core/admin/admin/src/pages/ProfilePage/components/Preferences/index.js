@@ -1,14 +1,6 @@
-import React from "react";
+import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Typography,
-  Box,
-  Grid,
-  GridItem,
-  Flex,
-  Select,
-  Option
-} from '@strapi/design-system';
+import { Typography, Box, Grid, GridItem, Flex, Select, Option } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import upperFirst from 'lodash/upperFirst';
 
@@ -75,8 +67,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
               })}
               hint={formatMessage({
                 id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
-                defaultMessage:
-                  'This will only display your own interface in the chosen language.',
+                defaultMessage: 'This will only display your own interface in the chosen language.',
               })}
               onClear={() => {
                 onChange({
@@ -94,13 +85,11 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
                 });
               }}
             >
-              {
-                Object.entries(localeNames).map(([ language, langName ]) => (
-                  <Option value={language} key={language}>
-                    { langName }
-                  </Option>
-                ))
-              }
+              {Object.entries(localeNames).map(([language, langName]) => (
+                <Option value={language} key={language}>
+                  {langName}
+                </Option>
+              ))}
             </Select>
           </GridItem>
           <GridItem s={12} col={6}>
@@ -146,7 +135,7 @@ const Preferences = ({ onChange, values, localeNames, allApplicationThemes }) =>
       </Flex>
     </Box>
   );
-}
+};
 
 Preferences.propTypes = {
   allApplicationThemes: PropTypes.object,
