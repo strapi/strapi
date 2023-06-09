@@ -25,6 +25,18 @@ describe('<SearchURLQuery />', () => {
     const { container } = render(makeApp(null));
 
     expect(container).toMatchInlineSnapshot(`
+      .c4 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 8px;
@@ -103,18 +115,6 @@ describe('<SearchURLQuery />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c4 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c3 svg > g,
       .c3 svg path {
         fill: #8e8ea9;
@@ -138,7 +138,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="0"
+            aria-labelledby=":r0:"
             class="c0 c1 c2 c3"
             tabindex="0"
             type="button"

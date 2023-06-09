@@ -49,6 +49,11 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c9 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c0 {
         background: #eaeaef;
       }
@@ -63,11 +68,6 @@ describe('<UploadProgress />', () => {
         position: relative;
         width: 102px;
         height: 8px;
-      }
-
-      .c9 {
-        font-size: 0.75rem;
-        line-height: 1.33;
       }
 
       .c1 {

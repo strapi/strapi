@@ -54,6 +54,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   };
 
   const handleChange = ({ target: { name, value, type: inputType } }) => {
+
     dispatch({
       type: 'ON_CHANGE',
       inputType,
@@ -81,17 +82,20 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
 
     if (!errors) {
+      
       try {
         lockApp();
 
         dispatch({
           type: 'ON_SUBMIT',
         });
-
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
+        }
+        if (cleanedData.ssoLockedRoles) {
+          cleanedData.ssoLockedRoles = [...new Set(cleanedData.ssoLockedRoles)];
         }
 
         const {

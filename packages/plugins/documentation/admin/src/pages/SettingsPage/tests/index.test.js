@@ -56,61 +56,16 @@ describe('Plugin | Documentation | SettingsPage', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c3 {
-        min-width: 0;
-      }
-
-      .c7 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
-      }
-
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c14 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c25 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c27 {
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c6 {
@@ -168,6 +123,63 @@ describe('Plugin | Documentation | SettingsPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c14 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c25 {
+        background: #f6f6f9;
+        padding: 4px;
+        border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c27 {
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
       }
 
       .c2 {
@@ -314,20 +326,13 @@ describe('Plugin | Documentation | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c10 {
         height: 2rem;
+      }
+
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c10[aria-disabled='true'] {
@@ -566,74 +571,70 @@ describe('Plugin | Documentation | SettingsPage', () => {
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         <div
-                          class="c20"
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c21 c22"
+                            for=":r0:"
+                          >
+                            Restricted Access
+                          </label>
+                        </div>
+                        <label
+                          class="c23"
                         >
                           <div
-                            class="c4"
+                            class="c24"
                           >
-                            <label
-                              class="c5 c21 c22"
-                              for="1"
-                            >
-                              Restricted Access
-                            </label>
+                            Restricted Access
                           </div>
-                          <label
-                            class="c23"
+                          <div
+                            class="c25 c26"
+                            display="flex"
                           >
                             <div
-                              class="c24"
+                              aria-hidden="true"
+                              class="c27 c28 c29"
                             >
-                              Restricted Access
+                              <span
+                                class="c5 c30"
+                              >
+                                Off
+                              </span>
                             </div>
                             <div
-                              class="c25 c26"
-                              display="flex"
+                              aria-hidden="true"
+                              class="c27 c28 c31"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c29"
+                              <span
+                                class="c5 c32"
                               >
-                                <span
-                                  class="c5 c30"
-                                >
-                                  Off
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c31"
-                              >
-                                <span
-                                  class="c5 c32"
-                                >
-                                  On
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="1-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c33"
-                                id="1"
-                                name="restrictedAccess"
-                                type="checkbox"
-                              />
+                                On
+                              </span>
                             </div>
-                          </label>
-                          <p
-                            class="c5 c34"
-                            id="1-hint"
-                          >
-                            Make the documentation endpoint private
-                          </p>
-                        </div>
+                            <input
+                              aria-describedby=":r0:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c33"
+                              id=":r0:"
+                              name="restrictedAccess"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c34"
+                          id=":r0:-hint"
+                        >
+                          Make the documentation endpoint private
+                        </p>
                       </div>
                     </div>
                   </div>

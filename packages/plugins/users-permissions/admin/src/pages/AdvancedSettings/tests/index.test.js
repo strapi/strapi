@@ -62,6 +62,79 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c34 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c15 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c19 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c26 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c30 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c40 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
+      .c42 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -134,67 +207,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
-      }
-
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c15 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c19 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c30 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c40 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
-      .c42 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
       }
 
       .c2 {
@@ -375,20 +387,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 2px solid #4945ff;
       }
 
-      .c34 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c10 {
         height: 2rem;
+      }
+
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c10[aria-disabled='true'] {
@@ -441,6 +446,60 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c23 {
+        border: 1px solid #dcdce4;
+        min-height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c23[aria-disabled='true'] {
+        color: #666687;
+      }
+
+      .c23:focus-visible {
+        outline: none;
+      }
+
+      .c23:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c29 > svg {
+        width: 0.375rem;
+      }
+
+      .c29 > svg > path {
+        fill: #666687;
+      }
+
+      .c27 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        gap: 4px;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+      }
+
+      .c49[data-state='checked'] .c5 {
+        font-weight: bold;
+        color: #4945ff;
       }
 
       .c46 {
@@ -566,60 +625,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       .c47:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c23 {
-        border: 1px solid #dcdce4;
-        min-height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c23[aria-disabled='true'] {
-        color: #666687;
-      }
-
-      .c23:focus-visible {
-        outline: none;
-      }
-
-      .c23:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c29 > svg {
-        width: 0.375rem;
-      }
-
-      .c29 > svg > path {
-        fill: #666687;
-      }
-
-      .c27 {
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c28 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        gap: 4px;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-      }
-
-      .c49[data-state='checked'] .c5 {
-        font-weight: bold;
-        color: #4945ff;
       }
 
       .c16 {
@@ -839,6 +844,221 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                       class=""
                     >
                       <div
+                        class="c18"
+                      >
+                        <label
+                          class="c5 c19 c20"
+                          for=":r0:"
+                        >
+                          Default role for authenticated users
+                        </label>
+                        <div
+                          aria-autocomplete="none"
+                          aria-controls="radix-:r3:"
+                          aria-describedby=":r0:-hint :r0:-error"
+                          aria-expanded="false"
+                          aria-label="Default role for authenticated users"
+                          class="c21 c22 c23"
+                          data-state="closed"
+                          dir="ltr"
+                          id=":r0:"
+                          overflow="hidden"
+                          role="combobox"
+                          tabindex="0"
+                        >
+                          <span
+                            class="c24 c25"
+                          >
+                            <span
+                              class="c5 c26 c27"
+                            >
+                              <span
+                                class="c28"
+                              >
+                                Authenticated
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            class="c25"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c29"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </span>
+                        </div>
+                        <p
+                          class="c5 c30"
+                          id=":r0:-hint"
+                        >
+                          It will attach the new authenticated user to the selected role.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c31"
+                  >
+                    <div
+                      class="c32"
+                    >
+                      <div
+                        class="c18"
+                      >
+                        <div
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c19 c20"
+                            for=":r4:"
+                          >
+                            One account per email address
+                          </label>
+                        </div>
+                        <label
+                          class="c33"
+                        >
+                          <div
+                            class="c34"
+                          >
+                            One account per email address
+                          </div>
+                          <div
+                            class="c35 c36"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c39"
+                            >
+                              <span
+                                class="c5 c40"
+                              >
+                                False
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c41"
+                            >
+                              <span
+                                class="c5 c42"
+                              >
+                                True
+                              </span>
+                            </div>
+                            <input
+                              aria-describedby=":r4:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c43"
+                              id=":r4:"
+                              name="unique_email"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c30"
+                          id=":r4:-hint"
+                        >
+                          Disallow the user to create multiple accounts using the same email address with different authentication providers.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c31"
+                  >
+                    <div
+                      class="c32"
+                    >
+                      <div
+                        class="c18"
+                      >
+                        <div
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c19 c20"
+                            for=":r6:"
+                          >
+                            Enable sign-ups
+                          </label>
+                        </div>
+                        <label
+                          class="c33"
+                        >
+                          <div
+                            class="c34"
+                          >
+                            Enable sign-ups
+                          </div>
+                          <div
+                            class="c35 c36"
+                            display="flex"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c39"
+                            >
+                              <span
+                                class="c5 c40"
+                              >
+                                False
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c41"
+                            >
+                              <span
+                                class="c5 c42"
+                              >
+                                True
+                              </span>
+                            </div>
+                            <input
+                              aria-describedby=":r6:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c43"
+                              id=":r6:"
+                              name="allow_register"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c30"
+                          id=":r6:-hint"
+                        >
+                          When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c44"
+                  >
+                    <div>
+                      <div
                         class=""
                       >
                         <div
@@ -846,66 +1066,31 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         >
                           <label
                             class="c5 c19 c20"
-                            for="1"
+                            for="email_reset_password"
                           >
-                            Default role for authenticated users
+                            Reset password page
                           </label>
                           <div
-                            aria-autocomplete="none"
-                            aria-controls="radix-0"
-                            aria-describedby="1-hint 1-error"
-                            aria-expanded="false"
-                            aria-label="Default role for authenticated users"
-                            class="c21 c22 c23"
-                            data-state="closed"
-                            dir="ltr"
-                            id="1"
-                            overflow="hidden"
-                            role="combobox"
-                            tabindex="0"
+                            class="c2 c45"
                           >
-                            <span
-                              class="c24 c25"
-                            >
-                              <span
-                                class="c5 c26 c27"
-                              >
-                                <span
-                                  class="c28"
-                                >
-                                  Authenticated
-                                </span>
-                              </span>
-                            </span>
-                            <span
-                              class="c25"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="c29"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
-                            </span>
+                            <input
+                              aria-describedby="email_reset_password-hint"
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c46"
+                              id="email_reset_password"
+                              name="email_reset_password"
+                              placeholder="ex: https://youtfrontend.com/reset-password"
+                              type="text"
+                              value="https://cat-bounce.com/"
+                            />
                           </div>
                           <p
                             class="c5 c30"
-                            id="1-hint"
+                            id="email_reset_password-hint"
                           >
-                            It will attach the new authenticated user to the selected role.
+                            URL of your application's reset password page.
                           </p>
                         </div>
                       </div>
@@ -915,318 +1100,114 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     class="c31"
                   >
                     <div
-                      class=""
+                      class="c32"
                     >
                       <div
-                        class="c32"
+                        class="c18"
                       >
                         <div
-                          class="c18"
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c19 c20"
+                            for=":ra:"
+                          >
+                            Enable email confirmation
+                          </label>
+                        </div>
+                        <label
+                          class="c33"
                         >
                           <div
-                            class="c4"
+                            class="c34"
                           >
-                            <label
-                              class="c5 c19 c20"
-                              for="3"
-                            >
-                              One account per email address
-                            </label>
+                            Enable email confirmation
                           </div>
-                          <label
-                            class="c33"
-                          >
-                            <div
-                              class="c34"
-                            >
-                              One account per email address
-                            </div>
-                            <div
-                              class="c35 c36"
-                              display="flex"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c39"
-                              >
-                                <span
-                                  class="c5 c40"
-                                >
-                                  False
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c41"
-                              >
-                                <span
-                                  class="c5 c42"
-                                >
-                                  True
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="3-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c43"
-                                id="3"
-                                name="unique_email"
-                                type="checkbox"
-                              />
-                            </div>
-                          </label>
-                          <p
-                            class="c5 c30"
-                            id="3-hint"
-                          >
-                            Disallow the user to create multiple accounts using the same email address with different authentication providers.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c31"
-                  >
-                    <div
-                      class=""
-                    >
-                      <div
-                        class="c32"
-                      >
-                        <div
-                          class="c18"
-                        >
                           <div
-                            class="c4"
+                            class="c35 c36"
+                            display="flex"
                           >
-                            <label
-                              class="c5 c19 c20"
-                              for="5"
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c39"
                             >
-                              Enable sign-ups
-                            </label>
+                              <span
+                                class="c5 c40"
+                              >
+                                False
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden="true"
+                              class="c37 c38 c41"
+                            >
+                              <span
+                                class="c5 c42"
+                              >
+                                True
+                              </span>
+                            </div>
+                            <input
+                              aria-describedby=":ra:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c43"
+                              id=":ra:"
+                              name="email_confirmation"
+                              type="checkbox"
+                            />
                           </div>
-                          <label
-                            class="c33"
-                          >
-                            <div
-                              class="c34"
-                            >
-                              Enable sign-ups
-                            </div>
-                            <div
-                              class="c35 c36"
-                              display="flex"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c39"
-                              >
-                                <span
-                                  class="c5 c40"
-                                >
-                                  False
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c41"
-                              >
-                                <span
-                                  class="c5 c42"
-                                >
-                                  True
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="5-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c43"
-                                id="5"
-                                name="allow_register"
-                                type="checkbox"
-                              />
-                            </div>
-                          </label>
-                          <p
-                            class="c5 c30"
-                            id="5-hint"
-                          >
-                            When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.
-                          </p>
-                        </div>
+                        </label>
+                        <p
+                          class="c5 c30"
+                          id=":ra:-hint"
+                        >
+                          When enabled (ON), new registered users receive a confirmation email.
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div
                     class="c44"
                   >
-                    <div
-                      class=""
-                    >
-                      <div>
-                        <div
-                          class=""
-                        >
-                          <div
-                            class="c18"
-                          >
-                            <label
-                              class="c5 c19 c20"
-                              for="email_reset_password"
-                            >
-                              Reset password page
-                            </label>
-                            <div
-                              class="c2 c45"
-                            >
-                              <input
-                                aria-describedby="email_reset_password-hint"
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c46"
-                                id="email_reset_password"
-                                name="email_reset_password"
-                                placeholder="ex: https://youtfrontend.com/reset-password"
-                                type="text"
-                                value="https://cat-bounce.com/"
-                              />
-                            </div>
-                            <p
-                              class="c5 c30"
-                              id="email_reset_password-hint"
-                            >
-                              URL of your application's reset password page.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c31"
-                  >
-                    <div
-                      class=""
-                    >
+                    <div>
                       <div
-                        class="c32"
+                        class=""
                       >
                         <div
                           class="c18"
                         >
-                          <div
-                            class="c4"
-                          >
-                            <label
-                              class="c5 c19 c20"
-                              for="7"
-                            >
-                              Enable email confirmation
-                            </label>
-                          </div>
                           <label
-                            class="c33"
+                            class="c5 c19 c20"
+                            for="email_confirmation_redirection"
                           >
-                            <div
-                              class="c34"
-                            >
-                              Enable email confirmation
-                            </div>
-                            <div
-                              class="c35 c36"
-                              display="flex"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c39"
-                              >
-                                <span
-                                  class="c5 c40"
-                                >
-                                  False
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c37 c38 c41"
-                              >
-                                <span
-                                  class="c5 c42"
-                                >
-                                  True
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="7-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c43"
-                                id="7"
-                                name="email_confirmation"
-                                type="checkbox"
-                              />
-                            </div>
+                            Redirection url
                           </label>
-                          <p
-                            class="c5 c30"
-                            id="7-hint"
-                          >
-                            When enabled (ON), new registered users receive a confirmation email.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c44"
-                  >
-                    <div
-                      class=""
-                    >
-                      <div>
-                        <div
-                          class=""
-                        >
                           <div
-                            class="c18"
+                            class="c2 c47"
+                            disabled=""
                           >
-                            <label
-                              class="c5 c19 c20"
-                              for="email_confirmation_redirection"
-                            >
-                              Redirection url
-                            </label>
-                            <div
-                              class="c2 c47"
+                            <input
+                              aria-describedby="email_confirmation_redirection-hint"
+                              aria-disabled="true"
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c48"
+                              data-disabled=""
                               disabled=""
-                            >
-                              <input
-                                aria-describedby="email_confirmation_redirection-hint"
-                                aria-disabled="true"
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c48"
-                                data-disabled=""
-                                disabled=""
-                                id="email_confirmation_redirection"
-                                name="email_confirmation_redirection"
-                                placeholder="ex: https://youtfrontend.com/email-confirmation"
-                                type="text"
-                                value=""
-                              />
-                            </div>
-                            <p
-                              class="c5 c30"
-                              id="email_confirmation_redirection-hint"
-                            >
-                              After you confirmed your email, choose where you will be redirected.
-                            </p>
+                              id="email_confirmation_redirection"
+                              name="email_confirmation_redirection"
+                              placeholder="ex: https://youtfrontend.com/email-confirmation"
+                              type="text"
+                              value=""
+                            />
                           </div>
+                          <p
+                            class="c5 c30"
+                            id="email_confirmation_redirection-hint"
+                          >
+                            After you confirmed your email, choose where you will be redirected.
+                          </p>
                         </div>
                       </div>
                     </div>
