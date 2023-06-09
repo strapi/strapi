@@ -19,6 +19,10 @@ const postgres = {
 
 const mysql = {
   client: 'mysql',
+  pool: {
+    min: 0,
+    max: 50,
+  },
   connection: {
     database: 'strapi',
     user: 'strapi',
