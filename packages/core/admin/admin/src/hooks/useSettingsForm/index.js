@@ -54,7 +54,6 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   };
 
   const handleChange = ({ target: { name, value, type: inputType } }) => {
-
     dispatch({
       type: 'ON_CHANGE',
       inputType,
@@ -82,7 +81,6 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
 
     if (!errors) {
-      
       try {
         lockApp();
 
