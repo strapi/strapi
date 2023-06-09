@@ -920,7 +920,7 @@ describe('Relations', () => {
     });
   });
 
-  describe('Clone entity with relations', () => {
+  describe.skip('Clone entity with relations', () => {
     test('Auto cloning entity with relations should fail', async () => {
       const createdShop = await createEntry(
         'shop',

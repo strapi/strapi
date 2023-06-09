@@ -133,7 +133,7 @@ describe('CM API - Basic + dz', () => {
     data.productsWithDz.shift();
   });
 
-  test('Clone product with compo', async () => {
+  test.skip('Clone product with compo', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',

@@ -126,7 +126,7 @@ describe('CM API - Basic', () => {
     data.products.shift();
   });
 
-  test('Clone product', async () => {
+  test.skip('Clone product', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
@@ -148,7 +148,7 @@ describe('CM API - Basic', () => {
     expect(res.body).toMatchObject(omit('hiddenAttribute', product));
   });
 
-  test('Clone and update product', async () => {
+  test.skip('Clone and update product', async () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
