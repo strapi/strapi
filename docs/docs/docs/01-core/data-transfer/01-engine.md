@@ -20,13 +20,13 @@ After that, the integrity check between the source and destination is run, which
 
 Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
 
-Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The stages are:
+Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
 
-1. schemas - streams the content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
-2. entities - streams all entities (including media data) without their relations
-3. assets - streams the files from the /uploads folder
-4. links - streams the relations between entities
-5. configuration - streams the Strapi project configuration
+1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
+2. entities - all entities (including media data records, not files) _without their relations_
+3. assets - the files from the /uploads folder
+4. links - the relations between entities
+5. configuration - the Strapi project configuration data
 
 Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
 
