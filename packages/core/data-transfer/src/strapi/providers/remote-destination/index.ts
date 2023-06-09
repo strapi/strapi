@@ -317,8 +317,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         }
 
         if (hasStarted) {
-          await this.#streamStep('assets', null);
-
           const endStepError = await this.#endStep('assets');
 
           if (endStepError) {
