@@ -73,7 +73,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(getByRole('textbox').value).toBe('something');
     expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
 
-    expect(getByRole('combobox')).toHaveValue('Blue');
+    expect(getByRole('combobox')).toHaveTextContent('Blue');
 
     expect(
       queryByRole('button', {
