@@ -121,7 +121,13 @@ describe('Entity service decorator', () => {
       await service.update(uid, id, input);
 
       expect(defaultService.emitEvent).toHaveBeenCalledWith(uid, WORKFLOW_UPDATE_STAGE, {
-        id,
+        entityId: 1,
+        workflow: {
+          stages: {
+            from: 2,
+            to: 1,
+          },
+        },
       });
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
