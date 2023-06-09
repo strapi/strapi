@@ -40,17 +40,13 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    const {
-      container: { firstChild },
-    } = render(App);
+    render(App);
 
     await waitFor(() =>
       expect(
         screen.getByText('Create new user on SSO login if no account exists')
       ).toBeInTheDocument()
     );
-
-    expect(firstChild).toMatchSnapshot();
   });
 
   it('should disable the form when there is no change', async () => {

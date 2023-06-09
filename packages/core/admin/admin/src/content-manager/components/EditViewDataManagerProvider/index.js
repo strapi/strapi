@@ -22,12 +22,13 @@ import {
   getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
-import { getTrad } from '../../utils';
+import { createYupSchema, getTrad } from '../../utils';
 
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema } from './utils';
+import { cleanData } from './utils';
+
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import { usePrev } from '../../hooks';
 

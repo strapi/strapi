@@ -48,29 +48,29 @@ const Providers = ({
   themes,
 }) => {
   return (
-    <ThemeToggleProvider themes={themes}>
-      <Theme>
-        <QueryClientProvider client={queryClient}>
-          <Provider store={store}>
-            <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-              <ConfigurationsProvider
-                authLogo={authLogo}
-                menuLogo={menuLogo}
-                showReleaseNotification={showReleaseNotification}
-                showTutorials={showTutorials}
-              >
-                <StrapiAppProvider
-                  getPlugin={getPlugin}
-                  menu={menu}
-                  plugins={plugins}
-                  runHookParallel={runHookParallel}
-                  runHookWaterfall={runHookWaterfall}
-                  runHookSeries={runHookSeries}
-                  settings={settings}
+    <LanguageProvider messages={messages} localeNames={localeNames}>
+      <ThemeToggleProvider themes={themes}>
+        <Theme>
+          <QueryClientProvider client={queryClient}>
+            <Provider store={store}>
+              <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+                <ConfigurationsProvider
+                  authLogo={authLogo}
+                  menuLogo={menuLogo}
+                  showReleaseNotification={showReleaseNotification}
+                  showTutorials={showTutorials}
                 >
-                  <LibraryProvider components={components} fields={fields}>
-                    <CustomFieldsProvider customFields={customFields}>
-                      <LanguageProvider messages={messages} localeNames={localeNames}>
+                  <StrapiAppProvider
+                    getPlugin={getPlugin}
+                    menu={menu}
+                    plugins={plugins}
+                    runHookParallel={runHookParallel}
+                    runHookWaterfall={runHookWaterfall}
+                    runHookSeries={runHookSeries}
+                    settings={settings}
+                  >
+                    <LibraryProvider components={components} fields={fields}>
+                      <CustomFieldsProvider customFields={customFields}>
                         <AutoReloadOverlayBlockerProvider>
                           <OverlayBlockerProvider>
                             <GuidedTour>
@@ -78,16 +78,16 @@ const Providers = ({
                             </GuidedTour>
                           </OverlayBlockerProvider>
                         </AutoReloadOverlayBlockerProvider>
-                      </LanguageProvider>
-                    </CustomFieldsProvider>
-                  </LibraryProvider>
-                </StrapiAppProvider>
-              </ConfigurationsProvider>
-            </AdminContext.Provider>
-          </Provider>
-        </QueryClientProvider>
-      </Theme>
-    </ThemeToggleProvider>
+                      </CustomFieldsProvider>
+                    </LibraryProvider>
+                  </StrapiAppProvider>
+                </ConfigurationsProvider>
+              </AdminContext.Provider>
+            </Provider>
+          </QueryClientProvider>
+        </Theme>
+      </ThemeToggleProvider>
+    </LanguageProvider>
   );
 };
 

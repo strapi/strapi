@@ -49,6 +49,42 @@ describe('GuidedTour Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c3 {
+        font-weight: 600;
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
+      }
+
+      .c8 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c9 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
+      .c29 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
       .c0 {
         background: #ffffff;
         padding-top: 32px;
@@ -118,42 +154,6 @@ describe('GuidedTour Homepage', () => {
         border-color: #4945ff;
         border: 1px solid #4945ff;
         cursor: pointer;
-      }
-
-      .c3 {
-        font-weight: 600;
-        font-size: 1.125rem;
-        line-height: 1.22;
-        color: #32324d;
-      }
-
-      .c8 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #ffffff;
-      }
-
-      .c9 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        font-weight: 500;
-        color: #666687;
-      }
-
-      .c29 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
       }
 
       .c1 {
