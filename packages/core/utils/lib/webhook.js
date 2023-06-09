@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * TODO V5: remove this file
+ * @deprecated
+ */
 const webhookEvents = {
   ENTRY_CREATE: 'entry.create',
   ENTRY_UPDATE: 'entry.update',
@@ -11,7 +15,6 @@ const webhookEvents = {
   MEDIA_DELETE: 'media.delete',
 };
 
-// TODO V5: remove this file
 const deprecatedWebhookEvents = new Proxy(webhookEvents, {
   get(target, prop) {
     console.warn(
