@@ -152,8 +152,8 @@ module.exports = {
 
     const publishedEntity = await entityManager.publish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
@@ -185,8 +185,8 @@ module.exports = {
 
     const unpublishedEntity = await entityManager.unpublish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);

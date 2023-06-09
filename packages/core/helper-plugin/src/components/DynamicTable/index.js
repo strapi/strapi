@@ -24,9 +24,10 @@ const Table = ({
   rows,
   withBulkActions,
   withMainAction,
+  renderBulkActionsBar,
   ...rest
 }) => {
-  const [entriesToDelete, setEntriesToDelete] = useState([]);
+  const [selectedEntries, setSelectedEntries] = useState([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
@@ -36,7 +37,7 @@ const Table = ({
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query?.filters !== undefined;
-  const areAllEntriesSelected = entriesToDelete.length === rows.length && rows.length > 0;
+  const areAllEntriesSelected = selectedEntries.length === rows.length && rows.length > 0;
 
   const content = hasFilters
     ? {
@@ -49,9 +50,9 @@ const Table = ({
   const handleConfirmDeleteAll = async () => {
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(entriesToDelete);
+      await onConfirmDeleteAll(selectedEntries);
       handleToggleConfirmDeleteAll();
-      setEntriesToDelete([]);
+      setSelectedEntries([]);
       setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
@@ -63,7 +64,7 @@ const Table = ({
     try {
       setIsConfirmButtonLoading(true);
       // await onConfirmDeleteAll(entriesToDelete);
-      await onConfirmDelete(entriesToDelete[0]);
+      await onConfirmDelete(selectedEntries[0]);
       handleToggleConfirmDelete();
       setIsConfirmButtonLoading(false);
     } catch (err) {
@@ -74,9 +75,9 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setEntriesToDelete(rows.map((row) => row.id));
+      setSelectedEntries(rows.map((row) => row.id));
     } else {
-      setEntriesToDelete([]);
+      setSelectedEntries([]);
     }
   };
 
@@ -90,25 +91,29 @@ const Table = ({
 
   const handleToggleConfirmDelete = () => {
     if (showConfirmDelete) {
-      setEntriesToDelete([]);
+      setSelectedEntries([]);
     }
     setShowConfirmDelete((prev) => !prev);
   };
 
   const handleClickDelete = (id) => {
-    setEntriesToDelete([id]);
+    setSelectedEntries([id]);
 
     handleToggleConfirmDelete();
   };
 
   const handleSelectRow = ({ name, value }) => {
-    setEntriesToDelete((prev) => {
+    setSelectedEntries((prev) => {
       if (value) {
         return prev.concat(name);
       }
 
       return prev.filter((id) => id !== name);
     });
+  };
+
+  const clearSelectedEntries = () => {
+    setSelectedEntries([]);
   };
 
   const ConfirmDeleteAllComponent = components?.ConfirmDialogDeleteAll
@@ -121,7 +126,7 @@ const Table = ({
 
   return (
     <>
-      {entriesToDelete.length > 0 && (
+      {selectedEntries.length > 0 && (
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between">
@@ -132,17 +137,21 @@ const Table = ({
                       id: 'content-manager.components.TableDelete.label',
                       defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
                     },
-                    { number: entriesToDelete.length }
+                    { number: selectedEntries.length }
                   )}
                 </Typography>
-                <Button
-                  onClick={handleToggleConfirmDeleteAll}
-                  startIcon={<Trash />}
-                  size="L"
-                  variant="danger-light"
-                >
-                  {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
-                </Button>
+                {renderBulkActionsBar ? (
+                  renderBulkActionsBar({ selectedEntries, clearSelectedEntries })
+                ) : (
+                  <Button
+                    onClick={handleToggleConfirmDeleteAll}
+                    startIcon={<Trash />}
+                    size="L"
+                    variant="danger-light"
+                  >
+                    {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
+                  </Button>
+                )}
               </Flex>
             </Flex>
           </Box>
@@ -151,7 +160,7 @@ const Table = ({
       <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT} footer={footer}>
         <TableHead
           areAllEntriesSelected={areAllEntriesSelected}
-          entriesToDelete={entriesToDelete}
+          entriesToDelete={selectedEntries}
           headers={headers}
           onSelectAll={handleSelectAll}
           withMainAction={withMainAction}
@@ -167,7 +176,7 @@ const Table = ({
         ) : (
           Children.toArray(children).map((child) =>
             cloneElement(child, {
-              entriesToDelete,
+              entriesToDelete: selectedEntries,
               onClickDelete: handleClickDelete,
               onSelectRow: handleSelectRow,
               headers,
@@ -211,6 +220,7 @@ Table.defaultProps = {
   rows: [],
   withBulkActions: false,
   withMainAction: false,
+  renderBulkActionsBar: undefined,
 };
 
 Table.propTypes = {
@@ -240,6 +250,7 @@ Table.propTypes = {
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
+  renderBulkActionsBar: PropTypes.func,
 };
 
 export default Table;

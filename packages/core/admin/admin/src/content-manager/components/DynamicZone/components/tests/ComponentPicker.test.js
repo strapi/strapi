@@ -1,70 +1,73 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 
-import ComponentPicker from '../ComponentPicker';
+import { ComponentPicker } from '../ComponentPicker';
 
-import { layoutData } from './fixtures';
-
-jest.mock('../../../../hooks', () => ({
-  useContentTypeLayout: jest.fn().mockReturnValue({
-    getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
-  }),
-}));
+import { dynamicComponentsByCategory } from './fixtures';
 
 describe('ComponentPicker', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   const Component = (props) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <ComponentPicker isOpen onClickAddComponent={jest.fn()} {...props} />
-      </IntlProvider>
-    </ThemeProvider>
+    <ComponentPicker
+      isOpen
+      onClickAddComponent={jest.fn()}
+      dynamicComponentsByCategory={dynamicComponentsByCategory}
+      {...props}
+    />
   );
 
-  const setup = (props) => render(<Component {...props} />);
+  const render = (props) => ({
+    ...renderRTL(<Component {...props} />, {
+      wrapper: ({ children }) => (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en">
+            {children}
+          </IntlProvider>
+        </ThemeProvider>
+      ),
+    }),
+    user: userEvent.setup(),
+  });
 
   it('should by default give me the instruction to Pick one Component', () => {
-    setup();
+    const { getByText } = render();
 
-    expect(screen.getByText(/Pick one component/)).toBeInTheDocument();
+    expect(getByText(/Pick one component/)).toBeInTheDocument();
   });
 
   it('should render null if isOpen is false', () => {
-    setup({ isOpen: false });
+    const { queryByText } = render({ isOpen: false });
 
-    expect(screen.queryByText(/Pick one component/)).not.toBeInTheDocument();
+    expect(queryByText(/Pick one component/)).not.toBeInTheDocument();
   });
 
   it('should render the category names by default', () => {
-    setup({ components: ['component1', 'component2'] });
+    const { getByText } = render({ components: ['component1', 'component2'] });
 
-    expect(screen.getByText(/myComponents/)).toBeInTheDocument();
+    expect(getByText(/myComponents/)).toBeInTheDocument();
   });
 
   it('should open the first category of components when isOpen changes to true from false', () => {
-    const { rerender } = setup({
+    const { rerender, getByRole, queryByRole } = render({
       isOpen: false,
     });
 
     rerender(<Component isOpen components={['component1', 'component2', 'component3']} />);
 
-    expect(screen.getByText(/component1/)).toBeInTheDocument();
-    expect(screen.queryByText(/component3/)).not.toBeInTheDocument();
+    expect(getByRole('button', { name: /component1/ })).toBeInTheDocument();
+    expect(queryByRole('button', { name: /component3/ })).not.toBeInTheDocument();
   });
 
-  it('should call onClickAddComponent with the componentUid when a Component is clicked', () => {
+  it('should call onClickAddComponent with the componentUid when a Component is clicked', async () => {
     const onClickAddComponent = jest.fn();
-    setup({
+    const { user, getByRole } = render({
       components: ['component1', 'component2'],
       onClickAddComponent,
     });
 
-    fireEvent.click(screen.getByText(/component1/));
+    await user.click(getByRole('button', { name: /component1/ }));
 
     expect(onClickAddComponent).toHaveBeenCalledWith('component1');
   });

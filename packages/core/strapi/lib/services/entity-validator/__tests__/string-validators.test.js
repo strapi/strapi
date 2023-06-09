@@ -27,7 +27,6 @@ describe('String validator', () => {
       kind: 'contentType',
       modelName: 'test-model',
       uid: 'test-uid',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrStringUnique: { type: 'string', unique: true },

@@ -7,15 +7,10 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 
-const StyledBox = styled(Box)`
-  border-radius: ${pxToRem(26)};
-`;
-
-const DynamicZoneLabel = ({
+export const DynamicZoneLabel = ({
   label,
   labelAction,
   name,
@@ -28,36 +23,35 @@ const DynamicZoneLabel = ({
 
   return (
     <Flex justifyContent="center">
-      <Box>
-        <StyledBox
-          paddingTop={3}
-          paddingBottom={3}
-          paddingRight={4}
-          paddingLeft={4}
-          background="neutral0"
-          shadow="filterShadow"
-          color="neutral500"
-        >
-          <Flex direction="column" justifyContent="center">
-            <Flex maxWidth={pxToRem(356)}>
-              <Typography variant="pi" textColor="neutral600" fontWeight="bold" ellipsis>
-                {intlLabel}&nbsp;
-              </Typography>
-              <Typography variant="pi" textColor="neutral600" fontWeight="bold">
-                ({numberOfComponents})
-              </Typography>
-              {required && <Typography textColor="danger600">*</Typography>}
-              {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
-            </Flex>
-            {intlDescription && (
-              <Box paddingTop={1} maxWidth={pxToRem(356)}>
-                <Typography variant="pi" textColor="neutral600" ellipsis>
-                  {formatMessage(intlDescription)}
-                </Typography>
-              </Box>
-            )}
+      <Box
+        paddingTop={3}
+        paddingBottom={3}
+        paddingRight={4}
+        paddingLeft={4}
+        borderRadius={26}
+        background="neutral0"
+        shadow="filterShadow"
+        color="neutral500"
+      >
+        <Flex direction="column" justifyContent="center">
+          <Flex maxWidth={pxToRem(356)}>
+            <Typography variant="pi" textColor="neutral600" fontWeight="bold" ellipsis>
+              {intlLabel}&nbsp;
+            </Typography>
+            <Typography variant="pi" textColor="neutral600" fontWeight="bold">
+              ({numberOfComponents})
+            </Typography>
+            {required && <Typography textColor="danger600">*</Typography>}
+            {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
           </Flex>
-        </StyledBox>
+          {intlDescription && (
+            <Box paddingTop={1} maxWidth={pxToRem(356)}>
+              <Typography variant="pi" textColor="neutral600" ellipsis>
+                {formatMessage(intlDescription)}
+              </Typography>
+            </Box>
+          )}
+        </Flex>
       </Box>
     </Flex>
   );
@@ -82,5 +76,3 @@ DynamicZoneLabel.propTypes = {
   numberOfComponents: PropTypes.number,
   required: PropTypes.bool,
 };
-
-export default DynamicZoneLabel;

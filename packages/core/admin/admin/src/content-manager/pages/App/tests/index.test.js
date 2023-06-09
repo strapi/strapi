@@ -6,7 +6,7 @@ import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../components/Theme';
@@ -92,7 +92,7 @@ describe('Content manager | App | main', () => {
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    history.push('/content-manager');
+    act(() => history.push('/content-manager'));
 
     const { container } = render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -114,6 +114,18 @@ describe('Content manager | App | main', () => {
     expect(screen.getByText('Categories')).toBeVisible();
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c37 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c33 {
         padding-bottom: 56px;
       }
@@ -134,18 +146,6 @@ describe('Content manager | App | main', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c37 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c38 {
@@ -552,7 +552,7 @@ describe('Content manager | App | main', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="0"
+                  aria-labelledby=":r1:"
                   class="c6 c7 c8 c9"
                   tabindex="0"
                   type="button"
@@ -631,7 +631,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="2"
+                    id=":r3:"
                   >
                     <li>
                       <a
@@ -708,7 +708,7 @@ describe('Content manager | App | main', () => {
                     </div>
                   </div>
                   <ol
-                    id="3"
+                    id=":r4:"
                   >
                     <li>
                       <a
@@ -819,7 +819,7 @@ describe('Content manager | App | main', () => {
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    history.push('/content-manager');
+    act(() => history.push('/content-manager'));
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -865,7 +865,7 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
-    history.push('/content-manager/collectionType/category');
+    act(() => history.push('/content-manager/collectionType/category'));
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">
@@ -910,7 +910,7 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
-    history.push('/content-manager/collectionType/category');
+    act(() => history.push('/content-manager/collectionType/category'));
 
     render(
       <IntlProvider messages={{}} defaultLocale="en" locale="en">

@@ -394,7 +394,7 @@ describe('Single Types', () => {
 
     await singleTypes.publish(ctx);
 
-    expect(publishFn).toHaveBeenCalledWith(entity, { updatedBy: state.user.id }, modelUid);
+    expect(publishFn).toHaveBeenCalledWith(entity, modelUid, { updatedBy: state.user.id });
     expect(permissionChecker.cannot.publish).toHaveBeenCalledWith(entity);
     expect(permissionChecker.sanitizeOutput).toHaveBeenCalled();
   });
@@ -492,7 +492,7 @@ describe('Single Types', () => {
 
     await singleTypes.unpublish(ctx);
 
-    expect(unpublishFn).toHaveBeenCalledWith(entity, { updatedBy: state.user.id }, modelUid);
+    expect(unpublishFn).toHaveBeenCalledWith(entity, modelUid, { updatedBy: state.user.id });
     expect(permissionChecker.cannot.unpublish).toHaveBeenCalledWith(entity);
     expect(permissionChecker.sanitizeOutput).toHaveBeenCalled();
   });

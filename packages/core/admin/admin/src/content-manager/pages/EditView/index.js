@@ -13,7 +13,7 @@ import { Pencil, Layer } from '@strapi/icons';
 import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
-import DynamicZone from '../../components/DynamicZone';
+import { DynamicZone } from '../../components/DynamicZone';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';

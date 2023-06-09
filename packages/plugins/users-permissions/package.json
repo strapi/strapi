@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.10.5",
+  "version": "4.11.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -29,12 +29,12 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.7.7",
-    "@strapi/helper-plugin": "4.10.5",
-    "@strapi/icons": "1.7.7",
-    "@strapi/utils": "4.10.5",
+    "@strapi/design-system": "1.8.0",
+    "@strapi/helper-plugin": "4.11.0",
+    "@strapi/icons": "1.8.0",
+    "@strapi/utils": "4.11.0",
     "bcryptjs": "2.4.3",
-    "formik": "2.2.9",
+    "formik": "2.4.0",
     "grant-koa": "5.4.8",
     "immer": "9.0.19",
     "jsonwebtoken": "9.0.0",
@@ -42,31 +42,30 @@
     "koa": "^2.13.4",
     "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
-    "prop-types": "^15.7.2",
+    "prop-types": "^15.8.1",
     "purest": "4.0.2",
     "react-intl": "6.4.1",
-    "react-query": "3.24.3",
+    "react-query": "3.39.3",
     "react-redux": "8.0.5",
     "url-join": "4.0.1",
     "yup": "^0.32.9"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.19.0",
-    "@testing-library/react": "12.1.4",
-    "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/dom": "9.2.0",
+    "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "history": "^4.9.0",
     "msw": "1.2.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.3"
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

@@ -284,7 +284,7 @@ describe('transactions', () => {
         .where({ id: 1 })
         .execute();
 
-      expect(end[0].key).toEqual('strapi_content_types_schema');
+      expect(end[0].key).toEqual(original[0].key);
     });
 
     test('rollback successfully', async () => {
@@ -323,7 +323,7 @@ describe('transactions', () => {
         .where({ id: 1 })
         .execute();
 
-      expect(end[0].key).toEqual('strapi_content_types_schema');
+      expect(end[0].key).toEqual(original[0].key);
     });
   });
 });
