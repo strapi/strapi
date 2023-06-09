@@ -1,8 +1,6 @@
 'use strict';
 
-const path = require('path');
+const TYPES_ROOT_DIR = 'typings';
+const GENERATED_OUT_DIR = 'generated';
 
-const TYPES_ROOT_DIR = 'types';
-const REGISTRIES_OUT_DIR = path.join('shared', 'registries');
-
-module.exports = { REGISTRIES_OUT_DIR, TYPES_ROOT_DIR };
+module.exports = { GENERATED_OUT_DIR, TYPES_ROOT_DIR };

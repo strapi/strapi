@@ -3,12 +3,7 @@
 const { factory } = require('typescript');
 
 const { models } = require('../common');
-const {
-  emitDefinitions,
-  format,
-  generateSharedExtensionDefinition,
-  generateLocalDirectoryImportDefinition,
-} = require('../utils');
+const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
 
 /**
  * Generate type definitions for Strapi Content-Types
@@ -43,7 +38,6 @@ const generateContentTypesDefinitions = async (options = {}) => {
   const allDefinitions = [
     // Imports
     ...models.imports.generateImportDefinition(),
-    generateLocalDirectoryImportDefinition(),
 
     // Add a newline after the import statement
     factory.createIdentifier('\n'),

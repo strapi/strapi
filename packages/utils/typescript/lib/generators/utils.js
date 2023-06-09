@@ -74,20 +74,6 @@ const format = async (content) => {
 };
 
 /**
- * Generate the import declaration for local directory
- *
- * @returns {ts.ImportDeclaration}
- */
-const generateLocalDirectoryImportDefinition = () => {
-  return factory.createImportDeclaration(
-    undefined,
-    undefined,
-    factory.createStringLiteral('.'),
-    undefined
-  );
-};
-
-/**
  * Generate the extension block for a shared component from strapi/strapi
  *
  * @param {string} registry The registry to extend
@@ -111,15 +97,19 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
       factory.createModuleDeclaration(
         [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
         factory.createIdentifier('Shared'),
-        factory.createModuleBlock([
-          factory.createInterfaceDeclaration(
-            [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-            factory.createIdentifier(registry),
-            undefined,
-            undefined,
-            properties
-          ),
-        ])
+        factory.createModuleBlock(
+          properties.length > 0
+            ? [
+                factory.createInterfaceDeclaration(
+                  [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+                  factory.createIdentifier(registry),
+                  undefined,
+                  undefined,
+                  properties
+                ),
+              ]
+            : []
+        )
       ),
     ]),
     ts.NodeFlags.ExportContext
@@ -216,7 +206,6 @@ module.exports = {
   saveDefinitionToFileSystem,
   format,
   generateSharedExtensionDefinition,
-  generateLocalDirectoryImportDefinition,
   createLogger,
   timer,
 };

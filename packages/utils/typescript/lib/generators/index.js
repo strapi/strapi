@@ -3,7 +3,7 @@
 const path = require('path');
 const chalk = require('chalk');
 
-const { TYPES_ROOT_DIR, REGISTRIES_OUT_DIR } = require('./constants');
+const { TYPES_ROOT_DIR, GENERATED_OUT_DIR } = require('./constants');
 const { saveDefinitionToFileSystem, createLogger, timer } = require('./utils');
 const generateContentTypesDefinitions = require('./content-types');
 const generateComponentsDefinitions = require('./components');
@@ -42,7 +42,7 @@ const generate = async (config = {}) => {
   const logger = createLogger(loggerConfig);
   const psTimer = timer().start();
 
-  const registryPwd = path.join(pwd, rootDir, REGISTRIES_OUT_DIR);
+  const registryPwd = path.join(pwd, rootDir, GENERATED_OUT_DIR);
   const generatorConfig = { strapi, pwd: registryPwd, logger };
 
   const returnWithMessage = () => {
