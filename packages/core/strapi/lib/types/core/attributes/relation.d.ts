@@ -7,6 +7,10 @@ export type BasicRelationType =
   | 'manyToMany'
   | 'morphOne'
   | 'morphMany';
+export type BasicMorphRelationType = Extract<
+  BasicRelationType,
+  Utils.String.Prefix<string, 'morph'>
+>;
 export type PolymorphicRelationType = 'morphToOne' | 'morphToMany';
 export type RelationType = BasicRelationType | PolymorphicRelationType;
 
@@ -17,7 +21,7 @@ export type BasicRelationProperties<
 > = {
   relation: TRelationType;
   target: TTarget;
-} & TRelationType extends Utils.String.Suffix<'morph', 'One' | 'Many'>
+} & (TRelationType extends BasicMorphRelationType
   ? {
       morphBy?: Utils.Object.KeysBy<
         Common.Schemas[TTarget]['attributes'],
@@ -27,7 +31,7 @@ export type BasicRelationProperties<
   : {
       inversedBy?: RelationsKeysFromTo<TTarget, TOrigin>;
       mappedBy?: RelationsKeysFromTo<TTarget, TOrigin>;
-    };
+    });
 
 export interface PolymorphicRelationProperties<TRelationType extends PolymorphicRelationType> {
   relation: TRelationType;
