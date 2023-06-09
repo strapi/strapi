@@ -33,7 +33,7 @@ module.exports = ({ strapi }) => {
      * @param {object} opts.filters - Filters object.
      * @returns {Promise<object[]>} - List of workflows that match the user's filters.
      */
-    async find(opts) {
+    async find(opts = {}) {
       const filters = processFilters({ strapi }, opts.filters);
       return strapi.entityService.findMany(WORKFLOW_MODEL_UID, { ...opts, filters });
     },
@@ -167,7 +167,7 @@ module.exports = ({ strapi }) => {
      * @returns {Promise<object|null>} - Assigned workflow object if found, or null.
      */
     async getAssignedWorkflow(uid, opts = {}) {
-      const workflows = await getService('workflows').find({
+      const workflows = await this.find({
         ...opts,
         filters: { contentTypes: getContentTypeFilter({ strapi }, uid) },
       });

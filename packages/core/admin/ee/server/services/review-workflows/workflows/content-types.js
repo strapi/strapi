@@ -13,7 +13,7 @@ module.exports = ({ strapi }) => {
 
   const updateContentTypeConfig = async (uid, reviewWorkflowOption) => {
     // Merge options in the configuration as the configuration service use a destructuration merge which doesn't include nested objects
-    const modelConfig = await contentManagerContentTypeService.getConfiguration(uid);
+    const modelConfig = await contentManagerContentTypeService.findConfiguration(uid);
 
     await contentManagerContentTypeService.updateConfiguration(
       { uid },

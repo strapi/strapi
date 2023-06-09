@@ -23,7 +23,7 @@ jest.mock('../../../../utils', () => {
 });
 
 const CTMPContentTypesServiceMock = {
-  getConfiguration: jest.fn(),
+  findConfiguration: jest.fn(),
   updateConfiguration: jest.fn(),
 };
 
@@ -61,7 +61,7 @@ describe('Review Workflows', () => {
         const prevOptions = { testOptions: true };
 
         workflowsServiceMock.getAssignedWorkflow.mockResolvedValueOnce(null);
-        CTMPContentTypesServiceMock.getConfiguration.mockResolvedValueOnce({
+        CTMPContentTypesServiceMock.findConfiguration.mockResolvedValueOnce({
           options: prevOptions,
         });
         stagesServiceMock.updateEntitiesStage.mockResolvedValueOnce('update entity');
@@ -72,7 +72,7 @@ describe('Review Workflows', () => {
           stageId: 1,
         });
 
-        expect(CTMPContentTypesServiceMock.getConfiguration).toHaveBeenCalled();
+        expect(CTMPContentTypesServiceMock.findConfiguration).toHaveBeenCalled();
         expect(CTMPContentTypesServiceMock.updateConfiguration).toBeCalledTimes(1);
         expect(CTMPContentTypesServiceMock.updateConfiguration).toHaveBeenCalledWith(
           { uid: 'content' },
@@ -92,7 +92,7 @@ describe('Review Workflows', () => {
           id: 1,
           contentTypes: ['content'],
         });
-        CTMPContentTypesServiceMock.getConfiguration.mockResolvedValueOnce({
+        CTMPContentTypesServiceMock.findConfiguration.mockResolvedValueOnce({
           options: prevOptions,
         });
 
@@ -109,7 +109,7 @@ describe('Review Workflows', () => {
         const prevOptions = { testOptions: true };
 
         workflowsServiceMock.getAssignedWorkflow.mockResolvedValueOnce(null);
-        CTMPContentTypesServiceMock.getConfiguration.mockResolvedValueOnce({
+        CTMPContentTypesServiceMock.findConfiguration.mockResolvedValueOnce({
           options: prevOptions,
         });
         stagesServiceMock.updateEntitiesStage.mockResolvedValueOnce('update entity');
@@ -120,7 +120,7 @@ describe('Review Workflows', () => {
           stageId: 1,
         });
 
-        expect(CTMPContentTypesServiceMock.getConfiguration).toHaveBeenCalled();
+        expect(CTMPContentTypesServiceMock.findConfiguration).toHaveBeenCalled();
         expect(CTMPContentTypesServiceMock.updateConfiguration).toBeCalledTimes(1);
         expect(CTMPContentTypesServiceMock.updateConfiguration).toHaveBeenCalledWith(
           { uid: 'content' },
