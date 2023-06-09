@@ -49,7 +49,7 @@ interface IDefaultLink {
   /**
    * The relation type
    */
-  relation: Attribute.RelationType;
+  relation: Attribute.RelationKind.Any;
 
   /**
    * Left side of the link

@@ -8,7 +8,9 @@ export type Extends<TLeft, TRight> = [TLeft] extends [TRight] ? True : False;
 
 export type Not<TExpression extends BooleanValue> = If<TExpression, False, True>;
 
-export type If<TExpression extends BooleanValue, TOnTrue, TOnFalse> = [TExpression] extends [True]
+export type If<TExpression extends BooleanValue, TOnTrue, TOnFalse = never> = [
+  TExpression
+] extends [True]
   ? TOnTrue
   : TOnFalse;
 

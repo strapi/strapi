@@ -2,7 +2,7 @@
  * Strapi custom scalar types
  */
 
-import type { Attribute, Common } from '@strapi/strapi';
+import { Attribute, Common } from '@strapi/strapi';
 
 /**
  * Setters for the attributes options
@@ -58,7 +58,14 @@ export type Any =
   | Attribute.JSON
   | Attribute.Media<Attribute.MediaKind | undefined, boolean>
   | Attribute.Password
-  | Attribute.Relation
+  | (
+      | Attribute.Relation<
+          Common.UID.Schema,
+          Attribute.RelationKind.BiDirectional,
+          Common.UID.Schema
+        >
+      | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.UniDirectional>
+    )
   | Attribute.RichText
   | Attribute.String
   | Attribute.Text

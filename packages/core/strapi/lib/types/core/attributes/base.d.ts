@@ -39,6 +39,9 @@ export interface Attribute<TKind extends Kind = Kind> {
   pluginOptions?: object;
 }
 
+/**
+ * Creates a basic Attribute of type T
+ */
 export type OfType<T extends Kind> = Attribute<T>;
 
 // Common attributes Options
