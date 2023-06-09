@@ -14,7 +14,6 @@ import {
   IconButton,
   TextInput,
   VisuallyHidden,
-  Typography,
   SingleSelect,
   SingleSelectOption,
 } from '@strapi/design-system';
@@ -174,9 +173,7 @@ export function Stage({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  // TODO: the .toUpperCase() conversion can be removed once the hex code is normalized in
-  // the admin API
-  const colorValue = colorOptions.find(({ value }) => value === colorField.value.toUpperCase());
+  const { themeColorName } = colorField.value ? getStageColorByHex(colorField.value) : {};
 
   return (
     <Box ref={composedRef}>
@@ -264,19 +261,31 @@ export function Stage({
                     id: 'content-manager.reviewWorkflows.stage.color',
                     defaultMessage: 'Color',
                   })}
-                  defaultTextValue={colorValue?.label}
                   onChange={(value) => {
                     colorField.onChange({ target: { value } });
                     dispatch(updateStage(id, { color: value }));
                   }}
-                  value={colorField.value}
+                  value={colorField.value.toUpperCase()}
+                  startIcon={
+                    <Flex
+                      as="span"
+                      height={2}
+                      background={colorField.value}
+                      borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                      hasRadius
+                      shrink={0}
+                      width={2}
+                    />
+                  }
                 >
                   {colorOptions.map(({ value, label, color }) => {
                     const { themeColorName } = getStageColorByHex(color);
 
                     return (
-                      <SingleSelectOption value={value} textValue={label}>
-                        <Flex as="span" alignItems="center" gap={2}>
+                      <SingleSelectOption
+                        value={value}
+                        key={value}
+                        startIcon={
                           <Flex
                             as="span"
                             height={2}
@@ -288,10 +297,9 @@ export function Stage({
                             shrink={0}
                             width={2}
                           />
-                          <Typography textColor="neutral800" ellipsis>
-                            {label}
-                          </Typography>
-                        </Flex>
+                        }
+                      >
+                        {label}
                       </SingleSelectOption>
                     );
                   })}
