@@ -87,19 +87,21 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                 </ComponentStack>
               </button>
             )}
-            {components.map((component, index) => {
-              return (
-                <ComponentCard
-                  key={component}
-                  dzName={name}
-                  index={index}
-                  component={component}
-                  isActive={activeTab === index}
-                  isInDevelopmentMode={isInDevelopmentMode}
-                  onClick={() => toggle(index)}
-                />
-              );
-            })}
+            <Flex role="tablist" gap={2}>
+              {components.map((component, index) => {
+                return (
+                  <ComponentCard
+                    key={component}
+                    dzName={name}
+                    index={index}
+                    component={component}
+                    isActive={activeTab === index}
+                    isInDevelopmentMode={isInDevelopmentMode}
+                    onClick={() => toggle(index)}
+                  />
+                );
+              })}
+            </Flex>
           </ScrollableStack>
         </FixedBox>
         <ComponentContentBox>
@@ -111,7 +113,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
 
             return (
               <Box
-                tabId={`${index}`}
+                id={`dz-${name}-panel-${index}`}
+                role="tabpanel"
+                tabindex={0}
+                aria-labelledby={`dz-${name}-tab-${index}`}
                 key={component}
                 style={{ display: activeTab === index ? 'block' : 'none' }}
               >

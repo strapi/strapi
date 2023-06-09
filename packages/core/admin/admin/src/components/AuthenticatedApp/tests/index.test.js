@@ -4,6 +4,7 @@ import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
 import { ConfigurationsContext } from '../../../contexts';
 import {
   fetchAppInfo,
@@ -63,15 +64,17 @@ const queryClient = new QueryClient({
 const configurationContextValue = { showReleaseNotification: false };
 
 const App = () => (
-  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-    <Theme>
-      <QueryClientProvider client={queryClient}>
-        <ConfigurationsContext.Provider value={configurationContextValue}>
-          <AuthenticatedApp />
-        </ConfigurationsContext.Provider>
-      </QueryClientProvider>
-    </Theme>
-  </ThemeToggleProvider>
+  <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+      <Theme>
+        <QueryClientProvider client={queryClient}>
+          <ConfigurationsContext.Provider value={configurationContextValue}>
+            <AuthenticatedApp />
+          </ConfigurationsContext.Provider>
+        </QueryClientProvider>
+      </Theme>
+    </ThemeToggleProvider>
+  </IntlProvider>
 );
 
 describe('Admin | components | AuthenticatedApp', () => {
@@ -99,6 +102,18 @@ describe('Admin | components | AuthenticatedApp', () => {
     const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -115,18 +130,6 @@ describe('Admin | components | AuthenticatedApp', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c2 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c3 {

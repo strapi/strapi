@@ -36,15 +36,21 @@ const ComponentBox = styled(Box)`
     > div > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
     }
   }
 `;
 
-export default function ComponentCard({ children, onClick }) {
+export default function ComponentCard({ children, onClick, icon }) {
   return (
     <ComponentBox as="button" type="button" onClick={onClick} hasRadius>
       <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
-        <ComponentIcon />
+        <ComponentIcon icon={icon} />
 
         <Typography variant="pi" fontWeight="bold" textColor="neutral600">
           {children}
@@ -56,9 +62,11 @@ export default function ComponentCard({ children, onClick }) {
 
 ComponentCard.defaultProps = {
   onClick() {},
+  icon: 'Cube',
 };
 
 ComponentCard.propTypes = {
   children: PropTypes.node.isRequired,
   onClick: PropTypes.func,
+  icon: PropTypes.string,
 };

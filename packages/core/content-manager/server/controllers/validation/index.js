@@ -13,7 +13,7 @@ const TYPES = ['singleType', 'collectionType'];
  */
 const kindSchema = yup.string().oneOf(TYPES).nullable();
 
-const bulkDeleteInputSchema = yup
+const bulkActionInputSchema = yup
   .object({
     ids: yup.array().of(yup.strapiID()).min(1).required(),
   })
@@ -64,7 +64,7 @@ const validatePagination = ({ page, pageSize }) => {
 module.exports = {
   createModelConfigurationSchema,
   validateKind: validateYupSchema(kindSchema),
-  validateBulkDeleteInput: validateYupSchema(bulkDeleteInputSchema),
+  validateBulkActionInput: validateYupSchema(bulkActionInputSchema),
   validateGenerateUIDInput: validateYupSchema(generateUIDInputSchema),
   validateCheckUIDAvailabilityInput: validateYupSchema(checkUIDAvailabilityInputSchema),
   validateUIDField,

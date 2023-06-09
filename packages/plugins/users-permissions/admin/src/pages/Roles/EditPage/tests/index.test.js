@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, waitFor, act, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -37,7 +37,7 @@ function makeAndRenderApp() {
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/1`);
+  act(() => history.push(`/settings/${pluginId}/roles/1`));
 
   return renderResult;
 }
@@ -57,6 +57,64 @@ describe('Admin | containers | RoleEditPage', () => {
     await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c10 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c16 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c21 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c39 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c49 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #4945ff;
+      }
+
+      .c50 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #4a4a6a;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 24px;
@@ -178,64 +236,6 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-right: 32px;
         padding-bottom: 24px;
         padding-left: 32px;
-      }
-
-      .c10 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c15 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c16 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c21 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c39 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c49 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c50 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #4a4a6a;
       }
 
       .c6 {
@@ -545,6 +545,11 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c14 {
         height: 2rem;
+      }
+
+      .c14 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c14[aria-disabled='true'] {
@@ -969,7 +974,7 @@ describe('Admin | containers | RoleEditPage', () => {
                           >
                             <label
                               class="c9 c25 c26"
-                              for="1"
+                              for=":r0:"
                             >
                               Name
                             </label>
@@ -981,7 +986,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 aria-invalid="false"
                                 aria-required="false"
                                 class="c28"
-                                id="1"
+                                id=":r0:"
                                 name="name"
                                 value="Authenticated"
                               />
@@ -1062,10 +1067,10 @@ describe('Admin | containers | RoleEditPage', () => {
                             class="c5 c44 c45"
                           >
                             <button
-                              aria-controls="accordion-content-2"
+                              aria-controls="accordion-content-:r4:"
                               aria-disabled="false"
                               aria-expanded="false"
-                              aria-labelledby="accordion-label-2"
+                              aria-labelledby="accordion-label-:r4:"
                               class="c5 c46 c12 c47 c48"
                               data-strapi-accordion-toggle="true"
                               type="button"
@@ -1075,13 +1080,13 @@ describe('Admin | containers | RoleEditPage', () => {
                               >
                                 <span
                                   class="c9 c50"
-                                  id="accordion-label-2"
+                                  id="accordion-label-:r4:"
                                 >
                                   Address
                                 </span>
                                 <p
                                   class="c9 c39"
-                                  id="accordion-desc-2"
+                                  id="accordion-desc-:r4:"
                                 >
                                   Define all allowed actions for the api::address plugin.
                                 </p>
@@ -1178,7 +1183,7 @@ describe('Admin | containers | RoleEditPage', () => {
   it('can toggle the permissions accordions and actions', async () => {
     const user = userEvent.setup();
     // Create app and wait for loading
-    const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
+    const { getByLabelText, getByRole, queryByText, getByTestId, getByText, getAllByRole } =
       makeAndRenderApp();
     const loader = getByTestId('loader');
     await waitForElementToBeRemoved(loader);
@@ -1195,13 +1200,16 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(getByText('POST')).toBeInTheDocument();
     expect(getByText('/addresses')).toBeInTheDocument();
 
-    // Select all actions with the "select all" checkbox
-    const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
-    expect(selectAllCheckbox.checked).toBe(false);
-    fireEvent.click(selectAllCheckbox);
-    actionCheckboxes.forEach((actionCheckbox) => {
-      expect(actionCheckbox.checked).toBe(true);
-    });
+    expect(getByRole('checkbox', { name: 'Select all' }).checked).toBe(false);
+
+    await user.click(getByRole('checkbox', { name: 'Select all' }));
+
+    getAllByRole('checkbox')
+      .slice(1, -1)
+      .forEach((actionCheckbox) => {
+        console.log(actionCheckbox.checked);
+        expect(actionCheckbox.checked).toBe(true);
+      });
 
     // Close the collapse
     await user.click(collapse);

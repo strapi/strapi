@@ -33,7 +33,9 @@ export const TableRows = ({
       {rows.map((element) => {
         const { id, isSelectable, name, folderURL, type: contentType } = element;
 
-        const isSelected = !!selected.find((currentRow) => currentRow.id === id);
+        const isSelected = !!selected.find(
+          (currentRow) => currentRow.id === id && currentRow.type === contentType
+        );
 
         return (
           <Tr
