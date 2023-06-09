@@ -81,7 +81,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -109,7 +109,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -168,7 +168,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -214,7 +214,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -236,7 +236,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -282,7 +282,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -417,7 +417,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -428,7 +428,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -509,7 +509,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -520,7 +520,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/UsersPermissionsRole',
@@ -553,7 +553,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -564,7 +564,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -645,7 +645,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
@@ -656,7 +656,7 @@ describe('Documentation plugin | Build component schema', () => {
         type: 'object',
         properties: {
           id: {
-            type: 'number',
+            type: 'integer',
           },
           attributes: {
             $ref: '#/components/schemas/Restaurant',
