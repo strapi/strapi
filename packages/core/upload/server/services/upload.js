@@ -12,8 +12,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const { set, pipe, toArray, zip } = require('lodash/fp');
+const { pipe, castArray, zip } = require('lodash/fp');
 const { extension } = require('mime-types');
+const { fromStream } = require('file-type');
 const {
   sanitize,
   nameToSlug,
@@ -42,14 +43,20 @@ const sendMediaMetrics = (file) => {
 
 async function withTempDirectory(callback) {
   const folderPath = path.join(os.tmpdir(), 'strapi-upload-');
-  const folder = fse.mkdtemp(folderPath);
+  const folder = await fse.mkdtemp(folderPath);
 
   try {
-    return callback(folder);
+    const res = await callback(folder);
+    return res;
   } finally {
     await fse.remove(folder);
   }
 }
+
+const getFileType = async (file) => {
+  const fileType = await fromStream(file.getStream());
+  return fileType?.ext;
+};
 
 const generateFileName = (name) => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
@@ -94,7 +101,6 @@ module.exports = ({ strapi }) => ({
       file.path = metas.path;
     }
 
-    // TODO: Remove this
     if (metas.tmpWorkingDirectory) {
       file.tmpWorkingDirectory = metas.tmpWorkingDirectory;
     }
@@ -103,18 +109,16 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Adds properties needed to upload the file to a provider.
+   * Adds properties needed to upload a file to a provider.
    */
-  async formatUploadFile({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const config = strapi.config.get('plugin.upload');
+  async formatUploadFile({ name: filename, type, size, path }, fileInfo = {}, metas = {}) {
     const file = await this.formatFileInfo({ filename, type, size }, fileInfo, metas);
 
-    // TODO: Get file type
+    file.getStream = () => fs.createReadStream(path);
+    file.type = await getFileType(file);
+    file.provider = strapi.config.get('plugin.upload').provider;
 
-    return pipe(
-      set('getStream', () => fs.createReadStream(file.path)),
-      set('provider', config.provider)
-    )(file);
+    return file;
   },
 
   // fileToDB(files) {},
@@ -128,15 +132,15 @@ module.exports = ({ strapi }) => ({
     const { fileInfo, ...metas } = data;
 
     const filesAndInfo = zip(
-      toArray(fileInfo).map((info) => info || {}),
-      toArray(files)
+      castArray(files),
+      castArray(fileInfo).map((info) => info || {})
     );
 
     return withTempDirectory((tmpWorkingDirectory) => {
       const fileMetadata = { ...metas, tmpWorkingDirectory };
 
       const doUpload = async ([fileData, fileInfo]) => {
-        const file = await this.formatFileInfo(fileData, fileInfo, fileMetadata);
+        const file = await this.formatUploadFile(fileData, fileInfo, fileMetadata);
         return this.uploadFileAndPersist(file, { user });
       };
 
@@ -331,21 +335,15 @@ module.exports = ({ strapi }) => ({
       await strapi.plugin('upload').provider.delete(file);
 
       if (file.formats) {
-        await Promise.all(
-          Object.keys(file.formats).map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats[key]);
-          })
-        );
+        const fileFormats = Object.values(file.formats);
+        await mapAsync(fileFormats, strapi.plugin('upload').provider.delete);
       }
     }
 
-    const media = await strapi.query(FILE_MODEL_UID).findOne({
-      where: { id: file.id },
-    });
-
+    const deleteQuery = { where: { id: file.id } };
+    const media = await strapi.query(FILE_MODEL_UID).findOne(deleteQuery);
     await this.emitEvent(MEDIA_DELETE, media);
-
-    return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
+    return strapi.query(FILE_MODEL_UID).delete(deleteQuery);
   },
 
   async uploadToEntity(params, files) {
@@ -357,7 +355,7 @@ module.exports = ({ strapi }) => ({
       const fileMetadata = { refId: id, ref: model, field, tmpWorkingDirectory };
 
       return mapAsync(
-        toArray(files),
+        castArray(files),
         pipe(
           (file) => this.formatUploadFile(file, fileInfo, fileMetadata),
           (file) => this.uploadFileAndPersist(file, fileMetadata)
