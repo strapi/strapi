@@ -18678,7 +18678,7 @@ __metadata:
     react-dom: ^18.2.0
     react-intl: 6.4.1
     react-router-dom: 5.3.4
-    sqlite3: 5.1.2
+    sqlite3: 5.1.5
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -22835,7 +22835,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
-    sqlite3: 5.1.2
+    sqlite3: 5.1.5
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -30481,9 +30481,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sqlite3@npm:5.1.2":
-  version: 5.1.2
-  resolution: "sqlite3@npm:5.1.2"
+"sqlite3@npm:5.1.5":
+  version: 5.1.5
+  resolution: "sqlite3@npm:5.1.5"
   dependencies:
     "@mapbox/node-pre-gyp": ^1.0.0
     node-addon-api: ^4.2.0
@@ -30497,7 +30497,7 @@ __metadata:
   peerDependenciesMeta:
     node-gyp:
       optional: true
-  checksum: 5ed90068f27853c4fef9d01c2e18706b7f51351220cbcd34488772a8ee5438097a16955e7a9d462da81c93fdf1ed3c8cdb085b23ddda02fc863b48e6acc0ee6e
+  checksum: b7df68c8d4a16cd1d8d42e34035973c2e4cff33e0b917ff8830fa21c84e3bc0d16beaf51589a4a45df9c52e30bf0224122e6c67d0f17ff1d776be738d8706b02
   languageName: node
   linkType: hard
 
