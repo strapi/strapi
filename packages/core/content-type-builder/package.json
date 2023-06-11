@@ -35,7 +35,7 @@
     "@strapi/helper-plugin": "4.11.0",
     "@strapi/icons": "1.8.0",
     "@strapi/utils": "4.11.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",

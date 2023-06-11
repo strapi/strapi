@@ -35,7 +35,7 @@
     "cropperjs": "1.5.12",
     "date-fns": "2.30.0",
     "formik": "2.4.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "immer": "9.0.19",
     "koa-range": "0.3.0",
     "koa-static": "5.0.0",
