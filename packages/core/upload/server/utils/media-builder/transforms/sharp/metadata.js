@@ -16,7 +16,6 @@ const metadata = async (file) => {
     ...file,
     width: metadata.width,
     height: metadata.height,
-    size: metadata.size,
   };
 };
 
