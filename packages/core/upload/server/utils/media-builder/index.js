@@ -29,8 +29,17 @@ const MediaBuilder = () => {
       );
     },
 
-    async build(file) {
-      return this.transform(file);
+    groupByFormats(transformedFiles, srcFile) {
+      // Merge files into one
+      const file = transformedFiles.find((file) => !file.format) || srcFile;
+      const formattedFiles = transformedFiles.filter((file) => !!file.format);
+
+      // Add formatted files into the original file
+      file.formats = {};
+      for (const formattedFile of formattedFiles) {
+        file.formats[formattedFile.format] = formattedFile;
+      }
+      return file;
     },
   };
 };
