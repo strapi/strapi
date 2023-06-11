@@ -101,7 +101,7 @@
     "jest-cli": "29.5.0",
     "jest-environment-jsdom": "29.0.3",
     "jest-watch-typeahead": "2.2.2",
-    "lerna": "6.5.1",
+    "lerna": "6.6.2",
     "lint-staged": "13.2.2",
     "lodash": "4.17.21",
     "nx": "15.9.4",
