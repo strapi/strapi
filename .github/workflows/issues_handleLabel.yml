@@ -185,21 +185,21 @@ jobs:
 
       # Auto assign issues to projects based on source
       - name: assign issues to Content squad project
-        uses: actions/add-to-project@v0.4.1
+        uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/strapi/projects/11
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
           labeled: 'source: core:admin, source: core:content-manager, source: core:upload, source: plugin:i18n'
           label-operator: OR
       - name: assign issues to DevExp squad project
-        uses: actions/add-to-project@v0.4.1
+        uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
           labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript, source: core:data-transfer'
           label-operator: OR
       - name: assign issues to Expansions squad project
-        uses: actions/add-to-project@v0.4.1
+        uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/strapi/projects/4
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
