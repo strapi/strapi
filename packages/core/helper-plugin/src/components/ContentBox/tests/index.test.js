@@ -22,18 +22,6 @@ describe('ContentBox', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c2 {
-        padding: 12px;
-        border-radius: 4px;
-      }
-
       .c5 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -45,6 +33,18 @@ describe('ContentBox', () => {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
+      }
+
+      .c0 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c2 {
+        padding: 12px;
+        border-radius: 4px;
       }
 
       .c1 {

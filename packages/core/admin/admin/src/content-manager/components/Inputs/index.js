@@ -12,14 +12,7 @@ import Wysiwyg from '../Wysiwyg';
 import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
 
-import {
-  connect,
-  generateOptions,
-  getInputType,
-  getStep,
-  select,
-  VALIDATIONS_TO_OMIT,
-} from './utils';
+import { connect, generateOptions, getInputType, select, VALIDATIONS_TO_OMIT } from './utils';
 
 function Inputs({
   allowedFields,
@@ -93,9 +86,7 @@ function Inputs({
     return value;
   }, [type, value]);
 
-  const step = useMemo(() => {
-    return getStep(type);
-  }, [type]);
+  const step = getStep(type);
 
   const isUserAllowedToEditField = useMemo(() => {
     const joinedName = fieldName.join('.');
@@ -184,6 +175,9 @@ function Inputs({
 
     let minutes;
 
+    /**
+     * Wtf is this?
+     */
     if (inputType === 'datetime') {
       minutes = parseInt(inputValue.substr(14, 2), 10);
     } else if (inputType === 'time') {
@@ -314,6 +308,19 @@ Inputs.propTypes = {
     endPoint: PropTypes.string,
   }),
   customFieldInputs: PropTypes.object,
+};
+
+const getStep = (type) => {
+  switch (type) {
+    case 'float':
+    case 'decimal':
+      return 0.01;
+    case 'time':
+    case 'datetime':
+      return 15;
+    default:
+      return 1;
+  }
 };
 
 const Memoized = memo(Inputs, isEqual);

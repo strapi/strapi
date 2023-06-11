@@ -2,7 +2,10 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
-
+/**
+ * TODO: this will come in another PR.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { ReactSelect } from '@strapi/helper-plugin';
 import {
   Status,

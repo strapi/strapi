@@ -1,6 +1,121 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marketplace page - layout renders the online layout 1`] = `
+.c29 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c46 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c55 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c99 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c74 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c67 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  line-height: 16;
+  color: #32324d;
+}
+
+.c72 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c83 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #328048;
+}
+
+.c90 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: revert;
+  color: #32324d;
+}
+
+.c92 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  line-height: revert;
+  color: #32324d;
+}
+
 .c1 {
   padding-bottom: 56px;
 }
@@ -165,109 +280,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 
 .c85 {
   padding-left: 8px;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c24 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c26 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c46 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c55 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c99 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c74 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c67 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  line-height: 16;
-  color: #32324d;
-}
-
-.c72 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c83 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #328048;
-}
-
-.c90 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: revert;
-  color: #32324d;
-}
-
-.c92 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  line-height: revert;
-  color: #32324d;
 }
 
 .c5 {
@@ -510,18 +522,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c29 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c53 {
   height: 2rem;
   border: 1px solid #dcdce4;
@@ -651,67 +651,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   align-items: center;
 }
 
-.c37 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 0;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c37::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c37:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c33 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c33:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
 .c43 {
   border: 1px solid #dcdce4;
   min-height: 2rem;
@@ -772,6 +711,67 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
+}
+
+.c37 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 0;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c37::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c37:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c33 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
 .c56 {
@@ -1219,7 +1219,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 sc-gXRojI c11 c12 c13 c14"
+              class="c10 sc-bGaVxB c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1606,7 +1606,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Comments"
-                        class="c10 sc-gXRojI c11 c12 c13 c14"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-comments"
                         target="_self"
                       >
@@ -1770,7 +1770,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Config Sync"
-                        class="c10 sc-gXRojI c11 c12 c13 c14"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                         target="_self"
                       >
@@ -1919,7 +1919,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Content Versioning"
-                        class="c10 sc-gXRojI c11 c12 c13 c14"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                         target="_self"
                       >
@@ -2122,7 +2122,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Documentation"
-                        class="c10 sc-gXRojI c11 c12 c13 c14"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                         target="_self"
                       >
@@ -2253,7 +2253,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Transformer"
-                        class="c10 sc-gXRojI c11 c12 c13 c14"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                         target="_self"
                       >
