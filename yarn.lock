@@ -7822,7 +7822,7 @@ __metadata:
     cross-env: ^7.0.3
     css-loader: ^6.8.1
     date-fns: 2.30.0
-    dotenv: 8.5.1
+    dotenv: 8.6.0
     duplicate-dependencies-webpack-plugin: ^1.0.2
     esbuild-loader: ^2.21.0
     execa: ^1.0.0
@@ -8586,7 +8586,7 @@ __metadata:
     configstore: 5.0.1
     debug: 4.3.4
     delegates: 1.0.0
-    dotenv: 10.0.0
+    dotenv: 8.6.0
     execa: 5.1.1
     fs-extra: 10.0.0
     glob: 7.2.0
@@ -11307,7 +11307,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "api-tests@workspace:packages/utils/api-tests"
   dependencies:
-    dotenv: 14.2.0
+    dotenv: 8.6.0
     lodash: 4.17.21
     qs: 6.11.1
     supertest: 6.3.3
@@ -15747,31 +15747,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:10.0.0, dotenv@npm:~10.0.0":
-  version: 10.0.0
-  resolution: "dotenv@npm:10.0.0"
-  checksum: f412c5fe8c24fbe313d302d2500e247ba8a1946492db405a4de4d30dd0eb186a88a43f13c958c5a7de303938949c4231c56994f97d05c4bc1f22478d631b4005
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:14.2.0":
-  version: 14.2.0
-  resolution: "dotenv@npm:14.2.0"
-  checksum: 85a0e44918ef49e64c278f757dab50a156b9a6ca67f708876fd81d265e575e35b67387fc681d910df99368d6c1edca66cd546edeb0f7db3b499cb876c999233e
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:8.5.1":
-  version: 8.5.1
-  resolution: "dotenv@npm:8.5.1"
-  checksum: d9de0e6b0592b83d02fddb8152f84dc0ae5a46bd150f57e30510838f8a7511f887fe8705c0e291126b8c6ee049f66926a056acb1f9c9ef78bd6a5062cbd79c14
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:^8.0.0":
+"dotenv@npm:8.6.0, dotenv@npm:^8.0.0":
   version: 8.6.0
   resolution: "dotenv@npm:8.6.0"
   checksum: 38e902c80b0666ab59e9310a3d24ed237029a7ce34d976796349765ac96b8d769f6df19090f1f471b77a25ca391971efde8a1ea63bb83111bd8bec8e5cc9b2cd
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:~10.0.0":
+  version: 10.0.0
+  resolution: "dotenv@npm:10.0.0"
+  checksum: f412c5fe8c24fbe313d302d2500e247ba8a1946492db405a4de4d30dd0eb186a88a43f13c958c5a7de303938949c4231c56994f97d05c4bc1f22478d631b4005
   languageName: node
   linkType: hard
 
@@ -30388,7 +30374,7 @@ __metadata:
     chokidar: 3.5.3
     core-js: 3.30.1
     cross-env: 7.0.3
-    dotenv: 14.2.0
+    dotenv: 8.6.0
     eslint: 8.42.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-airbnb-base: ^15.0.0

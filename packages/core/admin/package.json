@@ -69,7 +69,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^6.8.1",
     "date-fns": "2.30.0",
-    "dotenv": "8.5.1",
+    "dotenv": "8.6.0",
     "esbuild-loader": "^2.21.0",
     "execa": "^1.0.0",
     "fast-deep-equal": "3.1.3",
