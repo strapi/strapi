@@ -208,7 +208,7 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
 
       if (!srcStage) {
         acc.created.push(stageToCompare);
-      } else if (srcStage.name !== stageToCompare.name) {
+      } else if (srcStage.name !== stageToCompare.name || srcStage.color !== stageToCompare.color) {
         acc.updated.push(stageToCompare);
       }
       return acc;

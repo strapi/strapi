@@ -31,6 +31,27 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -136,38 +157,18 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: center;
       }
 
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c4 {
         position: relative;
         outline: none;
       }
 
-      .c4 svg {
+      .c4 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c4 svg > g,
-      .c4 svg path {
+      .c4 > svg > g,
+      .c4 > svg path {
         fill: #ffffff;
       }
 
@@ -209,6 +210,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         height: 2rem;
         border: 1px solid transparent;
         background: transparent;
+      }
+
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c5[aria-disabled='true'] {
@@ -255,6 +261,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         fill: #8e8ea9;
       }
 
+      .c11:focus-visible {
+        outline: none;
+      }
+
       .c9 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -269,10 +279,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       .c9 svg {
         height: 4px;
         width: 6px;
-      }
-
-      .c11:focus-visible {
-        outline: none;
       }
 
       .c22 {
@@ -292,16 +298,25 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
         -webkit-text-decoration: none;
         text-decoration: none;
+        gap: 8px;
         position: relative;
         outline: none;
+      }
+
+      .c21 svg {
+        font-size: 0.625rem;
       }
 
       .c21 svg path {
         fill: #4945ff;
       }
 
-      .c21 svg {
-        font-size: 0.625rem;
+      .c21:hover {
+        color: #7b79ff;
+      }
+
+      .c21:active {
+        color: #271fe0;
       }
 
       .c21:after {
@@ -358,7 +373,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="0"
+                aria-controls=":r0:"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"

@@ -1,13 +1,7 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { INITIAL_STATE_DATA } from '../constants';
 import FormModalNavigationProvider from '../index';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  useTracking: jest.fn(() => ({
-    trackUsage: jest.fn(),
-  })),
-}));
 
 const removeFunctionsFromObject = (state) => {
   const stringified = JSON.stringify(state);

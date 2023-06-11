@@ -27,6 +27,13 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c1 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c5 {
         padding-right: 8px;
         padding-left: 12px;
@@ -63,13 +70,6 @@ describe('<NotAllowedInput />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-      }
-
-      .c1 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c2 {

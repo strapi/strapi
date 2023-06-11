@@ -18,12 +18,24 @@ import { Check } from '@strapi/icons';
 
 import { Stages } from './components/Stages';
 import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE } from './constants';
+import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
 import { setWorkflows } from './actions';
 import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
 import adminPermissions from '../../../../../../admin/src/permissions';
+import { StageDragPreview } from './components/StageDragPreview';
+import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+
+function renderDragLayerItem({ type, item }) {
+  switch (type) {
+    case DRAG_DROP_TYPES.STAGE:
+      return <StageDragPreview {...item} />;
+
+    default:
+      return null;
+  }
+}
 
 export function ReviewWorkflowsPage() {
   const { trackUsage } = useTracking();
@@ -32,7 +44,7 @@ export function ReviewWorkflowsPage() {
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows, status: workflowStatus, refetch: refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -47,31 +59,15 @@ export function ReviewWorkflowsPage() {
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflowId, stages }) => {
-      try {
-        const {
-          data: { data },
-        } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
-          data: stages,
-        });
+      const {
+        data: { data },
+      } = await put(`/admin/review-workflows/workflows/${workflowId}/stages`, {
+        data: stages,
+      });
 
-        return data;
-      } catch (error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      }
-
-      return null;
+      return data;
     },
     {
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-
       onSuccess() {
         toggleNotification({
           type: 'success',
@@ -81,8 +77,19 @@ export function ReviewWorkflowsPage() {
     }
   );
 
-  const updateWorkflowStages = (workflowId, stages) => {
-    return mutateAsync({ workflowId, stages });
+  const updateWorkflowStages = async (workflowId, stages) => {
+    try {
+      const res = await mutateAsync({ workflowId, stages });
+
+      return res;
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
+
+      return null;
+    }
   };
 
   const submitForm = async () => {
@@ -117,8 +124,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
+    dispatch(setWorkflows({ status: workflowStatus, data: workflows }));
+  }, [workflowStatus, workflows, dispatch]);
 
   useEffect(() => {
     trackUsage('didViewWorkflow');
@@ -135,6 +142,8 @@ export function ReviewWorkflowsPage() {
           })}
         />
         <Main tabIndex={-1}>
+          <DragLayer renderItem={renderDragLayerItem} />
+
           <FormikProvider value={formik}>
             <Form onSubmit={formik.handleSubmit}>
               <HeaderLayout

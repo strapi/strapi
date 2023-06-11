@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { act, render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
@@ -13,7 +13,6 @@ import ModelsContext from '../../../contexts/ModelsContext';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const client = new QueryClient({
@@ -126,9 +125,11 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
     const history = createMemoryHistory();
-    history.push(
-      '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
-    );
+    act(() => {
+      history.push(
+        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
+      );
+    });
 
     const { container } = render(makeApp(history));
     await waitFor(() =>
@@ -191,24 +192,26 @@ describe('ADMIN | CM | LV | Configure the view', () => {
         screen.getByText("This value overrides the label displayed in the table's head")
       ).toBeInTheDocument();
     });
-    
+
     it('should close edit modal onSubmit', async () => {
       const history = createMemoryHistory();
-      
+
       const { queryByText } = render(makeApp(history));
       await waitFor(() =>
         expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
       );
-      
+
       fireEvent.click(screen.getByLabelText('Edit address'));
-      
+
       expect(
         screen.getByText("This value overrides the label displayed in the table's head")
       ).toBeInTheDocument();
-      
+
       fireEvent.click(screen.getByText('Finish'));
-      
-      expect(queryByText("This value overrides the label displayed in the table's head")).not.toBeInTheDocument();
+
+      expect(
+        queryByText("This value overrides the label displayed in the table's head")
+      ).not.toBeInTheDocument();
     });
 
     it('should not show sortable toggle input if field not sortable', async () => {

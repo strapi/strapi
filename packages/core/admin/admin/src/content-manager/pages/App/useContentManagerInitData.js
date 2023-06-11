@@ -10,7 +10,7 @@ import { useNotifyAT } from '@strapi/design-system';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
-import { getRequestUrl, getTrad } from '../../utils';
+import { getTrad } from '../../utils';
 import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
@@ -36,7 +36,7 @@ const useContentManagerInitData = () => {
         data: {
           data: { components, contentTypes: models, fieldSizes },
         },
-      } = await get(getRequestUrl('init'), { cancelToken: source.token });
+      } = await get('/content-manager/init', { cancelToken: source.token });
       notifyStatus(
         formatMessage({
           id: getTrad('App.schemas.data-loaded'),
@@ -75,7 +75,6 @@ const useContentManagerInitData = () => {
       if (axios.isCancel(err)) {
         return;
       }
-
       console.error(err);
 
       toggleNotification({ type: 'warning', message: { id: 'notification.error' } });

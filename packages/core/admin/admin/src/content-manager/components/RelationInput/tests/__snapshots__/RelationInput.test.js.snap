@@ -1,6 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Content-Manager || RelationInput should render and match snapshot 1`] = `
+.c15 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c13 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #4945ff;
+}
+
+.c29 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #006096;
+}
+
+.c37 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4945ff;
+}
+
+.c40 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #2f6846;
+}
+
+.c42 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c0 {
   padding-bottom: 12px;
 }
@@ -190,59 +251,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   justify-content: center;
 }
 
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c13 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c29 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #006096;
-}
-
-.c37 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #4945ff;
-}
-
-.c40 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #2f6846;
-}
-
-.c42 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c36 path {
-  fill: #666687;
-}
-
 .c12 {
   border: none;
   position: relative;
@@ -291,18 +299,22 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
+.c36 path {
+  fill: #666687;
+}
+
 .c23 {
   position: relative;
   outline: none;
 }
 
-.c23 svg {
+.c23 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c23 svg > g,
-.c23 svg path {
+.c23 > svg > g,
+.c23 > svg path {
   fill: #ffffff;
 }
 
@@ -340,18 +352,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   border: 2px solid #4945ff;
 }
 
-.c15 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c6 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -361,6 +361,25 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+}
+
+.c24 svg > g,
+.c24 svg path {
+  fill: #8e8ea9;
+}
+
+.c24:hover svg > g,
+.c24:hover svg path {
+  fill: #666687;
+}
+
+.c24:active svg > g,
+.c24:active svg path {
+  fill: #a5a5ba;
+}
+
+.c24[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c27 {
@@ -431,25 +450,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c24 svg > g,
-.c24 svg path {
-  fill: #8e8ea9;
-}
-
-.c24:hover svg > g,
-.c24:hover svg path {
-  fill: #666687;
-}
-
-.c24:active svg > g,
-.c24:active svg path {
-  fill: #a5a5ba;
-}
-
-.c24[aria-disabled='true'] svg path {
-  fill: #666687;
 }
 
 .c31 .c4 {
@@ -770,7 +770,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     <span>
                       <a
                         aria-current="page"
-                        aria-describedby="0"
+                        aria-describedby=":r1:"
                         class="c27 c28 active"
                         href="/"
                         tabindex="0"
@@ -892,7 +892,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby="1"
+                        aria-describedby=":r3:"
                         class="c4 c37"
                         tabindex="0"
                       >
@@ -1009,7 +1009,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                   >
                     <span>
                       <span
-                        aria-describedby="2"
+                        aria-describedby=":r5:"
                         class="c4 c37"
                         tabindex="0"
                       >

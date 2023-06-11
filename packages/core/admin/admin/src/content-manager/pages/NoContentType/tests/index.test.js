@@ -30,6 +30,21 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -94,21 +109,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         flex-direction: row;
       }
 
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-      }
-
       .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -116,11 +121,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
       }
 
       .c10 svg {
@@ -183,13 +183,13 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 

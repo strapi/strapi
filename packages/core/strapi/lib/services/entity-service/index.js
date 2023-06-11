@@ -4,11 +4,7 @@ const _ = require('lodash');
 const delegate = require('delegates');
 const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
   require('@strapi/database').errors;
-const {
-  webhook: webhookUtils,
-  contentTypes: contentTypesUtils,
-  sanitize,
-} = require('@strapi/utils');
+const { contentTypes: contentTypesUtils, sanitize } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
@@ -31,9 +27,6 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
   };
 };
 
-// TODO: those should be strapi events used by the webhooks not the other way arround
-const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
-
 const databaseErrorsToTransform = [
   InvalidTimeError,
   InvalidDateTimeError,
@@ -49,6 +42,12 @@ const updatePipeline = (data, context) => {
   return applyTransforms(data, context);
 };
 
+const ALLOWED_WEBHOOK_EVENTS = {
+  ENTRY_CREATE: 'entry.create',
+  ENTRY_UPDATE: 'entry.update',
+  ENTRY_DELETE: 'entry.delete',
+};
+
 /**
  * @type {import('.').default}
  */
@@ -57,6 +56,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   async wrapParams(options = {}) {
     return options;
+  },
+
+  async wrapResult(result) {
+    return result;
   },
 
   async emitEvent(uid, event, entity) {
@@ -83,10 +86,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, wrappedParams);
 
     if (kind === 'singleType') {
-      return db.query(uid).findOne(query);
+      const entity = db.query(uid).findOne(query);
+      return this.wrapResult(entity, { uid, action: 'findOne' });
     }
 
-    return db.query(uid).findMany(query);
+    const entities = await db.query(uid).findMany(query);
+    return this.wrapResult(entities, { uid, action: 'findMany' });
   },
 
   async findPage(uid, opts) {
@@ -94,7 +99,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findPage(query);
+    const page = await db.query(uid).findPage(query);
+    return {
+      ...page,
+      results: await this.wrapResult(page.results, { uid, action: 'findPage' }),
+    };
   },
 
   // TODO: streamline the logic based on the populate option
@@ -103,7 +112,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findPage(query);
+    const entities = await db.query(uid).findPage(query);
+    return {
+      ...entities,
+      results: await this.wrapResult(entities.results, { uid, action: 'findWithRelationCounts' }),
+    };
   },
 
   async findWithRelationCounts(uid, opts) {
@@ -111,7 +124,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).findMany(query);
+    const entities = await db.query(uid).findMany(query);
+    return this.wrapResult(entities, { uid, action: 'findWithRelationCounts' });
   },
 
   async findOne(uid, entityId, opts) {
@@ -119,7 +133,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    return db.query(uid).findOne({ ...query, where: { id: entityId } });
+    const entity = await db.query(uid).findOne({ ...query, where: { id: entityId } });
+    return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
   async count(uid, opts) {
@@ -162,6 +177,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
+    entity = await this.wrapResult(entity, { uid, action: 'create' });
+
+    const { ENTRY_CREATE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
@@ -213,6 +231,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
+    entity = await this.wrapResult(entity, { uid, action: 'update' });
+
+    const { ENTRY_UPDATE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
     return entity;
@@ -224,7 +245,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entityToDelete = await db.query(uid).findOne({
+    let entityToDelete = await db.query(uid).findOne({
       ...query,
       where: { id: entityId },
     });
@@ -238,6 +259,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
     await deleteComponents(uid, componentsToDelete, { loadComponents: false });
 
+    entityToDelete = await this.wrapResult(entityToDelete, { uid, action: 'delete' });
+
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
     return entityToDelete;
@@ -250,7 +274,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const entitiesToDelete = await db.query(uid).findMany(query);
+    let entitiesToDelete = await db.query(uid).findMany(query);
 
     if (!entitiesToDelete.length) {
       return null;
@@ -265,21 +289,28 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       componentsToDelete.map((compos) => deleteComponents(uid, compos, { loadComponents: false }))
     );
 
+    entitiesToDelete = await this.wrapResult(entitiesToDelete, { uid, action: 'delete' });
+
     // Trigger webhooks. One for each entity
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
     return deletedEntities;
   },
 
-  load(uid, entity, field, params = {}) {
+  async load(uid, entity, field, params = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
-    return db.query(uid).load(entity, field, transformLoadParamsToQuery(uid, field, params));
+    const loadedEntity = await db
+      .query(uid)
+      .load(entity, field, transformLoadParamsToQuery(uid, field, params));
+
+    return this.wrapResult(loadedEntity, { uid, field, action: 'load' });
   },
 
-  loadPages(uid, entity, field, params = {}, pagination = {}) {
+  async loadPages(uid, entity, field, params = {}, pagination = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
@@ -293,11 +324,20 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformLoadParamsToQuery(uid, field, params, pagination);
 
-    return db.query(uid).loadPages(entity, field, query);
+    const loadedPage = await db.query(uid).loadPages(entity, field, query);
+
+    return {
+      ...loadedPage,
+      results: await this.wrapResult(loadedPage.results, { uid, field, action: 'load' }),
+    };
   },
 });
 
 module.exports = (ctx) => {
+  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+    ctx.strapi.webhookStore.addAllowedEvent(key, value);
+  });
+
   const implementation = createDefaultImplementation(ctx);
 
   const service = {

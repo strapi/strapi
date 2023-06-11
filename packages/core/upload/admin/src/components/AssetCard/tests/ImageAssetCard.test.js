@@ -32,6 +32,39 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c17 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c24 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c33 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         border-radius: 4px;
@@ -155,27 +188,6 @@ describe('ImageAssetCard', () => {
         justify-content: center;
       }
 
-      .c24 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c33 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c31 {
         border-radius: 4px;
         height: 1.5rem;
@@ -186,13 +198,13 @@ describe('ImageAssetCard', () => {
         outline: none;
       }
 
-      .c15 svg {
+      .c15 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c15 svg > g,
-      .c15 svg path {
+      .c15 > svg > g,
+      .c15 > svg path {
         fill: #ffffff;
       }
 
@@ -296,18 +308,6 @@ describe('ImageAssetCard', () => {
 
       .c9:indeterminate:disabled:after {
         background-color: #8e8ea9;
-      }
-
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c7 > * {
@@ -415,7 +415,7 @@ describe('ImageAssetCard', () => {
 
       <div>
         <article
-          aria-labelledby="1-title"
+          aria-labelledby=":r0:-title"
           class="c0 c1"
           role="button"
           tabindex="-1"
@@ -431,7 +431,7 @@ describe('ImageAssetCard', () => {
                   class=""
                 >
                   <input
-                    aria-labelledby="1-title"
+                    aria-labelledby=":r0:-title"
                     class="c9"
                     type="checkbox"
                   />
@@ -444,7 +444,7 @@ describe('ImageAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="0"
+                  aria-labelledby=":r1:"
                   class="c14 c3 c15 c16"
                   tabindex="0"
                   type="button"
@@ -498,7 +498,7 @@ describe('ImageAssetCard', () => {
                 >
                   <h2
                     class="c24"
-                    id="1-title"
+                    id=":r0:-title"
                   >
                     hello.png
                   </h2>

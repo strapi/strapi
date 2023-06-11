@@ -5,6 +5,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGE_POSITION,
 } from '../../constants';
 
 const WORKFLOWS_FIXTURE = [
@@ -13,11 +14,13 @@ const WORKFLOWS_FIXTURE = [
     stages: [
       {
         id: 1,
+        color: '#4945FF',
         name: 'stage-1',
       },
 
       {
         id: 2,
+        color: '#4945FF',
         name: 'stage-2',
       },
     ],
@@ -41,16 +44,26 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       payload: { status: 'loading-state', workflows: WORKFLOWS_FIXTURE },
     };
 
+    const DEFAULT_WORKFLOW_FIXTURE = {
+      ...WORKFLOWS_FIXTURE[0],
+
+      // stages without a color should have a default color assigned
+      stages: WORKFLOWS_FIXTURE[0].stages.map((stage) => ({
+        ...stage,
+        color: stage?.color ?? '#4945ff',
+      })),
+    };
+
     expect(reducer(state, action)).toStrictEqual(
       expect.objectContaining({
         status: 'loading-state',
         serverState: expect.objectContaining({
-          currentWorkflow: WORKFLOWS_FIXTURE[0],
+          currentWorkflow: DEFAULT_WORKFLOW_FIXTURE,
           workflows: WORKFLOWS_FIXTURE,
         }),
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
-            data: WORKFLOWS_FIXTURE[0],
+            data: DEFAULT_WORKFLOW_FIXTURE,
             isDirty: false,
             hasDeletedServerStages: false,
           }),
@@ -225,6 +238,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 3,
+                  color: '#4945ff',
                   name: 'something',
                 },
               ]),
@@ -257,6 +271,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 0,
+                  color: expect.any(String),
                   name: 'something',
                 },
               ]),
@@ -306,6 +321,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   __temp_key__: 4,
+                  color: expect.any(String),
                   name: 'something',
                 },
               ]),
@@ -338,6 +354,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
               stages: expect.arrayContaining([
                 {
                   id: 1,
+                  color: '#4945FF',
                   name: 'stage-1-modified',
                 },
               ]),
@@ -387,6 +404,114 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
       expect.objectContaining({
         clientState: expect.objectContaining({
           currentWorkflow: expect.objectContaining({
+            isDirty: false,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: 1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-2' }),
+                expect.objectContaining({ name: 'stage-1' }),
+              ],
+            }),
+            isDirty: true,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION - does not update position if new index is smaller than 0', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: -1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-1' }),
+                expect.objectContaining({ name: 'stage-2' }),
+              ],
+            }),
+            isDirty: false,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGE_POSITION - does not update position if new index is greater than the amount of stages', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGE_POSITION,
+      payload: { oldIndex: 0, newIndex: 3 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: {
+        currentWorkflow: WORKFLOWS_FIXTURE[0],
+      },
+      clientState: {
+        currentWorkflow: {
+          data: WORKFLOWS_FIXTURE[0],
+          isDirty: false,
+        },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({ name: 'stage-1' }),
+                expect.objectContaining({ name: 'stage-2' }),
+              ],
+            }),
             isDirty: false,
           }),
         }),

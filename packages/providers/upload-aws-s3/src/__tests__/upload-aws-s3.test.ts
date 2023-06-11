@@ -122,7 +122,7 @@ describe('AWS-S3 provider', () => {
       });
 
       S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
-        callback(null, { Location: 'https://validurl.test' })
+        callback(null, { Location: 'validurl.test' })
       );
 
       const file: File = {
