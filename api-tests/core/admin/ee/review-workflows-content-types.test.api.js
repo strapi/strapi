@@ -37,7 +37,7 @@ const longCTModel = {
   draftAndPublish: true,
   pluginOptions: {},
   singularName: 'thatsanabsurdreallyreallylongcontenttypename',
-  pluralName: 'thatsanabsurdreallyreallylongcontenttypenamewithans',
+  pluralName: 'thatsanabsurdreallyreallylongcontenttypenames',
   displayName: 'Thats an absurd really really long content type name',
   kind: 'collectionType',
   attributes: {
