@@ -1,11 +1,11 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
+// const { ApplicationError } = require('@strapi/utils').errors;
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkActionInput } = require('./validation');
-const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
+// const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
 
 module.exports = {
   async find(ctx) {
@@ -127,56 +127,56 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
 
-  async clone(ctx) {
-    const { userAbility, user } = ctx.state;
-    const { model, sourceId: id } = ctx.params;
-    const { body } = ctx.request;
+  // async clone(ctx) {
+  //   const { userAbility, user } = ctx.state;
+  //   const { model, sourceId: id } = ctx.params;
+  //   const { body } = ctx.request;
 
-    const entityManager = getService('entity-manager');
-    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+  //   const entityManager = getService('entity-manager');
+  //   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    if (permissionChecker.cannot.create()) {
-      return ctx.forbidden();
-    }
+  //   if (permissionChecker.cannot.create()) {
+  //     return ctx.forbidden();
+  //   }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+  //   const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
-    if (!entity) {
-      return ctx.notFound();
-    }
+  //   if (!entity) {
+  //     return ctx.notFound();
+  //   }
 
-    const pickWritables = pickWritableAttributes({ model });
-    const pickPermittedFields = permissionChecker.sanitizeCreateInput;
-    const setCreator = setCreatorFields({ user });
-    const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
+  //   const pickWritables = pickWritableAttributes({ model });
+  //   const pickPermittedFields = permissionChecker.sanitizeCreateInput;
+  //   const setCreator = setCreatorFields({ user });
+  //   const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
 
-    const sanitizeFn = pipeAsync(
-      pickWritables,
-      pickPermittedFields,
-      setCreator,
-      excludeNotCreatable
-    );
+  //   const sanitizeFn = pipeAsync(
+  //     pickWritables,
+  //     pickPermittedFields,
+  //     setCreator,
+  //     excludeNotCreatable
+  //   );
 
-    const sanitizedBody = await sanitizeFn(body);
+  //   const sanitizedBody = await sanitizeFn(body);
 
-    const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
+  //   const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
 
-    ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
-  },
+  //   ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
+  // },
 
-  async autoClone(ctx) {
-    const { model } = ctx.params;
+  // async autoClone(ctx) {
+  //   const { model } = ctx.params;
 
-    // Trying to automatically clone the entity and model has unique or relational fields
-    if (hasProhibitedCloningFields(model)) {
-      throw new ApplicationError(
-        'Entity could not be cloned as it has unique and/or relational fields. ' +
-          'Please edit those fields manually and save to complete the cloning.'
-      );
-    }
+  //   // Trying to automatically clone the entity and model has unique or relational fields
+  //   if (hasProhibitedCloningFields(model)) {
+  //     throw new ApplicationError(
+  //       'Entity could not be cloned as it has unique and/or relational fields. ' +
+  //         'Please edit those fields manually and save to complete the cloning.'
+  //     );
+  //   }
 
-    this.clone(ctx);
-  },
+  //   this.clone(ctx);
+  // },
 
   async delete(ctx) {
     const { userAbility } = ctx.state;
