@@ -45,7 +45,16 @@ export default ({ env }) => {
           ),
         },
       },
-      pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
+      pool: { 
+        min: env.int('DATABASE_POOL_MIN', 2), 
+        max: env.int('DATABASE_POOL_MAX', 10),  
+        createTimeoutMillis: env.int('DATABASE_POOL_CREATE_TIMEOUT_MILLIS', 3000),
+        acquireTimeoutMillis: env.int('DATABASE_POOL_ACQUIRE_TIMEOUT_MILLIS', 30000),
+        idleTimeoutMillis: env.int('DATABASE_POOL_IDLE_TIMEOUT_MILLIS', 30000),
+        reapIntervalMillis: env.int('DATABASE_POOL_REAP_INTERVAL_MILLIS', 1000),
+        createRetryIntervalMillis: env.int('DATABASE_POOL_CREATE_RETRY_INTERVAL_MILLIS', 100),
+        propagateCreateError: env.bool('DATABASE_POOL_CREATE_ERROR', false),
+      },
     },
     postgres: {
       connection: {
