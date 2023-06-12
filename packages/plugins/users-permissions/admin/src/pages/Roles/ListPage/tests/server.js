@@ -4,7 +4,6 @@ import { setupServer } from 'msw/node';
 const handlers = [
   rest.get('*/roles', (req, res, ctx) => {
     return res(
-      ctx.delay(1000),
       ctx.status(200),
       ctx.json({
         roles: [
