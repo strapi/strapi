@@ -90,6 +90,8 @@ jobs:
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
           MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+          DATABASE_POOL_MAX: 100
+          DATABASE_POOL_MIN: 20
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
