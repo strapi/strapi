@@ -1,76 +1,105 @@
-import React, { memo, useMemo, useState } from 'react';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
+import { NotAllowedInput, useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
 
-import connect from './utils/connect';
-import select from './utils/select';
-
-import DynamicZoneComponent from './components/DynamicComponent';
-import AddComponentButton from './components/AddComponentButton';
-import DynamicZoneLabel from './components/DynamicZoneLabel';
-import ComponentPicker from './components/ComponentPicker';
+import { DynamicComponent } from './components/DynamicComponent';
+import { AddComponentButton } from './components/AddComponentButton';
+import { DynamicZoneLabel } from './components/DynamicZoneLabel';
+import { ComponentPicker } from './components/ComponentPicker';
 
 import { useContentTypeLayout } from '../../hooks';
 
-const DynamicZone = ({
-  name,
-  // Passed with the select function
-  addComponentToDynamicZone,
-  formErrors,
-  isCreatingEntry,
-  isFieldAllowed,
-  isFieldReadable,
-  labelAction,
-  moveComponentField,
-  removeComponentFromDynamicZone,
-  dynamicDisplayedComponents,
-  fieldSchema,
-  metadatas,
-}) => {
+const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
+  // We cannot use the default props here
+  const { max = Infinity, min = -Infinity, components = [], required = false } = fieldSchema;
+
   const [addComponentIsOpen, setAddComponentIsOpen] = useState(false);
   const [liveText, setLiveText] = useState('');
+
+  const {
+    addComponentToDynamicZone,
+    createActionAllowedFields,
+    isCreatingEntry,
+    formErrors,
+    modifiedData,
+    moveComponentField,
+    removeComponentFromDynamicZone,
+    readActionAllowedFields,
+    updateActionAllowedFields,
+  } = useCMEditViewDataManager();
+
+  const dynamicDisplayedComponents = useMemo(
+    () =>
+      (modifiedData?.[name] ?? []).map((data) => {
+        return {
+          componentUid: data.__component,
+          id: data.id ?? data.__temp_key__,
+        };
+      }),
+    [modifiedData, name]
+  );
+
+  const { getComponentLayout, components: allComponents } = useContentTypeLayout();
+
+  /**
+   * @type {Record<string, Array<{category: string; info: unknown, attributes: Record<string, unknown>}>>}
+   */
+  const dynamicComponentsByCategory = useMemo(() => {
+    return components.reduce((acc, componentUid) => {
+      const { category, info, attributes } = getComponentLayout(componentUid);
+      const component = { componentUid, info, attributes };
+
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+
+      acc[category] = [...acc[category], component];
+
+      return acc;
+    }, {});
+  }, [components, getComponentLayout]);
 
   const { formatMessage } = useIntl();
 
   const toggleNotification = useNotification();
-  const { getComponentLayout, components } = useContentTypeLayout();
+
+  const isFieldAllowed = useMemo(() => {
+    const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
+
+  const isFieldReadable = useMemo(() => {
+    const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, readActionAllowedFields]);
 
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
   const intlDescription = metadatas.description
     ? { id: metadatas.description, defaultMessage: metadatas.description }
     : null;
 
-  // We cannot use the default props here
-  const { max = Infinity, min = -Infinity } = fieldSchema;
-  const dynamicZoneErrors = useMemo(() => {
-    return Object.keys(formErrors)
-      .filter((key) => {
-        return key === name;
-      })
-      .map((key) => formErrors[key]);
-  }, [formErrors, name]);
+  const dynamicZoneError = formErrors[name];
 
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
-  const hasError = dynamicZoneErrors.length > 0;
+  const hasError = !!dynamicZoneError;
 
-  const hasMinError =
-    dynamicZoneErrors.length > 0 && get(dynamicZoneErrors, [0, 'id'], '').includes('min');
-
-  const hasMaxError =
-    hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
-
-  const handleAddComponent = (componentUid) => {
+  const handleAddComponent = (componentUid, position) => {
     setAddComponentIsOpen(false);
 
     const componentLayoutData = getComponentLayout(componentUid);
 
-    addComponentToDynamicZone(name, componentLayoutData, components, hasError);
+    /**
+     * You have to pass _every component_ because the EditViewDataManager is not part of redux
+     * and you could have a dynamic component option that contains a component that is not part
+     * of the former list. Therefore it's schema is inaccessible leading to a crash.
+     */
+    addComponentToDynamicZone(name, componentLayoutData, allComponents, hasError, position);
   };
 
   const handleClickOpenPicker = () => {
@@ -160,6 +189,38 @@ const DynamicZone = ({
     removeComponentFromDynamicZone(name, currentIndex);
   };
 
+  const renderButtonLabel = () => {
+    if (addComponentIsOpen) {
+      return formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
+    }
+
+    if (hasError && dynamicZoneError.id.includes('max')) {
+      return formatMessage({
+        id: 'components.Input.error.validation.max',
+        defaultMessage: 'The value is too high.',
+      });
+    }
+
+    if (hasError && dynamicZoneError.id.includes('min')) {
+      return formatMessage(
+        {
+          id: getTrad(`components.DynamicZone.missing-components`),
+          defaultMessage:
+            'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+        },
+        { number: missingComponentNumber }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: getTrad('components.DynamicZone.add-component'),
+        defaultMessage: 'Add a component to {componentName}',
+      },
+      { componentName: metadatas.label || name }
+    );
+  };
+
   if (!isFieldAllowed && (isCreatingEntry || (!isFieldReadable && !isCreatingEntry))) {
     return (
       <NotAllowedInput
@@ -183,7 +244,7 @@ const DynamicZone = ({
             labelAction={labelAction}
             name={name}
             numberOfComponents={dynamicDisplayedComponentsLength}
-            required={fieldSchema.required || false}
+            required={required}
           />
           <VisuallyHidden id={ariaDescriptionId}>
             {formatMessage({
@@ -194,7 +255,7 @@ const DynamicZone = ({
           <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <ol aria-describedby={ariaDescriptionId}>
             {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
-              <DynamicZoneComponent
+              <DynamicComponent
                 componentUid={componentUid}
                 formErrors={formErrors}
                 key={`${componentUid}-${id}`}
@@ -206,26 +267,26 @@ const DynamicZone = ({
                 onCancel={handleCancel}
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
+                onAddComponent={handleAddComponent}
+                dynamicComponentsByCategory={dynamicComponentsByCategory}
               />
             ))}
           </ol>
         </Box>
       )}
-
-      <AddComponentButton
-        hasError={hasError}
-        hasMaxError={hasMaxError}
-        hasMinError={hasMinError}
-        isDisabled={!isFieldAllowed}
-        label={metadatas.label}
-        missingComponentNumber={missingComponentNumber}
-        isOpen={addComponentIsOpen}
-        name={name}
-        onClick={handleClickOpenPicker}
-      />
+      <Flex justifyContent="center">
+        <AddComponentButton
+          hasError={hasError}
+          isDisabled={!isFieldAllowed}
+          isOpen={addComponentIsOpen}
+          onClick={handleClickOpenPicker}
+        >
+          {renderButtonLabel()}
+        </AddComponentButton>
+      </Flex>
       <ComponentPicker
+        dynamicComponentsByCategory={dynamicComponentsByCategory}
         isOpen={addComponentIsOpen}
-        components={fieldSchema.components ?? []}
         onClickAddComponent={handleAddComponent}
       />
     </Flex>
@@ -233,44 +294,23 @@ const DynamicZone = ({
 };
 
 DynamicZone.defaultProps = {
-  dynamicDisplayedComponents: [],
-  fieldSchema: {
-    max: Infinity,
-    min: -Infinity,
-  },
+  fieldSchema: {},
   labelAction: null,
 };
 
 DynamicZone.propTypes = {
-  addComponentToDynamicZone: PropTypes.func.isRequired,
-  dynamicDisplayedComponents: PropTypes.arrayOf(
-    PropTypes.shape({
-      componentUid: PropTypes.string.isRequired,
-      id: PropTypes.number.isRequired,
-    })
-  ),
   fieldSchema: PropTypes.shape({
-    components: PropTypes.array.isRequired,
+    components: PropTypes.array,
     max: PropTypes.number,
     min: PropTypes.number,
     required: PropTypes.bool,
   }),
-  formErrors: PropTypes.object.isRequired,
-  isCreatingEntry: PropTypes.bool.isRequired,
-  isFieldAllowed: PropTypes.bool.isRequired,
-  isFieldReadable: PropTypes.bool.isRequired,
   labelAction: PropTypes.element,
   metadatas: PropTypes.shape({
     description: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
-  moveComponentField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
-  removeComponentFromDynamicZone: PropTypes.func.isRequired,
 };
-
-const Memoized = memo(DynamicZone, isEqual);
-
-export default connect(Memoized, select);
 
 export { DynamicZone };

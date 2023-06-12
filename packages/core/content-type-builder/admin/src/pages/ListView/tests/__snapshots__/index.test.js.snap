@@ -1,6 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ListView /> renders and matches the snapshot 1`] = `
+.c36 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c8 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c17 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c31 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c46 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #4945ff;
+}
+
+.c62 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: #32324d;
+}
+
 .c0 {
   background: #f6f6f9;
   padding-top: 24px;
@@ -99,91 +178,45 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .c58 {
   background: #d9d8ff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
 }
 
-.c60 {
+.c59 {
+  color: #666687;
+  width: 20px;
+  height: 20px;
+}
+
+.c61 {
   margin-top: 4px;
   max-width: 100%;
 }
 
+.c65 {
+  background: #dcdce4;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
 .c68 {
-  background: #eaeaef;
+  background: #d9d8ff;
 }
 
 .c70 {
+  background: #eaeaef;
+}
+
+.c72 {
   background: #f0f0ff;
   padding: 20px;
-}
-
-.c8 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c17 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c24 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c46 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
-}
-
-.c54 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #4945ff;
-}
-
-.c61 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  color: #32324d;
 }
 
 .c4 {
@@ -350,6 +383,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
+.c60 path {
+  fill: #666687;
+}
+
 .c12 {
   position: relative;
   outline: none;
@@ -399,22 +436,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c36 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c13 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c13[aria-disabled='true'] {
@@ -464,6 +494,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c15 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c15[aria-disabled='true'] {
@@ -523,6 +558,11 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   height: 2rem;
 }
 
+.c16 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -564,7 +604,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c69 {
+.c71 {
   height: 1px;
   border: none;
   -webkit-flex-shrink: 0;
@@ -592,7 +632,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c72 {
+.c74 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -610,16 +650,16 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c72 svg {
+.c74 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c72 svg path {
+.c74 svg path {
   fill: #4945ff;
 }
 
-.c71 {
+.c73 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
@@ -694,43 +734,19 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c59 {
-  border-radius: 50%;
-  color: #4945ff;
-  height: 40px;
-  width: 40px;
-}
-
-.c59 svg {
-  height: 20px;
-  width: 20px;
-}
-
 .c64 {
-  border-radius: 50%;
-  color: #666687;
-  height: 40px;
-  width: 40px;
-}
-
-.c64 svg {
-  height: 20px;
-  width: 20px;
-}
-
-.c63 {
   position: absolute;
   display: none;
   top: 5px;
   right: 0.5rem;
 }
 
-.c63 svg {
+.c64 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c63 svg path {
+.c64 svg path {
   fill: #4945ff;
 }
 
@@ -751,9 +767,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c57.active .c62,
-.c57:focus .c62,
-.c57:hover .c62 {
+.c57.active .c63,
+.c57:focus .c63,
+.c57:hover .c63 {
   display: block;
 }
 
@@ -768,6 +784,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c57:hover > div:first-child {
   background: #d9d8ff;
   color: #4945ff;
+}
+
+.c57.active > div:first-child svg path,
+.c57:focus > div:first-child svg path,
+.c57:hover > div:first-child svg path {
+  fill: #4945ff;
 }
 
 .c37.component-row,
@@ -861,7 +883,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   overflow-x: auto;
 }
 
-.c65 {
+.c66 {
   padding-top: 5.625rem;
 }
 
@@ -943,7 +965,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c67 {
+.c69 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -961,12 +983,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c67 svg {
+.c69 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c67 svg path {
+.c69 svg path {
   fill: #4945ff;
 }
 
@@ -1006,7 +1028,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #eaeaef;
 }
 
-.c66 {
+.c67 {
   position: relative;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
@@ -1016,7 +1038,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   transform: translate(-0.5px,-1px);
 }
 
-.c66 * {
+.c67 * {
   fill: #d9d8ff;
 }
 
@@ -1317,7 +1339,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="0"
+                            aria-labelledby=":r0:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1348,7 +1370,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="1"
+                            aria-labelledby=":r2:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1429,7 +1451,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       <span
                         style="font-style: italic;"
                       >
-                        
                          
                       </span>
                     </span>
@@ -1446,7 +1467,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="2"
+                            aria-labelledby=":r4:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1477,7 +1498,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="3"
+                            aria-labelledby=":r6:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1573,7 +1594,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="4"
+                            aria-labelledby=":r8:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1604,7 +1625,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="5"
+                            aria-labelledby=":ra:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1700,7 +1721,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="6"
+                            aria-labelledby=":rc:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1731,7 +1752,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="7"
+                            aria-labelledby=":re:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1825,7 +1846,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="8"
+                            aria-labelledby=":rg:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1856,7 +1877,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="9"
+                            aria-labelledby=":ri:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1952,7 +1973,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="10"
+                            aria-labelledby=":rk:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -1983,7 +2004,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="11"
+                            aria-labelledby=":rm:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2073,7 +2094,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="12"
+                            aria-labelledby=":ro:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2104,7 +2125,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="13"
+                            aria-labelledby=":rq:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2204,7 +2225,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="14"
+                            aria-labelledby=":rs:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2235,7 +2256,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="15"
+                            aria-labelledby=":ru:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2362,7 +2383,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="16"
+                                        aria-labelledby=":r10:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2393,7 +2414,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="17"
+                                        aria-labelledby=":r12:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2506,7 +2527,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="18"
+                                        aria-labelledby=":r14:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2537,7 +2558,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="19"
+                                        aria-labelledby=":r16:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2650,7 +2671,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="20"
+                                        aria-labelledby=":r18:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2681,7 +2702,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="21"
+                                        aria-labelledby=":r1a:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -2822,7 +2843,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="22"
+                            aria-labelledby=":r1c:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2853,7 +2874,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="23"
+                            aria-labelledby=":r1e:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -2980,7 +3001,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="24"
+                                        aria-labelledby=":r1g:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3011,7 +3032,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="25"
+                                        aria-labelledby=":r1i:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3124,7 +3145,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="26"
+                                        aria-labelledby=":r1k:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3155,7 +3176,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="27"
+                                        aria-labelledby=":r1m:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3268,7 +3289,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="28"
+                                        aria-labelledby=":r1o:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3299,7 +3320,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     <span>
                                       <button
                                         aria-disabled="false"
-                                        aria-labelledby="29"
+                                        aria-labelledby=":r1q:"
                                         class="c33 c34 c12 c35"
                                         tabindex="0"
                                         type="button"
@@ -3434,7 +3455,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="30"
+                            aria-labelledby=":r1s:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -3465,7 +3486,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="31"
+                            aria-labelledby=":r1u:"
                             class="c33 c34 c12 c35"
                             tabindex="0"
                             type="button"
@@ -3533,181 +3554,216 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             </span>
                           </div>
                         </button>
-                        <button
-                          class="c55 c56 c57 active"
-                          type="button"
+                        <div
+                          class="c11"
+                          role="tablist"
                         >
                           <div
-                            class="c58 c34 c59"
+                            aria-controls="dz-DynamicZone-panel-0"
+                            aria-selected="true"
+                            class="c55 c56 c57 active"
+                            id="dz-DynamicZone-tab-0"
+                            role="tab"
+                            tabindex="0"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c58 c34"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
+                            >
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
                           </div>
                           <div
-                            class="c60"
+                            aria-controls="dz-DynamicZone-panel-1"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-1"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <span
-                              class="c7 c61"
-                            />
-                          </div>
-                          <button
-                            class="c62 c63"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </button>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
-                          <div
-                            class="c43 c34 c64"
-                          >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
-                            />
-                          </div>
-                          <button
-                            class="c62 c63"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            </div>
+                            <button
+                              class="c63 c64"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </button>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
-                          <div
-                            class="c43 c34 c64"
-                          >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
                           </div>
                           <div
-                            class="c60"
+                            aria-controls="dz-DynamicZone-panel-2"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-2"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <span
-                              class="c7 c61"
-                            />
-                          </div>
-                          <button
-                            class="c62 c63"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
+                              <svg
+                                class="c59 c60"
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M3.869 2.99V0h2.9v2.99h10.463V0h2.9v2.99h.629c2.768 0 3.203.498 3.239 2.926V21c0 2.124-.191 3-2.802 3H2.818C.208 24 0 23.363 0 20.785V6.21c.035-2.049.233-3.22 3.001-3.22h.868ZM2.32 20.369c0 .811.245.865.776.865h17.905c.53 0 .68-.012.68-.825V8.233c-.015-.627-.219-.737-.631-.737H2.907c-.413 0-.592.09-.587.573v12.3Z"
+                                  fill="#212134"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
+                            >
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </button>
-                        </button>
-                        <button
-                          class="c55 c56 c57"
-                          type="button"
-                        >
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                           <div
-                            class="c43 c34 c64"
+                            aria-controls="dz-DynamicZone-panel-3"
+                            aria-selected="false"
+                            class="c55 c56 c57"
+                            id="dz-DynamicZone-tab-3"
+                            role="tab"
+                            tabindex="-1"
                           >
-                            <svg
-                              viewBox="0 0 448 512"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <div
+                              class="c65 c34"
                             >
-                              <path
-                                d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0L422.3 106c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14V496c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8 .3L8.3 414C3.2 411.2 0 405.9 0 400V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8 .3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c60"
-                          >
-                            <span
-                              class="c7 c61"
-                            />
-                          </div>
-                          <button
-                            class="c62 c63"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                class="c59 c60"
+                                height="1rem"
+                                viewBox="0 0 448 512"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M216.3 2c4.8-2.6 10.5-2.6 15.3 0l190.7 104c5.1 2.8 8.3 8.2 8.3 14s-3.2 11.2-8.3 14L231.7 238c-4.8 2.6-10.5 2.6-15.3 0L25.7 134c-5.1-2.8-8.3-8.2-8.3-14s3.2-11.2 8.3-14L216.3 2zM23.7 170l176 96c5.1 2.8 8.3 8.2 8.3 14v216c0 5.6-3 10.9-7.8 13.8s-10.9 3-15.8.3L8.3 414c-5.1-2.8-8.3-8.1-8.3-14V184c0-5.6 3-10.9 7.8-13.8s10.9-3 15.8-.3zm400.7 0c5-2.7 11-2.6 15.8.3s7.8 8.1 7.8 13.8V400c0 5.9-3.2 11.2-8.3 14l-176 96c-5 2.7-11 2.6-15.8-.3s-7.8-8.1-7.8-13.8V280c0-5.9 3.2-11.2 8.3-14l176-96z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              class="c61"
                             >
-                              <path
-                                d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                                fill="#212134"
+                              <span
+                                class="c7 c62"
                               />
-                            </svg>
-                          </button>
-                        </button>
+                            </div>
+                            <button
+                              class="c63 c64"
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div
-                      class="c65"
+                      class="c66"
                     >
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-0"
                         class=""
+                        id="dz-DynamicZone-panel-0"
+                        role="tabpanel"
                         style="display: block;"
                       >
                         <table>
@@ -3737,7 +3793,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3809,7 +3865,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="32"
+                                                    aria-labelledby=":r20:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3840,7 +3896,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="33"
+                                                    aria-labelledby=":r22:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3881,7 +3937,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3953,7 +4009,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="34"
+                                                    aria-labelledby=":r24:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -3984,7 +4040,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="35"
+                                                    aria-labelledby=":r26:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4025,7 +4081,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4097,7 +4153,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="36"
+                                                    aria-labelledby=":r28:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4128,7 +4184,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="37"
+                                                    aria-labelledby=":r2a:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4170,7 +4226,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c67"
+                                        class="c68 c69"
                                       >
                                         <svg
                                           fill="none"
@@ -4203,7 +4259,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-1"
                         class=""
+                        id="dz-DynamicZone-panel-1"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>
@@ -4233,7 +4292,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4305,7 +4364,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="38"
+                                                    aria-labelledby=":r2c:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4336,7 +4395,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="39"
+                                                    aria-labelledby=":r2e:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4377,7 +4436,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4449,7 +4508,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="40"
+                                                    aria-labelledby=":r2g:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4480,7 +4539,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="41"
+                                                    aria-labelledby=":r2i:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4521,7 +4580,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4593,7 +4652,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="42"
+                                                    aria-labelledby=":r2k:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4624,7 +4683,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="43"
+                                                    aria-labelledby=":r2m:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4665,7 +4724,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4739,7 +4798,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="44"
+                                                    aria-labelledby=":r2o:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4770,7 +4829,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="45"
+                                                    aria-labelledby=":r2q:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4811,7 +4870,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4885,7 +4944,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="46"
+                                                    aria-labelledby=":r2s:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4916,7 +4975,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="47"
+                                                    aria-labelledby=":r2u:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -4957,7 +5016,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5016,7 +5075,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               <span
                                                 style="font-style: italic;"
                                               >
-                                                
                                                  
                                               </span>
                                             </span>
@@ -5033,7 +5091,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="48"
+                                                    aria-labelledby=":r30:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5064,7 +5122,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="49"
+                                                    aria-labelledby=":r32:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5106,7 +5164,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c67"
+                                        class="c68 c69"
                                       >
                                         <svg
                                           fill="none"
@@ -5139,7 +5197,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-2"
                         class=""
+                        id="dz-DynamicZone-panel-2"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>
@@ -5169,7 +5230,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5241,7 +5302,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="50"
+                                                    aria-labelledby=":r34:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5272,7 +5333,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="51"
+                                                    aria-labelledby=":r36:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5313,7 +5374,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5385,7 +5446,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="52"
+                                                    aria-labelledby=":r38:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5416,7 +5477,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="53"
+                                                    aria-labelledby=":r3a:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5457,7 +5518,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5536,7 +5597,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="54"
+                                                    aria-labelledby=":r3c:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5567,7 +5628,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="55"
+                                                    aria-labelledby=":r3e:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -5694,7 +5755,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="56"
+                                                                aria-labelledby=":r3g:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5725,7 +5786,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="57"
+                                                                aria-labelledby=":r3i:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5838,7 +5899,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="58"
+                                                                aria-labelledby=":r3k:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5869,7 +5930,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="59"
+                                                                aria-labelledby=":r3m:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -5982,7 +6043,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="60"
+                                                                aria-labelledby=":r3o:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6013,7 +6074,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="61"
+                                                                aria-labelledby=":r3q:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6128,7 +6189,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="62"
+                                                                aria-labelledby=":r3s:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6159,7 +6220,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="63"
+                                                                aria-labelledby=":r3u:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6274,7 +6335,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="64"
+                                                                aria-labelledby=":r40:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6305,7 +6366,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="65"
+                                                                aria-labelledby=":r42:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6405,7 +6466,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           <span
                                                             style="font-style: italic;"
                                                           >
-                                                            
                                                              
                                                           </span>
                                                         </span>
@@ -6422,7 +6482,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="66"
+                                                                aria-labelledby=":r44:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6453,7 +6513,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                             <span>
                                                               <button
                                                                 aria-disabled="false"
-                                                                aria-labelledby="67"
+                                                                aria-labelledby=":r46:"
                                                                 class="c33 c34 c12 c35"
                                                                 tabindex="0"
                                                                 type="button"
@@ -6536,7 +6596,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c67"
+                                        class="c68 c69"
                                       >
                                         <svg
                                           fill="none"
@@ -6569,7 +6629,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                         </table>
                       </div>
                       <div
+                        aria-labelledby="dz-DynamicZone-tab-3"
                         class=""
+                        id="dz-DynamicZone-panel-3"
+                        role="tabpanel"
                         style="display: none;"
                       >
                         <table>
@@ -6599,7 +6662,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6671,7 +6734,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="68"
+                                                    aria-labelledby=":r48:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6702,7 +6765,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="69"
+                                                    aria-labelledby=":r4a:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6743,7 +6806,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6817,7 +6880,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="70"
+                                                    aria-labelledby=":r4c:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6848,7 +6911,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="71"
+                                                    aria-labelledby=":r4e:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6889,7 +6952,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               class="c39"
                                             >
                                               <svg
-                                                class="c66"
+                                                class="c67"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6961,7 +7024,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="72"
+                                                    aria-labelledby=":r4g:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -6992,7 +7055,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                 <span>
                                                   <button
                                                     aria-disabled="false"
-                                                    aria-labelledby="73"
+                                                    aria-labelledby=":r4i:"
                                                     class="c33 c34 c12 c35"
                                                     tabindex="0"
                                                     type="button"
@@ -7034,7 +7097,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c58 c67"
+                                        class="c68 c69"
                                       >
                                         <svg
                                           fill="none"
@@ -7074,17 +7137,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c68 c69"
+              class="c70 c71"
             />
             <button
-              class="c70 c71"
+              class="c72 c73"
             >
               <div
                 class="c6"
               >
                 <div
                   aria-hidden="true"
-                  class="c58 c72"
+                  class="c68 c74"
                 >
                   <svg
                     fill="none"

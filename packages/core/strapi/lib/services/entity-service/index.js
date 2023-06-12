@@ -4,11 +4,7 @@ const _ = require('lodash');
 const delegate = require('delegates');
 const { InvalidTimeError, InvalidDateError, InvalidDateTimeError, InvalidRelationError } =
   require('@strapi/database').errors;
-const {
-  webhook: webhookUtils,
-  contentTypes: contentTypesUtils,
-  sanitize,
-} = require('@strapi/utils');
+const { contentTypes: contentTypesUtils, sanitize } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { isAnyToMany } = require('@strapi/utils').relations;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
@@ -31,9 +27,6 @@ const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) =>
   };
 };
 
-// TODO: those should be strapi events used by the webhooks not the other way arround
-const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
-
 const databaseErrorsToTransform = [
   InvalidTimeError,
   InvalidDateTimeError,
@@ -47,6 +40,12 @@ const creationPipeline = (data, context) => {
 
 const updatePipeline = (data, context) => {
   return applyTransforms(data, context);
+};
+
+const ALLOWED_WEBHOOK_EVENTS = {
+  ENTRY_CREATE: 'entry.create',
+  ENTRY_UPDATE: 'entry.update',
+  ENTRY_DELETE: 'entry.delete',
 };
 
 /**
@@ -180,6 +179,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entity = await this.wrapResult(entity, { uid, action: 'create' });
 
+    const { ENTRY_CREATE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
@@ -233,6 +233,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entity = await this.wrapResult(entity, { uid, action: 'update' });
 
+    const { ENTRY_UPDATE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
     return entity;
@@ -260,6 +261,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     entityToDelete = await this.wrapResult(entityToDelete, { uid, action: 'delete' });
 
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
     return entityToDelete;
@@ -290,6 +292,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     entitiesToDelete = await this.wrapResult(entitiesToDelete, { uid, action: 'delete' });
 
     // Trigger webhooks. One for each entity
+    const { ENTRY_DELETE } = ALLOWED_WEBHOOK_EVENTS;
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
     return deletedEntities;
@@ -331,6 +334,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 });
 
 module.exports = (ctx) => {
+  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+    ctx.strapi.webhookStore.addAllowedEvent(key, value);
+  });
+
   const implementation = createDefaultImplementation(ctx);
 
   const service = {
