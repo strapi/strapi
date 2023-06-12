@@ -25,6 +25,7 @@ module.exports = async ({ strapi }) => {
     strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowStagesColor);
     strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowName);
     strapi.hook('strapi::content-types.afterSync').register(migrateWorkflowsContentTypes);
+    strapi.hook('strapi::content-types.afterSync').register(migrateStageAttribute);
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
