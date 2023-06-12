@@ -1,11 +1,18 @@
 import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
+import { useRBACProvider, findMatchingPermissions, useCollator } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
 
 const useAllowedAttributes = (contentType, slug) => {
   const { allPermissions } = useRBACProvider();
+  const { locale } = useIntl();
+
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
     {
@@ -34,7 +41,7 @@ const useAllowedAttributes = (contentType, slug) => {
 
       return true;
     })
-    .sort();
+    .sort((a, b) => formatter.compare(a, b));
 
   return allowedAttributes;
 };
