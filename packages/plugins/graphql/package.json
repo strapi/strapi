@@ -31,7 +31,7 @@
     "@strapi/icons": "1.8.0",
     "@strapi/utils": "4.11.0",
     "apollo-server-core": "3.12.0",
-    "apollo-server-koa": "3.10.0",
+    "apollo-server-koa": "3.12.0",
     "glob": "^7.1.7",
     "graphql": "^15.5.1",
     "graphql-depth-limit": "^1.1.0",
