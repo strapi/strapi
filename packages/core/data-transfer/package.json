@@ -47,7 +47,7 @@
     "lodash": "4.17.21",
     "semver": "7.5.1",
     "stream-chain": "2.2.5",
-    "stream-json": "1.7.4",
+    "stream-json": "1.8.0",
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
