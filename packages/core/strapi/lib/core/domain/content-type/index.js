@@ -86,7 +86,7 @@ const createContentType = (uid, definition) => {
     target: 'admin::user',
     configurable: false,
     writable: false,
-    visible: false,
+    visible: true,
     useJoinTable: false,
     private: isPrivate,
   };
@@ -97,7 +97,7 @@ const createContentType = (uid, definition) => {
     target: 'admin::user',
     configurable: false,
     writable: false,
-    visible: false,
+    visible: true,
     useJoinTable: false,
     private: isPrivate,
   };
