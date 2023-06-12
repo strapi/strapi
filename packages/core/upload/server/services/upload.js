@@ -18,34 +18,33 @@ const {
   file: { bytesToKbytes },
   mapAsync,
 } = require('@strapi/utils');
-// const { getFileType, generateFileName, withTempDirectory } = require('../utils/file');
-const { generateFileName, withTempDirectory } = require('../utils/file');
+const { getFileType, generateFileName, withTempDirectory } = require('../utils/file');
 const MediaBuilder = require('../utils/media-builder');
 const { getService } = require('../utils');
-// const {
-//   metadata,
-//   optimize,
-//   autoRotate,
-//   breakpoints,
-//   thumbnail,
-// } = require('../utils/media-builder/transforms/sharp');
-// const throttle = require('../utils/media-builder/transforms/throttle');
+const {
+  metadata,
+  optimize,
+  autoRotate,
+  breakpoints,
+  thumbnail,
+} = require('../utils/media-builder/transforms/sharp');
+const throttle = require('../utils/media-builder/transforms/throttle');
 
 const { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } = require('../constants');
 
 const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
-// const IMAGES_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'gif', 'svg', 'avif'];
-// const IMAGES_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
-// const IMAGES_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
+const IMAGES_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'gif', 'svg', 'avif'];
+const IMAGES_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
+const IMAGES_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
-const mediaBuilder = MediaBuilder();
-// .transformOn('image.metadata', IMAGES_TO_PROCESS, [metadata])
-// .transformOn('image.throttle', ['jpg', 'jpeg'], [throttle])
-// .transformOn('image.optimize', IMAGES_TO_OPTIMIZE, [optimize, autoRotate])
-// .transformOn('image.breakpoints', IMAGES_TO_RESIZE, [breakpoints])
-// .transformOn('image.thumbnail', IMAGES_TO_RESIZE, [thumbnail]);
+const mediaBuilder = MediaBuilder()
+  .transformOn('image.metadata', IMAGES_TO_PROCESS, [metadata])
+  .transformOn('image.throttle', IMAGES_TO_PROCESS, [throttle])
+  .transformOn('image.optimize', IMAGES_TO_OPTIMIZE, [optimize, autoRotate])
+  .transformOn('image.breakpoints', IMAGES_TO_RESIZE, [breakpoints])
+  .transformOn('image.thumbnail', IMAGES_TO_RESIZE, [thumbnail]);
 // .transformOn('image.size', IMAGES_TO_PROCESS, [size])
 
 module.exports = ({ strapi }) => ({
@@ -113,8 +112,7 @@ module.exports = ({ strapi }) => ({
       });
       return stream;
     };
-    // file.type = await getFileType(file);
-    file.type = 'pdf';
+    file.type = await getFileType(file);
     file.provider = strapi.config.get('plugin.upload').provider;
 
     return file;
