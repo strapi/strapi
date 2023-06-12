@@ -52,7 +52,7 @@ const ActionBar = ({ children }) => {
   if (!selectedEntries.length > 0) return null;
 
   return (
-    <Flex paddingBottom={4} gap={3}>
+    <Flex paddingBottom={4} gap={2}>
       <Typography variant="epsilon" textColor="neutral600">
         {formatMessage(
           {
