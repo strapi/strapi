@@ -47,8 +47,14 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const entity = await service.findOne.call(this, uid, entityId, {
-      populate: [ENTITY_STAGE_ATTRIBUTE],
+    const entity = await this.findOne(uid, entityId, {
+      populate: {
+        [ENTITY_STAGE_ATTRIBUTE]: {
+          populate: {
+            workflow: true,
+          },
+        },
+      },
     });
     const previousStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id ?? null;
 
@@ -57,6 +63,7 @@ const decorator = (service) => ({
       const webhookPayload = {
         entityId,
         workflow: {
+          id: entity[ENTITY_STAGE_ATTRIBUTE].workflow.id,
           stages: {
             from: previousStageId,
             to: data[ENTITY_STAGE_ATTRIBUTE],
