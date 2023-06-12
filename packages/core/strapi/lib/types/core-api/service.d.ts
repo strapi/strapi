@@ -1,7 +1,7 @@
 import type { Common, Utils } from '@strapi/strapi';
 
 // TODO Use actual entities instead of regular object
-type Entity = object;
+type Entity = unknown;
 
 /**
  * Base Core-API service type
@@ -11,7 +11,7 @@ export interface Base {
 }
 
 /**
- * Generic service structure
+ * Generic core api service structure
  */
 export type Generic = {
   [method: string | number | symbol]: (...args: any) => any;
@@ -21,7 +21,7 @@ export type Generic = {
  * Core-API collection type service
  */
 export interface CollectionType extends Base {
-  find?(params: object): Promise<Entity[]> | Entity;
+  find?(params: object): Promise<Entity[]> | Entity[];
   findOne?(entityId: string, params: object): Promise<Entity> | Entity;
   create?(params: object): Promise<Entity> | Entity;
   update?(entityId: string, params: object): Promise<Entity> | Entity;
@@ -37,12 +37,14 @@ export interface SingleType extends Base {
   delete?(params: object): Promise<Entity> | Entity;
 }
 
-export type ContentType<TContentTypeUID extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
-  [
-    Utils.Expression.Test<Common.UID.IsCollectionType<TContentTypeUID>, CollectionType>,
-    Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleType>
-  ],
-  Base
->;
+export type ContentType<TContentTypeUID extends Common.UID.ContentType> =
+  Utils.Expression.MatchFirst<
+    [
+      Utils.Expression.Test<Common.UID.IsCollectionType<TContentTypeUID>, CollectionType>,
+      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleType>
+    ],
+    Base
+  >;
 
-export type Extendable<TContentTypeUID extends Common.UID.ContentType> = ContentType<TContentTypeUID> & Generic;
+export type Extendable<TContentTypeUID extends Common.UID.ContentType> =
+  ContentType<TContentTypeUID> & Generic;
