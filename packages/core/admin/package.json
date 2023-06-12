@@ -77,7 +77,7 @@
     "fork-ts-checker-webpack-plugin": "7.3.0",
     "formik": "^2.4.0",
     "fractional-indexing": "3.2.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "highlight.js": "^10.4.1",
     "history": "^4.9.0",
     "html-loader": "^4.2.0",

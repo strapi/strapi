@@ -37,7 +37,7 @@
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.4.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "immer": "9.0.19",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",

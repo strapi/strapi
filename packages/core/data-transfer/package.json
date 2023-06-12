@@ -43,7 +43,7 @@
     "@strapi/logger": "4.11.0",
     "@strapi/strapi": "4.11.0",
     "chalk": "4.1.2",
-    "fs-extra": "10.0.0",
+    "fs-extra": "10.1.0",
     "lodash": "4.17.21",
     "semver": "7.5.1",
     "stream-chain": "2.2.5",
