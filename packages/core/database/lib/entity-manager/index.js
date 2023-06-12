@@ -5,7 +5,7 @@ const {
   compact,
   difference,
   differenceWith,
-  flow,
+  // flow,
   has,
   isArray,
   isEmpty,
@@ -18,21 +18,21 @@ const {
   isString,
   isUndefined,
   map,
-  mergeWith,
-  omit,
+  // mergeWith,
+  // omit,
   pick,
   uniqBy,
   uniqWith,
 } = require('lodash/fp');
 
-const { mapAsync } = require('@strapi/utils');
+// const { mapAsync } = require('@strapi/utils');
 const types = require('../types');
 const { createField } = require('../fields');
 const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
 const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morph-relations');
 const {
-  isPolymorphic,
+  // isPolymorphic,
   isBidirectional,
   isAnyToOne,
   isOneToAny,
@@ -46,11 +46,11 @@ const {
   cleanOrderColumns,
 } = require('./regular-relations');
 const { relationsOrderer } = require('./relations-orderer');
-const {
-  replaceRegularRelations,
-  cloneRegularRelations,
-} = require('./relations/cloning/regular-relations');
-const { DatabaseError } = require('../errors');
+// const {
+//   replaceRegularRelations,
+//   cloneRegularRelations,
+// } = require('./relations/cloning/regular-relations');
+// const { DatabaseError } = require('../errors');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -370,60 +370,60 @@ const createEntityManager = (db) => {
       return result;
     },
 
-    async clone(uid, cloneId, params = {}) {
-      const states = await db.lifecycles.run('beforeCreate', uid, { params });
+    // async clone(uid, cloneId, params = {}) {
+    //   const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
-      const metadata = db.metadata.get(uid);
-      const { data } = params;
+    //   const metadata = db.metadata.get(uid);
+    //   const { data } = params;
 
-      if (!isNil(data) && !isPlainObject(data)) {
-        throw new Error('Create expects a data object');
-      }
+    //   if (!isNil(data) && !isPlainObject(data)) {
+    //     throw new Error('Create expects a data object');
+    //   }
 
-      // TODO: Handle join columns?
-      const entity = await this.findOne(uid, { where: { id: cloneId } });
+    //   // TODO: Handle join columns?
+    //   const entity = await this.findOne(uid, { where: { id: cloneId } });
 
-      const dataToInsert = flow(
-        // Omit unwanted properties
-        omit(['id', 'created_at', 'updated_at']),
-        // Merge with provided data, set attribute to null if data attribute is null
-        mergeWith(data || {}, (original, override) => (override === null ? override : original)),
-        // Process data with metadata
-        (entity) => processData(metadata, entity, { withDefaults: true })
-      )(entity);
+    //   const dataToInsert = flow(
+    //     // Omit unwanted properties
+    //     omit(['id', 'created_at', 'updated_at']),
+    //     // Merge with provided data, set attribute to null if data attribute is null
+    //     mergeWith(data || {}, (original, override) => (override === null ? override : original)),
+    //     // Process data with metadata
+    //     (entity) => processData(metadata, entity, { withDefaults: true })
+    //   )(entity);
 
-      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+    //   const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
 
-      const id = res[0].id || res[0];
+    //   const id = res[0].id || res[0];
 
-      const trx = await strapi.db.transaction();
-      try {
-        const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
-          // TODO: handle components in the db layer
-          if (attr.type === 'relation' && attr.joinTable && !attr.component) {
-            acc.push(attrName);
-          }
-          return acc;
-        }, []);
+    //   const trx = await strapi.db.transaction();
+    //   try {
+    //     const cloneAttrs = Object.entries(metadata.attributes).reduce((acc, [attrName, attr]) => {
+    //       // TODO: handle components in the db layer
+    //       if (attr.type === 'relation' && attr.joinTable && !attr.component) {
+    //         acc.push(attrName);
+    //       }
+    //       return acc;
+    //     }, []);
 
-        await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
-        await trx.commit();
-      } catch (e) {
-        await trx.rollback();
-        await this.createQueryBuilder(uid).where({ id }).delete().execute();
-        throw e;
-      }
+    //     await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
+    //     await trx.commit();
+    //   } catch (e) {
+    //     await trx.rollback();
+    //     await this.createQueryBuilder(uid).where({ id }).delete().execute();
+    //     throw e;
+    //   }
 
-      const result = await this.findOne(uid, {
-        where: { id },
-        select: params.select,
-        populate: params.populate,
-      });
+    //   const result = await this.findOne(uid, {
+    //     where: { id },
+    //     select: params.select,
+    //     populate: params.populate,
+    //   });
 
-      await db.lifecycles.run('afterCreate', uid, { params, result }, states);
+    //   await db.lifecycles.run('afterCreate', uid, { params, result }, states);
 
-      return result;
-    },
+    //   return result;
+    // },
 
     async delete(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDelete', uid, { params });
@@ -1233,72 +1233,72 @@ const createEntityManager = (db) => {
       }
     },
 
-    // TODO: Clone polymorphic relations
-    /**
-     *
-     * @param {string} uid - uid of the entity to clone
-     * @param {number} targetId - id of the entity to clone into
-     * @param {number} sourceId - id of the entity to clone from
-     * @param {object} opt
-     * @param {object} opt.cloneAttrs - key value pair of attributes to clone
-     * @param {object} opt.transaction - transaction to use
-     * @example cloneRelations('user', 3, 1, { cloneAttrs: ["comments"]})
-     * @example cloneRelations('post', 5, 2, { cloneAttrs: ["comments", "likes"] })
-     */
-    async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = [], transaction }) {
-      const { attributes } = db.metadata.get(uid);
+    // // TODO: Clone polymorphic relations
+    // /**
+    //  *
+    //  * @param {string} uid - uid of the entity to clone
+    //  * @param {number} targetId - id of the entity to clone into
+    //  * @param {number} sourceId - id of the entity to clone from
+    //  * @param {object} opt
+    //  * @param {object} opt.cloneAttrs - key value pair of attributes to clone
+    //  * @param {object} opt.transaction - transaction to use
+    //  * @example cloneRelations('user', 3, 1, { cloneAttrs: ["comments"]})
+    //  * @example cloneRelations('post', 5, 2, { cloneAttrs: ["comments", "likes"] })
+    //  */
+    // async cloneRelations(uid, targetId, sourceId, data, { cloneAttrs = [], transaction }) {
+    //   const { attributes } = db.metadata.get(uid);
 
-      if (!attributes) {
-        return;
-      }
+    //   if (!attributes) {
+    //     return;
+    //   }
 
-      await mapAsync(cloneAttrs, async (attrName) => {
-        const attribute = attributes[attrName];
+    //   await mapAsync(cloneAttrs, async (attrName) => {
+    //     const attribute = attributes[attrName];
 
-        if (attribute.type !== 'relation') {
-          throw new DatabaseError(
-            `Attribute ${attrName} is not a relation attribute. Cloning relations is only supported for relation attributes.`
-          );
-        }
+    //     if (attribute.type !== 'relation') {
+    //       throw new DatabaseError(
+    //         `Attribute ${attrName} is not a relation attribute. Cloning relations is only supported for relation attributes.`
+    //       );
+    //     }
 
-        if (isPolymorphic(attribute)) {
-          // TODO: add support for cloning polymorphic relations
-          return;
-        }
+    //     if (isPolymorphic(attribute)) {
+    //       // TODO: add support for cloning polymorphic relations
+    //       return;
+    //     }
 
-        if (attribute.joinColumn) {
-          // TODO: add support for cloning oneToMany relations on the owning side
-          return;
-        }
+    //     if (attribute.joinColumn) {
+    //       // TODO: add support for cloning oneToMany relations on the owning side
+    //       return;
+    //     }
 
-        if (!attribute.joinTable) {
-          return;
-        }
+    //     if (!attribute.joinTable) {
+    //       return;
+    //     }
 
-        let omitIds = [];
-        if (has(attrName, data)) {
-          const cleanRelationData = toAssocs(data[attrName]);
+    //     let omitIds = [];
+    //     if (has(attrName, data)) {
+    //       const cleanRelationData = toAssocs(data[attrName]);
 
-          // Don't clone if the relation attr is being set
-          if (cleanRelationData.set) {
-            return;
-          }
+    //       // Don't clone if the relation attr is being set
+    //       if (cleanRelationData.set) {
+    //         return;
+    //       }
 
-          // Disconnected relations don't need to be cloned
-          if (cleanRelationData.disconnect) {
-            omitIds = toIds(cleanRelationData.disconnect);
-          }
-        }
+    //       // Disconnected relations don't need to be cloned
+    //       if (cleanRelationData.disconnect) {
+    //         omitIds = toIds(cleanRelationData.disconnect);
+    //       }
+    //     }
 
-        if (isOneToAny(attribute) && isBidirectional(attribute)) {
-          await replaceRegularRelations({ targetId, sourceId, attribute, omitIds, transaction });
-        } else {
-          await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
-        }
-      });
+    //     if (isOneToAny(attribute) && isBidirectional(attribute)) {
+    //       await replaceRegularRelations({ targetId, sourceId, attribute, omitIds, transaction });
+    //     } else {
+    //       await cloneRegularRelations({ targetId, sourceId, attribute, transaction });
+    //     }
+    //   });
 
-      await this.updateRelations(uid, targetId, data, { transaction });
-    },
+    //   await this.updateRelations(uid, targetId, data, { transaction });
+    // },
 
     // TODO: add lifecycle events
     async populate(uid, entity, populate) {

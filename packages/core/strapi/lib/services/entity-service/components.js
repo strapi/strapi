@@ -322,95 +322,95 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
   }
 };
 
-const cloneComponents = async (uid, entityToClone, data) => {
-  const { attributes = {} } = strapi.getModel(uid);
+// const cloneComponents = async (uid, entityToClone, data) => {
+//   const { attributes = {} } = strapi.getModel(uid);
 
-  const componentBody = {};
-  const componentData = await getComponents(uid, entityToClone);
+//   const componentBody = {};
+//   const componentData = await getComponents(uid, entityToClone);
 
-  for (const attributeName of Object.keys(attributes)) {
-    const attribute = attributes[attributeName];
+//   for (const attributeName of Object.keys(attributes)) {
+//     const attribute = attributes[attributeName];
 
-    // If the attribute is not set or on the component to clone, skip it
-    if (!has(attributeName, data) && !has(attributeName, componentData)) {
-      continue;
-    }
+//     // If the attribute is not set or on the component to clone, skip it
+//     if (!has(attributeName, data) && !has(attributeName, componentData)) {
+//       continue;
+//     }
 
-    if (attribute.type === 'component') {
-      const { component: componentUID, repeatable = false } = attribute;
+//     if (attribute.type === 'component') {
+//       const { component: componentUID, repeatable = false } = attribute;
 
-      const componentValue = has(attributeName, data)
-        ? data[attributeName]
-        : componentData[attributeName];
+//       const componentValue = has(attributeName, data)
+//         ? data[attributeName]
+//         : componentData[attributeName];
 
-      if (componentValue === null) {
-        continue;
-      }
+//       if (componentValue === null) {
+//         continue;
+//       }
 
-      if (repeatable === true) {
-        if (!Array.isArray(componentValue)) {
-          throw new Error('Expected an array to create repeatable component');
-        }
+//       if (repeatable === true) {
+//         if (!Array.isArray(componentValue)) {
+//           throw new Error('Expected an array to create repeatable component');
+//         }
 
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = await mapAsync(
-          componentValue,
-          (value) => cloneComponent(componentUID, value),
-          { concurrency: isDialectMySQL() ? 1 : Infinity }
-        );
+//         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+//         const components = await mapAsync(
+//           componentValue,
+//           (value) => cloneComponent(componentUID, value),
+//           { concurrency: isDialectMySQL() ? 1 : Infinity }
+//         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
-          return {
-            id,
-            __pivot: {
-              field: attributeName,
-              component_type: componentUID,
-            },
-          };
-        });
-      } else {
-        const component = await cloneComponent(componentUID, componentValue);
-        componentBody[attributeName] = component && {
-          id: component.id,
-          __pivot: {
-            field: attributeName,
-            component_type: componentUID,
-          },
-        };
-      }
+//         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
+//           return {
+//             id,
+//             __pivot: {
+//               field: attributeName,
+//               component_type: componentUID,
+//             },
+//           };
+//         });
+//       } else {
+//         const component = await cloneComponent(componentUID, componentValue);
+//         componentBody[attributeName] = component && {
+//           id: component.id,
+//           __pivot: {
+//             field: attributeName,
+//             component_type: componentUID,
+//           },
+//         };
+//       }
 
-      continue;
-    }
+//       continue;
+//     }
 
-    if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = has(attributeName, data)
-        ? data[attributeName]
-        : componentData[attributeName];
+//     if (attribute.type === 'dynamiczone') {
+//       const dynamiczoneValues = has(attributeName, data)
+//         ? data[attributeName]
+//         : componentData[attributeName];
 
-      if (!Array.isArray(dynamiczoneValues)) {
-        throw new Error('Expected an array to create repeatable component');
-      }
-      // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await mapAsync(
-        dynamiczoneValues,
-        async (value) => {
-          const { id } = await cloneComponent(value.__component, value);
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        },
-        { concurrency: isDialectMySQL() ? 1 : Infinity }
-      );
-      continue;
-    }
-  }
+//       if (!Array.isArray(dynamiczoneValues)) {
+//         throw new Error('Expected an array to create repeatable component');
+//       }
+//       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+//       componentBody[attributeName] = await mapAsync(
+//         dynamiczoneValues,
+//         async (value) => {
+//           const { id } = await cloneComponent(value.__component, value);
+//           return {
+//             id,
+//             __component: value.__component,
+//             __pivot: {
+//               field: attributeName,
+//             },
+//           };
+//         },
+//         { concurrency: isDialectMySQL() ? 1 : Infinity }
+//       );
+//       continue;
+//     }
+//   }
 
-  return componentBody;
-};
+//   return componentBody;
+// };
 /** *************************
     Component queries
 ************************** */
@@ -466,25 +466,25 @@ const deleteComponent = async (uid, componentToDelete) => {
   await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
-const cloneComponent = async (uid, data) => {
-  const model = strapi.getModel(uid);
+// const cloneComponent = async (uid, data) => {
+//   const model = strapi.getModel(uid);
 
-  if (!has('id', data)) {
-    return createComponent(uid, data);
-  }
+//   if (!has('id', data)) {
+//     return createComponent(uid, data);
+//   }
 
-  const componentData = await cloneComponents(uid, { id: data.id }, data);
-  const transform = pipe(
-    // Make sure we don't save the component with a pre-defined ID
-    omit('id'),
-    // Remove the component data from the original data object ...
-    (payload) => omitComponentData(model, payload),
-    // ... and assign the newly created component instead
-    assign(componentData)
-  );
+//   const componentData = await cloneComponents(uid, { id: data.id }, data);
+//   const transform = pipe(
+//     // Make sure we don't save the component with a pre-defined ID
+//     omit('id'),
+//     // Remove the component data from the original data object ...
+//     (payload) => omitComponentData(model, payload),
+//     // ... and assign the newly created component instead
+//     assign(componentData)
+//   );
 
-  return strapi.query(uid).clone(data.id, { data: transform(data) });
-};
+//   return strapi.query(uid).clone(data.id, { data: transform(data) });
+// };
 
 module.exports = {
   omitComponentData,
@@ -493,5 +493,5 @@ module.exports = {
   updateComponents,
   deleteComponents,
   deleteComponent,
-  cloneComponents,
+  // cloneComponents,
 };
