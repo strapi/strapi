@@ -31,6 +31,22 @@ module.exports = {
     'react/jsx-no-constructed-context-values': 'warn',
     'react/jsx-no-useless-fragment': 'warn',
     'react/no-unstable-nested-components': 'warn',
+    'import/order': [
+      'error',
+      {
+        groups: [
+          ['external', 'internal', 'builtin'],
+          'parent',
+          ['sibling', 'index'],
+          'object',
+          'type',
+        ],
+        pathGroups: [{ pattern: 'react', group: 'external', position: 'before' }],
+        pathGroupsExcludedImportTypes: ['react'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
     'no-restricted-imports': [
       'error',
       {
