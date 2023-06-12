@@ -9,8 +9,6 @@ import { useIntl } from 'react-intl';
 import {
   Button,
   Flex,
-  Breadcrumbs,
-  Crumb,
   Grid,
   GridItem,
   ModalLayout,
@@ -18,6 +16,7 @@ import {
   ModalFooter,
   ModalBody,
 } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';
@@ -43,8 +42,10 @@ const FormModal = ({
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
-          {headerBreadcrumbs.map((crumb) => (
-            <Crumb key={crumb}>{crumb}</Crumb>
+          {headerBreadcrumbs.map((crumb, index, arr) => (
+            <Crumb isCurrent={index === arr.length - 1} key={crumb}>
+              {crumb}
+            </Crumb>
           ))}
         </Breadcrumbs>
       </ModalHeader>

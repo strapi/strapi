@@ -6,10 +6,9 @@ import {
   ModalHeader,
   ModalLayout,
   ModalBody,
-  Breadcrumbs,
-  Crumb,
   Typography,
 } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import produce from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
@@ -79,8 +78,8 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
     <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
       <ModalHeader>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
-          {headerBreadCrumbs.map((label) => (
-            <Crumb key={label}>
+          {headerBreadCrumbs.map((label, index, arr) => (
+            <Crumb isCurrent={index === arr.length - 1} key={label}>
               {upperFirst(
                 formatMessage({
                   id: label,

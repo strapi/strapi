@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
-import { ModalLayout, ModalHeader, ModalBody, Breadcrumbs, Crumb } from '@strapi/design-system';
+import { ModalLayout, ModalHeader, ModalBody } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import ActionBody from './ActionBody';
@@ -37,7 +38,7 @@ const Modal = ({ handleClose, logId }) => {
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={formattedDate} id="title">
-          <Crumb>{formattedDate}</Crumb>
+          <Crumb isCurrent>{formattedDate}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
       <ModalBody>

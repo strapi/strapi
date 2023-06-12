@@ -8,13 +8,12 @@ import {
   ModalBody,
   Grid,
   GridItem,
-  Breadcrumbs,
-  Crumb,
   Box,
   Button,
   Flex,
   Typography,
 } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { Formik } from 'formik';
 import {
   Form,
@@ -114,7 +113,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerTitle}>
-          <Crumb>{headerTitle}</Crumb>
+          <Crumb isCurrent>{headerTitle}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
       <Formik
