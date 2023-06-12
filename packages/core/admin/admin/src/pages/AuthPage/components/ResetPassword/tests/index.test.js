@@ -588,6 +588,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -597,10 +601,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c15 {
-        height: 4.5rem;
       }
 
       .c32 svg {

@@ -626,6 +626,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 2px solid #4945ff;
       }
 
+      .c5 {
+        height: 4.5rem;
+      }
+
       .c2 {
         margin: 0 auto;
         width: 552px;
@@ -635,10 +639,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c5 {
-        height: 4.5rem;
       }
 
       .c26 svg {
