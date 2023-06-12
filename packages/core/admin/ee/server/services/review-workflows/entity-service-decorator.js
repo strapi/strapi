@@ -47,7 +47,7 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const entity = await this.findOne(uid, entityId, {
+    const entity = await service.findOne.call(this, uid, entityId, {
       populate: {
         [ENTITY_STAGE_ATTRIBUTE]: {
           populate: {

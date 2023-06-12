@@ -109,7 +109,7 @@ describe('Entity service decorator', () => {
       const defaultService = {
         update: jest.fn(() => Promise.resolve(entry)),
         findOne: jest.fn(() => {
-          return { strapi_reviewWorkflows_stage: { id: 2 } };
+          return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
         }),
         emitEvent: jest.fn(),
       };
@@ -123,6 +123,7 @@ describe('Entity service decorator', () => {
       expect(defaultService.emitEvent).toHaveBeenCalledWith(uid, WORKFLOW_UPDATE_STAGE, {
         entityId: 1,
         workflow: {
+          id: 1,
           stages: {
             from: 2,
             to: 1,
