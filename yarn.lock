@@ -8516,7 +8516,6 @@ __metadata:
     bcryptjs: 2.4.3
     formik: 2.4.0
     grant-koa: 5.4.8
-    history: ^4.9.0
     immer: 9.0.19
     jsonwebtoken: 9.0.0
     jwk-to-pem: 2.0.5
