@@ -9,7 +9,6 @@
     "name": "Address"
   },
   "options": {
-    "reviewWorkflows": true,
     "draftAndPublish": false
   },
   "pluginOptions": {},

@@ -17,6 +17,12 @@ jest.mock('@strapi/strapi/lib/utils/ee', () => {
   return eeModule;
 });
 
+jest.mock('../review-workflows/workflows/content-types', () => {
+  return jest.fn(() => ({
+    migrate: jest.fn(),
+  }));
+});
+
 const workflowsServiceFactory = require('../review-workflows/workflows');
 const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
 
@@ -29,8 +35,21 @@ const entityServiceMock = {
   findMany: jest.fn(() => [workflowMock]),
 };
 
+const contentManagerServicesMock = {
+  'content-types': {
+    updateConfiguration: jest.fn(() => Promise.resolve()),
+  },
+};
+
+const pluginsMock = {
+  'content-manager': {
+    service: jest.fn((name) => contentManagerServicesMock[name]),
+  },
+};
+
 const strapiMock = {
   entityService: entityServiceMock,
+  plugin: jest.fn((name) => pluginsMock[name]),
 };
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });

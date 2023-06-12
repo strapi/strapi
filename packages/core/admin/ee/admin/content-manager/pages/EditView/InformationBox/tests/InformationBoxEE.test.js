@@ -84,7 +84,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { getByText } = setup();
@@ -97,7 +97,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     expect(useReviewWorkflows).toHaveBeenCalledWith({
@@ -108,7 +108,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
   it('renders no select input, if no workflow stage is assigned to the entity', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: false } },
     });
 
     const { queryByRole } = setup();
@@ -122,7 +122,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: true,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { queryByRole } = setup();
@@ -137,7 +137,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { queryByRole } = setup();
@@ -152,7 +152,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
       },
       isCreatingEntry: false,
-      layout: { uid: 'api::articles:articles' },
+      layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
     const { queryByRole, getByText } = setup();
