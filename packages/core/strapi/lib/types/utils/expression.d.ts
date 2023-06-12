@@ -55,14 +55,14 @@ export type Every<TExpressions extends BooleanValue[]> = TExpressions extends [
   infer THead extends BooleanValue,
   ...infer TTail extends BooleanValue[]
 ]
-  ? If<Utils.Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, true>>
+  ? If<Utils.Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, True>>
   : never;
 
 export type And<TLeft extends BooleanValue, TRight extends BooleanValue> = Extends<
-  Extends<TLeft, true> | Extends<TRight, true>,
-  true
+  Extends<TLeft, True> | Extends<TRight, True>,
+  True
 >;
 
 export type Or<TLeft extends BooleanValue, TRight extends BooleanValue> = Not<
-  Extends<Extends<TLeft, true> | Extends<TRight, true>, false>
+  Extends<Extends<TLeft, True> | Extends<TRight, True>, False>
 >;
