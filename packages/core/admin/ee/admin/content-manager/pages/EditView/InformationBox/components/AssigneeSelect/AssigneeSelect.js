@@ -99,8 +99,15 @@ export function AssigneeSelect() {
           isSearchable
           isClearable
           name={ASSIGNEE_ATTRIBUTE_NAME}
-          onChange={handleChange}
-          onClear={() => handleChange({ value: null })}
+          onChange={(selectedOption, triggeredAction) => {
+            if (triggeredAction.action === 'clear') {
+              handleChange({ value: null });
+
+              return;
+            }
+
+            handleChange({ value: selectedOption.value });
+          }}
           options={users.map(({ id, firstname, lastname }) => ({
             value: id,
             label: formatMessage(

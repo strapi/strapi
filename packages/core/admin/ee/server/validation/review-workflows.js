@@ -21,10 +21,18 @@ const validateUpdateStageOnEntity = yup
   })
   .required();
 
+const validateUpdateAssigneeOnEntity = yup
+  .object()
+  .shape({
+    id: yup.number().integer().min(1),
+  })
+  .required();
+
 module.exports = {
   validateUpdateStages: validateYupSchema(validateUpdateStagesSchema, {
     strict: false,
     stripUnknown: true,
   }),
   validateUpdateStageOnEntity: validateYupSchema(validateUpdateStageOnEntity),
+  validateUpdateAssigneeOnEntity: validateYupSchema(validateUpdateAssigneeOnEntity),
 };
