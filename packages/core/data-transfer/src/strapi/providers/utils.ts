@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
-import type { client, server } from '../../../types/remote/protocol';
+import type { Client, Server } from '../../../types/remote/protocol';
 import {
   ProviderError,
   ProviderTransferError,
@@ -9,7 +9,7 @@ import {
 } from '../../errors/providers';
 
 interface IDispatcherState {
-  transfer?: { kind: client.TransferKind; id: string };
+  transfer?: { kind: Client.TransferKind; id: string };
 }
 
 interface IDispatchOptions {
@@ -27,7 +27,7 @@ export const createDispatcher = (
 ) => {
   const state: IDispatcherState = {};
 
-  type DispatchMessage = Dispatch<client.Message>;
+  type DispatchMessage = Dispatch<Client.Message>;
 
   const dispatch = async <U = null>(
     message: DispatchMessage,
@@ -68,7 +68,7 @@ export const createDispatcher = (
       const interval = setInterval(sendPeriodically, retryMessageTimeout);
 
       const onResponse = (raw: RawData) => {
-        const response: server.Message<U> = JSON.parse(raw.toString());
+        const response: Server.Message<U> = JSON.parse(raw.toString());
         if (response.uuid === uuid) {
           clearInterval(interval);
           if (response.error) {
@@ -84,33 +84,33 @@ export const createDispatcher = (
     });
   };
 
-  const dispatchCommand = <U extends client.Command>(
+  const dispatchCommand = <U extends Client.Command>(
     payload: {
       command: U;
-    } & ([client.GetCommandParams<U>] extends [never]
+    } & ([Client.GetCommandParams<U>] extends [never]
       ? unknown
-      : { params?: client.GetCommandParams<U> })
+      : { params?: Client.GetCommandParams<U> })
   ) => {
-    return dispatch({ type: 'command', ...payload } as client.CommandMessage);
+    return dispatch({ type: 'command', ...payload } as Client.CommandMessage);
   };
 
-  const dispatchTransferAction = async <T>(action: client.Action['action']) => {
-    const payload: Dispatch<client.Action> = { type: 'transfer', kind: 'action', action };
+  const dispatchTransferAction = async <T>(action: Client.Action['action']) => {
+    const payload: Dispatch<Client.Action> = { type: 'transfer', kind: 'action', action };
 
     return dispatch<T>(payload, { attachTransfer: true }) ?? Promise.resolve(null);
   };
 
   const dispatchTransferStep = async <
     T,
-    A extends client.TransferPushMessage['action'] = client.TransferPushMessage['action'],
-    S extends client.TransferPushStep = client.TransferPushStep
+    A extends Client.TransferPushMessage['action'] = Client.TransferPushMessage['action'],
+    S extends Client.TransferPushStep = Client.TransferPushStep
   >(
     payload: {
       step: S;
       action: A;
-    } & (A extends 'stream' ? { data: client.GetTransferPushStreamData<S> } : unknown)
+    } & (A extends 'stream' ? { data: Client.GetTransferPushStreamData<S> } : unknown)
   ) => {
-    const message: Dispatch<client.TransferPushMessage> = {
+    const message: Dispatch<Client.TransferPushMessage> = {
       type: 'transfer',
       kind: 'step',
       ...payload,

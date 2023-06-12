@@ -22,11 +22,13 @@ module.exports = {
       factory.createImportSpecifier(false, undefined, factory.createIdentifier(key))
     );
 
-    return factory.createImportDeclaration(
-      undefined,
-      factory.createImportClause(false, undefined, factory.createNamedImports(formattedImports)),
-      factory.createStringLiteral('@strapi/strapi'),
-      undefined
-    );
+    return [
+      factory.createImportDeclaration(
+        undefined,
+        factory.createImportClause(true, undefined, factory.createNamedImports(formattedImports)),
+        factory.createStringLiteral('@strapi/strapi'),
+        undefined
+      ),
+    ];
   },
 };
