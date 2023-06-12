@@ -112,6 +112,9 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
+        {/**
+         * TODO: this is not semantically correct and should be amended.
+         */}
         <Breadcrumbs label={headerTitle}>
           <Crumb isCurrent>{headerTitle}</Crumb>
         </Breadcrumbs>

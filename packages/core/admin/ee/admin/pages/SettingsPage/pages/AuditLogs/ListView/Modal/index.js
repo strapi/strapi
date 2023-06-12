@@ -37,6 +37,9 @@ const Modal = ({ handleClose, logId }) => {
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
+        {/**
+         * TODO: this is not semantically correct and should be amended.
+         */}
         <Breadcrumbs label={formattedDate} id="title">
           <Crumb isCurrent>{formattedDate}</Crumb>
         </Breadcrumbs>
