@@ -18,7 +18,8 @@ const {
   file: { bytesToKbytes },
   mapAsync,
 } = require('@strapi/utils');
-const { getFileType, generateFileName, withTempDirectory } = require('../utils/file');
+// const { getFileType, generateFileName, withTempDirectory } = require('../utils/file');
+const { generateFileName, withTempDirectory } = require('../utils/file');
 const MediaBuilder = require('../utils/media-builder');
 const { getService } = require('../utils');
 // const {
@@ -105,8 +106,15 @@ module.exports = ({ strapi }) => ({
   async formatUploadFile({ name: filename, type, size, path }, fileInfo = {}, metas = {}) {
     const file = await this.formatFileInfo({ filename, type, size }, fileInfo, metas);
 
-    file.getStream = () => fs.createReadStream(path);
-    file.type = await getFileType(file);
+    file.getStream = () => {
+      const stream = fs.createReadStream(path, {
+        // Set the highWaterMark to 1MB instead of the default 64KB
+        highWaterMark: 1024 * 1024,
+      });
+      return stream;
+    };
+    // file.type = await getFileType(file);
+    file.type = 'pdf';
     file.provider = strapi.config.get('plugin.upload').provider;
 
     return file;
