@@ -22,12 +22,13 @@ import {
   getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
-import { getTrad } from '../../utils';
+import { createYupSchema, getTrad } from '../../utils';
 
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema } from './utils';
+import { cleanData } from './utils';
+
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import { usePrev } from '../../hooks';
 
@@ -195,14 +196,21 @@ const EditViewDataManagerProvider = ({
 
   const dispatchAddComponent = useCallback(
     (type) =>
-      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+      (
+        keys,
+        componentLayoutData,
+        allComponents,
+        shouldCheckErrors = false,
+        position = undefined
+      ) => {
         trackUsageRef.current('didAddComponentToDynamicZone');
 
         dispatch({
           type,
           keys: keys.split('.'),
+          position,
           componentLayoutData,
-          allComponents: components,
+          allComponents,
           shouldCheckErrors,
         });
       },

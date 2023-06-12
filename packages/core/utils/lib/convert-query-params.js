@@ -18,6 +18,7 @@ const {
   cloneDeep,
   get,
   mergeAll,
+  isString,
 } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
@@ -28,6 +29,7 @@ const {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } = require('./content-types');
+const { isOperator } = require('./operators');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -46,7 +48,7 @@ class InvalidSortError extends Error {
 }
 
 const validateOrder = (order) => {
-  if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
+  if (!isString(order) || !['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
 };
@@ -80,6 +82,13 @@ const convertSortQueryParams = (sortQuery) => {
 };
 
 const convertSingleSortQueryParam = (sortQuery) => {
+  if (!sortQuery) {
+    return {};
+  }
+  if (!isString(sortQuery)) {
+    throw new Error('Invalid sort query');
+  }
+
   // split field and order param with default order to ascending
   const [field, order = 'asc'] = sortQuery.split(':');
 
@@ -88,6 +97,8 @@ const convertSingleSortQueryParam = (sortQuery) => {
   }
 
   validateOrder(order);
+
+  // TODO: field should be a valid path on an object model
 
   return _.set({}, field, order);
 };
@@ -368,6 +379,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   return query;
 };
 
+// TODO: ensure field is valid in content types (will probably have to check strapi.contentTypes since it can be a string.path)
 const convertFieldsQueryParams = (fields, depth = 0) => {
   if (depth === 0 && fields === '*') {
     return undefined;
@@ -387,6 +399,18 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
+const isValidSchemaAttribute = (key, schema) => {
+  if (key === 'id') {
+    return true;
+  }
+
+  if (!schema) {
+    return false;
+  }
+
+  return Object.keys(schema.attributes).includes(key);
+};
+
 const convertFiltersQueryParams = (filters, schema) => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
@@ -401,10 +425,6 @@ const convertFiltersQueryParams = (filters, schema) => {
 };
 
 const convertAndSanitizeFilters = (filters, schema) => {
-  if (!isPlainObject(filters)) {
-    return filters;
-  }
-
   if (Array.isArray(filters)) {
     return (
       filters
@@ -415,14 +435,23 @@ const convertAndSanitizeFilters = (filters, schema) => {
     );
   }
 
+  // This must come after check for Array or else arrays are not filtered
+  if (!isPlainObject(filters)) {
+    return filters;
+  }
+
   const removeOperator = (operator) => delete filters[operator];
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
     const attribute = get(key, schema?.attributes);
+    const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
+    if (!validKey) {
+      removeOperator(key);
+    }
     // Handle attributes
-    if (attribute) {
+    else if (attribute) {
       // Relations
       if (attribute.type === 'relation') {
         filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));

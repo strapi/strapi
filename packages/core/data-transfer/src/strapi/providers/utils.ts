@@ -18,7 +18,13 @@ interface IDispatchOptions {
 
 type Dispatch<T> = Omit<T, 'transferID' | 'uuid'>;
 
-export const createDispatcher = (ws: WebSocket) => {
+export const createDispatcher = (
+  ws: WebSocket,
+  retryMessageOptions = {
+    retryMessageMaxRetries: 5,
+    retryMessageTimeout: 15000,
+  }
+) => {
   const state: IDispatcherState = {};
 
   type DispatchMessage = Dispatch<client.Message>;
@@ -34,26 +40,40 @@ export const createDispatcher = (ws: WebSocket) => {
     return new Promise<U | null>((resolve, reject) => {
       const uuid = randomUUID();
       const payload = { ...message, uuid };
+      let numberOfTimesMessageWasSent = 0;
 
       if (options.attachTransfer) {
         Object.assign(payload, { transferID: state.transfer?.id });
       }
 
       const stringifiedPayload = JSON.stringify(payload);
-
       ws.send(stringifiedPayload, (error) => {
         if (error) {
           reject(error);
         }
       });
+      const { retryMessageMaxRetries, retryMessageTimeout } = retryMessageOptions;
+      const sendPeriodically = () => {
+        if (numberOfTimesMessageWasSent <= retryMessageMaxRetries) {
+          numberOfTimesMessageWasSent += 1;
+          ws.send(stringifiedPayload, (error) => {
+            if (error) {
+              reject(error);
+            }
+          });
+        } else {
+          reject(new ProviderError('error', 'Request timed out'));
+        }
+      };
+      const interval = setInterval(sendPeriodically, retryMessageTimeout);
 
       const onResponse = (raw: RawData) => {
         const response: server.Message<U> = JSON.parse(raw.toString());
         if (response.uuid === uuid) {
+          clearInterval(interval);
           if (response.error) {
             return reject(new ProviderError('error', response.error.message));
           }
-
           resolve(response.data ?? null);
         } else {
           ws.once('message', onResponse);

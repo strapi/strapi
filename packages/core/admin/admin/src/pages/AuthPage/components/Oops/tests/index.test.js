@@ -31,6 +31,27 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c18 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -69,27 +90,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c19 {
         padding-top: 16px;
-      }
-
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
       }
 
       .c0 {
@@ -212,6 +212,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -256,6 +261,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         fill: #8e8ea9;
       }
 
+      .c11:focus-visible {
+        outline: none;
+      }
+
       .c9 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -270,10 +279,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       .c9 svg {
         height: 4px;
         width: 6px;
-      }
-
-      .c11:focus-visible {
-        outline: none;
       }
 
       .c22 {

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  // eslint-disable-next-line no-restricted-imports
   ReactSelect,
   useCMEditViewDataManager,
   useAPIErrorHandler,
