@@ -3,12 +3,12 @@ import { stringify, parse } from 'qs';
 import getDefaultLocale from '../../utils/getDefaultLocale';
 
 const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permissions) => {
+  const currentURL = new URL(window.location.href);
+
+  const currentLocale = currentURL.searchParams.get('plugins[i18n][locale]');
+  
   return links.map((link) => {
     const contentTypeUID = link.to.split(`/${kind}/`)[1];
-
-    const currentURL = new URL(window.location.href);
-
-    const currentLocale = currentURL.searchParams.get('plugins[i18n][locale]');
 
     const contentTypeSchema = contentTypeSchemas.find(({ uid }) => uid === contentTypeUID);
 
