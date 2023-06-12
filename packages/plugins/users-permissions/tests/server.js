@@ -1,13 +1,13 @@
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+'use strict';
 
-import pluginId from '../../../../pluginId';
+const { setupServer } = require('msw/node');
+const { rest } = require('msw');
+const pluginId = require('../admin/src/pluginId').default;
 
 const handlers = [
   // Mock get role route
   rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
     return res(
-      ctx.delay(100),
       ctx.status(200),
       ctx.json({
         role: {
@@ -36,7 +36,12 @@ const handlers = [
 
   // Mock edit role route
   rest.put(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
-    return res(ctx.delay(500), ctx.status(200), ctx.json({ ok: true }));
+    return res(ctx.status(200), ctx.json({ ok: true }));
+  }),
+
+  // Mock create role route
+  rest.post(`*/${pluginId}/roles`, (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json({ ok: true }));
   }),
 
   // Mock get all routes route
@@ -70,7 +75,6 @@ const handlers = [
   // Mock permissions route
   rest.get(`*/${pluginId}/permissions`, (req, res, ctx) => {
     return res(
-      ctx.delay(100),
       ctx.status(200),
       ctx.json({
         permissions: {
@@ -88,8 +92,34 @@ const handlers = [
       })
     );
   }),
+
+  rest.get('*/roles', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        roles: [
+          {
+            id: 1,
+            name: 'Authenticated',
+            description: 'Default role given to authenticated user.',
+            type: 'authenticated',
+            nb_users: 0,
+          },
+          {
+            id: 2,
+            name: 'Public',
+            description: 'Default role given to unauthenticated user.',
+            type: 'public',
+            nb_users: 0,
+          },
+        ],
+      })
+    );
+  }),
 ];
 
 const server = setupServer(...handlers);
 
-export default server;
+module.exports = {
+  server,
+};

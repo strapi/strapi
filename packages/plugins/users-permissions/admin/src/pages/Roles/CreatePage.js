@@ -20,18 +20,23 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  translatedErrors,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import * as yup from 'yup';
 
-import UsersPermissions from '../../../components/UsersPermissions';
-import { usePlugins } from '../../../hooks';
-import pluginId from '../../../pluginId';
-import getTrad from '../../../utils/getTrad';
+import UsersPermissions from '../../components/UsersPermissions';
+import { usePlugins } from '../../hooks';
+import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
-import schema from './utils/schema';
+const schema = yup.object().shape({
+  name: yup.string().required(translatedErrors.required),
+  description: yup.string().required(translatedErrors.required),
+});
 
 const EditPage = () => {
   const { formatMessage } = useIntl();

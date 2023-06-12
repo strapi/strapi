@@ -1,38 +1,43 @@
 import React, { useRef, useState } from 'react';
 
 import {
-  Box,
-  Button,
   ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
   HeaderLayout,
   Main,
-  Textarea,
+  Button,
+  Flex,
+  Box,
   TextInput,
+  Textarea,
   Typography,
+  GridItem,
+  Grid,
 } from '@strapi/design-system';
 import {
-  Form,
-  Link,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
   useFetchClient,
-  useNotification,
   useOverlayBlocker,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useNotification,
+  Link,
+  translatedErrors,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
+import * as yup from 'yup';
 
-import UsersPermissions from '../../../components/UsersPermissions';
-import { useFetchRole, usePlugins } from '../../../hooks';
-import pluginId from '../../../pluginId';
-import getTrad from '../../../utils/getTrad';
+import UsersPermissions from '../../components/UsersPermissions';
+import { usePlugins, useFetchRole } from '../../hooks';
+import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
-import schema from './utils/schema';
+const schema = yup.object().shape({
+  name: yup.string().required(translatedErrors.required),
+  description: yup.string().required(translatedErrors.required),
+});
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
