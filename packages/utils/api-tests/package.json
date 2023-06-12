@@ -3,7 +3,7 @@
   "version": "4.11.1",
   "private": true,
   "dependencies": {
-    "dotenv": "14.2.0",
+    "dotenv": "8.6.0",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "supertest": "6.3.3"
