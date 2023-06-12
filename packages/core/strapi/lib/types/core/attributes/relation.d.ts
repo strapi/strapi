@@ -1,6 +1,10 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 export type Relation<
+  // TODO: TOrigin was originally needed to infer precise attribute literal types by doing a reverse lookup
+  // on TTarget -> TOrigin relations. Due to errors because of Attribute.Any [relation] very generic
+  // representation, type mismatches were encountered and mappedBy/inversedBy are now regular strings.
+  // It is kept to allow for future iterations without breaking the current type API
   TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTarget extends Common.UID.Schema = never
@@ -12,7 +16,7 @@ export type Relation<
   Attribute.PrivateOption;
 
 export type RelationProperties<
-  TOrigin extends Common.UID.Schema,
+  _TOrigin extends Common.UID.Schema,
   TRelationKind extends RelationKind.Any,
   TTarget extends Common.UID.Schema
 > = Utils.Expression.MatchFirst<
@@ -22,22 +26,8 @@ export type RelationProperties<
       {
         relation: TRelationKind;
         target: TTarget;
-        mappedBy?: Utils.Guard.Never<
-          Attribute.GetKeysByType<
-            TTarget,
-            'relation',
-            { target: TOrigin; relation: RelationKind.Reverse<TRelationKind> }
-          >,
-          string
-        >;
-        inversedBy?: Utils.Guard.Never<
-          Attribute.GetKeysByType<
-            TTarget,
-            'relation',
-            { target: TOrigin; relation: RelationKind.Reverse<TRelationKind> }
-          >,
-          string
-        >;
+        inversedBy?: string;
+        mappedBy?: string;
       }
     >,
     Utils.Expression.Test<
@@ -49,10 +39,9 @@ export type RelationProperties<
       {
         relation: TRelationKind;
         target: TTarget;
-        morphBy?: Attribute.GetKeysByType<
-          TTarget,
-          'relation',
-          { relation: RelationKind.MorphOwner }
+        morphBy?: Utils.Guard.Never<
+          Attribute.GetKeysByType<TTarget, 'relation', { relation: RelationKind.MorphOwner }>,
+          string
         >;
       }
     >
@@ -89,7 +78,7 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribut
 
 export module RelationKind {
   type GetOppositePlurality<TPlurality extends RelationKind.Left | RelationKind.Right> = {
-    one: 'one';
+    one: 'many';
     One: 'Many';
     many: 'one';
     Many: 'One';

@@ -50,3 +50,13 @@ export type IsSingleType<TContentTypeUID extends ContentType> = Utils.Expression
   Shared.ContentTypes[TContentTypeUID],
   SchemaNamespace.SingleType
 >;
+
+export type IsComponent<TComponentUID extends Component> = Utils.Expression.Extends<
+  Shared.Components[TComponentUID],
+  SchemaNamespace.Component
+>;
+
+export type IsContentType<TContentTypeUID extends ContentType> = Utils.Expression.Or<
+  IsCollectionType<TContentTypeUID>,
+  IsSingleType<TContentTypeUID>
+>;
