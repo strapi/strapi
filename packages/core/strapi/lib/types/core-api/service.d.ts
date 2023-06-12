@@ -14,7 +14,7 @@ export interface Base {
  * Generic core api service structure
  */
 export type Generic = {
-  [method: string | number | symbol]: (...args: any) => any;
+  [key: keyof any]: unknown;
 };
 
 /**
