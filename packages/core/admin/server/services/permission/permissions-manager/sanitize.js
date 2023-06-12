@@ -27,7 +27,6 @@ const {
   constants,
   isScalarAttribute,
   getNonVisibleAttributes,
-  getNonWritableAttributes,
   getWritableAttributes,
 } = contentTypes;
 const {
@@ -241,14 +240,12 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const getOutputFields = (fields = []) => {
-    const nonWritableAttributes = getNonWritableAttributes(schema);
     const nonVisibleAttributes = getNonVisibleAttributes(schema);
 
     return uniq([
       ...fields,
       ...STATIC_FIELDS,
       ...COMPONENT_FIELDS,
-      ...nonWritableAttributes,
       ...nonVisibleAttributes,
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
