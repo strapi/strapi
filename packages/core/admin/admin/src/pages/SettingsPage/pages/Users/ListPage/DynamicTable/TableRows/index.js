@@ -1,19 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import {
   BaseCheckbox,
   Box,
-  IconButton,
   Flex,
-  Typography,
+  IconButton,
   Tbody,
   Td,
   Tr,
+  Typography,
 } from '@strapi/design-system';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
-import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+import { useHistory } from 'react-router-dom';
+
 import { getFullName } from '../../../../../../../utils';
 
 const TableRows = ({

@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
-import * as yup from 'yup';
 import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
+
 import BaseLogin from '../BaseLogin';
 
 jest.mock('../../../../../hooks/useConfigurations', () => () => ({

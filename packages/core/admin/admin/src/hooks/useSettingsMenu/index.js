@@ -1,8 +1,9 @@
 import { useEffect, useReducer } from 'react';
-import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 
-import reducer, { initialState } from './reducer';
+import { hasPermissions, useAppInfo, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
+
 import init from './init';
+import reducer, { initialState } from './reducer';
 
 const useSettingsMenu = (noCheck = false) => {
   const { allPermissions: permissions } = useRBACProvider();

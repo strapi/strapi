@@ -1,11 +1,11 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification, useFetchClient } from '@strapi/helper-plugin';
-import { useNotifyAT, ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import { useFolder } from '../useFolder';
 

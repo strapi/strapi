@@ -1,13 +1,14 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
 
-import en from '../../../../../../../../translations/en.json';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
+import en from '../../../../../../../../translations/en.json';
 import WebhookForm from '../index';
 
 jest.mock('../../../../../../../../hooks/useContentTypes');

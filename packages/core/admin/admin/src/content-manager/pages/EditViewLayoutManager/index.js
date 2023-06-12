@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
+
+import { LoadingIndicatorPage, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { LoadingIndicatorPage, useQueryParams, useStrapiApp } from '@strapi/helper-plugin';
+
 import { MUTATE_EDIT_VIEW_LAYOUT } from '../../../exposedHooks';
 import { useSyncRbac } from '../../hooks';
+
 import { resetProps, setLayout } from './actions';
-import selectLayout from './selectors';
 import Permissions from './Permissions';
+import selectLayout from './selectors';
 
 const EditViewLayoutManager = ({ layout, ...rest }) => {
   const currentLayout = useSelector(selectLayout);

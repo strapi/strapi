@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { useRBAC, LoadingIndicatorPage, useNotification } from '@strapi/helper-plugin';
+
+import { LoadingIndicatorPage, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Redirect, useLocation } from 'react-router-dom';
 
 import adminPermissions from '../../../../../permissions';

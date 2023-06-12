@@ -1,5 +1,5 @@
+import { Flex, inputFocusStyle, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
-import { Flex, Typography, inputFocusStyle } from '@strapi/design-system';
 
 const Wrapper = styled(Flex)`
   position: relative;

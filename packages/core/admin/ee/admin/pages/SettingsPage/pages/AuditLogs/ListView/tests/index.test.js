@@ -1,14 +1,17 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
-import { createMemoryHistory } from 'history';
-import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
+
 import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
-import { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData } from './utils/data';
+
+import { getBigTestPageData, TEST_PAGE_DATA, TEST_SINGLE_DATA } from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();

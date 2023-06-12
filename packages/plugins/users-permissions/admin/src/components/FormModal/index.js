@@ -5,21 +5,23 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
+
 import {
   Button,
   Flex,
   Grid,
   GridItem,
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
   ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
 import { Form } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import Input from './Input';
 
 const FormModal = ({

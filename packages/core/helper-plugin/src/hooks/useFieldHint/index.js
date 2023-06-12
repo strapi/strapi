@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { useIntl } from 'react-intl';
+
 import { getFieldUnits, getMinMax } from './utils';
 
 /**
