@@ -25,14 +25,15 @@ import {
 } from '@strapi/helper-plugin';
 import { useMutation } from 'react-query';
 
-import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 
+import { FORM_INITIAL_VALUES } from './constants';
 import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
+import { useEnterprise } from '../../../../../../hooks/useEnterprise';
 
 const ModalForm = ({ onSuccess, onToggle }) => {
   const [currentStep, setStep] = useState('create');
@@ -42,6 +43,25 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { post } = useFetchClient();
+  const formDataModel = useEnterprise(
+    FORM_INITIAL_VALUES,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+        )
+      ).FORM_INITIAL_VALUES,
+    {
+      combine(ceValues, eeValues) {
+        return {
+          ...ceValues,
+          ...eeValues,
+        };
+      },
+
+      defaultValue: {},
+    }
+  );
   const postMutation = useMutation(
     (body) => {
       return post('/admin/users', body);
