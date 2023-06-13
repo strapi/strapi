@@ -6,12 +6,13 @@ import omit from 'lodash/omit';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { auth, useQuery, useGuidedTour, useTracking, useFetchClient } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
+import { FORMS } from './constants';
+import { useEnterprise } from '../../hooks/useEnterprise';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const {
@@ -25,10 +26,19 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
-    forms,
-    authType,
-    {}
+  const forms = useEnterprise(
+    FORMS,
+    async () => (await import('../../../../ee/admin/pages/AuthPage/constants')).FORMS,
+    {
+      combine(ceForms, eeForms) {
+        return {
+          ...ceForms,
+          ...eeForms,
+        };
+      },
+
+      defaultValue: {},
+    }
   );
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
     reducer,
@@ -37,6 +47,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   );
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } =
+    forms?.[authType] ?? {};
 
   useEffect(() => {
     // Cancel request on unmount
