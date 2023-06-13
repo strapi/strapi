@@ -25,10 +25,9 @@ import {
 } from '@strapi/helper-plugin';
 import { useMutation } from 'react-query';
 
-import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 
-import { FORM_INITIAL_VALUES } from './constants';
+import { FORM_INITIAL_VALUES, ROLE_LAYOUT } from './constants';
 import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
@@ -43,7 +42,19 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { post } = useFetchClient();
-  const formDataModel = useEnterprise(
+  const roleRowLayout = useEnterprise(
+    ROLE_LAYOUT,
+    async () =>
+      (
+        await import(
+          '../../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/ModalForm/constants'
+        )
+      ).ROLE_LAYOUT,
+    {
+      defaultValue: [],
+    }
+  );
+  const initialValues = useEnterprise(
     FORM_INITIAL_VALUES,
     async () =>
       (
@@ -138,7 +149,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
         </Breadcrumbs>
       </ModalHeader>
       <Formik
-        initialValues={formDataModel}
+        initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={schema}
         validateOnChange={false}
@@ -195,7 +206,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
                             value={values.roles}
                           />
                         </GridItem>
-                        {roleSettingsForm.map((row) => {
+                        {roleRowLayout.map((row) => {
                           return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>

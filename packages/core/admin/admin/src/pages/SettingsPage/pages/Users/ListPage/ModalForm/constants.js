@@ -4,3 +4,5 @@ export const FORM_INITIAL_VALUES = {
   email: '',
   roles: [],
 };
+
+export const ROLE_LAYOUT = [];
