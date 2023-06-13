@@ -27,11 +27,8 @@ import { useMutation } from 'react-query';
 
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 
-import { FORM_INITIAL_VALUES, ROLE_LAYOUT } from './constants';
+import { FORM_LAYOUT, FORM_SCHEMA, FORM_INITIAL_VALUES, ROLE_LAYOUT, STEPPER } from './constants';
 import SelectRoles from '../../components/SelectRoles';
-import layout from './utils/layout';
-import schema from './utils/schema';
-import stepper from './utils/stepper';
 import { useEnterprise } from '../../../../../../hooks/useEnterprise';
 
 const ModalForm = ({ onSuccess, onToggle }) => {
@@ -129,7 +126,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
     }
   };
 
-  const { buttonSubmitLabel, isDisabled, next } = stepper[currentStep];
+  const { buttonSubmitLabel, isDisabled, next } = STEPPER[currentStep];
   const endActions =
     currentStep === 'create' ? (
       <Button type="submit" loading={isSubmitting}>
@@ -151,7 +148,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
       <Formik
         initialValues={initialValues}
         onSubmit={handleSubmit}
-        validationSchema={schema}
+        validationSchema={FORM_SCHEMA}
         validateOnChange={false}
       >
         {({ errors, handleChange, values }) => {
@@ -170,7 +167,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
                     <Box paddingTop={4}>
                       <Flex direction="column" alignItems="stretch" gap={1}>
                         <Grid gap={5}>
-                          {layout.map((row) => {
+                          {FORM_LAYOUT.map((row) => {
                             return row.map((input) => {
                               return (
                                 <GridItem key={input.name} {...input.size}>
