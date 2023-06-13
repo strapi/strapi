@@ -39,7 +39,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { post } = useFetchClient();
-  const roleRowLayout = useEnterprise(
+  const roleLayout = useEnterprise(
     ROLE_LAYOUT,
     async () =>
       (
@@ -203,7 +203,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
                             value={values.roles}
                           />
                         </GridItem>
-                        {roleRowLayout.map((row) => {
+                        {roleLayout.map((row) => {
                           return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>
