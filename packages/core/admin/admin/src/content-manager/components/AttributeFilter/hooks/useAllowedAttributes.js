@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 
 const useAllowedAttributes = (contentType, slug) => {
   const { allPermissions } = useRBACProvider();
@@ -21,6 +22,14 @@ const useAllowedAttributes = (contentType, slug) => {
     },
   ]);
 
+  const canReadAdminUsers =
+    findMatchingPermissions(allPermissions, [
+      {
+        action: 'admin::users.read',
+        subject: null,
+      },
+    ]).length > 0;
+
   const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
   const attributesArray = Object.keys(get(contentType, ['attributes']), {});
   const allowedAttributes = attributesArray
@@ -36,6 +45,10 @@ const useAllowedAttributes = (contentType, slug) => {
       }
 
       if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
+        return false;
+      }
+
+      if (CREATOR_ATTRIBUTES.includes(attr) && !canReadAdminUsers) {
         return false;
       }
 
