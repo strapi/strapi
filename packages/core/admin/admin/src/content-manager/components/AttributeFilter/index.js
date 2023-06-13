@@ -2,7 +2,7 @@ import React from 'react';
 
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams, getDisplayName } from '@strapi/helper-plugin';
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import useAllowedAttributes from './hooks/useAllowedAttributes';
 import Filters from './Filters';
@@ -58,7 +58,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
           ],
           customInput: AdminUsersFilter,
           options: users.map((user) => ({
-            label: user.firstname,
+            label: getDisplayName(user, formatMessage),
             customValue: user.id.toString(),
           })),
         },
