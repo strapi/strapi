@@ -102,6 +102,7 @@ export { default as prefixPluginTranslations } from './utils/prefixPluginTransla
 export { default as pxToRem } from './utils/pxToRem';
 export { default as request } from './utils/request';
 export { default as setHexOpacity } from './utils/setHexOpacity';
+export { getDisplayName } from './utils/getDisplayName';
 export * from './utils/stopPropagation';
 export { default as translatedErrors } from './utils/translatedErrors';
 export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
