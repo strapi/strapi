@@ -39,6 +39,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   useContentTypeLayout: jest.fn().mockReturnValue({
+    components: {},
     getComponentLayout: jest.fn().mockImplementation((componentUid) => layoutData[componentUid]),
   }),
 }));

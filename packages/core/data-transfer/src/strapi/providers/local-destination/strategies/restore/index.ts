@@ -1,4 +1,4 @@
-import type { ContentTypeSchema } from '@strapi/strapi';
+import type { Schema } from '@strapi/strapi';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
@@ -11,7 +11,7 @@ export interface IRestoreOptions {
   entities?: {
     include?: string[];
     exclude?: string[];
-    filters?: ((contentType: ContentTypeSchema) => boolean)[];
+    filters?: ((contentType: Schema.ContentType) => boolean)[];
     params?: { [uid: string]: unknown };
   };
 }
@@ -38,7 +38,7 @@ const deleteEntitiesRecord = async (
 ): Promise<IDeleteResults> => {
   const { entities } = options;
   const query = queries.entity.createEntityQuery(strapi);
-  const contentTypes = Object.values<ContentTypeSchema>(strapi.contentTypes);
+  const contentTypes = Object.values<Schema.ContentType>(strapi.contentTypes);
 
   const contentTypesToClear = contentTypes.filter((contentType) => {
     let keep = true;

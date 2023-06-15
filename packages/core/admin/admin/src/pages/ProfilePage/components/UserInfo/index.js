@@ -1,22 +1,12 @@
-import React from "react";
+import React from 'react';
 import PropTypes from 'prop-types';
 import { GenericInput } from '@strapi/helper-plugin';
-import {
-  Typography,
-  Box,
-  Grid,
-  GridItem,
-  Flex,
-} from '@strapi/design-system';
+import { Typography, Box, Grid, GridItem, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-const UserInfo = ({
-  errors,
-  onChange,
-  values
-}) => {
+const UserInfo = ({ errors, onChange, values }) => {
   const { formatMessage } = useIntl();
-  
+
   return (
     <Box
       background="neutral0"
@@ -89,8 +79,8 @@ const UserInfo = ({
         </Grid>
       </Flex>
     </Box>
-  )
-}
+  );
+};
 
 UserInfo.propTypes = {
   errors: PropTypes.shape({
@@ -115,7 +105,7 @@ UserInfo.defaultProps = {
     firstname: '',
     lastname: '',
     username: '',
-    email: ''
+    email: '',
   },
 };
 
