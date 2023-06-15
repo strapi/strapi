@@ -370,7 +370,7 @@ const assignPermissions = async (roleId, permissions = []) => {
 
   if (permissionsToAdd.length > 0) {
     const createdPermissions = await addPermissions(roleId, permissionsToAdd);
-    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
+    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role?.id })));
   }
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
