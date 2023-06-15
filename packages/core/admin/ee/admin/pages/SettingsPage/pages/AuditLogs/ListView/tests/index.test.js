@@ -6,7 +6,6 @@ import { render, screen, waitFor, within, fireEvent } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
 import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
 import { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData } from './utils/data';
@@ -45,15 +44,13 @@ const client = new QueryClient({
 
 const App = (
   <QueryClientProvider client={client}>
-    <TrackingProvider>
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-          <Router history={history}>
-            <ListView />
-          </Router>
-        </IntlProvider>
-      </ThemeProvider>
-    </TrackingProvider>
+    <ThemeProvider theme={lightTheme}>
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+        <Router history={history}>
+          <ListView />
+        </Router>
+      </IntlProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
@@ -135,7 +132,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const modalContainer = within(modal);
     expect(modalContainer.getByText('Create role')).toBeInTheDocument();
     expect(modalContainer.getByText('test user')).toBeInTheDocument();
-    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(3);
+    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(2);
 
     const closeButton = modalContainer.getByText(/close the modal/i).closest('button');
     await user.click(closeButton);

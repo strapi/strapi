@@ -4,9 +4,14 @@ const ts = require('typescript');
 const { factory } = require('typescript');
 const { isEmpty } = require('lodash/fp');
 
-const { getSchemaExtendsTypeName, getSchemaInterfaceName, toTypeLiteral } = require('./utils');
+const {
+  getSchemaExtendsTypeName,
+  getSchemaInterfaceName,
+  toTypeLiteral,
+  NAMESPACES,
+} = require('./utils');
 const attributeToPropertySignature = require('./attributes');
-const { addImport } = require('./imports');
+const { addImport } = require('../imports');
 
 /**
  * Generate a property signature for the schema's `attributes` field
@@ -51,11 +56,11 @@ const generateSchemaDefinition = (schema) => {
   const interfaceName = getSchemaInterfaceName(uid);
   const parentType = getSchemaExtendsTypeName(schema);
 
-  // Make sure the extended interface are imported
-  addImport(parentType);
+  // Make sure the Schema namespace is imported
+  addImport(NAMESPACES.schema);
 
   // Properties whose values can be mapped to a literal type expression
-  const literalPropertiesDefinitions = ['info', 'options', 'pluginOptions']
+  const literalPropertiesDefinitions = ['collectionName', 'info', 'options', 'pluginOptions']
     // Ignore non-existent or empty declarations
     .filter((key) => !isEmpty(schema[key]))
     // Generate literal definition for each property

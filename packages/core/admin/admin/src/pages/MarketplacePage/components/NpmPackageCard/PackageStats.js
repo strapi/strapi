@@ -32,7 +32,7 @@ const PackageStats = ({ githubStars, npmDownloads, npmPackageType }) => {
               }
             )}
           >
-            <Typography variant="pi" textColor="neutral800" lineHeight={16}>
+            <Typography variant="pi" textColor="neutral800">
               {githubStars}
             </Typography>
           </p>
@@ -52,7 +52,7 @@ const PackageStats = ({ githubStars, npmDownloads, npmPackageType }) => {
           }
         )}
       >
-        <Typography variant="pi" textColor="neutral800" lineHeight={16}>
+        <Typography variant="pi" textColor="neutral800">
           {npmDownloads}
         </Typography>
       </p>

@@ -29,6 +29,7 @@ const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
 const env = require('./env-helper');
+const webhook = require('./webhook');
 const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
@@ -74,6 +75,7 @@ module.exports = {
   isKebabCase,
   isCamelCase,
   toKebabCase,
+  webhook,
   contentTypes,
   env,
   relations,
