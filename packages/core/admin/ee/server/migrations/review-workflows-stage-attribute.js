@@ -22,14 +22,26 @@ async function migrateStageAttribute({ oldContentTypes, contentTypes }) {
     const newAttributeTableName = 'strapi_stage';
     const tables = await findTables({ strapi }, new RegExp(oldAttributeTableName));
 
-    await mapAsync(tables, (tableName) => {
+    await mapAsync(tables, async (tableName) => {
       const newTableName = tableName.replace(oldAttributeTableName, newAttributeTableName);
-      return strapi.db.connection.schema.renameTable(tableName, newTableName).catch((e) => {
+      const alreadyHasNextTable = await strapi.db.connection.schema.hasTable(newTableName);
+
+      // The table can be already created but empty. In order to rename the old one, we need to drop the previously created empty one.
+      if (alreadyHasNextTable) {
+        const dataInTable = await strapi.db.connection(newTableName).select().limit(1);
+        if (!dataInTable.length) {
+          await strapi.db.connection.schema.dropTable(newTableName);
+        }
+      }
+
+      try {
+        await strapi.db.connection.schema.renameTable(tableName, newTableName);
+      } catch (e) {
         strapi.log.warn(
           `An error occurred during the migration of ${tableName} table to ${newTableName}.\nIf ${newTableName} already exists, migration can't be done automatically.`
         );
         strapi.log.warn(e.message);
-      });
+      }
     });
   }
 }
