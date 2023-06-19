@@ -89,7 +89,8 @@ describe('Create Webhook', () => {
         events: ['entry.create'],
         headers: [{ key: '', value: '' }],
       });
-      expect(saveButton).toHaveAttribute('aria-disabled', 'true');
     });
+
+    expect(saveButton).toHaveAttribute('aria-disabled', 'true');
   });
 });
