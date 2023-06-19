@@ -1,11 +1,9 @@
-import AuthResponse from '../../AuthResponse';
+import { AuthResponse } from '../AuthResponse';
 
-const customRoutes = [
+export const ROUTES_EE = [
   {
     Component: () => ({ default: AuthResponse }),
     to: '/auth/login/:authResponse',
     exact: true,
   },
 ];
-
-export default customRoutes;

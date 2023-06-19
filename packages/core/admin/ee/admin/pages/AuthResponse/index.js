@@ -7,7 +7,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { getRequestUrl } from '../../../../admin/src/utils';
 
-const AuthResponse = () => {
+export const AuthResponse = () => {
   const {
     params: { authResponse },
   } = useRouteMatch('/auth/login/:authResponse');
