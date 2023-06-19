@@ -36,7 +36,7 @@ const buildDeepPopulate = (uid) => {
   // They will be transformed into counts later if this is set to true.
   return getService('populate-builder')(uid)
     .populateDeep(Infinity)
-    .countRelationsIf(isWebhooksPopulateRelationsEnabled(uid))
+    .countRelationsIf(!isWebhooksPopulateRelationsEnabled(uid))
     .build();
 };
 
