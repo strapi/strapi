@@ -9,6 +9,7 @@
     "name": "Category"
   },
   "options": {
+    "reviewWorkflows": true,
     "draftAndPublish": true
   },
   "pluginOptions": {
