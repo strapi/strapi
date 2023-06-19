@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+
 import { useNotification, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
+
 import pluginId from '../pluginId';
 import { cleanPermissions, getTrad } from '../utils';
 

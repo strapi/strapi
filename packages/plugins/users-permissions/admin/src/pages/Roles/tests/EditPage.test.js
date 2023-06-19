@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 import {
   fireEvent,
   render as renderRTL,
@@ -6,13 +9,12 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { MemoryRouter, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import RolesEditPage from '../EditPage';
+import { MemoryRouter, Switch, Route } from 'react-router-dom';
+
 import pluginId from '../../../pluginId';
+import RolesEditPage from '../EditPage';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

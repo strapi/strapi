@@ -1,11 +1,13 @@
 import React from 'react';
-import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { NotificationsProvider } from '@strapi/helper-plugin';
-import { MemoryRouter, Switch, Route } from 'react-router-dom';
+import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter, Switch, Route } from 'react-router-dom';
+
 import pluginId from '../../../pluginId';
 import RolesCreatePage from '../CreatePage';
 
