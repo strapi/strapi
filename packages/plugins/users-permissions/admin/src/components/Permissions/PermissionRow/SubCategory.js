@@ -1,6 +1,14 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { Box, Checkbox, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Checkbox,
+  Flex,
+  Typography,
+  Grid,
+  GridItem,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { Cog as CogIcon } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
@@ -90,10 +98,20 @@ const SubCategory = ({ subCategory }) => {
                   </Checkbox>
                   <button
                     type="button"
-                    data-testid="action-cog"
                     onClick={() => onSelectedAction(action.name)}
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
+                    <VisuallyHidden as="span">
+                      {formatMessage(
+                        {
+                          id: 'app.utils.show-bound-route',
+                          defaultMessage: 'Show bound route for {route}',
+                        },
+                        {
+                          route: action.name,
+                        }
+                      )}
+                    </VisuallyHidden>
                     <CogIcon />
                   </button>
                 </CheckboxWrapper>
