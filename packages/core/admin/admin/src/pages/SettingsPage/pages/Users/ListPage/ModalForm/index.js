@@ -48,6 +48,10 @@ const ModalForm = ({ onSuccess, onToggle }) => {
         )
       ).ROLE_LAYOUT,
     {
+      combine(ceRoles, eeRoles) {
+        return [...ceRoles, eeRoles];
+      },
+
       defaultValue: [],
     }
   );
@@ -67,7 +71,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
         };
       },
 
-      defaultValue: {},
+      defaultValue: FORM_INITIAL_VALUES,
     }
   );
   const postMutation = useMutation(
@@ -149,6 +153,7 @@ const ModalForm = ({ onSuccess, onToggle }) => {
         </Breadcrumbs>
       </ModalHeader>
       <Formik
+        enableReinitialize
         initialValues={initialValues}
         onSubmit={handleSubmit}
         validationSchema={FORM_SCHEMA}
