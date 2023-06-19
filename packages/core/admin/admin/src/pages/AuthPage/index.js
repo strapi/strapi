@@ -40,7 +40,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         };
       },
 
-      defaultValue: {},
+      defaultValue: FORMS,
     }
   );
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
