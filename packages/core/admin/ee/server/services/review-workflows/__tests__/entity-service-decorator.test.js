@@ -108,10 +108,16 @@ describe('Entity service decorator', () => {
 
       const defaultService = {
         update: jest.fn(() => Promise.resolve(entry)),
-        findOne: jest.fn(() => {
-          return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
-        }),
         emitEvent: jest.fn(),
+      };
+
+      global.strapi = {
+        ...global.strapi,
+        entityService: {
+          findOne: jest.fn(() => {
+            return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
+          }),
+        },
       };
 
       const service = decorator(defaultService);
