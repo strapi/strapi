@@ -66,8 +66,9 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     const previousStage = await getEntityStage(uid, entityId);
+
+    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     if (
       previousStage?.workflow?.id &&
       previousStage?.id &&
