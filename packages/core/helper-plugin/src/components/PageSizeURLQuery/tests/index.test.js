@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import PageSizeURLQuery from '../index';
 
 jest.mock('../../../features/Tracking', () => ({

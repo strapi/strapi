@@ -1,5 +1,6 @@
 import React from 'react';
-import { Loader, Flex } from '@strapi/design-system';
+
+import { Flex, Loader } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 

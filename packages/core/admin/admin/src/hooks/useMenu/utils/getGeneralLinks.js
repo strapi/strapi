@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+
 import checkPermissions from './checkPermissions';
 
 const getGeneralLinks = async (permissions, generalSectionRawLinks, shouldUpdateStrapi) => {

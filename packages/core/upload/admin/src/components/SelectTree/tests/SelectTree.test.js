@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, act } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import SelectTree from '../index';
 

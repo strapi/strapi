@@ -1,10 +1,12 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useStrapiApp } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { useStrapiApp } from '@strapi/helper-plugin';
+import { Router } from 'react-router-dom';
+
 import { useMenu } from '../../../hooks';
 import Admin from '../index';
 

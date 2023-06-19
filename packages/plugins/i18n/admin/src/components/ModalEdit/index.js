@@ -1,30 +1,33 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Form, useRBACProvider } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
-import { Check } from '@strapi/icons';
+
 import {
-  ModalLayout,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  TabGroup,
-  Tabs,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Flex,
   Box,
   Button,
   Divider,
+  Flex,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  Tab,
+  TabGroup,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Typography,
 } from '@strapi/design-system';
-import localeFormSchema from '../../schemas';
+import { Form, useRBACProvider } from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import useEditLocale from '../../hooks/useEditLocale';
+import localeFormSchema from '../../schemas';
 import { getTrad } from '../../utils';
-import BaseForm from './BaseForm';
+
 import AdvancedForm from './AdvancedForm';
+import BaseForm from './BaseForm';
 
 const ModalEdit = ({ locale, onClose }) => {
   const { refetchPermissions } = useRBACProvider();

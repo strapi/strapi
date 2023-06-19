@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import PaginationURLQuery from '../index';
 
 const messages = {

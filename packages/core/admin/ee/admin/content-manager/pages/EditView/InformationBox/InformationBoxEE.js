@@ -1,19 +1,18 @@
 import React from 'react';
+
+import { Flex, Loader, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import {
-  ReactSelect,
-  useCMEditViewDataManager,
   useAPIErrorHandler,
+  useCMEditViewDataManager,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
-import { OptionColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/Stages/Stage/components/OptionColor';
-import { SingleValueColor } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/Stages/Stage/components/SingleValueColor';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
+import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';
 
@@ -100,52 +99,72 @@ export function InformationBoxEE() {
     }
   };
 
+  const { themeColorName } = activeWorkflowStage?.color
+    ? getStageColorByHex(activeWorkflowStage?.color)
+    : {};
+
   return (
     <Information.Root>
       <Information.Title />
 
       {hasReviewWorkflowsEnabled && !isCreatingEntry && (
-        <Field error={formattedError} name={ATTRIBUTE_NAME} id={ATTRIBUTE_NAME}>
-          <Flex direction="column" gap={2} alignItems="stretch">
-            <FieldLabel>
-              {formatMessage({
-                id: 'content-manager.reviewWorkflows.stage.label',
-                defaultMessage: 'Review stage',
-              })}
-            </FieldLabel>
-
-            <ReactSelect
-              components={{
-                LoadingIndicator: () => <Loader small />,
-                Option: OptionColor,
-                SingleValue: SingleValueColor,
-              }}
-              error={formattedError}
-              inputId={ATTRIBUTE_NAME}
-              isLoading={isLoading}
-              isSearchable={false}
-              isClearable={false}
-              name={ATTRIBUTE_NAME}
-              onChange={handleStageChange}
-              options={
-                workflow
-                  ? workflow.stages.map(({ id, color, name }) => ({
-                      value: id,
-                      label: name,
-                      color,
-                    }))
-                  : []
-              }
-              value={{
-                value: activeWorkflowStage?.id,
-                label: activeWorkflowStage?.name,
-                color: activeWorkflowStage?.color,
-              }}
+        <SingleSelect
+          error={formattedError}
+          name={ATTRIBUTE_NAME}
+          id={ATTRIBUTE_NAME}
+          value={activeWorkflowStage?.id}
+          onChange={(value) => handleStageChange({ value })}
+          label={formatMessage({
+            id: 'content-manager.reviewWorkflows.stage.label',
+            defaultMessage: 'Review stage',
+          })}
+          startIcon={
+            <Flex
+              as="span"
+              height={2}
+              background={activeWorkflowStage?.color}
+              borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+              hasRadius
+              shrink={0}
+              width={2}
+              marginRight="-3px"
             />
+          }
+          // eslint-disable-next-line react/no-unstable-nested-components
+          customizeContent={() => (
+            <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+              <Typography textColor="neutral800" ellipsis>
+                {activeWorkflowStage?.name}
+              </Typography>
+              {isLoading ? <Loader small style={{ display: 'flex' }} /> : null}
+            </Flex>
+          )}
+        >
+          {workflow
+            ? workflow.stages.map(({ id, color, name }) => {
+                const { themeColorName } = getStageColorByHex(color);
 
-            <FieldError />
-          </Flex>
-        </Field>
+                return (
+                  <SingleSelectOption
+                    startIcon={
+                      <Flex
+                        height={2}
+                        background={color}
+                        borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                        hasRadius
+                        shrink={0}
+                        width={2}
+                      />
+                    }
+                    value={id}
+                    textValue={name}
+                  >
+                    {name}
+                  </SingleSelectOption>
+                );
+              })
+            : []}
+        </SingleSelect>
       )}
 
       <Information.Body />

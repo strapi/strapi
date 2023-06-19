@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from 'react';
+
 import { useFetchClient } from '@strapi/helper-plugin';
 
 import reducer, { initialState } from './reducer';

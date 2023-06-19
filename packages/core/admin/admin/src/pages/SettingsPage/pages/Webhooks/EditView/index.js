@@ -1,15 +1,18 @@
 import * as React from 'react';
+
+import { Main } from '@strapi/design-system';
 import {
   LoadingIndicatorPage,
   SettingsPageTitle,
-  useNotification,
-  useFetchClient,
   useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
+
 import { useContentTypes } from '../../../../../hooks/useContentTypes';
+
 import WebhookForm from './components/WebhookForm';
 
 const cleanData = (data) => ({

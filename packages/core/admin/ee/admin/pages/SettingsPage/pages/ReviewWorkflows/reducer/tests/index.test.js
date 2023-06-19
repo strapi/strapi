@@ -1,9 +1,8 @@
 import { initialState, reducer } from '..';
-
 import {
-  ACTION_SET_WORKFLOWS,
-  ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
+  ACTION_DELETE_STAGE,
+  ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
   ACTION_UPDATE_STAGE_POSITION,
 } from '../../constants';

@@ -1,9 +1,10 @@
 import React from 'react';
+
+import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
+import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
+import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
-import { Avatar, Initials, Box, Icon } from '@strapi/design-system';
-import { Folder } from '@strapi/icons';
 
 import { AssetType } from '../../constants';
 import { createAssetUrl } from '../../utils';

@@ -83,7 +83,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c67 {
   font-size: 0.75rem;
   line-height: 1.33;
-  line-height: 16;
   color: #32324d;
 }
 
@@ -1136,6 +1135,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   word-break: break-all;
 }
 
+.c54 {
+  height: 2rem;
+}
+
 .c70 {
   width: 0.75rem;
   -webkit-transform: rotate(90deg);
@@ -1168,10 +1171,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c54 {
-  height: 2rem;
 }
 
 @media (max-width:68.75rem) {

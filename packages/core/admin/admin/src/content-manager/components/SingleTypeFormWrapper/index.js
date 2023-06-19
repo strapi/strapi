@@ -1,20 +1,22 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useQueryClient } from 'react-query';
-import get from 'lodash/get';
+
 import {
-  useTracking,
   formatContentTypeData,
-  useQueryParams,
-  useNotification,
-  useGuidedTour,
   useAPIErrorHandler,
   useFetchClient,
+  useGuidedTour,
+  useNotification,
+  useQueryParams,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useSelector, useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
 import axios from 'axios';
-import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { useQueryClient } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
+import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 import {
   getData,
   getDataSucceeded,
@@ -25,8 +27,9 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
+
 import { getRequestUrl } from './utils';
-import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
