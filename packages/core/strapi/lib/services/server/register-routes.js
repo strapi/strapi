@@ -94,7 +94,7 @@ const registerAPIRoutes = (strapi) => {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
       router.type = 'content-api';
-      router.routes.forEach((route) => {
+      router.routes?.forEach((route) => {
         generateRouteScope(route);
         route.info = { apiName };
       });
