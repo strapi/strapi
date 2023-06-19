@@ -53,7 +53,12 @@ const WebhookForm = ({
       headers: mapHeaders(data?.headers || {}),
       events: data?.events || [],
     },
-    onSubmit: handleSubmit,
+    onSubmit(values, { resetForm, setSubmitting }) {
+      handleSubmit(values);
+
+      resetForm({ values });
+      setSubmitting(false);
+    },
     validationSchema: makeWebhookValidationSchema({ formatMessage }),
     validateOnChange: false,
     validateOnBlur: false,
