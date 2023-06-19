@@ -1,7 +1,9 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider, useIntl } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import RelativeTime from '../index';
 
 const App = (

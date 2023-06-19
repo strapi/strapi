@@ -1,6 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
+
 import { CarretDown } from '@strapi/icons';
+import styled from 'styled-components';
+
 import IconBox from './IconBox';
 
 export const CarretBox = styled(IconBox)`

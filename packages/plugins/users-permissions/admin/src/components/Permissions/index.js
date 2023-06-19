@@ -1,10 +1,13 @@
 import React, { useReducer } from 'react';
-import { Accordion, AccordionToggle, AccordionContent, Box, Flex } from '@strapi/design-system';
+
+import { Accordion, AccordionContent, AccordionToggle, Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
-import PermissionRow from './PermissionRow';
+
 import init from './init';
+import PermissionRow from './PermissionRow';
 import { initialState, reducer } from './reducer';
 
 const Permissions = () => {

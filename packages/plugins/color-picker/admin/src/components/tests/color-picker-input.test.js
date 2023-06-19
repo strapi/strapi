@@ -1,7 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+
 import ColorPickerInput from '../ColorPicker/ColorPickerInput';
 
 const mockAttribute = {

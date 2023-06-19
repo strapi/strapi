@@ -1,15 +1,17 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import RoleListPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({

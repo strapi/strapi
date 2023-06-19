@@ -1,9 +1,10 @@
 import React from 'react';
+
 import { renderHook } from '@testing-library/react';
 import axios from 'axios';
 
 import { useAppInfo } from '../AppInfo';
-import { useTracking, TrackingProvider } from '../Tracking';
+import { TrackingProvider, useTracking } from '../Tracking';
 
 jest.mock('../AppInfo');
 

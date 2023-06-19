@@ -10,16 +10,19 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React, { memo, useMemo } from 'react';
-import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
-import { Switch, Redirect, Route, useParams } from 'react-router-dom';
+
 import { Layout } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+
 import { useSettingsMenu } from '../../hooks';
 import { createRoute, makeUniqueRoutes } from '../../utils';
+
+import SettingsNav from './components/SettingsNav';
 import ApplicationInfosPage from './pages/ApplicationInfosPage';
 import { createSectionsRoutes, routes } from './utils';
-import SettingsNav from './components/SettingsNav';
 
 function SettingsPage() {
   const { settingId } = useParams();

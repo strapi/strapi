@@ -1,7 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
+
 import { Box, Flex } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+
 import LocaleToggle from './LocaleToggle';
 
 const Wrapper = styled(Box)`

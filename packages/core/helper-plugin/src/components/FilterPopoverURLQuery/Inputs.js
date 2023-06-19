@@ -1,17 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import parseISO from 'date-fns/parseISO';
-import formatISO from 'date-fns/formatISO';
+
 import {
   DatePicker,
   DateTimePicker,
   Field,
-  NumberInput,
-  TimePicker,
-  Select,
   FieldInput,
+  NumberInput,
   Option,
+  Select,
+  TimePicker,
 } from '@strapi/design-system';
+import formatISO from 'date-fns/formatISO';
+import parseISO from 'date-fns/parseISO';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 const Inputs = ({ label, onChange, options, type, value }) => {

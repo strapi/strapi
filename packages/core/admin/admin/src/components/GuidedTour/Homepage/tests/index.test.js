@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useGuidedTour } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { Router } from 'react-router-dom';
+
 import GuidedTourHomepage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

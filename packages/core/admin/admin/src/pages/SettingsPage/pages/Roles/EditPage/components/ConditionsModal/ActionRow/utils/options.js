@@ -28,4 +28,4 @@ const getNewStateFromChangedValues = (options, changedValues) =>
     .flat()
     .reduce((acc, curr) => ({ [curr.id]: changedValues.includes(curr.id), ...acc }), {});
 
-export { getNestedOptions, getSelectedValues, getNewStateFromChangedValues };
+export { getNestedOptions, getNewStateFromChangedValues, getSelectedValues };

@@ -1,34 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
-import omit from 'lodash/omit';
-import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Grid,
+  GridItem,
+  Main,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   Form,
-  useQuery,
-  useNotification,
-  useTracking,
   getYupInnerErrors,
   Link,
   useAPIErrorHandler,
   useFetchClient,
+  useNotification,
+  useQuery,
+  useTracking,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Main,
-  Flex,
-  Button,
-  TextInput,
-  Checkbox,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
-import { EyeStriked, Eye } from '@strapi/icons';
-import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
+import { Eye, EyeStriked } from '@strapi/icons';
+import { Formik } from 'formik';
+import omit from 'lodash/omit';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
 import Logo from '../../../../components/UnauthenticatedLogo';
+import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const A = styled.a`

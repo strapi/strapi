@@ -1,34 +1,37 @@
 import React, { useEffect, useReducer, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { useIntl } from 'react-intl';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Layout,
+  Main,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import {
-  Box,
-  Flex,
-  ToggleInput,
-  Typography,
-  Button,
-  Main,
-  Grid,
-  GridItem,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-} from '@strapi/design-system';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+
+import pluginPermissions from '../../permissions';
 import { getRequestUrl, getTrad } from '../../utils';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
-import pluginPermissions from '../../permissions';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();

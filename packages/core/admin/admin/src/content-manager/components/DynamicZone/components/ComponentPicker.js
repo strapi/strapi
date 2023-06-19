@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+
+import { Box, Flex, KeyboardNavigable, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { KeyboardNavigable, Box, Flex, Typography } from '@strapi/design-system';
 
 import { getTrad } from '../../../utils';
 

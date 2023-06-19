@@ -1,38 +1,41 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+
 import {
-  ConfirmDialog,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  SettingsPageTitle,
-  getFetchClient,
-  useNotification,
-  useQueryParams,
-  useRBAC,
-  useFocusWhenNavigate,
-  useFilter,
-  useCollator,
-} from '@strapi/helper-plugin';
-import { Plus, Trash, Duplicate, Pencil } from '@strapi/icons';
-import {
-  Button,
   ActionLayout,
+  Button,
   ContentLayout,
   HeaderLayout,
   Main,
   Table,
   Tbody,
   TFooter,
-  Thead,
   Th,
+  Thead,
   Tr,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  getFetchClient,
+  LoadingIndicatorPage,
+  SearchURLQuery,
+  SettingsPageTitle,
+  useCollator,
+  useFilter,
+  useFocusWhenNavigate,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+
 import { useRolesList } from '../../../../../hooks';
 import adminPermissions from '../../../../../permissions';
+
 import EmptyRole from './components/EmptyRole';
 import BaseRoleRow from './components/RoleRow';
 import reducer, { initialState } from './reducer';

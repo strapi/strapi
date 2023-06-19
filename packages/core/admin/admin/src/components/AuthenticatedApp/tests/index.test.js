@@ -1,21 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { render, waitFor } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { useGuidedTour } from '@strapi/helper-plugin';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { render, waitFor } from '@testing-library/react';
+import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+import AuthenticatedApp from '..';
+import packageJSON from '../../../../../package.json';
 import { ConfigurationsContext } from '../../../contexts';
+import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import {
   fetchAppInfo,
   fetchCurrentUserPermissions,
   fetchStrapiLatestRelease,
   fetchUserRoles,
 } from '../utils/api';
-import packageJSON from '../../../../../package.json';
-import Theme from '../../Theme';
-import ThemeToggleProvider from '../../ThemeToggleProvider';
-import AuthenticatedApp from '..';
 
 const strapiVersion = packageJSON.version;
 

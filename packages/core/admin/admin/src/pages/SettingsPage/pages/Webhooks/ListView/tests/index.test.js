@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import {
   fireEvent,
   render as renderRTL,
@@ -7,12 +10,11 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useRBAC } from '@strapi/helper-plugin';
-import { QueryClientProvider, QueryClient } from 'react-query';
 import ListView from '../index';
+
 import server, { resetWebhooks } from './server';
 
 const toggleNotification = jest.fn();

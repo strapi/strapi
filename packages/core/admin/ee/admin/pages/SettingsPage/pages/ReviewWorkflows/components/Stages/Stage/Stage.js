@@ -1,31 +1,32 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import { useField } from 'formik';
-import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
+  AccordionToggle,
   Box,
   Flex,
   Grid,
   GridItem,
   IconButton,
-  TextInput,
-  VisuallyHidden,
   SingleSelect,
   SingleSelectOption,
+  TextInput,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
 import { Drag, Trash } from '@strapi/icons';
+import { useField } from 'formik';
+import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 
-import { deleteStage, updateStagePosition, updateStage } from '../../../actions';
-import { getAvailableStageColors, getStageColorByHex } from '../../../utils/colors';
 import { useDragAndDrop } from '../../../../../../../../../admin/src/content-manager/hooks';
 import { composeRefs } from '../../../../../../../../../admin/src/content-manager/utils';
+import { deleteStage, updateStage, updateStagePosition } from '../../../actions';
 import { DRAG_DROP_TYPES } from '../../../constants';
+import { getAvailableStageColors, getStageColorByHex } from '../../../utils/colors';
 
 const AVAILABLE_COLORS = getAvailableStageColors();
 

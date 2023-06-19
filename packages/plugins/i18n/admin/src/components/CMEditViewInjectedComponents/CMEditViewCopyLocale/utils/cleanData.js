@@ -2,6 +2,7 @@ import {
   contentManagementUtilRemoveFieldsFromData,
   formatContentTypeData,
 } from '@strapi/helper-plugin';
+
 import removePasswordAndRelationsFieldFromData from './removePasswordAndRelationsFieldFromData';
 
 const cleanData = (data, { contentType, components }, initialLocalizations) => {

@@ -1,9 +1,11 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { Flex, Button, Tooltip, Icon } from '@strapi/design-system';
+
+import { Button, Flex, Icon, Tooltip } from '@strapi/design-system';
 import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
 import isNil from 'lodash/isNil';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { useLicenseLimits } from '../../../../../../hooks';
 
 const CreateAction = ({ onClick }) => {

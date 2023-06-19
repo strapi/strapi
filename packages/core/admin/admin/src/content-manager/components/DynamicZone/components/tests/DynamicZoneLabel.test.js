@@ -1,9 +1,9 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { render as renderRTL } from '@testing-library/react';
 
-import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
+import { lightTheme, ThemeProvider, Tooltip } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
+import { render as renderRTL } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import { DynamicZoneLabel } from '../DynamicZoneLabel';
 

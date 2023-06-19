@@ -1,26 +1,27 @@
 import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
+
 import { Box } from '@strapi/design-system';
+import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
 import {
-  Component,
-  CollectionType,
-  Date,
   Boolean,
+  CollectionType,
+  Component,
+  Date,
   DynamicZone,
   Email,
   Enumeration,
   Json,
-  RichText,
   Media,
+  Number,
   Password,
   Relation,
+  RichText,
   SingleType,
   Text,
   Uid,
-  Number,
 } from '@strapi/icons';
-import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 const iconByTypes = {
   biginteger: Number,

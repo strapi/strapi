@@ -1,5 +1,6 @@
 import { useFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
+
 import adminPermissions from '../../../../admin/src/permissions';
 
 const useLicenseLimits = () => {

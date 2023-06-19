@@ -6,9 +6,11 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
+
 import pluginPkg from '../../package.json';
-import pluginId from './pluginId';
+
 import pluginPermissions from './permissions';
+import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
 const name = pluginPkg.strapi.name;

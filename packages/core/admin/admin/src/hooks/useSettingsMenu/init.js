@@ -1,8 +1,9 @@
 import omit from 'lodash/omit';
-import sortLinks from './utils/sortLinks';
-import formatLinks from './utils/formatLinks';
+
 import adminLinks from './utils/adminLinks';
+import formatLinks from './utils/formatLinks';
 import globalLinks from './utils/globalLinks';
+import sortLinks from './utils/sortLinks';
 
 const init = (initialState, { settings, shouldUpdateStrapi }) => {
   // Retrieve the links that will be injected into the global section
