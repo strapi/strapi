@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = {
+  auth: require('./auth'),
   passport: require('./passport'),
   role: require('./role'),
   user: require('./user'),

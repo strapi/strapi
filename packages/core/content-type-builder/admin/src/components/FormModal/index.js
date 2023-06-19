@@ -45,6 +45,7 @@ import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
 import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
+import IconPicker from '../IconPicker';
 import Relation from '../Relation';
 import PluralName from '../PluralName';
 import SelectCategory from '../SelectCategory';
@@ -244,6 +245,7 @@ const FormModal = () => {
           data: {
             displayName: data.schema.displayName,
             category: data.category,
+            icon: data.schema.icon,
           },
         });
       }
@@ -915,6 +917,7 @@ const FormModal = () => {
       'allowed-types-select': AllowedTypesSelect,
       'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
+      'icon-picker': IconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,

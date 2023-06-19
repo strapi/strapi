@@ -1,17 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
-.c5 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
 .c2 {
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
+}
+
+.c5 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .c0 {
@@ -76,6 +76,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   -ms-flex-pack: justify;
   justify-content: space-between;
   gap: 16px;
+  min-height: 2.5rem;
   outline: none;
   box-shadow: 0;
   -webkit-transition-property: border-color,box-shadow,fill;
@@ -103,7 +104,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   width: 100%;
   font-size: 0.875rem;
   color: #32324d;
-  min-height: 2.5rem;
+  padding: 0;
   border: none;
   background-color: transparent;
 }
@@ -128,22 +129,12 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
   cursor: inherit;
 }
 
-.c9[data-selected] .c1 {
+.c9[data-state='checked'] .c1 {
   color: #4945ff;
   font-weight: bold;
 }
 
 .c9[data-highlighted] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c10[data-selected] .c1 {
-  color: #4945ff;
-  font-weight: bold;
-}
-
-.c10[data-highlighted] .c1 {
   color: #4945ff;
   font-weight: bold;
 }
@@ -169,11 +160,12 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
       >
         <input
           aria-autocomplete="both"
-          aria-controls="radix-:r3:"
+          aria-busy="false"
+          aria-controls="radix-:r4:"
+          aria-describedby=":r0:-hint :r0:-error"
           aria-disabled="false"
           aria-expanded="false"
           aria-invalid="false"
-          aria-labelledby=":r0:-hint :r0:-error"
           aria-required="false"
           class="c7"
           data-placeholder=""
@@ -189,7 +181,7 @@ exports[`LocaleSelect shows an aria-busy element when loading the data 1`] = `
         class="c6"
       >
         <button
-          aria-controls="radix-:r3:"
+          aria-controls="radix-:r4:"
           aria-disabled="false"
           aria-expanded="false"
           aria-hidden="true"

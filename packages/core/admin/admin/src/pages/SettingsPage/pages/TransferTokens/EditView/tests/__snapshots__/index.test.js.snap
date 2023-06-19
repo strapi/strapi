@@ -40,6 +40,86 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 `;
 
 exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snapshot when editing existing token 1`] = `
+.c51 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c24 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c27 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #d02b20;
+}
+
+.c45 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c49 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c6 {
   min-width: 0;
 }
@@ -138,74 +218,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   overflow: hidden;
   width: 100%;
   cursor: default;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c24 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c27 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c30 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #d02b20;
-}
-
-.c45 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c49 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
 }
 
 .c5 {
@@ -383,18 +395,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   border: 2px solid #4945ff;
 }
 
-.c51 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c52[aria-disabled='true'] .c8 {
   color: #666687;
 }
@@ -407,6 +407,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c13[aria-disabled='true'] {
@@ -454,6 +459,11 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 
 .c15 {
   height: 2rem;
+}
+
+.c15 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c15[aria-disabled='true'] {
@@ -510,6 +520,60 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 
 .c33 {
   line-height: 0;
+}
+
+.c42 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c42[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c42:focus-visible {
+  outline: none;
+}
+
+.c42:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c48 > svg {
+  width: 0.375rem;
+}
+
+.c48 > svg > path {
+  fill: #666687;
+}
+
+.c46 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c53[data-state='checked'] .c8 {
+  font-weight: bold;
+  color: #4945ff;
 }
 
 .c35 {
@@ -571,60 +635,6 @@ exports[`ADMIN | Pages | TRANSFER TOKENS | EditView renders and matches the snap
 .c34:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c42 {
-  border: 1px solid #dcdce4;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c42[aria-disabled='true'] {
-  color: #666687;
-}
-
-.c42:focus-visible {
-  outline: none;
-}
-
-.c42:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c48 > svg {
-  width: 0.375rem;
-}
-
-.c48 > svg > path {
-  fill: #666687;
-}
-
-.c46 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c47 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  gap: 4px;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-}
-
-.c53[data-state='checked'] .c8 {
-  font-weight: bold;
-  color: #4945ff;
 }
 
 .c28 {

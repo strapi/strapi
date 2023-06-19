@@ -2,6 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
+/**
+ * TODO: this will come in another PR.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { ReactSelect } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 

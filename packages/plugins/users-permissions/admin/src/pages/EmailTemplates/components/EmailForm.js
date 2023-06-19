@@ -11,10 +11,9 @@ import {
   Grid,
   GridItem,
   Button,
-  Breadcrumbs,
-  Crumb,
   Textarea,
 } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
@@ -45,7 +44,7 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
               defaultMessage: 'Edit email template',
             })}
           </Crumb>
-          <Crumb>
+          <Crumb isCurrent>
             {formatMessage({ id: getTrad(template.display), defaultMessage: template.display })}
           </Crumb>
         </Breadcrumbs>

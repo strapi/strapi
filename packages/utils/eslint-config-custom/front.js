@@ -6,7 +6,6 @@ module.exports = {
     commonjs: true,
     es6: true,
     jest: true,
-    mocha: true,
   },
   parserOptions: {
     requireConfigFile: false,
@@ -15,14 +14,7 @@ module.exports = {
     },
   },
   globals: {
-    strapi: false,
     window: false,
-    cy: false,
-    Cypress: false,
-    expect: false,
-    assert: false,
-    chai: false,
-    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
     ADMIN_PATH: true,
     BACKEND_URL: true,
@@ -54,6 +46,12 @@ module.exports = {
             importNames: ['request'],
             message:
               "'request' has been deprecated. Please import 'useFetchClient' from '@strapi/helper-plugin' instead.",
+          },
+          {
+            name: '@strapi/helper-plugin',
+            importNames: ['ReactSelect'],
+            message:
+              "'ReactSelect' has been deprecated. You should use the components from '@strapi/design-system' instead.",
           },
           {
             name: 'lodash',
