@@ -18,6 +18,19 @@ const getDataWithStage = async (data) => {
   return data;
 };
 
+const getEntityStage = async (uid, id) => {
+  const entity = await strapi.entityService.findOne(uid, id, {
+    populate: {
+      [ENTITY_STAGE_ATTRIBUTE]: {
+        populate: {
+          workflow: true,
+        },
+      },
+    },
+  });
+  return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? null;
+};
+
 /**
  * Decorates the entity service with RW business logic
  * @param {object} service - entity service
@@ -47,25 +60,20 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const entity = await service.findOne.call(this, uid, entityId, {
-      populate: {
-        [ENTITY_STAGE_ATTRIBUTE]: {
-          populate: {
-            workflow: true,
-          },
-        },
-      },
-    });
-    const previousStageId = entity?.[ENTITY_STAGE_ATTRIBUTE]?.id ?? null;
+    const previousStage = await getEntityStage(uid, entityId);
 
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
-    if (previousStageId && previousStageId !== data[ENTITY_STAGE_ATTRIBUTE]) {
+    if (
+      previousStage?.workflow?.id &&
+      previousStage?.id &&
+      previousStage.id !== data[ENTITY_STAGE_ATTRIBUTE]
+    ) {
       const webhookPayload = {
         entityId,
         workflow: {
-          id: entity[ENTITY_STAGE_ATTRIBUTE].workflow.id,
+          id: previousStage.workflow.id,
           stages: {
-            from: previousStageId,
+            from: previousStage.id,
             to: data[ENTITY_STAGE_ATTRIBUTE],
           },
         },
