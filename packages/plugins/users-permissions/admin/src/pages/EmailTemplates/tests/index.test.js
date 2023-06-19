@@ -8,8 +8,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import ProtectedEmailTemplatesPage from '../index';
 
-import server from './utils/server';
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
@@ -38,19 +36,12 @@ const App = (
 );
 
 describe('ADMIN | Pages | Settings | Email Templates', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   afterAll(() => {
     jest.resetAllMocks();
-    server.close();
   });
 
   it('renders and matches the snapshot', async () => {

@@ -1,68 +1,69 @@
 import React, { useRef, useState } from 'react';
 
 import {
-  Box,
-  Button,
   ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
   HeaderLayout,
   Main,
-  Textarea,
+  Button,
+  Flex,
+  Box,
   TextInput,
+  Textarea,
   Typography,
+  GridItem,
+  Grid,
 } from '@strapi/design-system';
 import {
-  Form,
-  SettingsPageTitle,
   useFetchClient,
-  useNotification,
   useOverlayBlocker,
-  useTracking,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useNotification,
+  Link,
 } from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
+import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
 
-import UsersPermissions from '../../../components/UsersPermissions';
-import { usePlugins } from '../../../hooks';
-import pluginId from '../../../pluginId';
-import getTrad from '../../../utils/getTrad';
+import UsersPermissions from '../../components/UsersPermissions';
+import { usePlugins, useFetchRole } from '../../hooks';
+import pluginId from '../../pluginId';
+import getTrad from '../../utils/getTrad';
 
-import schema from './utils/schema';
+import { createRoleSchema } from './constants';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleNotification = useNotification();
-  const { goBack } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
-  const { trackUsage } = useTracking();
+  const {
+    params: { id },
+  } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
+  const { isLoading: isLoadingPlugins, routes } = usePlugins();
+  const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
-  const { post } = useFetchClient();
+  const { put } = useFetchClient();
 
-  const handleCreateRoleSubmit = async (data) => {
+  const handleEditRoleSubmit = async (data) => {
     // Set loading state
     lockApp();
     setIsSubmitting(true);
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
+      await put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
       // Notify success
-      trackUsage('didCreateRole');
+      onSubmitSucceeded({ name: data.name, description: data.description });
       toggleNotification({
         type: 'success',
         message: {
-          id: getTrad('Settings.roles.created'),
-          defaultMessage: 'Role created',
+          id: getTrad('Settings.roles.edited'),
+          defaultMessage: 'Role edited',
         },
       });
-      // Forcing redirecting since we don't have the id in the response
-      goBack();
     } catch (err) {
       console.error(err);
       toggleNotification({
@@ -78,21 +79,30 @@ const EditPage = () => {
     unlockApp();
   };
 
+  if (isLoadingRole) {
+    return <LoadingIndicatorPage />;
+  }
+
   return (
     <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
-        initialValues={{ name: '', description: '' }}
-        onSubmit={handleCreateRoleSubmit}
-        validationSchema={schema}
+        initialValues={{ name: role.name, description: role.description }}
+        onSubmit={handleEditRoleSubmit}
+        validationSchema={createRoleSchema}
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={isSubmitting} startIcon={<Check />}>
+                  <Button
+                    disabled={role.code === 'strapi-super-admin'}
+                    type="submit"
+                    loading={isSubmitting}
+                    startIcon={<Check />}
+                  >
                     {formatMessage({
                       id: 'global.save',
                       defaultMessage: 'Save',
@@ -100,14 +110,16 @@ const EditPage = () => {
                   </Button>
                 )
               }
-              title={formatMessage({
-                id: 'Settings.roles.create.title',
-                defaultMessage: 'Create a role',
-              })}
-              subtitle={formatMessage({
-                id: 'Settings.roles.create.description',
-                defaultMessage: 'Define the rights given to the role',
-              })}
+              title={role.name}
+              subtitle={role.description}
+              navigationAction={
+                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
+                  {formatMessage({
+                    id: 'global.back',
+                    defaultMessage: 'Back',
+                  })}
+                </Link>
+              }
             />
             <ContentLayout>
               <Flex direction="column" alignItems="stretch" gap={7}>
@@ -169,7 +181,7 @@ const EditPage = () => {
                 {!isLoadingPlugins && (
                   <UsersPermissions
                     ref={permissionsRef}
-                    permissions={permissions}
+                    permissions={role.permissions}
                     routes={routes}
                   />
                 )}
