@@ -9,7 +9,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
 
-import pluginPermissions from './permissions';
+import { pluginPermissions } from './permissions';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 

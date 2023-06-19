@@ -30,7 +30,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import { getTrad } from '../../utils';
 
 import { fetchData, putAdvancedSettings } from './utils/api';

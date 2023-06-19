@@ -15,7 +15,7 @@ import { Route, Switch } from 'react-router-dom';
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider';
 import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import pluginId from '../../pluginId';
 import RecursivePath from '../RecursivePath';
 

@@ -1,4 +1,4 @@
-const pluginPermissions = {
+export const pluginPermissions = {
   // This permission regards the main component (App) and is used to tell
   // If the plugin link should be displayed in the menu
   // And also if the plugin is accessible. This use case is found when a user types the url of the
@@ -37,5 +37,3 @@ const pluginPermissions = {
   settings: [{ action: 'plugin::upload.settings.read', subject: null }],
   update: [{ action: 'plugin::upload.assets.update', subject: null, fields: null }],
 };
-
-export default pluginPermissions;

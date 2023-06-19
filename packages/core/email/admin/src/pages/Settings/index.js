@@ -23,7 +23,7 @@ import {
 import { Envelop } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import getTrad from '../../utils/getTrad';
 import schema from '../../utils/schema';
 

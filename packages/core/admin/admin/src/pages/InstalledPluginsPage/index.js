@@ -1,14 +1,13 @@
 import React from 'react';
 
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, useAppInfo } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-
-import adminPermissions from '../../permissions';
 
 import Plugins from './Plugins';
 
 const InstalledPluginsPage = () => {
+  const { permissions } = useAppInfo();
   const { formatMessage } = useIntl();
   const title = formatMessage({
     id: 'global.plugins',
@@ -16,7 +15,7 @@ const InstalledPluginsPage = () => {
   });
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+    <CheckPagePermissions permissions={permissions.marketplace.main}>
       <Helmet title={title} />
       <Plugins />
     </CheckPagePermissions>

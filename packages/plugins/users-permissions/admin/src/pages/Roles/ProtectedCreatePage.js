@@ -2,7 +2,7 @@ import React from 'react';
 
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 
 import RolesCreatePage from './CreatePage';
 

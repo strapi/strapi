@@ -6,6 +6,7 @@ import {
   NoContent,
   NoPermissions,
   SettingsPageTitle,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -19,7 +20,6 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import Table from '../../../components/Tokens/Table';
 
@@ -30,9 +30,10 @@ const ApiTokenListView = () => {
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const { permissions } = useAppInfo();
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(adminPermissions.settings['api-tokens']);
+  } = useRBAC(permissions.settings['api-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();

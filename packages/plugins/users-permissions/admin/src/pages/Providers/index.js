@@ -35,7 +35,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import FormModal from '../../components/FormModal';
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import { getTrad } from '../../utils';
 
 import { fetchData, putProvider } from './utils/api';

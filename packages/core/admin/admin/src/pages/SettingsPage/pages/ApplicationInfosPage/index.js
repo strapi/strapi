@@ -26,7 +26,6 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { useConfigurations } from '../../../../hooks';
-import adminPermissions from '../../../../permissions';
 
 import CustomizationInfos from './components/CustomizationInfos';
 import { fetchProjectSettings, postProjectSettings } from './utils/api';
@@ -39,13 +38,12 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
-  const appInfos = useAppInfo();
-  const { latestStrapiReleaseTag, shouldUpdateStrapi, strapiVersion } = appInfos;
+  const { latestStrapiReleaseTag, permissions, shouldUpdateStrapi, strapiVersion } = useAppInfo();
   const { updateProjectSettings } = useConfigurations();
 
   const {
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(adminPermissions.settings['project-settings']);
+  } = useRBAC(permissions.settings['project-settings']);
   const canSubmit = canRead && canUpdate;
 
   const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });

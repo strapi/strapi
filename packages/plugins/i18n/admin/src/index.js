@@ -17,7 +17,7 @@ import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSi
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
 import i18nReducers from './hooks/reducers';
 import middlewares from './middlewares';
-import pluginPermissions from './permissions';
+import { pluginPermissions } from './permissions';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 import LOCALIZED_FIELDS from './utils/localizedFields';

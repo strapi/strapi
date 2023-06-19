@@ -1,11 +1,10 @@
 import React, { memo, useMemo } from 'react';
 
-import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { CheckPagePermissions, LoadingIndicatorPage, useAppInfo } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Route, Switch } from 'react-router-dom';
 
-import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
@@ -16,14 +15,13 @@ import ListViewLayout from '../ListViewLayoutManager';
 
 import ErrorFallback from './components/ErrorFallback';
 
-const cmPermissions = permissions.contentManager;
-
 const CollectionTypeRecursivePath = ({
   match: {
     params: { slug },
     url,
   },
 }) => {
+  const { permissions } = useAppInfo();
   const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = useMemo(() => {
@@ -92,7 +90,7 @@ const CollectionTypeRecursivePath = ({
       <ContentTypeLayoutContext.Provider value={layout}>
         <Switch>
           <Route path={`${url}/configurations/list`}>
-            <CheckPagePermissions permissions={cmPermissions.collectionTypesConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.collectionTypesConfigurations}>
               <ListSettingsView
                 layout={rawContentTypeLayout}
                 slug={slug}
@@ -101,7 +99,7 @@ const CollectionTypeRecursivePath = ({
             </CheckPagePermissions>
           </Route>
           <Route path={`${url}/configurations/edit`}>
-            <CheckPagePermissions permissions={cmPermissions.collectionTypesConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.collectionTypesConfigurations}>
               <EditSettingsView
                 components={rawComponentsLayouts}
                 isContentTypeView

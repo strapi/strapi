@@ -11,7 +11,7 @@ import pluginPkg from '../../package.json';
 import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
 import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+import { pluginPermissions } from './permissions';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 

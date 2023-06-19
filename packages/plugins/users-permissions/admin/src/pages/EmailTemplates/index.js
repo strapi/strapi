@@ -14,7 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import { getTrad } from '../../utils';
 
 import EmailForm from './components/EmailForm';

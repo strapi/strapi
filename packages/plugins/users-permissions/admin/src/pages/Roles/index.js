@@ -3,7 +3,7 @@ import React from 'react';
 import { AnErrorOccurred, CheckPagePermissions } from '@strapi/helper-plugin';
 import { Route, Switch } from 'react-router-dom';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import pluginId from '../../pluginId';
 
 import ProtectedRolesCreatePage from './ProtectedCreatePage';

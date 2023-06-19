@@ -6,6 +6,7 @@ import {
   NoPermissions,
   SearchURLQuery,
   SettingsPageTitle,
+  useAppInfo,
   useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
@@ -20,7 +21,6 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
-import adminPermissions from '../../../../../permissions';
 import Filters from '../../../components/Filters';
 
 import TableRows from './DynamicTable/TableRows';
@@ -34,10 +34,11 @@ const EE_LICENSE_LIMIT_QUERY_KEY = ['ee', 'license-limit-info'];
 const ListPage = () => {
   const { post } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
+  const { permissions } = useAppInfo();
   const [isModalOpened, setIsModalOpen] = useState(false);
   const {
     allowedActions: { canCreate, canDelete, canRead },
-  } = useRBAC(adminPermissions.settings.users);
+  } = useRBAC(permissions.settings.users);
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();

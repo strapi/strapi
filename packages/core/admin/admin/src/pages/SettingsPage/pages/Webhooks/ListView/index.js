@@ -33,6 +33,7 @@ import {
   SettingsPageTitle,
   stopPropagation,
   useAPIErrorHandler,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
@@ -43,12 +44,10 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
-
 const ListView = () => {
   const [showModal, setShowModal] = useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = useState([]);
-
+  const { permissions } = useAppInfo();
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
@@ -59,7 +58,7 @@ const ListView = () => {
   const {
     isLoading: isRBACLoading,
     allowedActions: { canCreate, canUpdate, canDelete },
-  } = useRBAC(adminPermissions.settings.webhooks);
+  } = useRBAC(permissions.settings.webhooks);
   const { get, post, put } = useFetchClient();
   const { notifyStatus } = useNotifyAT();
 

@@ -5,6 +5,7 @@ import {
   Form,
   SettingsPageTitle,
   useAPIErrorHandler,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -18,7 +19,6 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import { formatAPIErrors } from '../../../../../utils';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';
@@ -32,6 +32,7 @@ const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
 const TransferTokenCreateView = () => {
   useFocusWhenNavigate();
+  const { permissions } = useAppInfo();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
@@ -48,7 +49,7 @@ const TransferTokenCreateView = () => {
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(adminPermissions.settings['transfer-tokens']);
+  } = useRBAC(permissions.settings['transfer-tokens']);
   const {
     params: { id },
   } = useRouteMatch('/settings/transfer-tokens/:id');

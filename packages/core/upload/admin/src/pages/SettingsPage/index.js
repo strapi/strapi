@@ -27,7 +27,7 @@ import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
-import pluginPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 import { getRequestUrl, getTrad } from '../../utils';
 
 import init from './init';

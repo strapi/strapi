@@ -9,10 +9,11 @@ import {
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useQueries } from 'react-query';
-//  TODO: DS add loader
 
 import packageJSON from '../../../../package.json';
-import { useConfigurations } from '../../hooks';
+import { PERMISSIONS_CE } from '../../constants';
+import useConfigurations from '../../hooks/useConfigurations';
+import { useEnterprise } from '../../hooks/useEnterprise';
 import { getFullName, hashAdminUserEmail } from '../../utils';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
@@ -35,6 +36,13 @@ const AuthenticatedApp = () => {
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const [userId, setUserId] = useState(null);
   const { showReleaseNotification } = useConfigurations();
+  const appPermissions = useEnterprise(PERMISSIONS_CE, async () => (await import('../../../../ee/admin/constants')).PERMISSIONS_EE, {
+    combine(cePermissions, eePermissions) {
+      return { ...cePermissions, eePermissions };
+    },
+
+    defaultValue: PERMISSIONS_CE
+  })
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },
@@ -104,6 +112,7 @@ const AuthenticatedApp = () => {
       {...appInfos}
       userId={userId}
       latestStrapiReleaseTag={tagName}
+      permissions={appPermissions}
       setUserDisplayName={setUserDisplayName}
       shouldUpdateStrapi={shouldUpdateStrapi}
       userDisplayName={userDisplayName}

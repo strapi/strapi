@@ -9,7 +9,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 
 import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+import { pluginPermissions } from './permissions';
 import pluginId from './pluginId';
 
 const name = pluginPkg.strapi.name;

@@ -19,6 +19,7 @@ import {
   Link,
   LoadingIndicatorPage,
   SettingsPageTitle,
+  useAppInfo,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
@@ -34,7 +35,6 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
-import adminPermissions from '../../../../../permissions';
 import Permissions from '../EditPage/components/Permissions';
 
 import schema from './utils/schema';
@@ -61,6 +61,7 @@ const CreatePage = () => {
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  
 
   const { post, put } = useFetchClient();
 
@@ -257,8 +258,10 @@ const CreatePage = () => {
 };
 
 export default function () {
+  const { permissions } = useAppInfo();
+
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
+    <CheckPagePermissions permissions={permissions.settings.roles.create}>
       <CreatePage />
     </CheckPagePermissions>
   );

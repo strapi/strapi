@@ -5,6 +5,7 @@ import {
   AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useAppInfo,
   useGuidedTour,
 } from '@strapi/helper-plugin';
 import sortBy from 'lodash/sortBy';
@@ -13,7 +14,6 @@ import { useIntl } from 'react-intl';
 import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
 
 import { DragLayer } from '../../../components/DragLayer';
-import permissions from '../../../permissions';
 import ModelsContext from '../../contexts/ModelsContext';
 import getTrad from '../../utils/getTrad';
 import ItemTypes from '../../utils/ItemTypes';
@@ -28,8 +28,6 @@ import { ComponentDragPreview } from './components/ComponentDragPreview';
 import { RelationDragPreview } from './components/RelationDragPreview';
 import LeftMenu from './LeftMenu';
 import useContentManagerInitData from './useContentManagerInitData';
-
-const cmPermissions = permissions.contentManager;
 
 function renderDraglayerItem({ type, item }) {
   if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
@@ -63,6 +61,7 @@ function renderDraglayerItem({ type, item }) {
 }
 
 const App = () => {
+  const { permissions } = useAppInfo();
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
     useContentManagerInitData();
@@ -127,7 +126,7 @@ const App = () => {
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
           <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
               <ComponentSettingsView />
             </CheckPagePermissions>
           </Route>

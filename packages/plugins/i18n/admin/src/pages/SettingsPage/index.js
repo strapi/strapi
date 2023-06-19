@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useRBAC } from '@strapi/helper-plugin';
 
-import i18nPermissions from '../../permissions';
+import { pluginPermissions } from '../../permissions';
 
 import LocaleSettingsPage from './LocaleSettingsPage';
 
@@ -10,7 +10,7 @@ const ProtectedLocaleSettingsPage = () => {
   const {
     isLoading,
     allowedActions: { canRead, canUpdate, canCreate, canDelete },
-  } = useRBAC(i18nPermissions);
+  } = useRBAC(pluginPermissions);
 
   if (isLoading) {
     return null;

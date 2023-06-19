@@ -4,6 +4,7 @@ import { ContentLayout, Flex, Main } from '@strapi/design-system';
 import {
   Form,
   SettingsPageTitle,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -18,7 +19,6 @@ import { useQuery } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import adminPermissions from '../../../../../permissions';
 import { formatAPIErrors } from '../../../../../utils';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';
@@ -46,12 +46,13 @@ const ApiTokenCreateView = () => {
         }
       : null
   );
+  const { permissions } = useAppInfo();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(adminPermissions.settings['api-tokens']);
+  } = useRBAC(permissions.settings['api-tokens']);
   const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
     params: { id },

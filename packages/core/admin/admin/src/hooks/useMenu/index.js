@@ -9,7 +9,7 @@ import getPluginSectionLinks from './utils/getPluginSectionLinks';
 const useMenu = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { allPermissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfo();
+  const { permissions: appPermissions, shouldUpdateStrapi } = useAppInfo();
   const { menu } = useStrapiApp();
 
   // We are using a ref because we don't want our effect to have this in its dependencies array
@@ -22,13 +22,15 @@ const useMenu = () => {
 
     const authorizedPluginSectionLinks = await getPluginSectionLinks(
       permissions,
-      pluginsSectionLinks
+      pluginsSectionLinks,
+      appPermissions
     );
 
     const authorizedGeneralSectionLinks = await getGeneralLinks(
       permissions,
       generalSectionLinksRef.current,
-      shouldUpdateStrapiRef.current
+      shouldUpdateStrapiRef.current,
+      appPermissions
     );
 
     dispatch({

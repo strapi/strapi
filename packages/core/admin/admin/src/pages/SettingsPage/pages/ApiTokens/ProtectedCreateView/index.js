@@ -1,13 +1,14 @@
 import React from 'react';
 
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, useAppInfo } from '@strapi/helper-plugin';
 
-import adminPermissions from '../../../../../permissions';
 import EditView from '../EditView';
 
 const ProtectedApiTokenCreateView = () => {
+  const { permissions } = useAppInfo();
+
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['api-tokens'].create}>
+    <CheckPagePermissions permissions={permissions.settings['api-tokens'].create}>
       <EditView />
     </CheckPagePermissions>
   );

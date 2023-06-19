@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 
-import { LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useAppInfo, useRBAC } from '@strapi/helper-plugin';
 import { Redirect } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
+  const { permissions: appPermissions } = useAppInfo();
   const permissions = useMemo(() => {
     return {
-      read: adminPermissions.settings.roles.read,
-      update: adminPermissions.settings.roles.update,
+      read: appPermissions.settings.roles.read,
+      update: appPermissions.settings.roles.update,
     };
-  }, []);
+  }, [appPermissions]);
 
   const {
     isLoading,

@@ -1,20 +1,18 @@
 import React, { memo, useEffect, useMemo, useReducer } from 'react';
 
-import { CheckPagePermissions, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
+import { CheckPagePermissions, LoadingIndicatorPage, useAppInfo, useFetchClient } from '@strapi/helper-plugin';
 import axios from 'axios';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import permissions from '../../../permissions';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
 import { mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import EditSettingsView from '../EditSettingsView';
 
-const cmPermissions = permissions.contentManager;
-
 const ComponentSettingsView = () => {
+  const { permissions } = useAppInfo();
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
@@ -54,7 +52,7 @@ const ComponentSettingsView = () => {
   }
 
   return (
-    <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+    <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
       <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
     </CheckPagePermissions>
   );

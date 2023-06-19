@@ -1,19 +1,19 @@
 import React, { useEffect, useMemo } from 'react';
 
-import { LoadingIndicatorPage, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useAppInfo, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Redirect, useLocation } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
   const toggleNotification = useNotification();
+  const { permissions: appPermissions } = useAppInfo();
   const permissions = useMemo(() => {
     return {
-      read: adminPermissions.settings.users.read,
-      update: adminPermissions.settings.users.update,
+      read: appPermissions.settings.users.read,
+      update: appPermissions.settings.users.update,
     };
-  }, []);
+  }, [appPermissions]);
 
   const {
     isLoading,

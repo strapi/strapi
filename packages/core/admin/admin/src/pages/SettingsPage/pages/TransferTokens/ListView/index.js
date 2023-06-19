@@ -6,6 +6,7 @@ import {
   NoContent,
   NoPermissions,
   SettingsPageTitle,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useGuidedTour,
@@ -19,7 +20,6 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import Table from '../../../components/Tokens/Table';
 
@@ -27,12 +27,13 @@ import tableHeaders from './utils/tableHeaders';
 
 const TransferTokenListView = () => {
   useFocusWhenNavigate();
+  const { permissions } = useAppInfo();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(adminPermissions.settings['transfer-tokens']);
+  } = useRBAC(permissions.settings['transfer-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
 

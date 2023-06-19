@@ -1,14 +1,17 @@
 import React from 'react';
 
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, useAppInfo } from '@strapi/helper-plugin';
 
-import adminPermissions from '../../../../../permissions';
 import EditView from '../EditView';
 
-const ProtectedEditView = () => (
-  <CheckPagePermissions permissions={adminPermissions.settings.webhooks.update}>
-    <EditView />
-  </CheckPagePermissions>
-);
+const ProtectedEditView = () => {
+  const { permissions } = useAppInfo();
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.webhooks.update}>
+      <EditView />
+    </CheckPagePermissions>
+  );
+}
 
 export default ProtectedEditView;

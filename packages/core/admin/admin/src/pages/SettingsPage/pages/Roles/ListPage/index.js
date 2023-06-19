@@ -21,6 +21,7 @@ import {
   LoadingIndicatorPage,
   SearchURLQuery,
   SettingsPageTitle,
+  useAppInfo,
   useCollator,
   useFilter,
   useFocusWhenNavigate,
@@ -34,7 +35,6 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
 import { useRolesList } from '../../../../../hooks';
-import adminPermissions from '../../../../../permissions';
 
 import EmptyRole from './components/EmptyRole';
 import BaseRoleRow from './components/RoleRow';
@@ -42,11 +42,12 @@ import reducer, { initialState } from './reducer';
 
 const useSortedRoles = () => {
   useFocusWhenNavigate();
+  const { permissions } = useAppInfo();
   const { locale } = useIntl();
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useRBAC(adminPermissions.settings.roles);
+  } = useRBAC(permissions.settings.roles);
 
   const { getData, roles, isLoading } = useRolesList(false);
   const [{ query }] = useQueryParams();

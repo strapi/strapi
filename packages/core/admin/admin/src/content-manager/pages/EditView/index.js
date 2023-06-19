@@ -5,6 +5,7 @@ import {
   CheckPermissions,
   LinkButton,
   LoadingIndicatorPage,
+  useAppInfo,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
@@ -13,7 +14,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import permissions from '../../../permissions';
 import { InjectionZone } from '../../../shared/components';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone';
@@ -29,11 +29,10 @@ import Header from './Header';
 import { selectAttributesLayout, selectCurrentLayout, selectCustomFieldUids } from './selectors';
 import { getFieldsActionMatchingPermissions } from './utils';
 
-const cmPermissions = permissions.contentManager;
-const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
+const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
-/* eslint-disable  react/no-array-index-key */
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
+  const { permissions } = useAppInfo();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
 
@@ -49,8 +48,8 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     getFieldsActionMatchingPermissions(userPermissions, slug);
 
   const configurationPermissions = isSingleType
-    ? cmPermissions.singleTypesConfigurations
-    : cmPermissions.collectionTypesConfigurations;
+    ? permissions.contentManager.singleTypesConfigurations
+    : permissions.contentManager.collectionTypesConfigurations;
 
   // // FIXME when changing the routing
   const configurationsURL = `/content-manager/${
@@ -125,6 +124,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                           } = row;
 
                           return (
+                            // eslint-disable-next-line react/no-array-index-key
                             <Box key={index}>
                               <Grid gap={4}>
                                 <GridItem col={12} s={12} xs={12}>
@@ -142,6 +142,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
 
                         return (
                           <Box
+                            // eslint-disable-next-line react/no-array-index-key
                             key={index}
                             hasRadius
                             background="neutral0"
@@ -157,6 +158,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                                 <GridRow
                                   columns={grid}
                                   customFieldInputs={lazyComponentStore}
+                                  // eslint-disable-next-line react/no-array-index-key
                                   key={gridRowIndex}
                                 />
                               ))}
@@ -188,7 +190,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         <Flex direction="column" alignItems="stretch" gap={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
-                            <CheckPermissions permissions={ctbPermissions}>
+                            <CheckPermissions permissions={CTB_PERMISSIONS}>
                               <LinkButton
                                 onClick={() => {
                                   trackUsage('willEditEditLayout');

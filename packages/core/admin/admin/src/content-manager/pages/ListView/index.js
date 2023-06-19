@@ -17,6 +17,7 @@ import {
   NoPermissions,
   SearchURLQuery,
   useAPIErrorHandler,
+  useAppInfo,
   useFetchClient,
   useFocusWhenNavigate,
   useNotification,
@@ -36,7 +37,6 @@ import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-d
 import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
-import permissions from '../../../permissions';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
 import DynamicTable from '../../components/DynamicTable';
@@ -47,8 +47,6 @@ import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
 import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
-
-const cmPermissions = permissions.contentManager;
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -78,6 +76,7 @@ function ListView({
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
 
+  const { permissions } = useAppInfo();
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -391,7 +390,7 @@ function ListView({
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
-              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+              <CheckPermissions permissions={permissions.contentManger.collectionTypesConfigurations}>
                 <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
                   <IconButton
                     onClick={() => {

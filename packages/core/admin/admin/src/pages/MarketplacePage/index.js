@@ -26,7 +26,6 @@ import { useIntl } from 'react-intl';
 
 import useDebounce from '../../hooks/useDebounce';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
-import adminPermissions from '../../permissions';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesFilters from './components/NpmPackagesFilters';
@@ -249,11 +248,15 @@ const MarketPlacePage = () => {
   );
 };
 
-const ProtectedMarketPlace = () => (
-  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-    <MarketPlacePage />
-  </CheckPagePermissions>
-);
+const ProtectedMarketPlace = () => {
+  const { permissions } = useAppInfo();
+
+  return (
+    <CheckPagePermissions permissions={permissions.marketplace.main}>
+      <MarketPlacePage />
+    </CheckPagePermissions>
+  );
+}
 
 export { MarketPlacePage };
 export default ProtectedMarketPlace;

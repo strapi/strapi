@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
 
+import { PERMISSIONS_CE } from '../../constants';
 import { useEnterprise } from '../useEnterprise';
 
 import { LINKS_CE } from './constants';
@@ -16,7 +17,17 @@ const useSettingsMenu = () => {
   const { allPermissions: permissions } = useRBACProvider();
   const { shouldUpdateStrapi } = useAppInfo();
   const { settings } = useStrapiApp();
-  const { global: globalLinks, admin: adminLinks } = useEnterprise(
+  const appPermissions = useEnterprise(PERMISSIONS_CE, async () => (await import('../../../../ee/admin/constants')).PERMISSIONS_EE, {
+    combine(cePermissions, eePermissions) {
+      return {
+        ...cePermissions,
+        ...eePermissions
+      };
+    },
+
+    defaultValue: PERMISSIONS_CE,
+  })
+  let { global: globalLinks, admin: adminLinks } = useEnterprise(
     LINKS_CE,
     async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
     {
@@ -32,6 +43,28 @@ const useSettingsMenu = () => {
       },
     }
   );
+
+  globalLinks = globalLinks.map((link) => {
+    if (link.permission === false) {
+      return link;
+    }
+
+    return {
+      ...link,
+      permissions: appPermissions.settings[link.id].main
+    }
+  })
+
+  adminLinks = adminLinks.map((link) => {
+    if (link.permission === false) {
+      return link;
+    }
+
+    return {
+      ...link,
+      permissions: appPermissions.settings[link.id].main
+    }
+  })
 
   useEffect(() => {
     const getData = async () => {
