@@ -8,8 +8,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { ProvidersPage } from '../index';
 
-import server from './server';
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
@@ -36,15 +34,9 @@ const App = (
 );
 
 describe('Admin | containers | ProvidersPage', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => server.resetHandlers());
-
-  afterAll(() => server.close());
 
   it('renders and matches the snapshot', () => {
     useRBAC.mockImplementation(() => ({

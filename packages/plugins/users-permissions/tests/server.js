@@ -116,6 +116,72 @@ const handlers = [
       })
     );
   }),
+
+  rest.get('*/providers', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        email: { enabled: true, icon: 'envelope' },
+        discord: {
+          callback: '/auth/discord/callback',
+          enabled: false,
+          icon: 'discord',
+          key: '',
+          scope: ['identify', 'email'],
+          secret: '',
+        },
+      })
+    );
+  }),
+
+  rest.get('*/email-templates', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        email_confirmation: {
+          display: 'Email.template.email_confirmation',
+          options: {
+            from: {
+              email: 'mochoko@strapi.io',
+              name: 'Administration Panel',
+            },
+            message: 'Thank you for registering. Please click on the link below.',
+            object: 'Account confirmation',
+            response_email: '',
+          },
+        },
+        reset_password: {
+          display: 'Email.template.reset_password',
+          options: {
+            from: {
+              email: 'mochoko@strapi.io',
+              name: 'Administration Panel',
+            },
+            message: 'We heard that you lost your password. Sorry about that!',
+            object: 'Reset password',
+            response_email: '',
+          },
+        },
+      })
+    );
+  }),
+
+  rest.get('*/advanced', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        roles: [{ name: 'Authenticated', type: 'authenticated' }],
+        settings: {
+          allow_register: false,
+          default_role: 'authenticated',
+          email_confirmation: false,
+          email_confirmation_redirection: '',
+          email_reset_password: 'https://cat-bounce.com/',
+          unique_email: false,
+        },
+      })
+    );
+  }),
 ];
 
 const server = setupServer(...handlers);
