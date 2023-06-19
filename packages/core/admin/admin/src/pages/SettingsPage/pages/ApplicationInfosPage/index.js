@@ -38,10 +38,14 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
-  const { communityEdition, latestStrapiReleaseTag, nodeVersion,
+  const {
+    communityEdition,
+    latestStrapiReleaseTag,
+    nodeVersion,
     permissions,
     shouldUpdateStrapi,
-    strapiVersion } = useAppInfo();
+    strapiVersion,
+  } = useAppInfo();
   const { updateProjectSettings } = useConfigurations();
 
   const {
