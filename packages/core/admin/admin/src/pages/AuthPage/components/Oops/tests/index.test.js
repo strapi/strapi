@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+
 import Oops from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -212,6 +214,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -344,6 +351,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -355,10 +366,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         flex-direction: column;
       }
 
-      .c15 {
-        height: 4.5rem;
-      }
-
       <div>
         <header
           class="c0"
@@ -368,7 +375,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           >
             <div>
               <button
-                aria-controls="0"
+                aria-controls=":r0:"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"

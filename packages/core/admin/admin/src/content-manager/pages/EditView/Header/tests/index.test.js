@@ -5,13 +5,16 @@
  */
 
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
+
 import ct from './data/ct-schema.json';
 
 const defaultProps = {
@@ -199,6 +202,11 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c12 {
         height: 2rem;
+      }
+
+      .c12 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c12[aria-disabled='true'] {

@@ -1,4 +1,5 @@
 import {
+  CLEAR_SET_MODIFIED_DATA_ONLY,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
@@ -6,7 +7,6 @@ import {
   SET_DATA_STRUCTURES,
   SET_STATUS,
   SUBMIT_SUCCEEDED,
-  CLEAR_SET_MODIFIED_DATA_ONLY,
 } from './constants';
 
 export const getData = () => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, merge } = require('lodash/fp');
+const { pick } = require('lodash/fp');
 const compose = require('koa-compose');
 const { ValidationError } = require('@strapi/utils').errors;
 
@@ -8,7 +8,7 @@ const { validateProviderOptionsUpdate } = require('../validation/authentication'
 const { middlewares, utils } = require('./authentication/index');
 
 const toProviderDTO = pick(['uid', 'displayName', 'icon']);
-const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole']);
+const toProviderLoginOptionsDTO = pick(['autoRegister', 'defaultRole', 'ssoLockedRoles']);
 
 const providerAuthenticationFlow = compose([
   middlewares.authenticate,
@@ -40,8 +40,7 @@ module.exports = {
 
     const adminStore = await utils.getAdminStore();
     const currentAuthOptions = await adminStore.get({ key: 'auth' });
-    const newAuthOptions = merge(currentAuthOptions, { providers: body });
-
+    const newAuthOptions = { ...currentAuthOptions, providers: body };
     await adminStore.set({ key: 'auth', value: newAuthOptions });
 
     ctx.body = {

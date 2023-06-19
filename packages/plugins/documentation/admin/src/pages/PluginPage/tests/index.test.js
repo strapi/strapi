@@ -1,12 +1,14 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import PluginPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -307,6 +309,11 @@ describe('Plugin | Documentation | PluginPage', () => {
 
       .c13 {
         height: 2rem;
+      }
+
+      .c13 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c13[aria-disabled='true'] {
@@ -641,7 +648,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="2"
+                                  aria-labelledby=":r2:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -676,7 +683,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="3"
+                                  aria-labelledby=":r4:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -707,7 +714,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="4"
+                                  aria-labelledby=":r6:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -775,7 +782,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="5"
+                                  aria-labelledby=":r8:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"
@@ -810,7 +817,7 @@ describe('Plugin | Documentation | PluginPage', () => {
                               <span>
                                 <button
                                   aria-disabled="false"
-                                  aria-labelledby="6"
+                                  aria-labelledby=":ra:"
                                   class="c33 c34 c12 c35"
                                   tabindex="-1"
                                   type="button"

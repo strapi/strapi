@@ -1,15 +1,17 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
-import { createMemoryHistory } from 'history';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
+import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
+
 import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
-import { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData } from './utils/data';
+
+import { getBigTestPageData, TEST_PAGE_DATA, TEST_SINGLE_DATA } from './utils/data';
 
 const history = createMemoryHistory();
 const user = userEvent.setup();
@@ -45,15 +47,13 @@ const client = new QueryClient({
 
 const App = (
   <QueryClientProvider client={client}>
-    <TrackingProvider>
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-          <Router history={history}>
-            <ListView />
-          </Router>
-        </IntlProvider>
-      </ThemeProvider>
-    </TrackingProvider>
+    <ThemeProvider theme={lightTheme}>
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+        <Router history={history}>
+          <ListView />
+        </Router>
+      </IntlProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
@@ -135,7 +135,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
     const modalContainer = within(modal);
     expect(modalContainer.getByText('Create role')).toBeInTheDocument();
     expect(modalContainer.getByText('test user')).toBeInTheDocument();
-    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(3);
+    expect(modalContainer.getAllByText('December 22, 2022, 16:11:03')).toHaveLength(2);
 
     const closeButton = modalContainer.getByText(/close the modal/i).closest('button');
     await user.click(closeButton);

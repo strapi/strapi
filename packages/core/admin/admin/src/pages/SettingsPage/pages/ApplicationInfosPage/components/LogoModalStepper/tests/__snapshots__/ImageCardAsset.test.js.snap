@@ -161,7 +161,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
 
 <div>
   <article
-    aria-labelledby="0-title"
+    aria-labelledby=":r0:-title"
     class="c0"
     tabindex="0"
   >
@@ -189,7 +189,7 @@ exports[`ApplicationInfosPage | ImageCardAsset should render and match snapshot 
         >
           <div
             class="c9"
-            id="0-title"
+            id=":r0:-title"
           >
             asset.jpeg
           </div>

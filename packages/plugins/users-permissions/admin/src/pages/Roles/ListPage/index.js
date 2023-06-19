@@ -1,45 +1,47 @@
 import React, { useMemo, useState } from 'react';
+
 import {
+  ActionLayout,
   Button,
+  ContentLayout,
   HeaderLayout,
   Layout,
-  ContentLayout,
-  ActionLayout,
   Main,
   Table,
-  Tr,
-  Thead,
   Th,
+  Thead,
+  Tr,
   Typography,
   useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
 import {
-  useTracking,
-  SettingsPageTitle,
   CheckPermissions,
-  useNotification,
-  useRBAC,
-  NoPermissions,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  useFocusWhenNavigate,
-  useQueryParams,
-  EmptyStateLayout,
   ConfirmDialog,
-  useFilter,
+  EmptyStateLayout,
+  LoadingIndicatorPage,
+  NoPermissions,
+  SearchURLQuery,
+  SettingsPageTitle,
   useCollator,
+  useFilter,
+  useFocusWhenNavigate,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+  useTracking,
 } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useHistory } from 'react-router-dom';
 
-import { fetchData, deleteData } from './utils/api';
-import { getTrad } from '../../../utils';
-import pluginId from '../../../pluginId';
 import permissions from '../../../permissions';
+import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
+
 import TableBody from './components/TableBody';
+import { deleteData, fetchData } from './utils/api';
 
 const RoleListPage = () => {
   const { trackUsage } = useTracking();

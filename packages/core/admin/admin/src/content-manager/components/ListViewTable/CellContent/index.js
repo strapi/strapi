@@ -1,14 +1,16 @@
 import React from 'react';
+
+import { Tooltip, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Typography, Tooltip } from '@strapi/design-system';
+
+import CellValue from './CellValue';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import RelationMultiple from './RelationMultiple';
 import RelationSingle from './RelationSingle';
 import RepeatableComponent from './RepeatableComponent';
 import SingleComponent from './SingleComponent';
-import CellValue from './CellValue';
 import hasContent from './utils/hasContent';
 import isSingleRelation from './utils/isSingleRelation';
 

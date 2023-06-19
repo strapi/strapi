@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+
 import { getTrad } from './utils';
 
 export const AssetType = {

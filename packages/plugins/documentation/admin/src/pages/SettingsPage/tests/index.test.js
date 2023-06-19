@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import SettingsPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -330,6 +332,11 @@ describe('Plugin | Documentation | SettingsPage', () => {
         height: 2rem;
       }
 
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c10[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -566,74 +573,70 @@ describe('Plugin | Documentation | SettingsPage', () => {
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         <div
-                          class="c20"
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c21 c22"
+                            for=":r0:"
+                          >
+                            Restricted Access
+                          </label>
+                        </div>
+                        <label
+                          class="c23"
                         >
                           <div
-                            class="c4"
+                            class="c24"
                           >
-                            <label
-                              class="c5 c21 c22"
-                              for="1"
-                            >
-                              Restricted Access
-                            </label>
+                            Restricted Access
                           </div>
-                          <label
-                            class="c23"
+                          <div
+                            class="c25 c26"
+                            display="flex"
                           >
                             <div
-                              class="c24"
+                              aria-hidden="true"
+                              class="c27 c28 c29"
                             >
-                              Restricted Access
+                              <span
+                                class="c5 c30"
+                              >
+                                Off
+                              </span>
                             </div>
                             <div
-                              class="c25 c26"
-                              display="flex"
+                              aria-hidden="true"
+                              class="c27 c28 c31"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c29"
+                              <span
+                                class="c5 c32"
                               >
-                                <span
-                                  class="c5 c30"
-                                >
-                                  Off
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c31"
-                              >
-                                <span
-                                  class="c5 c32"
-                                >
-                                  On
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="1-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c33"
-                                id="1"
-                                name="restrictedAccess"
-                                type="checkbox"
-                              />
+                                On
+                              </span>
                             </div>
-                          </label>
-                          <p
-                            class="c5 c34"
-                            id="1-hint"
-                          >
-                            Make the documentation endpoint private
-                          </p>
-                        </div>
+                            <input
+                              aria-describedby=":r0:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c33"
+                              id=":r0:"
+                              name="restrictedAccess"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c34"
+                          id=":r0:-hint"
+                        >
+                          Make the documentation endpoint private
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -1,21 +1,24 @@
 import React, { useRef, useState } from 'react';
+
+import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import {
+  Link,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  Link,
 } from '@strapi/helper-plugin';
-import { Box, Button, ContentLayout, HeaderLayout, Main, Flex } from '@strapi/design-system';
-import { Formik } from 'formik';
 import { ArrowLeft } from '@strapi/icons';
+import { Formik } from 'formik';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { Permissions, RoleForm } from './components';
+
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
+
+import { Permissions, RoleForm } from './components';
 import schema from './utils/schema';
 
 const EditPage = () => {

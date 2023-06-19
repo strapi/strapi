@@ -201,6 +201,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
   height: 2rem;
 }
 
+.c16 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -246,6 +251,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c21 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c21[aria-disabled='true'] {

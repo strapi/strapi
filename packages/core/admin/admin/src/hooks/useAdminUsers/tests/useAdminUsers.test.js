@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { setupServer } from 'msw/node';
+
+import { renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
-import { renderHook } from '@testing-library/react-hooks';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -71,7 +72,7 @@ describe('useAdminUsers', () => {
   });
 
   test('fetches users', async () => {
-    const { result, waitFor } = setup();
+    const { result } = setup();
 
     expect(result.current.isLoading).toBe(true);
 
@@ -95,7 +96,7 @@ describe('useAdminUsers', () => {
   });
 
   test('fetches a single user', async () => {
-    const { result, waitFor } = setup({ id: 1 });
+    const { result } = setup({ id: 1 });
 
     expect(result.current.isLoading).toBe(true);
 
@@ -111,7 +112,7 @@ describe('useAdminUsers', () => {
   });
 
   test('forwards all query params except `id`', async () => {
-    const { result, waitFor } = setup({ id: 1, some: 'param' });
+    const { result } = setup({ id: 1, some: 'param' });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

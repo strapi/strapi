@@ -238,6 +238,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   height: 2rem;
 }
 
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c22[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -283,6 +288,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c29 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c29[aria-disabled='true'] {
@@ -374,11 +384,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
         role="tablist"
       >
         <button
-          aria-controls="1-0-tabpanel"
+          aria-controls=":r0:-0-tabpanel"
           aria-disabled="false"
           aria-selected="true"
           class="c1"
-          id="1-0-tab"
+          id=":r0:-0-tab"
           role="tab"
           tabindex="0"
           type="button"
@@ -397,7 +407,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
           aria-disabled="false"
           aria-selected="false"
           class="c1"
-          id="1-1-tab"
+          id=":r0:-1-tab"
           role="tab"
           tabindex="-1"
           type="button"
@@ -419,8 +429,8 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from computer tab and
     </div>
     <div>
       <div
-        aria-labelledby="1-0-tab"
-        id="1-0-tabpanel"
+        aria-labelledby=":r0:-0-tab"
+        id=":r0:-0-tabpanel"
         role="tabpanel"
         tabindex="0"
       >
@@ -740,6 +750,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   height: 2rem;
 }
 
+.c24 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c24[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -785,6 +800,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c22[aria-disabled='true'] {
@@ -941,7 +961,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
           aria-disabled="false"
           aria-selected="false"
           class="c1"
-          id="3-0-tab"
+          id=":r2:-0-tab"
           role="tab"
           tabindex="-1"
           type="button"
@@ -957,11 +977,11 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
           </div>
         </button>
         <button
-          aria-controls="3-1-tabpanel"
+          aria-controls=":r2:-1-tabpanel"
           aria-disabled="false"
           aria-selected="true"
           class="c1"
-          id="3-1-tab"
+          id=":r2:-1-tab"
           role="tab"
           tabindex="0"
           type="button"
@@ -983,8 +1003,8 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
     </div>
     <div>
       <div
-        aria-labelledby="3-1-tab"
-        id="3-1-tabpanel"
+        aria-labelledby=":r2:-1-tab"
+        id=":r2:-1-tabpanel"
         role="tabpanel"
         tabindex="0"
       >
@@ -1001,7 +1021,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                 >
                   <label
                     class="c4 c12 c13"
-                    for="5"
+                    for=":r4:"
                   >
                     URL
                   </label>
@@ -1013,7 +1033,7 @@ exports[`ApplicationInfosPage | AddLogoDialog shoud render from url tab and matc
                       aria-invalid="false"
                       aria-required="false"
                       class="c16"
-                      id="5"
+                      id=":r4:"
                       name="logo-url"
                       value=""
                     />

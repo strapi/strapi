@@ -115,7 +115,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   width: 100%;
   height: 6.5625rem;
-  line-height: 4;
+  line-height: 1.43;
 }
 
 .c5 {
@@ -281,6 +281,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   height: 2.5rem;
 }
 
+.c13 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -326,6 +331,11 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c22 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c22[aria-disabled='true'] {
@@ -738,35 +748,31 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                 <div
                   class="c25"
                 >
-                  <div
-                    class=""
-                  >
-                    <div>
+                  <div>
+                    <div
+                      class=""
+                    >
                       <div
-                        class=""
+                        class="c26"
                       >
-                        <div
-                          class="c26"
+                        <label
+                          class="c8 c27 c28"
+                          for=":r0:"
                         >
-                          <label
-                            class="c8 c27 c28"
-                            for="1"
-                          >
-                            Name
-                          </label>
-                          <div
-                            class="c5 c29"
-                          >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c30"
-                              id="1"
-                              name="name"
-                              value=""
-                            />
-                          </div>
+                          Name
+                        </label>
+                        <div
+                          class="c5 c29"
+                        >
+                          <input
+                            aria-disabled="false"
+                            aria-invalid="false"
+                            aria-required="false"
+                            class="c30"
+                            id=":r0:"
+                            name="name"
+                            value=""
+                          />
                         </div>
                       </div>
                     </div>
@@ -779,28 +785,24 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
                     class=""
                   >
                     <div
-                      class=""
+                      class="c26"
                     >
-                      <div
-                        class="c26"
+                      <label
+                        class="c8 c27 c28"
+                        for="description"
                       >
-                        <label
-                          class="c8 c27 c28"
-                          for="description"
-                        >
-                          Description
-                        </label>
-                        <div
-                          class="c31 c32"
-                        >
-                          <textarea
-                            aria-invalid="false"
-                            aria-required="false"
-                            class="c33 c34"
-                            font-size="2"
-                            id="description"
-                          />
-                        </div>
+                        Description
+                      </label>
+                      <div
+                        class="c31 c32"
+                      >
+                        <textarea
+                          aria-invalid="false"
+                          aria-required="false"
+                          class="c33 c34"
+                          font-size="2"
+                          id="description"
+                        />
                       </div>
                     </div>
                   </div>

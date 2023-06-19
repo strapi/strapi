@@ -1,19 +1,20 @@
 import * as React from 'react';
+
+import { Td } from '@strapi/design-system';
+import { Table, useStrapiApp } from '@strapi/helper-plugin';
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/ListViewTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Table, useStrapiApp } from '@strapi/helper-plugin';
-import { Td } from '@strapi/design-system';
-
 import { useSelector } from 'react-redux';
 
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/ListViewTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
+
 import { Body } from './Body';
-import { PublicationState } from './CellContent/PublicationState/PublicationState';
 import BulkActionButtons from './BulkActionButtons';
 import CellContent from './CellContent';
+import { PublicationState } from './CellContent/PublicationState/PublicationState';
 
 const ListViewTable = ({
   canCreate,

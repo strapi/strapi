@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { useAppInfo } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import Onboarding from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

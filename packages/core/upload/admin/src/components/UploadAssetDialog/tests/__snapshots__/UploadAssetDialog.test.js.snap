@@ -263,6 +263,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   height: 2rem;
 }
 
+.c35 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c35[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -308,6 +313,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c38 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c38[aria-disabled='true'] {
@@ -520,11 +530,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                   role="tablist"
                 >
                   <button
-                    aria-controls="0-0-tabpanel"
+                    aria-controls=":r0:-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c14"
-                    id="0-0-tab"
+                    id=":r0:-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -543,7 +553,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c14"
-                    id="0-1-tab"
+                    id=":r0:-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -565,8 +575,8 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="0-0-tab"
-                  id="0-0-tabpanel"
+                  aria-labelledby=":r0:-0-tab"
+                  id=":r0:-0-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -815,7 +825,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border-radius: 4px;
   width: 100%;
   height: 6.5625rem;
-  line-height: 4;
+  line-height: 1.43;
 }
 
 .c2 {
@@ -937,6 +947,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   height: 2rem;
 }
 
+.c36 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c36[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -982,6 +997,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c34 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c34[aria-disabled='true'] {
@@ -1236,7 +1256,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     aria-disabled="false"
                     aria-selected="false"
                     class="c14"
-                    id="32-0-tab"
+                    id=":r10:-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
@@ -1252,11 +1272,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     </div>
                   </button>
                   <button
-                    aria-controls="32-1-tabpanel"
+                    aria-controls=":r10:-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
                     class="c14"
-                    id="32-1-tab"
+                    id=":r10:-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
@@ -1278,8 +1298,8 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
               </div>
               <div>
                 <div
-                  aria-labelledby="32-1-tab"
-                  id="32-1-tabpanel"
+                  aria-labelledby=":r10:-1-tab"
+                  id=":r10:-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >

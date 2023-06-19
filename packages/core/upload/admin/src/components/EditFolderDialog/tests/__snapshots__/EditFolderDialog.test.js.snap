@@ -232,6 +232,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
+.c30 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -277,6 +282,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 
 .c32 {
   height: 2rem;
+}
+
+.c32 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c32[aria-disabled='true'] {
@@ -579,35 +589,31 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                   <div
                     class="c18"
                   >
-                    <div
-                      class=""
-                    >
-                      <div>
+                    <div>
+                      <div
+                        class=""
+                      >
                         <div
-                          class=""
+                          class="c19"
                         >
-                          <div
-                            class="c19"
+                          <label
+                            class="c10 c20 c21"
+                            for=":r0:"
                           >
-                            <label
-                              class="c10 c20 c21"
-                              for="1"
-                            >
-                              Name
-                            </label>
-                            <div
-                              class="c9 c22"
-                            >
-                              <input
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                aria-required="false"
-                                class="c23"
-                                id="1"
-                                name="name"
-                                value=""
-                              />
-                            </div>
+                            Name
+                          </label>
+                          <div
+                            class="c9 c22"
+                          >
+                            <input
+                              aria-disabled="false"
+                              aria-invalid="false"
+                              aria-required="false"
+                              class="c23"
+                              id=":r0:"
+                              name="name"
+                              value=""
+                            />
                           </div>
                         </div>
                       </div>
@@ -617,85 +623,81 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
-                      <div
-                        class="c19"
+                      <label
+                        class="c10 c20 c21"
+                        for="folder-parent"
                       >
-                        <label
-                          class="c10 c20 c21"
-                          for="folder-parent"
-                        >
-                          Location
-                        </label>
+                        Location
+                      </label>
+                      <div
+                        class=" css-1iyvlxg-container"
+                      >
+                        <span
+                          class="css-1f43avz-a11yText-A11yText"
+                          id="react-select-2-live-region"
+                        />
+                        <span
+                          aria-atomic="false"
+                          aria-live="polite"
+                          aria-relevant="additions text"
+                          class="css-1f43avz-a11yText-A11yText"
+                        />
                         <div
-                          class=" css-1iyvlxg-container"
+                          class=" css-1ckpxei-control"
                         >
-                          <span
-                            class="css-1f43avz-a11yText-A11yText"
-                            id="react-select-2-live-region"
-                          />
-                          <span
-                            aria-atomic="false"
-                            aria-live="polite"
-                            aria-relevant="additions text"
-                            class="css-1f43avz-a11yText-A11yText"
-                          />
                           <div
-                            class=" css-1ckpxei-control"
+                            class=" css-onz4xi-ValueContainer"
                           >
                             <div
-                              class=" css-onz4xi-ValueContainer"
+                              class=" css-1ryi7up-singleValue"
                             >
-                              <div
-                                class=" css-1ryi7up-singleValue"
-                              >
-                                Media Library
-                              </div>
-                              <input
-                                aria-autocomplete="list"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-invalid="false"
-                                aria-readonly="true"
-                                class="css-mohuvp-dummyInput-DummyInput"
-                                id="folder-parent"
-                                inputmode="none"
-                                role="combobox"
-                                tabindex="0"
-                                value=""
-                              />
+                              Media Library
                             </div>
+                            <input
+                              aria-autocomplete="list"
+                              aria-expanded="false"
+                              aria-haspopup="true"
+                              aria-invalid="false"
+                              aria-readonly="true"
+                              class="css-mohuvp-dummyInput-DummyInput"
+                              id="folder-parent"
+                              inputmode="none"
+                              role="combobox"
+                              tabindex="0"
+                              value=""
+                            />
+                          </div>
+                          <div
+                            class=" css-1hb7zxy-IndicatorsContainer"
+                          >
                             <div
-                              class=" css-1hb7zxy-IndicatorsContainer"
+                              aria-hidden="true"
+                              class="c24 c25 c26"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c24 c25 c26"
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 14 8"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </div>
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </div>
                           </div>
-                          <input
-                            name="parent"
-                            type="hidden"
-                            value=""
-                          />
                         </div>
+                        <input
+                          name="parent"
+                          type="hidden"
+                          value=""
+                        />
                       </div>
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
+
 import {
   Box,
   Flex,
@@ -17,8 +17,9 @@ import {
   Loader,
   Table as DSTable,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
 import { Trash } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 import useQueryParams from '../../hooks/useQueryParams';
 import SortIcon from '../../icons/SortIcon';

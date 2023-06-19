@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
+
 import ProtectedEmailTemplatesPage from '../index';
-import server from './utils/server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -35,19 +36,12 @@ const App = (
 );
 
 describe('ADMIN | Pages | Settings | Email Templates', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   afterAll(() => {
     jest.resetAllMocks();
-    server.close();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -518,7 +512,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="0"
+                            aria-labelledby=":r0:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"
@@ -598,7 +592,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="1"
+                            aria-labelledby=":r2:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"

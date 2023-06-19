@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import PageSizeURLQuery from '../index';
 
 jest.mock('../../../features/Tracking', () => ({
@@ -224,17 +226,17 @@ describe('<PageSizeURLQuery />', () => {
           >
             <label
               class="c2 c3 c4"
-              for="2"
+              for=":r0:"
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-0"
-              aria-describedby="2-hint 2-error"
+              aria-controls="radix-:r3:"
+              aria-describedby=":r0:-hint :r0:-error"
               aria-expanded="false"
               class="c5 c6 c7"
               data-state="closed"
               dir="ltr"
-              id="2"
+              id=":r0:"
               overflow="hidden"
               role="combobox"
               tabindex="0"

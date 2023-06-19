@@ -1,4 +1,5 @@
 import { getFetchClient } from '@strapi/helper-plugin';
+
 import prefixAllUrls from './prefixAllUrls';
 
 const fetchProjectSettings = async () => {

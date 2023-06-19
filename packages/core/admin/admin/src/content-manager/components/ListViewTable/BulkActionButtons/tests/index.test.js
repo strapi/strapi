@@ -1,10 +1,11 @@
 import React from 'react';
-import { act, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Table, useTableContext } from '@strapi/helper-plugin';
 
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { Table, useTableContext } from '@strapi/helper-plugin';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+
 import BulkActionButtons from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -88,10 +89,11 @@ describe('BulkActionsBar', () => {
       onConfirmDeleteAll: mockConfirmDeleteAll,
     });
 
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
-      await user.click(screen.getByRole('button', { name: /confirm/i }));
-    });
+    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: /confirm/i }));
 
     expect(mockConfirmDeleteAll).toHaveBeenCalledWith([1, 2]);
   });
@@ -116,12 +118,13 @@ describe('BulkActionsBar', () => {
     const onConfirmPublishAll = jest.fn();
     setup({ showPublish: true, onConfirmPublishAll });
 
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
-      await user.click(
-        within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
-      );
-    });
+    await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
+    );
 
     expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2]);
   });
@@ -130,12 +133,13 @@ describe('BulkActionsBar', () => {
     const onConfirmUnpublishAll = jest.fn();
     setup({ showPublish: true, onConfirmUnpublishAll });
 
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
-      await user.click(
-        within(screen.getByRole('dialog')).getByRole('button', { name: /\bunpublish\b/i })
-      );
-    });
+    await user.click(screen.getByRole('button', { name: /\bunpublish\b/i }));
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: /\bunpublish\b/i })
+    );
 
     expect(onConfirmUnpublishAll).toHaveBeenCalledWith([1, 2]);
   });

@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import UseCasePage from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -447,6 +449,11 @@ describe('Admin | UseCasePage', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -493,6 +500,11 @@ describe('Admin | UseCasePage', () => {
 
       .c35 {
         height: 2.5rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
@@ -644,7 +656,7 @@ describe('Admin | UseCasePage', () => {
             >
               <div>
                 <button
-                  aria-controls="0"
+                  aria-controls=":r0:"
                   aria-disabled="false"
                   aria-expanded="false"
                   aria-haspopup="true"
@@ -735,7 +747,7 @@ describe('Admin | UseCasePage', () => {
                         </label>
                         <div
                           aria-autocomplete="none"
-                          aria-controls="radix-0"
+                          aria-controls="radix-:r4:"
                           aria-describedby="usecase-hint usecase-error"
                           aria-expanded="false"
                           aria-label="What type of work do you do?"

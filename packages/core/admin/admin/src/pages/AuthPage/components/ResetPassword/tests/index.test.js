@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import * as yup from 'yup';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
+
 import ResetPassword from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -318,6 +320,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         background: transparent;
       }
 
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
       .c5[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
@@ -364,6 +371,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c35 {
         height: 2rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
@@ -576,6 +588,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -585,10 +601,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c15 {
-        height: 4.5rem;
       }
 
       .c32 svg {
@@ -613,7 +625,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
           >
             <div>
               <button
-                aria-controls="0"
+                aria-controls=":r0:"
                 aria-disabled="false"
                 aria-expanded="false"
                 aria-haspopup="true"
@@ -701,7 +713,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                       >
                         <label
                           class="c6 c20 c21"
-                          for="2"
+                          for=":r1:"
                         >
                           Password
                           <span
@@ -714,12 +726,12 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           class="c24 c25"
                         >
                           <input
-                            aria-describedby="2-hint"
+                            aria-describedby=":r1:-hint"
                             aria-disabled="false"
                             aria-invalid="false"
                             aria-required="true"
                             class="c26 c27"
-                            id="2"
+                            id=":r1:"
                             name="password"
                             type="password"
                             value=""
@@ -755,7 +767,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         </div>
                         <p
                           class="c6 c34"
-                          id="2-hint"
+                          id=":r1:-hint"
                         >
                           Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
                         </p>
@@ -771,7 +783,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                       >
                         <label
                           class="c6 c20 c21"
-                          for="4"
+                          for=":r3:"
                         >
                           Confirm Password
                           <span
@@ -788,7 +800,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                             aria-invalid="false"
                             aria-required="true"
                             class="c26 c27"
-                            id="4"
+                            id=":r3:"
                             name="confirmPassword"
                             type="password"
                             value=""

@@ -1,11 +1,14 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { CheckPagePermissions, AnErrorOccurred } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
+
+import { AnErrorOccurred, CheckPagePermissions } from '@strapi/helper-plugin';
+import { Route, Switch } from 'react-router-dom';
+
 import pluginPermissions from '../../permissions';
-import ProtectedRolesListPage from './ProtectedListPage';
-import ProtectedRolesEditPage from './ProtectedEditPage';
+import pluginId from '../../pluginId';
+
 import ProtectedRolesCreatePage from './ProtectedCreatePage';
+import ProtectedRolesEditPage from './ProtectedEditPage';
+import ProtectedRolesListPage from './ProtectedListPage';
 
 const Roles = () => {
   return (

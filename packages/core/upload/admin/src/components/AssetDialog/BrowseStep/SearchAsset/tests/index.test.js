@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import SearchAsset from '../index';
 
 const handleChange = jest.fn();
@@ -138,7 +140,7 @@ describe('<SearchURLQuery />', () => {
         <span>
           <button
             aria-disabled="false"
-            aria-labelledby="0"
+            aria-labelledby=":r0:"
             class="c0 c1 c2 c3"
             tabindex="0"
             type="button"

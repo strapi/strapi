@@ -111,7 +111,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
     >
       <label
         class="c1 c2"
-        for="0"
+        for=":ri:"
       >
         Default label
       </label>
@@ -120,7 +120,7 @@ exports[`GenericInput json renders and matches the snapshot 1`] = `
         font-size="2"
       >
         <div
-          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ19 ͼo"
+          class="cm-editor ͼ1 ͼ3 ͼ4 ͼ18 ͼo"
         >
           <div
             aria-live="polite"

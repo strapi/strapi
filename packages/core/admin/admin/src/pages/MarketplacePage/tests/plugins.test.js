@@ -1,13 +1,16 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
+
 import MarketPlacePage from '../index';
+
 import server from './server';
 
 // Increase the jest timeout to accommodate long running tests

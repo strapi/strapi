@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import PropTypes from 'prop-types';
-import styled, { keyframes } from 'styled-components';
-import { Flex, Box, Typography } from '@strapi/design-system';
-import { Refresh, Clock } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import { createPortal } from 'react-dom';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
+import { Clock, Refresh } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { createPortal } from 'react-dom';
+import { useIntl } from 'react-intl';
+import styled, { keyframes } from 'styled-components';
+
 import pxToRem from '../utils/pxToRem';
 
 /**

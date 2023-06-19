@@ -1,60 +1,62 @@
 import React, { memo, useEffect, useMemo, useRef } from 'react';
-import PropTypes from 'prop-types';
+
+import {
+  LoadingIndicatorPage,
+  useAppInfo,
+  useAutoReloadOverlayBlocker,
+  useFetchClient,
+  useGuidedTour,
+  useNotification,
+  useRBACProvider,
+  useStrapiApp,
+  useTracking,
+} from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
 import size from 'lodash/size';
-import {
-  LoadingIndicatorPage,
-  useTracking,
-  useNotification,
-  useStrapiApp,
-  useAutoReloadOverlayBlocker,
-  useAppInfo,
-  useRBACProvider,
-  useGuidedTour,
-  useFetchClient,
-} from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import { compose } from 'redux';
+
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
-import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
-import createDataObject from './utils/createDataObject';
-import createModifiedDataSchema from './utils/createModifiedDataSchema';
-import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
-import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
-import retrieveNestedComponents from './utils/retrieveNestedComponents';
-import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
-import serverRestartWatcher from './utils/serverRestartWatcher';
-import validateSchema from './utils/validateSchema';
 
 import {
   ADD_ATTRIBUTE,
-  ADD_CUSTOM_FIELD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
+  ADD_CUSTOM_FIELD_ATTRIBUTE,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
-  CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
+  CREATE_SCHEMA,
   DELETE_NOT_SAVED_TYPE,
   EDIT_ATTRIBUTE,
   EDIT_CUSTOM_FIELD_ATTRIBUTE,
   GET_DATA_SUCCEEDED,
   RELOAD_PLUGIN,
-  REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
   REMOVE_FIELD,
+  REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
 } from './constants';
 import makeSelectDataManagerProvider from './selectors';
+import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
+import createDataObject from './utils/createDataObject';
+import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import formatSchemas from './utils/formatSchemas';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
+import retrieveNestedComponents from './utils/retrieveNestedComponents';
+import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
+import serverRestartWatcher from './utils/serverRestartWatcher';
+import validateSchema from './utils/validateSchema';
 
 const DataManagerProvider = ({
   children,

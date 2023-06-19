@@ -188,6 +188,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background: #ffffff;
 }
 
+.c21 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
 .c21[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
@@ -235,6 +240,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #f5c0b8;
   background: #fcecea;
+}
+
+.c23 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c23[aria-disabled='true'] {
@@ -370,7 +380,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       <div>
         <div>
           <div
-            aria-labelledby="0-label"
+            aria-labelledby=":r0:-label"
             aria-modal="true"
             class="c5 c6"
             role="dialog"
@@ -380,7 +390,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
             >
               <h2
                 class="c10 c11"
-                id="0-label"
+                id=":r0:-label"
               >
                 Confirmation
               </h2>

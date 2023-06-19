@@ -1,13 +1,14 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { render as renderTL, screen } from '@testing-library/react';
-import { TrackingProvider } from '@strapi/helper-plugin';
-import { MemoryRouter } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 
-import { useConfig } from '../../../hooks/useConfig';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
+import { render as renderTL, screen } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
+
 import Upload from '..';
+import { useConfig } from '../../../hooks/useConfig';
 
 jest.mock('../../../hooks/useConfig');
 jest.mock('@strapi/helper-plugin', () => ({

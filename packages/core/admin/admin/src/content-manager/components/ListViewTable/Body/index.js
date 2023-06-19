@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Link, useHistory } from 'react-router-dom';
-import { useIntl } from 'react-intl';
 
 import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
-import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { useTracking, onRowClick, useTableContext } from '@strapi/helper-plugin';
+import { Trash, Duplicate, Pencil } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { Link, useHistory } from 'react-router-dom';
 
 import { usePluginsQueryParams } from '../../../hooks';
 import ConfirmDialogDelete from '../ConfirmDialogDelete';

@@ -1,6 +1,7 @@
-import { renderHook } from '@testing-library/react-hooks';
 import { useFetchClient } from '@strapi/helper-plugin';
+import { renderHook } from '@testing-library/react';
 import { useQuery } from 'react-query';
+
 import useLicenseLimits from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({

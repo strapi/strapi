@@ -19,10 +19,17 @@ const ALLOWED_SORT_STRINGS = [
   'updatedAt:ASC',
 ];
 
+const ALLOWED_WEBHOOK_EVENTS = {
+  MEDIA_CREATE: 'media.create',
+  MEDIA_UPDATE: 'media.update',
+  MEDIA_DELETE: 'media.delete',
+};
+
 module.exports = {
   ACTIONS,
   FOLDER_MODEL_UID: 'plugin::upload.folder',
   FILE_MODEL_UID: 'plugin::upload.file',
   API_UPLOAD_FOLDER_BASE_NAME: 'API Uploads',
   ALLOWED_SORT_STRINGS,
+  ALLOWED_WEBHOOK_EVENTS,
 };

@@ -1,8 +1,10 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { DocAssetCard } from '../DocAssetCard';
+
 import en from '../../../translations/en.json';
+import { DocAssetCard } from '../DocAssetCard';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -402,7 +404,7 @@ describe('DocAssetCard', () => {
 
       <div>
         <article
-          aria-labelledby="1-title"
+          aria-labelledby=":r0:-title"
           class="c0 c1"
           role="button"
           tabindex="-1"
@@ -418,7 +420,7 @@ describe('DocAssetCard', () => {
                   class=""
                 >
                   <input
-                    aria-labelledby="1-title"
+                    aria-labelledby=":r0:-title"
                     class="c9"
                     type="checkbox"
                   />
@@ -431,7 +433,7 @@ describe('DocAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="0"
+                  aria-labelledby=":r1:"
                   class="c14 c3 c15 c16"
                   tabindex="0"
                   type="button"
@@ -498,7 +500,7 @@ describe('DocAssetCard', () => {
                 >
                   <h2
                     class="c25"
-                    id="1-title"
+                    id=":r0:-title"
                   >
                     hello.png
                   </h2>
@@ -511,7 +513,6 @@ describe('DocAssetCard', () => {
                   >
                     png
                   </span>
-                  
                 </div>
               </div>
               <div

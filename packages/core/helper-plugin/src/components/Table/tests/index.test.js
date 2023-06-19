@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderRTL, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+
 import { Table, useTableContext } from '../index';
 
 jest.mock('../../../hooks/useQueryParams', () => jest.fn().mockReturnValue([{}, jest.fn()]));
