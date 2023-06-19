@@ -18,6 +18,12 @@ const getDataWithStage = async (data) => {
   return data;
 };
 
+/**
+ * Get the stage information of an entity
+ * @param {String} uid
+ * @param {Number} id
+ * @returns {Object}
+ */
 const getEntityStage = async (uid, id) => {
   const entity = await strapi.entityService.findOne(uid, id, {
     populate: {
@@ -28,7 +34,7 @@ const getEntityStage = async (uid, id) => {
       },
     },
   });
-  return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? null;
+  return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? {};
 };
 
 /**
@@ -60,9 +66,8 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const previousStage = await getEntityStage(uid, entityId);
-
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
+    const previousStage = await getEntityStage(uid, entityId);
     if (
       previousStage?.workflow?.id &&
       previousStage?.id &&
