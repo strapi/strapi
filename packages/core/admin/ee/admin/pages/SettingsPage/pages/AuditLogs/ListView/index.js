@@ -12,6 +12,7 @@ import {
   AnErrorOccurred,
   DynamicTable,
   SettingsPageTitle,
+  useAppInfo,
   useFocusWhenNavigate,
   useQueryParams,
   useRBAC,
@@ -19,7 +20,6 @@ import {
 import { useIntl } from 'react-intl';
 
 import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
-import adminPermissions from '../../../../../../../admin/src/permissions';
 
 import useAuditLogsData from './hooks/useAuditLogsData';
 import Modal from './Modal';
@@ -28,17 +28,16 @@ import TableRows from './TableRows';
 import getDisplayedFilters from './utils/getDisplayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
-const auditLogsPermissions = {
-  ...adminPermissions.settings.auditLogs,
-  readUsers: adminPermissions.settings.users.read,
-};
-
 const ListView = () => {
   const { formatMessage } = useIntl();
+  const { permissions } = useAppInfo();
 
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-  } = useRBAC(auditLogsPermissions);
+  } = useRBAC({
+    ...permissions.settings.auditLogs,
+    readUsers: permissions.settings.users.read,
+  });
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({

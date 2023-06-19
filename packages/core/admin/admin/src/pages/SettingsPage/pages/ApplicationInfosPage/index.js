@@ -38,7 +38,7 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
-  const { latestStrapiReleaseTag, permissions, shouldUpdateStrapi, strapiVersion } = useAppInfo();
+  const { latestStrapiReleaseTag, nodeVersion, permissions, shouldUpdateStrapi, strapiVersion } = useAppInfo();
   const { updateProjectSettings } = useConfigurations();
 
   const {
@@ -172,7 +172,7 @@ const ApplicationInfosPage = () => {
                             defaultMessage:
                               '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
                           },
-                          { communityEdition: appInfos.communityEdition }
+                          { communityEdition }
                         )}
                       </Typography>
                       <Link
@@ -195,7 +195,7 @@ const ApplicationInfosPage = () => {
                         defaultMessage: 'node version',
                       })}
                     </Typography>
-                    <Typography as="dd">{appInfos.nodeVersion}</Typography>
+                    <Typography as="dd">{nodeVersion}</Typography>
                   </GridItem>
                   <AdminSeatInfo />
                 </Grid>

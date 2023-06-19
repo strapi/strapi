@@ -5,6 +5,7 @@ import {
   CheckPagePermissions,
   ConfirmDialog,
   SettingsPageTitle,
+  useAppInfo,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
@@ -18,7 +19,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
 import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
-import adminPermissions from '../../../../../../admin/src/permissions';
 
 import { setWorkflows } from './actions';
 import { StageDragPreview } from './components/StageDragPreview';
@@ -39,6 +39,7 @@ function renderDragLayerItem({ type, item }) {
 }
 
 export function ReviewWorkflowsPage() {
+  const { permissions } = useAppInfo();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
@@ -134,7 +135,7 @@ export function ReviewWorkflowsPage() {
   }, []);
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+    <CheckPagePermissions permissions={permissions.settings['review-workflows'].main}>
       <Layout>
         <SettingsPageTitle
           name={formatMessage({

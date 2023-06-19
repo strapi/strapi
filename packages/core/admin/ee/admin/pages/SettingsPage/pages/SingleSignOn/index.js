@@ -20,6 +20,7 @@ import {
   CheckPagePermissions,
   LoadingIndicatorPage,
   SettingsPageTitle,
+  useAppInfo,
   useFocusWhenNavigate,
   useRBAC,
 } from '@strapi/helper-plugin';
@@ -28,23 +29,20 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
 import { getRequestUrl } from '../../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
-
 export const SingleSignOn = () => {
+  const { permissions } = useAppInfo();
   const { formatMessage } = useIntl();
-
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -247,10 +245,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const { permissions } = useAppInfo();
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+}
 
 export default ProtectedSSO;
