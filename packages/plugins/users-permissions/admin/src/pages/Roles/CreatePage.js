@@ -20,25 +20,20 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
-  translatedErrors,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import * as yup from 'yup';
 
 import UsersPermissions from '../../components/UsersPermissions';
 import { usePlugins } from '../../hooks';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
-const schema = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
-});
+import { createRoleSchema } from './constants';
 
-const EditPage = () => {
+const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toggleNotification = useNotification();
@@ -90,7 +85,7 @@ const EditPage = () => {
         enableReinitialize
         initialValues={{ name: '', description: '' }}
         onSubmit={handleCreateRoleSubmit}
-        validationSchema={schema}
+        validationSchema={createRoleSchema}
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
@@ -187,4 +182,4 @@ const EditPage = () => {
   );
 };
 
-export default EditPage;
+export default CreatePage;

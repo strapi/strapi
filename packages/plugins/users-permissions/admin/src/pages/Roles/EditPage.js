@@ -21,23 +21,18 @@ import {
   Form,
   useNotification,
   Link,
-  translatedErrors,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import * as yup from 'yup';
 
 import UsersPermissions from '../../components/UsersPermissions';
 import { usePlugins, useFetchRole } from '../../hooks';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
-const schema = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
-});
+import { createRoleSchema } from './constants';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -95,7 +90,7 @@ const EditPage = () => {
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
         onSubmit={handleEditRoleSubmit}
-        validationSchema={schema}
+        validationSchema={createRoleSchema}
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
