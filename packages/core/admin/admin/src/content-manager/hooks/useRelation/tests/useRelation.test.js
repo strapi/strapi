@@ -1,8 +1,9 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useFetchClient } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import { useRelation } from '../useRelation';
 
 jest.mock('@strapi/helper-plugin', () => ({

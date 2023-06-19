@@ -1,11 +1,13 @@
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { act, render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
+import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { Route, Router } from 'react-router-dom';
+
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';

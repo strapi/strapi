@@ -1,10 +1,10 @@
 /* eslint-disable no-undef */
 import * as React from 'react';
 
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Box } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
+import styled from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
@@ -74,4 +74,4 @@ const Overlay = styled(Box)`
  */
 const useOverlayBlocker = () => React.useContext(OverlayBlockerContext);
 
-export { OverlayBlockerProvider, useOverlayBlocker, OverlayBlockerContext };
+export { OverlayBlockerContext, OverlayBlockerProvider, useOverlayBlocker };

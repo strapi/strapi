@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+
 import Oops from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -349,6 +351,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -358,10 +364,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c15 {
-        height: 4.5rem;
       }
 
       <div>

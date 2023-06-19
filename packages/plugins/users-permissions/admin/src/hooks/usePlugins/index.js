@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import init from './init';
+
 import pluginId from '../../pluginId';
 import { cleanPermissions } from '../../utils';
+
+import init from './init';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {

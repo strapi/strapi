@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useFetchClient, useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
+
+import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
 
 const useRegenerate = (url, id, onRegenerate, onError) => {
   const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);

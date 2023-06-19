@@ -1,6 +1,7 @@
-import { setupServer } from 'msw/node';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
+
 import useSettingsForm from '../index';
 
 const toggleNotification = jest.fn();

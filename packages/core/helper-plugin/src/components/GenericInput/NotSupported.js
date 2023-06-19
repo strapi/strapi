@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+
 import { TextInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 

@@ -6,36 +6,36 @@
  */
 
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
+
 import {
-  CheckPermissions,
-  ConfirmDialog,
-  LoadingIndicatorPage,
-  stopPropagation,
-  EmptyStateLayout,
-  useFocusWhenNavigate,
-  AnErrorOccurred,
-} from '@strapi/helper-plugin';
-import { Helmet } from 'react-helmet';
-import {
+  Box,
   Button,
-  Layout,
-  HeaderLayout,
   ContentLayout,
-  Main,
-  IconButton,
-  Typography,
   Flex,
+  HeaderLayout,
+  IconButton,
+  Layout,
+  Main,
   Table,
-  Tr,
-  Thead,
-  Th,
   Tbody,
   Td,
-  Box,
+  Th,
+  Thead,
+  Tr,
+  Typography,
 } from '@strapi/design-system';
-
-import { Trash, Eye as Show, Refresh as Reload } from '@strapi/icons';
+import {
+  AnErrorOccurred,
+  CheckPermissions,
+  ConfirmDialog,
+  EmptyStateLayout,
+  LoadingIndicatorPage,
+  stopPropagation,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
+import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
 
 import permissions from '../../permissions';
 import { getTrad } from '../../utils';

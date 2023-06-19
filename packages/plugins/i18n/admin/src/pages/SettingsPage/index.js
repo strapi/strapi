@@ -1,7 +1,10 @@
 import React from 'react';
+
 import { useRBAC } from '@strapi/helper-plugin';
-import LocaleSettingsPage from './LocaleSettingsPage';
+
 import i18nPermissions from '../../permissions';
+
+import LocaleSettingsPage from './LocaleSettingsPage';
 
 const ProtectedLocaleSettingsPage = () => {
   const {

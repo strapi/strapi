@@ -1,21 +1,23 @@
-import React, { useState, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import React, { useRef, useState } from 'react';
+
 import {
   Box,
-  Flex,
-  Icon,
-  Typography,
-  ModalFooter,
   Button,
   Field,
   FieldError,
   FieldInput,
+  Flex,
+  Icon,
+  ModalFooter,
+  Typography,
 } from '@strapi/design-system';
 import { PicturePlus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../../utils/constants';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
-import { ACCEPTED_FORMAT, SIZE, DIMENSION } from '../../utils/constants';
 
 const FileInput = styled(FieldInput)`
   opacity: 0;

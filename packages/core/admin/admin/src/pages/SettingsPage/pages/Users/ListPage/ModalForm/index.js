@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  Grid,
-  GridItem,
-  Breadcrumbs,
-  Crumb,
   Box,
   Button,
   Flex,
+  Grid,
+  GridItem,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { Formik } from 'formik';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import {
   Form,
   GenericInput,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
+import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+import { useEnterprise } from '../../../../../../hooks/useEnterprise';
+import SelectRoles from '../../components/SelectRoles';
 
 import { FORM_LAYOUT, FORM_SCHEMA, FORM_INITIAL_VALUES, ROLE_LAYOUT, STEPPER } from './constants';
-import SelectRoles from '../../components/SelectRoles';
-import { useEnterprise } from '../../../../../../hooks/useEnterprise';
 
 const ModalForm = ({ onSuccess, onToggle }) => {
   const [currentStep, setStep] = useState('create');
@@ -141,8 +141,11 @@ const ModalForm = ({ onSuccess, onToggle }) => {
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
+        {/**
+         * TODO: this is not semantically correct and should be amended.
+         */}
         <Breadcrumbs label={headerTitle}>
-          <Crumb>{headerTitle}</Crumb>
+          <Crumb isCurrent>{headerTitle}</Crumb>
         </Breadcrumbs>
       </ModalHeader>
       <Formik

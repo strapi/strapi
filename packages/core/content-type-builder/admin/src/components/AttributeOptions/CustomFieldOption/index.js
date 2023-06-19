@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box, Flex, Typography } from '@strapi/design-system';
-import OptionBoxWrapper from '../OptionBoxWrapper';
-import AttributeIcon from '../../AttributeIcon';
+
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
+import AttributeIcon from '../../AttributeIcon';
+import OptionBoxWrapper from '../OptionBoxWrapper';
 
 const CustomFieldOption = ({ customFieldUid, customField }) => {
   const { type, intlLabel, intlDescription } = customField;

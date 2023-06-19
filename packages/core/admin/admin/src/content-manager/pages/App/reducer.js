@@ -4,6 +4,7 @@
  */
 /* eslint-disable consistent-return */
 import produce from 'immer';
+
 import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
 
 const initialState = {

@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+
 import LocalesProviderContext from './context';
 
 const useLocalesProvider = () => {

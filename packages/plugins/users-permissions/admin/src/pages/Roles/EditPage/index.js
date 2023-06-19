@@ -1,34 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Textarea,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
+import {
+  Form,
+  Link,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFetchClient,
+  useNotification,
+  useOverlayBlocker,
+} from '@strapi/helper-plugin';
+import { ArrowLeft, Check } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import {
-  useFetchClient,
-  useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  Form,
-  useNotification,
-  Link,
-} from '@strapi/helper-plugin';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Main,
-  Button,
-  Flex,
-  Box,
-  TextInput,
-  Textarea,
-  Typography,
-  GridItem,
-  Grid,
-} from '@strapi/design-system';
-import { ArrowLeft, Check } from '@strapi/icons';
+
 import UsersPermissions from '../../../components/UsersPermissions';
-import getTrad from '../../../utils/getTrad';
+import { useFetchRole, usePlugins } from '../../../hooks';
 import pluginId from '../../../pluginId';
-import { usePlugins, useFetchRole } from '../../../hooks';
+import getTrad from '../../../utils/getTrad';
+
 import schema from './utils/schema';
 
 const EditPage = () => {

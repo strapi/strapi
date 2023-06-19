@@ -1,28 +1,31 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Flex, IconButton } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Flex, IconButton } from '@strapi/design-system';
-import { Trash, Download as DownloadIcon, Crop as Resize } from '@strapi/icons';
-import { useTracking } from '@strapi/helper-plugin';
-import getTrad from '../../../utils/getTrad';
-import { downloadFile } from '../../../utils/downloadFile';
-import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
+import { AssetDefinition, AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
-import {
-  RelativeBox,
-  ActionRow,
-  Wrapper,
-  BadgeOverride,
-  UploadProgressWrapper,
-} from './components';
-import { CroppingActions } from './CroppingActions';
+import { createAssetUrl } from '../../../utils';
+import { downloadFile } from '../../../utils/downloadFile';
+import getTrad from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
-import { AssetType, AssetDefinition } from '../../../constants';
+import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
 import { AssetPreview } from './AssetPreview';
-import { createAssetUrl } from '../../../utils';
+import {
+  ActionRow,
+  BadgeOverride,
+  RelativeBox,
+  UploadProgressWrapper,
+  Wrapper,
+} from './components';
+import { CroppingActions } from './CroppingActions';
 
 import 'cropperjs/dist/cropper.css';
 

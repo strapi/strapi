@@ -1,4 +1,5 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import useNavigatorOnLine from '../index';
 
 describe('useNavigatorOnLine', () => {
