@@ -5,11 +5,13 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
+
 import pluginPkg from '../../package.json';
+
+import { MediaLibraryDialog } from './components/MediaLibraryDialog';
+import { MediaLibraryInput } from './components/MediaLibraryInput';
 import PluginIcon from './components/PluginIcon';
 import pluginPermissions from './permissions';
-import { MediaLibraryInput } from './components/MediaLibraryInput';
-import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 

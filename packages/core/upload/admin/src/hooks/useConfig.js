@@ -1,5 +1,5 @@
+import { useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useNotification, useTracking, useFetchClient } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
 

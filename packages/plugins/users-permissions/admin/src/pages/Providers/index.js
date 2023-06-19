@@ -1,43 +1,46 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { useIntl } from 'react-intl';
+
 import {
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  useTracking,
-  useNotification,
-  useOverlayBlocker,
-  CheckPagePermissions,
-  useRBAC,
-  useFocusWhenNavigate,
-  onRowClick,
-  stopPropagation,
-} from '@strapi/helper-plugin';
-import has from 'lodash/has';
-import upperFirst from 'lodash/upperFirst';
-import {
-  HeaderLayout,
-  Layout,
   ContentLayout,
+  HeaderLayout,
+  IconButton,
+  Layout,
   Main,
-  useNotifyAT,
   Table,
-  Thead,
-  Tr,
-  Th,
   Tbody,
   Td,
+  Th,
+  Thead,
+  Tr,
   Typography,
-  IconButton,
+  useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  onRowClick,
+  SettingsPageTitle,
+  stopPropagation,
+  useFocusWhenNavigate,
+  useNotification,
+  useOverlayBlocker,
+  useRBAC,
+  useTracking,
+} from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import forms from './utils/forms';
+import has from 'lodash/has';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
+import FormModal from '../../components/FormModal';
+import pluginPermissions from '../../permissions';
+import { getTrad } from '../../utils';
+
 import { fetchData, putProvider } from './utils/api';
 import createProvidersArray from './utils/createProvidersArray';
-import { getTrad } from '../../utils';
-import pluginPermissions from '../../permissions';
-import FormModal from '../../components/FormModal';
+import forms from './utils/forms';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();

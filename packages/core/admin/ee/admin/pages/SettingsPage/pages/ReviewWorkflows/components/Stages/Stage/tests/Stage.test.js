@@ -1,19 +1,18 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
 import { FormikProvider, useFormik } from 'formik';
-import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../../admin/src/core/store/configureStore';
-import { Stage } from '../Stage';
-import { reducer } from '../../../../reducer';
-
 import { STAGE_COLOR_DEFAULT } from '../../../../constants';
+import { reducer } from '../../../../reducer';
+import { Stage } from '../Stage';
 
 const STAGES_FIXTURE = {
   id: 1,

@@ -1,12 +1,15 @@
 import React from 'react';
-import { render, waitFor, act, waitForElementToBeRemoved } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router, Switch, Route } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-import pluginId from '../../../../pluginId';
+import { IntlProvider } from 'react-intl';
+import { Route, Router, Switch } from 'react-router-dom';
+
 import RolesEditPage from '..';
+import pluginId from '../../../../pluginId';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => {

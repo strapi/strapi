@@ -1,13 +1,15 @@
 import React, { memo, useMemo } from 'react';
-import { Switch, Route } from 'react-router-dom';
+
+import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
+import { Route, Switch } from 'react-router-dom';
+
 import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
-import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
+import EditViewLayoutManager from '../EditViewLayoutManager';
 
 const cmPermissions = permissions.contentManager;
 

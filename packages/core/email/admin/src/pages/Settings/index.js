@@ -1,32 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useIntl } from 'react-intl';
+import React, { useEffect, useState } from 'react';
+
 import {
-  getYupInnerErrors,
-  CheckPagePermissions,
-  useNotification,
-  LoadingIndicatorPage,
-  useOverlayBlocker,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
-import {
-  Main,
-  ContentLayout,
   Box,
+  Button,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Typography,
+  Main,
   TextInput,
-  Button,
-  Flex,
+  Typography,
   useNotifyAT,
 } from '@strapi/design-system';
+import {
+  CheckPagePermissions,
+  getYupInnerErrors,
+  LoadingIndicatorPage,
+  useFocusWhenNavigate,
+  useNotification,
+  useOverlayBlocker,
+} from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
-import Configuration from './components/Configuration';
-import schema from '../../utils/schema';
+import { useIntl } from 'react-intl';
+
 import pluginPermissions from '../../permissions';
-import { fetchEmailSettings, postEmailTest } from './utils/api';
-import EmailHeader from './components/EmailHeader';
 import getTrad from '../../utils/getTrad';
+import schema from '../../utils/schema';
+
+import Configuration from './components/Configuration';
+import EmailHeader from './components/EmailHeader';
+import { fetchEmailSettings, postEmailTest } from './utils/api';
 
 const ProtectedSettingsPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.settings}>

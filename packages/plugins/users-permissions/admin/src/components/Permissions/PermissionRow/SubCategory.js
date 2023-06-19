@@ -1,12 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
-import get from 'lodash/get';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { Box, Checkbox, Flex, Typography, Grid, GridItem } from '@strapi/design-system';
+
+import { Box, Checkbox, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Cog as CogIcon } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import CheckboxWrapper from './CheckboxWrapper';
+import styled from 'styled-components';
+
 import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
+
+import CheckboxWrapper from './CheckboxWrapper';
 
 const Border = styled.div`
   flex: 1;

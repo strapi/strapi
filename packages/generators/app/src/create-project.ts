@@ -93,6 +93,18 @@ export default async function createProject(
 
         await fse.writeJSON(destPath, json, { spaces: 2 });
       }
+    } else {
+      const jsJSONDir = join(__dirname, 'resources/json/js');
+      const filesMap = { 'jsconfig.json.js': '.' };
+
+      for (const [fileName, path] of Object.entries(filesMap)) {
+        const srcPath = join(jsJSONDir, fileName);
+        const destPath = join(rootPath, path, 'jsconfig.json');
+
+        const json = require(srcPath).default();
+
+        await fse.writeJSON(destPath, json, { spaces: 2 });
+      }
     }
 
     // ensure node_modules is created

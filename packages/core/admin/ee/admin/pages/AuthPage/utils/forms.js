@@ -1,5 +1,5 @@
-import Providers from '../components/Providers';
 import baseForms from '../../../../../admin/src/pages/AuthPage/utils/forms';
+import Providers from '../components/Providers';
 
 const forms = {
   ...baseForms,

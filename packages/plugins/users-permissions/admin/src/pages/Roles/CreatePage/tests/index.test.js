@@ -1,11 +1,14 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { act, render, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router, Switch, Route } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-import pluginId from '../../../../pluginId';
+import { IntlProvider } from 'react-intl';
+import { Route, Router, Switch } from 'react-router-dom';
+
 import RolesCreatePage from '..';
+import pluginId from '../../../../pluginId';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => {

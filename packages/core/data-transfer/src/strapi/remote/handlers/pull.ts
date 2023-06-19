@@ -19,9 +19,9 @@ export interface PullHandler extends Handler {
 
   assertValidTransferAction(action: string): asserts action is PullTransferAction;
 
-  onTransferMessage(msg: Protocol.client.TransferMessage): Promise<unknown> | unknown;
-  onTransferAction(msg: Protocol.client.Action): Promise<unknown> | unknown;
-  onTransferStep(msg: Protocol.client.TransferPullMessage): Promise<unknown> | unknown;
+  onTransferMessage(msg: Protocol.Client.TransferMessage): Promise<unknown> | unknown;
+  onTransferAction(msg: Protocol.Client.Action): Promise<unknown> | unknown;
+  onTransferStep(msg: Protocol.Client.TransferPullMessage): Promise<unknown> | unknown;
 
   createReadableStreamForStep(step: TransferStage): Promise<void>;
 
@@ -121,7 +121,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     }
 
     if (kind === 'step') {
-      return this.onTransferStep(msg as Protocol.client.TransferPullMessage);
+      return this.onTransferStep(msg as Protocol.Client.TransferPullMessage);
     }
   },
 
@@ -243,8 +243,8 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
   async end(
     this: PullHandler,
-    params: Protocol.client.GetCommandParams<'end'>
-  ): Promise<Protocol.server.Payload<Protocol.server.EndMessage>> {
+    params: Protocol.Client.GetCommandParams<'end'>
+  ): Promise<Protocol.Server.Payload<Protocol.Server.EndMessage>> {
     await this.verifyAuth();
 
     if (this.transferID !== params.transferID) {

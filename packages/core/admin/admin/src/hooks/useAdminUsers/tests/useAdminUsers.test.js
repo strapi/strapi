@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { setupServer } from 'msw/node';
-import { rest } from 'msw';
+
 import { renderHook, waitFor } from '@testing-library/react';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
+
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import init from './init';
+
 import pluginId from '../../pluginId';
+
+import init from './init';
 import reducer, { initialState } from './reducer';
 
 const useRolesList = (shouldFetchData = true) => {

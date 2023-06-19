@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { Box, Grid, GridItem, Option, Select } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Grid, GridItem, Box, Select, Option } from '@strapi/design-system';
-import getTrad from '../../../../utils/getTrad';
+
 import { pageSizes, sortOptions } from '../../../../constants';
+import getTrad from '../../../../utils/getTrad';
 
 const Settings = ({ sort = '', pageSize = 10, onChange }) => {
   const { formatMessage } = useIntl();

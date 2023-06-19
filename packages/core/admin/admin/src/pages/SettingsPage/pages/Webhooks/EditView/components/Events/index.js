@@ -1,24 +1,24 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 
-import { useFormikContext } from 'formik';
-import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import {
-  FieldLabel,
-  Flex,
-  Typography,
   BaseCheckbox,
   Checkbox,
+  FieldLabel,
+  Flex,
   Loader,
   RawTable as Table,
-  RawTh as Th,
-  RawTd as Td,
-  RawTr as Tr,
-  RawThead as Thead,
   RawTbody as Tbody,
+  RawTd as Td,
+  RawTh as Th,
+  RawThead as Thead,
+  RawTr as Tr,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { useFormikContext } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../hooks/useContentTypes';
 

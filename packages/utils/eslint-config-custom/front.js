@@ -6,7 +6,6 @@ module.exports = {
     commonjs: true,
     es6: true,
     jest: true,
-    mocha: true,
   },
   parserOptions: {
     requireConfigFile: false,
@@ -15,14 +14,7 @@ module.exports = {
     },
   },
   globals: {
-    strapi: false,
     window: false,
-    cy: false,
-    Cypress: false,
-    expect: false,
-    assert: false,
-    chai: false,
-    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
     ADMIN_PATH: true,
     BACKEND_URL: true,
@@ -39,6 +31,22 @@ module.exports = {
     'react/jsx-no-constructed-context-values': 'warn',
     'react/jsx-no-useless-fragment': 'warn',
     'react/no-unstable-nested-components': 'warn',
+    'import/order': [
+      'error',
+      {
+        groups: [
+          ['external', 'internal', 'builtin'],
+          'parent',
+          ['sibling', 'index'],
+          'object',
+          'type',
+        ],
+        pathGroups: [{ pattern: 'react', group: 'external', position: 'before' }],
+        pathGroupsExcludedImportTypes: ['react'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
+    ],
     'no-restricted-imports': [
       'error',
       {
