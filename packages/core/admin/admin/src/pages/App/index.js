@@ -4,29 +4,31 @@
  *
  */
 
-import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+
+import { SkipToContent } from '@strapi/design-system';
 import {
-  LoadingIndicatorPage,
   auth,
-  useNotification,
-  TrackingProvider,
+  LoadingIndicatorPage,
   prefixFileUrlWithBackendUrl,
+  TrackingProvider,
   useAppInfo,
   useFetchClient,
+  useNotification,
 } from '@strapi/helper-plugin';
-import { SkipToContent } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { Route, Switch } from 'react-router-dom';
 
 import PrivateRoute from '../../components/PrivateRoute';
+import { useConfigurations } from '../../hooks';
+import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
-import { getUID } from './utils';
-import { useConfigurations } from '../../hooks';
-import { useEnterprise } from '../../hooks/useEnterprise';
+
 import { ROUTES_CE } from './constants';
+import { getUID } from './utils';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')

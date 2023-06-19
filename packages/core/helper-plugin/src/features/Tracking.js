@@ -140,4 +140,4 @@ const useTracking = () => {
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking, TrackingContext };
+export { TrackingContext, TrackingProvider, useTracking };

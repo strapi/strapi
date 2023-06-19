@@ -734,64 +734,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c64 {
-  position: absolute;
-  display: none;
-  top: 5px;
-  right: 0.5rem;
-}
-
-.c64 svg {
-  width: 0.625rem;
-  height: 0.625rem;
-}
-
-.c64 svg path {
-  fill: #4945ff;
-}
-
-.c57 {
-  width: 8.75rem;
-  height: 5rem;
-  position: relative;
-  border: 1px solid #dcdce4;
-  background: #f6f6f9;
-  border-radius: 4px;
-  max-width: 100%;
-}
-
-.c57.active,
-.c57:focus,
-.c57:hover {
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-}
-
-.c57.active .c63,
-.c57:focus .c63,
-.c57:hover .c63 {
-  display: block;
-}
-
-.c57.active .c7,
-.c57:focus .c7,
-.c57:hover .c7 {
-  color: #4945ff;
-}
-
-.c57.active > div:first-child,
-.c57:focus > div:first-child,
-.c57:hover > div:first-child {
-  background: #d9d8ff;
-  color: #4945ff;
-}
-
-.c57.active > div:first-child svg path,
-.c57:focus > div:first-child svg path,
-.c57:hover > div:first-child svg path {
-  fill: #4945ff;
-}
-
 .c37.component-row,
 .c37.dynamiczone-row {
   position: relative;
@@ -858,6 +800,64 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   padding: 0;
 }
 
+.c64 {
+  position: absolute;
+  display: none;
+  top: 5px;
+  right: 0.5rem;
+}
+
+.c64 svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+.c64 svg path {
+  fill: #4945ff;
+}
+
+.c57 {
+  width: 8.75rem;
+  height: 5rem;
+  position: relative;
+  border: 1px solid #dcdce4;
+  background: #f6f6f9;
+  border-radius: 4px;
+  max-width: 100%;
+}
+
+.c57.active,
+.c57:focus,
+.c57:hover {
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+}
+
+.c57.active .c63,
+.c57:focus .c63,
+.c57:hover .c63 {
+  display: block;
+}
+
+.c57.active .c7,
+.c57:focus .c7,
+.c57:hover .c7 {
+  color: #4945ff;
+}
+
+.c57.active > div:first-child,
+.c57:focus > div:first-child,
+.c57:hover > div:first-child {
+  background: #d9d8ff;
+  color: #4945ff;
+}
+
+.c57.active > div:first-child svg path,
+.c57:focus > div:first-child svg path,
+.c57:hover > div:first-child svg path {
+  fill: #4945ff;
+}
+
 .c53 {
   width: 2rem;
   height: 2rem;
@@ -901,41 +901,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c22 table {
-  width: 100%;
-  white-space: nowrap;
-}
-
-.c22 thead {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c22 thead tr {
-  border-top: 0;
-}
-
-.c22 tr {
-  border-top: 1px solid #eaeaef;
-}
-
-.c22 tr td,
-.c22 tr th {
-  padding: 16px;
-}
-
-.c22 tr td:first-of-type,
-.c22 tr th:first-of-type {
-  padding: 0 4px;
-}
-
-.c22 th,
-.c22 td {
-  vertical-align: middle;
-  text-align: left;
-  color: #666687;
-  outline-offset: -4px;
 }
 
 .c44 {
@@ -1001,6 +966,41 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   left: -0.25rem;
 }
 
+.c22 table {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.c22 thead {
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c22 thead tr {
+  border-top: 0;
+}
+
+.c22 tr {
+  border-top: 1px solid #eaeaef;
+}
+
+.c22 tr td,
+.c22 tr th {
+  padding: 16px;
+}
+
+.c22 tr td:first-of-type,
+.c22 tr th:first-of-type {
+  padding: 0 4px;
+}
+
+.c22 th,
+.c22 td {
+  vertical-align: middle;
+  text-align: left;
+  color: #666687;
+  outline-offset: -4px;
+}
+
 .c39 {
   position: absolute;
   left: -1.125rem;
@@ -1042,13 +1042,13 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #d9d8ff;
 }
 
-.c25 {
-  position: relative;
-}
-
 .c29 svg {
   height: 100%;
   width: 100%;
+}
+
+.c25 {
+  position: relative;
 }
 
 <div>

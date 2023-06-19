@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import SearchAsset from '../index';
 
 const handleChange = jest.fn();

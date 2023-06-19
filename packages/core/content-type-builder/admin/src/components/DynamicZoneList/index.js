@@ -6,12 +6,14 @@
 
 /* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import ComponentCard from '../ComponentCard';

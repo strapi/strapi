@@ -1,28 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import get from 'lodash/get';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
-  IconButton,
+  AccordionToggle,
   Box,
   Flex,
+  IconButton,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Trash, Drag, More } from '@strapi/icons';
+import { Drag, More, Trash } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
-
-import FieldComponent from '../../FieldComponent';
 import { ComponentIcon } from '../../ComponentIcon';
+import FieldComponent from '../../FieldComponent';
 
 export const DynamicComponent = ({
   componentUid,

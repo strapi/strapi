@@ -1,7 +1,19 @@
 import React, { useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Option,
+  Select,
+  Typography,
+  useNotifyAT,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   Form,
@@ -13,26 +25,17 @@ import {
   useOverlayBlocker,
   useRBAC,
 } from '@strapi/helper-plugin';
-import {
-  useNotifyAT,
-  Main,
-  HeaderLayout,
-  ContentLayout,
-  Button,
-  Box,
-  Flex,
-  Select,
-  Option,
-  Typography,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
 import { Check } from '@strapi/icons';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
 import pluginPermissions from '../../permissions';
 import { getTrad } from '../../utils';
+
+import { fetchData, putAdvancedSettings } from './utils/api';
 import layout from './utils/layout';
 import schema from './utils/schema';
-import { fetchData, putAdvancedSettings } from './utils/api';
 
 const ProtectedAdvancedSettingsPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>

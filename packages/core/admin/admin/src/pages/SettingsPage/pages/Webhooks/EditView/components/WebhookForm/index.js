@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { useIntl } from 'react-intl';
-import { Form, Link } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
+
 import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Button,
-  Flex,
-  TextInput,
   HeaderLayout,
-  ContentLayout,
-  Box,
+  TextInput,
 } from '@strapi/design-system';
-
+import { Form, Link } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, Play as Publish } from '@strapi/icons';
 import EventTable from 'ee_else_ce/pages/SettingsPage/pages/Webhooks/EditView/components/EventTable';
-import { makeWebhookValidationSchema } from './utils/makeWebhookValidationSchema';
+import { Field, FormikProvider, useFormik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import HeadersInput from '../HeadersInput';
 import TriggerContainer from '../TriggerContainer';
+
+import { makeWebhookValidationSchema } from './utils/makeWebhookValidationSchema';
 
 const WebhookForm = ({
   handleSubmit,

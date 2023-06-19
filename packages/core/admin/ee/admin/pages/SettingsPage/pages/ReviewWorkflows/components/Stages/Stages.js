@@ -1,13 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
 import { Box, Flex } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import { addStage } from '../../actions';
 import { AddStage } from '../AddStage';
+
 import { Stage } from './Stage';
 
 const StagesContainer = styled(Box)`

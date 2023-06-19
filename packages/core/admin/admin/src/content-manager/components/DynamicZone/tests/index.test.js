@@ -1,11 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
 
 import { DynamicZone } from '../index';
 

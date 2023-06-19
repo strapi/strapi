@@ -1,10 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 

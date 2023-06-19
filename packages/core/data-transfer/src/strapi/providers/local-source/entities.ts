@@ -1,4 +1,4 @@
-import type { ContentTypeSchema } from '@strapi/strapi';
+import type { Schema } from '@strapi/strapi';
 
 import { Readable, PassThrough } from 'stream';
 import * as shared from '../../queries';
@@ -8,7 +8,7 @@ import { IEntity } from '../../../../types';
  * Generate and consume content-types streams in order to stream each entity individually
  */
 export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
-  const contentTypes: ContentTypeSchema[] = Object.values(strapi.contentTypes);
+  const contentTypes: Schema.ContentType[] = Object.values(strapi.contentTypes);
 
   async function* contentTypeStreamGenerator() {
     for (const contentType of contentTypes) {
@@ -31,7 +31,7 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
   return Readable.from(
     (async function* entitiesGenerator(): AsyncGenerator<{
       entity: IEntity;
-      contentType: ContentTypeSchema;
+      contentType: Schema.ContentType;
     }> {
       for await (const { stream, contentType } of contentTypeStreamGenerator()) {
         try {

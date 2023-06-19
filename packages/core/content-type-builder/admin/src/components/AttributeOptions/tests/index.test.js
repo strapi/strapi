@@ -1,9 +1,11 @@
 import React from 'react';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { render, screen, fireEvent } from '@testing-library/react';
+
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
 import AttributeOptions from '../index';
 

@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
-import qs from 'qs';
+
+import { ActionLayout, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
   DynamicTable,
+  NoPermissions,
   SearchURLQuery,
   SettingsPageTitle,
-  useRBAC,
-  useNotification,
-  useFocusWhenNavigate,
-  NoPermissions,
   useAPIErrorHandler,
   useFetchClient,
+  useFocusWhenNavigate,
+  useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { useLocation } from 'react-router-dom';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
+import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
-import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
-import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import adminPermissions from '../../../../../permissions';
-import TableRows from './DynamicTable/TableRows';
 import Filters from '../../../components/Filters';
+
+import TableRows from './DynamicTable/TableRows';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
 import displayedFilters from './utils/displayedFilters';

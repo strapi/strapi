@@ -1,8 +1,10 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
+
 import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
 
