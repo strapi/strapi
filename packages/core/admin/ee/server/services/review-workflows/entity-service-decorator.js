@@ -84,7 +84,7 @@ const decorator = (service) => ({
           },
         },
       };
-      await service.emitEvent.call(this, uid, WORKFLOW_UPDATE_STAGE, webhookPayload);
+      await strapi.entityService.emitEvent(uid, WORKFLOW_UPDATE_STAGE, webhookPayload);
     }
 
     return updatedEntity;
