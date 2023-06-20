@@ -49,12 +49,13 @@ KeyValuePair.propTypes = {
 
 const Body = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
-  const { initialData, isCreatingEntry } = useCMEditViewDataManager();
+  const { initialData, isCreatingEntry, readActionAllowedFields } = useCMEditViewDataManager();
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const { firstname, lastname, username } = initialData[byField] ?? {};
+    const { firstname, lastname, username } = initialData[byField]?.[0] ?? {};
 
+    const canReadByField = readActionAllowedFields.includes(byField);
     const userFirstname = firstname ?? '';
     const userLastname = lastname ?? '';
     const user = username ?? getFullName(userFirstname, userLastname);
@@ -64,7 +65,7 @@ const Body = () => {
 
     return {
       at: formatRelativeTime(value, unit, { numeric: 'auto' }),
-      by: isCreatingEntry ? '-' : user,
+      by: isCreatingEntry || !canReadByField ? '-' : user,
     };
   };
 

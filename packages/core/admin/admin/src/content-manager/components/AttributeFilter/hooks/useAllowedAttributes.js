@@ -1,4 +1,3 @@
-import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import { useRBACProvider, findMatchingPermissions, useCollator } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
