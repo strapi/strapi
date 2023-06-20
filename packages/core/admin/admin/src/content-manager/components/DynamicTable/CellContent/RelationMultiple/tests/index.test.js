@@ -62,7 +62,13 @@ const DEFAULT_PROPS_FIXTURE = {
 };
 
 const ComponentFixture = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

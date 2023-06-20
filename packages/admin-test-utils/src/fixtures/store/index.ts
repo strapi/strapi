@@ -1,7 +1,7 @@
 import { combineReducers, createStore } from 'redux';
 
 const reducers = {
-  admin_app: jest.fn(() => ({ status: 'init' })),
+  admin_app: jest.fn(() => ({ permissions: {}, status: 'init' })),
   'content-manager_app': jest.fn(() => ({
     components: [],
     status: 'loading',

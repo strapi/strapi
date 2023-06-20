@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { act, render, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Route, Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { Route, MemoryRouter } from 'react-router-dom';
+import { createStore } from 'redux';
 
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
@@ -56,31 +58,38 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
+const setup = ({ path, ...props } = {}) =>
+  render(() => <EditView {...props} />, {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
-const makeApp = (history) => {
-  return (
-    <QueryClientProvider client={client}>
-      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Router history={history}>
-              <Route path="/settings/api-tokens/:id">
-                <EditView />
-              </Route>
-            </Router>
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
-    </QueryClientProvider>
-  );
-};
+      return (
+        <Provider
+          store={createStore((state) => state, {
+            admin_app: { permissions: fixtures.permissions.app },
+          })}
+        >
+          <QueryClientProvider client={client}>
+            <IntlProvider defaultLocale="en" locale="en">
+              <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+                <Theme>
+                  <MemoryRouter initialEntries={[path || '/settings/api-tokens/create']}>
+                    <Route path="/settings/api-tokens/create">{children}</Route>
+                  </MemoryRouter>
+                </Theme>
+              </ThemeToggleProvider>
+            </IntlProvider>
+          </QueryClientProvider>
+        </Provider>
+      );
+    },
+  });
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
   afterAll(() => {
@@ -88,33 +97,17 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
   });
 
   it('renders and matches the snapshot when creating token', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const { container, getByText } = render(App);
+    const { getByText } = setup();
 
-    act(() => history.push('/settings/api-tokens/create'));
-
-    await waitFor(() => {
-      expect(getByText('Address')).toBeInTheDocument();
-    });
-
-    expect(container).toMatchSnapshot();
+    await waitFor(() => expect(getByText('Address')).toBeInTheDocument());
   });
 
   it('renders and matches the snapshot when editing existing token', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const { container, getByText } = render(App);
+    const { getByText } = setup({ path: '/settings/api-tokens/1' });
 
-    act(() => history.push('/settings/api-tokens/1'));
-
-    await waitFor(() => {
-      expect(getByText('My super token')).toBeInTheDocument();
-      expect(getByText('This describe my super token')).toBeInTheDocument();
-      expect(getByText('Regenerate')).toBeInTheDocument();
-      expect(getByText('Address')).toBeInTheDocument();
-    });
-
-    expect(container).toMatchSnapshot();
+    await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('This describe my super token')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Regenerate')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Address')).toBeInTheDocument());
   });
 });

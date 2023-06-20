@@ -1,24 +1,26 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { createStore } from 'redux';
 
 import useAuditLogsData from '../hooks/useAuditLogsData';
 import ListView from '../index';
 
 import { getBigTestPageData, TEST_PAGE_DATA, TEST_SINGLE_DATA } from './utils/data';
 
-const history = createMemoryHistory();
-const user = userEvent.setup();
-
 jest.mock('../hooks/useAuditLogsData', () => jest.fn());
 
 const mockUseQuery = jest.fn();
+
+// TODO: Refactor to use msw instead
 jest.mock('react-query', () => {
   const actual = jest.requireActual('react-query');
 
@@ -37,25 +39,49 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
+const history = createMemoryHistory();
 
-const App = (
-  <QueryClientProvider client={client}>
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-        <Router history={history}>
-          <ListView />
-        </Router>
-      </IntlProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const setup = (props) => ({
+  ...render(<ListView {...props} />, {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <Provider
+          store={createStore((state) => state, {
+            admin_app: {
+              permissions: {
+                ...fixtures.permissions.app,
+                settings: {
+                  ...fixtures.permissions.app.settings,
+                  auditLogs: {
+                    main: [{ action: 'admin::audit-logs.read', subject: null }],
+                    read: [{ action: 'admin::audit-logs.read', subject: null }],
+                  },
+                },
+              },
+            },
+          })}
+        >
+          <QueryClientProvider client={client}>
+            <ThemeProvider theme={lightTheme}>
+              <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+                <Router history={history}>{children}</Router>
+              </IntlProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </Provider>
+      );
+    },
+  }),
+  user: userEvent.setup(),
+});
 
 const waitForReload = async () => {
   await screen.findByText('Audit Logs', { selector: 'h1' });
@@ -83,14 +109,12 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    render(App);
-    const title = screen.getByText(/audit logs/i);
+    const { getByText } = setup();
+    const title = getByText(/audit logs/i);
     expect(title).toBeInTheDocument();
-    const subTitle = screen.getByText(
-      /logs of all the activities that happened in your environment/i
-    );
+    const subTitle = getByText(/logs of all the activities that happened in your environment/i);
     expect(subTitle).toBeInTheDocument();
-    expect(screen.getByText(/filters/i)).toBeInTheDocument();
+    expect(getByText(/filters/i)).toBeInTheDocument();
   });
 
   it('should show a list of audit logs with all actions', async () => {
@@ -100,14 +124,13 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       },
       isLoading: false,
     });
-    render(App);
 
-    await waitFor(() => {
-      expect(screen.getByText('Create role')).toBeInTheDocument();
-      expect(screen.getByText('Delete role')).toBeInTheDocument();
-      expect(screen.getByText('Create entry (article)')).toBeInTheDocument();
-      expect(screen.getByText('Admin logout')).toBeInTheDocument();
-    });
+    const { getByText } = setup();
+
+    await waitFor(() => expect(getByText('Create role')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Delete role')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Create entry (article)')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Admin logout')).toBeInTheDocument());
   });
 
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
@@ -117,16 +140,16 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       },
       isLoading: false,
     });
-    render(App);
+    const { getByText, queryByRole, user } = setup();
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(queryByRole('dialog')).not.toBeInTheDocument();
 
     mockUseQuery.mockReturnValue({
       data: TEST_SINGLE_DATA,
       status: 'success',
     });
 
-    const auditLogRow = screen.getByText('Create role').closest('tr');
+    const auditLogRow = getByText('Create role').closest('tr');
     await user.click(auditLogRow);
 
     const modal = screen.getByRole('dialog');
@@ -156,11 +179,9 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    render(App);
+    const { getByText } = setup();
 
-    await waitFor(() =>
-      expect(screen.getByText(/go to page 1/i).closest('a')).toHaveClass('active')
-    );
+    await waitFor(() => expect(getByText(/go to page 1/i).closest('a')).toHaveClass('active'));
   });
 
   it('should paginate the results', async () => {
@@ -177,31 +198,28 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    render(App);
+    const { getAllByText, getByText, getByLabelText, user } = setup();
     await waitForReload();
 
     // Should have pagination section with 4 pages
-    const pagination = screen.getByLabelText(/pagination/i);
+    const pagination = getByLabelText(/pagination/i);
     expect(pagination).toBeVisible();
-    const pageButtons = screen.getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
+    const pageButtons = getAllByText(/go to page \d+/i).map((el) => el.closest('a'));
     expect(pageButtons.length).toBe(4);
 
     // Can't go to previous page since there isn't one
-    expect(screen.getByText(/go to previous page/i).closest('a')).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
+    expect(getByText(/go to previous page/i).closest('a')).toHaveAttribute('aria-disabled', 'true');
 
     // Can go to next page
-    await user.click(screen.getByText(/go to next page/i).closest('a'));
+    await user.click(getByText(/go to next page/i).closest('a'));
     expect(history.location.search).toBe('?page=2');
 
     // Can go to previous page
-    await user.click(screen.getByText(/go to previous page/i).closest('a'));
+    await user.click(getByText(/go to previous page/i).closest('a'));
     expect(history.location.search).toBe('?page=1');
 
     // Can go to specific page
-    await user.click(screen.getByText(/go to page 3/i).closest('a'));
+    await user.click(getByText(/go to page 3/i).closest('a'));
     expect(history.location.search).toBe('?page=3');
   });
 
@@ -221,7 +239,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    const { container } = render(App);
+    const { container } = setup();
 
     const rows = await waitFor(() => container.querySelector('tbody').querySelectorAll('tr'));
     expect(rows.length).toEqual(20);
@@ -235,14 +253,14 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    render(App);
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const { getByRole, getByLabelText, getByPlaceholderText, user } = setup();
+    const filtersButton = getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
 
-    const filterButton = screen.getByLabelText(/select field/i, { name: 'action' });
-    const operatorButton = screen.getByLabelText(/select filter/i, { name: 'is' });
-    const comboBoxInput = screen.getByPlaceholderText(/select or enter a value/i);
-    const addFilterButton = screen.getByRole('button', { name: /add filter/i });
+    const filterButton = getByLabelText(/select field/i, { name: 'action' });
+    const operatorButton = getByLabelText(/select filter/i, { name: 'is' });
+    const comboBoxInput = getByPlaceholderText(/select or enter a value/i);
+    const addFilterButton = getByRole('button', { name: /add filter/i });
 
     expect(filterButton).toBeVisible();
     expect(operatorButton).toBeVisible();
@@ -258,16 +276,16 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
       isLoading: false,
     });
 
-    render(App);
+    const { getByRole, getByPlaceholderText, user } = setup();
     // Open the filters popover
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = getByRole('button', { name: /filters/i });
     await user.click(filtersButton);
     // Click the combobox
-    await user.click(screen.getByPlaceholderText(/select or enter a value/i));
+    await user.click(getByPlaceholderText(/select or enter a value/i));
     // Select an option
-    await user.click(screen.getByRole('option', { name: /create entry/i }));
+    await user.click(getByRole('option', { name: /create entry/i }));
     // Apply the filter
-    const addFilterButton = screen.getByRole('button', { name: /add filter/i });
+    const addFilterButton = getByRole('button', { name: /add filter/i });
     fireEvent.click(addFilterButton);
 
     expect(history.location.search).toBe('?filters[$and][0][action][$eq]=entry.create&page=1');

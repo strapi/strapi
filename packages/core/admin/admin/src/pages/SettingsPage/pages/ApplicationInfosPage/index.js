@@ -9,6 +9,7 @@ import {
   HeaderLayout,
   Layout,
   Link,
+  Loader,
   Main,
   Typography,
 } from '@strapi/design-system';
@@ -55,7 +56,9 @@ const ApplicationInfosPage = () => {
   } = useRBAC(permissions.settings['project-settings']);
   const canSubmit = canRead && canUpdate;
 
-  const { data } = useQuery('project-settings', fetchProjectSettings, { enabled: canRead });
+  const { data, isLoading } = useQuery('project-settings', fetchProjectSettings, {
+    enabled: canRead,
+  });
 
   const submitMutation = useMutation((body) => postProjectSettings(body), {
     async onSuccess({ menuLogo, authLogo }) {
@@ -104,121 +107,134 @@ const ApplicationInfosPage = () => {
 
   return (
     <Layout>
+      {/* TODO: Add missing translation */}
       <SettingsPageTitle name="Application" />
       <Main>
-        <form onSubmit={handleSubmit}>
-          <HeaderLayout
-            title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Overview' })}
-            subtitle={formatMessage({
-              id: 'Settings.application.description',
-              defaultMessage: 'Administration panel’s global information',
+        {isLoading ? (
+          <Loader>
+            {formatMessage({
+              id: 'Settings.application.isLoading',
+              defaultMessage: 'Loading',
             })}
-            primaryAction={
-              canSubmit && (
-                <Button type="submit" startIcon={<Check />}>
-                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                </Button>
-              )
-            }
-          />
-          <ContentLayout>
-            <Flex direction="column" alignItems="stretch" gap={6}>
-              <Flex
-                direction="column"
-                alignItems="stretch"
-                gap={4}
-                hasRadius
-                background="neutral0"
-                shadow="tableShadow"
-                paddingTop={6}
-                paddingBottom={6}
-                paddingRight={7}
-                paddingLeft={7}
-              >
-                <Typography variant="delta" as="h3">
-                  {formatMessage({
-                    id: 'global.details',
-                    defaultMessage: 'Details',
-                  })}
-                </Typography>
+          </Loader>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <HeaderLayout
+              title={formatMessage({
+                id: 'Settings.application.title',
+                defaultMessage: 'Overview',
+              })}
+              subtitle={formatMessage({
+                id: 'Settings.application.description',
+                defaultMessage: 'Administration panel’s global information',
+              })}
+              primaryAction={
+                canSubmit && (
+                  <Button type="submit" startIcon={<Check />}>
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                  </Button>
+                )
+              }
+            />
+            <ContentLayout>
+              <Flex direction="column" alignItems="stretch" gap={6}>
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  gap={4}
+                  hasRadius
+                  background="neutral0"
+                  shadow="tableShadow"
+                  paddingTop={6}
+                  paddingBottom={6}
+                  paddingRight={7}
+                  paddingLeft={7}
+                >
+                  <Typography variant="delta" as="h3">
+                    {formatMessage({
+                      id: 'global.details',
+                      defaultMessage: 'Details',
+                    })}
+                  </Typography>
 
-                <Grid gap={5} as="dl">
-                  <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
-                      {formatMessage({
-                        id: 'Settings.application.strapiVersion',
-                        defaultMessage: 'strapi version',
-                      })}
-                    </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" as="dd">
-                      <Typography>v{strapiVersion}</Typography>
-                      {shouldUpdateStrapi && (
+                  <Grid gap={5} as="dl">
+                    <GridItem col={6} s={12}>
+                      <Typography variant="sigma" textColor="neutral600" as="dt">
+                        {formatMessage({
+                          id: 'Settings.application.strapiVersion',
+                          defaultMessage: 'strapi version',
+                        })}
+                      </Typography>
+                      <Flex gap={3} direction="column" alignItems="start" as="dd">
+                        <Typography>v{strapiVersion}</Typography>
+                        {shouldUpdateStrapi && (
+                          <Link
+                            href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                            isExternal
+                            endIcon={<ExternalLink />}
+                          >
+                            {formatMessage({
+                              id: 'Settings.application.link-upgrade',
+                              defaultMessage: 'Upgrade your admin panel',
+                            })}
+                          </Link>
+                        )}
+                      </Flex>
+                    </GridItem>
+                    <GridItem col={6} s={12}>
+                      <Typography variant="sigma" textColor="neutral600" as="dt">
+                        {formatMessage({
+                          id: 'Settings.application.edition-title',
+                          defaultMessage: 'current plan',
+                        })}
+                      </Typography>
+                      <Flex gap={3} direction="column" alignItems="start" as="dd">
+                        <Typography>
+                          {formatMessage(
+                            {
+                              id: 'Settings.application.ee-or-ce',
+                              defaultMessage:
+                                '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
+                            },
+                            { communityEdition }
+                          )}
+                        </Typography>
                         <Link
-                          href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                          href="https://strapi.io/pricing-self-hosted"
                           isExternal
                           endIcon={<ExternalLink />}
                         >
                           {formatMessage({
-                            id: 'Settings.application.link-upgrade',
-                            defaultMessage: 'Upgrade your admin panel',
+                            id: 'Settings.application.link-pricing',
+                            defaultMessage: 'See all pricing plans',
                           })}
                         </Link>
-                      )}
-                    </Flex>
-                  </GridItem>
-                  <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
-                      {formatMessage({
-                        id: 'Settings.application.edition-title',
-                        defaultMessage: 'current plan',
-                      })}
-                    </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" as="dd">
-                      <Typography>
-                        {formatMessage(
-                          {
-                            id: 'Settings.application.ee-or-ce',
-                            defaultMessage:
-                              '{communityEdition, select, true {Community Edition} other {Enterprise Edition}}',
-                          },
-                          { communityEdition }
-                        )}
-                      </Typography>
-                      <Link
-                        href="https://strapi.io/pricing-self-hosted"
-                        isExternal
-                        endIcon={<ExternalLink />}
-                      >
-                        {formatMessage({
-                          id: 'Settings.application.link-pricing',
-                          defaultMessage: 'See all pricing plans',
-                        })}
-                      </Link>
-                    </Flex>
-                  </GridItem>
+                      </Flex>
+                    </GridItem>
 
-                  <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
-                      {formatMessage({
-                        id: 'Settings.application.node-version',
-                        defaultMessage: 'node version',
-                      })}
-                    </Typography>
-                    <Typography as="dd">{nodeVersion}</Typography>
-                  </GridItem>
-                  <AdminSeatInfo />
-                </Grid>
+                    <GridItem col={6} s={12}>
+                      <Typography variant="sigma" textColor="neutral600" as="dt">
+                        {formatMessage({
+                          id: 'Settings.application.node-version',
+                          defaultMessage: 'node version',
+                        })}
+                      </Typography>
+                      <Typography as="dd">{nodeVersion}</Typography>
+                    </GridItem>
+                    <AdminSeatInfo />
+                  </Grid>
+                </Flex>
+                {canRead && data && (
+                  <CustomizationInfos
+                    canUpdate={canUpdate}
+                    ref={inputsRef}
+                    projectSettingsStored={data}
+                  />
+                )}
               </Flex>
-              {canRead && data && (
-                <CustomizationInfos
-                  canUpdate={canUpdate}
-                  ref={inputsRef}
-                  projectSettingsStored={data}
-                />
-              )}
-            </Flex>
-          </ContentLayout>
-        </form>
+            </ContentLayout>
+          </form>
+        )}
       </Main>
     </Layout>
   );
