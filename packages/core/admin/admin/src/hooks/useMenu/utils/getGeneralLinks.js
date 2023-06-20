@@ -2,8 +2,12 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import checkPermissions from './checkPermissions';
 
-const getGeneralLinks = async (permissions, generalSectionRawLinks, shouldUpdateStrapi) => {
-  const generalSectionPermissionsPromises = checkPermissions(permissions, generalSectionRawLinks);
+const getGeneralLinks = async (userPermissions, generalSectionRawLinks, shouldUpdateStrapi, permissions) => {
+  const generalSectionRawLinksWithPermissions = generalSectionRawLinks.map((link) => ({
+    ...link,
+    permissions: link.permissions ? permissions[link.permissions] : []
+  }));
+  const generalSectionPermissionsPromises = checkPermissions(userPermissions, generalSectionRawLinksWithPermissions);
   const generalSectionLinksPermissions = await Promise.all(generalSectionPermissionsPromises);
 
   const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(

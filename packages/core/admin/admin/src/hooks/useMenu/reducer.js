@@ -2,8 +2,6 @@
 import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import produce from 'immer';
 
-import adminPermissions from '../../permissions';
-
 const initialState = {
   generalSectionLinks: [
     {
@@ -13,7 +11,7 @@ const initialState = {
         defaultMessage: 'Plugins',
       },
       to: '/list-plugins',
-      permissions: adminPermissions.marketplace.main,
+      permissions: 'marketplace',
     },
     {
       icon: ShoppingCart,
@@ -22,7 +20,7 @@ const initialState = {
         defaultMessage: 'Marketplace',
       },
       to: '/marketplace',
-      permissions: adminPermissions.marketplace.main,
+      permissions: 'marketplace',
     },
     {
       icon: Cog,
@@ -33,7 +31,7 @@ const initialState = {
       to: '/settings',
       // Permissions of this link are retrieved in the init phase
       // using the settings menu
-      permissions: [],
+      permissions: false,
       notificationsCount: 0,
     },
   ],

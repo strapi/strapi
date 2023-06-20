@@ -1,9 +1,13 @@
 import checkPermissions from './checkPermissions';
 
-const getPluginSectionLinks = async (userPermissions, pluginsSectionRawLinks) => {
+const getPluginSectionLinks = async (userPermissions, pluginsSectionRawLinks, permissions) => {
+  const pluginsSectionRawLinksWithPermissions = pluginsSectionRawLinks.map((link) => ({
+    ...link,
+    permissions: link.permissions ? permissions[link.permissions] : []
+  }));
   const pluginSectionPermissionsPromises = checkPermissions(
     userPermissions,
-    pluginsSectionRawLinks
+    pluginsSectionRawLinksWithPermissions
   );
   const pluginSectionLinksPermissions = await Promise.all(pluginSectionPermissionsPromises);
 
