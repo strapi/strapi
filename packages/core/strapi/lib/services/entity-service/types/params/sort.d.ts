@@ -1,4 +1,4 @@
-import type { Attribute, Common } from '@strapi/strapi';
+import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 export module OrderKind {
   export type Asc = 'asc';
@@ -18,7 +18,7 @@ export module OrderKind {
  */
 type SingleAttribute<TSchemaUID extends Common.UID.Schema> =
   | 'id'
-  | Attribute.GetNonPopulatableKeys<TSchemaUID>;
+  | Utils.Guard.Never<Attribute.GetNonPopulatableKeys<TSchemaUID>, string>;
 
 /**
  * Ordered single non-populatable attribute representation
