@@ -1,3 +1,5 @@
+import type { Utils } from '@strapi/strapi';
+
 export type PageNotation = {
   page?: number;
   pageSize?: number;
@@ -8,4 +10,4 @@ export type OffsetNotation = {
   limit?: number;
 };
 
-export type Any = PageNotation | OffsetNotation;
+export type Any = Utils.XOR<PageNotation, OffsetNotation>;
