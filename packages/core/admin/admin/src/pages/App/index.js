@@ -110,14 +110,19 @@ function App() {
           setTelemetryProperties(properties);
 
           try {
+            const event = 'didInitializeAdministration';
             await post('https://analytics.strapi.io/api/v2/track', {
               // This event is anonymous
-              event: 'didInitializeAdministration',
+              event,
               userId: '',
               deviceId,
               eventPropeties: {},
               userProperties: { environment: appInfo.currentEnvironment },
               groupProperties: { ...properties, projectId: uuid },
+            }, {
+              headers: {
+                'X-Strapi-Event': event,
+              }
             });
           } catch (e) {
             // Silent.
