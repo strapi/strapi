@@ -9,7 +9,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 
 import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 
 const name = pluginPkg.strapi.name;
@@ -23,7 +23,7 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Documentation',
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
       async Component() {
         const component = await import(
           /* webpackChunkName: "documentation-page" */ './pages/PluginPage'
@@ -53,7 +53,7 @@ export default {
 
         return component;
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
     });
   },
   async registerTrads({ locales }) {

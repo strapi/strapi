@@ -23,7 +23,7 @@ import {
 import { Envelop } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import getTrad from '../../utils/getTrad';
 import schema from '../../utils/schema';
 
@@ -32,7 +32,7 @@ import EmailHeader from './components/EmailHeader';
 import { fetchEmailSettings, postEmailTest } from './utils/api';
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
+  <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
 );

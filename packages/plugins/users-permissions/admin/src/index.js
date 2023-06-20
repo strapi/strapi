@@ -8,7 +8,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
 
-import pluginPermissions from './permissions';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
@@ -40,7 +40,7 @@ export default {
 
             return component;
           },
-          permissions: pluginPermissions.accessRoles,
+          permissions: PERMISSIONS.accessRoles,
         },
         {
           intlLabel: {
@@ -56,7 +56,7 @@ export default {
 
             return component;
           },
-          permissions: pluginPermissions.readProviders,
+          permissions: PERMISSIONS.readProviders,
         },
         {
           intlLabel: {
@@ -72,7 +72,7 @@ export default {
 
             return component;
           },
-          permissions: pluginPermissions.readEmailTemplates,
+          permissions: PERMISSIONS.readEmailTemplates,
         },
         {
           intlLabel: {
@@ -88,7 +88,7 @@ export default {
 
             return component;
           },
-          permissions: pluginPermissions.readAdvancedSettings,
+          permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]
     );

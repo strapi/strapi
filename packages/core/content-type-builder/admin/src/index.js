@@ -3,7 +3,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 
 import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import reducers from './reducers';
 import formsAPI from './utils/formAPI';
@@ -21,7 +21,7 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Content Types Builder',
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
       async Component() {
         const component = await import(
           /* webpackChunkName: "content-type-builder" */ './pages/App'
