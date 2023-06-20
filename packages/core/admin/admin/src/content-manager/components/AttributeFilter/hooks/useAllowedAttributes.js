@@ -1,5 +1,5 @@
-import get from 'lodash/get';
 import { useRBACProvider, findMatchingPermissions, useCollator } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];

@@ -47,6 +47,7 @@ describe('CONTENT MANAGER | EditView | InformationBoxCE', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
+      readActionAllowedFields: [],
     }));
 
     const { getByText } = setup();
