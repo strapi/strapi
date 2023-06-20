@@ -31,12 +31,12 @@ import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
-import permissions from '../../../permissions';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
 import DynamicTable from '../../components/DynamicTable';
@@ -47,8 +47,6 @@ import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
 import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
-
-const cmPermissions = permissions.contentManager;
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -85,6 +83,7 @@ function ListView({
   const fetchPermissionsRef = useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const permissions = useSelector(selectAdminPermissions);
 
   useFocusWhenNavigate();
 
@@ -391,7 +390,9 @@ function ListView({
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
-              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+              <CheckPermissions
+                permissions={permissions.contentManager.collectionTypesConfigurations}
+              >
                 <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
                   <IconButton
                     onClick={() => {

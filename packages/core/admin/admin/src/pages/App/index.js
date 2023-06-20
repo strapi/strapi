@@ -16,10 +16,13 @@ import {
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
+import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import PrivateRoute from '../../components/PrivateRoute';
+import { ADMIN_PERMISSIONS_CE } from '../../constants';
 import { useConfigurations } from '../../hooks';
 import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
@@ -27,7 +30,7 @@ import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 
-import { ROUTES_CE } from './constants';
+import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 import { getUID } from './utils';
 
 const AuthenticatedApp = lazy(() =>
@@ -35,6 +38,14 @@ const AuthenticatedApp = lazy(() =>
 );
 
 function App() {
+  const adminPermissions = useEnterprise(ADMIN_PERMISSIONS_CE, async () => (await import('../../../../ee/admin/constants')).ADMIN_PERMISSIONS_EE, {
+    combine(cePermissions, eePermissions) {
+      // the `settings` NS e.g. are deep nested objects, that need a deep merge
+      return merge({}, cePermissions, eePermissions);
+    },
+
+    defaultValue: ADMIN_PERMISSIONS_CE,
+  })
   const routes = useEnterprise(
     ROUTES_CE,
     async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
@@ -49,6 +60,7 @@ function App() {
     isLoading: true,
     hasAdmin: false,
   });
+  const dispatch = useDispatch();
   const appInfo = useAppInfo();
   const { get, post } = useFetchClient();
 
@@ -59,6 +71,10 @@ function App() {
   }, [routes]);
 
   const [telemetryProperties, setTelemetryProperties] = useState(null);
+
+  useEffect(() => {
+    dispatch({ type: SET_ADMIN_PERMISSIONS, payload: adminPermissions });
+  }, [adminPermissions, dispatch]);
 
   useEffect(() => {
     const currentToken = auth.getToken();

@@ -3,15 +3,16 @@ import React from 'react';
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../../../../../../../admin/src/pages/App/selectors';
-import ListView from '../ListView';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
+
+import { ReviewWorkflowsPage } from './ReviewWorkflows';
 
 const ProtectedListPage = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings.auditLogs.main}>
-      <ListView />
+    <CheckPagePermissions permissions={permissions.settings['review-workflows'].main}>
+      <ReviewWorkflowsPage />
     </CheckPagePermissions>
   );
 };

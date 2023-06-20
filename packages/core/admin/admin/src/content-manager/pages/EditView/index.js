@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import permissions from '../../../permissions';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import { DynamicZone } from '../../components/DynamicZone';
@@ -29,14 +29,14 @@ import Header from './Header';
 import { selectAttributesLayout, selectCurrentLayout, selectCustomFieldUids } from './selectors';
 import { getFieldsActionMatchingPermissions } from './utils';
 
-const cmPermissions = permissions.contentManager;
-const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
+// TODO: this seems suspicious
+const CTB_PERMISSIONS = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, userPermissions }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-
+  const permissions = useSelector(selectAdminPermissions);
   const { layout, formattedContentTypeLayout, customFieldUids } = useSelector((state) => ({
     layout: selectCurrentLayout(state),
     formattedContentTypeLayout: selectAttributesLayout(state),
@@ -49,8 +49,8 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     getFieldsActionMatchingPermissions(userPermissions, slug);
 
   const configurationPermissions = isSingleType
-    ? cmPermissions.singleTypesConfigurations
-    : cmPermissions.collectionTypesConfigurations;
+    ? permissions.contentManager.singleTypesConfigurations
+    : permissions.contentManager.collectionTypesConfigurations;
 
   // // FIXME when changing the routing
   const configurationsURL = `/content-manager/${
@@ -188,7 +188,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         <Flex direction="column" alignItems="stretch" gap={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
-                            <CheckPermissions permissions={ctbPermissions}>
+                            <CheckPermissions permissions={CTB_PERMISSIONS}>
                               <LinkButton
                                 onClick={() => {
                                   trackUsage('willEditEditLayout');
