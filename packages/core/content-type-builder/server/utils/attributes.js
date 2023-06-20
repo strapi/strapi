@@ -27,6 +27,11 @@ const formatAttributes = (model) => {
 
   // only get attributes that can be seen in the CTB
   return getVisibleAttributes(model).reduce((acc, key) => {
+    // We ignore the author attributes because we don't want to show them on CTB
+    if (key === 'createdBy' || key === 'updatedBy') {
+      return acc;
+    }
+
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});

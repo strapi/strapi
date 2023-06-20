@@ -237,6 +237,11 @@ const reducer = (state, action) =>
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
           (value) => {
+            // We don't want to replace relations with admin users
+            if (value.target === 'admin::user') {
+              return false;
+            }
+
             return value.type === 'relation';
           },
           (_, { path }) => {

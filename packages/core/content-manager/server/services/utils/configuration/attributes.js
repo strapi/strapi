@@ -139,6 +139,11 @@ const hasEditableAttribute = (schema, name) => {
     return false;
   }
 
+  // We ignore creator attributes because we don't want to show them on edit view
+  if (name === 'createdBy' || name === 'updatedBy') {
+    return false;
+  }
+
   return true;
 };
 
