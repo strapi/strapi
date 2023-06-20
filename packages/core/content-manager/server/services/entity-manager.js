@@ -186,7 +186,7 @@ module.exports = ({ strapi }) => ({
         return strapi.entityValidator.validateEntityCreation(
           strapi.getModel(uid),
           entity,
-          { isDraft: true },
+          undefined,
           entity
         );
       })
