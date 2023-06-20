@@ -7,8 +7,6 @@ export module OrderKind {
   export type Any = Asc | Desc;
 }
 
-// String
-
 /**
  * Single non-populatable attribute representation
  *
@@ -19,7 +17,8 @@ export module OrderKind {
  * type D = 'title,description'; // ❌
  */
 type SingleAttribute<TSchemaUID extends Common.UID.Schema> =
-  Attribute.GetNonPopulatableKeys<TSchemaUID>;
+  | 'id'
+  | Attribute.GetNonPopulatableKeys<TSchemaUID>;
 
 /**
  * Ordered single non-populatable attribute representation
@@ -47,11 +46,8 @@ type OrderedSingleAttribute<TSchemaUID extends Common.UID.Schema> =
 export type StringNotation<TSchemaUID extends Common.UID.Schema> =
   | SingleAttribute<TSchemaUID>
   | OrderedSingleAttribute<TSchemaUID>
-  // TODO: Improve type checking for comma separated strings
-  // Loose checking for comma separated literal sort (complex to typecheck as the combination are near infinite)
+  // TODO: Loose type checking to avoid circular dependencies & infinite recursion
   | `${string},${string}`;
-
-// Array
 
 /**
  * Array notation for a sort
@@ -66,8 +62,6 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  */
 export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID>[];
 
-// Objects
-
 /**
  * Object notation for a sort
  *
@@ -81,7 +75,7 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  */
 export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
   // First level sort
-  [key in Attribute.GetNonPopulatableKeys<TSchemaUID>]?: OrderKind.Any;
+  [key in SingleAttribute<TSchemaUID>]?: OrderKind.Any;
 } & {
   // Deep sort, only add populatable keys that have a
   // target (remove dynamic zones and other polymorphic links)
