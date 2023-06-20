@@ -23,12 +23,8 @@ const { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } = require(
 const { removePassword } = require('@strapi/utils').sanitize.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
-const {
-  constants,
-  isScalarAttribute,
-  getNonVisibleAttributes,
-  getWritableAttributes,
-} = contentTypes;
+const { constants, isScalarAttribute, getNonVisibleAttributes, getWritableAttributes } =
+  contentTypes;
 const {
   ID_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
