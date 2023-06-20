@@ -69,7 +69,10 @@ describe('useTracking', () => {
         userProperties: {},
       },
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Strapi-Event': 'event',
+        },
       }
     );
 
