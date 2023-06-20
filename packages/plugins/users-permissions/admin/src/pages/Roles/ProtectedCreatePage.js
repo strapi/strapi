@@ -2,12 +2,12 @@ import React from 'react';
 
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 
 import RolesCreatePage from './CreatePage';
 
 const ProtectedRolesCreatePage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.createRole}>
+  <CheckPagePermissions permissions={PERMISSIONS.createRole}>
     <RolesCreatePage />
   </CheckPagePermissions>
 );

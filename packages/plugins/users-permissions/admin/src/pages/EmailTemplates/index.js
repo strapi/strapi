@@ -14,7 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
 import EmailForm from './components/EmailForm';
@@ -22,7 +22,7 @@ import EmailTable from './components/EmailTable';
 import { fetchData, putEmailTemplate } from './utils/api';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
   </CheckPagePermissions>
 );
@@ -41,7 +41,7 @@ const EmailTemplatesPage = () => {
   const [templateToEdit, setTemplateToEdit] = useState(null);
 
   const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateEmailTemplates };
+    return { update: PERMISSIONS.updateEmailTemplates };
   }, []);
 
   const {

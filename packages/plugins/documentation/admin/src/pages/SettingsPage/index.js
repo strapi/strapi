@@ -26,7 +26,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
 import FieldActionWrapper from '../../components/FieldActionWrapper';
-import permissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 import schema from '../utils/schema';
 import useReactQuery from '../utils/useReactQuery';
@@ -70,7 +70,7 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={permissions.update}>
+                    <CheckPermissions permissions={PERMISSIONS.update}>
                       <Button type="submit" startIcon={<Check />}>
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.Button.save'),

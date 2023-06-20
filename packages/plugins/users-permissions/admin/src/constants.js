@@ -1,4 +1,4 @@
-const pluginPermissions = {
+export const PERMISSIONS = {
   // Roles
   accessRoles: [
     { action: 'plugin::users-permissions.roles.create', subject: null },
@@ -27,5 +27,3 @@ const pluginPermissions = {
   readProviders: [{ action: 'plugin::users-permissions.providers.read', subject: null }],
   updateProviders: [{ action: 'plugin::users-permissions.providers.update', subject: null }],
 };
-
-export default pluginPermissions;
