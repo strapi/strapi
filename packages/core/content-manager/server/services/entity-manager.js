@@ -126,6 +126,28 @@ module.exports = ({ strapi }) => ({
     return updatedEntity;
   },
 
+  async clone(entity, body, uid) {
+    const modelDef = strapi.getModel(uid);
+    const populate = await buildDeepPopulate(uid);
+
+    const publishData = { ...body };
+    if (hasDraftAndPublish(modelDef)) {
+      publishData[PUBLISHED_AT_ATTRIBUTE] = null;
+    }
+
+    const params = { data: publishData, populate };
+
+    const clonedEntity = await strapi.entityService
+      .clone(uid, entity.id, params)
+      .then((entity) => this.mapEntity(entity, uid));
+
+    if (isWebhooksPopulateRelationsEnabled(uid)) {
+      return getDeepRelationsCount(clonedEntity, uid);
+    }
+
+    return clonedEntity;
+  },
+
   async delete(entity, uid) {
     const populate = await buildDeepPopulate(uid);
     const deletedEntity = await strapi.entityService.delete(uid, entity.id, { populate });
