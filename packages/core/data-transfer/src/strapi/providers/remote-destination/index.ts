@@ -329,7 +329,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
       async write(asset: IAsset, _encoding, callback) {
         const startError = await startAssetsTransferOnce();
-
+        // console.log('asset', asset);
         if (startError) {
           return callback(startError);
         }
@@ -337,13 +337,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         hasStarted = true;
 
         const assetID = randomUUID();
-        const { filename, filepath, stats, stream } = asset;
+        const { filename, filepath, stats, stream, metadata } = asset;
 
         try {
           await safePush({
             action: 'start',
             assetID,
-            data: { filename, filepath, stats },
+            data: { filename, filepath, stats, metadata },
           });
 
           for await (const chunk of stream) {

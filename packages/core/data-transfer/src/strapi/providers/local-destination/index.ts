@@ -151,59 +151,47 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
     const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
-    const backupDirectory = path.join(
-      this.strapi.dirs.static.public,
-      `uploads_backup_${Date.now()}`
-    );
+    // const backupDirectory = path.join(
+    //   this.strapi.dirs.static.public,
+    //   `uploads_backup_${Date.now()}`
+    // );
 
-    try {
-      await fse.move(assetsDirectory, backupDirectory);
-      await fse.mkdir(assetsDirectory);
-      // Create a .gitkeep file to ensure the directory is not empty
-      await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
-    } catch (err) {
-      throw new ProviderTransferError(
-        'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
-      );
-    }
+    // try {
+    //   await fse.move(assetsDirectory, backupDirectory);
+    //   await fse.mkdir(assetsDirectory);
+    //   // Create a .gitkeep file to ensure the directory is not empty
+    //   await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+    // } catch (err) {
+    //   throw new ProviderTransferError(
+    //     'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
+    //   );
+    // }
 
+    const strapi = this.strapi;
     return new Writable({
       objectMode: true,
       async final(next) {
-        await fse.rm(backupDirectory, { recursive: true, force: true });
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
         const entryPath = path.join(assetsDirectory, chunk.filename);
-        const writableStream = fse.createWriteStream(entryPath);
-
-        chunk.stream
-          .pipe(writableStream)
-          .on('close', () => {
-            callback(null);
-          })
-          .on('error', async (error: NodeJS.ErrnoException) => {
-            const errorMessage =
-              error.code === 'ENOSPC'
-                ? " Your server doesn't have space to proceed with the import. "
-                : ' ';
-
-            try {
-              await fse.rm(assetsDirectory, { recursive: true, force: true });
-              await fse.move(backupDirectory, assetsDirectory);
-              this.destroy(
-                new ProviderTransferError(
-                  `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
-                )
-              );
-            } catch (err) {
-              throw new ProviderTransferError(
-                `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
-              );
-            } finally {
-              callback(error);
-            }
+        // const chunk = fse.createWriteStream(entryPath);
+        try {
+          console.log(`Uploading asset ${chunk.filename}`);
+          console.log({
+            ...chunk.metadata,
+            stream: chunk.stream,
           });
+          await strapi.plugin('upload').provider.uploadStream({
+            ...chunk.metadata,
+            stream: chunk.stream,
+          });
+          console.log(`Uploaded asset ${chunk.filename}`);
+          callback();
+        } catch (error) {
+          console.log(error);
+          callback(new Error(`Error while uploading asset ${chunk.filename}`));
+        }
       },
     });
   }

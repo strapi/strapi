@@ -149,7 +149,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
 
-            const asset: IAsset = {
+            const asset: Omit<IAsset, 'metadata'> = {
               filename: file,
               filepath: normalizedPath,
               stats: { size },

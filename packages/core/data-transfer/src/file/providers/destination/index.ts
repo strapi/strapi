@@ -252,13 +252,23 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         // always write tar files with posix paths so we have a standard format for paths regardless of system
         const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
+        const entryMetadataPath = path.posix.join('assets', 'metadata', `${data.filename}.json`);
+        const entryMetadata = archiveStream.entry(
+          {
+            name: entryMetadataPath,
+            size: JSON.stringify(data.metadata).length,
+          },
+          JSON.stringify(data.metadata) // or Buffer.from(data.metadata)
+        );
+
+        // data.metadata
         const entry = archiveStream.entry({
           name: entryPath,
           size: data.stats.size,
         });
 
         if (!entry) {
-          callback(new Error(`Failed to created a tar entry for ${entryPath}`));
+          callback(new Error(`Failed to created an asset tar entry for ${entryPath}`));
           return;
         }
 
@@ -267,6 +277,34 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         entry
           .on('finish', () => {
             callback(null);
+            // const entryMetadataPath = path.posix.join(
+            //   'assets',
+            //   'metadata',
+            //   `${data.filename}.json`
+            // );
+            // const entryMetadata = archiveStream.entry(
+            //   {
+            //     name: entryMetadataPath,
+            //     size: JSON.stringify(data.metadata).length,
+            //   },
+            //   JSON.stringify(data.metadata) // or Buffer.from(data.metadata)
+            // );
+
+            // if (!entryMetadata) {
+            //   callback(
+            //     new Error(`Failed to created a metadata tar entry for ${entryMetadataPath}`)
+            //   );
+            //   return;
+            // }
+
+            // entryMetadata
+            //   .on('finish', () => {
+            //     console.log('ENTRY FINISHED');
+            //     callback(null);
+            //   })
+            //   .on('error', (error) => {
+            //     callback(error);
+            //   });
           })
           .on('error', (error) => {
             callback(error);
