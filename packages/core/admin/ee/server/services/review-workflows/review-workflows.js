@@ -11,6 +11,7 @@ const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { getDefaultWorkflow } = require('../../utils/review-workflows');
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
+const webhookEvents = require('../../constants/webhookEvents');
 
 async function initDefaultWorkflow({ workflowsService, stagesService, strapi }) {
   const wfCount = await workflowsService.count();
@@ -108,12 +109,18 @@ function persistStagesJoinTables({ strapi }) {
   };
 }
 
+const registerWebhookEvents = async ({ strapi }) =>
+  Object.entries(webhookEvents).forEach(([eventKey, event]) =>
+    strapi.webhookStore.addAllowedEvent(eventKey, event)
+  );
+
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
 
   return {
     async bootstrap() {
+      await registerWebhookEvents({ strapi });
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
     async register() {

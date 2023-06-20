@@ -1,32 +1,33 @@
 import React, { useEffect, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
+
+import { HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
-  AnErrorOccurred,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, Main } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
-import permissions from '../../../permissions';
-import getTrad from '../../utils/getTrad';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+
 import { DragLayer } from '../../../components/DragLayer';
+import permissions from '../../../permissions';
 import ModelsContext from '../../contexts/ModelsContext';
+import getTrad from '../../utils/getTrad';
+import ItemTypes from '../../utils/ItemTypes';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
-import LeftMenu from './LeftMenu';
-import useContentManagerInitData from './useContentManagerInitData';
-
-import ItemTypes from '../../utils/ItemTypes';
 
 import { CardDragPreview } from './components/CardDragPreview';
 import { ComponentDragPreview } from './components/ComponentDragPreview';
 import { RelationDragPreview } from './components/RelationDragPreview';
+import LeftMenu from './LeftMenu';
+import useContentManagerInitData from './useContentManagerInitData';
 
 const cmPermissions = permissions.contentManager;
 

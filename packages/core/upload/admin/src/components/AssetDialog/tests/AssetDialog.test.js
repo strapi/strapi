@@ -1,13 +1,14 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL, screen } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { AssetDialog } from '..';
-import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
+import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../../hooks/useModalQueryParams';
 
@@ -15,7 +16,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');

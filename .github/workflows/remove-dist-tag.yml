@@ -23,6 +23,6 @@ jobs:
         with:
           node-version: 16
       - run: yarn
-      - run: ./scripts/remove-dist-tag
+      - run: ./scripts/remove-dist-tag.sh
         env:
           DIST_TAG: ${{ github.event.inputs.dist-tag }}

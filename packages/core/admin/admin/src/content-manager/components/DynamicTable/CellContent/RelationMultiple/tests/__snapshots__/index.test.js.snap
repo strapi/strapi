@@ -1,6 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+.c14 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c0 {
   background: #4945ff;
   padding: 8px;
@@ -84,21 +112,6 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   flex-direction: row;
 }
 
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
 .c10 {
   border-radius: 4px;
   height: 1.5rem;
@@ -109,13 +122,13 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   outline: none;
 }
 
-.c2 svg {
+.c2 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c2 svg > g,
-.c2 svg path {
+.c2 > svg > g,
+.c2 > svg path {
   fill: #ffffff;
 }
 
@@ -153,22 +166,15 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   border: 2px solid #4945ff;
 }
 
-.c14 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c3 {
   height: 2rem;
   border: 1px solid transparent;
   background: transparent;
+}
+
+.c3 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c3[aria-disabled='true'] {
@@ -243,7 +249,7 @@ exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the s
   >
     <div>
       <button
-        aria-controls="0"
+        aria-controls=":r0:"
         aria-disabled="false"
         aria-expanded="false"
         aria-haspopup="true"

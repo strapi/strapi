@@ -5,21 +5,21 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Router, Switch, Route } from 'react-router-dom';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { act, render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
+import { Route, Router, Switch } from 'react-router-dom';
+
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
-
 import EditPage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const makeApp = (history) => (
@@ -49,7 +49,7 @@ describe('<EditPage />', () => {
     const App = makeApp(history);
     const { container } = render(App);
 
-    history.push('/settings/roles/1');
+    act(() => history.push('/settings/roles/1'));
 
     expect(container).toMatchSnapshot();
   });

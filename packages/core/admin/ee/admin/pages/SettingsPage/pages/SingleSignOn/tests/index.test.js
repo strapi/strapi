@@ -1,16 +1,16 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { getByLabelText, render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
-import server from './server';
+import { fireEvent, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+
 import { SingleSignOn } from '../index';
+
+import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn().mockImplementation(() => jest.fn()),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
   useRBAC: jest.fn(),
@@ -42,17 +42,13 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    const {
-      container: { firstChild },
-    } = render(App);
+    render(App);
 
     await waitFor(() =>
       expect(
         screen.getByText('Create new user on SSO login if no account exists')
       ).toBeInTheDocument()
     );
-
-    expect(firstChild).toMatchSnapshot();
   });
 
   it('should disable the form when there is no change', async () => {
@@ -81,10 +77,8 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     const { container } = render(App);
     let el;
 
-    await act(async () => {
-      await waitFor(() => {
-        el = getByLabelText(container, 'autoRegister');
-      });
+    await waitFor(() => {
+      el = getByLabelText(container, 'autoRegister');
     });
 
     fireEvent.click(el);

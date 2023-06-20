@@ -1,31 +1,36 @@
 import React, { useEffect } from 'react';
+
 import {
-  CheckPagePermissions,
-  SettingsPageTitle,
-  useRBAC,
-  LoadingIndicatorPage,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Layout,
   Button,
-  Main,
-  Typography,
-  ToggleInput,
-  Select,
-  Option,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Flex,
+  HeaderLayout,
+  Layout,
+  Main,
+  MultiSelect,
+  MultiSelectOption,
+  Option,
+  Select,
+  ToggleInput,
+  Typography,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFocusWhenNavigate,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
+import { useIntl } from 'react-intl';
+
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../../admin/src/permissions';
+import { getRequestUrl } from '../../../../../../admin/src/utils';
+
 import schema from './utils/schema';
 
 const ssoPermissions = {
@@ -49,6 +54,7 @@ export const SingleSignOn = () => {
   ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
     'autoRegister',
     'defaultRole',
+    'ssoLockedRoles',
   ]);
   const { roles } = useRolesList(canReadRoles);
 
@@ -188,6 +194,48 @@ export const SingleSignOn = () => {
                         </Option>
                       ))}
                     </Select>
+                  </GridItem>
+                  <GridItem col={6} m={6} s={12}>
+                    <MultiSelect
+                      disabled={!canUpdate}
+                      hint={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.description',
+                        defaultMessage:
+                          'Select the roles for which you want to disable the local authentication',
+                      })}
+                      error={
+                        formErrors.ssoLockedRoles
+                          ? formatMessage({
+                              id: formErrors.ssoLockedRoles.id,
+                              defaultMessage: formErrors.ssoLockedRoles.id,
+                            })
+                          : ''
+                      }
+                      label={formatMessage({
+                        id: 'Settings.sso.form.localAuthenticationLock.label',
+                        defaultMessage: 'Local authentication lock-out',
+                      })}
+                      name="ssoLockedRoles"
+                      onChange={(value) => {
+                        handleChange({ target: { name: 'ssoLockedRoles', value } });
+                      }}
+                      placeholder={formatMessage({
+                        id: 'components.InputSelect.option.placeholder',
+                        defaultMessage: 'Choose here',
+                      })}
+                      onClear={() => {
+                        const emptyArray = [];
+                        handleChange({ target: { name: 'ssoLockedRoles', emptyArray } });
+                      }}
+                      value={modifiedData.ssoLockedRoles || []}
+                      withTags
+                    >
+                      {roles.map(({ id, name }) => (
+                        <MultiSelectOption key={id} value={id.toString()}>
+                          {name}
+                        </MultiSelectOption>
+                      ))}
+                    </MultiSelect>
                   </GridItem>
                 </Grid>
               </Flex>

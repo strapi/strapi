@@ -1,13 +1,14 @@
 import React from 'react';
+
 import {
   Box,
+  Button,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  Typography,
   Textarea,
   TextInput,
-  Button,
+  Typography,
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -74,7 +75,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 id: 'global.description',
                 defaultMessage: 'Description',
               })}
-              name="description"
+              id="description"
               error={errors.name && formatMessage({ id: errors.name })}
               onChange={onChange}
               onBlur={onBlur}

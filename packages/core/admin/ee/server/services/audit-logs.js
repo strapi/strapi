@@ -124,7 +124,11 @@ const createAuditLogsService = (strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      await state.provider.saveEvent(processedEvent);
+      // This stores the event when after the transaction is committed,
+      // so it's not stored if the transaction is rolled back
+      await strapi.db.transaction(({ onCommit }) => {
+        onCommit(() => state.provider.saveEvent(processedEvent));
+      });
     }
   }
 

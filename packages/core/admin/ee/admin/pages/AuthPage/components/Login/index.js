@@ -1,11 +1,13 @@
 import React from 'react';
+
+import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box, Flex, Divider, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import BaseLogin from '../../../../../../admin/src/pages/AuthPage/components/Login/BaseLogin';
 import { useAuthProviders } from '../../../../hooks';
-import UnauthenticatedLayout from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import SSOProviders from '../Providers/SSOProviders';
 
 const DividerFull = styled(Divider)`
@@ -13,7 +15,7 @@ const DividerFull = styled(Divider)`
 `;
 
 const Login = (loginProps) => {
-  const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
+  const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
 

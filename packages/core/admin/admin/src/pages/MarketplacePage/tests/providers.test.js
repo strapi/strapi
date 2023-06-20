@@ -1,15 +1,16 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
-
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import MarketPlacePage from '../index';
+
 import server from './server';
 
 // Increase the jest timeout to accommodate long running tests
@@ -22,9 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn(() => {
     return toggleNotification;
   }),
-  pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -148,14 +147,15 @@ describe('Marketplace page - providers tab', () => {
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     await user.click(providersTab);
     await user.click(filtersButton);
-    screen.getByLabelText(/no collections selected/i);
+
+    expect(screen.getByRole('combobox', { name: 'Collections' })).toBeVisible();
   });
 
   it('shows the collections filter options', async () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const mockedServerCollections = {
@@ -175,11 +175,16 @@ describe('Marketplace page - providers tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
+
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -196,15 +201,22 @@ describe('Marketplace page - providers tab', () => {
 
   it('filters multiple collection options', async () => {
     await user.click(screen.getByTestId('filters-button'));
-    await user.click(screen.getByTestId('Collections-button'));
+    await user.click(screen.getByRole('combobox', { name: 'Collections' }));
     await user.click(screen.getByTestId('Made by Strapi-6'));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     await waitForReload();
 
-    await user.click(
-      screen.getByRole('combobox', { name: `Collections 1 collection selected Made by Strapi` })
-    );
+    await user.click(screen.getByTestId('filters-button'));
+    await user.click(screen.getByRole('combobox', { name: `Collections` }));
     await user.click(screen.getByRole('option', { name: `Verified (6)` }));
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
     await waitForReload();
 
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -221,11 +233,15 @@ describe('Marketplace page - providers tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
     await waitForReload();
 
     const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
@@ -241,11 +257,15 @@ describe('Marketplace page - providers tab', () => {
     const filtersButton = screen.getByTestId('filters-button');
     await user.click(filtersButton);
 
-    const collectionsButton = screen.getByTestId('Collections-button');
+    const collectionsButton = screen.getByRole('combobox', { name: 'Collections' });
     await user.click(collectionsButton);
 
     const option = screen.getByTestId('Made by Strapi-6');
     await user.click(option);
+    // Close the combobox
+    await user.keyboard('[Escape]');
+    // Close the popover
+    await user.keyboard('[Escape]');
 
     const collectionCards = await screen.findAllByTestId('npm-package-card');
     expect(collectionCards.length).toBe(2);
@@ -264,8 +284,8 @@ describe('Marketplace page - providers tab', () => {
     const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
-    const alphabeticalOption = screen.getByText('Alphabetical order').closest('li');
-    const newestOption = screen.getByText('Newest').closest('li');
+    const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
 
     expect(alphabeticalOption).toBeVisible();
     expect(newestOption).toBeVisible();
@@ -276,7 +296,7 @@ describe('Marketplace page - providers tab', () => {
     const sortButton = screen.getByRole('combobox', { name: /Sort by/i });
     await user.click(sortButton);
 
-    const newestOption = screen.getByText('Newest').closest('li');
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
     await user.click(newestOption);
 
     expect(history.location.search).toEqual(

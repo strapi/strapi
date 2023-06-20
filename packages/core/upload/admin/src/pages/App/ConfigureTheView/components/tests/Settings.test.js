@@ -1,28 +1,32 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { TrackingProvider } from '@strapi/helper-plugin';
-import { MemoryRouter } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 
-import { Settings } from '../Settings';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
+import { render as renderRTL } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
+
 import { pageSizes, sortOptions } from '../../../../../constants';
+import { Settings } from '../Settings';
 
 const testPageSize = pageSizes[0];
 const testSort = sortOptions[0].value;
 
-const renderSettings = ({ pageSize = testPageSize, sort = testSort, onChange = jest.fn() }) =>
-  renderTL(
-    <IntlProvider locale="en" messages={{}}>
-      <TrackingProvider>
-        <ThemeProvider theme={lightTheme}>
-          <MemoryRouter>
-            <Settings sort={sort} pageSize={pageSize} onChange={onChange} />
-          </MemoryRouter>
-        </ThemeProvider>
-      </TrackingProvider>
-    </IntlProvider>
-  );
+const render = ({ pageSize = testPageSize, sort = testSort, onChange = jest.fn() } = {}) => ({
+  user: userEvent.setup(),
+  ...renderRTL(<Settings sort={sort} pageSize={pageSize} onChange={onChange} />, {
+    wrapper: ({ children }) => (
+      <IntlProvider locale="en" messages={{}}>
+        <TrackingProvider>
+          <ThemeProvider theme={lightTheme}>
+            <MemoryRouter>{children}</MemoryRouter>
+          </ThemeProvider>
+        </TrackingProvider>
+      </IntlProvider>
+    ),
+  }),
+});
 
 describe('Upload - Configure | Settings', () => {
   beforeEach(() => {
@@ -31,11 +35,9 @@ describe('Upload - Configure | Settings', () => {
 
   describe('initial render', () => {
     it('renders and matches the snapshot', async () => {
-      const { container } = renderSettings({});
+      const { getByText, container } = render();
 
-      await waitFor(() => {
-        expect(screen.getByText('Entries per page')).toBeInTheDocument();
-      });
+      expect(getByText('Entries per page')).toBeInTheDocument();
 
       expect(container).toMatchSnapshot();
     });
@@ -43,59 +45,53 @@ describe('Upload - Configure | Settings', () => {
 
   describe('pageSize', () => {
     it('renders all page Sizes', async () => {
-      renderSettings({});
+      const { getByRole, user } = render();
 
-      fireEvent.mouseDown(screen.getByTestId('pageSize-select'));
-      await waitFor(() => {
-        pageSizes.forEach((size) => {
-          const option = screen.getByTestId(`pageSize-option-${size}`);
-          expect(option).toBeInTheDocument();
-          expect(option).toHaveAttribute('data-strapi-value', `${size}`);
-        });
+      await user.click(getByRole('combobox', { name: 'Entries per page' }));
+
+      pageSizes.forEach((size) => {
+        expect(getByRole('option', { name: size })).toBeInTheDocument();
       });
     });
 
     it('call onChange when changing page size', async () => {
       const onChange = jest.fn();
-      renderSettings({ onChange });
+      const { user, getByRole } = render({ onChange });
 
       const testValue = pageSizes[1];
 
-      fireEvent.mouseDown(screen.getByTestId('pageSize-select'));
-      fireEvent.click(screen.getByTestId(`pageSize-option-${testValue}`));
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenCalledWith({ target: { name: 'pageSize', value: testValue } });
-      });
+      await user.click(getByRole('combobox', { name: 'Entries per page' }));
+
+      await user.click(getByRole('option', { name: testValue }));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({ target: { name: 'pageSize', value: testValue } });
     });
   });
 
   describe('sort', () => {
     it('renders all sort options', async () => {
-      renderSettings({});
+      const { user, getByRole } = render();
 
-      fireEvent.mouseDown(screen.getByTestId('sort-select'));
-      await waitFor(() => {
-        sortOptions.forEach((filter) => {
-          const option = screen.getByTestId(`sort-option-${filter.value}`);
-          expect(option).toBeInTheDocument();
-          expect(option).toHaveAttribute('data-strapi-value', `${filter.value}`);
-        });
+      await user.click(getByRole('combobox', { name: 'Default sort order' }));
+
+      sortOptions.forEach((filter) => {
+        expect(getByRole('option', { name: filter.value })).toBeInTheDocument();
       });
     });
 
     it('call onChange when changing sort', async () => {
       const onChange = jest.fn();
-      renderSettings({ onChange });
+      const { user, getByRole } = render({ onChange });
 
       const testValue = sortOptions[1].value;
 
-      fireEvent.mouseDown(screen.getByTestId('sort-select'));
-      fireEvent.click(screen.getByTestId(`sort-option-${testValue}`));
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenCalledWith({ target: { name: 'sort', value: testValue } });
-      });
+      await user.click(getByRole('combobox', { name: 'Default sort order' }));
+
+      await user.click(getByRole('option', { name: testValue }));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({ target: { name: 'sort', value: testValue } });
     });
   });
 });

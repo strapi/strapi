@@ -5,16 +5,17 @@
  */
 
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
-import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import { useRolesList } from '../../../../../../hooks';
+import { Router } from 'react-router-dom';
 
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
+import { useRolesList } from '../../../../../../hooks';
 import ListPage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -61,6 +62,18 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c3 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c1 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -77,18 +90,6 @@ describe('<ListPage />', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c3 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c4 {

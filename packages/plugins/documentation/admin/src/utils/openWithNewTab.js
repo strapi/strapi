@@ -1,14 +1,14 @@
 const openWithNewTab = (path) => {
   const url = (() => {
     if (path.startsWith('/')) {
-      return `${strapi.backendURL}${path}`;
+      return `${window.strapi.backendURL}${path}`;
     }
 
     if (path.startsWith('http')) {
       return path;
     }
 
-    return `${strapi.backendURL}/${path}`;
+    return `${window.strapi.backendURL}/${path}`;
   })();
 
   window.open(url, '_blank');

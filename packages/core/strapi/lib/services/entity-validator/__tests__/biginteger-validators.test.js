@@ -27,7 +27,6 @@ describe('BigInteger validator', () => {
       kind: 'contentType',
       modelName: 'test-model',
       uid: 'test-uid',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrBigIntegerUnique: { type: 'biginteger', unique: true },

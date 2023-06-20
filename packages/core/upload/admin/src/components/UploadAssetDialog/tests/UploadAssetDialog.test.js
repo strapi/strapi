@@ -1,10 +1,13 @@
 import React from 'react';
-import { render as renderTL, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider } from '@strapi/helper-plugin';
+import { fireEvent, render as renderTL, screen, waitFor, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';
+
 import { server } from './server';
 
 jest.mock('../../../utils/getTrad', () => (x) => x);
@@ -146,7 +149,7 @@ describe('UploadAssetDialog', () => {
     });
 
     it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
-      render();
+      const { debug } = render();
       fireEvent.click(screen.getByText('From url'));
 
       const urls = [
@@ -197,6 +200,8 @@ describe('UploadAssetDialog', () => {
           rawFile: new File([''], 'something/weird'),
         },
       ];
+
+      debug(undefined, 100000);
 
       await waitFor(() =>
         expect(

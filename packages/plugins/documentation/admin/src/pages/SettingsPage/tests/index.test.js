@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import SettingsPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -56,6 +58,75 @@ describe('Plugin | Documentation | SettingsPage', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c16 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c21 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c30 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #b72b1a;
+        text-transform: uppercase;
+      }
+
+      .c32 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
+        text-transform: uppercase;
+      }
+
+      .c34 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -208,74 +279,18 @@ describe('Plugin | Documentation | SettingsPage', () => {
         justify-content: center;
       }
 
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c16 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c21 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c30 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
-
-      .c32 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
       .c9 {
         position: relative;
         outline: none;
       }
 
-      .c9 svg {
+      .c9 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c9 svg > g,
-      .c9 svg path {
+      .c9 > svg > g,
+      .c9 > svg path {
         fill: #ffffff;
       }
 
@@ -313,20 +328,13 @@ describe('Plugin | Documentation | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c10 {
         height: 2rem;
+      }
+
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c10[aria-disabled='true'] {
@@ -565,74 +573,70 @@ describe('Plugin | Documentation | SettingsPage', () => {
                     class="c18"
                   >
                     <div
-                      class=""
+                      class="c19"
                     >
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         <div
-                          class="c20"
+                          class="c4"
+                        >
+                          <label
+                            class="c5 c21 c22"
+                            for=":r0:"
+                          >
+                            Restricted Access
+                          </label>
+                        </div>
+                        <label
+                          class="c23"
                         >
                           <div
-                            class="c4"
+                            class="c24"
                           >
-                            <label
-                              class="c5 c21 c22"
-                              for="1"
-                            >
-                              Restricted Access
-                            </label>
+                            Restricted Access
                           </div>
-                          <label
-                            class="c23"
+                          <div
+                            class="c25 c26"
+                            display="flex"
                           >
                             <div
-                              class="c24"
+                              aria-hidden="true"
+                              class="c27 c28 c29"
                             >
-                              Restricted Access
+                              <span
+                                class="c5 c30"
+                              >
+                                Off
+                              </span>
                             </div>
                             <div
-                              class="c25 c26"
-                              display="flex"
+                              aria-hidden="true"
+                              class="c27 c28 c31"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c29"
+                              <span
+                                class="c5 c32"
                               >
-                                <span
-                                  class="c5 c30"
-                                >
-                                  Off
-                                </span>
-                              </div>
-                              <div
-                                aria-hidden="true"
-                                class="c27 c28 c31"
-                              >
-                                <span
-                                  class="c5 c32"
-                                >
-                                  On
-                                </span>
-                              </div>
-                              <input
-                                aria-describedby="1-hint"
-                                aria-disabled="false"
-                                aria-required="false"
-                                class="c33"
-                                id="1"
-                                name="restrictedAccess"
-                                type="checkbox"
-                              />
+                                On
+                              </span>
                             </div>
-                          </label>
-                          <p
-                            class="c5 c34"
-                            id="1-hint"
-                          >
-                            Make the documentation endpoint private
-                          </p>
-                        </div>
+                            <input
+                              aria-describedby=":r0:-hint"
+                              aria-disabled="false"
+                              aria-required="false"
+                              class="c33"
+                              id=":r0:"
+                              name="restrictedAccess"
+                              type="checkbox"
+                            />
+                          </div>
+                        </label>
+                        <p
+                          class="c5 c34"
+                          id=":r0:-hint"
+                        >
+                          Make the documentation endpoint private
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+
 import { UploadProgress } from '..';
 import en from '../../../translations/en.json';
 
@@ -49,6 +51,11 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c9 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
       .c0 {
         background: #eaeaef;
       }
@@ -107,11 +114,6 @@ describe('<UploadProgress />', () => {
         -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
-      }
-
-      .c9 {
-        font-size: 0.75rem;
-        line-height: 1.33;
       }
 
       .c6:before {

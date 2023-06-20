@@ -1,10 +1,12 @@
-import React, { useLayoutEffect, useState, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+
+import { Icon, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { Search as SearchIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Search as SearchIcon } from '@strapi/icons';
-import { Searchbar, SearchForm, IconButton, Icon } from '@strapi/design-system';
-import useQueryParams from '../../hooks/useQueryParams';
+
 import { useTracking } from '../../features/Tracking';
+import useQueryParams from '../../hooks/useQueryParams';
 
 const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
   const wrapperRef = useRef(null);

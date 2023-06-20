@@ -1,35 +1,46 @@
-import { useQuery, useQueryClient } from 'react-query';
 import { useFetchClient } from '@strapi/helper-plugin';
+import { stringify } from 'qs';
+import { useQuery } from 'react-query';
 
-const QUERY_BASE_KEY = 'review-workflows';
-const API_BASE_URL = '/admin/review-workflows';
+export function useReviewWorkflows(params = {}) {
+  const { id = '', ...queryParams } = params;
+  const defaultQueryParams = {
+    populate: 'stages',
+  };
 
-export function useReviewWorkflows(workflowId) {
   const { get } = useFetchClient();
-  const client = useQueryClient();
-  const workflowQueryKey = [QUERY_BASE_KEY, workflowId ?? 'default'];
+  const queryString = stringify({ ...defaultQueryParams, ...queryParams }, { encode: false });
 
-  async function fetchWorkflows({ params = { populate: 'stages' } }) {
-    try {
-      const {
-        data: { data },
-      } = await get(`${API_BASE_URL}/workflows/${workflowId ?? ''}`, { params });
+  const { data, isLoading, status, refetch } = useQuery(
+    ['review-workflows', 'workflows', id],
+    async () => {
+      try {
+        const {
+          data: { data },
+        } = await get(
+          `/admin/review-workflows/workflows/${id}${queryString ? `?${queryString}` : ''}`
+        );
 
-      return data;
-    } catch (err) {
-      // silence
-      return null;
+        return data;
+      } catch (err) {
+        // silence
+        return null;
+      }
     }
-  }
+  );
 
-  async function refetchWorkflow() {
-    await client.refetchQueries(workflowQueryKey);
-  }
+  let workflows = [];
 
-  const workflows = useQuery(workflowQueryKey, fetchWorkflows);
+  if (id && data) {
+    workflows = [data];
+  } else if (Array.isArray(data)) {
+    workflows = data;
+  }
 
   return {
     workflows,
-    refetchWorkflow,
+    isLoading,
+    status,
+    refetch,
   };
 }

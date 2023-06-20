@@ -27,7 +27,6 @@ describe('Time validator', () => {
       kind: 'contentType',
       modelName: 'test-model',
       uid: 'test-uid',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrTimestampUnique: { type: 'timestamp', unique: true },

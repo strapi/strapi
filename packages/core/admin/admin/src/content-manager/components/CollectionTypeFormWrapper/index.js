@@ -1,27 +1,23 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useQueryClient } from 'react-query';
-import { useHistory } from 'react-router-dom';
-import axios from 'axios';
-import get from 'lodash/get';
+
 import {
-  useTracking,
-  useNotification,
-  useQueryParams,
-  formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
-  useGuidedTour,
+  formatContentTypeData,
   useAPIErrorHandler,
   useFetchClient,
+  useGuidedTour,
+  useNotification,
+  useQueryParams,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
-import isEqual from 'react-fast-compare';
-import {
-  createDefaultForm,
-  getTrad,
-  getRequestUrl,
-  removePasswordFieldsFromData,
-} from '../../utils';
+import { useQueryClient } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import { useFindRedirectionLink } from '../../hooks';
 import {
   getData,
@@ -33,6 +29,12 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import {
+  createDefaultForm,
+  getRequestUrl,
+  getTrad,
+  removePasswordFieldsFromData,
+} from '../../utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -149,7 +151,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         if (axios.isCancel(err)) {
           return;
         }
-
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {

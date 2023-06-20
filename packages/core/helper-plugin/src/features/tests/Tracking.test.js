@@ -1,9 +1,10 @@
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import axios from 'axios';
 
 import { useAppInfo } from '../AppInfo';
-import { useTracking, TrackingProvider } from '../Tracking';
+import { TrackingProvider, useTracking } from '../Tracking';
 
 jest.mock('../AppInfo');
 
@@ -16,7 +17,7 @@ jest.mock('axios', () => ({
 
 const setup = (props) =>
   renderHook(() => useTracking(), {
-    wrapper: ({ children, ...restProps }) => (
+    wrapper: ({ children }) => (
       <TrackingProvider
         value={{
           uuid: '1',
@@ -24,16 +25,19 @@ const setup = (props) =>
             nestedProperty: true,
           },
           deviceId: 'someTestDeviceId',
-          ...restProps,
+          ...props,
         }}
       >
         {children}
       </TrackingProvider>
     ),
-    initialProps: props,
   });
 
 describe('useTracking', () => {
+  beforeAll(() => {
+    window.strapi.telemetryDisabled = false;
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

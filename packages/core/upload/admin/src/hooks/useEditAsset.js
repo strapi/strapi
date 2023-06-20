@@ -1,11 +1,12 @@
-import axios from 'axios';
 import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 
-import { getTrad } from '../utils';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import axios from 'axios';
+import { useIntl } from 'react-intl';
+import { useMutation, useQueryClient } from 'react-query';
+
 import pluginId from '../pluginId';
+import { getTrad } from '../utils';
 
 const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
