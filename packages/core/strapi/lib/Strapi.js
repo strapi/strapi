@@ -73,7 +73,17 @@ const resolveWorkingDirectories = (opts) => {
 
 /** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
-  constructor(opts = {}) {
+  constructor() {
+    if (Strapi.instance) {
+      // eslint-disable-next-line no-constructor-return
+      return Strapi.instance;
+    }
+
+    this.initialized = false;
+    Strapi.instance = this;
+  }
+
+  initialize(opts = {}) {
     destroyOnSignal(this);
 
     const rootDirs = resolveWorkingDirectories(opts);
@@ -130,6 +140,19 @@ class Strapi {
       },
       configurable: false,
     });
+
+    this.initialized = true;
+
+    return this;
+  }
+
+  // TODO: Use in every other Strapi instance methods
+  assertInitialized() {
+    if (!this.initialized) {
+      throw new Error(
+        'Strapi is not initialized, you can not use the instance before initialization.'
+      );
+    }
   }
 
   get config() {
@@ -570,10 +593,9 @@ class Strapi {
   }
 }
 
-module.exports = (options) => {
-  const strapi = new Strapi(options);
-  global.strapi = strapi;
-  return strapi;
-};
+const strapi = new Strapi();
+module.exports = strapi;
+// TODO: remove global variable
+global.strapi = strapi;
 
 module.exports.Strapi = Strapi;

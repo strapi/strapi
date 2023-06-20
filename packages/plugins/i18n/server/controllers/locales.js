@@ -1,6 +1,7 @@
 'use strict';
 
 const utils = require('@strapi/utils');
+const strapi = require('@strapi/strapi');
 const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');
@@ -11,7 +12,6 @@ const { ApplicationError } = utils.errors;
 
 const sanitizeLocale = (locale) => {
   const model = strapi.getModel('plugin::i18n.locale');
-
   return sanitize.contentAPI.output(locale, model);
 };
 

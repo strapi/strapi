@@ -2,7 +2,10 @@
 
 const { getService } = require('./utils');
 
-const registerModelsHooks = () => {
+/**
+ * @param {Strapi} strapi
+ */
+const registerModelsHooks = (strapi) => {
   const i18nModelUIDs = Object.values(strapi.contentTypes)
     .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
     .map((contentType) => contentType.uid);
@@ -59,7 +62,7 @@ module.exports = async ({ strapi }) => {
   engine.registerI18nPermissionsHandlers();
 
   // Hooks & Models
-  registerModelsHooks();
+  registerModelsHooks(strapi);
 
   sendDidInitializeEvent();
 };

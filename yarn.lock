@@ -8408,6 +8408,7 @@ __metadata:
     "@strapi/design-system": 1.8.0
     "@strapi/helper-plugin": 4.11.1
     "@strapi/icons": 1.8.0
+    "@strapi/strapi": 4.11.1
     "@strapi/utils": 4.11.1
     "@testing-library/react": 14.0.0
     formik: 2.4.0

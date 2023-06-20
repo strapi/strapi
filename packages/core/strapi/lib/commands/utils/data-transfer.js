@@ -127,7 +127,7 @@ const setSignalHandler = async (handler, signals = ['SIGINT', 'SIGTERM', 'SIGQUI
 const createStrapiInstance = async (opts = {}) => {
   try {
     const appContext = await strapi.compile();
-    const app = strapi({ ...opts, ...appContext });
+    const app = strapi.initialize({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();

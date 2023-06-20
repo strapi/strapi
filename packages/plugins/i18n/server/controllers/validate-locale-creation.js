@@ -1,6 +1,7 @@
 'use strict';
 
 const { get } = require('lodash/fp');
+const strapi = require('@strapi/strapi');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 

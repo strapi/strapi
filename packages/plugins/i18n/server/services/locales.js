@@ -1,6 +1,7 @@
 'use strict';
 
 const { isNil } = require('lodash/fp');
+const strapi = require('@strapi/strapi');
 const { DEFAULT_LOCALE } = require('../constants');
 const { getService } = require('../utils');
 

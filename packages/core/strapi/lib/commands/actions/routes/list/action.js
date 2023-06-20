@@ -8,7 +8,7 @@ const strapi = require('../../../../index');
 
 module.exports = async () => {
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const app = await strapi.initialize(appContext).load();
 
   const list = app.server.listRoutes();
 

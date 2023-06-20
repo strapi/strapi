@@ -1,6 +1,7 @@
 'use strict';
 
 const { reduce } = require('lodash/fp');
+const strapi = require('@strapi/strapi');
 const { getService } = require('../utils');
 
 const sendDidInitializeEvent = async () => {

@@ -13,7 +13,7 @@ module.exports = async ({ file: filePath, pretty }) => {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const app = await strapi.initialize(appContext).load();
 
   const count = await app.query('strapi::core-store').count();
 

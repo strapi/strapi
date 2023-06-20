@@ -29,7 +29,7 @@ const createStrapiInstance = async ({
     appDir: TEST_APP_URL,
     distDir: TEST_APP_URL,
   };
-  const instance = strapi(options);
+  const instance = strapi.initialize(options);
 
   if (bypassAuth) {
     instance.container.get('auth').register('content-api', {
