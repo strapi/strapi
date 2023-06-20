@@ -1,11 +1,13 @@
 import React from 'react';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
+
 import { AdminUsersFilter } from '../AdminUsersFilter';
 
 const server = setupServer(

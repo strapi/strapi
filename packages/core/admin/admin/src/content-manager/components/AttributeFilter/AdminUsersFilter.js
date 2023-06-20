@@ -1,7 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Combobox, ComboboxOption } from '@strapi/design-system';
 import { getDisplayName } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useAdminUsers } from '../../../hooks/useAdminUsers';

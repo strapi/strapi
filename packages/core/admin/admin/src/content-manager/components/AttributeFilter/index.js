@@ -1,12 +1,14 @@
 import React from 'react';
 
+import { useQueryParams, getDisplayName } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useQueryParams, getDisplayName } from '@strapi/helper-plugin';
+
 import { useAdminUsers } from '../../../hooks/useAdminUsers';
-import useAllowedAttributes from './hooks/useAllowedAttributes';
-import Filters from './Filters';
+
 import { AdminUsersFilter } from './AdminUsersFilter';
+import Filters from './Filters';
+import useAllowedAttributes from './hooks/useAllowedAttributes';
 
 const AUTHOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 

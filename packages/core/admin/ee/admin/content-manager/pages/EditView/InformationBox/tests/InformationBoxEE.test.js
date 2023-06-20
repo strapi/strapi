@@ -87,6 +87,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       initialData: {},
       isCreatingEntry: true,
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { getByText } = setup();
@@ -99,6 +100,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
@@ -112,6 +114,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
         [STAGE_ATTRIBUTE_NAME]: null,
       },
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { getByText, queryByRole } = setup();
@@ -127,6 +130,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: true,
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
@@ -142,6 +146,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: false,
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
@@ -157,6 +162,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: false,
       layout: { uid: 'api::articles:articles' },
+      readActionAllowedFields: [],
     });
 
     const { getByRole, getByText, user } = setup();
