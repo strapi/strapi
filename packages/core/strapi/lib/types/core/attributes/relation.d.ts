@@ -76,6 +76,14 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribut
   ? RelationValue<TRelationKind, TTarget>
   : never;
 
+export type GetRelationTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
+  infer _TOrigin,
+  infer _TRelationKind,
+  infer TTarget
+>
+  ? TTarget
+  : never;
+
 export module RelationKind {
   type GetOppositePlurality<TPlurality extends RelationKind.Left | RelationKind.Right> = {
     one: 'many';

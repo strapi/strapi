@@ -1,5 +1,6 @@
 import type { Attribute, Utils } from '@strapi/strapi';
 
+export type MediaTarget = 'plugin::upload.file';
 export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
 
 export interface MediaProperties<
@@ -31,4 +32,11 @@ export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute e
   infer TMultiple
 >
   ? MediaValue<TMultiple>
+  : never;
+
+export type GetMediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
+  infer _TKind,
+  infer _TMultiple
+>
+  ? MediaTarget
   : never;
