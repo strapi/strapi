@@ -75,7 +75,7 @@ const ComponentFixture = () => {
   );
 };
 
-describe('DynamicTable / Cellcontent / RelationMultiple', () => {
+describe('ListViewTable / Cellcontent / RelationMultiple', () => {
   it('renders and matches the snapshot', async () => {
     const { container } = render(<ComponentFixture />);
     expect(container).toMatchSnapshot();

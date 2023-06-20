@@ -58,7 +58,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
 
   const notify = () => {
     const message = formatMessage({
-      id: getTrad('DynamicTable.relation-loaded'),
+      id: getTrad('ListViewTable.relation-loaded'),
       defaultMessage: 'Relations have been loaded',
     });
     notifyStatus(message);
@@ -89,7 +89,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
           <MenuItem aria-disabled>
             <Loader small>
               {formatMessage({
-                id: getTrad('DynamicTable.relation-loading'),
+                id: getTrad('ListViewTable.relation-loading'),
                 defaultMessage: 'Relations are loading',
               })}
             </Loader>
@@ -113,7 +113,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
               <MenuItem
                 aria-disabled
                 aria-label={formatMessage({
-                  id: getTrad('DynamicTable.relation-more'),
+                  id: getTrad('ListViewTable.relation-more'),
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >

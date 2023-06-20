@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DynamicTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+exports[`ListViewTable / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
 .c14 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);

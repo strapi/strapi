@@ -39,7 +39,7 @@ import styled from 'styled-components';
 import permissions from '../../../permissions';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
-import DynamicTable from '../../components/DynamicTable';
+import ListViewTable from '../../components/ListViewTable';
 import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
@@ -434,7 +434,7 @@ function ListView({
       <ContentLayout>
         {canRead ? (
           <>
-            <DynamicTable
+            <ListViewTable
               canCreate={canCreate}
               canDelete={canDelete}
               canPublish={canPublish}
@@ -443,7 +443,7 @@ function ListView({
               onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmPublishAll={handleConfirmPublishAllData}
               onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-              isBulkable={isBulkable}
+              withEntityActions={(canDelete || canPublish) && isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
               layout={layout}

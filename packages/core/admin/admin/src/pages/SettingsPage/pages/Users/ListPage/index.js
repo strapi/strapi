@@ -38,6 +38,7 @@ const ListPage = () => {
   const {
     allowedActions: { canCreate, canDelete, canRead },
   } = useRBAC(adminPermissions.settings.users);
+
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();

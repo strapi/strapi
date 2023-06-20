@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, useTableContext } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -176,21 +176,20 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
-const BulkActionsBar = ({
+const BulkActionButtons = ({
   showPublish,
   showDelete,
   onConfirmDeleteAll,
   onConfirmPublishAll,
   onConfirmUnpublishAll,
-  selectedEntries,
-  clearSelectedEntries,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { data } = useSelector(listViewDomain());
+  const { selectedEntries, setSelectedEntries } = useTableContext();
 
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
-  const [dialogToOpen, setDialogToOpen] = useState(null);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
+  const [dialogToOpen, setDialogToOpen] = React.useState(null);
 
   // Filters for Bulk actions
   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
@@ -232,7 +231,7 @@ const BulkActionsBar = ({
       await confirmAction(selectedEntries);
       setIsConfirmButtonLoading(false);
       toggleModal();
-      clearSelectedEntries();
+      setSelectedEntries([]);
     } catch (error) {
       setIsConfirmButtonLoading(false);
       toggleModal();
@@ -288,7 +287,7 @@ const BulkActionsBar = ({
   );
 };
 
-BulkActionsBar.defaultProps = {
+BulkActionButtons.defaultProps = {
   showPublish: false,
   showDelete: false,
   onConfirmDeleteAll() {},
@@ -296,14 +295,12 @@ BulkActionsBar.defaultProps = {
   onConfirmUnpublishAll() {},
 };
 
-BulkActionsBar.propTypes = {
+BulkActionButtons.propTypes = {
   showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
-  selectedEntries: PropTypes.array.isRequired,
-  clearSelectedEntries: PropTypes.func.isRequired,
 };
 
-export default BulkActionsBar;
+export default BulkActionButtons;
