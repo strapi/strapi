@@ -64,7 +64,7 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type E = [42]; // ❌
  * type F = 'title'; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID>[];
 
 // Objects
 
