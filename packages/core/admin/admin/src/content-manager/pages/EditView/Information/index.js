@@ -53,7 +53,7 @@ const Body = () => {
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const { firstname, lastname, username } = initialData[byField]?.[0] ?? {};
+    const { firstname, lastname, username } = initialData[byField] ?? {};
 
     const canReadByField = readActionAllowedFields.includes(byField);
     const userFirstname = firstname ?? '';

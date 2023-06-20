@@ -78,6 +78,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const displayedFields = flatMap(editLayout, 'rowContent');
   const editLayoutFields = Object.keys(modifiedData.attributes)
     .filter((attr) => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
+    // We hide the creator fields
+    .filter((attr) => !['createdBy', 'updatedBy'].includes(attr))
     .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
 
