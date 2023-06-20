@@ -21,10 +21,10 @@ module.exports = async ({ strapi }) => {
     await auditLogsService.register();
   }
   if (features.isEnabled('review-workflows')) {
+    strapi.hook('strapi::content-types.beforeSync').register(migrateStageAttribute);
     strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowStagesColor);
     strapi.hook('strapi::content-types.afterSync').register(migrateReviewWorkflowName);
     strapi.hook('strapi::content-types.afterSync').register(migrateWorkflowsContentTypes);
-    strapi.hook('strapi::content-types.afterSync').register(migrateStageAttribute);
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
