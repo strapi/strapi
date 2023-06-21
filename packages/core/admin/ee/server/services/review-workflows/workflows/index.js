@@ -4,20 +4,14 @@ const { set, isString } = require('lodash/fp');
 const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
+const { getWorkflowContentTypeFilter } = require('../../../utils/review-workflows');
 const workflowsContentTypesFactory = require('./content-types');
-
-const getContentTypeFilter = ({ strapi }, contentType) => {
-  if (strapi.db.dialect.supportsOperator('$jsonSupersetOf')) {
-    return { $jsonSupersetOf: JSON.stringify([contentType]) };
-  }
-  return { $contains: `"${contentType}"` };
-};
 
 const processFilters = ({ strapi }, filters = {}) => {
   const processedFilters = { ...filters };
 
   if (isString(filters.contentTypes)) {
-    processedFilters.contentTypes = getContentTypeFilter({ strapi }, filters.contentTypes);
+    processedFilters.contentTypes = getWorkflowContentTypeFilter({ strapi }, filters.contentTypes);
   }
 
   return processedFilters;
@@ -169,7 +163,7 @@ module.exports = ({ strapi }) => {
     async getAssignedWorkflow(uid, opts = {}) {
       const workflows = await this.find({
         ...opts,
-        filters: { contentTypes: getContentTypeFilter({ strapi }, uid) },
+        filters: { contentTypes: getWorkflowContentTypeFilter({ strapi }, uid) },
       });
       return workflows.length > 0 ? workflows[0] : null;
     },
