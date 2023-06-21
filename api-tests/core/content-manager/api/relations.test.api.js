@@ -656,7 +656,7 @@ describe('Relations', () => {
       );
 
       const relationToChange = [{ id: id1, position: { before: id3 } }];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { connect: relationToChange },
         products_mm: { connect: relationToChange },
@@ -667,20 +667,16 @@ describe('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
+      const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
 
     test('Reorder multiple relations', async () => {
@@ -703,7 +699,7 @@ describe('Relations', () => {
         { id: id3, position: { start: true } },
         { id: id2, position: { after: id1 } },
       ];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { connect: relationToChange },
         products_mm: { connect: relationToChange },
@@ -714,20 +710,16 @@ describe('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
 
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
 
     test('Invalid reorder with non-strict mode should not give an error', async () => {
@@ -748,7 +740,7 @@ describe('Relations', () => {
       const relationToChange = [
         { id: id1, position: { before: id3 } }, // id3 does not exist, should place it at the end
       ];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { options: { strict: false }, connect: relationToChange },
         products_mm: { options: { strict: false }, connect: relationToChange },
@@ -759,20 +751,15 @@ describe('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id1 }, { id: id2 }];
+      const expectedRelations = [{ id: id2 }, { id: id1 }];
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
   });
 
