@@ -54,9 +54,7 @@ describe('useLicenseLimitNotification', () => {
 
   it('should return if no license info is available', () => {
     useLicenseLimits.mockImplementationOnce(() => ({
-      license: {
-        data: {},
-      },
+      license: {},
     }));
 
     renderHook(() => useLicenseLimitNotification());
@@ -66,10 +64,8 @@ describe('useLicenseLimitNotification', () => {
   it('should not display notification if permittedSeat info is missing', () => {
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
-        data: {
-          ...baseLicenseInfo,
-          permittedSeats: undefined,
-        },
+        ...baseLicenseInfo,
+        permittedSeats: undefined,
       },
     }));
 
@@ -80,10 +76,8 @@ describe('useLicenseLimitNotification', () => {
   it('should not display notification if status is not AT_LIMIT or OVER_LIMIT', () => {
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
-        data: {
-          ...baseLicenseInfo,
-          licenseLimitStatus: 'SOME_STRING',
-        },
+        ...baseLicenseInfo,
+        licenseLimitStatus: 'SOME_STRING',
       },
     }));
 
@@ -117,10 +111,8 @@ describe('useLicenseLimitNotification', () => {
   it('should display a warning notification when license limit is at limit', () => {
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
-        data: {
-          ...baseLicenseInfo,
-          licenseLimitStatus: 'OVER_LIMIT',
-        },
+        ...baseLicenseInfo,
+        licenseLimitStatus: 'OVER_LIMIT',
       },
     }));
 
@@ -144,10 +136,8 @@ describe('useLicenseLimitNotification', () => {
   it('should have cloud billing url if is hosted on strapi cloud', () => {
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
-        data: {
-          ...baseLicenseInfo,
-          isHostedOnStrapiCloud: true,
-        },
+        ...baseLicenseInfo,
+        isHostedOnStrapiCloud: true,
       },
     }));
 
