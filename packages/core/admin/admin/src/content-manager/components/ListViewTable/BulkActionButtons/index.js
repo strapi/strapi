@@ -2,10 +2,11 @@ import * as React from 'react';
 
 import {
   Button,
+  Box,
+  Flex,
   Dialog,
   DialogBody,
   DialogFooter,
-  Flex,
   Typography,
   ModalLayout,
   ModalHeader,
@@ -112,39 +113,46 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
 ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
 
 const SelectedEntriesTableContent = () => {
-  const tableCtxNested = useTableContext();
-  const { setSelectedEntries, rows } = tableCtxNested;
+  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
 
-  console.log({ tableCtxNested });
-
+  // Select all entries by default
   React.useEffect(() => {
     setSelectedEntries(rows.map((row) => row.id));
   }, [setSelectedEntries, rows]);
 
   return (
-    <Table.Content>
-      <Table.Head>
-        <Table.HeaderCheckboxCell />
-        <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
-        <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
-      </Table.Head>
-      <Tbody>
-        {rows.map((entry, index) => (
-          <Tr>
-            <Body.CheckboxDataCell rowId={entry.id} index={index} />
-            <Td>{entry.id}</Td>
-            <Td>{entry.name}</Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </Table.Content>
+    <>
+      <Typography>
+        <Typography>{selectedEntries.length}</Typography> selected entries
+      </Typography>
+      <Box marginTop={5}>
+        <Table.Content>
+          <Table.Head>
+            <Table.HeaderCheckboxCell />
+            <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+            <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+          </Table.Head>
+          <Tbody>
+            {rows.map((entry, index) => (
+              <Tr>
+                <Body.CheckboxDataCell rowId={entry.id} index={index} />
+                <Td>
+                  <Typography>{entry.id}</Typography>
+                </Td>
+                <Td>
+                  <Typography>{entry.name}</Typography>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table.Content>
+      </Box>
+    </>
   );
 };
 
-const SelectedEntriesModal = ({ isOpen, onToggle, isConfirmButtonLoading, onConfirm }) => {
-  const tableCtx = useTableContext();
-  const { rows, selectedEntries } = tableCtx;
-  console.log(tableCtx);
+const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
+  const { rows, selectedEntries } = useTableContext();
 
   const entries = rows.filter((row) => {
     return selectedEntries.includes(row.id);
@@ -162,8 +170,6 @@ const SelectedEntriesModal = ({ isOpen, onToggle, isConfirmButtonLoading, onConf
         </Typography>
       </ModalHeader>
       <ModalBody>
-        {/* TODO count modal selections instead of list view selections */}
-        <Typography>{selectedEntries.length} selected entries</Typography>
         <Table.Root rows={entries} colCount={4}>
           <SelectedEntriesTableContent />
         </Table.Root>
@@ -174,15 +180,16 @@ const SelectedEntriesModal = ({ isOpen, onToggle, isConfirmButtonLoading, onConf
             Cancel
           </Button>
         }
-        endActions={
-          <>
-            <Button variant="secondary">Add new stuff</Button>
-            <Button onClick={onToggle}>Finish</Button>
-          </>
-        }
+        endActions={<Button onClick={() => onConfirm(selectedEntries)}>Publish</Button>}
       />
     </ModalLayout>
   );
+};
+
+SelectedEntriesModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
 };
 
 const ConfirmDialogUnpublishAll = ({
@@ -288,7 +295,7 @@ const BulkActionButtons = ({
   const unpublishButtonIsShown =
     showPublish && selectedEntriesObjects.some((entry) => entry.publishedAt);
 
-  const toggleDeleteModal = () => {
+  const toggleDeleteDialog = () => {
     if (dialogToOpen === 'delete') {
       setDialogToOpen(null);
     } else {
@@ -297,7 +304,7 @@ const BulkActionButtons = ({
     }
   };
 
-  const togglePublishModal = () => {
+  const togglePublishDialog = () => {
     if (dialogToOpen === 'publish') {
       setDialogToOpen(null);
     } else {
@@ -306,7 +313,7 @@ const BulkActionButtons = ({
     }
   };
 
-  const toggleUnpublishModal = () => {
+  const toggleUnpublishDialog = () => {
     if (dialogToOpen === 'unpublish') {
       setDialogToOpen(null);
     } else {
@@ -315,22 +322,23 @@ const BulkActionButtons = ({
     }
   };
 
-  const handleBulkAction = async (confirmAction, toggleModal) => {
+  const handleBulkAction = async (confirmAction, toggleDialog, entries = selectedEntries) => {
     try {
       setIsConfirmButtonLoading(true);
-      await confirmAction(selectedEntries);
+      await confirmAction(entries);
       setIsConfirmButtonLoading(false);
-      toggleModal();
+      toggleDialog();
       setSelectedEntries([]);
     } catch (error) {
       setIsConfirmButtonLoading(false);
-      toggleModal();
+      toggleDialog();
     }
   };
 
-  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteModal);
-  const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishModal);
-  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishModal);
+  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteDialog);
+  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishDialog);
+  const handleBulkPublish = (entries) =>
+    handleBulkAction(onConfirmPublishAll, togglePublishDialog, entries);
 
   return (
     <>
@@ -341,27 +349,25 @@ const BulkActionButtons = ({
           </Button>
           <SelectedEntriesModal
             isOpen={isSelectedEntriesModalOpen}
-            isConfirmButtonLoading={isConfirmButtonLoading}
             onToggle={() => setIsSelectedEntriesModalOpen((prev) => !prev)}
+            onConfirm={togglePublishDialog}
+          />
+          <ConfirmDialogPublishAll
+            isOpen={dialogToOpen === 'publish'}
+            onToggleDialog={togglePublishDialog}
+            isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkPublish}
           />
-          {/* TODO: reveal on "Publish" click */}
-          {/* <ConfirmDialogPublishAll
-            isOpen={dialogToOpen === 'publish'}
-            onToggleDialog={togglePublishModal}
-            isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleBulkPublish}
-          /> */}
         </>
       )}
       {unpublishButtonIsShown && (
         <>
-          <Button variant="tertiary" onClick={toggleUnpublishModal}>
+          <Button variant="tertiary" onClick={toggleUnpublishDialog}>
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
-            onToggleDialog={toggleUnpublishModal}
+            onToggleDialog={toggleUnpublishDialog}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkUnpublish}
           />
@@ -369,12 +375,12 @@ const BulkActionButtons = ({
       )}
       {showDelete && (
         <>
-          <Button variant="danger-light" onClick={toggleDeleteModal}>
+          <Button variant="danger-light" onClick={toggleDeleteDialog}>
             {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
           </Button>
           <ConfirmDialogDeleteAll
             isOpen={dialogToOpen === 'delete'}
-            onToggleDialog={toggleDeleteModal}
+            onToggleDialog={toggleDeleteDialog}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkDelete}
           />
