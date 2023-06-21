@@ -190,7 +190,6 @@ const FormModal = () => {
           actionType,
           data: {
             draftAndPublish: true,
-            reviewWorkflows: false,
           },
           pluginOptions: {},
         });

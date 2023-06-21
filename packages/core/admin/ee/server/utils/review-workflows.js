@@ -8,7 +8,7 @@ const getVisibleContentTypesUID = pipe([
   pickBy(
     (value) =>
       getOr(true, 'pluginOptions.content-manager.visible', value) &&
-      getOr(true, 'options.reviewWorkflows', value) !== false
+      !getOr(false, 'options.noStageAttribute', value)
   ),
   // Get UIDs
   keys,

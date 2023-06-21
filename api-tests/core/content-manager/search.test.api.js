@@ -21,7 +21,7 @@ const bedModel = {
   pluralName: 'beds',
   kind: 'collectionType',
   options: {
-    reviewWorkflows: false,
+    noStageAttribute: true,
   },
   attributes: {
     name: {
