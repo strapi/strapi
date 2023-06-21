@@ -5,30 +5,31 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import parseISO from 'date-fns/parseISO';
-import formatISO from 'date-fns/formatISO';
-import { useIntl } from 'react-intl';
 
 import {
   Checkbox,
   DatePicker,
   DateTimePicker,
   Icon,
+  JSONInput,
   NumberInput,
+  Option,
   Select,
   Textarea,
   TextInput,
   TimePicker,
   ToggleInput,
-  JSONInput,
-  Option,
 } from '@strapi/design-system';
-import { EyeStriked, Eye } from '@strapi/icons';
+import { Eye, EyeStriked } from '@strapi/icons';
+import formatISO from 'date-fns/formatISO';
+import parseISO from 'date-fns/parseISO';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
-import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
 import pxToRem from '../../utils/pxToRem';
+
+import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,

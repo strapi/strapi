@@ -1,17 +1,18 @@
 import React from 'react';
+
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import { setupServer } from 'msw/node';
-import { rest } from 'msw';
 
-import { StageSelect } from '../StageSelect';
 import { STAGE_ATTRIBUTE_NAME } from '../../../constants';
+import { StageSelect } from '../StageSelect';
 
 const STAGE_1_STATE_FIXTURE = {
   id: 1,

@@ -1,8 +1,10 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { DocAssetCard } from '../DocAssetCard';
+
 import en from '../../../translations/en.json';
+import { DocAssetCard } from '../DocAssetCard';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),

@@ -1,4 +1,6 @@
 import * as React from 'react';
+
+import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import {
   // eslint-disable-next-line no-restricted-imports
   ReactSelect,
@@ -7,7 +9,6 @@ import {
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Field, FieldLabel, FieldError, Flex, Loader } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 

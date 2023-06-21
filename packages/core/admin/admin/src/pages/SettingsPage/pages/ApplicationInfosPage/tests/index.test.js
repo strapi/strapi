@@ -1,10 +1,13 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useAppInfo, useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useAppInfo, useRBAC, TrackingProvider } from '@strapi/helper-plugin';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import ApplicationInfosPage from '../index';
+
 import server from './server';
 
 const updateProjectSettingsSpy = jest.fn();

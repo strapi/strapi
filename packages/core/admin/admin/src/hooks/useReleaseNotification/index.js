@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+
 import { useAppInfo, useNotification } from '@strapi/helper-plugin';
 
 const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));

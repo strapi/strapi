@@ -1,10 +1,5 @@
 import * as React from 'react';
-import {
-  useCMEditViewDataManager,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
+
 import {
   SingleSelect,
   SingleSelectOption,
@@ -14,6 +9,12 @@ import {
   Loader,
   Typography,
 } from '@strapi/design-system';
+import {
+  useCMEditViewDataManager,
+  useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 

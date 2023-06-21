@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+
 import { initialState } from './reducer';
 
 const selectAppDomain = () => (state) => {
@@ -30,6 +31,6 @@ export {
   makeSelectModelAndComponentSchemas,
   makeSelectModelLinks,
   makeSelectModels,
-  selectFieldSizes,
   selectAppDomain,
+  selectFieldSizes,
 };

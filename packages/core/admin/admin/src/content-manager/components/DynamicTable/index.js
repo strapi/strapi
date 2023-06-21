@@ -1,17 +1,19 @@
 import React, { useMemo } from 'react';
+
+import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import getReviewWorkflowsColumns from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumns';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import getReviewWorkflowsColumns from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumns';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
-import TableRows from './TableRows';
-import ConfirmDialogDelete from './ConfirmDialogDelete';
-import { PublicationState } from './CellContent/PublicationState/PublicationState';
+
 import BulkActionsBar from './BulkActionsBar';
+import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import ConfirmDialogDelete from './ConfirmDialogDelete';
+import TableRows from './TableRows';
 
 const DynamicTable = ({
   canCreate,

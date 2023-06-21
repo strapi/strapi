@@ -1,3 +1,5 @@
+import React, { useMemo, useState } from 'react';
+
 import {
   Badge,
   Box,
@@ -10,10 +12,10 @@ import {
 } from '@strapi/design-system';
 import { stopPropagation, useFetchClient } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
+
 import { getRequestUrl, getTrad } from '../../../../utils';
 import CellValue from '../CellValue';
 

@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { Box, Icon, Typography } from '@strapi/design-system';
+import { useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useNotification, useTracking, useClipboard } from '@strapi/helper-plugin';
-import { Box, Icon, Typography } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+
 import CardButton from './CardButton';
 
 const InstallPluginButton = ({

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import { Button } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 import { BulkMoveDialog } from '../../../../components/BulkMoveDialog';
 import { AssetDefinition, FolderDefinition } from '../../../../constants';

@@ -55,7 +55,12 @@ module.exports = {
       if (entityId) {
         const entityManager = getService('entity-manager');
 
-        const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+        const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+        const populate = await getService('populate-builder')(model)
+          .populateFromQuery(permissionQuery)
+          .build();
+
+        const entity = await entityManager.findOne(entityId, model, { populate });
 
         if (!entity) {
           return ctx.notFound();
@@ -161,7 +166,12 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const entity = await entityManager.findOneWithCreatorRoles(id, model);
+      const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+      const populate = await getService('populate-builder')(model)
+        .populateFromQuery(permissionQuery)
+        .build();
+
+      const entity = await entityManager.findOne(id, model, { populate });
 
       if (!entity) {
         return ctx.notFound();

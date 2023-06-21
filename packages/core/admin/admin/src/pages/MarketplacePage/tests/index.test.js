@@ -1,14 +1,17 @@
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useAppInfo, useTracking } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useTracking, useAppInfo, TrackingProvider } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
+
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
+
 import server from './server';
 
 const toggleNotification = jest.fn();

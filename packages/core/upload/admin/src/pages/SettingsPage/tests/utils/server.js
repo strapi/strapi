@@ -1,5 +1,5 @@
-import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 
 const handlers = [
   rest.get('*/settings', (req, res, ctx) => {

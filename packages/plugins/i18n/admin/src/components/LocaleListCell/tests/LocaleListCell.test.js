@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
-import { useSelector } from 'react-redux';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { useSelector } from 'react-redux';
+
 import LocaleListCell from '../LocaleListCell';
 
 jest.mock('react-redux', () => ({

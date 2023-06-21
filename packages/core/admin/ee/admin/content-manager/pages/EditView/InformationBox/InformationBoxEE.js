@@ -1,10 +1,12 @@
 import React from 'react';
+
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
-import { STAGE_ATTRIBUTE_NAME } from './constants';
+
 import { AssigneeSelect } from './components/AssigneeSelect';
 import { StageSelect } from './components/StageSelect';
+import { STAGE_ATTRIBUTE_NAME } from './constants';
 
 export function InformationBoxEE() {
   const { initialData, isCreatingEntry } = useCMEditViewDataManager();

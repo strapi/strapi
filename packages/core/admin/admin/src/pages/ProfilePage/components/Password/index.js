@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
+
 import {
-  Typography,
   Box,
+  FieldAction,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  FieldAction,
   TextInput,
+  Typography,
 } from '@strapi/design-system';
-import { Eye, EyeStriked } from '@strapi/icons';
-import { useIntl } from 'react-intl';
 import { pxToRem } from '@strapi/helper-plugin';
+import { Eye, EyeStriked } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {

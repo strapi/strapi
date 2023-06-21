@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import upperFirst from 'lodash/upperFirst';
-import { ModalHeader, Box, Flex, Typography } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';

@@ -1,10 +1,12 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system';
 
-import ReviewWorkflowsStage from '.';
+import { Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
 import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
 import { STAGE_COLOR_DEFAULT } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
+
+import ReviewWorkflowsStage from '.';
 
 export default (layout) => {
   const { formatMessage } = useIntl();
