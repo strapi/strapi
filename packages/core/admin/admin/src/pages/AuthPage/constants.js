@@ -2,13 +2,13 @@ import { translatedErrors } from '@strapi/helper-plugin';
 import Login from 'ee_else_ce/pages/AuthPage/components/Login';
 import * as yup from 'yup';
 
-import ForgotPassword from '../components/ForgotPassword';
-import ForgotPasswordSuccess from '../components/ForgotPasswordSuccess';
-import Oops from '../components/Oops';
-import Register from '../components/Register';
-import ResetPassword from '../components/ResetPassword';
+import ForgotPassword from './components/ForgotPassword';
+import ForgotPasswordSuccess from './components/ForgotPasswordSuccess';
+import Oops from './components/Oops';
+import Register from './components/Register';
+import ResetPassword from './components/ResetPassword';
 
-const forms = {
+export const FORMS = {
   'forgot-password': {
     Component: ForgotPassword,
     endPoint: 'forgot-password',
@@ -119,5 +119,3 @@ const forms = {
     }),
   },
 };
-
-export default forms;
