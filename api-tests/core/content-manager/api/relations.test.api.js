@@ -151,7 +151,7 @@ const getRelations = async (uid, field, id) => {
   return res.body;
 };
 
-describe.skip('Relations', () => {
+describe('Relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -920,7 +920,7 @@ describe.skip('Relations', () => {
     });
   });
 
-  describe.skip('Clone entity with relations', () => {
+  describe('Clone entity with relations', () => {
     test('Auto cloning entity with relations should fail', async () => {
       const createdShop = await createEntry(
         'shop',
