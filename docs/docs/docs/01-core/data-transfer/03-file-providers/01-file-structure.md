@@ -1,11 +1,11 @@
 ---
-title: Local Strapi
+title: Strapi File
 tags:
   - providers
   - data-transfer
   - experimental
 ---
 
-# Local Strapi Destination Provider
+# Strapi File Structure
 
-TODO
+**TODO**

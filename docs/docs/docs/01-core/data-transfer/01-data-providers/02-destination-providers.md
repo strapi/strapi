@@ -1,5 +1,5 @@
 ---
-title: Local Strapi
+title: Destination Providers
 tags:
   - providers
   - data-transfer
@@ -8,4 +8,6 @@ tags:
 
 # Destination Providers
 
-TODO
+## Destination provider structure
+
+**TODO**

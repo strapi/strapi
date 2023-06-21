@@ -8,4 +8,6 @@ tags:
 
 # Strapi File Source Provider
 
-TODO
+This provider will output a Strapi Data File
+
+**TODO**
