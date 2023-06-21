@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import * as yup from 'yup';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
+
 import ResetPassword from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -586,6 +588,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -595,10 +601,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c15 {
-        height: 4.5rem;
       }
 
       .c32 svg {

@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Router, Route, Switch } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { act, render, screen, waitFor } from '@testing-library/react';
 import { auth } from '@strapi/helper-plugin';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Route, Router, Switch } from 'react-router-dom';
+
 import PrivateRoute from '..';
 
 const ProtectedPage = () => {

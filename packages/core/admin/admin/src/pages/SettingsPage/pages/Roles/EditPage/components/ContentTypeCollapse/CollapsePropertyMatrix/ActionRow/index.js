@@ -1,9 +1,11 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
+
+import { BaseCheckbox, Flex } from '@strapi/design-system';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox, Flex } from '@strapi/design-system';
-import get from 'lodash/get';
+
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
@@ -13,6 +15,7 @@ import { getCheckboxState } from '../../../utils';
 import { activeStyle } from '../../utils';
 import CarretIcon from '../CarretIcon';
 import SubActionRow from '../SubActionRow';
+
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
 const Cell = styled(Flex)`

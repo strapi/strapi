@@ -1,10 +1,11 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
 import { RelationInput } from '../index';
 

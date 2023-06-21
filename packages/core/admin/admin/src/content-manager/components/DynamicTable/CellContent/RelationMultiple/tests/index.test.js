@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
 
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useFetchClient } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import RelationMultiple from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -61,7 +62,13 @@ const DEFAULT_PROPS_FIXTURE = {
 };
 
 const ComponentFixture = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

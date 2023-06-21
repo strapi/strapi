@@ -1,14 +1,16 @@
 import React from 'react';
-import { act, render, waitFor, screen, fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import ListSettingsView from '../index';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
+
 import ModelsContext from '../../../contexts/ModelsContext';
+import ListSettingsView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

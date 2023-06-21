@@ -1,5 +1,5 @@
-import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
+import * as yup from 'yup';
 
 const NAME_REGEX = /(^$)|(^[A-Za-z][_0-9A-Za-z ]*$)/;
 const URL_REGEX = /(^$)|((https?:\/\/.*)(d*)\/?(.*))/;

@@ -1,22 +1,23 @@
-import React, { useState, useRef } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import React, { useRef, useState } from 'react';
+
 import {
-  Typography,
-  Flex,
-  Box,
   BaseButton,
-  FocusTrap,
+  Box,
   Field,
-  FieldHint,
   FieldError,
-  FieldLabel,
+  FieldHint,
   FieldInput,
+  FieldLabel,
+  Flex,
+  FocusTrap,
   Popover,
+  Typography,
 } from '@strapi/design-system';
 import { CarretDown } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import { HexColorPicker } from 'react-colorful';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import getTrad from '../../../utils/getTrad';
 

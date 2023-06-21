@@ -1,7 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
-import { Icon, Flex } from '@strapi/design-system';
+
+import { Flex, Icon } from '@strapi/design-system';
 import { Paint } from '@strapi/icons';
+import styled from 'styled-components';
 
 const IconBox = styled(Flex)`
   /* Hard code color values */

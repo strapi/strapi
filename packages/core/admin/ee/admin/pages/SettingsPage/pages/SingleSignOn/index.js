@@ -1,47 +1,50 @@
 import React, { useEffect } from 'react';
+
 import {
-  CheckPagePermissions,
-  SettingsPageTitle,
-  useRBAC,
-  LoadingIndicatorPage,
-  useFocusWhenNavigate,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import {
-  ContentLayout,
-  HeaderLayout,
-  Layout,
   Button,
-  Main,
-  Typography,
-  ToggleInput,
-  Select,
-  Option,
+  ContentLayout,
+  Flex,
   Grid,
   GridItem,
-  Flex,
+  HeaderLayout,
+  Layout,
+  Main,
   MultiSelect,
   MultiSelectOption,
+  Option,
+  Select,
+  ToggleInput,
+  Typography,
 } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFocusWhenNavigate,
+  useRBAC,
+} from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
-import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
-import schema from './utils/schema';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
+import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
+import { getRequestUrl } from '../../../../../../admin/src/utils';
+
+import schema from './utils/schema';
 
 export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -244,10 +247,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedSSO;

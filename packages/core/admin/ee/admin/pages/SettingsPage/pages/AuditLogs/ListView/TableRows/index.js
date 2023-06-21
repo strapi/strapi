@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { Flex, IconButton, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { Eye } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton, Flex, Typography, Tbody, Td, Tr } from '@strapi/design-system';
-import { Eye } from '@strapi/icons';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
 

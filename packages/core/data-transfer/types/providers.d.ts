@@ -1,16 +1,16 @@
-import type { PipelineSource, PipelineDestination, Readable, Writable } from 'stream';
+import type { Schema, Utils } from '@strapi/strapi';
+import type { Readable, Writable } from 'stream';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
   ISourceProviderTransferResults,
-  Stream,
   MaybePromise,
 } from './utils';
 import type { IMetadata } from './common-entities';
 
-type ProviderType = 'source' | 'destination';
+export type ProviderType = 'source' | 'destination';
 
-interface IProvider {
+export interface IProvider {
   type: ProviderType;
   name: string;
   results?: IProviderTransferResults;
@@ -19,7 +19,7 @@ interface IProvider {
   close?(): MaybePromise<void>;
 
   getMetadata(): MaybePromise<IMetadata | null>;
-  getSchemas?(): MaybePromise<Strapi.Schemas>;
+  getSchemas?(): MaybePromise<Utils.StringRecord<Schema.Schema> | null>;
 
   beforeTransfer?(): MaybePromise<void>;
   validateOptions?(): MaybePromise<void>;

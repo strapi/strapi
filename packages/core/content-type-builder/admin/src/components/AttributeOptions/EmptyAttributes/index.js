@@ -1,9 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
+
+import { Box, Flex, Icon, LinkButton, Typography } from '@strapi/design-system';
+import { EmptyDocuments, Plus } from '@strapi/icons';
 import qs from 'qs';
-import { Box, Flex, Typography, LinkButton, Icon } from '@strapi/design-system';
-import { Plus, EmptyDocuments } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
 
 const EmptyCard = styled(Box)`
