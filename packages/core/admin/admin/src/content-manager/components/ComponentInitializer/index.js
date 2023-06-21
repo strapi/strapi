@@ -1,10 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { PlusCircle } from '@strapi/icons';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
+import { PlusCircle } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { getTrad } from '../../utils';
 
 const IconWrapper = styled.span`

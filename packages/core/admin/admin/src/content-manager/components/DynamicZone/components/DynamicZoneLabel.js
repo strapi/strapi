@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { pxToRem } from '@strapi/helper-plugin';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 export const DynamicZoneLabel = ({
   label,

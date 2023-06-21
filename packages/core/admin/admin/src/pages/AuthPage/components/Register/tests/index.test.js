@@ -1,14 +1,15 @@
 import React from 'react';
-import { act, render, waitFor, fireEvent } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useNotification, useQuery } from '@strapi/helper-plugin';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
-import { TrackingProvider, useQuery, useNotification } from '@strapi/helper-plugin';
 import { createMemoryHistory } from 'history';
-import * as yup from 'yup';
-import { IntlProvider } from 'react-intl';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
 
 import Register from '..';
 

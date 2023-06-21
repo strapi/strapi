@@ -1,9 +1,10 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
 import { renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useReviewWorkflows } from '../useReviewWorkflows';
 

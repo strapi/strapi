@@ -1,9 +1,12 @@
 import { useEffect, useReducer } from 'react';
+
 import { useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
+
 import { checkFormValidity, formatAPIErrors } from '../../utils';
-import { initialState, reducer } from './reducer';
+
 import init from './init';
+import { initialState, reducer } from './reducer';
 
 /**
  * TODO: refactor this, it's confusing and hard to read.
@@ -54,7 +57,6 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   };
 
   const handleChange = ({ target: { name, value, type: inputType } }) => {
-
     dispatch({
       type: 'ON_CHANGE',
       inputType,
@@ -82,7 +84,6 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
 
     if (!errors) {
-      
       try {
         lockApp();
 

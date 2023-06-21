@@ -6,7 +6,6 @@ import produce from 'immer';
 // and force us to either disable the linter for the hooks dependencies array rule or
 // require us to add the dispatch to the array wich is not wanted. This refacto does not require us to
 // to do any of this.
-
 import {
   CLEAR_SET_MODIFIED_DATA_ONLY,
   GET_DATA,

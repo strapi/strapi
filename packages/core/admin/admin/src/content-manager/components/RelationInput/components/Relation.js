@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { Flex } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 
 export const Relation = ({
   children,

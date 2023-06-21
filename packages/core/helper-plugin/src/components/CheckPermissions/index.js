@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import { useNotification } from '../../features/Notifications';
 
-import hasPermissions from '../../utils/hasPermissions';
+import PropTypes from 'prop-types';
+
+import { useNotification } from '../../features/Notifications';
 import { useRBACProvider } from '../../features/RBAC';
+import hasPermissions from '../../utils/hasPermissions';
 
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state

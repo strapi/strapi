@@ -1,16 +1,18 @@
 import React, { memo, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
+import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
-import isEqual from 'lodash/isEqual';
-import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import Wysiwyg from '../Wysiwyg';
 import InputUID from '../InputUID';
 import { RelationInputDataManager } from '../RelationInputDataManager';
+import Wysiwyg from '../Wysiwyg';
 
 import { connect, generateOptions, getInputType, select, VALIDATIONS_TO_OMIT } from './utils';
 

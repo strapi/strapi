@@ -1,10 +1,12 @@
 /* eslint-disable no-useless-escape */
 
 import React from 'react';
+
+import { Flex, Grid, GridItem, Option, Select, TextInput, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Flex, Grid, GridItem, Typography, TextInput, Select, Option } from '@strapi/design-system';
+import styled from 'styled-components';
+
 import getTrad from '../../../utils/getTrad';
 
 const DocumentationLink = styled.a`

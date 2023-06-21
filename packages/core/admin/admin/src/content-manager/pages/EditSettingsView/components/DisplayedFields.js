@@ -1,11 +1,14 @@
 import React from 'react';
+
+import { Box, Button, Flex, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button, Box, Typography, Flex, SimpleMenu, MenuItem } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+
 import { getTrad } from '../../../utils';
-import RowsLayout from './RowsLayout';
+
 import LinkToCTB from './LinkToCTB';
+import RowsLayout from './RowsLayout';
 
 const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();

@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+
 import { LoadingIndicatorPage, RBACProviderContext } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { resetStore, setPermissions } from './actions';
 
 const RBACProvider = ({ children, permissions, refetchPermissions }) => {

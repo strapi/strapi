@@ -1,9 +1,11 @@
 import React, { memo, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useRBAC, LoadingIndicatorPage } from '@strapi/helper-plugin';
+
+import { LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
 import isEqual from 'lodash/isEqual';
-import EditView from '../EditView';
+import PropTypes from 'prop-types';
+
 import { generatePermissionsObject } from '../../utils';
+import EditView from '../EditView';
 
 const Permissions = (props) => {
   const viewPermissions = useMemo(() => generatePermissionsObject(props.slug), [props.slug]);

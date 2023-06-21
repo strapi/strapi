@@ -1,6 +1,8 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, KeyboardNavigable, Flex } from '@strapi/design-system';
+
 import AttributeOption from '../AttributeOption';
 import getPadding from '../utils/getPadding';
 

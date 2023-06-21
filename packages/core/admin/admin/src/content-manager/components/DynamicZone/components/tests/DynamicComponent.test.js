@@ -1,14 +1,15 @@
 import React from 'react';
-import { render as renderRTL, fireEvent } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
 
 import { DynamicComponent } from '../DynamicComponent';
 
-import { layoutData, dynamicComponentsByCategory } from './fixtures';
+import { dynamicComponentsByCategory, layoutData } from './fixtures';
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),

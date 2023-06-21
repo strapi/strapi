@@ -1,8 +1,10 @@
 import React from 'react';
+
+import { Flex, Popover } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Popover, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import FilterSelect from './FilterSelect';
 
 const FiltersPopover = ({
