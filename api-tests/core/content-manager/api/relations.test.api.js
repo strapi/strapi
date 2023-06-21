@@ -151,7 +151,7 @@ const getRelations = async (uid, field, id) => {
   return res.body;
 };
 
-describe.skip('Relations', () => {
+describe('Relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -656,7 +656,7 @@ describe.skip('Relations', () => {
       );
 
       const relationToChange = [{ id: id1, position: { before: id3 } }];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { connect: relationToChange },
         products_mm: { connect: relationToChange },
@@ -667,20 +667,16 @@ describe.skip('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
+      const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
 
     test('Reorder multiple relations', async () => {
@@ -703,7 +699,7 @@ describe.skip('Relations', () => {
         { id: id3, position: { start: true } },
         { id: id2, position: { after: id1 } },
       ];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { connect: relationToChange },
         products_mm: { connect: relationToChange },
@@ -714,20 +710,16 @@ describe.skip('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id2 }, { id: id1 }, { id: id3 }];
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      const expectedRelations = [{ id: id3 }, { id: id1 }, { id: id2 }];
 
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
 
     test('Invalid reorder with non-strict mode should not give an error', async () => {
@@ -748,7 +740,7 @@ describe.skip('Relations', () => {
       const relationToChange = [
         { id: id1, position: { before: id3 } }, // id3 does not exist, should place it at the end
       ];
-      const updatedShop = await updateEntry('shop', createdShop.id, {
+      const { id } = await updateEntry('shop', createdShop.id, {
         name: 'Cazotte Shop',
         products_om: { options: { strict: false }, connect: relationToChange },
         products_mm: { options: { strict: false }, connect: relationToChange },
@@ -759,20 +751,15 @@ describe.skip('Relations', () => {
         },
       });
 
-      let res;
-      const expectedRelations = [{ id: id1 }, { id: id2 }];
+      const expectedRelations = [{ id: id2 }, { id: id1 }];
+      const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
-
-      res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-      expect(res.results).toMatchObject(expectedRelations);
+      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+      expect(updatedShop.products_om).toMatchObject(expectedRelations);
     });
   });
 
@@ -804,7 +791,7 @@ describe.skip('Relations', () => {
         const relationsToDisconnectMany =
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: id1 }] : [id3, id2, id1];
 
-        const updatedShop = await updateEntry(
+        const { id } = await updateEntry(
           'shop',
           createdShop.id,
           {
@@ -824,30 +811,18 @@ describe.skip('Relations', () => {
           populateShop
         );
 
-        let res;
-        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-        expect(res.results).toMatchObject([]);
+        const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+          populate: populateShop,
+        });
 
-        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
-        expect(res.data).toBe(null);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject([]);
+        expect(updatedShop.myCompo.compo_products_ow).toBe(null);
+        expect(updatedShop.products_mm).toMatchObject([]);
+        expect(updatedShop.products_mo).toBe(null);
+        expect(updatedShop.products_mw).toMatchObject([]);
+        expect(updatedShop.products_om).toMatchObject([]);
+        expect(updatedShop.products_oo).toBe(null);
+        expect(updatedShop.products_ow).toBe(null);
       });
 
       test("Remove relations that doesn't exist doesn't fail", async () => {
@@ -872,7 +847,7 @@ describe.skip('Relations', () => {
         const relationsToDisconnectMany =
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: 9999 }] : [id3, id2, 9999];
 
-        const updatedShop = await updateEntry(
+        const { id } = await updateEntry(
           'shop',
           createdShop.id,
           {
@@ -892,35 +867,23 @@ describe.skip('Relations', () => {
           populateShop
         );
 
-        let res;
-        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-        expect(res.results).toMatchObject([{ id: id1 }]);
+        const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+          populate: populateShop,
+        });
 
-        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
-        expect(res.data).toMatchObject({ id: id1 });
-
-        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-        expect(res.results).toMatchObject([{ id: id1 }]);
-
-        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
-        expect(res.data).toMatchObject({ id: id1 });
-
-        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-        expect(res.results).toMatchObject([{ id: id1 }]);
-
-        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-        expect(res.results).toMatchObject([{ id: id1 }]);
-
-        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
-        expect(res.data).toMatchObject({ id: id1 });
-
-        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
-        expect(res.data).toMatchObject({ id: id1 });
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject([{ id: id1 }]);
+        expect(updatedShop.myCompo.compo_products_ow).toMatchObject({ id: id1 });
+        expect(updatedShop.products_mm).toMatchObject([{ id: id1 }]);
+        expect(updatedShop.products_mo).toMatchObject({ id: id1 });
+        expect(updatedShop.products_mw).toMatchObject([{ id: id1 }]);
+        expect(updatedShop.products_om).toMatchObject([{ id: id1 }]);
+        expect(updatedShop.products_oo).toMatchObject({ id: id1 });
+        expect(updatedShop.products_ow).toMatchObject({ id: id1 });
       });
     });
   });
 
-  describe.skip('Clone entity with relations', () => {
+  describe('Clone entity with relations', () => {
     test('Auto cloning entity with relations should fail', async () => {
       const createdShop = await createEntry(
         'shop',
@@ -969,7 +932,7 @@ describe.skip('Relations', () => {
         ['myCompo']
       );
 
-      const clonedShop = await cloneEntry('shop', createdShop.id, {
+      const { id, name } = await cloneEntry('shop', createdShop.id, {
         name: 'Cazotte Shop 2',
         products_ow: { connect: [id2] },
         products_oo: { connect: [id2] },
@@ -984,32 +947,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      expect(clonedShop.name).toBe('Cazotte Shop 2');
+      expect(name).toBe('Cazotte Shop 2');
 
-      let res;
-      res = await getRelations('default.compo', 'compo_products_mw', clonedShop.myCompo.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+      const clonedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_ow', clonedShop.myCompo.id);
-      expect(res.data).toMatchObject({ id: id2 });
-
-      res = await getRelations('api::shop.shop', 'products_mm', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
-
-      res = await getRelations('api::shop.shop', 'products_mo', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
-
-      res = await getRelations('api::shop.shop', 'products_mw', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
-
-      res = await getRelations('api::shop.shop', 'products_om', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
-
-      res = await getRelations('api::shop.shop', 'products_oo', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
-
-      res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
-      expect(res.data).toMatchObject({ id: id2 });
+      expect(clonedShop.myCompo.compo_products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(clonedShop.myCompo.compo_products_ow).toMatchObject({ id: id2 });
+      expect(clonedShop.products_mm).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(clonedShop.products_mo).toMatchObject({ id: id2 });
+      expect(clonedShop.products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(clonedShop.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(clonedShop.products_oo).toMatchObject({ id: id2 });
+      expect(clonedShop.products_ow).toMatchObject({ id: id2 });
     });
 
     test('Clone entity with relations and disconnect data', async () => {
@@ -1031,7 +982,7 @@ describe.skip('Relations', () => {
         ['myCompo']
       );
 
-      const clonedShop = await cloneEntry('shop', createdShop.id, {
+      const { id, name } = await cloneEntry('shop', createdShop.id, {
         name: 'Cazotte Shop 2',
         products_ow: { disconnect: [id1] },
         products_oo: { disconnect: [id1] },
@@ -1046,32 +997,20 @@ describe.skip('Relations', () => {
         },
       });
 
-      expect(clonedShop.name).toBe('Cazotte Shop 2');
+      expect(name).toBe('Cazotte Shop 2');
 
-      let res;
-      res = await getRelations('default.compo', 'compo_products_mw', clonedShop.myCompo.id);
-      expect(res.results).toMatchObject([{ id: id2 }]);
+      const clonedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+        populate: populateShop,
+      });
 
-      res = await getRelations('default.compo', 'compo_products_ow', clonedShop.myCompo.id);
-      expect(res.data).toBe(null);
-
-      res = await getRelations('api::shop.shop', 'products_mm', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }]);
-
-      res = await getRelations('api::shop.shop', 'products_mo', clonedShop.id);
-      expect(res.data).toBe(null);
-
-      res = await getRelations('api::shop.shop', 'products_mw', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }]);
-
-      res = await getRelations('api::shop.shop', 'products_om', clonedShop.id);
-      expect(res.results).toMatchObject([{ id: id2 }]);
-
-      res = await getRelations('api::shop.shop', 'products_oo', clonedShop.id);
-      expect(res.data).toBe(null);
-
-      res = await getRelations('api::shop.shop', 'products_ow', clonedShop.id);
-      expect(res.data).toBe(null);
+      expect(clonedShop.myCompo.compo_products_mw).toMatchObject([{ id: id2 }]);
+      expect(clonedShop.myCompo.compo_products_ow).toBe(null);
+      expect(clonedShop.products_mm).toMatchObject([{ id: id2 }]);
+      expect(clonedShop.products_mo).toBe(null);
+      expect(clonedShop.products_mw).toMatchObject([{ id: id2 }]);
+      expect(clonedShop.products_om).toMatchObject([{ id: id2 }]);
+      expect(clonedShop.products_oo).toBe(null);
+      expect(clonedShop.products_ow).toBe(null);
     });
 
     test('Clone entity with relations and disconnect data should not steal relations', async () => {
@@ -1099,13 +1038,14 @@ describe.skip('Relations', () => {
         products_om: { disconnect: [id1] },
       });
 
-      let res;
+      const populatedCreatedShop = await strapi.entityService.findOne(
+        'api::shop.shop',
+        createdShop.id,
+        { populate: populateShop }
+      );
 
-      res = await getRelations('api::shop.shop', 'products_om', createdShop.id);
-      expect(res.results).toMatchObject([{ id: id1 }]);
-
-      res = await getRelations('api::shop.shop', 'products_oo', createdShop.id);
-      expect(res.data).toMatchObject({ id: id1 });
+      expect(populatedCreatedShop.products_om).toMatchObject([{ id: id1 }]);
+      expect(populatedCreatedShop.products_oo).toMatchObject({ id: id1 });
     });
 
     test('Clone entity with relations and set data should not steal relations', async () => {
@@ -1133,13 +1073,14 @@ describe.skip('Relations', () => {
         products_om: { set: [id2] }, // id 1 should not be stolen from createdShop products_om
       });
 
-      let res;
+      const populatedCreatedShop = await strapi.entityService.findOne(
+        'api::shop.shop',
+        createdShop.id,
+        { populate: populateShop }
+      );
 
-      res = await getRelations('api::shop.shop', 'products_om', createdShop.id);
-      expect(res.results).toMatchObject([{ id: id1 }]);
-
-      res = await getRelations('api::shop.shop', 'products_oo', createdShop.id);
-      expect(res.data).toMatchObject({ id: id1 });
+      expect(populatedCreatedShop.products_om).toMatchObject([{ id: id1 }]);
+      expect(populatedCreatedShop.products_oo).toMatchObject({ id: id1 });
     });
   });
 });
