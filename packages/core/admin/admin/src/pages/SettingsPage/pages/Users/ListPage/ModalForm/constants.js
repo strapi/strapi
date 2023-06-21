@@ -1,4 +1,16 @@
-const layout = [
+import { translatedErrors } from '@strapi/helper-plugin';
+import * as yup from 'yup';
+
+export const FORM_INITIAL_VALUES = {
+  firstname: '',
+  lastname: '',
+  email: '',
+  roles: [],
+};
+
+export const ROLE_LAYOUT = [];
+
+export const FORM_LAYOUT = [
   [
     {
       intlLabel: {
@@ -55,4 +67,25 @@ const layout = [
   ],
 ];
 
-export default layout;
+export const FORM_SCHEMA = yup.object().shape({
+  firstname: yup.string().trim().required(translatedErrors.required),
+  lastname: yup.string(),
+  email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
+  roles: yup.array().min(1, translatedErrors.required).required(translatedErrors.required),
+});
+
+export const STEPPER = {
+  create: {
+    buttonSubmitLabel: {
+      id: 'app.containers.Users.ModalForm.footer.button-success',
+      defaultMessage: 'Invite user',
+    },
+    isDisabled: false,
+    next: 'magic-link',
+  },
+  'magic-link': {
+    buttonSubmitLabel: { id: 'global.finish', defaultMessage: 'Finish' },
+    isDisabled: true,
+    next: null,
+  },
+};
