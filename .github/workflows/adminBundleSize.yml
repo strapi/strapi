@@ -7,6 +7,8 @@ on:
       - '**/ee/admin/**.js'
       - '**/helper-plugin/src/**.js'
       - '**/translations/**.json'
+      - '**/.github/workflows/adminBundleSize.yml'
+      - '**/admin/webpack.*.js'
 
       # Might be too broad, but it runs the action even if a
       # package.json wasn't changed, e.g. for non-pinned dependencies

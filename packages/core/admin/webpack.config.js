@@ -77,6 +77,26 @@ module.exports = ({
       ],
       moduleIds: 'deterministic',
       runtimeChunk: true,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            // Make sure every dependency from node_modules is moved into it's own
+            // chunk. Since dependencies don't change that often, each of these
+            // chunks will already be cached by browsers and therefore they only
+            // have to download the ones that have changed across versions.
+            test: /node_modules/,
+            name(module, chunks, cacheGroupKey) {
+              const moduleFileName = module
+                .identifier()
+                .split('/')
+                .reduceRight((item) => item);
+              const allChunksNames = chunks.map((item) => item.name).join('~');
+              return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
+            },
+          },
+        },
+      },
     },
     module: {
       rules: [
