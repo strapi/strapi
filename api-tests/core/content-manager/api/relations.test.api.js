@@ -804,7 +804,7 @@ describe('Relations', () => {
         const relationsToDisconnectMany =
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: id1 }] : [id3, id2, id1];
 
-        const updatedShop = await updateEntry(
+        const { id } = await updateEntry(
           'shop',
           createdShop.id,
           {
@@ -824,30 +824,18 @@ describe('Relations', () => {
           populateShop
         );
 
-        let res;
-        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
-        expect(res.results).toMatchObject([]);
+        const updatedShop = await strapi.entityService.findOne('api::shop.shop', id, {
+          populate: populateShop,
+        });
 
-        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
-        expect(res.results).toMatchObject([]);
-
-        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
-        expect(res.data).toBe(null);
-
-        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
-        expect(res.data).toBe(null);
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject([]);
+        expect(updatedShop.myCompo.compo_products_ow).toBe(null);
+        expect(updatedShop.products_mm).toMatchObject([]);
+        expect(updatedShop.products_mo).toBe(null);
+        expect(updatedShop.products_mw).toMatchObject([]);
+        expect(updatedShop.products_om).toMatchObject([]);
+        expect(updatedShop.products_oo).toBe(null);
+        expect(updatedShop.products_ow).toBe(null);
       });
 
       test("Remove relations that doesn't exist doesn't fail", async () => {
