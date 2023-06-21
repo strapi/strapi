@@ -1,0 +1,40 @@
+---
+title: useLicenseLimits
+description: API reference for the useLicenseLimits hook
+tags:
+  - admin
+  - hooks
+  - users
+  - ee
+---
+
+An abstraction around `react-query`'s `useQuery` hook to fetch license limits for a project.
+
+## Usage
+
+```js
+const { license, isError, isLoading } = useLicenseLimits();
+```
+
+### `license`
+
+An object the contains the whole admin API response.
+
+## Typescript
+
+```ts
+import { UseQueryResult } from 'react-query';
+
+// Note: the list of attributes might be incomplete
+interface License {
+  enforcementUserCount: number,
+  currentActiveUserCount: number,
+  permittedSeats: number,
+  shouldNotify: boolean,
+  shouldStopCreate: boolean,
+  licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT',
+  isHostedOnStrapiCloud: boolean
+}
+
+type UseLicenseLimit = () => Pick<UseQueryResult, 'isError' | 'isLoading'> & { license: License }
+```
