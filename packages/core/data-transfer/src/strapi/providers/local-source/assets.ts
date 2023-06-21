@@ -79,7 +79,9 @@ export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
       if (file.formats) {
         for (const format of Object.values(file.formats)) {
           const fileFormat = format;
-          const fileFormatFilepath = join(strapi.dirs.static.public, fileFormat.url);
+          const fileFormatFilepath = isLocalProvider
+            ? join(strapi.dirs.static.public, fileFormat.url)
+            : fileFormat.url;
 
           const thumbStats = await getFileStats(fileFormatFilepath, isLocalProvider);
           const thumbStream = getFileStream(fileFormatFilepath, isLocalProvider);
