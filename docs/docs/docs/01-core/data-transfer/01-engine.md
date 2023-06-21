@@ -90,23 +90,27 @@ const options = {
 
 #### versionStrategy
 
-The following versionStrategy values may be used:
+The following `versionStrategy` values may be used:
 
-"ignore" - allow transfer between any versions of Strapi
-"exact" - require an exact version match (including tags such as -alpha and -beta)
-"major" - require only the semver major version to match (but allow minor, patch, and tag to differ)
-"minor" - require only the semver major and minor versions to match (but allow patch to differ)
-"patch" - require only the semver major, minor, and patch version to match (but allow tag differences such as -alpha and -beta)
+`'ignore'` - allow transfer between any versions of Strapi
+`'exact'` - require an exact version match (including tags such as -alpha and -beta)
+`'major'` - require only the semver major version to match (but allow minor, patch, and tag to differ)
+`'minor'` - require only the semver major and minor versions to match (but allow patch to differ)
+`'patch'` - require only the semver major, minor, and patch version to match (but allow tag differences such as -alpha and -beta)
+
+The default `versionStrategy` used when one is not provided is `'ignore'`.
 
 #### schemaStrategy
 
-The follow schemaStrategy values may be used:
+The follow `schemaStrategy` values may be used:
 
-"ignore" - bypass schema validation (transfer will attempt to run but throw errors on incompatible data type inserts)
-"strict" - disallow mismatches that are expected to cause errors in the transfer, but allow certain non-data fields in the schema to differ
-"exact" - schema must be identical with no changes
+`'ignore'` - bypass schema validation (transfer will attempt to run but throw errors on incompatible data type inserts)
+`'strict'` - disallow mismatches that are expected to cause errors in the transfer, but allow certain non-data fields in the schema to differ
+`'exact'` - schema must be identical with no changes
 
 Note: The "strict" schema strategy is defined as "anything expected to cause errors in the transfer" and is the default method for the import, export, and transfer CLI commands. Therefore, the technical functionality will always be subject to change. If you need to find the definition for the current version of Strapi, see `packages/core/data-transfer/src/engine/validation/schemas/index.ts`
+
+The default `schemaStrategy` used when one is not provided is `'strict'`.
 
 ##### Handling Schema differences
 
