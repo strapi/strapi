@@ -26,25 +26,25 @@ import {
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
 import { getRequestUrl } from '../../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
-
 export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -247,10 +247,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedSSO;

@@ -5,19 +5,18 @@ import axios from 'axios';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import permissions from '../../../permissions';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
 import { mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import EditSettingsView from '../EditSettingsView';
 
-const cmPermissions = permissions.contentManager;
-
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
+  const permissions = useSelector(selectAdminPermissions);
   const { uid } = useParams();
   const { get } = useFetchClient();
 
@@ -54,7 +53,7 @@ const ComponentSettingsView = () => {
   }
 
   return (
-    <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+    <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
       <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
     </CheckPagePermissions>
   );

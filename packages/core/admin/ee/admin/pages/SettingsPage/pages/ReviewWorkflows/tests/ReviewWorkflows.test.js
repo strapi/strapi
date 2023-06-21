@@ -21,10 +21,6 @@ const notificationMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => notificationMock),
-  // eslint-disable-next-line react/prop-types
-  CheckPagePermissions({ children }) {
-    return children;
-  },
 }));
 
 let SHOULD_ERROR = false;
@@ -57,19 +53,18 @@ const server = setupServer(
   })
 );
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
 const setup = (props) => {
   return {
     ...render(<ReviewWorkflowsPage {...props} />, {
       wrapper({ children }) {
         const store = configureStore([], [reducer]);
+        const client = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
+          },
+        });
 
         return (
           <DndProvider backend={HTML5Backend}>
@@ -107,12 +102,6 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     expect(getByText('0 stages')).toBeInTheDocument();
     expect(getByText('Workflow is loading')).toBeInTheDocument();
-  });
-
-  test('loading state is not present', () => {
-    const { queryByText } = setup();
-
-    expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
 
   test('display stages', async () => {

@@ -15,11 +15,12 @@ import {
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import adminPermissions from '../../../../../permissions';
 import { formatAPIErrors } from '../../../../../utils';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';
 import TokenBox from '../../../components/Tokens/TokenBox';
@@ -39,6 +40,7 @@ const ApiTokenCreateView = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const permissions = useSelector(selectAdminPermissions);
   const [apiToken, setApiToken] = useState(
     history.location.state?.apiToken.accessKey
       ? {
@@ -51,7 +53,7 @@ const ApiTokenCreateView = () => {
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(adminPermissions.settings['api-tokens']);
+  } = useRBAC(permissions.settings['api-tokens']);
   const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
     params: { id },

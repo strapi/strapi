@@ -17,9 +17,10 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
+import { selectAdminPermissions } from '../../../../../../../admin/src/pages/App/selectors';
 import Filters from '../../../../../../../admin/src/pages/SettingsPage/components/Filters';
-import adminPermissions from '../../../../../../../admin/src/permissions';
 
 import useAuditLogsData from './hooks/useAuditLogsData';
 import Modal from './Modal';
@@ -28,17 +29,15 @@ import TableRows from './TableRows';
 import getDisplayedFilters from './utils/getDisplayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
-const auditLogsPermissions = {
-  ...adminPermissions.settings.auditLogs,
-  readUsers: adminPermissions.settings.users.read,
-};
-
 const ListView = () => {
   const { formatMessage } = useIntl();
-
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-  } = useRBAC(auditLogsPermissions);
+  } = useRBAC({
+    ...permissions.settings.auditLogs,
+    readUsers: permissions.settings.users.read,
+  });
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({
