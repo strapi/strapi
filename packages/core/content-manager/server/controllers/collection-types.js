@@ -164,12 +164,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.create(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
-
-    const entity = await entityManager.findOne(id, model, { populate });
+    const entity = await entityManager.findOneWithCreatorRoles(id, model);
 
     if (!entity) {
       return ctx.notFound();
