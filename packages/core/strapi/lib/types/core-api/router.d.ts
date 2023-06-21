@@ -48,7 +48,10 @@ export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
   except?: string[];
   config: Utils.Expression.MatchFirst<
     [
-      Utils.Expression.Test<Common.UID.IsCollectionType<TContentTypeUID>, CollectionTypeRouterConfig>,
+      Utils.Expression.Test<
+        Common.UID.IsCollectionType<TContentTypeUID>,
+        CollectionTypeRouterConfig
+      >,
       Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>
     ],
     Generic

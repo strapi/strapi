@@ -1,16 +1,17 @@
 import React from 'react';
+
+import { Flex, Loader, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import {
-  useCMEditViewDataManager,
   useAPIErrorHandler,
+  useCMEditViewDataManager,
   useFetchClient,
   useNotification,
 } from '@strapi/helper-plugin';
-import { Flex, Loader, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
 const ATTRIBUTE_NAME = 'strapi_reviewWorkflows_stage';

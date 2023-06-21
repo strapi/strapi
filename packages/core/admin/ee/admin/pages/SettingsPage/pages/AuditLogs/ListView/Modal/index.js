@@ -1,10 +1,13 @@
 import React from 'react';
+
+import { ModalBody, ModalHeader, ModalLayout } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
-import { ModalLayout, ModalHeader, ModalBody } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+
 import useFormatTimeStamp from '../hooks/useFormatTimeStamp';
+
 import ActionBody from './ActionBody';
 
 const Modal = ({ handleClose, logId }) => {

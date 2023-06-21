@@ -1,6 +1,8 @@
 import { getFetchClient } from '@strapi/helper-plugin';
-import checkLatestStrapiVersion from './checkLatestStrapiVersion';
+
 import packageJSON from '../../../../../package.json';
+
+import checkLatestStrapiVersion from './checkLatestStrapiVersion';
 
 const strapiVersion = packageJSON.version;
 const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));

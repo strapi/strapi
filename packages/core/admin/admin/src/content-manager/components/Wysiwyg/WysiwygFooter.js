@@ -1,8 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { ExpandButton } from './WysiwygStyles';
 
 const WysiwygFooter = ({ onToggleExpand }) => {

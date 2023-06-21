@@ -1,7 +1,7 @@
+import parseISO from 'date-fns/parseISO';
+import toString from 'lodash/toString';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import toString from 'lodash/toString';
-import parseISO from 'date-fns/parseISO';
 
 const CellValue = ({ type, value }) => {
   const { formatDate, formatTime, formatNumber } = useIntl();

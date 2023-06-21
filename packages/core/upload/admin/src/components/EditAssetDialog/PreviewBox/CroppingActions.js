@@ -1,9 +1,12 @@
 import React from 'react';
+
+import { Flex, FocusTrap, IconButton, MenuItem, SimpleMenu } from '@strapi/design-system';
+import { Check, Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { IconButton, FocusTrap, SimpleMenu, MenuItem, Flex } from '@strapi/design-system';
-import { Cross, Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
 import getTrad from '../../../utils/getTrad';
+
 import { CroppingActionRow } from './components';
 
 export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {

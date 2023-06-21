@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import qs from 'qs';
+import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+
 import FilterListURLQuery from '../index';
 
 // TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character

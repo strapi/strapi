@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Flex, Select, Option, Typography } from '@strapi/design-system';
+
+import { Box, Flex, Option, Select, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import useQueryParams from '../../hooks/useQueryParams';
+import { useIntl } from 'react-intl';
+
 import { useTracking } from '../../features/Tracking';
+import useQueryParams from '../../hooks/useQueryParams';
 
 const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
   const { formatMessage } = useIntl();

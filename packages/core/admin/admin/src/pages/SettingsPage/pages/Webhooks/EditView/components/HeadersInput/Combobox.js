@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useFormikContext } from 'formik';
+import React, { useEffect, useState } from 'react';
+
 import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
+import { useFormikContext } from 'formik';
+import PropTypes from 'prop-types';
 
 const HTTP_HEADERS = [
   'A-IM',

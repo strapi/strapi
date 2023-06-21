@@ -1,13 +1,13 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
 
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 /**
  * TODO: this will come in another PR.
  */
 // eslint-disable-next-line no-restricted-imports
 import { ReactSelect } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import { Option } from '../Option';
 

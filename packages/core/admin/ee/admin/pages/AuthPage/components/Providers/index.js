@@ -1,16 +1,19 @@
 import React from 'react';
+
+import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
+import { Link } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Link } from '@strapi/helper-plugin';
-import { Divider, Flex, Box, Button, Loader, Typography, Main } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
-import { useAuthProviders } from '../../../../hooks';
+
+import Logo from '../../../../../../admin/src/components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
+import { useAuthProviders } from '../../../../hooks';
+
 import SSOProviders from './SSOProviders';
-import Logo from '../../../../../../admin/src/components/UnauthenticatedLogo';
 
 const DividerFull = styled(Divider)`
   flex: 1;

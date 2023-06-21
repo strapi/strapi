@@ -1,30 +1,33 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+
+import { Box, ContentLayout, Flex, Grid, GridItem, Main } from '@strapi/design-system';
 import {
   CheckPermissions,
-  useTracking,
   LinkButton,
   LoadingIndicatorPage,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import { ContentLayout, Box, Flex, Grid, GridItem, Main } from '@strapi/design-system';
-import { Pencil, Layer } from '@strapi/icons';
+import { Layer, Pencil } from '@strapi/icons';
 import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
-import { InjectionZone } from '../../../shared/components';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+
 import permissions from '../../../permissions';
-import { DynamicZone } from '../../components/DynamicZone';
+import { InjectionZone } from '../../../shared/components';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
+import { DynamicZone } from '../../components/DynamicZone';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
-import { getTrad } from '../../utils';
 import useLazyComponents from '../../hooks/useLazyComponents';
-import DraftAndPublishBadge from './DraftAndPublishBadge';
-import Header from './Header';
-import { getFieldsActionMatchingPermissions } from './utils';
+import { getTrad } from '../../utils';
+
 import DeleteLink from './DeleteLink';
+import DraftAndPublishBadge from './DraftAndPublishBadge';
 import GridRow from './GridRow';
-import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
+import Header from './Header';
+import { selectAttributesLayout, selectCurrentLayout, selectCustomFieldUids } from './selectors';
+import { getFieldsActionMatchingPermissions } from './utils';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];

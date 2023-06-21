@@ -1,34 +1,35 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
 import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  Grid,
-  GridItem,
   Box,
   Button,
   Flex,
+  Grid,
+  GridItem,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { Formik } from 'formik';
 import {
   Form,
   GenericInput,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
-  useFetchClient,
 } from '@strapi/helper-plugin';
-import { useMutation } from 'react-query';
-
+import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import formDataModel from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 
 import SelectRoles from '../../components/SelectRoles';
+
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
