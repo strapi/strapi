@@ -9,7 +9,11 @@ const { getLocalScript } = require('../../utils/helpers');
 module.exports = ({ command }) => {
   command
     .command('build')
-    .option('--no-optimization', 'Build the admin app without optimizing assets')
     .description('Build the strapi admin app')
+    .option(
+      '-b, --builder <builder>',
+      'Use either webpack (default) or vite to bundle the admin app',
+      'webpack'
+    )
     .action(getLocalScript('build-command')); // build-command dir to avoid problems with 'build' being commonly ignored
 };

@@ -3,8 +3,6 @@ import { createRoot } from 'react-dom/client';
 
 import appCustomisations from './app';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
-// eslint-disable-next-line import/extensions
-import plugins from './plugins';
 import appReducers from './reducers';
 
 window.strapi = {
@@ -30,7 +28,8 @@ const reducers = Reducers({ appReducers });
 
 const MOUNT_NODE = document.getElementById('app');
 
-const run = async () => {
+const renderAdmin = async ({ plugins }) => {
+  console.log(plugins);
   const { get } = getFetchClient();
   try {
     const {
@@ -73,4 +72,4 @@ const run = async () => {
   root.render(app.render());
 };
 
-run();
+export { renderAdmin };

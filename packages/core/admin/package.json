@@ -20,6 +20,17 @@
     }
   ],
   "main": "index.js",
+  "exports": {
+    ".": {
+      "require": "./index.js"
+    },
+    "./admin": {
+      "import": "./admin/src/index.js"
+    },
+    "./strapi-server": {
+      "require": "./strapi-server.js"
+    }
+  },
   "scripts": {
     "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
     "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile",
@@ -99,10 +110,8 @@
     "pluralize": "8.0.0",
     "prop-types": "^15.8.1",
     "qs": "6.11.1",
-    "react": "^18.2.0",
     "react-dnd": "15.1.2",
     "react-dnd-html5-backend": "15.1.3",
-    "react-dom": "^18.2.0",
     "react-error-boundary": "3.1.4",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
@@ -110,7 +119,6 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "react-refresh": "0.14.0",
-    "react-router-dom": "5.3.4",
     "react-select": "5.7.0",
     "react-window": "1.8.8",
     "redux": "^4.2.1",
@@ -120,7 +128,6 @@
     "semver": "7.5.4",
     "sift": "16.0.1",
     "style-loader": "3.3.1",
-    "styled-components": "5.3.3",
     "typescript": "5.1.3",
     "webpack": "^5.88.1",
     "webpack-cli": "^5.1.0",
@@ -135,11 +142,19 @@
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
     "msw": "1.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4",
     "speed-measure-webpack-plugin": "1.5.0",
+    "styled-components": "5.3.3",
     "webpack-bundle-analyzer": "^4.9.0"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.3.4"
+    "@strapi/strapi": "^4.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

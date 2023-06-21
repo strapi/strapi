@@ -4,6 +4,9 @@ const ts = require('typescript');
 
 const logDiagnostics = require('./report-diagnostics');
 
+/**
+ * @type {(configPath: string) => Omit<ts.ParsedCommandLine, 'errors'>}
+ */
 module.exports = (configPath) => {
   // Parse the tsconfig.json file and resolve every file name & compiler options
   const { errors, ...configOptions } = ts.getParsedCommandLineOfConfigFile(

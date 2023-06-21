@@ -26,6 +26,7 @@ const buildAdmin = async () => {
 
   const corePlugins = getCorePluginsPath();
   const plugins = getPluginToInstallPath(PLUGINS_TO_INSTALL);
+
   const allPlugins = { ...corePlugins, ...plugins };
   const pluginsPath = getPluginsPath();
 

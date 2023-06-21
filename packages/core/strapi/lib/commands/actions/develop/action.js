@@ -59,12 +59,12 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
   // Don't run the build process if the admin is in watch mode
   if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
-      await buildAdmin({
-        buildDestDir: distDir,
-        forceBuild: false,
-        optimization: false,
-        srcDir: appDir,
-      });
+      // await buildAdmin({
+      //   buildDestDir: distDir,
+      //   forceBuild: false,
+      //   optimization: false,
+      //   srcDir: appDir,
+      // });
     } catch (err) {
       process.exit(1);
     }
