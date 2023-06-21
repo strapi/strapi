@@ -1,7 +1,21 @@
 import * as React from 'react';
 
-import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
-import { useTracking, useTableContext } from '@strapi/helper-plugin';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Flex,
+  Typography,
+  ModalLayout,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Tbody,
+  Td,
+  Tr,
+} from '@strapi/design-system';
+import { useTracking, useTableContext, Table } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -10,6 +24,7 @@ import { useSelector } from 'react-redux';
 import { listViewDomain } from '../../../pages/ListView/selectors';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
+import { Body } from '../Body';
 
 const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
   const { formatMessage } = useIntl();
@@ -95,6 +110,80 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
 };
 
 ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
+
+const SelectedEntriesTableContent = () => {
+  const tableCtxNested = useTableContext();
+  const { setSelectedEntries, rows } = tableCtxNested;
+
+  console.log({ tableCtxNested });
+
+  React.useEffect(() => {
+    setSelectedEntries(rows.map((row) => row.id));
+  }, [setSelectedEntries, rows]);
+
+  return (
+    <Table.Content>
+      <Table.Head>
+        <Table.HeaderCheckboxCell />
+        <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+        <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+      </Table.Head>
+      <Tbody>
+        {rows.map((entry, index) => (
+          <Tr>
+            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+            <Td>{entry.id}</Td>
+            <Td>{entry.name}</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table.Content>
+  );
+};
+
+const SelectedEntriesModal = ({ isOpen, onToggle, isConfirmButtonLoading, onConfirm }) => {
+  const tableCtx = useTableContext();
+  const { rows, selectedEntries } = tableCtx;
+  console.log(tableCtx);
+
+  const entries = rows.filter((row) => {
+    return selectedEntries.includes(row.id);
+  });
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <ModalLayout onClose={onToggle} labelledBy="title">
+      <ModalHeader>
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+          Publish entries
+        </Typography>
+      </ModalHeader>
+      <ModalBody>
+        {/* TODO count modal selections instead of list view selections */}
+        <Typography>{selectedEntries.length} selected entries</Typography>
+        <Table.Root rows={entries} colCount={4}>
+          <SelectedEntriesTableContent />
+        </Table.Root>
+      </ModalBody>
+      <ModalFooter
+        startActions={
+          <Button onClick={onToggle} variant="tertiary">
+            Cancel
+          </Button>
+        }
+        endActions={
+          <>
+            <Button variant="secondary">Add new stuff</Button>
+            <Button onClick={onToggle}>Finish</Button>
+          </>
+        }
+      />
+    </ModalLayout>
+  );
+};
 
 const ConfirmDialogUnpublishAll = ({
   isOpen,
@@ -189,6 +278,7 @@ const BulkActionButtons = ({
   const { selectedEntries, setSelectedEntries } = useTableContext();
 
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
+  const [isSelectedEntriesModalOpen, setIsSelectedEntriesModalOpen] = React.useState(false);
   const [dialogToOpen, setDialogToOpen] = React.useState(null);
 
   // Filters for Bulk actions
@@ -246,15 +336,22 @@ const BulkActionButtons = ({
     <>
       {publishButtonIsShown && (
         <>
-          <Button variant="tertiary" onClick={togglePublishModal}>
+          <Button variant="tertiary" onClick={() => setIsSelectedEntriesModalOpen(true)}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
-          <ConfirmDialogPublishAll
+          <SelectedEntriesModal
+            isOpen={isSelectedEntriesModalOpen}
+            isConfirmButtonLoading={isConfirmButtonLoading}
+            onToggle={() => setIsSelectedEntriesModalOpen((prev) => !prev)}
+            onConfirm={handleBulkPublish}
+          />
+          {/* TODO: reveal on "Publish" click */}
+          {/* <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
             onToggleDialog={togglePublishModal}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkPublish}
-          />
+          /> */}
         </>
       )}
       {unpublishButtonIsShown && (
