@@ -237,14 +237,16 @@ const reducer = (state, action) =>
         const findAllRelationsAndReplaceWithEmptyArray = findAllAndReplace(
           components,
           (value) => {
-            // We don't want to replace relations with admin users
-            if (value.target === 'admin::user') {
-              return false;
-            }
-
             return value.type === 'relation';
           },
-          (_, { path }) => {
+          (value, { path }) => {
+            const relationFieldName = path[path.length - 1];
+
+            // We don't want to fetch the relations with creator fields because we already have it
+            if (relationFieldName === 'createdBy' || relationFieldName === 'updatedBy') {
+              return value;
+            }
+
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {
               return get(state.modifiedData, path);
             }
