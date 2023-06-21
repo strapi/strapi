@@ -1,11 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Breadcrumbs } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');

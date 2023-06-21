@@ -1,5 +1,7 @@
 import React, { memo, useState } from 'react';
+
 import PropTypes from 'prop-types';
+
 import ContentTypeCollapse from '../ContentTypeCollapse';
 
 const ContentTypeCollapses = ({ actions, isFormDisabled, pathToData, subjects }) => {

@@ -1,4 +1,5 @@
 import get from 'lodash/get';
+
 import makeUnique from '../../../utils/makeUnique';
 
 const retrieveComponentsFromSchema = (attributes, allComponentsData) => {

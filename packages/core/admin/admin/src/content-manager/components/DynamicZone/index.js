@@ -1,17 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import { NotAllowedInput, useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { NotAllowedInput, useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { useContentTypeLayout } from '../../hooks';
 import { getTrad } from '../../utils';
 
-import { DynamicComponent } from './components/DynamicComponent';
 import { AddComponentButton } from './components/AddComponentButton';
-import { DynamicZoneLabel } from './components/DynamicZoneLabel';
 import { ComponentPicker } from './components/ComponentPicker';
-
-import { useContentTypeLayout } from '../../hooks';
+import { DynamicComponent } from './components/DynamicComponent';
+import { DynamicZoneLabel } from './components/DynamicZoneLabel';
 
 const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
   // We cannot use the default props here
@@ -43,7 +43,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
     [modifiedData, name]
   );
 
-  const { getComponentLayout } = useContentTypeLayout();
+  const { getComponentLayout, components: allComponents } = useContentTypeLayout();
 
   /**
    * @type {Record<string, Array<{category: string; info: unknown, attributes: Record<string, unknown>}>>}
@@ -94,19 +94,11 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
 
     const componentLayoutData = getComponentLayout(componentUid);
 
-    const allComponents = Object.values(dynamicComponentsByCategory).reduce((acc, components) => {
-      const componentObjects = components.reduce((acc, { componentUid, attributes }) => {
-        acc[componentUid] = {
-          attributes,
-          uid: componentUid,
-        };
-
-        return acc;
-      }, {});
-
-      return { ...acc, ...componentObjects };
-    }, {});
-
+    /**
+     * You have to pass _every component_ because the EditViewDataManager is not part of redux
+     * and you could have a dynamic component option that contains a component that is not part
+     * of the former list. Therefore it's schema is inaccessible leading to a crash.
+     */
     addComponentToDynamicZone(name, componentLayoutData, allComponents, hasError, position);
   };
 

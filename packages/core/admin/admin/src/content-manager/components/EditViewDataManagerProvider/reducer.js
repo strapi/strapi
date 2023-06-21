@@ -1,14 +1,15 @@
+import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
-import unset from 'lodash/unset';
+import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
-import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
-import { generateNKeysBetween } from 'fractional-indexing';
+import unset from 'lodash/unset';
+
+import { getMaxTempKey } from '../../utils';
 
 import { findAllAndReplace, moveFields } from './utils';
-import { getMaxTempKey } from '../../utils';
 
 const initialState = {
   componentsDataStructure: {},

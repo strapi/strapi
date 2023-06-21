@@ -17,6 +17,7 @@ import {
   removeDynamicZones,
   removeMorphToRelations,
 } from './visitors';
+import { isOperator } from '../operators';
 
 import type { Model } from '../types';
 
@@ -37,6 +38,17 @@ const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
 
 const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
   return pipeAsync(
+    // Remove keys that are not attributes or valid operators
+    traverseQueryFilters(
+      ({ key, attribute }, { remove }) => {
+        const isAttribute = !!attribute;
+
+        if (!isAttribute && !isOperator(key) && key !== 'id') {
+          remove(key);
+        }
+      },
+      { schema }
+    ),
     // Remove dynamic zones from filters
     traverseQueryFilters(removeDynamicZones, { schema }),
     // Remove morpTo relations from filters

@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+
 import ContentManagerEditViewDataManagerContext from '../../contexts/ContentManagerEditViewDataManagerContext';
 
 const useCMEditViewDataManager = () => {

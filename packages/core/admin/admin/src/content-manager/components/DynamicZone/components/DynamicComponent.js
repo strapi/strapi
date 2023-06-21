@@ -1,26 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import get from 'lodash/get';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
-  IconButton,
+  AccordionToggle,
   Box,
   Flex,
+  IconButton,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Trash, Drag, More } from '@strapi/icons';
+import { Drag, More, Trash } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
-
+import { ComponentIcon } from '../../ComponentIcon';
 import FieldComponent from '../../FieldComponent';
 
 export const DynamicComponent = ({
@@ -206,6 +206,7 @@ export const DynamicComponent = ({
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
+              startIcon={<ComponentIcon icon={icon} showBackground={false} size="S" />}
               action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"

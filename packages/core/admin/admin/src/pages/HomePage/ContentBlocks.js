@@ -1,9 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { ContentBox, useTracking } from '@strapi/helper-plugin';
+
 import { Flex } from '@strapi/design-system';
-import { InformationSquare, CodeSquare, PlaySquare, FeatherSquare } from '@strapi/icons';
+import { ContentBox, useTracking } from '@strapi/helper-plugin';
+import { CodeSquare, FeatherSquare, InformationSquare, PlaySquare } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import CloudBox from './CloudBox';
 
 const BlockLink = styled.a`

@@ -29,6 +29,7 @@ import {
   isMorphToRelationalAttribute,
 } from './content-types';
 import { Model } from './types';
+import { isOperator } from './operators';
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
@@ -117,7 +118,7 @@ class InvalidSortError extends Error {
 }
 
 function validateOrder(order: string): asserts order is SortOrder {
-  if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
+  if (!isString(order) || !['asc', 'desc'].includes(order.toLocaleLowerCase())) {
     throw new InvalidOrderError();
   }
 }
@@ -157,6 +158,14 @@ const convertStringSortQueryParam = (sortQuery: string): SortMap[] => {
 };
 
 const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
+  if (!sortQuery) {
+    return {};
+  }
+
+  if (!isString(sortQuery)) {
+    throw new Error('Invalid sort query');
+  }
+
   // split field and order param with default order to ascending
   const [field, order = 'asc'] = sortQuery.split(':');
 
@@ -165,6 +174,8 @@ const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
   }
 
   validateOrder(order);
+
+  // TODO: field should be a valid path on an object model
 
   return _.set({}, field, order);
 };
@@ -456,6 +467,7 @@ const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema: Model)
   return query;
 };
 
+// TODO: ensure field is valid in content types (will probably have to check strapi.contentTypes since it can be a string.path)
 const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery | undefined => {
   if (depth === 0 && fields === '*') {
     return undefined;
@@ -478,6 +490,18 @@ const convertFieldsQueryParams = (fields: FieldsParams, depth = 0): SelectQuery 
   throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
+const isValidSchemaAttribute = (key: string, schema?: Model) => {
+  if (key === 'id') {
+    return true;
+  }
+
+  if (!schema) {
+    return false;
+  }
+
+  return Object.keys(schema.attributes).includes(key);
+};
+
 const convertFiltersQueryParams = (filters: FiltersParams, schema: Model): WhereQuery => {
   // Filters need to be either an array or an object
   // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
@@ -492,10 +516,6 @@ const convertFiltersQueryParams = (filters: FiltersParams, schema: Model): Where
 };
 
 const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): WhereQuery => {
-  if (!isPlainObject(filters)) {
-    return filters as WhereQuery;
-  }
-
   if (Array.isArray(filters)) {
     return (
       filters
@@ -506,14 +526,22 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): Where
     );
   }
 
+  if (!isPlainObject(filters)) {
+    return filters as WhereQuery;
+  }
+
   const removeOperator = (operator: string) => delete filters[operator];
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
     const attribute = get(key, schema?.attributes);
+    const validKey = isOperator(key) || isValidSchemaAttribute(key, schema);
 
+    if (!validKey) {
+      removeOperator(key);
+    }
     // Handle attributes
-    if (attribute) {
+    else if (attribute) {
       // Relations
       if (attribute.type === 'relation') {
         filters[key] = convertAndSanitizeFilters(value, strapi.getModel(attribute.target));

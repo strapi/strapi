@@ -1,41 +1,44 @@
 import React, { useReducer, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Divider,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Option,
+  Select,
+  Typography,
+} from '@strapi/design-system';
+import { ConfirmDialog, Link, useNotification, useTracking } from '@strapi/helper-plugin';
+import { ArrowLeft, Check } from '@strapi/icons';
+import cloneDeep from 'lodash/cloneDeep';
+import flatMap from 'lodash/flatMap';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import upperFirst from 'lodash/upperFirst';
-import pick from 'lodash/pick';
-import cloneDeep from 'lodash/cloneDeep';
-import flatMap from 'lodash/flatMap';
-import isEqual from 'lodash/isEqual';
-import get from 'lodash/get';
-import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
-import {
-  Main,
-  HeaderLayout,
-  ContentLayout,
-  Button,
-  Box,
-  Typography,
-  Grid,
-  GridItem,
-  Select,
-  Option,
-  Flex,
-  Divider,
-} from '@strapi/design-system';
-import { ArrowLeft, Check } from '@strapi/icons';
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import { getTrad } from '../../utils';
-import reducer, { initialState } from './reducer';
-import init from './init';
+import { selectFieldSizes } from '../App/selectors';
+
 import DisplayedFields from './components/DisplayedFields';
 import ModalForm from './components/FormModal';
 import { LayoutDndProvider } from './components/LayoutDndProvider';
-import { unformatLayout } from './utils/layout';
+import init from './init';
+import reducer, { initialState } from './reducer';
 import putCMSettingsEV from './utils/api';
-import { selectFieldSizes } from '../App/selectors';
+import { unformatLayout } from './utils/layout';
 
 const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, updateLayout }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>

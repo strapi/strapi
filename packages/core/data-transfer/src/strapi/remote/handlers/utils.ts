@@ -32,7 +32,7 @@ export const assertValidHeader = (ctx: Context) => {
   }
 };
 
-export const isDataTransferMessage = (message: unknown): message is Protocol.client.Message => {
+export const isDataTransferMessage = (message: unknown): message is Protocol.Client.Message => {
   if (!message || typeof message !== 'object') {
     return false;
   }
@@ -79,6 +79,7 @@ export const handlerControllerFactory =
     return async (ctx: Context) => {
       handleWSUpgrade(wss, ctx, (ws) => {
         const state: TransferState = { id: undefined };
+        const messageUUIDs = new Set<string>();
 
         const prototype: Handler = {
           // Transfer ID
@@ -97,6 +98,22 @@ export const handlerControllerFactory =
 
           set startedAt(timestamp) {
             state.startedAt = timestamp;
+          },
+
+          get response() {
+            return state.response;
+          },
+
+          set response(response) {
+            state.response = response;
+          },
+
+          addUUID(uuid) {
+            messageUUIDs.add(uuid);
+          },
+
+          hasUUID(uuid) {
+            return messageUUIDs.has(uuid);
           },
 
           isTransferStarted() {
@@ -126,7 +143,11 @@ export const handlerControllerFactory =
                 reject(new Error('Missing uuid for this message'));
                 return;
               }
-
+              this.response = {
+                uuid,
+                data,
+                e,
+              };
               const payload = JSON.stringify({
                 uuid,
                 data: data ?? null,
@@ -199,6 +220,7 @@ export const handlerControllerFactory =
           cleanup() {
             this.transferID = undefined;
             this.startedAt = undefined;
+            this.response = undefined;
           },
 
           teardown() {

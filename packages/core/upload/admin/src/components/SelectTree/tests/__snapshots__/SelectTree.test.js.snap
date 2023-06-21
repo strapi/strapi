@@ -3,11 +3,7 @@
 exports[`SelectTree renders 1`] = `
 {
   "asFragment": [Function],
-  "baseElement": .c0 {
-  padding-right: 12px;
-}
-
-.c3 {
+  "baseElement": .c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -17,6 +13,10 @@ exports[`SelectTree renders 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  padding-right: 12px;
 }
 
 .c1 {
@@ -135,11 +135,7 @@ exports[`SelectTree renders 1`] = `
       </div>
     </div>
   </body>,
-  "container": .c0 {
-  padding-right: 12px;
-}
-
-.c3 {
+  "container": .c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -149,6 +145,10 @@ exports[`SelectTree renders 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  padding-right: 12px;
 }
 
 .c1 {

@@ -1,15 +1,17 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { useTracking } from '@strapi/helper-plugin';
+
 import {
   SubNav,
   SubNavHeader,
+  SubNavLink,
   SubNavSection,
   SubNavSections,
-  SubNavLink,
 } from '@strapi/design-system/v2';
+import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { getSectionsToDisplay } from '../../utils';
 
 const SettingsNav = ({ menu }) => {

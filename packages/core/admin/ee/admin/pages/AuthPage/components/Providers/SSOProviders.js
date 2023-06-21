@@ -1,9 +1,10 @@
 import React from 'react';
+
+import { Flex, Grid, GridItem, Tooltip, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Grid, GridItem, Flex, Typography, Tooltip } from '@strapi/design-system';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 const SSOButton = styled.a`
   width: ${136 / 16}rem;

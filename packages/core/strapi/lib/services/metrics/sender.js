@@ -77,7 +77,7 @@ module.exports = (strapi) => {
           ...payload.groupProperties,
         },
       }),
-      ..._.merge({}, defaultQueryOpts, opts),
+      ..._.merge({ headers: { 'X-Strapi-Event': event } }, defaultQueryOpts, opts),
     };
 
     try {

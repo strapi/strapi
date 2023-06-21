@@ -2,6 +2,7 @@
 
 const { isNil, isNull } = require('lodash/fp');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { WORKFLOW_UPDATE_STAGE } = require('../../constants/webhookEvents');
 const { hasReviewWorkflow, getDefaultWorkflow } = require('../../utils/review-workflows');
 
 /**
@@ -15,6 +16,25 @@ const getDataWithStage = async (data) => {
     return { ...data, [ENTITY_STAGE_ATTRIBUTE]: defaultWorkflow.stages[0].id };
   }
   return data;
+};
+
+/**
+ * Get the stage information of an entity
+ * @param {String} uid
+ * @param {Number} id
+ * @returns {Object}
+ */
+const getEntityStage = async (uid, id) => {
+  const entity = await strapi.entityService.findOne(uid, id, {
+    populate: {
+      [ENTITY_STAGE_ATTRIBUTE]: {
+        populate: {
+          workflow: true,
+        },
+      },
+    },
+  });
+  return entity?.[ENTITY_STAGE_ATTRIBUTE] ?? {};
 };
 
 /**
@@ -43,9 +63,31 @@ const decorator = (service) => ({
     const data = { ...opts.data };
     if (isNull(data[ENTITY_STAGE_ATTRIBUTE])) {
       delete data[ENTITY_STAGE_ATTRIBUTE];
+      return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    return service.update.call(this, uid, entityId, { ...opts, data });
+    const previousStage = await getEntityStage(uid, entityId);
+
+    const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
+    if (
+      previousStage?.workflow?.id &&
+      previousStage?.id &&
+      previousStage.id !== data[ENTITY_STAGE_ATTRIBUTE]
+    ) {
+      const webhookPayload = {
+        entityId,
+        workflow: {
+          id: previousStage.workflow.id,
+          stages: {
+            from: previousStage.id,
+            to: data[ENTITY_STAGE_ATTRIBUTE],
+          },
+        },
+      };
+      await strapi.entityService.emitEvent(uid, WORKFLOW_UPDATE_STAGE, webhookPayload);
+    }
+
+    return updatedEntity;
   },
 });
 

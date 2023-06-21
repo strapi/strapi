@@ -4,10 +4,12 @@
  *
  */
 import { useEffect } from 'react';
-import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+
 import { useNotification } from '@strapi/helper-plugin';
 import isNil from 'lodash/isNil';
+import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
+
 import useLicenseLimits from '../useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';

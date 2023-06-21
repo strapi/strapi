@@ -39,6 +39,8 @@ import importDefault from './import-default';
 import * as template from './template';
 import * as file from './file';
 import * as traverse from './traverse';
+import webhook from './webhook';
+import { isOperator, isOperatorOfType } from './operators';
 
 export {
   yup,
@@ -86,6 +88,8 @@ export {
   importDefault,
   file,
   traverse,
+  webhook,
+  isOperator, isOperatorOfType
 };
 
 const utils = {
@@ -134,6 +138,8 @@ const utils = {
   importDefault,
   file,
   traverse,
+  webhook,
+  isOperator, isOperatorOfType
 };
 
 export default utils;

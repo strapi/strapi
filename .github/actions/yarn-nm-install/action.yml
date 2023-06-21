@@ -45,7 +45,7 @@ runs:
       id: yarn-config
       shell: bash
       env:
-        YARN_ENABLE_GLOBAL_CACHE: "false"
+        YARN_ENABLE_GLOBAL_CACHE: 'false'
       run: |
         echo "CACHE_FOLDER=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
         echo "CURRENT_NODE_VERSION="node-$(node --version)"" >> $GITHUB_OUTPUT
@@ -81,8 +81,8 @@ runs:
       run: yarn install --immutable --inline-builds
       env:
         # Overrides/align yarnrc.yml options (v3, v4) for a CI context
-        YARN_ENABLE_GLOBAL_CACHE: "false" # Use local cache folder to keep downloaded archives
-        YARN_NM_MODE: "hardlinks-local"   # Reduce node_modules size
-        YARN_INSTALL_STATE_PATH: ".yarn/ci-cache/install-state.gz" # Might speed up resolutions when node_modules present
+        YARN_ENABLE_GLOBAL_CACHE: 'false' # Use local cache folder to keep downloaded archives
+        YARN_NM_MODE: 'hardlinks-local' # Reduce node_modules size
+        YARN_INSTALL_STATE_PATH: '.yarn/ci-cache/install-state.gz' # Might speed up resolutions when node_modules present
         # Other environment variables
         HUSKY: '0' # By default do not run HUSKY install
