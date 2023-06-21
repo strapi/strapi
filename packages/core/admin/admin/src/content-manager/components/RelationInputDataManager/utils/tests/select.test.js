@@ -1,5 +1,5 @@
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import useSelect from '../select';
 

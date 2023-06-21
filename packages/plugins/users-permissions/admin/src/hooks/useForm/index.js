@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useRBAC, useFetchClient, useNotification } from '@strapi/helper-plugin';
+
+import { useFetchClient, useNotification, useRBAC } from '@strapi/helper-plugin';
+
 import { getRequestURL } from '../../utils';
+
 import reducer, { initialState } from './reducer';
 
 const useUserForm = (endPoint, permissions) => {

@@ -1,34 +1,34 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
-import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import isEmpty from 'lodash/isEmpty';
-import cloneDeep from 'lodash/cloneDeep';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
-import set from 'lodash/set';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Prompt, Redirect } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import { Main } from '@strapi/design-system';
 import {
-  LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
+  getAPIInnerErrors,
+  getYupInnerErrors,
+  LoadingIndicatorPage,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  getYupInnerErrors,
-  getAPIInnerErrors,
 } from '@strapi/helper-plugin';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import set from 'lodash/set';
+import PropTypes from 'prop-types';
+import { flushSync } from 'react-dom';
+import { useIntl } from 'react-intl';
+import { useDispatch, useSelector } from 'react-redux';
+import { Prompt, Redirect } from 'react-router-dom';
 
-import { getTrad } from '../../utils';
-
+import { usePrev } from '../../hooks';
+import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import { createYupSchema, getTrad } from '../../utils';
 
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema } from './utils';
-import { clearSetModifiedDataOnly } from '../../sharedReducers/crudReducer/actions';
-import { usePrev } from '../../hooks';
+import { cleanData } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -54,6 +54,7 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  const [isSaving, setIsSaving] = React.useState(false);
   /**
    * TODO: this should be moved into the global reducer
    * to match ever other reducer in the CM.
@@ -193,14 +194,21 @@ const EditViewDataManagerProvider = ({
 
   const dispatchAddComponent = useCallback(
     (type) =>
-      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+      (
+        keys,
+        componentLayoutData,
+        allComponents,
+        shouldCheckErrors = false,
+        position = undefined
+      ) => {
         trackUsageRef.current('didAddComponentToDynamicZone');
 
         dispatch({
           type,
           keys: keys.split('.'),
+          position,
           componentLayoutData,
-          allComponents: components,
+          allComponents,
           shouldCheckErrors,
         });
       },
@@ -375,14 +383,20 @@ const EditViewDataManagerProvider = ({
       try {
         if (isEmpty(errors)) {
           const formData = createFormData(modifiedData, initialData);
+          flushSync(() => {
+            setIsSaving(true);
+          });
 
           if (isCreatingEntry) {
             await onPost(formData, trackerProperty);
           } else {
             await onPut(formData, trackerProperty);
           }
+
+          setIsSaving(false);
         }
       } catch (err) {
+        setIsSaving(false);
         errors = {
           ...errors,
           ...getAPIInnerErrors(err, { getTrad }),
@@ -444,9 +458,14 @@ const EditViewDataManagerProvider = ({
 
     try {
       if (isEmpty(errors)) {
+        flushSync(() => {
+          setIsSaving(true);
+        });
         await onPublish();
+        setIsSaving(false);
       }
     } catch (err) {
+      setIsSaving(false);
       errors = {
         ...errors,
         ...getAPIInnerErrors(err, { getTrad }),
@@ -638,10 +657,12 @@ const EditViewDataManagerProvider = ({
         </Main>
       ) : (
         <>
-          <Prompt
-            when={!isEqual(modifiedData, initialData)}
-            message={formatMessage({ id: 'global.prompt.unsaved' })}
-          />
+          {!isSaving ? (
+            <Prompt
+              when={!isEqual(modifiedData, initialData)}
+              message={formatMessage({ id: 'global.prompt.unsaved' })}
+            />
+          ) : null}
           <form noValidate onSubmit={handleSubmit}>
             {children}
           </form>

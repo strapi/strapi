@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
+
 import ProtectedEmailTemplatesPage from '../index';
-import server from './utils/server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -35,19 +36,12 @@ const App = (
 );
 
 describe('ADMIN | Pages | Settings | Email Templates', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   afterAll(() => {
     jest.resetAllMocks();
-    server.close();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -62,6 +56,39 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c18 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c20 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c24 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -111,27 +138,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         width: 2rem;
         height: 2rem;
         cursor: pointer;
-      }
-
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c20 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c24 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
       }
 
       .c2 {
@@ -235,18 +241,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c18 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c28 svg > g,
@@ -518,7 +512,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="0"
+                            aria-labelledby=":r0:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"
@@ -598,7 +592,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         <span>
                           <button
                             aria-disabled="false"
-                            aria-labelledby="1"
+                            aria-labelledby=":r2:"
                             class="c25 c26 c27 c28"
                             tabindex="-1"
                             type="button"

@@ -1,8 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Box, Grid, GridItem, KeyboardNavigable, Typography } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 
 import { AssetCard } from '../AssetCard/AssetCard';
+
 import { Draggable } from './Draggable';
 
 export const AssetGridList = ({

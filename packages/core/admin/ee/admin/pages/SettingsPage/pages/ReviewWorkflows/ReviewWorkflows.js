@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { FormikProvider, useFormik, Form } from 'formik';
-import { useIntl } from 'react-intl';
-import { useSelector, useDispatch } from 'react-redux';
-import { useMutation } from 'react-query';
 
+import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import {
   CheckPagePermissions,
   ConfirmDialog,
@@ -13,19 +10,23 @@ import {
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
+import { Form, FormikProvider, useFormik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { Stages } from './components/Stages';
-import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
-import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflows } from './actions';
-import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../admin/src/permissions';
-import { StageDragPreview } from './components/StageDragPreview';
 import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
+import adminPermissions from '../../../../../../admin/src/permissions';
+
+import { setWorkflows } from './actions';
+import { StageDragPreview } from './components/StageDragPreview';
+import { Stages } from './components/Stages';
+import { DRAG_DROP_TYPES, REDUX_NAMESPACE } from './constants';
+import { useReviewWorkflows } from './hooks/useReviewWorkflows';
+import { initialState, reducer } from './reducer';
+import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
 
 function renderDragLayerItem({ type, item }) {
   switch (type) {
@@ -44,7 +45,7 @@ export function ReviewWorkflowsPage() {
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows, status: workflowStatus, refetch: refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -124,8 +125,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
+    dispatch(setWorkflows({ status: workflowStatus, data: workflows }));
+  }, [workflowStatus, workflows, dispatch]);
 
   useEffect(() => {
     trackUsage('didViewWorkflow');

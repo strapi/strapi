@@ -7,7 +7,7 @@ module.exports = ({ schema, key, attribute }, { remove }) => {
     return;
   }
 
-  const isPrivate = isPrivateAttribute(schema, key) || attribute.private === true;
+  const isPrivate = attribute.private === true || isPrivateAttribute(schema, key);
 
   if (isPrivate) {
     remove(key);

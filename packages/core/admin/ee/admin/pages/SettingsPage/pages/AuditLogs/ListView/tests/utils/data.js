@@ -70,4 +70,4 @@ const getBigTestPageData = (quantity) => {
   return data;
 };
 
-export { TEST_PAGE_DATA, TEST_SINGLE_DATA, getBigTestPageData };
+export { getBigTestPageData, TEST_PAGE_DATA, TEST_SINGLE_DATA };

@@ -1,9 +1,10 @@
 import React from 'react';
+
+import { renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
 
 import configureStore from '../../../core/store/configureStore';
-import { useInjectReducer } from '..';
+import { useInjectReducer } from '../useInjectReducer';
 
 const store = configureStore([], [(state = {}) => state]);
 

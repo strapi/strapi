@@ -1,6 +1,120 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marketplace page - layout renders the online layout 1`] = `
+.c29 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c9 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c18 {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c24 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c46 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c55 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c99 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c74 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c67 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #32324d;
+}
+
+.c72 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c83 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #328048;
+}
+
+.c90 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: revert;
+  color: #32324d;
+}
+
+.c92 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  line-height: revert;
+  color: #32324d;
+}
+
 .c1 {
   padding-bottom: 56px;
 }
@@ -165,109 +279,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 
 .c85 {
   padding-left: 8px;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c24 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #4945ff;
-}
-
-.c26 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c30 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c46 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c55 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c99 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c74 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c67 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  line-height: 16;
-  color: #32324d;
-}
-
-.c72 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c83 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #328048;
-}
-
-.c90 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: revert;
-  color: #32324d;
-}
-
-.c92 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  line-height: revert;
-  color: #32324d;
 }
 
 .c5 {
@@ -510,22 +521,15 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c29 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c53 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c53 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c53[aria-disabled='true'] {
@@ -575,6 +579,11 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c77 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c77[aria-disabled='true'] {
@@ -641,67 +650,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   align-items: center;
 }
 
-.c37 {
-  border: none;
-  border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 0;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
-  color: #32324d;
-  font-weight: 400;
-  font-size: 0.875rem;
-  display: block;
-  width: 100%;
-  background: inherit;
-}
-
-.c37::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c37[aria-disabled='true'] {
-  color: inherit;
-}
-
-.c37:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.c33 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c33:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
 .c43 {
   border: 1px solid #dcdce4;
   min-height: 2rem;
@@ -762,6 +710,67 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
+}
+
+.c37 {
+  border: none;
+  border-radius: 4px;
+  padding-bottom: 0.65625rem;
+  padding-left: 0;
+  padding-right: 16px;
+  padding-top: 0.65625rem;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 0.875rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+}
+
+.c37::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c37[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c37:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c33 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c33:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
 .c56 {
@@ -1126,6 +1135,10 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   word-break: break-all;
 }
 
+.c54 {
+  height: 2rem;
+}
+
 .c70 {
   width: 0.75rem;
   -webkit-transform: rotate(90deg);
@@ -1158,10 +1171,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c54 {
-  height: 2rem;
 }
 
 @media (max-width:68.75rem) {
@@ -1209,7 +1218,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 sc-cjrPHo c11 c12 c13 c14"
+              class="c10 sc-bGaVxB c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1315,7 +1324,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   >
                     <label
                       class="c8 c30 c31"
-                      for="0"
+                      for=":r1:"
                     >
                       Search
                     </label>
@@ -1348,7 +1357,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       aria-invalid="false"
                       aria-required="false"
                       class="c37"
-                      id="0"
+                      id=":r1:"
                       name="searchbar"
                       placeholder="Search"
                       value=""
@@ -1378,7 +1387,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                   </label>
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-0"
+                    aria-controls="radix-:r5:"
                     aria-describedby="sort-by-select-hint sort-by-select-error"
                     aria-expanded="false"
                     aria-label="Sort by"
@@ -1479,686 +1488,29 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
               >
                 <div
                   class="c57"
+                  style="height: 100%;"
                 >
                   <div
-                    class=""
-                    style="height: 100%;"
+                    class="c58 c59"
+                    data-testid="npm-package-card"
                   >
                     <div
-                      class="c58 c59"
-                      data-testid="npm-package-card"
+                      class=""
                     >
                       <div
-                        class=""
+                        class="c60"
                       >
+                        <img
+                          alt="Comments logo"
+                          class="c61"
+                          src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
+                        />
                         <div
-                          class="c60"
-                        >
-                          <img
-                            alt="Comments logo"
-                            class="c61"
-                            src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
-                          />
-                          <div
-                            class="c62"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
-                                fill="#161614"
-                              />
-                            </svg>
-                            <svg
-                              aria-hidden="true"
-                              class="c65 c66"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin was starred 323 on GitHub"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                323
-                              </span>
-                            </p>
-                            <hr
-                              class="c68 c69 c70"
-                            />
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin has 1123 weekly downloads"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                1123
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          class="c71"
-                        >
-                          <h3
-                            class="c8 c72"
-                          >
-                            <div
-                              class="c7"
-                            >
-                              Comments
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c73"
-                        >
-                          <p
-                            class="c8 c74 c75"
-                          >
-                            Powerful Strapi based comments moderation tool for you and your users
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c76 c38"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Comments"
-                          class="c10 sc-cjrPHo c11 c12 c13 c14"
-                          href="https://market.strapi.io/plugins/strapi-plugin-comments"
-                          target="_self"
-                        >
-                          <span
-                            class="c16 c17"
-                          >
-                            More
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c15"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c51 c38 c52 c77"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class=""
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c8 c55"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c57"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c58 c59"
-                      data-testid="npm-package-card"
-                    >
-                      <div
-                        class=""
-                      >
-                        <div
-                          class="c60"
-                        >
-                          <img
-                            alt="Config Sync logo"
-                            class="c61"
-                            src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
-                          />
-                          <div
-                            class="c62"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin has 0 weekly downloads"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                0
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          class="c71"
-                        >
-                          <h3
-                            class="c8 c72"
-                          >
-                            <div
-                              class="c7"
-                            >
-                              Config Sync
-                              <span>
-                                <div
-                                  aria-describedby="2"
-                                  class="c7"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c78 c79"
-                                    fill="none"
-                                    height="1rem"
-                                    viewBox="0 0 24 24"
-                                    width="1rem"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12Zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354Z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c73"
-                        >
-                          <p
-                            class="c8 c74 c75"
-                          >
-                            Migrate your config data across environments using the CLI or Strapi admin panel.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c76 c38"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Config Sync"
-                          class="c10 sc-cjrPHo c11 c12 c13 c14"
-                          href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
-                          target="_self"
-                        >
-                          <span
-                            class="c16 c17"
-                          >
-                            More
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c15"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <span>
-                          <div
-                            aria-describedby="3"
-                            class=""
-                            tabindex="0"
-                          >
-                            <button
-                              aria-disabled="false"
-                              class="c51 c38 c52 c77"
-                              type="button"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class=""
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 24 24"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
-                                    fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c8 c55"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
-                          </div>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c57"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c58 c59"
-                      data-testid="npm-package-card"
-                    >
-                      <div
-                        class=""
-                      >
-                        <div
-                          class="c60"
-                        >
-                          <img
-                            alt="Content Versioning logo"
-                            class="c61"
-                            src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
-                          />
-                          <div
-                            class="c62"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin has 0 weekly downloads"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                0
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          class="c71"
-                        >
-                          <h3
-                            class="c8 c72"
-                          >
-                            <div
-                              class="c7"
-                            >
-                              Content Versioning
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c73"
-                        >
-                          <p
-                            class="c8 c74 c75"
-                          >
-                            This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c76 c38"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Content Versioning"
-                          class="c10 sc-cjrPHo c11 c12 c13 c14"
-                          href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
-                          target="_self"
-                        >
-                          <span
-                            class="c16 c17"
-                          >
-                            More
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c15"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <span>
-                          <div
-                            aria-describedby="4"
-                            class=""
-                            tabindex="0"
-                          >
-                            <button
-                              aria-disabled="true"
-                              class="c51 c38 c52 c77"
-                              disabled=""
-                              type="button"
-                            >
-                              <div
-                                aria-hidden="true"
-                                class=""
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 24 24"
-                                  width="1rem"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
-                                    fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c8 c55"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
-                          </div>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c57"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c58 c59"
-                      data-testid="npm-package-card"
-                    >
-                      <div
-                        class=""
-                      >
-                        <div
-                          class="c60"
-                        >
-                          <img
-                            alt="Documentation logo"
-                            class="c61"
-                            src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
-                          />
-                          <div
-                            class="c62"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
-                                fill="#161614"
-                              />
-                            </svg>
-                            <svg
-                              aria-hidden="true"
-                              class="c65 c66"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin was starred 49130 on GitHub"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                49130
-                              </span>
-                            </p>
-                            <hr
-                              class="c68 c69 c70"
-                            />
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin has 7492 weekly downloads"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                7492
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          class="c71"
-                        >
-                          <h3
-                            class="c8 c72"
-                          >
-                            <div
-                              class="c7"
-                            >
-                              Documentation
-                              <span>
-                                <div
-                                  aria-describedby="5"
-                                  class="c7"
-                                  tabindex="0"
-                                >
-                                  <img
-                                    alt="Made by Strapi"
-                                    class="c80"
-                                    src="IMAGE_MOCK"
-                                  />
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c73"
-                        >
-                          <p
-                            class="c8 c74 c75"
-                          >
-                            Create an OpenAPI Document and visualize your API with SWAGGER UI
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c76 c38"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Documentation"
-                          class="c10 sc-cjrPHo c11 c12 c13 c14"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
-                          target="_self"
-                        >
-                          <span
-                            class="c16 c17"
-                          >
-                            More
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c15"
-                          >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <div
-                          class="c81"
+                          class="c62"
                         >
                           <svg
-                            class="c82 c79"
+                            aria-hidden="true"
+                            class="c63 c64"
                             fill="none"
                             height="1rem"
                             viewBox="0 0 24 24"
@@ -2166,146 +1518,222 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                              d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
+                              fill="#161614"
+                            />
+                          </svg>
+                          <svg
+                            aria-hidden="true"
+                            class="c65 c66"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
                               fill="#212134"
                             />
                           </svg>
-                          <span
-                            class="c8 c83"
+                          <p
+                            aria-label="This plugin was starred 323 on GitHub"
                           >
-                            Installed
-                          </span>
+                            <span
+                              class="c8 c67"
+                            >
+                              323
+                            </span>
+                          </p>
+                          <hr
+                            class="c68 c69 c70"
+                          />
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 25"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                          <p
+                            aria-label="This plugin has 1123 weekly downloads"
+                          >
+                            <span
+                              class="c8 c67"
+                            >
+                              1123
+                            </span>
+                          </p>
                         </div>
                       </div>
+                      <div
+                        class="c71"
+                      >
+                        <h3
+                          class="c8 c72"
+                        >
+                          <div
+                            class="c7"
+                          >
+                            Comments
+                          </div>
+                        </h3>
+                      </div>
+                      <div
+                        class="c73"
+                      >
+                        <p
+                          class="c8 c74 c75"
+                        >
+                          Powerful Strapi based comments moderation tool for you and your users
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="c76 c38"
+                      style="align-self: flex-end;"
+                    >
+                      <a
+                        aria-disabled="false"
+                        aria-label="Learn more about Comments"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        href="https://market.strapi.io/plugins/strapi-plugin-comments"
+                        target="_self"
+                      >
+                        <span
+                          class="c16 c17"
+                        >
+                          More
+                        </span>
+                        <div
+                          aria-hidden="true"
+                          class="c15"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                      </a>
+                      <button
+                        aria-disabled="false"
+                        class="c51 c38 c52 c77"
+                        type="button"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class=""
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
+                              fill="#212134"
+                            />
+                            <path
+                              d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </div>
+                        <span
+                          class="c8 c55"
+                        >
+                          Copy install command
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
                 <div
                   class="c57"
+                  style="height: 100%;"
                 >
                   <div
-                    class=""
-                    style="height: 100%;"
+                    class="c58 c59"
+                    data-testid="npm-package-card"
                   >
                     <div
-                      class="c58 c59"
-                      data-testid="npm-package-card"
+                      class=""
                     >
                       <div
-                        class=""
+                        class="c60"
                       >
+                        <img
+                          alt="Config Sync logo"
+                          class="c61"
+                          src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
+                        />
                         <div
-                          class="c60"
+                          class="c62"
                         >
-                          <img
-                            alt="Transformer logo"
-                            class="c61"
-                            src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
-                          />
-                          <div
-                            class="c62"
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 25"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              aria-hidden="true"
-                              class="c63 c64"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                            <p
-                              aria-label="This plugin has 0 weekly downloads"
-                            >
-                              <span
-                                class="c8 c67"
-                              >
-                                0
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          class="c71"
-                        >
-                          <h3
-                            class="c8 c72"
-                          >
-                            <div
-                              class="c7"
-                            >
-                              Transformer
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c73"
-                        >
+                            <path
+                              clip-rule="evenodd"
+                              d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
                           <p
-                            class="c8 c74 c75"
+                            aria-label="This plugin has 0 weekly downloads"
                           >
-                            A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
+                            <span
+                              class="c8 c67"
+                            >
+                              0
+                            </span>
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c76 c38"
-                        style="align-self: flex-end;"
+                        class="c71"
                       >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Transformer"
-                          class="c10 sc-cjrPHo c11 c12 c13 c14"
-                          href="https://market.strapi.io/plugins/strapi-plugin-transformer"
-                          target="_self"
+                        <h3
+                          class="c8 c72"
                         >
-                          <span
-                            class="c16 c17"
-                          >
-                            More
-                          </span>
                           <div
-                            aria-hidden="true"
-                            class="c15"
+                            class="c7"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <span>
-                          <div
-                            aria-describedby="6"
-                            class=""
-                            tabindex="0"
-                          >
-                            <button
-                              aria-disabled="true"
-                              class="c51 c38 c52 c77"
-                              disabled=""
-                              type="button"
-                            >
+                            Config Sync
+                            <span>
                               <div
-                                aria-hidden="true"
-                                class=""
+                                aria-describedby=":ra:"
+                                class="c7"
+                                tabindex="0"
                               >
                                 <svg
+                                  class="c78 c79"
                                   fill="none"
                                   height="1rem"
                                   viewBox="0 0 24 24"
@@ -2313,24 +1741,585 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
+                                    clip-rule="evenodd"
+                                    d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12Zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354Z"
                                     fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
-                                    fill="#212134"
+                                    fill-rule="evenodd"
                                   />
                                 </svg>
                               </div>
-                              <span
-                                class="c8 c55"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
+                            </span>
                           </div>
+                        </h3>
+                      </div>
+                      <div
+                        class="c73"
+                      >
+                        <p
+                          class="c8 c74 c75"
+                        >
+                          Migrate your config data across environments using the CLI or Strapi admin panel.
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="c76 c38"
+                      style="align-self: flex-end;"
+                    >
+                      <a
+                        aria-disabled="false"
+                        aria-label="Learn more about Config Sync"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
+                        target="_self"
+                      >
+                        <span
+                          class="c16 c17"
+                        >
+                          More
+                        </span>
+                        <div
+                          aria-hidden="true"
+                          class="c15"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                      </a>
+                      <span>
+                        <div
+                          aria-describedby=":rc:"
+                          class=""
+                          tabindex="0"
+                        >
+                          <button
+                            aria-disabled="false"
+                            class="c51 c38 c52 c77"
+                            type="button"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class=""
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
+                                  fill="#212134"
+                                />
+                                <path
+                                  d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <span
+                              class="c8 c55"
+                            >
+                              Copy install command
+                            </span>
+                          </button>
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c57"
+                  style="height: 100%;"
+                >
+                  <div
+                    class="c58 c59"
+                    data-testid="npm-package-card"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c60"
+                      >
+                        <img
+                          alt="Content Versioning logo"
+                          class="c61"
+                          src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
+                        />
+                        <div
+                          class="c62"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 25"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                          <p
+                            aria-label="This plugin has 0 weekly downloads"
+                          >
+                            <span
+                              class="c8 c67"
+                            >
+                              0
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c71"
+                      >
+                        <h3
+                          class="c8 c72"
+                        >
+                          <div
+                            class="c7"
+                          >
+                            Content Versioning
+                          </div>
+                        </h3>
+                      </div>
+                      <div
+                        class="c73"
+                      >
+                        <p
+                          class="c8 c74 c75"
+                        >
+                          This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="c76 c38"
+                      style="align-self: flex-end;"
+                    >
+                      <a
+                        aria-disabled="false"
+                        aria-label="Learn more about Content Versioning"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
+                        target="_self"
+                      >
+                        <span
+                          class="c16 c17"
+                        >
+                          More
+                        </span>
+                        <div
+                          aria-hidden="true"
+                          class="c15"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                      </a>
+                      <span>
+                        <div
+                          aria-describedby=":re:"
+                          class=""
+                          tabindex="0"
+                        >
+                          <button
+                            aria-disabled="true"
+                            class="c51 c38 c52 c77"
+                            disabled=""
+                            type="button"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class=""
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
+                                  fill="#212134"
+                                />
+                                <path
+                                  d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <span
+                              class="c8 c55"
+                            >
+                              Copy install command
+                            </span>
+                          </button>
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c57"
+                  style="height: 100%;"
+                >
+                  <div
+                    class="c58 c59"
+                    data-testid="npm-package-card"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c60"
+                      >
+                        <img
+                          alt="Documentation logo"
+                          class="c61"
+                          src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
+                        />
+                        <div
+                          class="c62"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0 1 12 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0Z"
+                              fill="#161614"
+                            />
+                          </svg>
+                          <svg
+                            aria-hidden="true"
+                            class="c65 c66"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m12 18.26-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26Z"
+                              fill="#212134"
+                            />
+                          </svg>
+                          <p
+                            aria-label="This plugin was starred 49130 on GitHub"
+                          >
+                            <span
+                              class="c8 c67"
+                            >
+                              49130
+                            </span>
+                          </p>
+                          <hr
+                            class="c68 c69 c70"
+                          />
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 25"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                          <p
+                            aria-label="This plugin has 7492 weekly downloads"
+                          >
+                            <span
+                              class="c8 c67"
+                            >
+                              7492
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c71"
+                      >
+                        <h3
+                          class="c8 c72"
+                        >
+                          <div
+                            class="c7"
+                          >
+                            Documentation
+                            <span>
+                              <div
+                                aria-describedby=":rg:"
+                                class="c7"
+                                tabindex="0"
+                              >
+                                <img
+                                  alt="Made by Strapi"
+                                  class="c80"
+                                  src="IMAGE_MOCK"
+                                />
+                              </div>
+                            </span>
+                          </div>
+                        </h3>
+                      </div>
+                      <div
+                        class="c73"
+                      >
+                        <p
+                          class="c8 c74 c75"
+                        >
+                          Create an OpenAPI Document and visualize your API with SWAGGER UI
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="c76 c38"
+                      style="align-self: flex-end;"
+                    >
+                      <a
+                        aria-disabled="false"
+                        aria-label="Learn more about Documentation"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
+                        target="_self"
+                      >
+                        <span
+                          class="c16 c17"
+                        >
+                          More
+                        </span>
+                        <div
+                          aria-hidden="true"
+                          class="c15"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                      </a>
+                      <div
+                        class="c81"
+                      >
+                        <svg
+                          class="c82 c79"
+                          fill="none"
+                          height="1rem"
+                          viewBox="0 0 24 24"
+                          width="1rem"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
+                            fill="#212134"
+                          />
+                        </svg>
+                        <span
+                          class="c8 c83"
+                        >
+                          Installed
                         </span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c57"
+                  style="height: 100%;"
+                >
+                  <div
+                    class="c58 c59"
+                    data-testid="npm-package-card"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c60"
+                      >
+                        <img
+                          alt="Transformer logo"
+                          class="c61"
+                          src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
+                        />
+                        <div
+                          class="c62"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="c63 c64"
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 25"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                          <p
+                            aria-label="This plugin has 0 weekly downloads"
+                          >
+                            <span
+                              class="c8 c67"
+                            >
+                              0
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c71"
+                      >
+                        <h3
+                          class="c8 c72"
+                        >
+                          <div
+                            class="c7"
+                          >
+                            Transformer
+                          </div>
+                        </h3>
+                      </div>
+                      <div
+                        class="c73"
+                      >
+                        <p
+                          class="c8 c74 c75"
+                        >
+                          A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="c76 c38"
+                      style="align-self: flex-end;"
+                    >
+                      <a
+                        aria-disabled="false"
+                        aria-label="Learn more about Transformer"
+                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        href="https://market.strapi.io/plugins/strapi-plugin-transformer"
+                        target="_self"
+                      >
+                        <span
+                          class="c16 c17"
+                        >
+                          More
+                        </span>
+                        <div
+                          aria-hidden="true"
+                          class="c15"
+                        >
+                          <svg
+                            fill="none"
+                            height="1rem"
+                            viewBox="0 0 24 24"
+                            width="1rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M16.235 2.824a1.412 1.412 0 0 1 0-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 0 1-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 0 1-1.996-1.996l8.178-8.178h-2.945Zm4.942 10.588a1.412 1.412 0 0 1 2.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 0 1 0 2.824H2.824v18.353h18.353v-7.765Z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </div>
+                      </a>
+                      <span>
+                        <div
+                          aria-describedby=":ri:"
+                          class=""
+                          tabindex="0"
+                        >
+                          <button
+                            aria-disabled="true"
+                            class="c51 c38 c52 c77"
+                            disabled=""
+                            type="button"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class=""
+                            >
+                              <svg
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 24"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24Z"
+                                  fill="#212134"
+                                />
+                                <path
+                                  d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0 0 24 16.962V1.056A1.056 1.056 0 0 0 22.944 0H7.038a1.056 1.056 0 0 0-1.056 1.056v2.252h2.112V2.11Z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <span
+                              class="c8 c55"
+                            >
+                              Copy install command
+                            </span>
+                          </button>
+                        </div>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -2355,17 +2344,17 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 >
                   <label
                     class="c8 c30 c31"
-                    for="8"
+                    for=":rk:"
                   />
                   <div
                     aria-autocomplete="none"
-                    aria-controls="radix-5"
-                    aria-describedby="8-hint 8-error"
+                    aria-controls="radix-:rn:"
+                    aria-describedby=":rk:-hint :rk:-error"
                     aria-expanded="false"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
-                    id="8"
+                    id=":rk:"
                     overflow="hidden"
                     role="combobox"
                     tabindex="0"

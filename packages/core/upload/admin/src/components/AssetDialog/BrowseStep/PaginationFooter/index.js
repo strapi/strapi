@@ -12,10 +12,12 @@
  * 1, ... 6, `7`, 8, 9, 10
  */
 import React from 'react';
+
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
+import { Dots, NextLink, PageLink, PreviousLink } from './components';
 import { Pagination } from './Pagination';
-import { PreviousLink, NextLink, PageLink, Dots } from './components';
 
 const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } }) => {
   const { formatMessage } = useIntl();

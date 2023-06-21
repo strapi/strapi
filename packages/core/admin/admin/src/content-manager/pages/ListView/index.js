@@ -1,52 +1,50 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { connect } from 'react-redux';
-import isEqual from 'lodash/isEqual';
-import { bindActionCreators, compose } from 'redux';
-import { useIntl } from 'react-intl';
-import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import { stringify } from 'qs';
-import axios from 'axios';
 
 import {
-  NoPermissions,
-  CheckPermissions,
-  SearchURLQuery,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useQueryParams,
-  useNotification,
-  useRBACProvider,
-  useTracking,
-  Link,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
-
-import {
-  IconButton,
-  Main,
-  Box,
   ActionLayout,
+  Box,
+  Button,
   ContentLayout,
   HeaderLayout,
+  IconButton,
+  Main,
   useNotifyAT,
-  Button,
 } from '@strapi/design-system';
-
-import { ArrowLeft, Plus, Cog } from '@strapi/icons';
-
-import DynamicTable from '../../components/DynamicTable';
-import AttributeFilter from '../../components/AttributeFilter';
-import { InjectionZone } from '../../../shared/components';
+import {
+  CheckPermissions,
+  getYupInnerErrors,
+  Link,
+  NoPermissions,
+  SearchURLQuery,
+  useAPIErrorHandler,
+  useFetchClient,
+  useFocusWhenNavigate,
+  useNotification,
+  useQueryParams,
+  useRBACProvider,
+  useTracking,
+} from '@strapi/helper-plugin';
+import { ArrowLeft, Cog, Plus } from '@strapi/icons';
+import axios from 'axios';
+import isEqual from 'lodash/isEqual';
+import PropTypes from 'prop-types';
+import { stringify } from 'qs';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { connect } from 'react-redux';
+import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-dom';
+import { bindActionCreators, compose } from 'redux';
+import styled from 'styled-components';
 
 import permissions from '../../../permissions';
+import { InjectionZone } from '../../../shared/components';
+import AttributeFilter from '../../components/AttributeFilter';
+import DynamicTable from '../../components/DynamicTable';
+import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
-import { getRequestUrl, getTrad } from '../../utils';
-
+import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
-import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import makeSelectListView from './selectors';
 import { buildQueryString } from './utils';
 
@@ -64,6 +62,7 @@ function ListView({
   canCreate,
   canDelete,
   canRead,
+  canPublish,
   data,
   getData,
   getDataSucceeded,
@@ -99,6 +98,50 @@ function ListView({
   const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
+
+  const bulkPublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+        });
+
+        fetchData(`/content-manager/collection-types/${slug}${params}`);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+  const bulkUnpublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          },
+        });
+
+        fetchData(`/content-manager/collection-types/${slug}${params}`);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -198,6 +241,70 @@ function ListView({
     },
     [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
+
+  /**
+   * @param {number[]} selectedEntries - Array of ids to publish
+   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
+   */
+  const validateEntriesToPublish = async (selectedEntries) => {
+    const validations = { validIds: [], errors: {} };
+    // Create the validation schema based on the contentType
+    const schema = createYupSchema(
+      contentType,
+      { components: layout.components },
+      { isDraft: false }
+    );
+    // Get the selected entries
+    const entries = data.filter((entry) => {
+      return selectedEntries.includes(entry.id);
+    });
+    // Validate each entry and map the unresolved promises
+    const validationPromises = entries.map((entry) =>
+      schema.validate(entry, { abortEarly: false })
+    );
+    // Resolve all the promises in one go
+    const resolvedPromises = await Promise.allSettled(validationPromises);
+    // Set the validations
+    resolvedPromises.forEach((promise) => {
+      if (promise.status === 'rejected') {
+        const entityId = promise.reason.value.id;
+        validations.errors[entityId] = getYupInnerErrors(promise.reason);
+      }
+
+      if (promise.status === 'fulfilled') {
+        validations.validIds.push(promise.value.id);
+      }
+    });
+
+    return validations;
+  };
+
+  const handleConfirmPublishAllData = async (selectedEntries) => {
+    const validations = await validateEntriesToPublish(selectedEntries);
+
+    if (Object.values(validations.errors).length) {
+      toggleNotification({
+        type: 'warning',
+        title: {
+          id: 'content-manager.listView.validation.errors.title',
+          defaultMessage: 'Action required',
+        },
+        message: {
+          id: 'content-manager.listView.validation.errors.message',
+          defaultMessage:
+            'Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)',
+        },
+      });
+
+      throw new Error('Validation error');
+    }
+
+    return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
+  };
+
+  const handleConfirmUnpublishAllData = (selectedEntries) => {
+    return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
+  };
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
@@ -330,9 +437,12 @@ function ListView({
             <DynamicTable
               canCreate={canCreate}
               canDelete={canDelete}
+              canPublish={canPublish}
               contentTypeName={headerLayoutTitle}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
               onConfirmDelete={handleConfirmDeleteData}
+              onConfirmDeleteAll={handleConfirmDeleteAllData}
+              onConfirmPublishAll={handleConfirmPublishAllData}
+              onConfirmUnpublishAll={handleConfirmUnpublishAllData}
               isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
@@ -354,10 +464,12 @@ ListView.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   data: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
+      uid: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
       info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,

@@ -1,11 +1,13 @@
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { Route, Router } from 'react-router-dom';
+
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
@@ -116,6 +118,66 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c32 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c6 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #666687;
+      }
+
+      .c26 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c36 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c37 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+      }
+
+      .c38 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -165,54 +227,6 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
 
       .c43 {
         padding-left: 4px;
-      }
-
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c14 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
-
-      .c26 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c36 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c37 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #32324d;
-      }
-
-      .c38 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
       }
 
       .c2 {
@@ -330,18 +344,6 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
-      }
-
-      .c32 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c44[aria-disabled='true'] .c5 {
@@ -785,7 +787,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="0"
+                              aria-labelledby=":r0:"
                               class="c5 c26"
                               label="Name"
                               tabindex="-1"
@@ -799,7 +801,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="1"
+                                aria-labelledby=":r2:"
                                 class="c28 c29 c30 c31"
                                 tabindex="-1"
                                 type="button"
@@ -841,7 +843,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="2"
+                              aria-labelledby=":r4:"
                               class="c5 c26"
                               label="Description"
                               tabindex="-1"
@@ -864,7 +866,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="3"
+                              aria-labelledby=":r6:"
                               class="c5 c26"
                               label="Created at"
                               tabindex="-1"
@@ -887,7 +889,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                         >
                           <span>
                             <span
-                              aria-labelledby="4"
+                              aria-labelledby=":r8:"
                               class="c5 c26"
                               label="Last used"
                               tabindex="-1"
@@ -1018,7 +1020,7 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
                             <span>
                               <button
                                 aria-disabled="false"
-                                aria-labelledby="5"
+                                aria-labelledby=":ra:"
                                 class="c28 c29 c30 c31"
                                 name="delete"
                                 tabindex="-1"

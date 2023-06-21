@@ -122,7 +122,10 @@ const useTracking = () => {
               },
             },
             {
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Strapi-Event': event,
+              },
             }
           );
 
@@ -140,4 +143,4 @@ const useTracking = () => {
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking, TrackingContext };
+export { TrackingContext, TrackingProvider, useTracking };

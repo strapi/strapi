@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import { useQueryParams } from '@strapi/helper-plugin';
-import { MenuItem, CrumbSimpleMenu } from '@strapi/design-system/v2';
+
 import { Loader } from '@strapi/design-system';
+import { CrumbSimpleMenu, MenuItem } from '@strapi/design-system/v2';
+import { useQueryParams } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 

@@ -11,6 +11,20 @@ const webhookEvents = {
   MEDIA_DELETE: 'media.delete',
 };
 
+/**
+ * TODO V5: remove this file
+ * @deprecated
+ */
+const deprecatedWebhookEvents = new Proxy(webhookEvents, {
+  get(target, prop) {
+    console.warn(
+      '[deprecated] @strapi/utils/webhook will no longer exist in the next major release of Strapi. ' +
+        'Instead, the webhookEvents object can be retrieved from strapi.webhookStore.allowedEvents'
+    );
+    return target[prop];
+  },
+});
+
 module.exports = {
-  webhookEvents,
+  webhookEvents: deprecatedWebhookEvents,
 };

@@ -1,18 +1,18 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import ProfilePage from '../index';
-import server from './utils/server';
-import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
-import Theme from '../../../components/Theme';
 
-jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale() {},
-  localeNames: ['en'],
-  messages: ['test'],
-}));
+import Theme from '../../../components/Theme';
+import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
+import ProfilePage from '../index';
+
+import server from './utils/server';
+import serverLockedSSO from './utils/serverLockedSSO';
+
+jest.mock('../../../components/LocalesProvider/useLocalesProvider');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -22,27 +22,31 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
 }));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+const setup = (props) =>
+  render(<ProfilePage {...props} />, {
+    wrapper({ children }) {
+      window.strapi.isEE = true;
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <QueryClientProvider client={client}>
+          <IntlProvider messages={{}} textComponent="span" locale="en">
+            <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+              <Theme>{children}</Theme>
+            </ThemeToggleProvider>
+          </IntlProvider>
+        </QueryClientProvider>
+      );
     },
-  },
-});
+  });
 
-const App = (
-  <QueryClientProvider client={client}>
-    <IntlProvider messages={{}} textComponent="span" locale="en">
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <ProfilePage />
-        </Theme>
-      </ThemeToggleProvider>
-    </IntlProvider>
-  </QueryClientProvider>
-);
-
-describe('ADMIN | Pages | Profile page', () => {
+describe('ADMIN | Pages | Profile page | without SSO lock', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => {
@@ -54,23 +58,83 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
     server.close();
   });
 
-  it('renders and matches the snapshot', async () => {
-    const { container } = render(App);
+  it('renders and show the Interface Language section', async () => {
+    setup();
     await waitFor(() => {
       expect(screen.getByText('Interface language')).toBeInTheDocument();
     });
-
-    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should display username if it exists', async () => {
-    render(App);
+    setup();
     await waitFor(() => {
       expect(screen.getByText('yolo')).toBeInTheDocument();
     });
+  });
+
+  it('should display the change password section and all its fields', async () => {
+    const { getByRole, queryByTestId, getByLabelText } = setup();
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
+    });
+
+    expect(
+      getByRole('heading', {
+        name: 'Change password',
+      })
+    ).toBeInTheDocument();
+
+    expect(getByLabelText('Current Password')).toBeInTheDocument();
+
+    expect(getByLabelText('Password')).toBeInTheDocument();
+
+    expect(getByLabelText('Password confirmation')).toBeInTheDocument();
+  });
+});
+
+describe('ADMIN | Pages | Profile page | with SSO lock', () => {
+  beforeAll(() => serverLockedSSO.listen());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    serverLockedSSO.resetHandlers();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+    serverLockedSSO.close();
+  });
+
+  it('should display username if it exists', async () => {
+    setup();
+    await waitFor(() => {
+      expect(screen.getByText('yolo')).toBeInTheDocument();
+    });
+  });
+
+  it('should not display the change password section and all the fields if the user role is Locked', async () => {
+    const { queryByRole, queryByTestId, queryByLabelText } = setup();
+    const changePasswordHeading = queryByRole('heading', {
+      name: 'Change password',
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('loader')).not.toBeInTheDocument();
+    });
+
+    expect(changePasswordHeading).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Current Password')).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Password')).not.toBeInTheDocument();
+
+    expect(queryByLabelText('Password confirmation')).not.toBeInTheDocument();
   });
 });

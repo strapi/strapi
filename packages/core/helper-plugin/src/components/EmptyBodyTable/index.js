@@ -1,6 +1,8 @@
 import React from 'react';
-import { Tbody, Tr, Td, Box, Flex, Loader } from '@strapi/design-system';
+
+import { Box, Flex, Loader, Tbody, Td, Tr } from '@strapi/design-system';
 import PropTypes from 'prop-types';
+
 import EmptyStateLayout from '../EmptyStateLayout';
 
 const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {

@@ -1,42 +1,45 @@
 import React from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
-import omit from 'lodash/omit';
+
 import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Typography,
+} from '@strapi/design-system';
+import {
+  auth,
   Form,
   GenericInput,
+  Link,
+  LoadingIndicatorPage,
   SettingsPageTitle,
-  auth,
   useAppInfo,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  LoadingIndicatorPage,
-  Link,
 } from '@strapi/helper-plugin';
-import { useQuery } from 'react-query';
-import { Formik } from 'formik';
-import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  ContentLayout,
-  Typography,
-  Main,
-  Flex,
-} from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
+import { Formik } from 'formik';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
+import pick from 'lodash/pick';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+
+import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
 import { formatAPIErrors, getFullName } from '../../../../../utils';
-import { fetchUser, putUser } from './utils/api';
-import layout from './utils/layout';
-import { editValidation } from '../utils/validations/users';
 import SelectRoles from '../components/SelectRoles';
+import { editValidation } from '../utils/validations/users';
+
+import { putUser } from './utils/api';
+import layout from './utils/layout';
 
 const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'];
 
@@ -51,26 +54,35 @@ const EditPage = ({ canUpdate }) => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   useFocusWhenNavigate();
 
-  const { status, data } = useQuery(['user', id], () => fetchUser(id), {
-    retry: false,
-    onError(err) {
-      const status = err.response.status;
+  const {
+    users: [user],
+    isLoading,
+  } = useAdminUsers(
+    { id },
+    {
+      onError(error) {
+        const { status } = error.response;
 
-      // Redirect the use to the homepage if is not allowed to read
-      if (status === 403) {
-        toggleNotification({
-          type: 'info',
-          message: {
-            id: 'notification.permission.not-allowed-read',
-            defaultMessage: 'You are not allowed to see this document',
-          },
-        });
+        // Redirect the use to the homepage if is not allowed to read
+        if (status === 403) {
+          toggleNotification({
+            type: 'info',
+            message: {
+              id: 'notification.permission.not-allowed-read',
+              defaultMessage: 'You are not allowed to see this document',
+            },
+          });
 
-        push('/');
-      }
-      console.log(err.response.status);
-    },
-  });
+          push('/');
+        } else {
+          toggleNotification({
+            type: 'warning',
+            message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          });
+        }
+      },
+    }
+  );
 
   const handleSubmit = async (body, actions) => {
     lockApp();
@@ -113,19 +125,18 @@ const EditPage = ({ canUpdate }) => {
     unlockApp();
   };
 
-  const isLoading = status !== 'success';
   const headerLabel = isLoading
     ? { id: 'app.containers.Users.EditPage.header.label-loading', defaultMessage: 'Edit user' }
     : { id: 'app.containers.Users.EditPage.header.label', defaultMessage: 'Edit {name}' };
 
-  const initialData = Object.keys(pick(data, fieldsToPick)).reduce((acc, current) => {
+  const initialData = Object.keys(pick(user, fieldsToPick)).reduce((acc, current) => {
     if (current === 'roles') {
-      acc[current] = (data?.roles || []).map(({ id }) => id);
+      acc[current] = (user?.roles || []).map(({ id }) => id);
 
       return acc;
     }
 
-    acc[current] = data?.[current];
+    acc[current] = user?.[current];
 
     return acc;
   }, {});
@@ -138,6 +149,7 @@ const EditPage = ({ canUpdate }) => {
   if (isLoading) {
     return (
       <Main aria-busy="true">
+        {/* TODO: translate */}
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           primaryAction={
@@ -200,9 +212,9 @@ const EditPage = ({ canUpdate }) => {
                 }
               />
               <ContentLayout>
-                {data?.registrationToken && (
+                {user?.registrationToken && (
                   <Box paddingBottom={6}>
-                    <MagicLink registrationToken={data.registrationToken} />
+                    <MagicLink registrationToken={user.registrationToken} />
                   </Box>
                 )}
                 <Flex direction="column" alignItems="stretch" gap={7}>

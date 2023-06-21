@@ -1,27 +1,32 @@
 import React, { useMemo } from 'react';
+
+import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector } from 'react-redux';
 
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
-import TableRows from './TableRows';
-import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
-import ConfirmDialogDelete from './ConfirmDialogDelete';
+
+import BulkActionsBar from './BulkActionsBar';
 import { PublicationState } from './CellContent/PublicationState/PublicationState';
+import ConfirmDialogDelete from './ConfirmDialogDelete';
+import TableRows from './TableRows';
 
 const DynamicTable = ({
   canCreate,
   canDelete,
+  canPublish,
   contentTypeName,
   action,
   isBulkable,
   isLoading,
   onConfirmDelete,
   onConfirmDeleteAll,
+  onConfirmPublishAll,
+  onConfirmUnpublishAll,
   layout,
   rows,
 }) => {
@@ -89,17 +94,27 @@ const DynamicTable = ({
 
   return (
     <Table
-      components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
+      components={{ ConfirmDialogDelete }}
       contentType={contentTypeName}
       action={action}
       isLoading={isLoading}
       headers={tableHeaders}
       onConfirmDelete={onConfirmDelete}
-      onConfirmDeleteAll={onConfirmDeleteAll}
       onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
       rows={rows}
       withBulkActions
-      withMainAction={canDelete && isBulkable}
+      withMainAction={(canDelete || canPublish) && isBulkable}
+      renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
+        <BulkActionsBar
+          showPublish={canPublish && hasDraftAndPublish}
+          showDelete={canDelete}
+          onConfirmDeleteAll={onConfirmDeleteAll}
+          onConfirmPublishAll={onConfirmPublishAll}
+          onConfirmUnpublishAll={onConfirmUnpublishAll}
+          selectedEntries={selectedEntries}
+          clearSelectedEntries={clearSelectedEntries}
+        />
+      )}
     >
       <TableRows
         canCreate={canCreate}
@@ -121,6 +136,7 @@ DynamicTable.defaultProps = {
 DynamicTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   action: PropTypes.node,
   isBulkable: PropTypes.bool.isRequired,
@@ -139,6 +155,8 @@ DynamicTable.propTypes = {
   }).isRequired,
   onConfirmDelete: PropTypes.func.isRequired,
   onConfirmDeleteAll: PropTypes.func.isRequired,
+  onConfirmPublishAll: PropTypes.func.isRequired,
+  onConfirmUnpublishAll: PropTypes.func.isRequired,
   rows: PropTypes.array.isRequired,
 };
 
