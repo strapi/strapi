@@ -151,7 +151,7 @@ const getRelations = async (uid, field, id) => {
   return res.body;
 };
 
-describe.skip('Relations', () => {
+describe('Relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
