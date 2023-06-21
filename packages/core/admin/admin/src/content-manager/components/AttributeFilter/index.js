@@ -37,7 +37,10 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const displayedFilters = allowedAttributes.map((name) => {
-    if (AUTHOR_ATTRIBUTES.includes(name)) {
+    if (
+      contentType.attributes[name].type === 'relation' &&
+      contentType.attributes[name].target === 'admin::user'
+    ) {
       return {
         name,
         metadatas: {
