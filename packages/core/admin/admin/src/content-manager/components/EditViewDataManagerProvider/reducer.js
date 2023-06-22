@@ -138,17 +138,16 @@ const reducer = (state, action) =>
           __temp_key__: keys[index],
         }));
 
-        set(
-          draftState,
-          initialDataPath,
-          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
-        );
-
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
         set(
           draftState,
           modifiedDataPath,
