@@ -36,7 +36,7 @@ const FormModalNavigationProvider = ({ children }) => {
         modalType: 'attribute',
         step,
         attributeType,
-        showBackLink: true,
+        showBackLink: true
       };
     });
   };
