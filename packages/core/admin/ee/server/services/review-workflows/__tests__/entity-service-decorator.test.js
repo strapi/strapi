@@ -124,7 +124,7 @@ describe('Entity service decorator', () => {
         ...global.strapi,
         entityService: {
           findOne: jest.fn(() => {
-            return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
+            return { strapi_stage: { id: 2, workflow: { id: 1 } } };
           }),
           emitEvent: jest.fn(),
         },
