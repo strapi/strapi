@@ -192,7 +192,10 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
+const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography>;
+
 const SelectedEntriesTableContent = () => {
+  const { formatMessage } = useIntl();
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
 
   // Select all entries by default
@@ -203,7 +206,16 @@ const SelectedEntriesTableContent = () => {
   return (
     <>
       <Typography>
-        <Typography>{selectedEntries.length}</Typography> selected entries
+        {formatMessage(
+          {
+            id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
+            defaultMessage: 'test',
+          },
+          {
+            count: selectedEntries.length,
+            b: BoldChunk,
+          }
+        )}
       </Typography>
       <Box marginTop={5}>
         <Table.Content>
@@ -232,6 +244,7 @@ const SelectedEntriesTableContent = () => {
 };
 
 const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
+  const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
   const entries = rows.filter((row) => {
@@ -246,7 +259,10 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          Publish entries
+          {formatMessage({
+            id: getTrad('containers.ListPage.selectedEntriesModal.title'),
+            defaultMessage: 'Publish entries',
+          })}
         </Typography>
       </ModalHeader>
       <ModalBody>
@@ -257,10 +273,18 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
       <ModalFooter
         startActions={
           <Button onClick={onToggle} variant="tertiary">
-            Cancel
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'Cancel',
+            })}
           </Button>
         }
-        endActions={<Button onClick={onConfirm}>Publish</Button>}
+        endActions={
+          <Button onClick={onConfirm}>
+            {' '}
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        }
       />
     </ModalLayout>
   );

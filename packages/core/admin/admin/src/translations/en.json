@@ -708,6 +708,8 @@
   "content-manager.containers.ListPage.displayedFields": "Displayed Fields",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {items} one {item} other {items}}",
   "content-manager.containers.ListPage.table-headers.publishedAt": "State",
+  "content-manager.containers.ListPage.selectedEntriesModal.title": "Publish entries",
+  "content-manager.containers.ListPage.selectedEntriesModal.selectedCount": "<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Edit {fieldName}",
   "content-manager.containers.SettingPage.add.field": "Insert another field",
   "content-manager.containers.SettingPage.add.relational-field": "Insert another related field",
