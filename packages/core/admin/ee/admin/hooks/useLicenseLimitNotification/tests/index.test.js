@@ -14,14 +14,7 @@ const baseLicenseInfo = {
   licenseType: 'gold',
 };
 
-jest.mock('react-intl', () => {
-  return {
-    useIntl: jest.fn(() => ({
-      formatMessage: jest.fn((options) => options.defaultMessage),
-    })),
-  };
-});
-
+// TODO: refactor
 jest.mock('react-router', () => {
   return {
     useLocation: jest.fn(() => ({
@@ -40,9 +33,7 @@ jest.mock('@strapi/helper-plugin', () => {
 
 jest.mock('../../useLicenseLimits', () => {
   return jest.fn(() => ({
-    license: {
-      data: baseLicenseInfo,
-    },
+    license: baseLicenseInfo,
   }));
 });
 

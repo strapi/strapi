@@ -19,7 +19,7 @@ const AdminSeatInfo = () => {
     isLoading,
   } = useLicenseLimits();
 
-  if (isError || isLoading) {
+  if (isError || isLoading || !permittedSeats) {
     return null;
   }
 
