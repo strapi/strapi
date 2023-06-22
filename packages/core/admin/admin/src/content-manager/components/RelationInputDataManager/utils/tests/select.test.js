@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { MemoryRouter } from 'react-router-dom';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { act, renderHook } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import useSelect from '../select';
 
