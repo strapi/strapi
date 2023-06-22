@@ -112,86 +112,6 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
 
 ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
 
-const SelectedEntriesTableContent = () => {
-  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
-
-  // Select all entries by default
-  React.useEffect(() => {
-    setSelectedEntries(rows.map((row) => row.id));
-  }, [setSelectedEntries, rows]);
-
-  return (
-    <>
-      <Typography>
-        <Typography>{selectedEntries.length}</Typography> selected entries
-      </Typography>
-      <Box marginTop={5}>
-        <Table.Content>
-          <Table.Head>
-            <Table.HeaderCheckboxCell />
-            <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
-            <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
-          </Table.Head>
-          <Tbody>
-            {rows.map((entry, index) => (
-              <Tr>
-                <Body.CheckboxDataCell rowId={entry.id} index={index} />
-                <Td>
-                  <Typography>{entry.id}</Typography>
-                </Td>
-                <Td>
-                  <Typography>{entry.name}</Typography>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table.Content>
-      </Box>
-    </>
-  );
-};
-
-const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
-  const { rows, selectedEntries } = useTableContext();
-
-  const entries = rows.filter((row) => {
-    return selectedEntries.includes(row.id);
-  });
-
-  if (!isOpen) {
-    return null;
-  }
-
-  return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          Publish entries
-        </Typography>
-      </ModalHeader>
-      <ModalBody>
-        <Table.Root rows={entries} colCount={4}>
-          <SelectedEntriesTableContent />
-        </Table.Root>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={onToggle} variant="tertiary">
-            Cancel
-          </Button>
-        }
-        endActions={<Button onClick={() => onConfirm(selectedEntries)}>Publish</Button>}
-      />
-    </ModalLayout>
-  );
-};
-
-SelectedEntriesModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-};
-
 const ConfirmDialogUnpublishAll = ({
   isOpen,
   onToggleDialog,
@@ -272,6 +192,86 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
+const SelectedEntriesTableContent = () => {
+  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
+
+  // Select all entries by default
+  React.useEffect(() => {
+    setSelectedEntries(rows.map((row) => row.id));
+  }, [setSelectedEntries, rows]);
+
+  return (
+    <>
+      <Typography>
+        <Typography>{selectedEntries.length}</Typography> selected entries
+      </Typography>
+      <Box marginTop={5}>
+        <Table.Content>
+          <Table.Head>
+            <Table.HeaderCheckboxCell />
+            <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+            <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+          </Table.Head>
+          <Tbody>
+            {rows.map((entry, index) => (
+              <Tr key={entry.id}>
+                <Body.CheckboxDataCell rowId={entry.id} index={index} />
+                <Td>
+                  <Typography>{entry.id}</Typography>
+                </Td>
+                <Td>
+                  <Typography>{entry.name}</Typography>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table.Content>
+      </Box>
+    </>
+  );
+};
+
+const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
+  const { rows, selectedEntries } = useTableContext();
+
+  const entries = rows.filter((row) => {
+    return selectedEntries.includes(row.id);
+  });
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <ModalLayout onClose={onToggle} labelledBy="title">
+      <ModalHeader>
+        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+          Publish entries
+        </Typography>
+      </ModalHeader>
+      <ModalBody>
+        <Table.Root rows={entries} colCount={4}>
+          <SelectedEntriesTableContent />
+        </Table.Root>
+      </ModalBody>
+      <ModalFooter
+        startActions={
+          <Button onClick={onToggle} variant="tertiary">
+            Cancel
+          </Button>
+        }
+        endActions={<Button onClick={onConfirm}>Publish</Button>}
+      />
+    </ModalLayout>
+  );
+};
+
+SelectedEntriesModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+};
+
 const BulkActionButtons = ({
   showPublish,
   showDelete,
@@ -322,10 +322,10 @@ const BulkActionButtons = ({
     }
   };
 
-  const handleBulkAction = async (confirmAction, toggleDialog, entries = selectedEntries) => {
+  const handleBulkAction = async (confirmAction, toggleDialog) => {
     try {
       setIsConfirmButtonLoading(true);
-      await confirmAction(entries);
+      await confirmAction(selectedEntries);
       setIsConfirmButtonLoading(false);
       toggleDialog();
       setSelectedEntries([]);
@@ -337,8 +337,7 @@ const BulkActionButtons = ({
 
   const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteDialog);
   const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishDialog);
-  const handleBulkPublish = (entries) =>
-    handleBulkAction(onConfirmPublishAll, togglePublishDialog, entries);
+  const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishDialog);
 
   return (
     <>
