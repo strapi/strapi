@@ -11,6 +11,8 @@ const SORTABLE_RELATIONS = ['oneToOne', 'manyToOne'];
 const NON_LISTABLES = ['json', 'password', 'richtext', 'dynamiczone'];
 const LISTABLE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
 
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
+
 // hidden fields are fields that are configured to be hidden from list, and edit views
 const isHidden = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
@@ -140,7 +142,7 @@ const hasEditableAttribute = (schema, name) => {
   }
 
   // We ignore creator attributes because we don't want to show them on edit view
-  if (name === 'createdBy' || name === 'updatedBy') {
+  if (CREATOR_ATTRIBUTES.includes(name)) {
     return false;
   }
 
