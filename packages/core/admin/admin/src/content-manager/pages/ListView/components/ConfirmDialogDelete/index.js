@@ -5,9 +5,14 @@ import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import InjectionZoneList from '../../InjectionZoneList';
+import InjectionZoneList from '../../../../components/InjectionZoneList';
 
-const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, onConfirm }) => {
+export const ConfirmDialogDelete = ({
+  isConfirmButtonLoading,
+  isOpen,
+  onToggleDialog,
+  onConfirm,
+}) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -70,5 +75,3 @@ ConfirmDialogDelete.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   onToggleDialog: PropTypes.func.isRequired,
 };
-
-export default ConfirmDialogDelete;
