@@ -225,7 +225,8 @@ const SelectedEntriesTableContent = () => {
   // Get main field from list view layout
   const listViewSelector = React.useMemo(makeSelectListView, []);
   const layout = useSelector(listViewSelector);
-  const { mainField = 'id' } = layout.contentType.settings;
+  const { mainField } = layout.contentType.settings;
+  const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
   // Select all entries by default
   React.useEffect(() => {
@@ -252,7 +253,7 @@ const SelectedEntriesTableContent = () => {
           <Table.Head>
             <Table.HeaderCheckboxCell />
             <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
-            {mainField !== 'id' && (
+            {shouldDisplayMainField && (
               <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
             )}
           </Table.Head>
@@ -263,7 +264,7 @@ const SelectedEntriesTableContent = () => {
                 <Td>
                   <Typography>{entry.id}</Typography>
                 </Td>
-                {mainField !== 'id' && (
+                {shouldDisplayMainField && (
                   <Td>
                     <Typography>{entry[mainField]}</Typography>
                   </Td>
