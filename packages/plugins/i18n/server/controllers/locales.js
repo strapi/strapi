@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('@strapi/utils');
-const strapi = require('@strapi/strapi');
+const { strapi } = require('@strapi/strapi');
 const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');

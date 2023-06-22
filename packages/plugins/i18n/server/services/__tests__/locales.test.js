@@ -1,5 +1,15 @@
 'use strict';
 
+// Import the `strapi` package
+const { strapi } = require('@strapi/strapi');
+
+// Mock the `strapi` package
+jest.mock('@strapi/strapi', () => ({
+  strapi: {
+    query: jest.fn(),
+  },
+}));
+
 const localesService = require('../locales')();
 
 const fakeMetricsService = {
@@ -63,17 +73,19 @@ describe('Locales', () => {
   });
 
   describe('CRUD', () => {
-    test('find', async () => {
-      const locales = [{ name: 'French', code: 'fr' }];
-      const findMany = jest.fn(() => Promise.resolve(locales));
-      const query = jest.fn(() => ({ findMany }));
-      global.strapi = { query };
-      const params = { name: { $contains: 'en' } };
+    describe('Locales', () => {
+      test('find', async () => {
+        const locales = [{ name: 'French', code: 'fr' }];
+        const findMany = jest.fn(() => Promise.resolve(locales));
+        strapi.query.mockReturnValueOnce({ findMany });
 
-      const localesFound = await localesService.find(params);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
-      expect(findMany).toHaveBeenCalledWith({ where: params });
-      expect(localesFound).toMatchObject(locales);
+        const params = { name: { $contains: 'en' } };
+        const localesFound = await localesService.find(params);
+
+        expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
+        expect(findMany).toHaveBeenCalledWith({ where: params });
+        expect(localesFound).toMatchObject(locales);
+      });
     });
 
     test('findById', async () => {

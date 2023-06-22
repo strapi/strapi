@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { pick, pipe, has, prop, isNil, cloneDeep, isArray, difference } = require('lodash/fp');
-const strapi = require('@strapi/strapi');
+const { strapi } = require('@strapi/strapi');
 const { isRelationalAttribute, getVisibleAttributes, isTypedAttribute, getScalarAttributes } =
   require('@strapi/utils').contentTypes;
 const { ApplicationError } = require('@strapi/utils').errors;

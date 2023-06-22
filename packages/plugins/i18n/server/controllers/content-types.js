@@ -1,7 +1,7 @@
 'use strict';
 
 const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
-const strapi = require('@strapi/strapi');
+const { strapi } = require('@strapi/strapi');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');

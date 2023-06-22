@@ -1,7 +1,7 @@
 'use strict';
 
 const { prop, isNil, isEmpty, isArray } = require('lodash/fp');
-const strapi = require('@strapi/strapi');
+const { strapi } = require('@strapi/strapi');
 const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 

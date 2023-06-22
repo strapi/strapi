@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
-const strapi = require('@strapi/strapi');
+const { strapi } = require('@strapi/strapi');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 
