@@ -1,7 +1,9 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { SettingsPageTitle } from '@strapi/helper-plugin';
+
 import { HeaderLayout } from '@strapi/design-system';
+import { SettingsPageTitle } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+
 import getTrad from '../../../utils/getTrad';
 
 const EmailHeader = () => {

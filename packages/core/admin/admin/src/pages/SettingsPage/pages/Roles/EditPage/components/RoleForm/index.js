@@ -1,13 +1,14 @@
 import React from 'react';
+
 import {
   Box,
+  Button,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  Typography,
   Textarea,
   TextInput,
-  Button,
+  Typography,
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

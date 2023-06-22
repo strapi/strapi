@@ -1,8 +1,11 @@
 import React from 'react';
+
+import { Box, Flex, Grid, JSONInput, Loader, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Loader, Grid, Box, Flex, Typography, JSONInput } from '@strapi/design-system';
+
 import { getDefaultMessage } from '../utils/getActionTypesDefaultMessages';
+
 import ActionItem from './ActionItem';
 
 const ActionBody = ({ status, data, formattedDate }) => {

@@ -1,4 +1,4 @@
-import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import type { Common } from '@strapi/strapi';
 
 import { get, last } from 'lodash/fp';
 import { Writable } from 'stream';
@@ -10,7 +10,11 @@ import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
   strapi: Strapi.Strapi;
-  updateMappingTable<T extends SchemaUID | string>(type: T, oldID: number, newID: number): void;
+  updateMappingTable<TSchemaUID extends Common.UID.Schema>(
+    type: TSchemaUID,
+    oldID: number,
+    newID: number
+  ): void;
   transaction?: Transaction;
 }
 
@@ -31,7 +35,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
          * Resolve the component UID of an entity's attribute based
          * on a given path (components & dynamic zones only)
          */
-        const resolveType = (paths: string[]): string | undefined => {
+        const resolveType = (paths: string[]): Common.UID.Component | undefined => {
           let cType = contentType;
           let value: unknown = data;
 

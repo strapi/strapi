@@ -1,19 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
-import {
-  CheckPagePermissions,
-  ConfirmDialog,
-  Link,
-  LinkButton,
-  onRowClick,
-  pxToRem,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
+
 import {
   Flex,
   IconButton,
@@ -28,13 +14,25 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  Link,
+  LinkButton,
+  onRowClick,
+  pxToRem,
+  useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
-import adminPermissions from '../../../../../../../../admin/src/permissions';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
-
 import * as Layout from '../../components/Layout';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
   align-items: center;
@@ -128,7 +126,7 @@ export function ReviewWorkflowsListView() {
   };
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+    <>
       <Layout.Header
         primaryAction={
           <LinkButton startIcon={<Plus />} size="S" to="/settings/review-workflows/create">
@@ -286,6 +284,6 @@ export function ReviewWorkflowsListView() {
           onConfirm={handleConfirmDeleteDialog}
         />
       </Layout.Root>
-    </CheckPagePermissions>
+    </>
   );
 }

@@ -1,30 +1,23 @@
 import * as React from 'react';
+
+import { Button, Flex, Loader } from '@strapi/design-system';
+import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { useIntl } from 'react-intl';
-import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import {
-  CheckPagePermissions,
-  useAPIErrorHandler,
-  useFetchClient,
-  useNotification,
-} from '@strapi/helper-plugin';
-import { Button, Flex, Loader } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
-
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
-import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { Stages } from '../../components/Stages';
-import { reducer, initialState } from '../../reducer';
-import { REDUX_NAMESPACE } from '../../constants';
-import { resetWorkflow } from '../../actions';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../../../admin/src/permissions';
-
+import { resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
+import { Stages } from '../../components/Stages';
+import { WorkflowAttributes } from '../../components/WorkflowAttributes';
+import { REDUX_NAMESPACE } from '../../constants';
+import { reducer, initialState } from '../../reducer';
+import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 
 export function ReviewWorkflowsCreateView() {
   const { formatMessage } = useIntl();
@@ -96,7 +89,7 @@ export function ReviewWorkflowsCreateView() {
   }, [dispatch]);
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+    <>
       <Layout.DragLayerRendered />
 
       <FormikProvider value={formik}>
@@ -148,6 +141,6 @@ export function ReviewWorkflowsCreateView() {
           </Layout.Root>
         </Form>
       </FormikProvider>
-    </CheckPagePermissions>
+    </>
   );
 }

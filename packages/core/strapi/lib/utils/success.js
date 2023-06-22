@@ -17,13 +17,17 @@ try {
     process.env.npm_config_global === 'true' ||
     JSON.parse(process.env.npm_config_argv).original.includes('global')
   ) {
+    const event = 'didInstallStrapi';
     fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
-        event: 'didInstallStrapi',
+        event,
         deviceId: machineID(),
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Strapi-Event': event,
+      },
     }).catch(() => {});
   }
 } catch (e) {

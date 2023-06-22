@@ -1,39 +1,43 @@
 import React, { useRef, useState } from 'react';
-import { format } from 'date-fns';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Textarea,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   Form,
+  Link,
   LoadingIndicatorPage,
   SettingsPageTitle,
   useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  Link,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Grid,
-  GridItem,
-  Main,
-  Flex,
-  Typography,
-  TextInput,
-  Textarea,
-} from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
+import { format } from 'date-fns';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
-import Permissions from '../EditPage/components/Permissions';
+
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
+import Permissions from '../EditPage/components/Permissions';
+
 import schema from './utils/schema';
 
 const UsersRoleNumber = styled.div`
@@ -58,7 +62,6 @@ const CreatePage = () => {
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
-
   const { post, put } = useFetchClient();
 
   const handleCreateRoleSubmit = (data) => {
@@ -254,8 +257,10 @@ const CreatePage = () => {
 };
 
 export default function () {
+  const permissions = useSelector(selectAdminPermissions);
+
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
+    <CheckPagePermissions permissions={permissions.settings.roles.create}>
       <CreatePage />
     </CheckPagePermissions>
   );

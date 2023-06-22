@@ -194,5 +194,12 @@
   "table.button.no-fields": "Add new field",
   "table.content.create-first-content-type": "Create your first Collection-Type",
   "table.content.no-fields.collection-type": "Add your first field to this Collection-Type",
-  "table.content.no-fields.component": "Add your first field to this component"
+  "table.content.no-fields.component": "Add your first field to this component",
+  "IconPicker.search.placeholder.label": "Search for an icon",
+  "IconPicker.search.clear.label": "Clear the icon search",
+  "IconPicker.search.button.label": "Search icon button",
+  "IconPicker.remove.tooltip": "Remove the selected icon",
+  "IconPicker.remove.button": "Remove the selected icon button",
+  "IconPicker.emptyState.label": "No icon found",
+  "IconPicker.icon.label": "Select {icon} icon" 
 }

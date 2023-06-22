@@ -1,4 +1,5 @@
 import produce from 'immer';
+
 import {
   GET_DATA,
   GET_DATA_SUCCEEDED,

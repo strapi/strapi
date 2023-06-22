@@ -1,8 +1,8 @@
-import { stringify } from 'qs';
-import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getRequestUrl } from '../utils';

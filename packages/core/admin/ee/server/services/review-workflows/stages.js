@@ -149,6 +149,7 @@ module.exports = ({ strapi }) => {
      * @param {string} contentTypeUID
      * @param {number | undefined | null} fromStageId
      * @param {number} toStageId
+     * @param {import('knex').Knex.Transaction} trx
      * @returns
      */
     async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId }) {

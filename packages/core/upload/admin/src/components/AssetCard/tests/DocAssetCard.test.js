@@ -1,8 +1,10 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { DocAssetCard } from '../DocAssetCard';
+
 import en from '../../../translations/en.json';
+import { DocAssetCard } from '../DocAssetCard';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
@@ -29,6 +31,39 @@ describe('DocAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c17 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c25 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c26 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c34 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         border-radius: 4px;
@@ -91,27 +126,6 @@ describe('DocAssetCard', () => {
         padding-right: 8px;
         padding-left: 8px;
         min-width: 20px;
-      }
-
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c34 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
       }
 
       .c3 {
@@ -298,18 +312,6 @@ describe('DocAssetCard', () => {
 
       .c9:indeterminate:disabled:after {
         background-color: #8e8ea9;
-      }
-
-      .c17 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c7 > * {

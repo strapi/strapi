@@ -1,7 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+
+import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 import { INITIAL_STATE_DATA } from '../constants';
 import FormModalNavigationProvider from '../index';
-import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 
 const removeFunctionsFromObject = (state) => {
   const stringified = JSON.stringify(state);

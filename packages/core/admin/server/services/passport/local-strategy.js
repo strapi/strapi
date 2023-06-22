@@ -3,7 +3,7 @@
 const { toLower } = require('lodash/fp');
 const { Strategy: LocalStrategy } = require('passport-local');
 
-const createLocalStrategy = (strapi) => {
+const createLocalStrategy = (strapi, middleware) => {
   return new LocalStrategy(
     {
       usernameField: 'email',
@@ -13,7 +13,13 @@ const createLocalStrategy = (strapi) => {
     (email, password, done) => {
       return strapi.admin.services.auth
         .checkCredentials({ email: toLower(email), password })
-        .then(([error, user, message]) => done(error, user, message))
+        .then(async ([error, user, message]) => {
+          if (middleware) {
+            return middleware([error, user, message], done);
+          }
+
+          return done(error, user, message);
+        })
         .catch((error) => done(error));
     }
   );

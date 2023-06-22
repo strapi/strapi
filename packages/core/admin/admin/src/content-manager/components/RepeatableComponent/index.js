@@ -1,21 +1,20 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useMemo, useState } from 'react';
+
+import { Box, Flex, TextButton, VisuallyHidden } from '@strapi/design-system';
+import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import get from 'lodash/get';
 
-import { useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Box, Flex, TextButton, VisuallyHidden } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
-
-import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
-
+import { getMaxTempKey, getTrad } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
-import Component from './components/Component';
-import * as Accordion from './components/Accordion';
 
+import * as Accordion from './components/Accordion';
+import Component from './components/Component';
 import getComponentErrorKeys from './utils/getComponentErrorKeys';
 
 const TextButtonCustom = styled(TextButton)`

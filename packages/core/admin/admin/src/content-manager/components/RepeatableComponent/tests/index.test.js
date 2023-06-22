@@ -1,16 +1,16 @@
 import * as React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-
-import { layoutData } from './fixtures';
+import { IntlProvider } from 'react-intl';
 
 import RepeatableComponent from '../index';
+
+import { layoutData } from './fixtures';
 
 jest.mock('../../FieldComponent', () => () => "I'm a field component");
 jest.mock('../../Inputs', () => () => "I'm inputs");
