@@ -10,7 +10,7 @@ import { AdminUsersFilter } from './AdminUsersFilter';
 import Filters from './Filters';
 import useAllowedAttributes from './hooks/useAllowedAttributes';
 
-const AUTHOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 
 const AttributeFilter = ({ contentType, slug, metadatas }) => {
   const { formatMessage } = useIntl();
@@ -22,7 +22,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
       const [key, value] = Object.entries(filter)[0];
       const id = value.id?.$eq || value.id?.$ne;
 
-      if (AUTHOR_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+      if (CREATOR_ATTRIBUTES.includes(key) && !acc.includes(id)) {
         acc.push(id);
       }
 
