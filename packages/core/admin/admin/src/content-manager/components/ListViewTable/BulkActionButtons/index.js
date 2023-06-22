@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { listViewDomain } from '../../../pages/ListView/selectors';
+import makeSelectListView, { listViewDomain } from '../../../pages/ListView/selectors';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
 import { Body } from '../Body';
@@ -218,9 +218,14 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = ({ mainField }) => {
+const SelectedEntriesTableContent = () => {
   const { formatMessage } = useIntl();
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
+
+  // Get main field from list view layout
+  const listViewSelector = React.useMemo(makeSelectListView, []);
+  const layout = useSelector(listViewSelector);
+  const { mainField = 'id' } = layout.contentType.settings;
 
   // Select all entries by default
   React.useEffect(() => {
@@ -272,15 +277,11 @@ const SelectedEntriesTableContent = ({ mainField }) => {
   );
 };
 
-SelectedEntriesTableContent.propTypes = {
-  mainField: PropTypes.string.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm, mainField }) => {
+const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
@@ -305,7 +306,7 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm, mainField }) => {
       </ModalHeader>
       <ModalBody>
         <Table.Root rows={entries} colCount={4}>
-          <SelectedEntriesTableContent mainField={mainField} />
+          <SelectedEntriesTableContent />
         </Table.Root>
       </ModalBody>
       <ModalFooter
@@ -331,7 +332,6 @@ SelectedEntriesModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  mainField: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -344,7 +344,6 @@ const BulkActionButtons = ({
   onConfirmDeleteAll,
   onConfirmPublishAll,
   onConfirmUnpublishAll,
-  mainField,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -417,7 +416,6 @@ const BulkActionButtons = ({
             isOpen={isSelectedEntriesModalOpen}
             onToggle={() => setIsSelectedEntriesModalOpen((prev) => !prev)}
             onConfirm={togglePublishDialog}
-            mainField={mainField}
           />
           <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
@@ -463,7 +461,6 @@ BulkActionButtons.defaultProps = {
   onConfirmDeleteAll() {},
   onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
-  mainField: 'id',
 };
 
 BulkActionButtons.propTypes = {
@@ -472,7 +469,6 @@ BulkActionButtons.propTypes = {
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
-  mainField: PropTypes.string,
 };
 
 export default BulkActionButtons;
