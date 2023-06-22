@@ -44,6 +44,9 @@ describe('Entity service decorator', () => {
           stages: [{ id: 1 }],
         }),
       }),
+      entityService: {
+        findOne: jest.fn(),
+      },
     };
   });
 
