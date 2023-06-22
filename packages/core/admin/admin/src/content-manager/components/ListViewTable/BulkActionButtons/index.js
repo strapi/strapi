@@ -222,8 +222,6 @@ const SelectedEntriesTableContent = ({ mainField }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
 
-  console.log(rows);
-
   // Select all entries by default
   React.useEffect(() => {
     setSelectedEntries(rows.map((row) => row.id));
