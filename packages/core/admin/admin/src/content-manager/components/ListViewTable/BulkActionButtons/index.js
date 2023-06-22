@@ -218,9 +218,11 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = () => {
+const SelectedEntriesTableContent = ({ mainField }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
+
+  console.log(rows);
 
   // Select all entries by default
   React.useEffect(() => {
@@ -233,7 +235,8 @@ const SelectedEntriesTableContent = () => {
         {formatMessage(
           {
             id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
-            defaultMessage: 'test',
+            defaultMessage:
+              '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
           },
           {
             count: selectedEntries.length,
@@ -246,7 +249,9 @@ const SelectedEntriesTableContent = () => {
           <Table.Head>
             <Table.HeaderCheckboxCell />
             <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
-            <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+            {mainField !== 'id' && (
+              <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+            )}
           </Table.Head>
           <Tbody>
             {rows.map((entry, index) => (
@@ -255,9 +260,11 @@ const SelectedEntriesTableContent = () => {
                 <Td>
                   <Typography>{entry.id}</Typography>
                 </Td>
-                <Td>
-                  <Typography>{entry.name}</Typography>
-                </Td>
+                {mainField !== 'id' && (
+                  <Td>
+                    <Typography>{entry[mainField]}</Typography>
+                  </Td>
+                )}
               </Tr>
             ))}
           </Tbody>
@@ -267,11 +274,15 @@ const SelectedEntriesTableContent = () => {
   );
 };
 
+SelectedEntriesTableContent.propTypes = {
+  mainField: PropTypes.string.isRequired,
+};
+
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
+const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm, mainField }) => {
   const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
@@ -296,7 +307,7 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
       </ModalHeader>
       <ModalBody>
         <Table.Root rows={entries} colCount={4}>
-          <SelectedEntriesTableContent />
+          <SelectedEntriesTableContent mainField={mainField} />
         </Table.Root>
       </ModalBody>
       <ModalFooter
@@ -322,6 +333,7 @@ SelectedEntriesModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
+  mainField: PropTypes.string.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -334,6 +346,7 @@ const BulkActionButtons = ({
   onConfirmDeleteAll,
   onConfirmPublishAll,
   onConfirmUnpublishAll,
+  mainField,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -406,6 +419,7 @@ const BulkActionButtons = ({
             isOpen={isSelectedEntriesModalOpen}
             onToggle={() => setIsSelectedEntriesModalOpen((prev) => !prev)}
             onConfirm={togglePublishDialog}
+            mainField={mainField}
           />
           <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
@@ -451,6 +465,7 @@ BulkActionButtons.defaultProps = {
   onConfirmDeleteAll() {},
   onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
+  mainField: 'id',
 };
 
 BulkActionButtons.propTypes = {
@@ -459,6 +474,7 @@ BulkActionButtons.propTypes = {
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
+  mainField: PropTypes.string,
 };
 
 export default BulkActionButtons;

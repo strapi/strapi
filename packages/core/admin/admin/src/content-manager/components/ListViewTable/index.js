@@ -95,6 +95,8 @@ const ListViewTable = ({
   // Add 1 column for the checkbox and 1 for the actions
   const colCount = tableHeaders.length + 2;
 
+  const { mainField } = layout.contentType.settings;
+
   return (
     <Table.Root rows={rows} isLoading={isLoading} colCount={colCount}>
       <Table.ActionBar>
@@ -104,6 +106,7 @@ const ListViewTable = ({
           onConfirmDeleteAll={onConfirmDeleteAll}
           onConfirmPublishAll={onConfirmPublishAll}
           onConfirmUnpublishAll={onConfirmUnpublishAll}
+          mainField={mainField}
         />
       </Table.ActionBar>
       <Table.Content>
