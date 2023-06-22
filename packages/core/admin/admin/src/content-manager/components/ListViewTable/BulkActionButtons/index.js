@@ -27,6 +27,10 @@ import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
 import { Body } from '../Body';
 
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmBulkActionDialog
+ * -----------------------------------------------------------------------------------------------*/
+
 const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
   const { formatMessage } = useIntl();
 
@@ -75,6 +79,10 @@ const confirmDialogsPropTypes = {
   onToggleDialog: PropTypes.func.isRequired,
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogPublishAll
+ * -----------------------------------------------------------------------------------------------*/
+
 const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
   const { formatMessage } = useIntl();
 
@@ -111,6 +119,10 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
 };
 
 ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
+
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogUnpublishAll
+ * -----------------------------------------------------------------------------------------------*/
 
 const ConfirmDialogUnpublishAll = ({
   isOpen,
@@ -154,6 +166,10 @@ const ConfirmDialogUnpublishAll = ({
 
 ConfirmDialogUnpublishAll.propTypes = confirmDialogsPropTypes;
 
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogDeleteAll
+ * -----------------------------------------------------------------------------------------------*/
+
 const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
   const { formatMessage } = useIntl();
 
@@ -192,7 +208,15 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
+/* -------------------------------------------------------------------------------------------------
+ * BoldChunk
+ * -----------------------------------------------------------------------------------------------*/
+
 const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography>;
+
+/* -------------------------------------------------------------------------------------------------
+ * SelectedEntriesTableContent
+ * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesTableContent = () => {
   const { formatMessage } = useIntl();
@@ -243,10 +267,15 @@ const SelectedEntriesTableContent = () => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * SelectedEntriesModal
+ * -----------------------------------------------------------------------------------------------*/
+
 const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
+  // Get the selected entries full data, and keep the list view order
   const entries = rows.filter((row) => {
     return selectedEntries.includes(row.id);
   });
@@ -281,7 +310,6 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
         }
         endActions={
           <Button onClick={onConfirm}>
-            {' '}
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
         }
@@ -295,6 +323,10 @@ SelectedEntriesModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * BulkActionButtons
+ * -----------------------------------------------------------------------------------------------*/
 
 const BulkActionButtons = ({
   showPublish,
