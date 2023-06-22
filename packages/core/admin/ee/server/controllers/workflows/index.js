@@ -1,11 +1,28 @@
 'use strict';
 
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../utils');
 
 const {
   validateWorkflowCreate,
   validateWorkflowUpdate,
 } = require('../../validation/review-workflows');
+const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
+
+/**
+ *
+ * @param { Strapi } strapi - Strapi instance
+ * @param userAbility
+ * @return { (Workflow) => SanitizedWorkflow }
+ */
+function sanitizeWorkflow({ strapi }, userAbility) {
+  const permissionChecker = strapi
+    .plugin('content-manager')
+    .service('permission-checker')
+    .create({ userAbility, model: WORKFLOW_MODEL_UID });
+
+  return (entity) => permissionChecker.sanitizeOutput(entity);
+}
 
 module.exports = {
   /**
@@ -15,14 +32,15 @@ module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
     const { populate } = ctx.query;
+    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
     const workflowService = getService('workflows');
-    const data = await workflowService.create({ data: workflowBody, populate });
+    const createdWorkflow = await workflowService.create({ data: workflowBody, populate });
 
     ctx.body = {
-      data,
+      data: await sanitizer(createdWorkflow),
     };
   },
 
@@ -35,6 +53,7 @@ module.exports = {
     const { body } = ctx.request;
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
+    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
 
     const workflowBody = await validateWorkflowUpdate(body.data);
 
@@ -43,10 +62,13 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const data = await workflowService.update(workflow, { data: workflowBody, populate });
+    const updatedWorkflow = await workflowService.update(workflow, {
+      data: workflowBody,
+      populate,
+    });
 
     ctx.body = {
-      data,
+      data: await sanitizer(updatedWorkflow),
     };
   },
 
@@ -58,16 +80,17 @@ module.exports = {
     const { id } = ctx.params;
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
+    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
 
     const workflow = await workflowService.findById(id, { populate: ['stages'] });
     if (!workflow) {
       return ctx.notFound("Workflow doesn't exist");
     }
 
-    const data = await workflowService.delete(workflow, { populate });
+    const deletedWorkflow = await workflowService.delete(workflow, { populate });
 
     ctx.body = {
-      data,
+      data: await sanitizer(deletedWorkflow),
     };
   },
 
@@ -78,14 +101,16 @@ module.exports = {
   async find(ctx) {
     const { populate, filters, sort } = ctx.query;
     const workflowService = getService('workflows');
-    const data = await workflowService.find({
+    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+
+    const workflows = await workflowService.find({
       populate,
       filters,
       sort,
     });
 
     ctx.body = {
-      data,
+      data: await mapAsync(workflows, sanitizer),
     };
   },
   /**
@@ -95,12 +120,13 @@ module.exports = {
   async findById(ctx) {
     const { id } = ctx.params;
     const { populate } = ctx.query;
+    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
 
     const workflowService = getService('workflows');
-    const data = await workflowService.findById(id, { populate });
+    const workflow = await workflowService.findById(id, { populate });
 
     ctx.body = {
-      data,
+      data: await sanitizer(workflow),
     };
   },
 };
