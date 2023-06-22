@@ -36,7 +36,7 @@ const FormModalNavigationProvider = ({ children }) => {
         modalType: 'attribute',
         step,
         attributeType,
-        showBackLink: true
+        showBackLink: true,
       };
     });
   };
@@ -65,7 +65,7 @@ const FormModalNavigationProvider = ({ children }) => {
         targetUid,
         modalType: 'chooseAttribute',
         isOpen: true,
-        showBackLink: false
+        showBackLink: false,
       };
     });
   };
