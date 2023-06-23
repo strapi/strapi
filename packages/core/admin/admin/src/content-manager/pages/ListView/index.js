@@ -47,6 +47,7 @@ import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
+import BulkActionsBar from '../../components/DynamicTable/BulkActionsBar';
 import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
@@ -550,6 +551,18 @@ function ListView({
               onOpenDeleteAllModalTrackedEvent="willBulkDeleteEntries"
               withBulkActions
               withMainAction={canDelete && isBulkable}
+              renderBulkActionsBar={({ selectedEntries, clearSelectedEntries }) => (
+                <BulkActionsBar
+                  showPublish={canPublish && hasDraftAndPublish}
+                  showDelete={canDelete}
+                  onConfirmDeleteAll={handleConfirmDeleteAllData}
+                  onConfirmPublishAll={handleConfirmPublishAllData}
+                  onConfirmUnpublishAll={handleConfirmUnpublishAllData}
+                  selectedEntries={selectedEntries}
+                  clearSelectedEntries={clearSelectedEntries}
+                />
+              )}
+              bulkAction
             >
               <TableRows
                 canCreate={canCreate}
