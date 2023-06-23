@@ -1,34 +1,34 @@
 import React, { useEffect, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
+
+import { HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
-  AnErrorOccurred,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, Main } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
-import permissions from '../../../permissions';
-import getTrad from '../../utils/getTrad';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+
 import { DragLayer } from '../../../components/DragLayer';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import ModelsContext from '../../contexts/ModelsContext';
+import getTrad from '../../utils/getTrad';
+import ItemTypes from '../../utils/ItemTypes';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
-import LeftMenu from './LeftMenu';
-import useContentManagerInitData from './useContentManagerInitData';
-
-import ItemTypes from '../../utils/ItemTypes';
 
 import { CardDragPreview } from './components/CardDragPreview';
 import { ComponentDragPreview } from './components/ComponentDragPreview';
 import { RelationDragPreview } from './components/RelationDragPreview';
-
-const cmPermissions = permissions.contentManager;
+import LeftMenu from './LeftMenu';
+import useContentManagerInitData from './useContentManagerInitData';
 
 function renderDraglayerItem({ type, item }) {
   if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
@@ -72,6 +72,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
+  const permissions = useSelector(selectAdminPermissions);
 
   useEffect(() => {
     if (startSectionRef.current) {
@@ -126,7 +127,7 @@ const App = () => {
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
           <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
               <ComponentSettingsView />
             </CheckPagePermissions>
           </Route>

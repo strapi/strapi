@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+
 import { parse, stringify } from 'qs';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const useQueryParams = (initialParams) => {
   const { search } = useLocation();

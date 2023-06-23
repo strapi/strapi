@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { Box } from '@strapi/design-system';
+import styled from 'styled-components';
 
 export const IconBox = styled(Box)`
   background: transparent;

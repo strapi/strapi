@@ -1,55 +1,13 @@
 'use strict';
 
-const _ = require('lodash/fp');
+const { isArray, castArray, keys, isPlainObject } = require('lodash/fp');
 
+const { isOperatorOfType } = require('@strapi/utils');
 const types = require('../../types');
 const { createField } = require('../../fields');
 const { createJoin } = require('./join');
 const { toColumnName } = require('./transform');
 const { isKnexQuery } = require('../../utils/knex');
-
-const GROUP_OPERATORS = ['$and', '$or'];
-const OPERATORS = [
-  '$not',
-  '$in',
-  '$notIn',
-  '$eq',
-  '$eqi',
-  '$ne',
-  '$gt',
-  '$gte',
-  '$lt',
-  '$lte',
-  '$null',
-  '$notNull',
-  '$between',
-  '$startsWith',
-  '$endsWith',
-  '$startsWithi',
-  '$endsWithi',
-  '$contains',
-  '$notContains',
-  '$containsi',
-  '$notContainsi',
-  '$jsonSupersetOf',
-];
-
-const CAST_OPERATORS = [
-  '$not',
-  '$in',
-  '$notIn',
-  '$eq',
-  '$ne',
-  '$gt',
-  '$gte',
-  '$lt',
-  '$lte',
-  '$between',
-];
-
-const ARRAY_OPERATORS = ['$in', '$notIn', '$between'];
-
-const isOperator = (key) => OPERATORS.includes(key);
 
 const castValue = (value, attribute) => {
   if (!attribute) {
@@ -66,12 +24,12 @@ const castValue = (value, attribute) => {
 };
 
 const processAttributeWhere = (attribute, where, operator = '$eq') => {
-  if (_.isArray(where)) {
+  if (isArray(where)) {
     return where.map((sub) => processAttributeWhere(attribute, sub, operator));
   }
 
-  if (!_.isPlainObject(where)) {
-    if (CAST_OPERATORS.includes(operator)) {
+  if (!isPlainObject(where)) {
+    if (isOperatorOfType('cast', operator)) {
       return castValue(where, attribute);
     }
 
@@ -83,7 +41,7 @@ const processAttributeWhere = (attribute, where, operator = '$eq') => {
   for (const key of Object.keys(where)) {
     const value = where[key];
 
-    if (!isOperator(key)) {
+    if (!isOperatorOfType('where', key)) {
       throw new Error(`Undefined attribute level operator ${key}`);
     }
 
@@ -101,16 +59,16 @@ const processAttributeWhere = (attribute, where, operator = '$eq') => {
  * @returns {Object}
  */
 const processWhere = (where, ctx) => {
-  if (!_.isArray(where) && !_.isPlainObject(where)) {
+  if (!isArray(where) && !isPlainObject(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (_.isArray(where)) {
+  if (isArray(where)) {
     return where.map((sub) => processWhere(sub, ctx));
   }
 
   const processNested = (where, ctx) => {
-    if (!_.isPlainObject(where)) {
+    if (!isPlainObject(where)) {
       return where;
     }
 
@@ -127,7 +85,7 @@ const processWhere = (where, ctx) => {
     const value = where[key];
 
     // if operator $and $or then loop over them
-    if (GROUP_OPERATORS.includes(key)) {
+    if (isOperatorOfType('group', key)) {
       filters[key] = value.map((sub) => processNested(sub, ctx));
       continue;
     }
@@ -137,7 +95,7 @@ const processWhere = (where, ctx) => {
       continue;
     }
 
-    if (isOperator(key)) {
+    if (isOperatorOfType('where', key)) {
       throw new Error(
         `Only $and, $or and $not can only be used as root level operators. Found ${key}.`
       );
@@ -166,7 +124,7 @@ const processWhere = (where, ctx) => {
         uid: attribute.target,
       });
 
-      if (!_.isPlainObject(nestedWhere) || isOperator(_.keys(nestedWhere)[0])) {
+      if (!isPlainObject(nestedWhere) || isOperatorOfType('where', keys(nestedWhere)[0])) {
         nestedWhere = { [qb.aliasColumn('id', subAlias)]: nestedWhere };
       }
 
@@ -193,7 +151,7 @@ const processWhere = (where, ctx) => {
 
 // TODO: add type casting per operator at some point
 const applyOperator = (qb, column, operator, value) => {
-  if (Array.isArray(value) && !ARRAY_OPERATORS.includes(operator)) {
+  if (Array.isArray(value) && !isOperatorOfType('array', operator)) {
     return qb.where((subQB) => {
       value.forEach((subValue) =>
         subQB.orWhere((innerQB) => {
@@ -210,12 +168,12 @@ const applyOperator = (qb, column, operator, value) => {
     }
 
     case '$in': {
-      qb.whereIn(column, isKnexQuery(value) ? value : _.castArray(value));
+      qb.whereIn(column, isKnexQuery(value) ? value : castArray(value));
       break;
     }
 
     case '$notIn': {
-      qb.whereNotIn(column, isKnexQuery(value) ? value : _.castArray(value));
+      qb.whereNotIn(column, isKnexQuery(value) ? value : castArray(value));
       break;
     }
 
@@ -336,7 +294,7 @@ const applyOperator = (qb, column, operator, value) => {
 };
 
 const applyWhereToColumn = (qb, column, columnWhere) => {
-  if (!_.isPlainObject(columnWhere)) {
+  if (!isPlainObject(columnWhere)) {
     if (Array.isArray(columnWhere)) {
       return qb.whereIn(column, columnWhere);
     }
@@ -352,11 +310,11 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
 };
 
 const applyWhere = (qb, where) => {
-  if (!_.isArray(where) && !_.isPlainObject(where)) {
+  if (!isArray(where) && !isPlainObject(where)) {
     throw new Error('Where must be an array or an object');
   }
 
-  if (_.isArray(where)) {
+  if (isArray(where)) {
     return qb.where((subQB) => where.forEach((subWhere) => applyWhere(subQB, subWhere)));
   }
 

@@ -1,9 +1,12 @@
 import { useEffect, useReducer } from 'react';
+
 import { useFetchClient, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
+
 import { checkFormValidity, formatAPIErrors } from '../../utils';
-import { initialState, reducer } from './reducer';
+
 import init from './init';
+import { initialState, reducer } from './reducer';
 
 /**
  * TODO: refactor this, it's confusing and hard to read.
@@ -87,11 +90,13 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         dispatch({
           type: 'ON_SUBMIT',
         });
-
         const cleanedData = omit(modifiedData, ['confirmPassword', 'registrationToken']);
 
         if (cleanedData.roles) {
           cleanedData.roles = cleanedData.roles.map((role) => role.id);
+        }
+        if (cleanedData.ssoLockedRoles) {
+          cleanedData.ssoLockedRoles = [...new Set(cleanedData.ssoLockedRoles)];
         }
 
         const {

@@ -1,21 +1,23 @@
 import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import {
   Button,
+  ModalBody,
   ModalFooter,
   ModalHeader,
   ModalLayout,
-  ModalBody,
-  Breadcrumbs,
-  Crumb,
   Typography,
 } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import produce from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import { usePermissionsDataManager } from '../../../../../../../hooks';
+
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 
@@ -79,8 +81,8 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
     <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
       <ModalHeader>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
-          {headerBreadCrumbs.map((label) => (
-            <Crumb key={label}>
+          {headerBreadCrumbs.map((label, index, arr) => (
+            <Crumb isCurrent={index === arr.length - 1} key={label}>
               {upperFirst(
                 formatMessage({
                   id: label,

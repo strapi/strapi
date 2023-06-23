@@ -1,10 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useRBAC } from '@strapi/helper-plugin';
-import server from './server';
+
 import { ProvidersPage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -33,15 +34,9 @@ const App = (
 );
 
 describe('Admin | containers | ProvidersPage', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => server.resetHandlers());
-
-  afterAll(() => server.close());
 
   it('renders and matches the snapshot', () => {
     useRBAC.mockImplementation(() => ({
@@ -54,6 +49,25 @@ describe('Admin | containers | ProvidersPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c11 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c8 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c1 {
         padding-bottom: 56px;
       }
@@ -68,13 +82,6 @@ describe('Admin | containers | ProvidersPage', () => {
 
       .c6 {
         min-width: 0;
-      }
-
-      .c8 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
       }
 
       .c5 {
@@ -125,18 +132,6 @@ describe('Admin | containers | ProvidersPage', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c11 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
       }
 
       .c12 {

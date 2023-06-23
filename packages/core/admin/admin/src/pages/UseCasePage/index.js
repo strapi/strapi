@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
+
+import {
+  Box,
+  Button,
+  Flex,
+  Main,
+  Option,
+  Select,
+  TextButton,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
+import { auth, pxToRem, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { parse } from 'qs';
-import { pxToRem, useFetchClient, useNotification, auth } from '@strapi/helper-plugin';
-import {
-  Main,
-  Flex,
-  Box,
-  Typography,
-  Select,
-  Option,
-  TextInput,
-  TextButton,
-  Button,
-} from '@strapi/design-system';
+
 import Logo from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 

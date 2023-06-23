@@ -1,10 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { Typography, Box, Button, Flex } from '@strapi/design-system';
+
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ArrowRight } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 const WordWrap = styled(Typography)`
   word-break: break-word;

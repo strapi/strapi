@@ -16,7 +16,15 @@ const getVisibleContentTypesUID = pipe([
 
 const hasStageAttribute = has(['attributes', ENTITY_STAGE_ATTRIBUTE]);
 
+const getWorkflowContentTypeFilter = ({ strapi }, contentType) => {
+  if (strapi.db.dialect.supportsOperator('$jsonSupersetOf')) {
+    return { $jsonSupersetOf: JSON.stringify([contentType]) };
+  }
+  return { $contains: `"${contentType}"` };
+};
+
 module.exports = {
   getVisibleContentTypesUID,
   hasStageAttribute,
+  getWorkflowContentTypeFilter,
 };
