@@ -68,6 +68,7 @@ describe('Content Type Builder - Components', () => {
           component: {
             category: 'default',
             displayName: 'Some Component',
+            icon: 'calendar',
             pluginOptions: {
               pluginName: {
                 option: true,
@@ -107,6 +108,7 @@ describe('Content Type Builder - Components', () => {
         body: {
           component: {
             category: 'default',
+            icon: 'calendar',
             displayName: 'someComponent',
             attributes: {},
           },
@@ -172,6 +174,7 @@ describe('Content Type Builder - Components', () => {
           category: 'default',
           schema: {
             displayName: 'Some Component',
+            icon: 'calendar',
             description: '',
             collectionName: 'components_default_some_components',
             pluginOptions: {
@@ -254,6 +257,7 @@ describe('Content Type Builder - Components', () => {
         body: {
           component: {
             category: 'default',
+            icon: 'calendar',
             displayName: 'New Component',
             attributes: {
               name: {

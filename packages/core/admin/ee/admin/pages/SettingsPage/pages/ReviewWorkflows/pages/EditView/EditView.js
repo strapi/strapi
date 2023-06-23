@@ -1,33 +1,30 @@
 import * as React from 'react';
-import { useFormik, Form, FormikProvider } from 'formik';
-import { useIntl } from 'react-intl';
-import { useSelector, useDispatch } from 'react-redux';
-import { useMutation } from 'react-query';
-import { useParams } from 'react-router-dom';
 
+import { Button, Flex, Loader } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   ConfirmDialog,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Button, Flex, Loader } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
+import { useFormik, Form, FormikProvider } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
-import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { Stages } from '../../components/Stages';
-import { reducer, initialState } from '../../reducer';
-import { REDUX_NAMESPACE } from '../../constants';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { setWorkflow } from '../../actions';
-import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../../../admin/src/permissions';
-
 import * as Layout from '../../components/Layout';
+import { Stages } from '../../components/Stages';
+import { WorkflowAttributes } from '../../components/WorkflowAttributes';
+import { REDUX_NAMESPACE } from '../../constants';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
+import { reducer, initialState } from '../../reducer';
+import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 
 export function ReviewWorkflowsEditView() {
   const { trackUsage } = useTracking();
@@ -132,7 +129,7 @@ export function ReviewWorkflowsEditView() {
   // TODO redirect back to list-view if workflow is not found?
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+    <>
       <Layout.DragLayerRendered />
 
       <FormikProvider value={formik}>
@@ -194,6 +191,6 @@ export function ReviewWorkflowsEditView() {
         onToggleDialog={toggleConfirmDeleteDialog}
         onConfirm={handleConfirmDeleteDialog}
       />
-    </CheckPagePermissions>
+    </>
   );
 }

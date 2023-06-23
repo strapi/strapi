@@ -119,6 +119,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         stages: [defaultStage.id, secondStage.id],
       },
     });
+    defaultStage = await strapi.query(STAGE_MODEL_UID).update({
+      where: { id: defaultStage.id },
+      data: { name: 'Stage' },
+    });
+    secondStage = await strapi.query(STAGE_MODEL_UID).update({
+      where: { id: secondStage.id },
+      data: { name: 'Stage 2' },
+    });
     await updateContentType(productUID, {
       components: [],
       contentType: model,
@@ -474,10 +482,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         // Update workflow to unassign content type
-        await requests.admin.put(
+        const workflow = await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
           { body: { data: { contentTypes: [productUID] } } }
         );
+
+        console.log(workflow);
       });
 
       test('Should update the accordingly on an entity', async () => {

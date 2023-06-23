@@ -1,14 +1,15 @@
 /* eslint-disable react/prop-types */
 
 import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import { ArrowLeft } from '@strapi/icons';
-import { Link, SettingsPageTitle } from '@strapi/helper-plugin';
 
+import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
+import { Link, SettingsPageTitle } from '@strapi/helper-plugin';
+import { ArrowLeft } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+
+import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 import { DRAG_DROP_TYPES } from '../../constants';
 import { StageDragPreview } from '../StageDragPreview';
-import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 
 function renderDragLayerItem({ type, item }) {
   switch (type) {

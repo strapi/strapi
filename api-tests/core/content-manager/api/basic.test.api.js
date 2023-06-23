@@ -126,6 +126,55 @@ describe('CM API - Basic', () => {
     data.products.shift();
   });
 
+  test('Clone product', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+      hiddenAttribute: 'Secret value',
+    };
+    const { body: createdProduct } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::product.product',
+      body: product,
+    });
+
+    const res = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      body: {},
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
+  });
+
+  test('Clone and update product', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+      hiddenAttribute: 'Secret value',
+    };
+    const { body: createdProduct } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::product.product',
+      body: product,
+    });
+
+    const res = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::product.product/clone/${createdProduct.id}`,
+      body: {
+        name: 'Product 1 updated',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      name: 'Product 1 updated',
+      description: 'Product description',
+    });
+  });
+
   describe('validators', () => {
     test('Cannot create a product - minLength', async () => {
       const product = {

@@ -1,17 +1,17 @@
 import React from 'react';
-import { act, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { FormikProvider, useFormik } from 'formik';
-import { Provider } from 'react-redux';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { FormikProvider, useFormik } from 'formik';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
-import { WorkflowAttributes } from '../WorkflowAttributes';
 import { reducer } from '../../../reducer';
+import { WorkflowAttributes } from '../WorkflowAttributes';
 
 const CONTENT_TYPES_FIXTURE = {
   collectionTypes: [

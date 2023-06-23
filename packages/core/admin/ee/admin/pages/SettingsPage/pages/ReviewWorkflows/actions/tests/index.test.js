@@ -1,5 +1,4 @@
-import { setWorkflow, deleteStage, updateStage, addStage } from '..';
-
+import { addStage, deleteStage, setWorkflow, updateStage } from '..';
 import {
   ACTION_SET_WORKFLOW,
   ACTION_DELETE_STAGE,

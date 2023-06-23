@@ -1,5 +1,7 @@
 import React from 'react';
+
 import PropTypes from 'prop-types';
+
 import { PermissionsDataManagerContext } from '../../../../../../../contexts';
 
 const PermissionsDataManagerProvider = ({ children, value }) => {

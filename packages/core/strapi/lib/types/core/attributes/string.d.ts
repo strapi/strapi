@@ -1,30 +1,20 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxLengthOption,
-  PrivateOption,
-  RequiredOption,
-  UniqueOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export interface StringAttributeProperties {
+export interface StringProperties {
   regex?: RegExp;
 }
 
-export type StringAttribute = Attribute<'string'> &
+export type String = Attribute.OfType<'string'> &
   // Properties
-  StringAttributeProperties &
+  StringProperties &
   // Options
-  ConfigurableOption &
-  DefaultOption<StringValue> &
-  MinMaxLengthOption &
-  PrivateOption &
-  UniqueOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<StringValue> &
+  Attribute.MinMaxLengthOption &
+  Attribute.PrivateOption &
+  Attribute.UniqueOption &
+  Attribute.RequiredOption;
 
 export type StringValue = string;
 
-export type GetStringAttributeValue<T extends Attribute> = T extends StringAttribute
-  ? StringValue
-  : never;
+export type GetStringValue<T extends Attribute.Attribute> = T extends String ? StringValue : never;

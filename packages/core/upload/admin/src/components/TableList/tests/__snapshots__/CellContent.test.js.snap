@@ -1,12 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TableList | CellContent should render "-" by default when no recognized cell type is passed 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -17,6 +11,12 @@ exports[`TableList | CellContent should render "-" by default when no recognized
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -52,12 +52,6 @@ exports[`TableList | CellContent should render "-" by default when no recognized
 `;
 
 exports[`TableList | CellContent should render date cell type 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -68,6 +62,12 @@ exports[`TableList | CellContent should render date cell type 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -102,12 +102,6 @@ exports[`TableList | CellContent should render date cell type 1`] = `
 `;
 
 exports[`TableList | CellContent should render extension cell type when element type is asset 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -118,6 +112,12 @@ exports[`TableList | CellContent should render extension cell type when element 
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -152,12 +152,6 @@ exports[`TableList | CellContent should render extension cell type when element 
 `;
 
 exports[`TableList | CellContent should render extension cell type with "-" when element type is folder 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -168,6 +162,12 @@ exports[`TableList | CellContent should render extension cell type with "-" when
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -203,11 +203,16 @@ exports[`TableList | CellContent should render extension cell type with "-" when
 `;
 
 exports[`TableList | CellContent should render image cell type when element type is asset and mime does not include image 1`] = `
-.c0 {
-  background: #eaf5ff;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+.c4 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c3 {
@@ -216,6 +221,13 @@ exports[`TableList | CellContent should render image cell type when element type
   font-weight: 600;
   color: #0c75af;
   text-transform: uppercase;
+}
+
+.c0 {
+  background: #eaf5ff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
 }
 
 .c1 {
@@ -238,18 +250,6 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c2 span {
   line-height: 0;
-}
-
-.c4 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 <div>
@@ -288,6 +288,18 @@ exports[`TableList | CellContent should render image cell type when element type
 `;
 
 exports[`TableList | CellContent should render image cell type when element type is asset and mime includes image 1`] = `
+.c2 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c0 {
   position: relative;
   width: 32px;
@@ -299,18 +311,6 @@ exports[`TableList | CellContent should render image cell type when element type
   object-fit: cover;
   display: block;
   position: relative;
-}
-
-.c2 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 <div>
@@ -353,6 +353,26 @@ exports[`TableList | CellContent should render image cell type when element type
 `;
 
 exports[`TableList | CellContent should render image cell type when element type is folder 1`] = `
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #0c75af;
+  text-transform: uppercase;
+}
+
 .c0 {
   background: #eaf5ff;
   border-radius: 50%;
@@ -364,14 +384,6 @@ exports[`TableList | CellContent should render image cell type when element type
   color: #66b7f1;
   width: 1rem;
   height: 1rem;
-}
-
-.c3 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #0c75af;
-  text-transform: uppercase;
 }
 
 .c1 {
@@ -398,18 +410,6 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c2 span {
   line-height: 0;
-}
-
-.c6 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 <div>
@@ -460,12 +460,6 @@ exports[`TableList | CellContent should render image cell type when element type
 `;
 
 exports[`TableList | CellContent should render size cell type when element type is asset 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -476,6 +470,12 @@ exports[`TableList | CellContent should render size cell type when element type 
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -510,12 +510,6 @@ exports[`TableList | CellContent should render size cell type when element type 
 `;
 
 exports[`TableList | CellContent should render size cell type with "-" when element type is folder 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -526,6 +520,12 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>
@@ -561,12 +561,6 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
 `;
 
 exports[`TableList | CellContent should render text cell type 1`] = `
-.c0 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
 .c1 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -577,6 +571,12 @@ exports[`TableList | CellContent should render text cell type 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
+}
+
+.c0 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
 }
 
 <div>

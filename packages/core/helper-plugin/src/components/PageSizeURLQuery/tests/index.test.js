@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import PageSizeURLQuery from '../index';
 
 jest.mock('../../../features/Tracking', () => ({
@@ -41,27 +43,6 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        background: #ffffff;
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        cursor: default;
-      }
-
-      .c8 {
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c14 {
-        padding-left: 8px;
-      }
-
       .c3 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -83,6 +64,27 @@ describe('<PageSizeURLQuery />', () => {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
+      }
+
+      .c5 {
+        background: #ffffff;
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        cursor: default;
+      }
+
+      .c8 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c14 {
+        padding-left: 8px;
       }
 
       .c0 {

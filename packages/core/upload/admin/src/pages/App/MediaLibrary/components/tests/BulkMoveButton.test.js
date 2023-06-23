@@ -1,13 +1,14 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { render, fireEvent, waitFor, act, screen } from '@testing-library/react';
-import { within } from '@testing-library/dom';
-import { MemoryRouter } from 'react-router-dom';
-import { IntlProvider } from 'react-intl';
 
-import { BulkMoveButton } from '../BulkMoveButton';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { within } from '@testing-library/dom';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
+
 import { useBulkMove } from '../../../../../hooks/useBulkMove';
+import { BulkMoveButton } from '../BulkMoveButton';
 
 jest.mock('../../../../../hooks/useBulkMove');
 jest.mock('../../../../../hooks/useFolderStructure');

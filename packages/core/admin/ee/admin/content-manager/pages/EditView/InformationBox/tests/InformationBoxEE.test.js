@@ -1,14 +1,16 @@
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import { InformationBoxEE } from '../InformationBoxEE';
 import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
+import { InformationBoxEE } from '../InformationBoxEE';
 
 const STAGE_ATTRIBUTE_NAME = 'strapi_stage';
 const STAGE_FIXTURE = {
@@ -59,25 +61,26 @@ const queryClient = new QueryClient({
   },
 });
 
-const ComponentFixture = (props) => {
-  const store = createStore((state = {}) => state, {});
+const ComponentFixture = (props) => <InformationBoxEE {...props} />;
 
-  return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en" defaultLocale="en">
-          <ThemeProvider theme={lightTheme}>
-            <InformationBoxEE {...props} />
-          </ThemeProvider>
-        </IntlProvider>
-      </QueryClientProvider>
-    </Provider>
-  );
-};
+const setup = (props) => ({
+  ...render(<ComponentFixture {...props} />, {
+    wrapper({ children }) {
+      const store = createStore((state = {}) => state, {});
 
-const setup = (props) => {
-  return render(<ComponentFixture {...props} />);
-};
+      return (
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="en" defaultLocale="en">
+              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+            </IntlProvider>
+          </QueryClientProvider>
+        </Provider>
+      );
+    },
+  }),
+  user: userEvent.setup(),
+});
 
 describe('EE | Content Manager | EditView | InformationBox', () => {
   it('renders the title and body of the Information component', () => {
@@ -146,7 +149,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(select).toBeInTheDocument();
   });
 
-  it('renders a select input, if a workflow stage is assigned to the entity', () => {
+  it('renders a select input, if a workflow stage is assigned to the entity', async () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,
@@ -155,13 +158,12 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
     });
 
-    const { queryByRole, getByText } = setup();
-    const select = queryByRole('combobox');
+    const { getByRole, getByText, user } = setup();
 
-    expect(select).toBeInTheDocument();
+    expect(getByRole('combobox')).toBeInTheDocument();
     expect(getByText('Stage 1')).toBeInTheDocument();
 
-    fireEvent.mouseDown(select);
+    await user.click(getByRole('combobox'));
 
     expect(getByText('Stage 2')).toBeInTheDocument();
   });

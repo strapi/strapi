@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+
 import { Box } from '@strapi/design-system';
+import PropTypes from 'prop-types';
+
 import PermissionRow from './Row';
 
 const PluginsAndSettingsPermissions = ({ isFormDisabled, kind, layout }) => {

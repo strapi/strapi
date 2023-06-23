@@ -1,6 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapshot 1`] = `
+.c33 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c11 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c28 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c0 {
   padding-top: 24px;
   padding-right: 40px;
@@ -60,41 +107,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   padding-right: 20px;
   padding-bottom: 16px;
   padding-left: 20px;
-}
-
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c11 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c28 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
 }
 
 .c2 {
@@ -246,18 +258,6 @@ exports[`ApplicationInfosPage | PendingLogoDialog should render and match snapsh
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c33 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c10 {

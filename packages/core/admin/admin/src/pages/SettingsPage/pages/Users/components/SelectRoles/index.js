@@ -1,11 +1,12 @@
 import React from 'react';
+
+import { Option, Select } from '@strapi/design-system';
+import { getFetchClient } from '@strapi/helper-plugin';
+import { Loader as LoadingIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system';
 import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
-import { Loader as LoadingIcon } from '@strapi/icons';
-import { getFetchClient } from '@strapi/helper-plugin';
 
 const rotation = keyframes`
   from {

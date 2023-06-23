@@ -1,11 +1,10 @@
 import type { PassThrough } from 'stream';
 import type { ITransferResults, TransferTransforms, TransferProgress } from './utils';
 import type { ISourceProvider, IDestinationProvider } from './providers';
-import type { DiagnosticReporter } from '../src/engine/diagnostic';
+import type { IDiagnosticReporter } from '../src/engine/diagnostic';
+import type { Diff } from '../src/utils/json';
 
 export type TransferFilterPreset = 'content' | 'files' | 'config';
-
-type SchemaMap = Record<string, Schema>;
 
 // Error resolving handler middleware for the transfer engine
 export type NextMiddleware<T> = (context: T) => void | Promise<void>;
@@ -42,7 +41,7 @@ export interface ITransferEngine<
    * A diagnostic reporter instance used to gather information about
    * errors, warnings and information emitted by the engine
    */
-  diagnostics: DiagnosticReporter;
+  diagnostics: IDiagnosticReporter;
   /**
    * Utilities used to retrieve transfer progress data
    */

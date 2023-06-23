@@ -1,6 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders 1`] = `
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c10 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c0 {
   background: #f6f6f9;
   padding-top: 24px;
@@ -30,27 +63,6 @@ exports[`Header renders 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
-}
-
-.c6 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c10 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
 }
 
 .c7 {
@@ -147,18 +159,6 @@ exports[`Header renders 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c14 {

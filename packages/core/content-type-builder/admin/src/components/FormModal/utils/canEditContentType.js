@@ -1,4 +1,5 @@
 import get from 'lodash/get';
+
 import getRelationType from '../../../utils/getRelationType';
 
 const canEditContentType = (data, modifiedData) => {

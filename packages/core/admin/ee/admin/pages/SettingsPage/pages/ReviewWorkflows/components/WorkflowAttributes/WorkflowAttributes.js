@@ -1,9 +1,10 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
+
+import { Grid, GridItem, MultiSelectNested, TextInput } from '@strapi/design-system';
 import { useField } from 'formik';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { Grid, GridItem, MultiSelectNested, TextInput } from '@strapi/design-system';
 
 import { updateWorkflow } from '../../actions';
 

@@ -1,20 +1,26 @@
 import React from 'react';
+
 import { CheckPagePermissions } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import adminPermissions from '../../permissions';
+import { useSelector } from 'react-redux';
+
+import { selectAdminPermissions } from '../App/selectors';
+
 import Plugins from './Plugins';
 
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
-  const title = formatMessage({
-    id: 'global.plugins',
-    defaultMessage: 'Plugins',
-  });
+  const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-      <Helmet title={title} />
+    <CheckPagePermissions permissions={permissions.marketplace.main}>
+      <Helmet
+        title={formatMessage({
+          id: 'global.plugins',
+          defaultMessage: 'Plugins',
+        })}
+      />
       <Plugins />
     </CheckPagePermissions>
   );
