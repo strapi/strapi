@@ -218,8 +218,7 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = () => {
-  const { formatMessage } = useIntl();
+const SelectedEntriesTableContent = ({ notifySelectionChange }) => {
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
 
   // Get main field from list view layout
@@ -233,49 +232,41 @@ const SelectedEntriesTableContent = () => {
     setSelectedEntries(rows.map((row) => row.id));
   }, [setSelectedEntries, rows]);
 
+  // Notify parent component when selection changes
+  React.useEffect(() => {
+    notifySelectionChange(selectedEntries);
+  }, [selectedEntries, notifySelectionChange]);
+
   return (
-    <>
-      <Typography>
-        {formatMessage(
-          {
-            id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
-            defaultMessage:
-              '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
-          },
-          {
-            count: selectedEntries.length,
-            b: BoldChunk,
-          }
+    <Table.Content>
+      <Table.Head>
+        <Table.HeaderCheckboxCell />
+        <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+        {shouldDisplayMainField && (
+          <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
-      </Typography>
-      <Box marginTop={5}>
-        <Table.Content>
-          <Table.Head>
-            <Table.HeaderCheckboxCell />
-            <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+      </Table.Head>
+      <Tbody>
+        {rows.map((entry, index) => (
+          <Tr key={entry.id}>
+            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+            <Td>
+              <Typography>{entry.id}</Typography>
+            </Td>
             {shouldDisplayMainField && (
-              <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+              <Td>
+                <Typography>{entry[mainField]}</Typography>
+              </Td>
             )}
-          </Table.Head>
-          <Tbody>
-            {rows.map((entry, index) => (
-              <Tr key={entry.id}>
-                <Body.CheckboxDataCell rowId={entry.id} index={index} />
-                <Td>
-                  <Typography>{entry.id}</Typography>
-                </Td>
-                {shouldDisplayMainField && (
-                  <Td>
-                    <Typography>{entry[mainField]}</Typography>
-                  </Td>
-                )}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table.Content>
-      </Box>
-    </>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table.Content>
   );
+};
+
+SelectedEntriesTableContent.propTypes = {
+  notifySelectionChange: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -286,10 +277,17 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
+  // Only used to mirror the state of the nested table component
+  // setEntriesToPublish should not be called directly
+  const [entriesToPublish, setEntriesToPublish] = React.useState([]);
+
   // Get the selected entries full data, and keep the list view order
-  const entries = rows.filter((row) => {
-    return selectedEntries.includes(row.id);
-  });
+  // Memoize to prevent infinite useEffect runs in SelectedEntriesTableContent
+  const entries = React.useMemo(() => {
+    return rows.filter((row) => {
+      return selectedEntries.includes(row.id);
+    });
+  }, [rows, selectedEntries]);
 
   if (!isOpen) {
     return null;
@@ -306,8 +304,23 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
         </Typography>
       </ModalHeader>
       <ModalBody>
+        <Typography>
+          {formatMessage(
+            {
+              id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
+              defaultMessage:
+                '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
+            },
+            {
+              count: entriesToPublish.length,
+              b: BoldChunk,
+            }
+          )}
+        </Typography>
         <Table.Root rows={entries} colCount={4}>
-          <SelectedEntriesTableContent />
+          <Box marginTop={5}>
+            <SelectedEntriesTableContent notifySelectionChange={setEntriesToPublish} />
+          </Box>
         </Table.Root>
       </ModalBody>
       <ModalFooter
@@ -320,7 +333,7 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
           </Button>
         }
         endActions={
-          <Button onClick={onConfirm}>
+          <Button onClick={onConfirm} disabled={entriesToPublish.length === 0}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
         }
