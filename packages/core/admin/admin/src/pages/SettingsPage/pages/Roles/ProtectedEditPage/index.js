@@ -9,13 +9,20 @@ import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
   const permissions = useSelector(selectAdminPermissions);
+
+  // TODO: this is necessary because otherwise we run into an
+  // infinite rendering loop
+  const permissionsMemoized = React.useMemo(() => {
+    return {
+      read: permissions.settings.roles.read,
+      update: permissions.settings.roles.update,
+    };
+  }, [permissions.settings.roles.read, permissions.settings.roles.update]);
+
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },
-  } = useRBAC({
-    read: permissions.settings.roles.read,
-    update: permissions.settings.roles.update,
-  });
+  } = useRBAC(permissionsMemoized);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
