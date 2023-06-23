@@ -1,8 +1,6 @@
 import { eq, remove, cloneDeep } from 'lodash/fp';
 
-export interface Handler {
-  (...args: any[]): any;
-}
+export type Handler = (...args: any[]) => any;
 
 /**
  * Create a default Strapi hook

@@ -3,6 +3,10 @@ import { curry, curryN } from 'lodash/fp';
 
 type AnyFunc = (...args: any) => any;
 
+/*
+ NOTE: This type is here to enforce piped functions have the right input/output types
+ For a list of functions it will return a new list of function but will answer the return type of the previous is the arg type of the next function
+*/
 type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends [
   (arg: any) => infer B
 ]
@@ -18,8 +22,8 @@ export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
 ) {
   type Args = Parameters<FirstFn>;
   type ReturnT = F extends [...AnyFunc[], (...arg: any) => infer R]
-    ? R extends Promise<infer R>
-      ? R
+    ? R extends Promise<infer InnerType>
+      ? InnerType
       : R
     : never;
 

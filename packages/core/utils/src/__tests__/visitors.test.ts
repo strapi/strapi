@@ -1,6 +1,5 @@
 import * as visitors from '../sanitize/visitors';
 import * as contentTypeUtils from '../content-types';
-import type { Model } from '../types';
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
 

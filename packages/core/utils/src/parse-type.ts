@@ -7,7 +7,7 @@ const isDate = (v: unknown): v is Date => {
   return dates.isDate(v);
 };
 
-const parseTime = (value: string | Date): string => {
+const parseTime = (value: unknown): string => {
   if (isDate(value)) {
     return dates.format(value, 'HH:mm:ss.SSS');
   }
@@ -27,9 +27,13 @@ const parseTime = (value: string | Date): string => {
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
 
-const parseDate = (value: string | Date) => {
+const parseDate = (value: unknown) => {
   if (isDate(value)) {
     return dates.format(value, 'yyyy-MM-dd');
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(`Expected a string, got a ${typeof value}`);
   }
 
   try {
@@ -43,9 +47,13 @@ const parseDate = (value: string | Date) => {
   }
 };
 
-const parseDateTimeOrTimestamp = (value: string | Date) => {
+const parseDateTimeOrTimestamp = (value: unknown) => {
   if (isDate(value)) {
     return value;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(`Expected a string, got a ${typeof value}`);
   }
 
   try {
@@ -73,56 +81,63 @@ type TypeMap = {
   datetime: Date;
 };
 
-export interface ParseTypeOptions {
-  type: keyof TypeMap;
-  value: any;
+export interface ParseTypeOptions<T extends keyof TypeMap> {
+  type: T;
+  value: unknown;
   forceCast?: boolean;
 }
+
+const parseBoolean = (value: unknown, options: { forceCast?: boolean }): boolean => {
+  const { forceCast = false } = options;
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    if (['true', 't', '1', 1].includes(value)) {
+      return true;
+    }
+
+    if (['false', 'f', '0', 0].includes(value)) {
+      return false;
+    }
+  }
+
+  if (forceCast) {
+    return Boolean(value);
+  }
+
+  throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
+};
 
 /**
  * Cast basic values based on attribute type
  */
-const parseType = (options: ParseTypeOptions) => {
-  const { type, value, forceCast = false } = options;
+const parseType = <Type extends keyof TypeMap>(options: ParseTypeOptions<Type>): TypeMap[Type] => {
+  const { type, value, forceCast } = options;
 
   switch (type) {
-    case 'boolean': {
-      if (typeof value === 'boolean') {
-        return value;
-      }
-
-      if (['true', 't', '1', 1].includes(value)) {
-        return true;
-      }
-
-      if (['false', 'f', '0', 0].includes(value)) {
-        return false;
-      }
-
-      if (forceCast) {
-        return Boolean(value);
-      }
-
-      throw new Error('Invalid boolean input. Expected "t","1","true","false","0","f"');
-    }
+    case 'boolean':
+      return parseBoolean(value, { forceCast }) as TypeMap[Type];
     case 'integer':
     case 'biginteger':
     case 'float':
     case 'decimal': {
-      return _.toNumber(value);
+      return _.toNumber(value) as TypeMap[Type];
     }
     case 'time': {
-      return parseTime(value);
+      return parseTime(value) as TypeMap[Type];
     }
     case 'date': {
-      return parseDate(value);
+      return parseDate(value) as TypeMap[Type];
     }
     case 'timestamp':
     case 'datetime': {
-      return parseDateTimeOrTimestamp(value);
+      return parseDateTimeOrTimestamp(value) as TypeMap[Type];
     }
     default:
-      return value;
+      return value as TypeMap[Type];
   }
 };
 

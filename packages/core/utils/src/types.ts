@@ -1,5 +1,5 @@
-import * as Koa from 'koa';
-import 'koa-body';
+import type * as Koa from 'koa';
+import type {} from 'koa-body';
 
 export interface Config {
   get<T = unknown>(key: string, defaultVal?: T): T;

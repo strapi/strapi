@@ -27,9 +27,12 @@ export interface VisitorOptions {
   path: Path;
 }
 
-export interface Traverse {
-  (visitor: Visitor, options: TraverseOptions, data: unknown): Promise<unknown>;
-}
+export type Traverse = (
+  visitor: Visitor,
+  options: TraverseOptions,
+  data: unknown
+) => Promise<unknown>;
+
 export interface Visitor {
   (visitorOptions: VisitorOptions, opts: Pick<TransformUtils, 'set' | 'remove'>): void;
 }

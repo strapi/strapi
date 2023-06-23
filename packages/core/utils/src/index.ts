@@ -42,7 +42,7 @@ import * as traverse from './traverse';
 import webhook from './webhook';
 import { isOperator, isOperatorOfType } from './operators';
 
-export {
+export = {
   yup,
   handleYupError,
   policy,
@@ -89,57 +89,6 @@ export {
   file,
   traverse,
   webhook,
-  isOperator, isOperatorOfType
+  isOperator,
+  isOperatorOfType,
 };
-
-const utils = {
-  yup,
-  handleYupError,
-  policy,
-  templateConfiguration,
-  parseMultipartData,
-  sanitize,
-  traverseEntity,
-  parseType,
-  nameToSlug,
-  toRegressedEnumValue,
-  startsWithANumber,
-  joinBy,
-  nameToCollectionName,
-  getCommonBeginning,
-  getConfigUrls,
-  escapeQuery,
-  removeUndefined,
-  keysDeep,
-  getAbsoluteAdminUrl,
-  getAbsoluteServerUrl,
-  generateTimestampCode,
-  stringIncludes,
-  stringEquals,
-  template,
-  isKebabCase,
-  isCamelCase,
-  toKebabCase,
-  contentTypes,
-  env,
-  relations,
-  setCreatorFields,
-  hooks,
-  providerFactory,
-  pagination,
-  pipeAsync,
-  mapAsync,
-  reduceAsync,
-  forEachAsync,
-  errors,
-  validateYupSchema,
-  validateYupSchemaSync,
-  convertQueryParams,
-  importDefault,
-  file,
-  traverse,
-  webhook,
-  isOperator, isOperatorOfType
-};
-
-export default utils;

@@ -94,7 +94,7 @@ const getOptions = (model: Model) =>
 const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
 
-const isDraft = (data: object, model: Model) =>
+const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;

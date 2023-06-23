@@ -12,8 +12,8 @@ interface User {
   id: string | number;
 }
 
-export default ({ user, isEdition = false }: Options) =>
-  (data: object) => {
+export default <T extends object>({ user, isEdition = false }: Options) =>
+  (data: T) => {
     if (isEdition) {
       return assoc(UPDATED_BY_ATTRIBUTE, user.id, data);
     }

@@ -1,5 +1,5 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
-import { Attribute, Model } from './types';
+import type { Attribute, Model } from './types';
 import { isRelationalAttribute, isMediaAttribute, isComponentAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
@@ -13,9 +13,7 @@ export interface VisitorOptions {
   path: Path;
 }
 
-export interface Visitor {
-  (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils): void;
-}
+export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
 
 export interface Data {
   [key: string]: Data | Data[];

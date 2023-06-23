@@ -1,4 +1,4 @@
-import { Attribute, Model } from './types';
+import type { Attribute, Model } from './types';
 
 import { isRelationalAttribute } from './content-types';
 

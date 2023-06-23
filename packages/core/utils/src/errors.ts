@@ -8,16 +8,16 @@ import { formatYupErrors } from './format-yup-error';
 class ApplicationError extends Error {
   details: unknown;
 
-  constructor(message: string, details: unknown = {}) {
+  constructor(message = 'An application error occured', details: unknown = {}) {
     super();
     this.name = 'ApplicationError';
-    this.message = message || 'An application error occured';
+    this.message = message;
     this.details = details;
   }
 }
 
 class ValidationError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Validation error', details?: unknown) {
     super(message, details);
     this.name = 'ValidationError';
   }
@@ -33,68 +33,68 @@ class YupValidationError extends ValidationError {
 }
 
 class PaginationError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Invalid pagination', details?: unknown) {
     super(message, details);
     this.name = 'PaginationError';
-    this.message = message || 'Invalid pagination';
+    this.message = message;
   }
 }
 
 class NotFoundError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Entity not found', details?: unknown) {
     super(message, details);
     this.name = 'NotFoundError';
-    this.message = message || 'Entity not found';
+    this.message = message;
   }
 }
 
 class ForbiddenError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Forbidden access', details?: unknown) {
     super(message, details);
     this.name = 'ForbiddenError';
-    this.message = message || 'Forbidden access';
+    this.message = message;
   }
 }
 
 class UnauthorizedError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Unauthorized', details?: unknown) {
     super(message, details);
     this.name = 'UnauthorizedError';
-    this.message = message || 'Unauthorized';
+    this.message = message;
   }
 }
 
 class RateLimitError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Too many requests, please try again later.', details?: unknown) {
     super(message, details);
     this.name = 'RateLimitError';
-    this.message = message || 'Too many requests, please try again later.';
+    this.message = message;
     this.details = details || {};
   }
 }
 
 class PayloadTooLargeError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Entity too large', details?: unknown) {
     super(message, details);
     this.name = 'PayloadTooLargeError';
-    this.message = message || 'Entity too large';
+    this.message = message;
   }
 }
 
 class PolicyError extends ForbiddenError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'Policy Failed', details?: unknown) {
     super(message, details);
     this.name = 'PolicyError';
-    this.message = message || 'Policy Failed';
+    this.message = message;
     this.details = details || {};
   }
 }
 
 class NotImplementedError extends ApplicationError {
-  constructor(message: string, details?: unknown) {
+  constructor(message = 'This feature is not implemented yet', details?: unknown) {
     super(message, details);
     this.name = 'NotImplementedError';
-    this.message = message || 'This feature is not implemented yet';
+    this.message = message;
   }
 }
 
