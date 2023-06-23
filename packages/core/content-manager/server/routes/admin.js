@@ -370,5 +370,20 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/collection-types/:model/:ids/actions/multipleEntriesNumberOfDraftRelations',
+      handler: 'collection-types.getMultipleEntriesNumberOfDraftRelations',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
   ],
 };

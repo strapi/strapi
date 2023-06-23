@@ -12,6 +12,8 @@ interface EntityManager {
   deleteMany(): any;
   publish(): any;
   unpublish(): any;
+  getNumberOfDraftRelations(id: string, uid: string): number;
+  getMultipleEntriesNumberOfDraftRelations(ids: number[], uid: string): number;
 }
 
 export default function (opts: { strapi: Strapi }): EntityManager;

@@ -333,4 +333,48 @@ module.exports = {
       data: number,
     };
   },
+  async getMultipleEntriesNumberOfDraftRelations(ctx) {
+    const { userAbility } = ctx.state;
+    const { model, ids } = ctx.params;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const idsArray = JSON.parse(ids);
+
+    if (idsArray.length <= 0) {
+      return {
+        data: 0,
+      };
+    }
+
+    let number = 0;
+
+    for (const id of idsArray) {
+      const entity = await entityManager.findOne(id, model, { populate });
+
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
+
+      number += await entityManager.getNumberOfDraftRelations(id, model);
+    }
+
+    return {
+      data: number,
+    };
+  },
 };
