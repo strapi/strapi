@@ -11,7 +11,7 @@ const imageFilePath = path.join(__dirname, './image.png');
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
 function mockUploadProvider(uploadFunc, props) {
-  const { responsiveDimensions = false } = props || {};
+  const { responsiveDimensions = false, sharpFailOn = 'warning' } = props || {};
 
   const defaultConfig = {
     plugin: {
@@ -35,7 +35,7 @@ function mockUploadProvider(uploadFunc, props) {
             upload: uploadFunc,
           },
           upload: {
-            getSettings: () => ({ responsiveDimensions }),
+            getSettings: () => ({ responsiveDimensions, sharpFailOn }),
           },
           'image-manipulation': require('../../image-manipulation')(),
         },
@@ -56,6 +56,7 @@ const getFileData = (filePath) => ({
   size: 4,
   width: 1500,
   tmpWorkingDirectory,
+  isFaulty: false,
 });
 
 describe('Upload image', () => {

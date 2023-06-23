@@ -17,7 +17,7 @@ const {
   sanitize,
   nameToSlug,
   contentTypes: contentTypesUtils,
-  errors: { ApplicationError, NotFoundError },
+  errors: { NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
 
@@ -89,6 +89,7 @@ module.exports = ({ strapi }) => ({
       ext,
       mime: type,
       size: bytesToKbytes(size),
+      isFaulty: false,
     };
 
     const { refId, ref, field } = metas;
@@ -135,7 +136,11 @@ module.exports = ({ strapi }) => ({
 
     if (await isImage(currentFile)) {
       if (await isFaultyImage(currentFile)) {
-        throw new ApplicationError('File is not a valid image');
+        currentFile.isFaulty = true;
+        await getService('upload').setSettings({ sharpFailOn: 'none' });
+        strapi.log.warn(
+          `The image ${currentFile.name} is faulty, proceeding with the upload but processing the image (resizing, rotation, metadata removal, cropping, ect) may be impossible.`
+        );
       }
       if (await isOptimizableImage(currentFile)) {
         return optimize(currentFile);
@@ -363,6 +368,7 @@ module.exports = ({ strapi }) => ({
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
+    _.set(res, 'isFaulty', fileValues.isFaulty);
     await this.emitEvent(MEDIA_CREATE, res);
 
     return res;

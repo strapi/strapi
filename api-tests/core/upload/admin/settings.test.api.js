@@ -43,6 +43,7 @@ describe('Settings', () => {
           autoOrientation: false,
           sizeOptimization: true,
           responsiveDimensions: true,
+          sharpFailOn: 'warning',
         },
       });
     });

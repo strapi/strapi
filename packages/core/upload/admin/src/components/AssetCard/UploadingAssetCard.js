@@ -12,6 +12,7 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
+import { useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -39,6 +40,7 @@ export const UploadingAssetCard = ({
 }) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
 
   let badgeContent = formatMessage({
     id: getTrad('settings.section.doc.label'),
@@ -65,6 +67,7 @@ export const UploadingAssetCard = ({
   useEffect(() => {
     const uploadFile = async () => {
       const files = await upload(asset, folderId);
+      checkFaultyFile(files, asset);
 
       if (addUploadedFiles) {
         addUploadedFiles(files);
@@ -82,6 +85,25 @@ export const UploadingAssetCard = ({
   const handleCancel = () => {
     cancel();
     onCancel(asset.rawFile);
+  };
+
+  const checkFaultyFile = (files, asset) => {
+    const file = files.find((file) => file.name === asset.name);
+
+    if (file.isFaulty) {
+      showFultyFileAlert();
+    }
+  };
+
+  const showFultyFileAlert = () => {
+    toggleNotification({
+      type: 'softWarning',
+      message: {
+        id: getTrad('upload.file-warning'),
+        defaultMessage:
+          'The file is faulty. Proceed with the upload but processing the image (resizing, rotation, metadata removal, cropping, ect) may be impossible.',
+      },
+    });
   };
 
   return (

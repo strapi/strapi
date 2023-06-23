@@ -101,6 +101,12 @@ module.exports = {
       private: true,
       searchable: false,
     },
+    isFaulty: {
+      type: 'boolean',
+      required: true,
+      private: true,
+      searchable: false,
+    },
   },
   // experimental feature:
   indexes: [
