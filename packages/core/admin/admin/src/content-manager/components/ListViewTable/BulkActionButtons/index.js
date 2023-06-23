@@ -418,6 +418,7 @@ const BulkActionButtons = ({
   const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteDialog);
   const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishDialog);
   const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishDialog);
+  const handleToggleSelectedEntriesModal = () => setIsSelectedEntriesModalOpen((prev) => !prev);
 
   return (
     <>
@@ -428,7 +429,7 @@ const BulkActionButtons = ({
           </Button>
           <SelectedEntriesModal
             isOpen={isSelectedEntriesModalOpen}
-            onToggle={() => setIsSelectedEntriesModalOpen((prev) => !prev)}
+            onToggle={handleToggleSelectedEntriesModal}
             onConfirm={togglePublishDialog}
           />
           <ConfirmDialogPublishAll
