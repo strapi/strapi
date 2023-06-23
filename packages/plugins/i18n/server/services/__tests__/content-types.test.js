@@ -1,6 +1,7 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
+const { strapi } = require('@strapi/strapi');
 const {
   isLocalizedContentType,
   getValidLocale,
@@ -11,6 +12,14 @@ const {
   fillNonLocalizedAttributes,
   getNestedPopulateOfNonLocalizedAttributes,
 } = require('../content-types')();
+
+const mockStrapiServices = (services) => {
+  strapi.plugins = {
+    i18n: {
+      services,
+    },
+  };
+};
 
 describe('content-types service', () => {
   describe('isLocalizedContentType', () => {
@@ -142,17 +151,8 @@ describe('content-types service', () => {
   describe('getValidLocale', () => {
     test('set default locale if the provided one is nil', async () => {
       const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
-      global.strapi = {
-        plugins: {
-          i18n: {
-            services: {
-              locales: {
-                getDefaultLocale,
-              },
-            },
-          },
-        },
-      };
+      mockStrapiServices({ locales: { getDefaultLocale } });
+
       const locale = await getValidLocale(null);
 
       expect(locale).toBe('en');
@@ -160,17 +160,8 @@ describe('content-types service', () => {
 
     test('set locale to the provided one if it exists', async () => {
       const findByCode = jest.fn(() => Promise.resolve('en'));
-      global.strapi = {
-        plugins: {
-          i18n: {
-            services: {
-              locales: {
-                findByCode,
-              },
-            },
-          },
-        },
-      };
+      mockStrapiServices({ locales: { findByCode } });
+
       const locale = await getValidLocale('en');
 
       expect(locale).toBe('en');
@@ -178,17 +169,8 @@ describe('content-types service', () => {
 
     test("throw if provided locale doesn't exist", async () => {
       const findByCode = jest.fn(() => Promise.resolve(undefined));
-      global.strapi = {
-        plugins: {
-          i18n: {
-            services: {
-              locales: {
-                findByCode,
-              },
-            },
-          },
-        },
-      };
+      mockStrapiServices({ locales: { findByCode } });
+
       try {
         await getValidLocale('en');
       } catch (e) {
@@ -210,12 +192,8 @@ describe('content-types service', () => {
         const model = 'api::country.country';
         const locale = 'fr';
 
-        global.strapi = {
-          query: () => ({
-            findOne,
-          }),
-          getModel: () => ({ kind }),
-        };
+        strapi.query.mockReturnValueOnce({ findOne });
+        strapi.getModel.mockReturnValueOnce({ kind });
 
         try {
           await getAndValidateRelatedEntity(relatedEntityId, model, locale);
@@ -243,12 +221,8 @@ describe('content-types service', () => {
         const model = 'api::country.country';
         const locale = 'en';
 
-        global.strapi = {
-          query: () => ({
-            findOne,
-          }),
-          getModel: () => ({ kind }),
-        };
+        strapi.query.mockReturnValueOnce({ findOne });
+        strapi.getModel.mockReturnValueOnce({ kind });
 
         try {
           await getAndValidateRelatedEntity(relatedEntityId, model, locale);
@@ -281,12 +255,8 @@ describe('content-types service', () => {
         const model = 'api::country.country';
         const locale = 'en';
 
-        global.strapi = {
-          query: () => ({
-            findOne,
-          }),
-          getModel: () => ({ kind }),
-        };
+        strapi.query.mockReturnValueOnce({ findOne });
+        strapi.getModel.mockReturnValueOnce({ kind });
 
         try {
           await getAndValidateRelatedEntity(relatedEntityId, model, locale);
@@ -319,12 +289,8 @@ describe('content-types service', () => {
         const model = 'api::country.country';
         const locale = 'it';
 
-        global.strapi = {
-          query: () => ({
-            findOne,
-          }),
-          getModel: () => ({ kind }),
-        };
+        strapi.query.mockReturnValueOnce({ findOne });
+        strapi.getModel.mockReturnValueOnce({ kind });
 
         const foundEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
 
@@ -463,11 +429,7 @@ describe('content-types service', () => {
         },
       };
 
-      global.strapi = {
-        components: {
-          compo: compoModel,
-        },
-      };
+      strapi.components = { compo: compoModel };
 
       const model = {
         attributes: {
@@ -554,8 +516,7 @@ describe('content-types service', () => {
         },
       };
 
-      const getModel = jest.fn(() => modelDef);
-      global.strapi = { getModel };
+      strapi.getModel.mockReturnValueOnce(modelDef);
 
       fillNonLocalizedAttributes(entry, relatedEntry, { model: 'model' });
 
@@ -642,7 +603,7 @@ describe('content-types service', () => {
           },
         }[model]);
 
-      global.strapi = { getModel };
+      strapi.getModel.mockImplementationOnce(getModel);
     });
 
     test('Populate component, dz and media and not relations', () => {

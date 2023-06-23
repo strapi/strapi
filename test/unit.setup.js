@@ -33,6 +33,7 @@ jest.mock('@strapi/strapi', () => ({
     ...jest.requireActual('@strapi/strapi').strapi,
     query: jest.fn(),
     store: jest.fn(),
+    getModel: jest.fn(),
     controllers: {},
     controller(name) {
       return this.controllers[name];
