@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, validateYupSchema } = require('@strapi/utils');
+const { strapi } = require('@strapi/strapi');
 
 const { get } = require('lodash/fp');
 

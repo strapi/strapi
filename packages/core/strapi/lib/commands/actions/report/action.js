@@ -10,7 +10,7 @@ module.exports = async ({ uuid, dependencies, all }) => {
   };
 
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).register();
+  const app = await strapi.initialize(appContext).register();
 
   let debugInfo = `Launched In: ${Date.now() - app.config.launchedAt} ms
 Environment: ${app.config.environment}

@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { prop, pick, reduce, map, keys, toPath, isNil } = require('lodash/fp');
 const utils = require('@strapi/utils');
+const { strapi } = require('@strapi/strapi');
 const { getService } = require('../utils');
 
 const { contentTypes, parseMultipartData, sanitize } = utils;

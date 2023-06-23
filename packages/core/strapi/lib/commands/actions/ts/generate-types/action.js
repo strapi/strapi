@@ -11,7 +11,7 @@ module.exports = async ({ debug, silent, verbose, outDir }) => {
   }
 
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).register();
+  const app = await strapi.initialize(appContext).register();
 
   await tsUtils.generators.generate({
     strapi: app,

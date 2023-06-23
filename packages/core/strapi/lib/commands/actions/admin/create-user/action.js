@@ -88,7 +88,7 @@ module.exports = async (cmdOptions = {}) => {
 
 async function createAdmin({ email, password, firstname, lastname }) {
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const app = await strapi.initialize(appContext).load();
 
   const user = await app.admin.services.user.exists({ email });
 

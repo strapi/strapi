@@ -14,7 +14,7 @@ module.exports = async ({ file: filePath, strategy = 'replace' }) => {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const app = await strapi.initialize(appContext).load();
 
   let dataToImport;
   try {

@@ -1,17 +1,20 @@
 'use strict';
 
-const localesService = require('../locales')();
+// Import the `strapi` package
+const { strapi } = require('@strapi/strapi');
 
 const fakeMetricsService = {
   sendDidInitializeEvent() {},
   sendDidUpdateI18nLocalesEvent() {},
 };
 
+const localesService = require('../locales')();
+
 describe('Locales', () => {
   describe('setIsDefault', () => {
     test('Set isDefault to false', async () => {
       const get = jest.fn(() => Promise.resolve('en'));
-      global.strapi = { store: () => ({ get }) };
+      strapi.store.mockReturnValue({ get });
 
       const locale = {
         code: 'fr',
@@ -27,7 +30,7 @@ describe('Locales', () => {
 
     test('Set isDefault to true', async () => {
       const get = jest.fn(() => Promise.resolve('en'));
-      global.strapi = { store: () => ({ get }) };
+      strapi.store.mockReturnValue({ get });
 
       const locale = {
         code: 'en',
@@ -45,7 +48,7 @@ describe('Locales', () => {
   describe('getDefaultLocale', () => {
     test('get default locale', async () => {
       const get = jest.fn(() => Promise.resolve('en'));
-      global.strapi = { store: () => ({ get }) };
+      strapi.store.mockReturnValue({ get });
 
       const defaultLocaleCode = await localesService.getDefaultLocale();
       expect(defaultLocaleCode).toBe('en');
@@ -55,7 +58,7 @@ describe('Locales', () => {
   describe('setDefaultLocale', () => {
     test('set default locale', async () => {
       const set = jest.fn(() => Promise.resolve());
-      global.strapi = { store: () => ({ set }) };
+      strapi.store.mockReturnValue({ set });
 
       await localesService.setDefaultLocale({ code: 'fr-CA' });
       expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'fr-CA' });
@@ -66,12 +69,12 @@ describe('Locales', () => {
     test('find', async () => {
       const locales = [{ name: 'French', code: 'fr' }];
       const findMany = jest.fn(() => Promise.resolve(locales));
-      const query = jest.fn(() => ({ findMany }));
-      global.strapi = { query };
-      const params = { name: { $contains: 'en' } };
+      strapi.query.mockReturnValue({ findMany });
 
+      const params = { name: { $contains: 'en' } };
       const localesFound = await localesService.find(params);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findMany).toHaveBeenCalledWith({ where: params });
       expect(localesFound).toMatchObject(locales);
     });
@@ -79,11 +82,10 @@ describe('Locales', () => {
     test('findById', async () => {
       const locale = { name: 'French', code: 'fr' };
       const findOne = jest.fn(() => Promise.resolve(locale));
-      const query = jest.fn(() => ({ findOne }));
-      global.strapi = { query };
+      strapi.query.mockReturnValue({ findOne });
 
       const localeFound = await localesService.findById(1);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(localeFound).toMatchObject(locale);
     });
@@ -91,11 +93,10 @@ describe('Locales', () => {
     test('findByCode', async () => {
       const locale = { name: 'French', code: 'fr' };
       const findOne = jest.fn(() => Promise.resolve(locale));
-      const query = jest.fn(() => ({ findOne }));
-      global.strapi = { query };
+      strapi.query.mockReturnValue({ findOne });
 
       const localeFound = await localesService.findByCode('fr');
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ where: { code: 'fr' } });
       expect(localeFound).toMatchObject(locale);
     });
@@ -103,18 +104,13 @@ describe('Locales', () => {
     test('create', async () => {
       const locale = { name: 'French', code: 'fr' };
       const create = jest.fn(() => locale);
-      const query = jest.fn(() => ({ create }));
-      global.strapi = {
-        query,
-        plugins: {
-          i18n: {
-            services: { metrics: fakeMetricsService },
-          },
-        },
+      strapi.query.mockReturnValue({ create });
+      strapi.plugins = {
+        i18n: { services: { metrics: fakeMetricsService } },
       };
 
       const createdLocale = await localesService.create(locale);
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(create).toHaveBeenCalledWith({ data: locale });
       expect(createdLocale).toMatchObject(locale);
     });
@@ -122,18 +118,15 @@ describe('Locales', () => {
     test('update', async () => {
       const locale = { name: 'French', code: 'fr' };
       const update = jest.fn(() => locale);
-      const query = jest.fn(() => ({ update }));
-      global.strapi = {
-        query,
-        plugins: {
-          i18n: {
-            services: { metrics: fakeMetricsService },
-          },
+
+      strapi.query.mockReturnValue({ update });
+      strapi.plugins = {
+        i18n: {
+          services: { metrics: fakeMetricsService },
         },
       };
-
       const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(update).toHaveBeenCalledWith({ where: { code: 'fr' }, data: { name: 'French' } });
       expect(updatedLocale).toMatchObject(locale);
     });
@@ -144,19 +137,20 @@ describe('Locales', () => {
       const deleteMany = jest.fn(() => []);
       const findOne = jest.fn(() => locale);
       const isLocalizedContentType = jest.fn(() => true);
-      const query = jest.fn(() => ({ delete: deleteFn, findOne, deleteMany }));
-      global.strapi = {
-        query,
-        plugins: {
-          i18n: {
-            services: { metrics: fakeMetricsService, 'content-types': { isLocalizedContentType } },
+
+      strapi.query.mockReturnValue({ delete: deleteFn, findOne, deleteMany });
+      strapi.contentTypes = { 'api::country.country': {} };
+      strapi.plugins = {
+        i18n: {
+          services: {
+            metrics: fakeMetricsService,
+            'content-types': { isLocalizedContentType },
           },
         },
-        contentTypes: { 'api::country.country': {} },
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(deletedLocale).toMatchObject(locale);
     });
@@ -165,18 +159,12 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const deleteFn = jest.fn(() => locale);
       const findOne = jest.fn(() => undefined);
-      const query = jest.fn(() => ({ delete: deleteFn, findOne }));
-      global.strapi = {
-        query,
-        plugins: {
-          i18n: {
-            services: { metrics: fakeMetricsService },
-          },
-        },
-      };
+
+      strapi.query.mockReturnValue({ delete: deleteFn, findOne });
+      strapi.plugins = { i18n: { services: { metrics: fakeMetricsService } } };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
+      expect(strapi.query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).not.toHaveBeenCalled();
       expect(deletedLocale).toBeUndefined();
     });
@@ -188,19 +176,12 @@ describe('Locales', () => {
       const create = jest.fn(() => Promise.resolve());
       const set = jest.fn(() => Promise.resolve());
 
-      global.strapi = {
-        query: () => ({
-          count,
-          create,
-        }),
-        store: () => ({
-          set,
-        }),
-        plugins: {
-          i18n: {
-            services: {
-              metrics: fakeMetricsService,
-            },
+      strapi.query.mockReturnValue({ count, create });
+      strapi.store.mockReturnValue({ set });
+      strapi.plugins = {
+        i18n: {
+          services: {
+            metrics: fakeMetricsService,
           },
         },
       };
@@ -221,15 +202,8 @@ describe('Locales', () => {
       const create = jest.fn(() => Promise.resolve());
       const set = jest.fn(() => Promise.resolve());
 
-      global.strapi = {
-        query: () => ({
-          count,
-          create,
-        }),
-        store: () => ({
-          set,
-        }),
-      };
+      strapi.query.mockReturnValue({ count, create });
+      strapi.store.mockReturnValue({ set });
 
       await localesService.initDefaultLocale();
       expect(count).toHaveBeenCalledWith();

@@ -1,5 +1,7 @@
 'use strict';
 
+const { strapi } = require('@strapi/strapi');
+
 const getCoreStore = () => {
   return strapi.store({ type: 'plugin', name: 'i18n' });
 };

@@ -2,6 +2,7 @@
 
 const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { strapi } = require('@strapi/strapi');
 
 const { getService } = require('../utils');
 

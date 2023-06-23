@@ -26,3 +26,37 @@ Object.defineProperty(global, 'strapi', {
     };
   },
 });
+
+// Mock the `strapi` package
+jest.mock('@strapi/strapi', () => ({
+  strapi: {
+    ...jest.requireActual('@strapi/strapi').strapi,
+    query: jest.fn(),
+    store: jest.fn(),
+    controllers: {},
+    controller(name) {
+      return this.controllers[name];
+    },
+    services: {},
+    service(name) {
+      return this.services[name];
+    },
+    plugins: {},
+    plugin(name) {
+      return {
+        services: this.plugins[name].services,
+        service(serviceName) {
+          return this.services[serviceName];
+        },
+      };
+    },
+    contentTypes: {},
+    contentType(name) {
+      return this.contentTypes[name];
+    },
+    policies: {},
+    policy(name) {
+      return this.policies[name];
+    },
+  },
+}));

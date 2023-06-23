@@ -21,5 +21,5 @@ module.exports = async () => {
       `${outDir} directory not found. Please run the build command before starting your application`
     );
 
-  return strapi({ appDir, distDir }).start();
+  return strapi.initialize({ appDir, distDir }).start();
 };

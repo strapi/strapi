@@ -10,7 +10,7 @@ const strapi = require('../../../index');
 module.exports = async ({ browser }) => {
   const appContext = await strapi.compile();
 
-  const strapiInstance = strapi({
+  const strapiInstance = strapi.initialize({
     ...appContext,
     autoReload: true,
     serveAdminPanel: false,

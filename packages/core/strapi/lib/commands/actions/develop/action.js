@@ -107,11 +107,13 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
 };
 
 const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject }) => {
-  const strapiInstance = await strapi({
-    distDir,
-    autoReload: true,
-    serveAdminPanel: !watchAdmin,
-  }).load();
+  const strapiInstance = await strapi
+    .initialize({
+      distDir,
+      autoReload: true,
+      serveAdminPanel: !watchAdmin,
+    })
+    .load();
 
   /**
    * TypeScript automatic type generation upon dev server restart

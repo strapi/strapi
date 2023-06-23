@@ -7,11 +7,11 @@ const { getWeeklyCronScheduleAt } = require('../../utils/cron');
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
-const getMetricsStoreValue = async () => {
+const getMetricsStoreValue = async ({ strapi }) => {
   const value = await strapi.store.get({ type: 'plugin', name: 'upload', key: 'metrics' });
   return defaultTo({}, value);
 };
-const setMetricsStoreValue = (value) =>
+const setMetricsStoreValue = (value, { strapi }) =>
   strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
 
 module.exports = ({ strapi }) => ({
@@ -95,12 +95,15 @@ module.exports = ({ strapi }) => ({
       groupProperties: { metrics },
     });
 
-    const metricsInfoStored = await getMetricsStoreValue();
-    await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
+    const metricsInfoStored = await getMetricsStoreValue({ strapi });
+    await setMetricsStoreValue(
+      { ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() },
+      { strapi }
+    );
   },
 
   async ensureWeeklyStoredCronSchedule() {
-    const metricsInfoStored = await getMetricsStoreValue();
+    const metricsInfoStored = await getMetricsStoreValue({ strapi });
     const { weeklySchedule: currentSchedule, lastWeeklyUpdate } = metricsInfoStored;
 
     const now = new Date();

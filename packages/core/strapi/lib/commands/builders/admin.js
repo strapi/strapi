@@ -11,7 +11,7 @@ const strapi = require('../../index');
 const getEnabledPlugins = require('../../core/loaders/plugins/get-enabled-plugins');
 
 module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir }) => {
-  const strapiInstance = strapi({
+  const strapiInstance = strapi.initialize({
     // Directories
     appDir: srcDir,
     distDir: buildDestDir,

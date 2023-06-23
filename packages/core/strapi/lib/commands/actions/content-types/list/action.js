@@ -7,7 +7,7 @@ const strapi = require('../../../../index');
 
 module.exports = async () => {
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).register();
+  const app = await strapi.initialize(appContext).register();
 
   const list = app.container.get('content-types').keys();
 

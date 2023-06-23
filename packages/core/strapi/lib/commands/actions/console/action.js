@@ -9,7 +9,7 @@ const strapi = require('../../../index');
  */
 module.exports = async () => {
   const appContext = await strapi.compile();
-  const app = await strapi(appContext).load();
+  const app = await strapi.initialize(appContext).load();
 
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template

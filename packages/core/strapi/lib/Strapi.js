@@ -132,6 +132,15 @@ class Strapi {
     });
   }
 
+  // TODO: Use in every other Strapi instance methods
+  assertInitialized() {
+    if (!this.initialized) {
+      throw new Error(
+        'Strapi is not initialized, you can not use the instance before initialization.'
+      );
+    }
+  }
+
   get config() {
     return this.container.get('config');
   }
@@ -570,10 +579,15 @@ class Strapi {
   }
 }
 
-module.exports = (options) => {
-  const strapi = new Strapi(options);
+let strapi;
+
+const initialize = (config = {}) => {
+  strapi = new Strapi(config);
   global.strapi = strapi;
   return strapi;
 };
+
+module.exports.initialize = initialize;
+Object.defineProperty(module.exports, 'strapi', { get: () => strapi });
 
 module.exports.Strapi = Strapi;
