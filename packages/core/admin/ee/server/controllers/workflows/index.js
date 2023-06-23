@@ -13,14 +13,18 @@ const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
  *
  * @param { Strapi } strapi - Strapi instance
  * @param userAbility
+ * @param type - create a sanitizer for output or input
  * @return { (Workflow) => SanitizedWorkflow }
  */
-function sanitizeWorkflow({ strapi }, userAbility) {
+function sanitizeWorkflow({ strapi }, userAbility, type = 'output') {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')
     .create({ userAbility, model: WORKFLOW_MODEL_UID });
 
+  if (type === 'input') {
+    return (entity) => permissionChecker.sanitizeInput(entity);
+  }
   return (entity) => permissionChecker.sanitizeOutput(entity);
 }
 
@@ -32,15 +36,19 @@ module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
     const { populate } = ctx.query;
-    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+    const inputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'input');
+    const outputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'output');
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
     const workflowService = getService('workflows');
-    const createdWorkflow = await workflowService.create({ data: workflowBody, populate });
+    const createdWorkflow = await workflowService.create({
+      data: await inputSanitizer(workflowBody),
+      populate,
+    });
 
     ctx.body = {
-      data: await sanitizer(createdWorkflow),
+      data: await outputSanitizer(createdWorkflow),
     };
   },
 
@@ -53,7 +61,8 @@ module.exports = {
     const { body } = ctx.request;
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
-    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+    const inputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'input');
+    const outputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'output');
 
     const workflowBody = await validateWorkflowUpdate(body.data);
 
@@ -63,12 +72,12 @@ module.exports = {
     }
 
     const updatedWorkflow = await workflowService.update(workflow, {
-      data: workflowBody,
+      data: await inputSanitizer(workflowBody),
       populate,
     });
 
     ctx.body = {
-      data: await sanitizer(updatedWorkflow),
+      data: await outputSanitizer(updatedWorkflow),
     };
   },
 

@@ -76,9 +76,14 @@ module.exports = {
   async updateEntity(ctx) {
     const stagesService = getService('stages');
     const workflowService = getService('workflows');
-    const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
+
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
     const entityId = Number(entityIdString);
+
+    const { sanitizeOutput } = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     const { id: stageId } = await validateUpdateStageOnEntity(
       ctx.request?.body?.data,
@@ -88,8 +93,8 @@ module.exports = {
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    const stage = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
+    const entity = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
 
-    ctx.body = { data: await sanitizer(stage) };
+    ctx.body = { data: await sanitizeOutput(entity) };
   },
 };
