@@ -35,7 +35,7 @@ import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { connect, useSelector } from 'react-redux';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
@@ -47,7 +47,7 @@ import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
 import BulkActionsBar from '../../components/DynamicTable/BulkActionsBar';
-import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
+import { createYupSchema, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { ConfirmDialogDelete } from './components/ConfirmDialogDelete';
@@ -55,7 +55,7 @@ import { ConfirmDialogDeleteAll } from './components/ConfirmDialogDeleteAll';
 import { FieldPicker } from './components/FieldPicker';
 import { TableRows } from './components/TableRows';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
-import { buildQueryString } from './utils';
+import { buildValidGetParams } from './utils';
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -101,7 +101,7 @@ function ListView({
   useFocusWhenNavigate();
 
   const [{ query }] = useQueryParams();
-  const params = buildQueryString(query);
+  const params = buildValidGetParams(query);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
@@ -127,67 +127,19 @@ function ListView({
 
   const { post, del } = fetchClient;
 
-  const bulkPublishMutation = useMutation(
-    (data) =>
-      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
-        });
-
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
-  const bulkUnpublishMutation = useMutation(
-    (data) =>
-      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'content-manager.success.record.unpublish',
-            defaultMessage: 'Unpublished',
-          },
-        });
-
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
-
-  // FIXME
-  // Using a ref to avoid requests being fired multiple times on slug on change
-  // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
-  const requestUrlRef = React.useRef('');
-
-  /**
-   * TODO: re-write all of this, it's a mess.
-   */
-  const fetchData = React.useCallback(
-    async (endPoint, source) => {
+  const entityListQuery = useQuery(
+    [slug, params],
+    ({ signal }) => {
       getData();
 
-      try {
-        const opts = source ? { cancelToken: source.token } : null;
-        const {
-          data: { results, pagination: paginationResult },
-        } = await fetchClient.get(endPoint, opts);
+      return fetchClient.get(`/content-manager/collection-types/${slug}`, {
+        params,
+        signal,
+      });
+    },
+    {
+      onSuccess({ data }) {
+        const { results, pagination: paginationResult } = data;
 
         notifyStatus(
           formatMessage(
@@ -197,12 +149,13 @@ function ListView({
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
             // Using the plural form
-            { number: paginationResult.count }
+            { number: paginationResult.total }
           )
         );
 
         getDataSucceeded(paginationResult, results);
-      } catch (err) {
+      },
+      async onError(err) {
         if (axios.isCancel(err)) {
           return;
         }
@@ -226,20 +179,62 @@ function ListView({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
         });
-      }
-    },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
+      },
+    }
+  );
+  const bulkPublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+        });
+
+        entityListQuery.refetch();
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+  const bulkUnpublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          },
+        });
+
+        entityListQuery.refetch();
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
   );
 
   const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
-        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
           ids,
         });
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        entityListQuery.refetch();
+
         trackUsageRef.current('didBulkDeleteEntries');
       } catch (err) {
         toggleNotification({
@@ -248,16 +243,15 @@ function ListView({
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, formatAPIError, post]
+    [entityListQuery, slug, toggleNotification, formatAPIError, post]
   );
 
   const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
-        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        entityListQuery.refetch();
 
         toggleNotification({
           type: 'success',
@@ -270,7 +264,7 @@ function ListView({
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatAPIError, del]
+    [slug, entityListQuery, toggleNotification, formatAPIError, del]
   );
 
   /**
@@ -336,24 +330,6 @@ function ListView({
   const handleConfirmUnpublishAllData = (selectedEntries) => {
     return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
   };
-
-  React.useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-
-    if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
-    }
-
-    return () => {
-      requestUrlRef.current = slug;
-
-      source.cancel('Operation canceled by the user.');
-    };
-  }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const defaultHeaderLayoutTitle = formatMessage({
     id: getTrad('header.name'),

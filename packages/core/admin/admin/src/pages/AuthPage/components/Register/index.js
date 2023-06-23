@@ -61,10 +61,16 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   useEffect(() => {
     if (registrationToken) {
       const getData = async () => {
+        console.log('register');
+
         try {
           const {
             data: { data },
-          } = await get(`/admin/registration-info?registrationToken=${registrationToken}`);
+          } = await get(`/admin/registration-info`, {
+            params: {
+              registrationToken,
+            },
+          });
 
           if (data) {
             setUserInfo(data);

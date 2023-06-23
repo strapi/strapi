@@ -41,12 +41,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { data, error, isLoading } = useQuery(
     [pluginId, 'assets', stringify(params)],
     async () => {
-      const { data } = await get(
-        `${dataRequestURL}${stringify(params, {
-          encode: false,
-          addQueryPrefix: true,
-        })}`
-      );
+      const { data } = await get(dataRequestURL, { params });
 
       return data;
     },

@@ -12,11 +12,11 @@ import {
 import axios from 'axios';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { useQueryClient } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import buildQueryString from '../../pages/ListView/utils/buildQueryString';
+import { buildValidGetParams } from '../../pages/ListView/utils';
 import {
   getData,
   getDataSucceeded,
@@ -40,7 +40,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
-  const searchToSend = buildQueryString(query);
+  const params = buildValidGetParams(query);
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
@@ -49,6 +49,50 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
+
+  useQuery(
+    [slug, params],
+    ({ signal }) => {
+      dispatch(getData());
+      setIsCreatingEntry(true);
+
+      return fetchClient.get(getRequestUrl(`${slug}`), { params, signal });
+    },
+    {
+      onSuccess(result) {
+        dispatch(getDataSucceeded(cleanReceivedData(result.data)));
+        setIsCreatingEntry(false);
+      },
+      onError(err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+
+        const responseStatus = get(err, 'response.status', null);
+
+        if (responseStatus === 403) {
+          toggleNotification({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
+
+          push('/');
+        }
+      },
+      retry(_, error) {
+        const responseStatus = get(error, 'response.status', null);
+
+        // FIXME: Don't use an error to determine the create or update state
+        if (responseStatus === 404) {
+          dispatch(initForm(rawQuery, true));
+
+          return false;
+        }
+
+        return true;
+      },
+    }
+  );
 
   const cleanReceivedData = useCallback(
     (data) => {
@@ -99,61 +143,6 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
   }, [allLayoutData, dispatch]);
 
-  // Check if creation mode or editing mode
-  useEffect(() => {
-    const CancelToken = axios.CancelToken;
-    const source = CancelToken.source();
-
-    const fetchData = async (source) => {
-      dispatch(getData());
-
-      setIsCreatingEntry(true);
-
-      try {
-        const { data } = await fetchClient.get(getRequestUrl(`${slug}${searchToSend}`), {
-          cancelToken: source.token,
-        });
-
-        dispatch(getDataSucceeded(cleanReceivedData(data)));
-
-        setIsCreatingEntry(false);
-      } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-
-        const responseStatus = get(err, 'response.status', null);
-
-        // Creating a single type
-        if (responseStatus === 404) {
-          dispatch(initForm(rawQuery, true));
-        }
-
-        if (responseStatus === 403) {
-          toggleNotification({
-            type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
-          });
-
-          push('/');
-        }
-      }
-    };
-
-    fetchData(source);
-
-    return () => source.cancel('Operation canceled by the user.');
-  }, [
-    fetchClient,
-    cleanReceivedData,
-    push,
-    slug,
-    dispatch,
-    searchToSend,
-    rawQuery,
-    toggleNotification,
-  ]);
-
   const displayErrors = useCallback(
     (err) => {
       toggleNotification({ type: 'warning', message: formatAPIError(err) });
@@ -166,7 +155,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await del(getRequestUrl(`${slug}${searchToSend}`));
+        const { data } = await del(getRequestUrl(`${slug}`), {
+          params: query,
+        });
 
         toggleNotification({
           type: 'success',
@@ -187,17 +178,17 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [del, slug, displayErrors, toggleNotification, searchToSend, dispatch, rawQuery]
+    [del, slug, displayErrors, toggleNotification, query, dispatch, rawQuery]
   );
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
+      const endPoint = getRequestUrl(`${slug}`);
 
       try {
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put(endPoint, body);
+        const { data } = await put(endPoint, body, { params: query });
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -232,7 +223,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       displayErrors,
       slug,
       dispatch,
-      rawQuery,
+      query,
       toggleNotification,
       setCurrentStep,
       queryClient,
@@ -263,11 +254,17 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/actions/publish${searchToSend}`);
+      const endPoint = getRequestUrl(`${slug}/actions/publish`);
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await post(endPoint);
+      const { data } = await post(
+        endPoint,
+        {},
+        {
+          params: query,
+        }
+      );
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
@@ -287,18 +284,18 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       return Promise.reject(err);
     }
-  }, [post, cleanReceivedData, displayErrors, slug, searchToSend, dispatch, toggleNotification]);
+  }, [post, cleanReceivedData, displayErrors, slug, query, dispatch, toggleNotification]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
+      const endPoint = getRequestUrl(`${slug}`);
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await put(endPoint, body);
+        const { data } = await put(endPoint, body, { params: query });
 
         toggleNotification({
           type: 'success',
@@ -325,28 +322,25 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [
-      put,
-      cleanReceivedData,
-      displayErrors,
-      slug,
-      dispatch,
-      rawQuery,
-      toggleNotification,
-      queryClient,
-    ]
+    [put, cleanReceivedData, displayErrors, slug, dispatch, query, toggleNotification, queryClient]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/actions/unpublish${searchToSend}`);
+    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
 
     dispatch(setStatus('unpublish-pending'));
 
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const { data } = await post(endPoint);
+      const { data } = await post(
+        endPoint,
+        {},
+        {
+          params: query,
+        }
+      );
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
@@ -361,7 +355,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [post, cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, searchToSend]);
+  }, [post, cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, query]);
 
   return children({
     componentsDataStructure,
