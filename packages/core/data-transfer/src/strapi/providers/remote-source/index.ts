@@ -85,7 +85,9 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         return;
       }
 
-      stream.push(data);
+      for (const item of data) {
+        stream.push(item);
+      }
 
       this.ws?.once('message', listener);
 

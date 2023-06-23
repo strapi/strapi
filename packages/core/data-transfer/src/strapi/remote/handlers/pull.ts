@@ -6,6 +6,7 @@ import { handlerControllerFactory, isDataTransferMessage } from './utils';
 import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, TransferStage, Protocol } from '../../../../types';
+import { Client } from '../../../../types/remote/protocol';
 
 const TRANSFER_KIND = 'pull';
 const VALID_TRANSFER_ACTIONS = ['bootstrap', 'close', 'getMetadata', 'getSchemas'] as const;
@@ -134,8 +135,22 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
   },
 
   // TODO: Optimize performances (batching, client packets reconstruction, etc...)
-  async flush(this: PullHandler, stage: TransferStage, id) {
+  async flush(this: PullHandler, stage: Exclude<Client.TransferPullStep, 'assets'>, id) {
+    type Stage = typeof stage;
+    const batchSize = 1024 * 1024;
+    let batch = [] as Client.GetTransferPullStreamData<Stage>;
     const stream = this.streams?.[stage];
+
+    const batchLength = () => Buffer.byteLength(JSON.stringify(batch));
+    const sendBatch = async () => {
+      await this.confirm({
+        type: 'transfer',
+        data: batch,
+        ended: false,
+        error: null,
+        id,
+      });
+    };
 
     if (!stream) {
       throw new ProviderTransferError(`No available stream found for ${stage}`);
@@ -143,9 +158,17 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     try {
       for await (const chunk of stream) {
-        await this.confirm({ type: 'transfer', data: chunk, ended: false, error: null, id });
+        batch.push(chunk);
+        if (batchLength() >= batchSize) {
+          await sendBatch();
+          batch = [];
+        }
       }
 
+      if (batch.length > 0) {
+        await sendBatch();
+        batch = [];
+      }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
       await this.confirm({ type: 'transfer', data: null, ended: true, error: e, id });
@@ -163,7 +186,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       const flushUUID = randomUUID();
 
       await this.createReadableStreamForStep(step);
-
+      console.log('flushing', step);
       this.flush(step, flushUUID);
 
       return { ok: true, id: flushUUID };
