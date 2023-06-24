@@ -8,7 +8,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { Prompt, useRouteMatch } from 'react-router-dom';
+import { Prompt, useRouteMatch, useLocation } from 'react-router-dom';
 
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
@@ -26,6 +26,7 @@ const ListView = () => {
     useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const location = useLocation();
 
   const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
@@ -161,12 +162,12 @@ const ListView = () => {
           defaultMessage: 'Build the data architecture of your content',
         })}
         navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
+          (location.state?.prevPath && <Link startIcon={<ArrowLeft />} to={location.state.prevPath}>
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',
             })}
-          </Link>
+          </Link>)
         }
       />
       <ContentLayout>

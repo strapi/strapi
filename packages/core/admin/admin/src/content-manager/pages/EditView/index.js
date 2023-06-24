@@ -74,9 +74,8 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
     : permissions.contentManager.collectionTypesConfigurations;
 
   // // FIXME when changing the routing
-  const configurationsURL = `/content-manager/${
-    isSingleType ? 'singleType' : 'collectionType'
-  }/${slug}/configurations/edit`;
+  const configurationsURL = `/content-manager/${isSingleType ? 'singleType' : 'collectionType'
+    }/${slug}/configurations/edit`;
 
   const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
@@ -217,7 +216,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                                 size="S"
                                 startIcon={<Pencil />}
                                 style={{ width: '100%' }}
-                                to={`/plugins/content-type-builder/content-types/${slug}`}
+                                to={{ pathname: `/plugins/content-type-builder/content-types/${slug}`, state: { prevPath: location.pathname } }}
                                 variant="secondary"
                               >
                                 {formatMessage({
