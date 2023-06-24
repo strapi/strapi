@@ -8,6 +8,7 @@ const {
   getCommonPath,
   toRegressedEnumValue,
   joinBy,
+  insertAt,
 } = require('../string-formatting');
 
 describe('string-formatting', () => {
@@ -141,6 +142,18 @@ describe('string-formatting', () => {
       [['/', '///a///', '///b///', '///c///'], '///a/b/c///'],
     ])('%s => %s', (args, expectedResult) => {
       expect(joinBy(...args)).toBe(expectedResult);
+    });
+  });
+
+  describe('inserAt', () => {
+    test.each([
+      [['Hello, world!', 'beautiful ', 7], 'Hello, beautiful world!'],
+      [['123456', '0', 0], '0123456'],
+      [['abcdef', 'g', 6], 'abcdefg'],
+      [['', 'Hello', 0], 'Hello'],
+      [['Hello', '!', 10], 'Hello!'],
+    ])('%s => %s', (args, expectedResult) => {
+      expect(insertAt(...args)).toBe(expectedResult);
     });
   });
 });

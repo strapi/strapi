@@ -62,6 +62,8 @@ const joinBy = (joint, ...args) => {
 
 const toKebabCase = (value) => kebabCase(value);
 
+const insertAt = (str, value, pos) => str.slice(0, pos) + value + str.slice(pos);
+
 module.exports = {
   nameToSlug,
   nameToCollectionName,
@@ -76,4 +78,5 @@ module.exports = {
   toRegressedEnumValue,
   startsWithANumber,
   joinBy,
+  insertAt,
 };

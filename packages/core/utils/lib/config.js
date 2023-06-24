@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getCommonPath } = require('./string-formatting');
+const { getCommonPath, insertAt } = require('./string-formatting');
 
 const getConfigUrls = (config, forAdminBuild = false) => {
   const serverConfig = config.get('server');
@@ -66,9 +66,18 @@ const getAbsoluteUrl =
   (adminOrServer) =>
   (config, forAdminBuild = false) => {
     const { serverUrl, adminUrl } = getConfigUrls(config, forAdminBuild);
-    const url = adminOrServer === 'server' ? serverUrl : adminUrl;
+    const isServer = adminOrServer === 'server';
+    const url = isServer ? serverUrl : adminUrl;
+    const port = config.get('server.port');
 
     if (url.startsWith('http')) {
+      if (!url.includes(port)) {
+        const portFormatted = `:${port}`;
+        const urlFormatted = isServer
+          ? `${url}${portFormatted}`
+          : insertAt(url, portFormatted, url.lastIndexOf('/'));
+        return urlFormatted;
+      }
       return url;
     }
 
@@ -78,7 +87,7 @@ const getAbsoluteUrl =
         ? 'localhost'
         : config.get('server.host');
 
-    return `http://${hostname}:${config.get('server.port')}${url}`;
+    return `http://${hostname}:${port}${url}`;
   };
 
 module.exports = {
