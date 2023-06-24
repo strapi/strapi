@@ -216,7 +216,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                                 size="S"
                                 startIcon={<Pencil />}
                                 style={{ width: '100%' }}
-                                to={{ pathname: `/plugins/content-type-builder/content-types/${slug}`, state: { prevPath: location.pathname } }}
+                                to={{ pathname: `/plugins/content-type-builder/content-types/${slug}`, state: { from: location.pathname } }}
                                 variant="secondary"
                               >
                                 {formatMessage({

@@ -27,7 +27,6 @@ const ListView = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const location = useLocation();
-
   const match = useRouteMatch('/plugins/content-type-builder/:kind/:currentUID');
 
   const {
@@ -162,7 +161,7 @@ const ListView = () => {
           defaultMessage: 'Build the data architecture of your content',
         })}
         navigationAction={
-          (location.state?.prevPath && <Link startIcon={<ArrowLeft />} to={location.state.prevPath}>
+          (location.state?.from && <Link startIcon={<ArrowLeft />} to={location.state.from}>
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',

@@ -26,7 +26,7 @@ export const TableRows = ({
   rows,
 }) => {
   const { push, location } = useHistory();
-  const { pathname } = location;
+  const { pathname, search } = location;
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
 
@@ -45,7 +45,7 @@ export const TableRows = ({
     trackUsage('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
-      state: { from: pathname },
+      state: { from: pathname, search },
       search: pluginsQueryParams,
     });
   };
@@ -198,8 +198,8 @@ TableRows.defaultProps = {
   canCreate: false,
   canDelete: false,
   entriesToDelete: [],
-  onClickDelete() {},
-  onSelectRow() {},
+  onClickDelete() { },
+  onSelectRow() { },
   rows: [],
   withBulkActions: false,
   withMainAction: false,

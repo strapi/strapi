@@ -23,7 +23,6 @@ import {
   useNotification,
   useRBACProvider,
   useTracking,
-  Link,
   useAPIErrorHandler,
   getYupInnerErrors,
   useStrapiApp,
@@ -31,7 +30,7 @@ import {
   PaginationURLQuery,
   PageSizeURLQuery,
 } from '@strapi/helper-plugin';
-import { ArrowLeft, Cog, Plus } from '@strapi/icons';
+import { Cog, Plus } from '@strapi/icons';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -88,6 +87,7 @@ function ListView({
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
 
+  localStorage.removeItem('back-link');
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -101,7 +101,7 @@ function ListView({
 
   const [{ query }] = useQueryParams();
   const params = buildQueryString(query);
-  const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
+  const pluginsQueryParams = stringify({ plugins: query?.plugins }, { encode: false });
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -429,12 +429,12 @@ function ListView({
 
   const subtitle = canRead
     ? formatMessage(
-        {
-          id: getTrad('pages.ListView.header-subtitle'),
-          defaultMessage: '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-        },
-        { number: total }
-      )
+      {
+        id: getTrad('pages.ListView.header-subtitle'),
+        defaultMessage: '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+      },
+      { number: total }
+    )
     : null;
 
   const getCreateAction = (props) =>
@@ -449,7 +449,7 @@ function ListView({
         }}
         to={{
           pathname: `${pathname}/create`,
-          search: query.plugins ? pluginsQueryParams : '',
+          search: query?.plugins ? pluginsQueryParams : '',
         }}
         startIcon={<Plus />}
         style={{ textDecoration: 'none' }}
@@ -467,14 +467,6 @@ function ListView({
         primaryAction={getCreateAction()}
         subtitle={subtitle}
         title={headerLayoutTitle}
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/content-manager/">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
       />
       {!canRead && (
         <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />

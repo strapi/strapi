@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
 import {
   Box,
@@ -18,7 +18,7 @@ import isEqualFastCompare from 'lodash/isEqual';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
@@ -44,7 +44,8 @@ const Header = ({
   publishConfirmation: { show: showPublishConfirmation, draftCount },
   onPublishPromptDismissal,
 }) => {
-  const { goBack } = useHistory();
+  const { state } = useLocation();
+  const [prevPath, setPrevPath] = useState({});
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
 
@@ -137,6 +138,23 @@ const Header = ({
     defaultMessage: 'API ID ',
   })} : ${layout.apiID}`;
 
+  useEffect(() => {
+    const prevPathInfo = localStorage.getItem('back-link');
+
+    if (prevPathInfo) {
+      setPrevPath(JSON.parse(prevPathInfo));
+    } else {
+      const pathInfo = { pathname: state?.from, search: state?.search };
+      setPrevPath(pathInfo);
+    }
+  }, [state]);
+
+  useEffect(() => {
+    if (prevPath) {
+      localStorage.setItem('back-link', JSON.stringify(prevPath));
+    }
+  }, [prevPath]);
+
   return (
     <>
       <HeaderLayout
@@ -146,14 +164,7 @@ const Header = ({
         navigationAction={
           <Link
             startIcon={<ArrowLeft />}
-            // Needed in order to redirect the user with the correct search params
-            // Since parts is using a link from react-router-dom the best way to do it is to disable the
-            // event
-            onClick={(e) => {
-              e.preventDefault();
-              goBack();
-            }}
-            to="/"
+            to={prevPath}
           >
             {formatMessage({
               id: 'global.back',
