@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import InjectionZone from '../../shared/components/InjectionZone'
 import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
 import {
   MainNav,
