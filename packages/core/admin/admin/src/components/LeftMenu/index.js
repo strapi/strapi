@@ -122,7 +122,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       />
 
       <Divider />
-
+      <InjectionZone area="leftMenu.aboveContentManager"/>
       <NavSections>
         <NavLink
           as={RouterNavLink}
@@ -132,7 +132,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
-
+        <InjectionZone area="leftMenu.bellowContentManager"/>
         {pluginsSectionLinks.length > 0 ? (
           <NavSection
             label={formatMessage({
