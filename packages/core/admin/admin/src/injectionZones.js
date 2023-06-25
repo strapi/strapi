@@ -11,6 +11,10 @@ const injectionZones = {
       links: [],
     },
   },
+  leftMenu: {
+    aboveContentManager: [],
+    bellowContentManager: []
+  },
   contentManager: {
     editView: { informations: [], 'right-links': [] },
     listView: {
