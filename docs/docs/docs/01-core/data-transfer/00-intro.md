@@ -15,3 +15,5 @@ import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
 
 <DocCardList items={useCurrentSidebarCategory().items} />
 ```
+
+Note: The data-transfer package is written in Typescript and any additions or changes must include all necessary typings.
