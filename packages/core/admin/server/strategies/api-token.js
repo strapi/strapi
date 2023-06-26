@@ -54,9 +54,9 @@ const authenticate = async (ctx) => {
     }
   }
 
-  // update lastUsedAt if the token has not been used for 24 hours
+  // update lastUsedAt if the token has not been used in the last hour
   const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
-  if (hoursSinceLastUsed >= 24) {
+  if (hoursSinceLastUsed >= 1) {
     await strapi.query('admin::api-token').update({
       where: { id: apiToken.id },
       data: { lastUsedAt: currentDate },
