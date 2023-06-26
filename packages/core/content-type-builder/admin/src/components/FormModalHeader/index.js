@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { Link } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -151,6 +151,7 @@ FormModalHeader.defaultProps = {
   contentTypeKind: null,
   targetUid: null,
   customFieldUid: null,
+  showBackLink: false,
 };
 
 FormModalHeader.propTypes = {
@@ -164,6 +165,7 @@ FormModalHeader.propTypes = {
   modalType: PropTypes.string.isRequired,
   targetUid: PropTypes.string,
   customFieldUid: PropTypes.string,
+  showBackLink: PropTypes.bool,
 };
 
 export default FormModalHeader;
