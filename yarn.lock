@@ -4780,83 +4780,83 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nrwl/tao@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nrwl/tao@npm:16.3.2"
+"@nrwl/tao@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nrwl/tao@npm:16.4.0"
   dependencies:
-    nx: 16.3.2
+    nx: 16.4.0
   bin:
     tao: index.js
-  checksum: 85f6c83170b0beccee7d86ae7cc3a09154d003be4fb9ab7b34f66044b71161d439766b6b19ef63424671780285476bad3375306c7e2af099d82c39d755997678
+  checksum: 9743695cbdaa88ebf253898dce7160339de7bf14181543120b4c88abcdc949a372debc5686bff8c3cb08ff7e8ca29d17471afa84267f9492f244dedc36a28199
   languageName: node
   linkType: hard
 
-"@nx/nx-darwin-arm64@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-darwin-arm64@npm:16.3.2"
+"@nx/nx-darwin-arm64@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-darwin-arm64@npm:16.4.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@nx/nx-darwin-x64@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-darwin-x64@npm:16.3.2"
+"@nx/nx-darwin-x64@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-darwin-x64@npm:16.4.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@nx/nx-freebsd-x64@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-freebsd-x64@npm:16.3.2"
+"@nx/nx-freebsd-x64@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-freebsd-x64@npm:16.4.0"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
-"@nx/nx-linux-arm-gnueabihf@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-linux-arm-gnueabihf@npm:16.3.2"
+"@nx/nx-linux-arm-gnueabihf@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-linux-arm-gnueabihf@npm:16.4.0"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@nx/nx-linux-arm64-gnu@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-linux-arm64-gnu@npm:16.3.2"
+"@nx/nx-linux-arm64-gnu@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-linux-arm64-gnu@npm:16.4.0"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@nx/nx-linux-arm64-musl@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-linux-arm64-musl@npm:16.3.2"
+"@nx/nx-linux-arm64-musl@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-linux-arm64-musl@npm:16.4.0"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@nx/nx-linux-x64-gnu@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-linux-x64-gnu@npm:16.3.2"
+"@nx/nx-linux-x64-gnu@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-linux-x64-gnu@npm:16.4.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@nx/nx-linux-x64-musl@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-linux-x64-musl@npm:16.3.2"
+"@nx/nx-linux-x64-musl@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-linux-x64-musl@npm:16.4.0"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@nx/nx-win32-arm64-msvc@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-win32-arm64-msvc@npm:16.3.2"
+"@nx/nx-win32-arm64-msvc@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-win32-arm64-msvc@npm:16.4.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@nx/nx-win32-x64-msvc@npm:16.3.2":
-  version: 16.3.2
-  resolution: "@nx/nx-win32-x64-msvc@npm:16.3.2"
+"@nx/nx-win32-x64-msvc@npm:16.4.0":
+  version: 16.4.0
+  resolution: "@nx/nx-win32-x64-msvc@npm:16.4.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -25667,21 +25667,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nx@npm:16.3.2":
-  version: 16.3.2
-  resolution: "nx@npm:16.3.2"
+"nx@npm:16.4.0":
+  version: 16.4.0
+  resolution: "nx@npm:16.4.0"
   dependencies:
-    "@nrwl/tao": 16.3.2
-    "@nx/nx-darwin-arm64": 16.3.2
-    "@nx/nx-darwin-x64": 16.3.2
-    "@nx/nx-freebsd-x64": 16.3.2
-    "@nx/nx-linux-arm-gnueabihf": 16.3.2
-    "@nx/nx-linux-arm64-gnu": 16.3.2
-    "@nx/nx-linux-arm64-musl": 16.3.2
-    "@nx/nx-linux-x64-gnu": 16.3.2
-    "@nx/nx-linux-x64-musl": 16.3.2
-    "@nx/nx-win32-arm64-msvc": 16.3.2
-    "@nx/nx-win32-x64-msvc": 16.3.2
+    "@nrwl/tao": 16.4.0
+    "@nx/nx-darwin-arm64": 16.4.0
+    "@nx/nx-darwin-x64": 16.4.0
+    "@nx/nx-freebsd-x64": 16.4.0
+    "@nx/nx-linux-arm-gnueabihf": 16.4.0
+    "@nx/nx-linux-arm64-gnu": 16.4.0
+    "@nx/nx-linux-arm64-musl": 16.4.0
+    "@nx/nx-linux-x64-gnu": 16.4.0
+    "@nx/nx-linux-x64-musl": 16.4.0
+    "@nx/nx-win32-arm64-msvc": 16.4.0
+    "@nx/nx-win32-x64-msvc": 16.4.0
     "@parcel/watcher": 2.0.4
     "@yarnpkg/lockfile": ^1.1.0
     "@yarnpkg/parsers": ^3.0.0-rc.18
@@ -25705,7 +25705,7 @@ __metadata:
     minimatch: 3.0.5
     npm-run-path: ^4.0.1
     open: ^8.4.0
-    semver: 7.3.4
+    semver: 7.5.3
     string-width: ^4.2.3
     strong-log-transformer: ^2.1.0
     tar-stream: ~2.2.0
@@ -25746,7 +25746,7 @@ __metadata:
       optional: true
   bin:
     nx: bin/nx.js
-  checksum: 627decdb89cea60f45ab035b33a53f2e3170f24c0eed07cfbec59eeeda4a6d62b57738e5f34fd1cdcdc00dcff83bb4d1022fe892c69e89420182d50ff0f6b547
+  checksum: 12d71122bed6a39e359c4b561eda9c5b2f43908cddce855f529e40dbf802354ee352debc50a1a88075248d0172ff78c5e6852f7fcbaf18088952a4a90feddf5e
   languageName: node
   linkType: hard
 
@@ -29754,6 +29754,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:7.5.3":
+  version: 7.5.3
+  resolution: "semver@npm:7.5.3"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 9d58db16525e9f749ad0a696a1f27deabaa51f66e91d2fa2b0db3de3e9644e8677de3b7d7a03f4c15bc81521e0c3916d7369e0572dbde250d9bedf5194e2a8a7
+  languageName: node
+  linkType: hard
+
 "semver@npm:7.x, semver@npm:^7.0.0, semver@npm:^7.1.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8":
   version: 7.3.8
   resolution: "semver@npm:7.3.8"
@@ -30709,7 +30720,7 @@ __metadata:
     lerna: 6.5.1
     lint-staged: 13.2.2
     lodash: 4.17.21
-    nx: 16.3.2
+    nx: 16.4.0
     plop: 2.7.6
     prettier: 2.8.4
     qs: 6.11.1
