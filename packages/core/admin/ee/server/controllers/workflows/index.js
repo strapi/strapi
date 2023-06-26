@@ -13,19 +13,13 @@ const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
  *
  * @param { Strapi } strapi - Strapi instance
  * @param userAbility
- * @param type - create a sanitizer for output or input
- * @return { (Workflow) => SanitizedWorkflow }
+ * @return { PermissionChecker }
  */
-function sanitizeWorkflow({ strapi }, userAbility, type = 'output') {
-  const permissionChecker = strapi
+function getWorkflowsPermissionChecker({ strapi }, userAbility) {
+  return strapi
     .plugin('content-manager')
     .service('permission-checker')
     .create({ userAbility, model: WORKFLOW_MODEL_UID });
-
-  if (type === 'input') {
-    return (entity) => permissionChecker.sanitizeInput(entity);
-  }
-  return (entity) => permissionChecker.sanitizeOutput(entity);
 }
 
 module.exports = {
@@ -36,19 +30,21 @@ module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
     const { populate } = ctx.query;
-    const inputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'input');
-    const outputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'output');
+    const { sanitizeCreateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
+      { strapi },
+      ctx.state.userAbility
+    );
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
     const workflowService = getService('workflows');
     const createdWorkflow = await workflowService.create({
-      data: await inputSanitizer(workflowBody),
+      data: await sanitizeCreateInput(workflowBody),
       populate,
     });
 
     ctx.body = {
-      data: await outputSanitizer(createdWorkflow),
+      data: await sanitizeOutput(createdWorkflow),
     };
   },
 
@@ -61,8 +57,10 @@ module.exports = {
     const { body } = ctx.request;
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
-    const inputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'input');
-    const outputSanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility, 'output');
+    const { sanitizeUpdateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
+      { strapi },
+      ctx.state.userAbility
+    );
 
     const workflowBody = await validateWorkflowUpdate(body.data);
 
@@ -72,12 +70,12 @@ module.exports = {
     }
 
     const updatedWorkflow = await workflowService.update(workflow, {
-      data: await inputSanitizer(workflowBody),
+      data: await sanitizeUpdateInput(workflowBody),
       populate,
     });
 
     ctx.body = {
-      data: await outputSanitizer(updatedWorkflow),
+      data: await sanitizeOutput(updatedWorkflow),
     };
   },
 
@@ -89,7 +87,7 @@ module.exports = {
     const { id } = ctx.params;
     const { populate } = ctx.query;
     const workflowService = getService('workflows');
-    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
 
     const workflow = await workflowService.findById(id, { populate: ['stages'] });
     if (!workflow) {
@@ -99,7 +97,7 @@ module.exports = {
     const deletedWorkflow = await workflowService.delete(workflow, { populate });
 
     ctx.body = {
-      data: await sanitizer(deletedWorkflow),
+      data: await sanitizeOutput(deletedWorkflow),
     };
   },
 
@@ -110,7 +108,7 @@ module.exports = {
   async find(ctx) {
     const { populate, filters, sort } = ctx.query;
     const workflowService = getService('workflows');
-    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
 
     const workflows = await workflowService.find({
       populate,
@@ -119,7 +117,7 @@ module.exports = {
     });
 
     ctx.body = {
-      data: await mapAsync(workflows, sanitizer),
+      data: await mapAsync(workflows, sanitizeOutput),
     };
   },
   /**
@@ -129,13 +127,13 @@ module.exports = {
   async findById(ctx) {
     const { id } = ctx.params;
     const { populate } = ctx.query;
-    const sanitizer = sanitizeWorkflow({ strapi }, ctx.state.userAbility);
+    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
 
     const workflowService = getService('workflows');
     const workflow = await workflowService.findById(id, { populate });
 
     ctx.body = {
-      data: await sanitizer(workflow),
+      data: await sanitizeOutput(workflow),
     };
   },
 };
