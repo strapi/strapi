@@ -329,8 +329,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             class="c1"
           >
             <a
-              aria-current="page"
-              class="c2 active"
+              class="c2"
               href="/"
             >
               <svg
