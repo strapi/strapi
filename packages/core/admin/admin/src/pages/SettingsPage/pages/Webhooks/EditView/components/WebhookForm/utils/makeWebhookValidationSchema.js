@@ -14,7 +14,13 @@ export const makeWebhookValidationSchema = ({ formatMessage }) =>
           defaultMessage: 'Name is required',
         })
       )
-      .matches(NAME_REGEX, translatedErrors.regex),
+      .matches(
+        NAME_REGEX,
+        formatMessage({
+          id: translatedErrors.regex,
+          defaultMessage: 'The value does not match the regex',
+        })
+      ),
     url: yup
       .string()
       .required(
