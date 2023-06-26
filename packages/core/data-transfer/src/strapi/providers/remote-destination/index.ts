@@ -6,20 +6,15 @@ import { once } from 'lodash/fp';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
-import type { client, server } from '../../../../types/remote/protocol';
+import type { client, server, auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITransferTokenAuth {
-  type: 'token';
-  token: string;
-}
-
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
-  url: URL;
-  auth?: ITransferTokenAuth;
+  url: URL; // the url of the remote Strapi admin
+  auth?: auth.ITransferTokenAuth;
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));

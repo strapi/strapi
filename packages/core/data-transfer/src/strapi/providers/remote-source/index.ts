@@ -10,20 +10,15 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
-import { client, server } from '../../../../types/remote/protocol';
+import { client, server, auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
-interface ITransferTokenAuth {
-  type: 'token';
-  token: string;
-}
-
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
-  url: URL;
-  auth?: ITransferTokenAuth;
+  url: URL; // the url of the remote Strapi admin
+  auth?: auth.ITransferTokenAuth;
 }
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
