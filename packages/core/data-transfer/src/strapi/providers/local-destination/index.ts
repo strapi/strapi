@@ -1,12 +1,14 @@
 import { Writable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
+import { isFunction } from 'lodash/fp';
 import type {
   IAsset,
   IDestinationProvider,
   IMetadata,
   ProviderType,
   Transaction,
+  IFile,
 } from '../../../../types';
 
 import { restore } from './strategies';
@@ -23,6 +25,18 @@ export interface ILocalStrapiDestinationProviderOptions {
   restore?: restore.IRestoreOptions;
   strategy: 'restore' | 'merge';
 }
+
+const streamToBuffer = (stream: any): Promise<Buffer> =>
+  new Promise((resolve, reject) => {
+    const chunks: any[] = [];
+    stream.on('data', (chunk: any) => {
+      chunks.push(chunk);
+    });
+    stream.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    });
+    stream.on('error', reject);
+  });
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::local-strapi';
@@ -150,7 +164,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
-    const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+    // const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
     // const backupDirectory = path.join(
     //   this.strapi.dirs.static.public,
     //   `uploads_backup_${Date.now()}`
@@ -166,32 +180,57 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     //     'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
     //   );
     // }
-
     const strapi = this.strapi;
+    const transaction = this.transaction;
     return new Writable({
       objectMode: true,
       async final(next) {
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
-        const entryPath = path.join(assetsDirectory, chunk.filename);
-        // const chunk = fse.createWriteStream(entryPath);
-        try {
-          console.log(`Uploading asset ${chunk.filename}`);
-          console.log({
+        await transaction?.attach(async () => {
+          const uploadData = {
             ...chunk.metadata,
             stream: chunk.stream,
-          });
-          await strapi.plugin('upload').provider.uploadStream({
-            ...chunk.metadata,
-            stream: chunk.stream,
-          });
-          console.log(`Uploaded asset ${chunk.filename}`);
-          callback();
-        } catch (error) {
-          console.log(error);
-          callback(new Error(`Error while uploading asset ${chunk.filename}`));
-        }
+            buffer: chunk?.buffer,
+          };
+
+          try {
+            if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
+              console.log('uploading stream');
+              await strapi.plugin('upload').provider.uploadStream(uploadData);
+              console.log('uploaded stream');
+            } else {
+              uploadData.buffer = await streamToBuffer(uploadData.stream);
+              console.log('uploading buffer');
+              await strapi.plugin('upload').provider.upload(uploadData);
+              console.log('uploaded buffer');
+            }
+            // uploadData.buffer = await streamToBuffer(uploadData.stream);
+            // uploadData.size = uploadData.buffer.length;
+            // console.log('uploading buffer', uploadData.url);
+            // // plugin::upload.file
+            // await strapi.plugin('upload').provider.upload(uploadData);
+            // console.log('uploaded buffer', uploadData.url);
+            // if (uploadData?.type) {
+            //   const [entry]: IFile[] = await strapi.db.query('plugin::upload.file').findMany({
+            //     where: { hash: uploadData.mainHash },
+            //   });
+            //   const specificFormat = entry?.formats?.[uploadData.type];
+            //   if (specificFormat) {
+            //     specificFormat.url = uploadData.url;
+            //   }
+            // }
+            // const entries = await strapi.db.query('plugin::upload.file').findMany({
+            //   where: { hash: uploadData.hash },
+            // });
+            // console.log('entries', JSON.stringify(entries, null, 2));
+            callback();
+          } catch (error) {
+            console.log(error);
+            callback(new Error(`Error while uploading asset ${chunk.filename}`));
+          }
+        });
       },
     });
   }

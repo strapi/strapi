@@ -129,24 +129,13 @@ export interface IConfiguration<T = unknown> {
   value: T;
 }
 
-export interface IFileFormat {
-  ext: string;
-  url: string;
-  hash: string;
-  mime: string;
-  name: string;
-  path?: string | null;
-  size: number;
-  width?: number;
-  height?: number;
-}
 interface IFile {
   name: string;
   alternativeText?: string;
   caption?: string;
   width?: number;
   height?: number;
-  formats?: Record<string, IFileFormat>;
+  formats?: Record<string, IFile>;
   hash: string;
   ext?: string;
   mime: string;
@@ -156,12 +145,15 @@ interface IFile {
   path?: string;
   provider?: string;
   provider_metadata?: Record<string, unknown>;
+  type?: string;
+  mainHash?: string;
 }
 export interface IAsset {
   filename: string;
   filepath: string;
   stream: Readable;
   stats: IAssetStats;
+  buffer?: Buffer;
   metadata: IFile;
 }
 

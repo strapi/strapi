@@ -10,7 +10,7 @@ import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Schema } from '@strapi/strapi';
 
-import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
 
 import { createDecryptionCipher } from '../../../utils/encryption';
 import { collect } from '../../../utils/stream';
@@ -94,6 +94,11 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
+  async #loadAssetMetadata(path: string) {
+    const backupStream = this.#getBackupStream();
+    return this.#parseJSONFile<IFile>(backupStream, path);
+  }
+
   async getMetadata() {
     if (!this.#metadata) {
       await this.#loadMetadata();
@@ -132,6 +137,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   createAssetsReadStream(): Readable | Promise<Readable> {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
+    const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
 
     pipeline(
       [
@@ -143,13 +149,16 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
             return isFilePathInDirname('assets/uploads', filePath);
+            // isFilePathInDirname('assets/metadata', filePath)
           },
-          onentry(entry) {
+          async onentry(entry) {
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
+            const metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
 
-            const asset: Omit<IAsset, 'metadata'> = {
+            const asset: IAsset = {
+              metadata,
               filename: file,
               filepath: normalizedPath,
               stats: { size },

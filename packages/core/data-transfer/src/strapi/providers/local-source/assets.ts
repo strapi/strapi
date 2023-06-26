@@ -61,7 +61,7 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
 export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
-    console.log('files', JSON.stringify(files, null, 2));
+
     for (const file of files) {
       const isLocalProvider = file.provider === 'local';
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
@@ -69,7 +69,7 @@ export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
       const stream = getFileStream(filepath, isLocalProvider);
 
       yield {
-        metadata: file, // TODO: filter it down to just this file
+        metadata: file,
         filepath,
         filename: file.hash + file.ext,
         stream,
@@ -77,21 +77,21 @@ export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
       };
 
       if (file.formats) {
-        for (const format of Object.values(file.formats)) {
-          const fileFormat = format;
+        for (const format of Object.keys(file.formats)) {
+          const fileFormat = file.formats[format];
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
 
-          const thumbStats = await getFileStats(fileFormatFilepath, isLocalProvider);
-          const thumbStream = getFileStream(fileFormatFilepath, isLocalProvider);
-
+          const fileFormatStats = await getFileStats(fileFormatFilepath, isLocalProvider);
+          const fileFormatStream = getFileStream(fileFormatFilepath, isLocalProvider);
+          const metadata = { ...fileFormat, type: format, mainHash: file.hash };
           yield {
-            metadata: file, // TODO: filter it down to just this file
+            metadata,
             filepath: fileFormatFilepath,
             filename: fileFormat.hash + fileFormat.ext,
-            stream: thumbStream,
-            stats: { size: thumbStats.size },
+            stream: fileFormatStream,
+            stats: { size: fileFormatStats.size },
           };
         }
       }
