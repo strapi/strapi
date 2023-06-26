@@ -1,5 +1,5 @@
-import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
+import * as yup from 'yup';
 
 export const commonUserSchema = {
   firstname: yup.string().trim().required(translatedErrors.required),

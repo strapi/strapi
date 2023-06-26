@@ -1,6 +1,6 @@
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useIntl } from 'react-intl';
+import { act, renderHook } from '@testing-library/react';
 import { AxiosError } from 'axios';
+import { useIntl } from 'react-intl';
 
 import { useAPIErrorHandler } from '../useAPIErrorHandler';
 

@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FormikProvider, useFormik, Form } from 'formik';
-import { useIntl } from 'react-intl';
-import { useSelector, useDispatch } from 'react-redux';
-import { useMutation } from 'react-query';
 
+import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   ConfirmDialog,
   SettingsPageTitle,
   useAPIErrorHandler,
@@ -13,19 +9,22 @@ import {
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Button, ContentLayout, HeaderLayout, Layout, Loader, Main } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
+import { Form, FormikProvider, useFormik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { Stages } from './components/Stages';
-import { reducer, initialState } from './reducer';
-import { REDUX_NAMESPACE, DRAG_DROP_TYPES } from './constants';
-import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from './hooks/useReviewWorkflows';
-import { setWorkflows } from './actions';
-import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../admin/src/permissions';
-import { StageDragPreview } from './components/StageDragPreview';
 import { DragLayer } from '../../../../../../admin/src/components/DragLayer';
+import { useInjectReducer } from '../../../../../../admin/src/hooks/useInjectReducer';
+
+import { setWorkflows } from './actions';
+import { StageDragPreview } from './components/StageDragPreview';
+import { Stages } from './components/Stages';
+import { DRAG_DROP_TYPES, REDUX_NAMESPACE } from './constants';
+import { useReviewWorkflows } from './hooks/useReviewWorkflows';
+import { initialState, reducer } from './reducer';
+import { getWorkflowValidationSchema } from './utils/getWorkflowValidationSchema';
 
 function renderDragLayerItem({ type, item }) {
   switch (type) {
@@ -44,7 +43,7 @@ export function ReviewWorkflowsPage() {
   const { put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows: workflowsData, refetchWorkflow } = useReviewWorkflows();
+  const { workflows, status: workflowStatus, refetch: refetchWorkflow } = useReviewWorkflows();
   const {
     status,
     clientState: {
@@ -56,7 +55,6 @@ export function ReviewWorkflowsPage() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
-
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflowId, stages }) => {
       const {
@@ -124,8 +122,8 @@ export function ReviewWorkflowsPage() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   useEffect(() => {
-    dispatch(setWorkflows({ status: workflowsData.status, data: workflowsData.data }));
-  }, [workflowsData.status, workflowsData.data, dispatch]);
+    dispatch(setWorkflows({ status: workflowStatus, data: workflows }));
+  }, [workflowStatus, workflows, dispatch]);
 
   useEffect(() => {
     trackUsage('didViewWorkflow');
@@ -133,76 +131,74 @@ export function ReviewWorkflowsPage() {
   }, []);
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
-      <Layout>
-        <SettingsPageTitle
-          name={formatMessage({
-            id: 'Settings.review-workflows.page.title',
-            defaultMessage: 'Review Workflows',
-          })}
+    <Layout>
+      <SettingsPageTitle
+        name={formatMessage({
+          id: 'Settings.review-workflows.page.title',
+          defaultMessage: 'Review Workflows',
+        })}
+      />
+      <Main tabIndex={-1}>
+        <DragLayer renderItem={renderDragLayerItem} />
+
+        <FormikProvider value={formik}>
+          <Form onSubmit={formik.handleSubmit}>
+            <HeaderLayout
+              primaryAction={
+                <Button
+                  startIcon={<Check />}
+                  type="submit"
+                  size="M"
+                  disabled={!currentWorkflowIsDirty}
+                  // if the confirm dialog is open the loading state is on
+                  // the confirm button already
+                  loading={!isConfirmDeleteDialogOpen && isLoading}
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              }
+              title={formatMessage({
+                id: 'Settings.review-workflows.page.title',
+                defaultMessage: 'Review Workflows',
+              })}
+              subtitle={formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow?.stages?.length ?? 0 }
+              )}
+            />
+            <ContentLayout>
+              {status === 'loading' && (
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              )}
+
+              <Stages stages={formik.values?.stages} />
+            </ContentLayout>
+          </Form>
+        </FormikProvider>
+
+        <ConfirmDialog
+          bodyText={{
+            id: 'Settings.review-workflows.page.delete.confirm.body',
+            defaultMessage:
+              'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
+          }}
+          isConfirmButtonLoading={isLoading}
+          isOpen={isConfirmDeleteDialogOpen}
+          onToggleDialog={toggleConfirmDeleteDialog}
+          onConfirm={handleConfirmDeleteDialog}
         />
-        <Main tabIndex={-1}>
-          <DragLayer renderItem={renderDragLayerItem} />
-
-          <FormikProvider value={formik}>
-            <Form onSubmit={formik.handleSubmit}>
-              <HeaderLayout
-                primaryAction={
-                  <Button
-                    startIcon={<Check />}
-                    type="submit"
-                    size="M"
-                    disabled={!currentWorkflowIsDirty}
-                    // if the confirm dialog is open the loading state is on
-                    // the confirm button already
-                    loading={!isConfirmDeleteDialogOpen && isLoading}
-                  >
-                    {formatMessage({
-                      id: 'global.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                }
-                title={formatMessage({
-                  id: 'Settings.review-workflows.page.title',
-                  defaultMessage: 'Review Workflows',
-                })}
-                subtitle={formatMessage(
-                  {
-                    id: 'Settings.review-workflows.page.subtitle',
-                    defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-                  },
-                  { count: currentWorkflow?.stages?.length ?? 0 }
-                )}
-              />
-              <ContentLayout>
-                {status === 'loading' && (
-                  <Loader>
-                    {formatMessage({
-                      id: 'Settings.review-workflows.page.isLoading',
-                      defaultMessage: 'Workflow is loading',
-                    })}
-                  </Loader>
-                )}
-
-                <Stages stages={formik.values?.stages} />
-              </ContentLayout>
-            </Form>
-          </FormikProvider>
-
-          <ConfirmDialog
-            bodyText={{
-              id: 'Settings.review-workflows.page.delete.confirm.body',
-              defaultMessage:
-                'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
-            }}
-            isConfirmButtonLoading={isLoading}
-            isOpen={isConfirmDeleteDialogOpen}
-            onToggleDialog={toggleConfirmDeleteDialog}
-            onConfirm={handleConfirmDeleteDialog}
-          />
-        </Main>
-      </Layout>
-    </CheckPagePermissions>
+      </Main>
+    </Layout>
   );
 }

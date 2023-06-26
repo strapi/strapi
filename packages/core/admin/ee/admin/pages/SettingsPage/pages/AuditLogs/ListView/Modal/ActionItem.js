@@ -1,6 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Flex, Typography } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 
 const ActionItem = ({ actionLabel, actionName }) => {
   return (

@@ -5,10 +5,12 @@
  */
 
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { Button, Box, Popover, Flex, Select, Option } from '@strapi/design-system';
+
+import { Box, Button, Flex, Option, Popover, Select } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 

@@ -1,13 +1,14 @@
 import React from 'react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TrackingProvider } from '@strapi/helper-plugin';
-import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
-import { Settings } from '../Settings';
 import { pageSizes, sortOptions } from '../../../../../constants';
+import { Settings } from '../Settings';
 
 const testPageSize = pageSizes[0];
 const testSort = sortOptions[0].value;

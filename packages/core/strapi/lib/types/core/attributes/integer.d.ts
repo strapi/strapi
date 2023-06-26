@@ -1,22 +1,15 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type IntegerAttribute = Attribute<'integer'> &
+export type Integer = Attribute.OfType<'integer'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<IntegerValue> &
-  MinMaxOption &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<IntegerValue> &
+  Attribute.MinMaxOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
 export type IntegerValue = number;
 
-export type GetIntegerAttributeValue<T extends Attribute> = T extends IntegerAttribute
+export type GetIntegerValue<T extends Attribute.Attribute> = T extends Integer
   ? IntegerValue
   : never;

@@ -1,7 +1,7 @@
 import type { ReadStream } from 'node:fs';
 import { getOr } from 'lodash/fp';
 import AWS from 'aws-sdk';
-import { getBucketFromUrl } from './utils';
+import { isUrlFromBucket } from './utils';
 
 interface File {
   name: string;
@@ -69,6 +69,14 @@ export = {
 
     const ACL = getOr('public-read', ['params', 'ACL'], config);
 
+    // if ACL is private and baseUrl is set, we need to warn the user
+    // signed url's will not have the baseUrl prefix
+    if (ACL === 'private' && baseUrl) {
+      process.emitWarning(
+        'You are using a private ACL with a baseUrl. This is not recommended as the files will be accessible without the baseUrl prefix.'
+      );
+    }
+
     const upload = (file: File, customParams = {}): Promise<void> =>
       new Promise((resolve, reject) => {
         const fileKey = getFileKey(file);
@@ -113,10 +121,11 @@ export = {
       },
       async getSignedUrl(file: File): Promise<{ url: string }> {
         // Do not sign the url if it does not come from the same bucket.
-        const { bucket } = getBucketFromUrl(file.url);
-        if (bucket !== config.params.Bucket) {
+        if (!isUrlFromBucket(file.url, config.params.Bucket, baseUrl)) {
           return { url: file.url };
         }
+
+        const signedUrlExpires: string = getOr(15 * 60, ['params', 'signedUrlExpires'], config); // 15 minutes
 
         return new Promise((resolve, reject) => {
           const fileKey = getFileKey(file);
@@ -126,7 +135,7 @@ export = {
             {
               Bucket: config.params.Bucket,
               Key: fileKey,
-              Expires: getOr(15 * 60, ['params', 'signedUrlExpires'], config), // 15 minutes
+              Expires: parseInt(signedUrlExpires, 10),
             },
             (err, url) => {
               if (err) {

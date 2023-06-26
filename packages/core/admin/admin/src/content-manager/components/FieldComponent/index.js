@@ -1,22 +1,23 @@
 /* eslint-disable  import/no-cycle */
 import React, { memo, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import size from 'lodash/size';
-import isEqual from 'lodash/isEqual';
-import { useIntl } from 'react-intl';
 
+import { Box, Flex, IconButton } from '@strapi/design-system';
 import { NotAllowedInput } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
-import { Box, IconButton, Flex } from '@strapi/design-system';
+import isEqual from 'lodash/isEqual';
+import size from 'lodash/size';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
-import connect from './utils/connect';
-import select from './utils/select';
-import Label from './Label';
+import { useContentTypeLayout } from '../../hooks';
+import { getTrad } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
-import { useContentTypeLayout } from '../../hooks';
-import { getTrad } from '../../utils';
+
+import Label from './Label';
+import connect from './utils/connect';
+import select from './utils/select';
 
 const FieldComponent = ({
   addNonRepeatableComponentToField,

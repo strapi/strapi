@@ -1,6 +1,6 @@
-const webpack = require('webpack');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const browserslistToEsbuild = require('browserslist-to-esbuild');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const webpack = require('webpack');
 
 const packageJson = require('./package.json');
 

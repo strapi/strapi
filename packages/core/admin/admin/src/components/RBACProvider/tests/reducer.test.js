@@ -1,6 +1,6 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
-import { setPermissions, resetStore } from '../actions';
+import { resetStore, setPermissions } from '../actions';
 import rbacProviderReducer, { initialState } from '../reducer';
 
 describe('rbacProviderReducer', () => {

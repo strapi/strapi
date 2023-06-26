@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const usePersistentState = (key, defaultValue) => {
   const [value, setValue] = useState(() => {
