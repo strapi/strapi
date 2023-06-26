@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import { isFunction } from 'lodash/fp';
@@ -191,7 +191,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         await transaction?.attach(async () => {
           const uploadData = {
             ...chunk.metadata,
-            stream: chunk.stream,
+            stream: Readable.from(chunk.stream),
             buffer: chunk?.buffer,
           };
 
