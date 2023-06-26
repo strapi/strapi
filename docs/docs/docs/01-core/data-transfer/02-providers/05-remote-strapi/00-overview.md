@@ -1,5 +1,5 @@
 ---
-title: Remote Strapi Providers
+title: Overview
 tags:
   - experimental
   - providers

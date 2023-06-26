@@ -1,5 +1,5 @@
 ---
-title: Strapi Remote Source Provider
+title: Source
 tags:
   - providers
   - data-transfer

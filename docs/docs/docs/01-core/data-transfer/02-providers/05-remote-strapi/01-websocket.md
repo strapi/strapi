@@ -1,5 +1,5 @@
 ---
-title: Remote Provider Websocket
+title: Websocket
 tags:
   - providers
   - data-transfer

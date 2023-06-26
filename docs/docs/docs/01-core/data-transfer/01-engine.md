@@ -32,7 +32,7 @@ Once all stages have been completed, the transfer waits for all providers to clo
 
 ## Setting up the transfer engine
 
-A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](./source-providers/overview), a [destination provider](./destination-providers/overview), and an options object.
+A transfer engine object is created by using `createTransferEngine`, which accepts a [source provider](./02-providers/01-source-providers.md), a [destination provider](./02-providers/02-destination-providers.md), and an options object.
 
 Note: By default, a transfer engine will transfer ALL data, including admin data, api tokens, etc. Transform filters must be used if you wish to exclude, as seen in the example below. An array called `DEFAULT_IGNORED_CONTENT_TYPES` is available from @strapi/data-transfer containing the uids that are excluded by default from the import, export, and transfer commands. If you intend to transfer admin data, be aware that this behavior will likely change in the future to automatically exclude the entire `admin::` uid namespace and will instead require them to be explicitly included.
 

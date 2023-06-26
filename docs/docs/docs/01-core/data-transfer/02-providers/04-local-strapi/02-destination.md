@@ -1,5 +1,5 @@
 ---
-title: Local Strapi Destination
+title: Destination
 tags:
   - providers
   - data-transfer

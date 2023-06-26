@@ -1,5 +1,5 @@
 ---
-title: Local Strapi Source
+title: Source
 tags:
   - providers
   - data-transfer

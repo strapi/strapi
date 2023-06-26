@@ -1,5 +1,5 @@
 ---
-title: Local Strapi Providers
+title: Overview
 tags:
   - experimental
   - providers

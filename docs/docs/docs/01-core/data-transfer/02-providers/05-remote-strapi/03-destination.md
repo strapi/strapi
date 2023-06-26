@@ -1,5 +1,5 @@
 ---
-title: Remote Destination Provider
+title: Destination
 tags:
   - providers
   - data-transfer
