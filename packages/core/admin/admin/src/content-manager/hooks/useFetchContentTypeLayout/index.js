@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { useSelector, shallowEqual } from 'react-redux';
-import axios from 'axios';
+
 import { useFetchClient } from '@strapi/helper-plugin';
-import formatLayouts from './utils/formatLayouts';
-import reducer, { initialState } from './reducer';
+import axios from 'axios';
+import { shallowEqual, useSelector } from 'react-redux';
+
 import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
+
+import reducer, { initialState } from './reducer';
+import formatLayouts from './utils/formatLayouts';
 
 const useFetchContentTypeLayout = (contentTypeUID) => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);

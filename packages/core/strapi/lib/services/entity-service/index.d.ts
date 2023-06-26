@@ -84,6 +84,11 @@ export interface EntityService {
     entityId: ID,
     params: Params<T>
   ): Promise<any>;
+  clone<K extends keyof AllTypes, T extends AllTypes[K]>(
+    uid: K,
+    cloneId: ID,
+    params: Params<T>
+  ): Promise<any>;
 }
 
 export default function (opts: {

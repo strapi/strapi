@@ -1,5 +1,6 @@
-import { stringify } from 'qs';
 import set from 'lodash/set';
+import { stringify } from 'qs';
+
 import createPluginsFilter from './createPluginsFilter';
 
 /**

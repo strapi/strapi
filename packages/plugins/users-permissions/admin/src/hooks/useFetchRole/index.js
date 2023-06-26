@@ -1,7 +1,10 @@
-import { useCallback, useReducer, useEffect, useRef } from 'react';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
-import reducer, { initialState } from './reducer';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+
 import pluginId from '../../pluginId';
+
+import reducer, { initialState } from './reducer';
 
 const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);

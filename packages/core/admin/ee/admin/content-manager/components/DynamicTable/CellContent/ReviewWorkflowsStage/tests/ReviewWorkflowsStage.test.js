@@ -1,6 +1,7 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 
 import ReviewWorkflowsStage from '..';

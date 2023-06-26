@@ -1,24 +1,14 @@
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  MinMaxLengthOption,
-  PrivateOption,
-  RequiredOption,
-  UniqueOption,
-} from './base';
+import type { Attribute } from '@strapi/strapi';
 
-export type EmailAttribute = Attribute<'email'> &
+export type Email = Attribute.OfType<'email'> &
   // Options
-  ConfigurableOption &
-  DefaultOption<EmailValue> &
-  MinMaxLengthOption &
-  PrivateOption &
-  RequiredOption &
-  UniqueOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<EmailValue> &
+  Attribute.MinMaxLengthOption &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption &
+  Attribute.UniqueOption;
 
 export type EmailValue = string;
 
-export type GetEmailAttributeValue<T extends Attribute> = T extends EmailAttribute
-  ? EmailValue
-  : never;
+export type GetEmailValue<T extends Attribute.Attribute> = T extends Email ? EmailValue : never;

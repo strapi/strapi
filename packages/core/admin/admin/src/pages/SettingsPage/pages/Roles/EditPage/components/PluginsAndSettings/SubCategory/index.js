@@ -1,13 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { Grid, GridItem, Box, Checkbox, Flex, Typography } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
+
+import { Box, Checkbox, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
-import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
+import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
+
 import { formatActions, getConditionsButtonState } from './utils';
 
 const Border = styled.div`

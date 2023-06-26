@@ -5,16 +5,17 @@
  */
 
 import React from 'react';
-import get from 'lodash/get';
-import PropTypes from 'prop-types';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { ComponentIcon } from './ComponentIcon';
-
 import useDataManager from '../../hooks/useDataManager';
+
+import { ComponentIcon } from './ComponentIcon';
 
 const CloseButton = styled(Box)`
   position: absolute;

@@ -1,8 +1,10 @@
 import React from 'react';
-import { render as renderRTL, act } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+
 import { NotificationsProvider, useNotification } from '../Notifications';
 
 const defaultNotificationConfig = {

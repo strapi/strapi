@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
 import { Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../utils';
 
 const FormModalEndActions = ({

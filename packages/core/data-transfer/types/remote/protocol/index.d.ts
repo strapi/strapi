@@ -1,3 +1,3 @@
-export * as client from './client';
-export * as server from './server';
-export * as auth from './auth';
+export * as Client from './client';
+export * as Server from './server';
+export * as Auth from './auth';

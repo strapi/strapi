@@ -1,14 +1,15 @@
+import { generateNKeysBetween } from 'fractional-indexing';
 import produce from 'immer';
-import unset from 'lodash/unset';
+import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
-import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
-import { generateNKeysBetween } from 'fractional-indexing';
+import unset from 'lodash/unset';
+
+import { getMaxTempKey } from '../../utils';
 
 import { findAllAndReplace, moveFields } from './utils';
-import { getMaxTempKey } from '../../utils';
 
 const initialState = {
   componentsDataStructure: {},
@@ -137,17 +138,16 @@ const reducer = (state, action) =>
           __temp_key__: keys[index],
         }));
 
-        set(
-          draftState,
-          initialDataPath,
-          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
-        );
-
         /**
          * We need to set the value also on modifiedData, because initialData
          * and modifiedData need to stay in sync, so that the CM can compare
          * both states, to render the dirty UI state
          */
+        set(
+          draftState,
+          initialDataPath,
+          uniqBy([...valuesWithKeys, ...initialDataRelations], 'id')
+        );
         set(
           draftState,
           modifiedDataPath,

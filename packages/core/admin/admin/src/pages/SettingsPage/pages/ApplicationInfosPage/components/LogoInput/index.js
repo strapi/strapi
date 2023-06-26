@@ -1,15 +1,18 @@
 import React, { useReducer } from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
 import {
+  Box,
+  CarouselActions,
   CarouselInput,
   CarouselSlide,
-  CarouselActions,
   IconButton,
-  Box,
 } from '@strapi/design-system';
 import { Plus, Refresh } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import LogoModalStepper from '../LogoModalStepper';
+
 import reducer, { initialState } from './reducer';
 import stepper from './stepper';
 

@@ -103,4 +103,4 @@ StrapiAppProvider.propTypes = {
  */
 const useStrapiApp = () => React.useContext(StrapiAppContext);
 
-export { StrapiAppProvider, useStrapiApp, StrapiAppContext };
+export { StrapiAppContext, StrapiAppProvider, useStrapiApp };

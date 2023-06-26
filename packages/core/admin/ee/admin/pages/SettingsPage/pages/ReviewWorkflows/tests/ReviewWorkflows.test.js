@@ -1,18 +1,19 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useNotification } from '@strapi/helper-plugin';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
-import { QueryClientProvider, QueryClient } from 'react-query';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { useNotification } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
-import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsPage from '..';
+import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import { reducer } from '../reducer';
 
 const notificationMock = jest.fn();
@@ -20,10 +21,6 @@ const notificationMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => notificationMock),
-  // eslint-disable-next-line react/prop-types
-  CheckPagePermissions({ children }) {
-    return children;
-  },
 }));
 
 let SHOULD_ERROR = false;
@@ -56,19 +53,18 @@ const server = setupServer(
   })
 );
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
 const setup = (props) => {
   return {
     ...render(<ReviewWorkflowsPage {...props} />, {
       wrapper({ children }) {
         const store = configureStore([], [reducer]);
+        const client = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
+          },
+        });
 
         return (
           <DndProvider backend={HTML5Backend}>
@@ -106,12 +102,6 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     expect(getByText('0 stages')).toBeInTheDocument();
     expect(getByText('Workflow is loading')).toBeInTheDocument();
-  });
-
-  test('loading state is not present', () => {
-    const { queryByText } = setup();
-
-    expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
   });
 
   test('display stages', async () => {

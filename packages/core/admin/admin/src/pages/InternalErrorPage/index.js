@@ -5,9 +5,10 @@
  *
  */
 import React from 'react';
-import { useFocusWhenNavigate, LinkButton } from '@strapi/helper-plugin';
-import { Main, ContentLayout, HeaderLayout, EmptyStateLayout } from '@strapi/design-system';
-import { EmptyPictures, ArrowRight } from '@strapi/icons';
+
+import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { LinkButton, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 const InternalErrorPage = () => {
