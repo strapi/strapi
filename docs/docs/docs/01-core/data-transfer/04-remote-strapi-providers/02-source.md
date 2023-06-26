@@ -12,7 +12,7 @@ The Strapi remote source provider connects to a remote Strapi websocket server a
 
 ## Provider Options
 
-The remote source provider accepts a `url` and `auth` options described below.
+The remote source provider accepts `url`, `auth`, and `retryMessageOptions` described below.
 
 ```typescript
 interface ITransferTokenAuth {
@@ -24,6 +24,10 @@ export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
   url: URL;
   auth?: ITransferTokenAuth;
+  retryMessageOptions?: {
+    retryMessageTimeout: number; // milliseconds to wait for a response from a message
+    retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
+  };
 }
 ```
 

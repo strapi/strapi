@@ -11,7 +11,7 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
-import { client, server, auth } from '../../../../types/remote/protocol';
+import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
@@ -19,8 +19,11 @@ import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../util
 
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
   url: URL; // the url of the remote Strapi admin
-  auth?: auth.ITransferTokenAuth;
-  retryMessageOptions?: { retryMessageTimeout: number; retryMessageMaxRetries: number };
+  auth?: Auth.ITransferTokenAuth;
+  retryMessageOptions?: {
+    retryMessageTimeout: number; // milliseconds to wait for a response from a message
+    retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
+  };
 }
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
