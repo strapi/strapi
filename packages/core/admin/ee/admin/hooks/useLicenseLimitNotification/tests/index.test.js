@@ -1,4 +1,7 @@
+import React from 'react';
+
 import { renderHook } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import useLicenseLimitNotification from '..';
 import useLicenseLimits from '../../useLicenseLimits';
@@ -37,6 +40,13 @@ jest.mock('../../useLicenseLimits', () => {
   }));
 });
 
+const setup = (...args) =>
+  renderHook(() => useLicenseLimitNotification(...args), {
+    wrapper({ children }) {
+      return <IntlProvider>{children}</IntlProvider>;
+    },
+  });
+
 describe('useLicenseLimitNotification', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,7 +58,7 @@ describe('useLicenseLimitNotification', () => {
       license: {},
     }));
 
-    renderHook(() => useLicenseLimitNotification());
+    setup();
     expect(toggleNotification).not.toHaveBeenCalled();
   });
 
@@ -60,7 +70,7 @@ describe('useLicenseLimitNotification', () => {
       },
     }));
 
-    renderHook(() => useLicenseLimitNotification());
+    setup();
     expect(toggleNotification).not.toHaveBeenCalled();
   });
 
@@ -72,27 +82,26 @@ describe('useLicenseLimitNotification', () => {
       },
     }));
 
-    renderHook(() => useLicenseLimitNotification());
+    setup();
     expect(toggleNotification).not.toHaveBeenCalled();
   });
 
   it('should display a notification when license limit is over or at limit', () => {
-    renderHook(() => useLicenseLimitNotification());
+    setup();
     expect(toggleNotification).toHaveBeenCalled();
   });
 
   it('should display a soft warning notification when license limit is at limit', () => {
-    renderHook(() => useLicenseLimitNotification());
+    setup();
 
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'softWarning',
       message:
-        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title:
-        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
+        "Add seats to re-enable Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title: 'At seat limit (5/5)',
       link: {
         url: 'https://strapi.io/billing/request-seats',
-        label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
+        label: 'CONTACT SALES',
       },
       blockTransition: true,
       onClose: expect.any(Function),
@@ -107,17 +116,16 @@ describe('useLicenseLimitNotification', () => {
       },
     }));
 
-    renderHook(() => useLicenseLimitNotification());
+    setup();
 
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'warning',
       message:
-        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title:
-        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
+        "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title: 'Over seat limit (5/5)',
       link: {
         url: 'https://strapi.io/billing/request-seats',
-        label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
+        label: 'CONTACT SALES',
       },
       blockTransition: true,
       onClose: expect.any(Function),
@@ -132,17 +140,16 @@ describe('useLicenseLimitNotification', () => {
       },
     }));
 
-    renderHook(() => useLicenseLimitNotification());
+    setup();
 
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'softWarning',
       message:
-        "Add seats to {licenseLimitStatus, select, OVER_LIMIT {invite} other {re-enable}} Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
-      title:
-        '{licenseLimitStatus, select, OVER_LIMIT {Over} other {At}} seat limit ({enforcementUserCount}/{permittedSeats})',
+        "Add seats to re-enable Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
+      title: 'At seat limit (5/5)',
       link: {
         url: 'https://cloud.strapi.io/profile/billing',
-        label: '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
+        label: 'ADD SEATS',
       },
       blockTransition: true,
       onClose: expect.any(Function),
