@@ -110,6 +110,7 @@ describe('Entity service decorator', () => {
         update: jest.fn(() => Promise.resolve(entry)),
       };
 
+      const emit = jest.fn();
       global.strapi = {
         ...global.strapi,
         entityService: {
@@ -117,6 +118,16 @@ describe('Entity service decorator', () => {
             return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
           }),
           emitEvent: jest.fn(),
+        },
+        getModel: jest.fn(() => ({
+          modelName: uid,
+          uid,
+          options: {
+            reviewWorkflows: true,
+          },
+        })),
+        eventHub: {
+          emit,
         },
       };
 
@@ -126,20 +137,18 @@ describe('Entity service decorator', () => {
       const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: 1 } };
       await service.update(uid, id, input);
 
-      expect(global.strapi.entityService.emitEvent).toHaveBeenCalledWith(
+      expect(emit).toHaveBeenCalledWith(WORKFLOW_UPDATE_STAGE, {
+        entity: { id: 1 },
+        model: uid,
         uid,
-        WORKFLOW_UPDATE_STAGE,
-        {
-          entityId: 1,
-          workflow: {
-            id: 1,
-            stages: {
-              from: 2,
-              to: 1,
-            },
+        workflow: {
+          id: 1,
+          stages: {
+            from: 2,
+            to: 1,
           },
-        }
-      );
+        },
+      });
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
         ...input,
