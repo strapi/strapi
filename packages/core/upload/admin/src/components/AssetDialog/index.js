@@ -108,6 +108,7 @@ export const AssetDialog = ({
       return undefined;
     }
 
+    // selected files in current folder
     const alreadySelected = allowedAssets.filter(
       (asset) => selectedAssets.findIndex((selectedAsset) => selectedAsset.id === asset.id) !== -1
     );

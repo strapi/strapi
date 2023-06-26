@@ -35,11 +35,13 @@ export const useSelectionState = (keys, initialValue) => {
   };
 
   const selectMultiple = (nextSelections) => {
-    setSelections([
-      ...selections,
+    setSelections((currSelections) => [
+      // already selected items
+      ...currSelections,
+      // filter out already selected items from nextSelections
       ...nextSelections.filter(
         (nextSelection) =>
-          selections.findIndex((currentSelection) =>
+          currSelections.findIndex((currentSelection) =>
             keys.every((key) => currentSelection[key] === nextSelection[key])
           ) === -1
       ),
@@ -47,8 +49,9 @@ export const useSelectionState = (keys, initialValue) => {
   };
 
   const deselectMultiple = (nextSelections) => {
-    setSelections([
-      ...selections.filter(
+    setSelections((currSelections) => [
+      // filter out items in currSelections that are in nextSelections
+      ...currSelections.filter(
         (currentSelection) =>
           nextSelections.findIndex((nextSelection) =>
             keys.every((key) => currentSelection[key] === nextSelection[key])
