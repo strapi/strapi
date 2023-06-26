@@ -1,45 +1,47 @@
 import React, { useMemo, useState } from 'react';
+
 import {
+  ActionLayout,
   Button,
+  ContentLayout,
   HeaderLayout,
   Layout,
-  ContentLayout,
-  ActionLayout,
   Main,
   Table,
-  Tr,
-  Thead,
   Th,
+  Thead,
+  Tr,
   Typography,
   useNotifyAT,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
 import {
-  useTracking,
-  SettingsPageTitle,
   CheckPermissions,
-  useNotification,
-  useRBAC,
-  NoPermissions,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  useFocusWhenNavigate,
-  useQueryParams,
-  EmptyStateLayout,
   ConfirmDialog,
-  useFilter,
+  EmptyStateLayout,
+  LoadingIndicatorPage,
+  NoPermissions,
+  SearchURLQuery,
+  SettingsPageTitle,
   useCollator,
+  useFilter,
+  useFocusWhenNavigate,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+  useTracking,
 } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useHistory } from 'react-router-dom';
 
-import { fetchData, deleteData } from './utils/api';
-import { getTrad } from '../../../utils';
+import { PERMISSIONS } from '../../../constants';
 import pluginId from '../../../pluginId';
-import permissions from '../../../permissions';
+import { getTrad } from '../../../utils';
+
 import TableBody from './components/TableBody';
+import { deleteData, fetchData } from './utils/api';
 
 const RoleListPage = () => {
   const { trackUsage } = useTracking();
@@ -58,10 +60,10 @@ const RoleListPage = () => {
 
   const updatePermissions = useMemo(() => {
     return {
-      create: permissions.createRole,
-      read: permissions.readRoles,
-      update: permissions.updateRole,
-      delete: permissions.deleteRole,
+      create: PERMISSIONS.createRole,
+      read: PERMISSIONS.readRoles,
+      update: PERMISSIONS.updateRole,
+      delete: PERMISSIONS.deleteRole,
     };
   }, []);
 
@@ -155,7 +157,7 @@ const RoleListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={permissions.createRole}>
+            <CheckPermissions permissions={PERMISSIONS.createRole}>
               <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
@@ -218,7 +220,7 @@ const RoleListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
-                permissions={permissions}
+                permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}
               />

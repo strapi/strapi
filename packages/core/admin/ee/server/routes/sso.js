@@ -56,5 +56,14 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/providers/isSSOLocked',
+      handler: 'user.isSSOLocked',
+      config: {
+        middlewares: [enableFeatureMiddleware('sso')],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };

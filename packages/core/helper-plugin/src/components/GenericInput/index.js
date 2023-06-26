@@ -5,30 +5,31 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import parseISO from 'date-fns/parseISO';
-import formatISO from 'date-fns/formatISO';
-import { useIntl } from 'react-intl';
 
 import {
   Checkbox,
   DatePicker,
   DateTimePicker,
   Icon,
+  JSONInput,
   NumberInput,
+  Option,
   Select,
   Textarea,
   TextInput,
   TimePicker,
   ToggleInput,
-  JSONInput,
-  Option,
 } from '@strapi/design-system';
-import { EyeStriked, Eye } from '@strapi/icons';
+import { Eye, EyeStriked } from '@strapi/icons';
+import formatISO from 'date-fns/formatISO';
+import parseISO from 'date-fns/parseISO';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
-import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
 import pxToRem from '../../utils/pxToRem';
+
+import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
@@ -235,12 +236,7 @@ const GenericInput = ({
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          value={value && new Date(value)}
-          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-          selectButtonTitle={formatMessage({
-            id: 'selectButtonTitle',
-            defaultMessage: 'Select',
-          })}
+          value={value ? new Date(value) : undefined}
         />
       );
     }
@@ -423,9 +419,8 @@ const GenericInput = ({
       // The backend send a value which has the following format: '00:45:00.000'
       // or the time picker only supports hours & minutes so we need to mutate the value
       if (value && value.split(':').length > 2) {
-        time = time.split(':');
-        time.pop();
-        time = time.join(':');
+        const [hour, minute] = value.split(':');
+        time = `${hour}:${minute}`;
       }
 
       return (

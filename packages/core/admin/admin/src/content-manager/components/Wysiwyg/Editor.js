@@ -1,11 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
+
 import CodeMirror from 'codemirror5';
-import 'codemirror5/addon/display/placeholder';
+import PropTypes from 'prop-types';
+
 import PreviewWysiwyg from '../PreviewWysiwyg';
+
 import { EditorStylesContainer } from './EditorStylesContainer';
-import { EditorAndPreviewWrapper } from './WysiwygStyles';
 import newlineAndIndentContinueMarkdownList from './utils/continueList';
+import { EditorAndPreviewWrapper } from './WysiwygStyles';
+
+import 'codemirror5/addon/display/placeholder';
 
 const Editor = ({
   disabled,

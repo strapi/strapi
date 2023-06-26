@@ -1,9 +1,10 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
 import { renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useReviewWorkflows } from '../useReviewWorkflows';
 
@@ -24,6 +25,13 @@ const server = setupServer(
             stages: populate === 'stages' ? [STAGE_FIXTURE] : [],
           },
         ],
+
+        pagination: {
+          page: 1,
+          pageSize: 100,
+          pageCount: 1,
+          total: 1,
+        },
       })
     );
   }),
@@ -36,6 +44,13 @@ const server = setupServer(
         data: {
           id: 1,
           stages: populate === 'stages' ? [STAGE_FIXTURE] : [],
+        },
+
+        pagination: {
+          page: 1,
+          pageSize: 100,
+          pageCount: 1,
+          total: 1,
         },
       })
     );
@@ -79,6 +94,7 @@ describe('useReviewWorkflows', () => {
     expect(result.current).toStrictEqual(
       expect.objectContaining({
         status: 'success',
+        pagination: expect.objectContaining({ total: 1 }),
         workflows: [{ id: expect.any(Number), stages: expect.any(Array) }],
       })
     );
@@ -91,6 +107,7 @@ describe('useReviewWorkflows', () => {
 
     expect(result.current).toStrictEqual(
       expect.objectContaining({
+        pagination: expect.objectContaining({ total: 1 }),
         workflows: [expect.objectContaining({ id: 1, stages: expect.any(Array) })],
       })
     );

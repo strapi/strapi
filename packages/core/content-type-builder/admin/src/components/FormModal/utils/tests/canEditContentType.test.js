@@ -1,4 +1,5 @@
 import canEditContentType from '../canEditContentType';
+
 import rawData from './rawData';
 
 describe('canEditContentType', () => {

@@ -1,9 +1,5 @@
-import type Koa from 'koa';
-import { Database } from '@strapi/database';
-
-import type { StringMap } from './utils';
-import type { GenericController } from '../../../core-api/controller';
-import type { GenericService } from '../../../core-api/service';
+import type { Database } from '@strapi/database';
+import type { Shared, Common } from '@strapi/strapi';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -21,7 +17,7 @@ interface CustomFieldServerOptions {
    * The existing Strapi data type the custom field uses
    */
   type: string;
-  
+
   /**
    * Settings for the input size in the Admin UI
    */
@@ -69,24 +65,26 @@ export interface Strapi {
    *
    * It returns all the registered services
    */
-  readonly services: StringMap<GenericService>;
+  readonly services: Shared.Services;
 
   /**
    * Find a service using its unique identifier
    */
-  service<T extends GenericService = GenericService>(uid: string): T | undefined;
+  service<TService extends Common.Service = Common.Service>(uid: string): TService | undefined;
 
   /**
    * Getter for the Strapi controllers container
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<GenericController>;
+  readonly controllers: Shared.Controllers;
 
   /**
    * Find a controller using its unique identifier
    */
-  controller(uid: string): GenericController | undefined;
+  controller<TContentTypeUID extends Common.UID.Controller>(
+    uid: TContentTypeUID
+  ): Shared.Controllers[TContentTypeUID];
 
   /**
    * Getter for the Strapi content types container

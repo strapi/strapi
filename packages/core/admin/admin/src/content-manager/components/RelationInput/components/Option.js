@@ -1,11 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
-import { components } from 'react-select';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
 
-import { pxToRem } from '@strapi/helper-plugin';
 import { Flex, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { components } from 'react-select';
+import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
 

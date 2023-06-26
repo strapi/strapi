@@ -1,6 +1,6 @@
-import { useQuery } from 'react-query';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
+import { useQuery } from 'react-query';
 
 export function useReviewWorkflows(params = {}) {
   const { id = '', ...queryParams } = params;
@@ -15,9 +15,7 @@ export function useReviewWorkflows(params = {}) {
     ['review-workflows', 'workflows', id],
     async () => {
       try {
-        const {
-          data: { data },
-        } = await get(
+        const { data } = await get(
           `/admin/review-workflows/workflows/${id}${queryString ? `?${queryString}` : ''}`
         );
 
@@ -31,13 +29,14 @@ export function useReviewWorkflows(params = {}) {
 
   let workflows = [];
 
-  if (id && data) {
-    workflows = [data];
-  } else if (Array.isArray(data)) {
-    workflows = data;
+  if (id && data?.data) {
+    workflows = [data.data];
+  } else if (Array.isArray(data?.data)) {
+    workflows = data.data;
   }
 
   return {
+    pagination: data?.pagination ?? {},
     workflows,
     isLoading,
     status,

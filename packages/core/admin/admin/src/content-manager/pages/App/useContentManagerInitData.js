@@ -1,16 +1,19 @@
+import { useEffect, useRef } from 'react';
+
+import { useNotifyAT } from '@strapi/design-system';
 import {
+  useFetchClient,
   useNotification,
   useRBACProvider,
   useStrapiApp,
-  useFetchClient,
 } from '@strapi/helper-plugin';
-import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNotifyAT } from '@strapi/design-system';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getTrad } from '../../utils';
+
 import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';

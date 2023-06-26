@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Textarea } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Textarea } from '@strapi/design-system';
 
 const TokenDescription = ({ errors, values, onChange, canEditInputs }) => {
   const { formatMessage } = useIntl();

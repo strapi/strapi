@@ -1,14 +1,15 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClientProvider, QueryClient } from 'react-query';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { combineReducers, createStore } from 'redux';
 
-import reducers from '../../../hooks/reducers';
 import LocaleSelect from '..';
+import reducers from '../../../hooks/reducers';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

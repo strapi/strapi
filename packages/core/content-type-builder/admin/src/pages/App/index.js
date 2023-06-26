@@ -4,18 +4,20 @@
  *
  */
 
-import React, { Suspense, lazy, useEffect, useRef } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useRef } from 'react';
+
+import { Layout } from '@strapi/design-system';
+import { CheckPagePermissions, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { LoadingIndicatorPage, CheckPagePermissions, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/design-system';
-import pluginPermissions from '../../permissions';
-import pluginId from '../../pluginId';
+import { Route, Switch } from 'react-router-dom';
+
+import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider';
 import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
+import { PERMISSIONS } from '../../constants';
+import pluginId from '../../pluginId';
 import RecursivePath from '../RecursivePath';
-import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 
 const ListView = lazy(() =>
   import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView')
@@ -37,7 +39,7 @@ const App = () => {
   }, []);
 
   return (
-    <CheckPagePermissions permissions={pluginPermissions.main}>
+    <CheckPagePermissions permissions={PERMISSIONS.main}>
       <Helmet title={title} />
       <FormModalNavigationProvider>
         <DataManagerProvider>

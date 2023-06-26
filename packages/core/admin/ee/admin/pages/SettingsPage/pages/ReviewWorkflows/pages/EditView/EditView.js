@@ -1,33 +1,32 @@
 import * as React from 'react';
-import { useFormik, Form, FormikProvider } from 'formik';
-import { useIntl } from 'react-intl';
-import { useSelector, useDispatch } from 'react-redux';
-import { useMutation } from 'react-query';
-import { useParams } from 'react-router-dom';
 
+import { Button, Flex, Loader } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
   ConfirmDialog,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
   useTracking,
 } from '@strapi/helper-plugin';
-import { Button, Flex, Loader } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
+import { useFormik, Form, FormikProvider } from 'formik';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
-import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { Stages } from '../../components/Stages';
-import { reducer, initialState } from '../../reducer';
-import { REDUX_NAMESPACE } from '../../constants';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
+import { useLicenseLimits } from '../../../../../../hooks';
 import { setWorkflow } from '../../actions';
-import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
-import adminPermissions from '../../../../../../../../admin/src/permissions';
-
 import * as Layout from '../../components/Layout';
+import * as LimitsModal from '../../components/LimitsModal';
+import { Stages } from '../../components/Stages';
+import { WorkflowAttributes } from '../../components/WorkflowAttributes';
+import { REDUX_NAMESPACE } from '../../constants';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
+import { reducer, initialState } from '../../reducer';
+import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 
 export function ReviewWorkflowsEditView() {
   const { trackUsage } = useTracking();
@@ -38,6 +37,7 @@ export function ReviewWorkflowsEditView() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const {
+    pagination,
     workflows: [workflow],
     status: workflowStatus,
     refetch,
@@ -54,6 +54,8 @@ export function ReviewWorkflowsEditView() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
+  const { license, isLoading: isLicenseLoading } = useLicenseLimits();
+  const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -129,10 +131,16 @@ export function ReviewWorkflowsEditView() {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
   }, [workflowStatus, workflow, dispatch]);
 
+  React.useEffect(() => {
+    if (!isLicenseLoading && pagination?.total >= license?.data?.workflows) {
+      setShowLimitModal(true);
+    }
+  }, [isLicenseLoading, license?.data?.workflows, pagination?.total]);
+
   // TODO redirect back to list-view if workflow is not found?
 
   return (
-    <CheckPagePermissions permissions={adminPermissions.settings['review-workflows'].main}>
+    <>
       <Layout.DragLayerRendered />
 
       <FormikProvider value={formik}>
@@ -194,6 +202,22 @@ export function ReviewWorkflowsEditView() {
         onToggleDialog={toggleConfirmDeleteDialog}
         onConfirm={handleConfirmDeleteDialog}
       />
-    </CheckPagePermissions>
+
+      <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'Settings.review-workflows.edit.page.workflows.limit.title',
+            defaultMessage: 'You’ve reached the limit of workflows in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'Settings.review-workflows.edit.page.workflows.limit.body',
+            defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+    </>
   );
 }

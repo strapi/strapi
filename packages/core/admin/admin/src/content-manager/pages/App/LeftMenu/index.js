@@ -5,18 +5,18 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { useSelector, shallowEqual } from 'react-redux';
-import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
 import {
   SubNav,
   SubNavHeader,
+  SubNavLink,
   SubNavSection,
   SubNavSections,
-  SubNavLink,
 } from '@strapi/design-system/v2';
-import { useFilter, useCollator } from '@strapi/helper-plugin';
+import { useCollator, useFilter } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { shallowEqual, useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';

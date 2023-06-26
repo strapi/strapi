@@ -29,6 +29,7 @@ const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./
 const { generateTimestampCode } = require('./code-generator');
 const contentTypes = require('./content-types');
 const env = require('./env-helper');
+const webhook = require('./webhook');
 const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
 const hooks = require('./hooks');
@@ -42,6 +43,7 @@ const importDefault = require('./import-default');
 const template = require('./template');
 const file = require('./file');
 const traverse = require('./traverse');
+const { isOperator, isOperatorOfType } = require('./operators');
 
 module.exports = {
   yup,
@@ -73,6 +75,7 @@ module.exports = {
   isKebabCase,
   isCamelCase,
   toKebabCase,
+  webhook,
   contentTypes,
   env,
   relations,
@@ -91,4 +94,6 @@ module.exports = {
   importDefault,
   file,
   traverse,
+  isOperator,
+  isOperatorOfType,
 };

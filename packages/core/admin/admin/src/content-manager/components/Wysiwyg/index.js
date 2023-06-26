@@ -1,22 +1,24 @@
 import React, { useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { Typography, Box, Flex } from '@strapi/design-system';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import Editor from './Editor';
-import WysiwygNav from './WysiwygNav';
-import WysiwygFooter from './WysiwygFooter';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import Hint from '../Hint';
 
-import {
-  markdownHandler,
-  listHandler,
-  titleHandler,
-  insertFile,
-  quoteAndCodeHandler,
-} from './utils/utils';
+import Editor from './Editor';
 import { EditorLayout } from './EditorLayout';
+import {
+  insertFile,
+  listHandler,
+  markdownHandler,
+  quoteAndCodeHandler,
+  titleHandler,
+} from './utils/utils';
+import WysiwygFooter from './WysiwygFooter';
+import WysiwygNav from './WysiwygNav';
 
 const LabelAction = styled(Box)`
   svg path {

@@ -9,6 +9,7 @@ const defaultWorkflow = require('../../constants/default-workflow.json');
 const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
+const webhookEvents = require('../../constants/webhookEvents');
 
 const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
 // The longest index name that Strapi can create is prefixed with '_strapi_stage_links_inv_fk', so the content type name  should be no longer than this.
@@ -89,7 +90,9 @@ function persistStagesJoinTables({ strapi }) {
 }
 
 const registerWebhookEvents = async ({ strapi }) =>
-  strapi.webhookStore.addAllowedEvent('WORKFLOW_UPDATE_STAGE', 'workflow.updateEntryStage');
+  Object.entries(webhookEvents).forEach(([eventKey, event]) =>
+    strapi.webhookStore.addAllowedEvent(eventKey, event)
+  );
 
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
