@@ -1,11 +1,18 @@
 'use strict';
 
-const { merge, isEmpty } = require('lodash/fp');
+const { merge, isEmpty, set, propEq } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
+
+const isMorphToRelation = (attribute) =>
+  isRelation(attribute) && attribute.relation.includes('morphTo');
+const isMedia = propEq('type', 'media');
+const isRelation = propEq('type', 'relation');
+const isComponent = propEq('type', 'component');
+const isDynamicZone = propEq('type', 'dynamiczone');
 
 /**
  * Populate the model for relation
@@ -18,13 +25,23 @@ const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
  * @param {Boolean} options.countOne
  * @returns {true|{count: true}}
  */
-function getPopulateForRelation(attribute, model, attributeName, { countMany, countOne }) {
+function getPopulateForRelation(
+  attribute,
+  model,
+  attributeName,
+  { countMany, countOne, initialPopulate }
+) {
   const isManyRelation = isAnyToMany(attribute);
+
+  if (initialPopulate) {
+    return initialPopulate;
+  }
 
   // always populate createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
     return true;
   }
+
   if ((isManyRelation && countMany) || (!isManyRelation && countOne)) {
     return { count: true };
   }
@@ -109,7 +126,7 @@ function getPopulateFor(attributeName, model, options, level) {
  */
 const getDeepPopulate = (
   uid,
-  { countMany = false, countOne = false, maxLevel = Infinity } = {},
+  { initialPopulate = {}, countMany = false, countOne = false, maxLevel = Infinity } = {},
   level = 1
 ) => {
   if (level > maxLevel) {
@@ -122,7 +139,12 @@ const getDeepPopulate = (
     (populateAcc, attributeName) =>
       merge(
         populateAcc,
-        getPopulateFor(attributeName, model, { countMany, countOne, maxLevel }, level)
+        getPopulateFor(
+          attributeName,
+          model,
+          { initialPopulate: initialPopulate?.[attributeName], countMany, countOne, maxLevel },
+          level
+        )
       ),
     {}
   );
@@ -191,7 +213,62 @@ const getDeepPopulateDraftCount = (uid) => {
   return { populate, hasRelations };
 };
 
+/**
+ *  Create a Strapi populate object which populates all attribute fields of a Strapi query.
+ *
+ * @param {string} uid
+ * @param {Object} query
+ * @returns {Object} populate object
+ */
+const getQueryPopulate = async (uid, query) => {
+  let populateQuery = {};
+
+  await strapiUtils.traverse.traverseQueryFilters(
+    /**
+     *
+     * @param {Object} param0
+     * @param {string} param0.key - Attribute name
+     * @param {Object} param0.attribute - Attribute definition
+     * @param {string} param0.path - Content Type path to the attribute
+     * @returns
+     */
+    ({ attribute, path }) => {
+      // TODO: handle dynamic zones and morph relations
+      if (!attribute || isDynamicZone(attribute) || isMorphToRelation(attribute)) {
+        return;
+      }
+
+      // Populate all relations, components and media
+      if (isRelation(attribute) || isMedia(attribute) || isComponent(attribute)) {
+        const populatePath = path.attribute.replace(/\./g, '.populate.');
+        populateQuery = set(populatePath, {}, populateQuery);
+      }
+    },
+    { schema: strapi.getModel(uid) },
+    query
+  );
+
+  return populateQuery;
+};
+
+/**
+ * When config admin.webhooks.populateRelations is set to true,
+ * populated relations will be passed to any webhook event.
+ * The entity-manager response will not have the populated relations though.
+ * For performance reasons, it is recommended to set it to false,
+ *
+ * See docs: https://docs.strapi.io/dev-docs/configurations/server
+ *
+ * TODO V5: Set to false by default.
+ * TODO V5: Make webhooks always send the same entity data.
+ */
+const isWebhooksPopulateRelationsEnabled = () => {
+  return strapi.config.get('server.webhooks.populateRelations', true);
+};
+
 module.exports = {
   getDeepPopulate,
   getDeepPopulateDraftCount,
+  getQueryPopulate,
+  isWebhooksPopulateRelationsEnabled,
 };

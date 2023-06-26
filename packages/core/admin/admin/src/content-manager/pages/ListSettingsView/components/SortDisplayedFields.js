@@ -1,11 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Box, Flex, IconButton, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box, Flex, Typography, SimpleMenu, MenuItem, IconButton } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
-import DraggableCard from './DraggableCard';
+import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
+
+import DraggableCard from './DraggableCard';
 
 const FlexWrapper = styled(Box)`
   flex: ${({ size }) => size};

@@ -1,28 +1,18 @@
-import { GetArrayValues } from '../../utils';
-import {
-  Attribute,
-  ConfigurableOption,
-  DefaultOption,
-  PrivateOption,
-  RequiredOption,
-} from './base';
+import type { Attribute, Utils } from '@strapi/strapi';
 
-export interface EnumerationAttributeProperties<T extends string[] = []> {
-  enum: T;
+export interface EnumerationProperties<TValues extends string[] = []> {
+  enum: TValues;
 }
 
-export type EnumerationAttribute<T extends string[] = []> = Attribute<'enumeration'> &
-  EnumerationAttributeProperties<T> &
+export type Enumeration<TValues extends string[] = []> = Attribute.OfType<'enumeration'> &
+  EnumerationProperties<TValues> &
   // Options
-  ConfigurableOption &
-  DefaultOption<T> &
-  PrivateOption &
-  RequiredOption;
+  Attribute.ConfigurableOption &
+  Attribute.DefaultOption<TValues> &
+  Attribute.PrivateOption &
+  Attribute.RequiredOption;
 
-export type EnumerationValue<T extends string[]> = GetArrayValues<T>;
+export type EnumerationValue<TValues extends string[]> = Utils.Array.Values<TValues>;
 
-export type GetEnumerationAttributeValue<T extends Attribute> = T extends EnumerationAttribute<
-  infer U
->
-  ? EnumerationValue<U>
-  : never;
+export type GetEnumerationValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Enumeration<infer TValues> ? EnumerationValue<TValues> : never;

@@ -2,6 +2,7 @@
 // import { FormattedMessage } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { componentField, componentForm } from '../component';
+
 import { nameField } from './nameField';
 
 const baseForm = {

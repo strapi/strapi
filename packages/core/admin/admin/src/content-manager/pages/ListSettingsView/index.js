@@ -1,40 +1,42 @@
 import React, { memo, useContext, useReducer, useState } from 'react';
-import PropTypes from 'prop-types';
-import { useMutation } from 'react-query';
-import isEqual from 'lodash/isEqual';
-import upperFirst from 'lodash/upperFirst';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
-import { stringify } from 'qs';
+
 import {
-  useNotification,
-  useTracking,
+  Box,
+  Button,
+  ContentLayout,
+  Divider,
+  HeaderLayout,
+  Layout,
+  Main,
+} from '@strapi/design-system';
+import {
   ConfirmDialog,
   Link,
   useFetchClient,
+  useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
+import { ArrowLeft, Check } from '@strapi/icons';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
+import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import {
-  Box,
-  Divider,
-  Layout,
-  HeaderLayout,
-  ContentLayout,
-  Main,
-  Button,
-} from '@strapi/design-system';
-import { Check, ArrowLeft } from '@strapi/icons';
+import { useMutation } from 'react-query';
 
-import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
+import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
+
+import EditFieldForm from './components/EditFieldForm';
 import Settings from './components/Settings';
 import SortDisplayedFields from './components/SortDisplayedFields';
-import EditFieldForm from './components/EditFieldForm';
+import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 
 const ListSettingsView = ({ layout, slug }) => {
   const { put } = useFetchClient();

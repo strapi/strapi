@@ -4,21 +4,23 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
-import { useHistory } from 'react-router-dom';
+
+import { Box, Grid, GridItem, Layout, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout, Main, Box, Grid, GridItem } from '@strapi/design-system';
 import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+import { Helmet } from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
+import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
+import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import { useContentTypes } from '../../hooks/useContentTypes';
 
 import cornerOrnamentPath from './assets/corner-ornament.svg';
-import { useContentTypes } from '../../hooks/useContentTypes';
-import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
-import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
-import SocialLinks from './SocialLinks';
-import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
+import HomeHeader from './HomeHeader';
+import SocialLinks from './SocialLinks';
 
 const LogoContainer = styled(Box)`
   position: absolute;

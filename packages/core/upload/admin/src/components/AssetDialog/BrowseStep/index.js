@@ -1,42 +1,43 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
-import { usePersistentState } from '@strapi/helper-plugin';
 import {
-  Button,
-  Flex,
-  Box,
-  Divider,
   BaseCheckbox,
+  Box,
+  Button,
+  Divider,
+  Flex,
   GridItem,
-  Typography,
   IconButton,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Pencil, Plus, Grid, List } from '@strapi/icons';
+import { usePersistentState } from '@strapi/helper-plugin';
+import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import {
-  FolderDefinition,
   AssetDefinition,
-  viewOptions,
+  FolderDefinition,
   localStorageKeys,
+  viewOptions,
 } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { useFolder } from '../../../hooks/useFolder';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
+import getTrad from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList';
-import { TableList } from '../../TableList';
-import { FolderGridList } from '../../FolderGridList';
-import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
-import SortPicker from '../../SortPicker';
-import { useFolder } from '../../../hooks/useFolder';
+import { EmptyAssets } from '../../EmptyAssets';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
+import { FolderGridList } from '../../FolderGridList';
+import SortPicker from '../../SortPicker';
+import { TableList } from '../../TableList';
+
 import { Filters } from './Filters';
-import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
+import PaginationFooter from './PaginationFooter';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
 

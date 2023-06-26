@@ -1,6 +1,6 @@
-import { useQuery } from 'react-query';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
+import { useQuery } from 'react-query';
 
 export function useAdminUsers(params = {}, queryOptions = {}) {
   const { id = '', ...queryParams } = params;

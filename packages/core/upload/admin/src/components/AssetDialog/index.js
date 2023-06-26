@@ -1,37 +1,40 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
+
 import {
-  ModalLayout,
-  ModalBody,
-  ModalHeader,
-  Flex,
+  Badge,
   Button,
   Divider,
-  Typography,
-  Tabs,
+  Flex,
+  Loader,
+  ModalBody,
+  ModalHeader,
+  ModalLayout,
   Tab,
   TabGroup,
-  TabPanels,
   TabPanel,
-  Badge,
-  Loader,
+  TabPanels,
+  Tabs,
+  Typography,
 } from '@strapi/design-system';
-import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
-import { getTrad, containsAssetFilter } from '../../utils';
-import { SelectedStep } from './SelectedStep';
-import { BrowseStep } from './BrowseStep';
-import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { AnErrorOccurred, NoPermissions, pxToRem, useSelectionState } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
-import { AssetDefinition } from '../../constants';
+import { containsAssetFilter, getTrad } from '../../utils';
 import getAllowedFiles from '../../utils/getAllowedFiles';
-import { DialogFooter } from './DialogFooter';
-import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
+import { EditAssetDialog } from '../EditAssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog';
+
+import { BrowseStep } from './BrowseStep';
+import { DialogFooter } from './DialogFooter';
+import { SelectedStep } from './SelectedStep';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */

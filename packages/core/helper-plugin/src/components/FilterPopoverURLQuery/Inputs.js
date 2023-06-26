@@ -1,17 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import parseISO from 'date-fns/parseISO';
-import formatISO from 'date-fns/formatISO';
+
 import {
   DatePicker,
   DateTimePicker,
   Field,
-  NumberInput,
-  TimePicker,
-  Select,
   FieldInput,
+  NumberInput,
   Option,
+  Select,
+  TimePicker,
 } from '@strapi/design-system';
+import formatISO from 'date-fns/formatISO';
+import parseISO from 'date-fns/parseISO';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
@@ -54,7 +55,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
         // check if date is not null or undefined
         onChange={(date) => onChange(date ? date.toISOString() : null)}
         onClear={() => onChange(null)}
-        value={value ? new Date(value) : null}
+        value={value ? new Date(value) : undefined}
         selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />

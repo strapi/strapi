@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import * as yup from 'yup';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
+
 import ResetPassword from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
@@ -36,6 +38,52 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c33 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c7 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        line-height: 0;
+        color: #ffffff;
+      }
+
+      .c17 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c20 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #d02b20;
+      }
+
+      .c34 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -84,40 +132,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c37 {
         padding-top: 16px;
-      }
-
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        line-height: 0;
-        color: #ffffff;
-      }
-
-      .c17 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c20 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #d02b20;
-      }
-
-      .c34 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
       }
 
       .c0 {
@@ -300,22 +314,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
-      .c33 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c5 {
         height: 2rem;
         border: 1px solid transparent;
         background: transparent;
+      }
+
+      .c5 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c5[aria-disabled='true'] {
@@ -364,6 +371,11 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c35 {
         height: 2rem;
+      }
+
+      .c35 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c35[aria-disabled='true'] {
@@ -483,6 +495,15 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
+      .c31 {
+        font-size: 1.6rem;
+        padding: 0;
+      }
+
+      .c11:focus-visible {
+        outline: none;
+      }
+
       .c9 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -497,15 +518,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       .c9 svg {
         height: 4px;
         width: 6px;
-      }
-
-      .c31 {
-        font-size: 1.6rem;
-        padding: 0;
-      }
-
-      .c11:focus-visible {
-        outline: none;
       }
 
       .c39 {
@@ -576,6 +588,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 2px solid #4945ff;
       }
 
+      .c15 {
+        height: 4.5rem;
+      }
+
       .c13 {
         margin: 0 auto;
         width: 552px;
@@ -585,10 +601,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-      }
-
-      .c15 {
-        height: 4.5rem;
       }
 
       .c32 svg {

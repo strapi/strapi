@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
+
 import { resetPermissions, setPermissions } from './actions';
-import { selectPermissions, selectCollectionTypePermissions } from './selectors';
+import { selectCollectionTypePermissions, selectPermissions } from './selectors';
 
 const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);

@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Status, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Status, Typography } from '@strapi/design-system';
 
 import { getTrad } from '../../../../utils';
 

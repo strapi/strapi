@@ -2,12 +2,14 @@
 /* eslint-disable import/no-cycle */
 
 import React, { useMemo } from 'react';
+
+import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Box, Grid, GridItem, Flex } from '@strapi/design-system';
+
 import { useContentTypeLayout } from '../../hooks';
+import useLazyComponents from '../../hooks/useLazyComponents';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
-import useLazyComponents from '../../hooks/useLazyComponents';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();

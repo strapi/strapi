@@ -1,25 +1,28 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
+
+import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
   SettingsPageTitle,
-  useTracking,
+  useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  CheckPagePermissions,
   useRBAC,
-  useFocusWhenNavigate,
-  LoadingIndicatorPage,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useNotifyAT, Main, ContentLayout, HeaderLayout } from '@strapi/design-system';
-import pluginPermissions from '../../permissions';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
-import { fetchData, putEmailTemplate } from './utils/api';
-import EmailTable from './components/EmailTable';
+
 import EmailForm from './components/EmailForm';
+import EmailTable from './components/EmailTable';
+import { fetchData, putEmailTemplate } from './utils/api';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
   </CheckPagePermissions>
 );
@@ -38,7 +41,7 @@ const EmailTemplatesPage = () => {
   const [templateToEdit, setTemplateToEdit] = useState(null);
 
   const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateEmailTemplates };
+    return { update: PERMISSIONS.updateEmailTemplates };
   }, []);
 
   const {

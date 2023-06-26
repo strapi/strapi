@@ -1,5 +1,6 @@
 import produce from 'immer';
-import { getInitData, setInitData, resetInitData } from '../actions';
+
+import { getInitData, resetInitData, setInitData } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | App | reducer', () => {

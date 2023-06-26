@@ -1,33 +1,36 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { FixedSizeList as List } from 'react-window';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { ReactSelect } from '@strapi/helper-plugin';
 import {
-  Status,
   Box,
-  Link,
-  Icon,
-  FieldLabel,
+  Field,
   FieldError,
   FieldHint,
-  Field,
+  FieldLabel,
+  Icon,
+  Link,
+  Status,
   TextButton,
-  Typography,
   Tooltip,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-
+/**
+ * TODO: this will come in another PR.
+ */
+// eslint-disable-next-line no-restricted-imports
+import { ReactSelect } from '@strapi/helper-plugin';
 import { Cross, Refresh } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { FixedSizeList as List } from 'react-window';
+import styled from 'styled-components';
 
+import { usePrev } from '../../hooks';
+
+import { Option } from './components/Option';
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
-import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
-
-import { usePrev } from '../../hooks';
 
 export const LinkEllipsis = styled(Link)`
   display: block;

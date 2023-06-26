@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import capitalize from 'lodash/capitalize';
-import { useIntl } from 'react-intl';
+import React, { useEffect, useState } from 'react';
+
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
+  AccordionToggle,
+  Box,
   Checkbox,
+  Flex,
   Grid,
   GridItem,
   Typography,
-  Box,
-  Flex,
 } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
-import styled from 'styled-components';
+import capitalize from 'lodash/capitalize';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+
 import CheckboxWrapper from './CheckBoxWrapper';
 
 const Border = styled.div`
