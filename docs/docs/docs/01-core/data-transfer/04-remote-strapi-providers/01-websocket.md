@@ -1,11 +1,11 @@
 ---
-title: Strapi File
+title: Remote Provider Websocket
 tags:
   - providers
   - data-transfer
   - experimental
 ---
 
-# Strapi File Structure
+# Remote Provider Websocket
 
 **TODO**

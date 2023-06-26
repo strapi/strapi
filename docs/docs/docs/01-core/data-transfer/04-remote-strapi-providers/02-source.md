@@ -1,13 +1,11 @@
 ---
-title: Strapi File
+title: Strapi Remote Source Provider
 tags:
   - providers
   - data-transfer
   - experimental
 ---
 
-# Strapi File Source Provider
-
-This provider will output a Strapi Data File
+# Strapi Remote Source Provider
 
 **TODO**

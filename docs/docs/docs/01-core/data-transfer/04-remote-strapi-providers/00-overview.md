@@ -1,5 +1,5 @@
 ---
-title: File Providers
+title: Remote Strapi Providers
 tags:
   - experimental
   - providers
@@ -8,6 +8,6 @@ tags:
   - data-transfer
 ---
 
-# Strapi Data File Providers
+# Remote Strapi Providers
 
 **TODO**
