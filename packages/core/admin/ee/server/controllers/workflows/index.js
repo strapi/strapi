@@ -68,9 +68,12 @@ module.exports = {
     if (!workflow) {
       return ctx.notFound();
     }
+    const getPermittedFieldToUpdate = sanitizeUpdateInput(workflow);
+
+    const dataToUpdate = await getPermittedFieldToUpdate(workflowBody);
 
     const updatedWorkflow = await workflowService.update(workflow, {
-      data: await sanitizeUpdateInput(workflowBody),
+      data: dataToUpdate,
       populate,
     });
 
