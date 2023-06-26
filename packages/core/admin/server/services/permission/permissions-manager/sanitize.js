@@ -20,7 +20,7 @@ const {
 } = require('lodash/fp');
 
 const { contentTypes, traverseEntity, sanitize, pipeAsync, traverse } = require('@strapi/utils');
-const { removePassword } = require('@strapi/utils/lib/sanitize/visitors');
+const { removePassword } = require('@strapi/utils').sanitize.visitors;
 const { ADMIN_USER_ALLOWED_FIELDS } = require('../../../domain/user');
 
 const {
