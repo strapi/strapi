@@ -54,7 +54,7 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     server.close();
   });
 

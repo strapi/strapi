@@ -46,7 +46,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     server.close();
   });
 

@@ -14,7 +14,7 @@ const getSchemasInterfaceNode = get('body.statements[0].body.statements[0]');
 
 describe('Global', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   const assertGlobalNodeStructure = (node) => {
@@ -41,7 +41,7 @@ describe('Global', () => {
 
   describe('Generate Global Definition', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     test('With empty definition', () => {

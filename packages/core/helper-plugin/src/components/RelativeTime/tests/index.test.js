@@ -29,7 +29,7 @@ describe('RelativeTime', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', () => {
