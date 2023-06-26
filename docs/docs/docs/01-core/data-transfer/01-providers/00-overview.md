@@ -16,9 +16,9 @@ Data transfer providers are the interfaces for streaming data during a transfer.
 
 Strapi provides both source and destination providers for the following:
 
-- [Strapi file](../03-file-providers/00-overview.md): a standardized file format designed for the transfer process
-- [Local Strapi](../04-local-strapi-providers/00-overview.md): a connection to a local Strapi project which uses its configured database connection to manage data
-- [Remote Strapi](../05-remote-strapi-providers/00-overview.md): a wrapper of local Strapi provider that adds a websocket interface to a running remote (network) instance of Strapi
+- [Strapi file](../02-file-providers/00-overview.md): a standardized file format designed for the transfer process
+- [Local Strapi](../03-local-strapi-providers/00-overview.md): a connection to a local Strapi project which uses its configured database connection to manage data
+- [Remote Strapi](../04-remote-strapi-providers/00-overview.md): a wrapper of local Strapi provider that adds a websocket interface to a running remote (network) instance of Strapi
 
 Each provider must provide the same interface for transferring data, but will usually include its own unique set of options to be passed in when initializing the provider.
 
