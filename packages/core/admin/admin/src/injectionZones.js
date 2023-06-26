@@ -10,10 +10,10 @@ const injectionZones = {
     tutorials: {
       links: [],
     },
-  },
-  leftMenu: {
-    aboveContentManager: [],
-    bellowContentManager: []
+    leftMenu: {
+      aboveContentManager: [],
+      bellowContentManager: []
+    },
   },
   contentManager: {
     editView: { informations: [], 'right-links': [] },
