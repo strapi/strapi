@@ -2,10 +2,32 @@ import { eq, remove, cloneDeep } from 'lodash/fp';
 
 export type Handler = (...args: any[]) => any;
 
+export interface Hook<T extends Handler = Handler> {
+  getHandlers(): Handler[];
+  register(handler: T): Hook<T>;
+  delete(handler: T): Hook<T>;
+  call(...args: any[]): void;
+}
+
+export interface AsyncSeriesHook extends Hook {
+  call(...args: any[]): Promise<void>;
+}
+export interface AsyncSeriesWaterfallHook extends Hook {
+  call(...args: any[]): Promise<any>;
+}
+
+export interface AsyncParallelHook extends Hook {
+  call(...args: any[]): Promise<any[]>;
+}
+
+export interface AsyncBailHook extends Hook {
+  call(...args: any[]): Promise<any>;
+}
+
 /**
  * Create a default Strapi hook
  */
-const createHook = <T extends Handler = Handler>() => {
+const createHook = <T extends Handler = Handler>(): Hook<T> => {
   type State = {
     handlers: T[];
   };

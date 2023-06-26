@@ -1,19 +1,22 @@
 import { cloneDeep } from 'lodash/fp';
-import { createAsyncSeriesHook, createAsyncParallelHook } from './hooks';
+import {
+  createAsyncSeriesHook,
+  createAsyncParallelHook,
+  AsyncSeriesHook,
+  AsyncParallelHook,
+} from './hooks';
 
-/**
- * @typedef ProviderHooksMap
- * @property willRegister
- * @property didRegister
- * @property willDelete
- * @property didDelete
- */
+interface ProviderHooksMap {
+  willRegister: AsyncSeriesHook;
+  didRegister: AsyncParallelHook;
+  willDelete: AsyncParallelHook;
+  didDelete: AsyncParallelHook;
+}
 
 /**
  * Creates a new object containing various hooks used by the providers
- * @return {ProviderHooksMap}
  */
-const createProviderHooksMap = () => ({
+const createProviderHooksMap = (): ProviderHooksMap => ({
   // Register events
   willRegister: createAsyncSeriesHook(),
   didRegister: createAsyncParallelHook(),
@@ -26,21 +29,38 @@ export interface Options {
   throwOnDuplicates?: boolean;
 }
 
+type Item = Record<string, unknown>;
+
+export interface Provider {
+  hooks: ProviderHooksMap;
+  register(key: string, item: Item): Promise<Provider>;
+  delete(key: string): Promise<Provider>;
+  get(key: string): Item | undefined;
+  getWhere(filters?: Record<string, unknown>): Item[];
+  values(): Item[];
+  keys(): string[];
+  has(key: string): boolean;
+  size(): number;
+  clear(): Promise<Provider>;
+}
+
+export type ProviderFactory = (options?: Options) => Provider;
+
 /**
  * A Provider factory
  */
-const providerFactory = (options: Options = {}) => {
+const providerFactory: ProviderFactory = (options = {}) => {
   const { throwOnDuplicates = true } = options;
 
   const state = {
     hooks: createProviderHooksMap(),
-    registry: new Map(),
+    registry: new Map<string, Item>(),
   };
 
   return {
     hooks: state.hooks,
 
-    async register(key: string, item: unknown) {
+    async register(key: string, item: Item) {
       if (throwOnDuplicates && this.has(key)) {
         throw new Error(`Duplicated item key: ${key}`);
       }

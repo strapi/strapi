@@ -12,8 +12,9 @@ interface User {
   id: string | number;
 }
 
-export default <T extends object>({ user, isEdition = false }: Options) =>
-  (data: T) => {
+const setCreatorFields =
+  <TData extends object>({ user, isEdition = false }: Options) =>
+  <TDataInner extends object = TData>(data: TDataInner) => {
     if (isEdition) {
       return assoc(UPDATED_BY_ATTRIBUTE, user.id, data);
     }
@@ -23,3 +24,5 @@ export default <T extends object>({ user, isEdition = false }: Options) =>
       [UPDATED_BY_ATTRIBUTE]: user.id,
     });
   };
+
+export default setCreatorFields;

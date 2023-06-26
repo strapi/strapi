@@ -1,6 +1,6 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import type { Attribute, Model } from './types';
-import { isRelationalAttribute, isMediaAttribute, isComponentAttribute } from './content-types';
+import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
