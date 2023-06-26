@@ -28,12 +28,12 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async create(ctx) {
-    const { body } = ctx.request;
-    const { populate } = ctx.query;
-    const { sanitizeCreateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
+    const { body, query } = ctx.request;
+    const { sanitizeCreateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
+    const { populate } = await sanitizedQuery.create(query);
 
     const workflowBody = await validateWorkflowCreate(body.data);
 
@@ -54,13 +54,13 @@ module.exports = {
    */
   async update(ctx) {
     const { id } = ctx.params;
-    const { body } = ctx.request;
-    const { populate } = ctx.query;
+    const { body, query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeUpdateInput, sanitizeOutput } = getWorkflowsPermissionChecker(
+    const { sanitizeUpdateInput, sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
       { strapi },
       ctx.state.userAbility
     );
+    const { populate } = await sanitizedQuery.update(query);
 
     const workflowBody = await validateWorkflowUpdate(body.data);
 
@@ -85,9 +85,13 @@ module.exports = {
    */
   async delete(ctx) {
     const { id } = ctx.params;
-    const { populate } = ctx.query;
+    const { query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
+    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+      { strapi },
+      ctx.state.userAbility
+    );
+    const { populate } = await sanitizedQuery.delete(query);
 
     const workflow = await workflowService.findById(id, { populate: ['stages'] });
     if (!workflow) {
@@ -106,9 +110,13 @@ module.exports = {
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async find(ctx) {
-    const { populate, filters, sort } = ctx.query;
+    const { query } = ctx.request;
     const workflowService = getService('workflows');
-    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
+    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+      { strapi },
+      ctx.state.userAbility
+    );
+    const { populate, filters, sort } = await sanitizedQuery.read(query);
 
     const workflows = await workflowService.find({
       populate,
@@ -126,8 +134,12 @@ module.exports = {
    */
   async findById(ctx) {
     const { id } = ctx.params;
-    const { populate } = ctx.query;
-    const { sanitizeOutput } = getWorkflowsPermissionChecker({ strapi }, ctx.state.userAbility);
+    const { query } = ctx.request;
+    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
+      { strapi },
+      ctx.state.userAbility
+    );
+    const { populate } = await sanitizedQuery.read(query);
 
     const workflowService = getService('workflows');
     const workflow = await workflowService.findById(id, { populate });
