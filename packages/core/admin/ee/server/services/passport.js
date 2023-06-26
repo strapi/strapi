@@ -3,7 +3,7 @@
 // eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
 
-const { UnauthorizedError } = require('@strapi/utils/lib/errors');
+const { UnauthorizedError } = require('@strapi/utils').errors;
 const createLocalStrategy = require('../../../server/services/passport/local-strategy');
 const sso = require('./passport/sso');
 const { isSsoLocked } = require('../utils/sso-lock');

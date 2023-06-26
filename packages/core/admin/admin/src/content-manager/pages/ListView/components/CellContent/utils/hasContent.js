@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import isNumber from 'lodash/isNumber';
 
-import isFieldTypeNumber from '../../../../utils/isFieldTypeNumber';
+import isFieldTypeNumber from '../../../../../utils/isFieldTypeNumber';
 
 import isSingleRelation from './isSingleRelation';
 
