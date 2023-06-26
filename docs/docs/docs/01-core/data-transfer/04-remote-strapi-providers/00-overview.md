@@ -14,8 +14,8 @@ Remote Strapi providers connect to an instance of Strapi over a network using a 
 
 Internally, the remote Strapi providers map websocket requests to a local Strapi provider of the instance it is running in.
 
-## Websocket Server
+In order to use remote transfer providers, the remote Strapi server must have a value for `transfer.token.salt` configured in `config/admin.js` and the remote transfer feature must not be disabled.
 
-When the data transfer feature is enabled for a Strapi server (a transfer token salt has been set on the server and STRAPI_DISABLE_REMOTE_DATA_TRANSFER is not set to true), Strapi will create websocket servers available on the routes `/admin/transfer/runner/pull` and `/admin/transfer/runner/push`.
+## Disabling Remote Transfers
 
-Opening a websocket connection on those routes requires a valid transfer token as a bearer token in the Authorization header.
+If desired, the remote transfer feature of a server can be completely disabled by setting the environment variable `STRAPI_DISABLE_REMOTE_DATA_TRANSFER` to true.
