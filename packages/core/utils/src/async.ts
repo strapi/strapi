@@ -1,5 +1,5 @@
 import pMap from 'p-map';
-import { curry, curryN } from 'lodash/fp';
+import { curry } from 'lodash/fp';
 
 type AnyFunc = (...args: any) => any;
 
@@ -30,7 +30,7 @@ export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
   const [firstFn, ...fnRest] = fns;
 
   return async (...args: Args): Promise<ReturnT> => {
-    let res: ReturnT = firstFn(args);
+    let res: ReturnT = await firstFn.apply(firstFn, args);
 
     for (let i = 0; i < fnRest.length; i += 1) {
       res = await fnRest[i](res);

@@ -152,7 +152,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    if (isComponentAttribute(attribute)) {
+    if (attribute.type === 'component') {
       const targetSchema = strapi.getModel(attribute.component);
 
       if (isArray(value)) {
