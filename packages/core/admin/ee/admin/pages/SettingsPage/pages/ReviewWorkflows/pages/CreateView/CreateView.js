@@ -11,13 +11,13 @@ import { useHistory } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useLicenseLimits } from '../../../../../../hooks';
 import { resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
+import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
@@ -36,7 +36,7 @@ export function ReviewWorkflowsCreateView() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
-  const { license, isLoading: isLicenseLoading } = useLicenseLimits();
+  const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
   const { pagination, isLoading: isWorkflowLoading } = useReviewWorkflows();
 
   const { mutateAsync, isLoading } = useMutation(
@@ -96,9 +96,9 @@ export function ReviewWorkflowsCreateView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (pagination?.total >= license?.data?.workflows) {
+      if (pagination?.total >= limits?.workflows) {
         setShowLimitModal('workflow');
-      } else if (currentWorkflow.stages.length >= license?.data.stagesPerWorkflow) {
+      } else if (currentWorkflow.stages.length >= limits.stagesPerWorkflow) {
         setShowLimitModal('stage');
       }
     }
@@ -106,8 +106,8 @@ export function ReviewWorkflowsCreateView() {
     currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
-    license?.data.stagesPerWorkflow,
-    license?.data?.workflows,
+    limits.stagesPerWorkflow,
+    limits?.workflows,
     pagination?.total,
   ]);
 

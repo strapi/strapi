@@ -31,9 +31,9 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
-import { useLicenseLimits } from '../../../../../../hooks';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
+import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
@@ -73,7 +73,7 @@ export function ReviewWorkflowsListView() {
   const { del } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { license } = useLicenseLimits();
+  const { limits } = useReviewWorkflowLicenseLimits();
 
   const { mutateAsync, isLoading: isLoadingMutation } = useMutation(
     async ({ workflowId, stages }) => {
@@ -138,7 +138,7 @@ export function ReviewWorkflowsListView() {
             size="S"
             to="/settings/review-workflows/create"
             onClick={(event) => {
-              if (pagination?.total >= license.data.workflows) {
+              if (pagination?.total >= limits.workflows) {
                 event.preventDefault();
                 setShowLimitModal(true);
               }
@@ -177,7 +177,7 @@ export function ReviewWorkflowsListView() {
               <TFooter
                 icon={<Plus />}
                 onClick={() => {
-                  if (pagination?.total >= license?.data?.workflows) {
+                  if (pagination?.total >= limits?.workflows) {
                     setShowLimitModal(true);
                   } else {
                     push('/settings/review-workflows/create');

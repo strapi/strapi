@@ -11,8 +11,8 @@ import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
-import { useLicenseLimits } from '../../../../hooks';
 import * as LimitsModal from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
+import { useReviewWorkflowLicenseLimits } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
@@ -35,7 +35,7 @@ export function InformationBoxEE() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { license } = useLicenseLimits();
+  const { limits } = useReviewWorkflowLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const {
@@ -77,12 +77,12 @@ export function InformationBoxEE() {
 
   const handleStageChange = async ({ value: stageId }) => {
     try {
-      if (license?.data?.workflows > pagination.total) {
+      if (limits?.workflows > pagination.total) {
         setShowLimitModal('workflow');
 
         return;
       }
-      if (license?.data?.stagesPerWorkflow > workflow.stages.length) {
+      if (limits?.stagesPerWorkflow > workflow.stages.length) {
         setShowLimitModal('stage');
 
         return;

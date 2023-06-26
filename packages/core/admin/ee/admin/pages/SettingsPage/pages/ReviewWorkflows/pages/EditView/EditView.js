@@ -17,13 +17,13 @@ import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { useLicenseLimits } from '../../../../../../hooks';
 import { setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
+import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
@@ -55,7 +55,7 @@ export function ReviewWorkflowsEditView() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
-  const { license, isLoading: isLicenseLoading } = useLicenseLimits();
+  const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const { mutateAsync, isLoading } = useMutation(
@@ -134,9 +134,9 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (pagination?.total >= license?.data?.workflows) {
+      if (pagination?.total >= limits?.workflows) {
         setShowLimitModal('workflow');
-      } else if (currentWorkflow.stages.length >= license?.data?.stagesPerWorkflow) {
+      } else if (currentWorkflow.stages.length >= limits?.stagesPerWorkflow) {
         setShowLimitModal('stage');
       }
     }
@@ -144,8 +144,8 @@ export function ReviewWorkflowsEditView() {
     currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
-    license?.data?.stagesPerWorkflow,
-    license?.data?.workflows,
+    limits?.stagesPerWorkflow,
+    limits?.workflows,
     pagination?.total,
   ]);
 
