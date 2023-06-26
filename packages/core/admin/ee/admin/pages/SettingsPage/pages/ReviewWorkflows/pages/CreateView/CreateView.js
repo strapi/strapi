@@ -95,10 +95,21 @@ export function ReviewWorkflowsCreateView() {
   }, [dispatch]);
 
   React.useEffect(() => {
-    if (!isLicenseLoading && !isWorkflowLoading && pagination?.total >= license?.data?.workflows) {
-      setShowLimitModal(true);
+    if (!isWorkflowLoading && !isLicenseLoading) {
+      if (pagination?.total >= license?.data?.workflows) {
+        setShowLimitModal('workflow');
+      } else if (currentWorkflow.stages.length >= license?.data.stagesPerWorkflow) {
+        setShowLimitModal('stage');
+      }
     }
-  }, [isLicenseLoading, isWorkflowLoading, license?.data?.workflows, pagination?.total]);
+  }, [
+    currentWorkflow.stages.length,
+    isLicenseLoading,
+    isWorkflowLoading,
+    license?.data.stagesPerWorkflow,
+    license?.data?.workflows,
+    pagination?.total,
+  ]);
 
   return (
     <>
@@ -154,7 +165,10 @@ export function ReviewWorkflowsCreateView() {
         </Form>
       </FormikProvider>
 
-      <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(false)}
+      >
         <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.create.page.workflows.limit.title',
@@ -166,6 +180,25 @@ export function ReviewWorkflowsCreateView() {
           {formatMessage({
             id: 'Settings.review-workflows.create.page.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'stage'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.stages.limit.title',
+            defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.stages.limit.body',
+            defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
         </LimitsModal.Body>
       </LimitsModal.Root>

@@ -37,6 +37,7 @@ export function ReviewWorkflowsEditView() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const {
+    isLoading: isWorkflowLoading,
     pagination,
     workflows: [workflow],
     status: workflowStatus,
@@ -132,10 +133,21 @@ export function ReviewWorkflowsEditView() {
   }, [workflowStatus, workflow, dispatch]);
 
   React.useEffect(() => {
-    if (!isLicenseLoading && pagination?.total >= license?.data?.workflows) {
-      setShowLimitModal(true);
+    if (!isWorkflowLoading && !isLicenseLoading) {
+      if (pagination?.total >= license?.data?.workflows) {
+        setShowLimitModal('workflow');
+      } else if (currentWorkflow.stages.length >= license?.data?.stagesPerWorkflow) {
+        setShowLimitModal('stage');
+      }
     }
-  }, [isLicenseLoading, license?.data?.workflows, pagination?.total]);
+  }, [
+    currentWorkflow.stages.length,
+    isLicenseLoading,
+    isWorkflowLoading,
+    license?.data?.stagesPerWorkflow,
+    license?.data?.workflows,
+    pagination?.total,
+  ]);
 
   // TODO redirect back to list-view if workflow is not found?
 
@@ -203,7 +215,10 @@ export function ReviewWorkflowsEditView() {
         onConfirm={handleConfirmDeleteDialog}
       />
 
-      <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(false)}
+      >
         <LimitsModal.Title>
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.workflows.limit.title',
@@ -215,6 +230,25 @@ export function ReviewWorkflowsEditView() {
           {formatMessage({
             id: 'Settings.review-workflows.edit.page.workflows.limit.body',
             defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'stage'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'Settings.review-workflows.edit.page.stages.limit.title',
+            defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'Settings.review-workflows.edit.page.stages.limit.body',
+            defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
           })}
         </LimitsModal.Body>
       </LimitsModal.Root>
