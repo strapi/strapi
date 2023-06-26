@@ -197,34 +197,37 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           try {
             if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
-              console.log('uploading stream');
               await strapi.plugin('upload').provider.uploadStream(uploadData);
-              console.log('uploaded stream');
             } else {
               uploadData.buffer = await streamToBuffer(uploadData.stream);
-              console.log('uploading buffer');
               await strapi.plugin('upload').provider.upload(uploadData);
-              console.log('uploaded buffer');
             }
-            // uploadData.buffer = await streamToBuffer(uploadData.stream);
-            // uploadData.size = uploadData.buffer.length;
-            // console.log('uploading buffer', uploadData.url);
-            // // plugin::upload.file
-            // await strapi.plugin('upload').provider.upload(uploadData);
-            // console.log('uploaded buffer', uploadData.url);
-            // if (uploadData?.type) {
-            //   const [entry]: IFile[] = await strapi.db.query('plugin::upload.file').findMany({
-            //     where: { hash: uploadData.mainHash },
-            //   });
-            //   const specificFormat = entry?.formats?.[uploadData.type];
-            //   if (specificFormat) {
-            //     specificFormat.url = uploadData.url;
-            //   }
-            // }
-            // const entries = await strapi.db.query('plugin::upload.file').findMany({
-            //   where: { hash: uploadData.hash },
-            // });
-            // console.log('entries', JSON.stringify(entries, null, 2));
+            if (uploadData?.type) {
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+                where: { hash: uploadData.mainHash },
+              });
+              const specificFormat = entry?.formats?.[uploadData.type];
+              if (specificFormat) {
+                specificFormat.url = uploadData.url;
+              }
+              await strapi.db.query('plugin::upload.file').update({
+                where: { hash: uploadData.mainHash },
+                data: {
+                  formats: entry.formats,
+                },
+              });
+              return callback();
+            }
+            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+              where: { hash: uploadData.hash },
+            });
+            entry.url = uploadData.url;
+            await strapi.db.query('plugin::upload.file').update({
+              where: { hash: uploadData.hash },
+              data: {
+                url: entry.url,
+              },
+            });
             callback();
           } catch (error) {
             console.log(error);
