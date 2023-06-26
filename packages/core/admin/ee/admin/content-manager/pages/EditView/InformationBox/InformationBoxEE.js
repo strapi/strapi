@@ -11,6 +11,8 @@ import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { useLicenseLimits } from '../../../../hooks';
+import * as LimitsModal from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
@@ -33,8 +35,11 @@ export function InformationBoxEE() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
+  const { license } = useLicenseLimits();
+  const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const {
+    pagination,
     workflows: [workflow],
     isLoading: isWorkflowLoading,
   } = useReviewWorkflows({ filters: { contentTypes: uid } });
@@ -72,6 +77,17 @@ export function InformationBoxEE() {
 
   const handleStageChange = async ({ value: stageId }) => {
     try {
+      if (license?.data?.workflows > pagination.total) {
+        setShowLimitModal('workflow');
+
+        return;
+      }
+      if (license?.data?.stagesPerWorkflow > workflow.stages.length) {
+        setShowLimitModal('stage');
+
+        return;
+      }
+
       await mutateAsync({
         entityId: initialData.id,
         stageId,
@@ -152,6 +168,44 @@ export function InformationBoxEE() {
       )}
 
       <Information.Body />
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.workflows.limit.title',
+            defaultMessage: 'You’ve reached the limit of workflows in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.workflows.limit.body',
+            defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'stage'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.limit.title',
+            defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.limit.body',
+            defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
     </Information.Root>
   );
 }
