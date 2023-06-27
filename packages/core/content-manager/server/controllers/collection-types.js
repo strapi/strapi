@@ -205,7 +205,7 @@ module.exports = {
       );
     }
 
-    this.clone(ctx);
+    await this.clone(ctx);
   },
 
   async delete(ctx) {
