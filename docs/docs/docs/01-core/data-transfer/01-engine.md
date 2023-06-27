@@ -197,9 +197,27 @@ The following events are available:
 
 ### Diagnostics events
 
-`engine.diagnostics.onDiagnostic(formatDiagnostic('export'));`
+The engine includes a diagnostics reporter which can be used to listen for diagnostics information (debug messages, errors, etc).
 
-**TODO**
+Here is an example for creating a diagnostics listener:
+
+```
+// your listener
+engine.diagnostics.onDiagnostic(async (data: GenericDiagnostic) => {
+  // handle the diagnostics, for example with custom logging
+});
+
+// engine/diagnostics.ts - format of the data sent to the listener
+export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
+  kind: K;
+  details: {
+    message: string;
+    createdAt: Date;
+  } & T;
+};
+
+export type DiagnosticKind = 'error' | 'warning' | 'info';
+```
 
 ### Transforms
 
