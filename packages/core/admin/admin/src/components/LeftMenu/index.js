@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 
-import InjectionZone from '../../shared/components/InjectionZone'
 import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
 import {
   MainNav,
@@ -25,6 +24,7 @@ import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import InjectionZone from '../../shared/components/InjectionZone'
 import { useConfigurations } from '../../hooks';
 
 const LinkUserWrapper = styled(Box)`
@@ -123,7 +123,9 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       />
 
       <Divider />
+
       <InjectionZone area="admin.leftMenu.aboveContentManager"/>
+
       <NavSections>
         <NavLink
           as={RouterNavLink}
@@ -133,7 +135,9 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
+
         <InjectionZone area="admin.leftMenu.bellowContentManager"/>
+
         {pluginsSectionLinks.length > 0 ? (
           <NavSection
             label={formatMessage({
