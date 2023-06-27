@@ -157,7 +157,7 @@ However, there are a few exceptions where using export default might be appropri
 
 Using regular exports provides a clearer and more explicit interface for module consumers, promoting better code organization and maintainability. However, it is important to consider the context before deciding whether to use default exports.
 
-## 3. Generic Types' Parameters
+## 3. Parameters for Generics
 
 When working with generic types, it is required to follow naming conventions and use descriptive names for type parameters. This helps improve code readability and maintainability over the whole codebase.
 
