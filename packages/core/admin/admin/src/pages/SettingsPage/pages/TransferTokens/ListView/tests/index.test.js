@@ -104,7 +104,7 @@ const setup = (props) =>
 
 describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should show a list of transfer tokens', async () => {

@@ -93,7 +93,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListView', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
