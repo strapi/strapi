@@ -155,7 +155,7 @@ function ListView({
       // TODO: to remove, it is just a test to check the API
       try {
         const data = await fetchClient.get(
-          '/content-manager/collection-types/api::category.category/[1]/actions/multipleEntriesNumberOfDraftRelations'
+          '/content-manager/collection-types/api::category.category/actions/multipleEntriesNumberOfDraftRelations?ids=1,2'
         );
         console.log('data', data);
       } catch (err) {

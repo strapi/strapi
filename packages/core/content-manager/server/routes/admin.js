@@ -372,7 +372,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/collection-types/:model/:ids/actions/multipleEntriesNumberOfDraftRelations',
+      path: '/collection-types/:model/actions/multipleEntriesNumberOfDraftRelations',
       handler: 'collection-types.getMultipleEntriesNumberOfDraftRelations',
       config: {
         middlewares: [routing],

@@ -335,12 +335,14 @@ module.exports = {
   },
   async getMultipleEntriesNumberOfDraftRelations(ctx) {
     const { userAbility } = ctx.state;
-    const { model, ids } = ctx.params;
+    const params = new URLSearchParams(ctx.querystring);
+    const ids = params.get('ids').split(',');
+    const { model } = ctx.params;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    if (permissionChecker.cannot.read()) {
+    if (permissionChecker.cannot.publish()) {
       return ctx.forbidden();
     }
 
@@ -349,9 +351,7 @@ module.exports = {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const idsArray = JSON.parse(ids);
-
-    if (idsArray.length <= 0) {
+    if (ids.length <= 0) {
       return {
         data: 0,
       };
@@ -359,7 +359,7 @@ module.exports = {
 
     let number = 0;
 
-    for (const id of idsArray) {
+    for (const id of ids) {
       const entity = await entityManager.findOne(id, model, { populate });
 
       if (!entity) {
