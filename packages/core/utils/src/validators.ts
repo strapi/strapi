@@ -33,7 +33,7 @@ yup.addMethod(
   'isCamelCase',
   function isCamelCase(message = '${path} is not in camel case (anExampleOfCamelCase)') {
     return this.test('is in camelCase', message, (value) =>
-      value ? utils.isCamelCase(value) : false
+      value ? utils.isCamelCase(value) : true
     );
   }
 );
@@ -43,7 +43,7 @@ yup.addMethod(
   'isKebabCase',
   function isKebabCase(message = '${path} is not in kebab case (an-example-of-kebab-case)') {
     return this.test('is in kebab-case', message, (value) =>
-      value ? utils.isKebabCase(value) : false
+      value ? utils.isKebabCase(value) : true
     );
   }
 );
