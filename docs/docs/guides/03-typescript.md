@@ -16,7 +16,7 @@ In the colocation approach, type definitions are colocated with the correspondin
 
 **This approach is suitable when the types are specific to a particular module**.
 
-_Note: In some situation, colocated types can be exported too if needed by other modules_
+_Note: In some situations, colocated types can still be exported if needed by other modules_
 
 Example:
 
