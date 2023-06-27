@@ -29,3 +29,7 @@ To create your own providers, you must implement the interface(s) defined in `IS
 It is not necessary to create both a source and destination provider, only the part necessary for your use.
 
 For examples, see the existing providers such as the local Strapi provider.
+
+## Asset Transfers
+
+Currently, all of the data-transfer providers only handle local media assets (the `/upload` folder). Provider media is currently in development. Therefore, everything related to asset transfers -- including Strapi file structure, restore strategy, and rollback for assets -- is currently treated as `unstable` and likely to change in the near future.
