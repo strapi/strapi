@@ -45,7 +45,7 @@ const renderUpload = () =>
 
 describe('Upload Plugin', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('initial render', () => {

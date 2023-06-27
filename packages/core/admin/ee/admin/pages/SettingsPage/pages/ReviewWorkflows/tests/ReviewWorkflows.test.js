@@ -94,7 +94,6 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('handle initial loading state', () => {
