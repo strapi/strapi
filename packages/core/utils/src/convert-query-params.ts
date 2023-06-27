@@ -39,7 +39,10 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-type SortParams = string | string[] | object;
+interface SortParamsObject {
+  [key: string]: SortOrder | SortParamsObject;
+}
+type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
 type FieldsParams = string | string[];
 
 type FiltersParams = unknown;
@@ -142,13 +145,20 @@ const convertSortQueryParams = (sortQuery: SortParams): OrderByQuery => {
   if (typeof sortQuery === 'string') {
     return convertStringSortQueryParam(sortQuery);
   }
+
   if (isStringArray(sortQuery)) {
     return sortQuery.flatMap((sortValue: string) => convertStringSortQueryParam(sortValue));
+  }
+
+  if (Array.isArray(sortQuery)) {
+    return sortQuery.map((sortValue) => convertNestedSortQueryParam(sortValue));
   }
 
   if (isPlainObject(sortQuery)) {
     return convertNestedSortQueryParam(sortQuery);
   }
+
+  console.log(sortQuery);
 
   throw new InvalidSortError();
 };
@@ -180,7 +190,7 @@ const convertSingleSortQueryParam = (sortQuery: string): SortMap => {
   return _.set({}, field, order);
 };
 
-const convertNestedSortQueryParam = (sortQuery: Record<string, unknown>): SortMap => {
+const convertNestedSortQueryParam = (sortQuery: SortParamsObject): SortMap => {
   const transformedSort: SortMap = {};
   for (const field of Object.keys(sortQuery)) {
     const order = sortQuery[field];
