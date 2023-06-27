@@ -93,7 +93,7 @@ const makeApp = (history) => {
 
 describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot when editing existing token', async () => {

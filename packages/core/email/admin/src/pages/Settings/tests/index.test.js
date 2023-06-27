@@ -38,7 +38,7 @@ describe('Email | Pages | Settings', () => {
 
   afterAll(() => {
     server.close();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', async () => {
