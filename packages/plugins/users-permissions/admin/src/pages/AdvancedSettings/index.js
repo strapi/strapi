@@ -143,7 +143,7 @@ const AdvancedSettingsPage = () => {
         validationSchema={schema}
         enableReinitialize
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
@@ -155,7 +155,7 @@ const AdvancedSettingsPage = () => {
                   <Button
                     loading={isSubmitting}
                     type="submit"
-                    disabled={!canUpdate}
+                    disabled={canUpdate ? !dirty : !canUpdate}
                     startIcon={<Check />}
                     size="S"
                   >
