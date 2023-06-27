@@ -294,6 +294,8 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
       .build();
 
     const entityPromises = ids.map((id) => entityManager.findOne(id, model, { populate }));
