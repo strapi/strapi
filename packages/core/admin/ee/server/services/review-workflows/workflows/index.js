@@ -2,9 +2,17 @@
 
 const { set, isString } = require('lodash/fp');
 const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
-const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
+const {
+  WORKFLOW_MODEL_UID,
+  MAX_WORKFLOWS,
+  MAX_STAGES_PER_WORKFLOW,
+} = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
-const { getWorkflowContentTypeFilter } = require('../../../utils/review-workflows');
+const {
+  getWorkflowContentTypeFilter,
+  clampMaxWorkflows,
+  clampMaxStagesPerWorkflow,
+} = require('../../../utils/review-workflows');
 const workflowsContentTypesFactory = require('./content-types');
 
 const processFilters = ({ strapi }, filters = {}) => {
@@ -19,8 +27,21 @@ const processFilters = ({ strapi }, filters = {}) => {
 
 module.exports = ({ strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
+  const limits = {
+    workflows: MAX_WORKFLOWS,
+    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+  };
 
   return {
+    register({ workflows, stagesPerWorkflow }) {
+      if (!Object.isFrozen(limits)) {
+        limits.workflows = clampMaxWorkflows(workflows || limits.workflows);
+        limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
+          stagesPerWorkflow || limits.stagesPerWorkflow
+        );
+        Object.freeze(limits);
+      }
+    },
     /**
      * Returns all the workflows matching the user-defined filters.
      * @param {object} opts - Options for the query.

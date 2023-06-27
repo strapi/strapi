@@ -6,13 +6,29 @@ const {
 } = require('@strapi/utils');
 const { map } = require('lodash/fp');
 
-const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const {
+  STAGE_MODEL_UID,
+  ENTITY_STAGE_ATTRIBUTE,
+  MAX_STAGES_PER_WORKFLOW,
+} = require('../../constants/workflows');
 const { getService } = require('../../utils');
+const { clampMaxStagesPerWorkflow } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
+  const limits = {
+    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+  };
 
   return {
+    register({ stagesPerWorkflow }) {
+      if (!Object.isFrozen(limits)) {
+        limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
+          stagesPerWorkflow || limits.stagesPerWorkflow
+        );
+        Object.freeze(limits);
+      }
+    },
     find({ workflowId, populate }) {
       const params = {
         filters: { workflow: workflowId },

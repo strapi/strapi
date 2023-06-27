@@ -1,7 +1,11 @@
 'use strict';
 
-const { getOr, keys, pickBy, pipe, has } = require('lodash/fp');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../constants/workflows');
+const { getOr, keys, pickBy, pipe, has, clamp } = require('lodash/fp');
+const {
+  ENTITY_STAGE_ATTRIBUTE,
+  MAX_WORKFLOWS,
+  MAX_STAGES_PER_WORKFLOW,
+} = require('../constants/workflows');
 
 const getVisibleContentTypesUID = pipe([
   // Pick only content-types visible in the content-manager and option is not false
@@ -23,7 +27,12 @@ const getWorkflowContentTypeFilter = ({ strapi }, contentType) => {
   return { $contains: `"${contentType}"` };
 };
 
+const clampMaxWorkflows = clamp(1, MAX_WORKFLOWS);
+const clampMaxStagesPerWorkflow = clamp(1, MAX_STAGES_PER_WORKFLOW);
+
 module.exports = {
+  clampMaxWorkflows,
+  clampMaxStagesPerWorkflow,
   getVisibleContentTypesUID,
   hasStageAttribute,
   getWorkflowContentTypeFilter,

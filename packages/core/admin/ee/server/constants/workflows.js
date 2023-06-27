@@ -6,4 +6,6 @@ module.exports = {
   STAGE_MODEL_UID: 'admin::workflow-stage',
   STAGE_DEFAULT_COLOR: '#4945FF',
   ENTITY_STAGE_ATTRIBUTE: 'strapi_stage',
+  MAX_WORKFLOWS: 200,
+  MAX_STAGES_PER_WORKFLOW: 200,
 };
