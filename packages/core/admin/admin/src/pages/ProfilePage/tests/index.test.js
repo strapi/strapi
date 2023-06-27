@@ -108,7 +108,7 @@ describe('ADMIN | Pages | Profile page | with SSO lock', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     serverLockedSSO.close();
   });
 
