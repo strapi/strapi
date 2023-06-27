@@ -53,6 +53,8 @@ const getTimestamps = (model: Model) => {
 };
 
 const getNonWritableAttributes = (model: Model) => {
+  if (!model) return [];
+
   const nonWritableAttributes = _.reduce(
     model.attributes,
     (acc, attr, attrName) => (attr.writable === false ? acc.concat(attrName) : acc),
@@ -63,6 +65,8 @@ const getNonWritableAttributes = (model: Model) => {
 };
 
 const getWritableAttributes = (model: Model) => {
+  if (!model) return [];
+
   return _.difference(Object.keys(model.attributes), getNonWritableAttributes(model));
 };
 
