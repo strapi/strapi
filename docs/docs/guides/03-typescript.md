@@ -151,7 +151,7 @@ const user: User = findUser();
 
 ### c. Exports
 
-In most cases, it is recommended to use regular exports (export) instead of the default export (export default). Regular exports provide more flexibility and clarity when importing and using modules. They allow importing specific members of a module explicitly, which improves code readability and maintainability.
+In most cases, it is recommended to use named exports (export) instead of the default export (export default). Named exports provide more flexibility and clarity when importing and using modules. They allow importing specific members of a module explicitly, which improves code readability and maintainability.
 
 However, there are a few exceptions where using export default might be appropriate. For example, when exporting a single primary entity or class from a module, or when working with modules that have a natural default export, such as a configuration object.
 
