@@ -25,6 +25,7 @@ import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-
 import styled from 'styled-components';
 
 import InjectionZone from '../../shared/components/InjectionZone'
+
 import { useConfigurations } from '../../hooks';
 
 const LinkUserWrapper = styled(Box)`
