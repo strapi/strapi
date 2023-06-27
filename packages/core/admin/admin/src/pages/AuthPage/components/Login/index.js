@@ -1,7 +1,10 @@
 import React from 'react';
+
 import PropTypes from 'prop-types';
-import BaseLogin from './BaseLogin';
+
 import UnauthenticatedLayout from '../../../../layouts/UnauthenticatedLayout';
+
+import BaseLogin from './BaseLogin';
 
 const Login = (loginProps) => {
   return (

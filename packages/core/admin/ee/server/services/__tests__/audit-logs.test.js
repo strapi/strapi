@@ -34,6 +34,7 @@ describe('Audit logs service', () => {
 
   afterAll(() => {
     jest.resetAllMocks();
+    jest.useRealTimers();
   });
 
   describe('Init with audit logs disabled', () => {

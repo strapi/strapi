@@ -1,7 +1,9 @@
 import produce from 'immer';
 import set from 'lodash/set';
+
 import pluginId from '../pluginId';
-import { RESOLVE_LOCALES, ADD_LOCALE, DELETE_LOCALE, UPDATE_LOCALE } from './constants';
+
+import { ADD_LOCALE, DELETE_LOCALE, RESOLVE_LOCALES, UPDATE_LOCALE } from './constants';
 
 export const initialState = {
   isLoading: true,

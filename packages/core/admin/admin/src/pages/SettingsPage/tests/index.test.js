@@ -1,13 +1,15 @@
 import React from 'react';
-import { Router, Route } from 'react-router-dom';
-import { StrapiAppProvider, AppInfosContext, TrackingProvider } from '@strapi/helper-plugin';
-import { render, screen, waitFor } from '@testing-library/react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import { AppInfosContext, StrapiAppProvider, TrackingProvider } from '@strapi/helper-plugin';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { Route, Router } from 'react-router-dom';
+
+import { SettingsPage } from '..';
 import Theme from '../../../components/Theme';
 import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
-import { SettingsPage } from '..';
 import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
@@ -65,7 +67,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings/application-infos';
-    history.push(route);
+    act(() => history.push(route));
 
     const { container } = render(App);
 
@@ -228,7 +230,7 @@ describe('ADMIN | pages | SettingsPage', () => {
       },
     });
     const route = '/settings';
-    history.push(route);
+    act(() => history.push(route));
 
     render(App);
 
@@ -311,7 +313,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     });
     const route = '/settings/application-infos';
     const user = userEvent.setup();
-    history.push(route);
+    act(() => history.push(route));
 
     render(App);
 

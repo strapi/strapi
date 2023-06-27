@@ -1,36 +1,35 @@
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
+
+// Strapi Parts
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  TextInput,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPermissions,
   Form,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-
-// Strapi Parts
-import {
-  ContentLayout,
-  HeaderLayout,
-  Main,
-  Button,
-  Box,
-  Flex,
-  Typography,
-  ToggleInput,
-  TextInput,
-  Grid,
-  GridItem,
-} from '@strapi/design-system';
-
 // Strapi Icons
-import { Eye as Show, EyeStriked as Hide, Check } from '@strapi/icons';
+import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
 
-import permissions from '../../permissions';
-import { getTrad } from '../../utils';
-import useReactQuery from '../utils/useReactQuery';
 import FieldActionWrapper from '../../components/FieldActionWrapper';
+import { PERMISSIONS } from '../../constants';
+import { getTrad } from '../../utils';
 import schema from '../utils/schema';
+import useReactQuery from '../utils/useReactQuery';
 
 const SettingsPage = () => {
   useFocusWhenNavigate();
@@ -58,7 +57,7 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
+            {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue, dirty }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -71,8 +70,8 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={permissions.update}>
-                      <Button type="submit" startIcon={<Check />}>
+                    <CheckPermissions permissions={PERMISSIONS.update}>
+                      <Button type="submit" startIcon={<Check />} disabled={!dirty}>
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.Button.save'),
                           defaultMessage: 'Save',

@@ -1,16 +1,16 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { fireEvent, render, act, screen } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { useRelation } from '../../../hooks/useRelation';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import { RelationInputDataManager } from '..';
+import { useRelation } from '../../../hooks/useRelation';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -150,7 +150,7 @@ const setup = (props) => render(<RelationInputDataManagerComponent {...props} />
 
 describe('RelationInputDataManager', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('Does pass through props from the CM', async () => {

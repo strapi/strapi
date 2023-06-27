@@ -1,7 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Box, Flex } from '@strapi/design-system';
-import { PaginationURLQuery, PageSizeURLQuery } from '@strapi/helper-plugin';
+import { PageSizeURLQuery, PaginationURLQuery } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 
 export const PaginationFooter = ({ pagination }) => {
   return (

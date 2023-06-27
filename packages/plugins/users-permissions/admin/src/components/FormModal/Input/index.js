@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { ToggleInput, TextInput } from '@strapi/design-system';
+
+import { TextInput, ToggleInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const Input = ({
   description,

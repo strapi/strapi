@@ -27,7 +27,6 @@ describe('Float validator', () => {
       kind: 'contentType',
       uid: 'test-uid',
       modelName: 'test-model',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrFloatUnique: { type: 'float', unique: true },

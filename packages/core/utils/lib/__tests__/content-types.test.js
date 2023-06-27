@@ -40,7 +40,7 @@ const createModel = (opts) => ({
 
 describe('Content types utils', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('Verify constants exist', () => {
@@ -153,7 +153,6 @@ describe('Content types utils', () => {
     test('Attribute is private in the model attributes', () => {
       const model = createModelWithPrivates();
       global.strapi = { config: createConfig() };
-      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();
@@ -164,7 +163,6 @@ describe('Content types utils', () => {
     test('Attribute is set to private in the app config', () => {
       const model = createModelWithPrivates();
       global.strapi = { config: createConfig(['bar']) };
-      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeTruthy();
@@ -175,7 +173,6 @@ describe('Content types utils', () => {
     test('Attribute is set to private in the model options', () => {
       const model = createModelWithPrivates(['foobar']);
       global.strapi = { config: createConfig() };
-      Object.assign(model, { privateAttributes: getPrivateAttributes(model) });
 
       expect(isPrivateAttribute(model, 'foo')).toBeTruthy();
       expect(isPrivateAttribute(model, 'bar')).toBeFalsy();

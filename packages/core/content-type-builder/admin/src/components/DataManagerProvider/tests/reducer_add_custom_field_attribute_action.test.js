@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
-import reducer, { initialState } from '../reducer';
+
 import { ADD_CUSTOM_FIELD_ATTRIBUTE } from '../constants';
+import reducer, { initialState } from '../reducer';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_ATTRIBUTE', () => {
   it('adds a custom field to a contentType', () => {

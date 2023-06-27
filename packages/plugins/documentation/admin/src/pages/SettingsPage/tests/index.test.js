@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import SettingsPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -56,61 +58,16 @@ describe('Plugin | Documentation | SettingsPage', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c3 {
-        min-width: 0;
-      }
-
-      .c7 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
-      }
-
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c14 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c25 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c27 {
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c6 {
@@ -168,6 +125,63 @@ describe('Plugin | Documentation | SettingsPage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c14 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c25 {
+        background: #f6f6f9;
+        padding: 4px;
+        border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c27 {
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
       }
 
       .c2 {
@@ -314,20 +328,13 @@ describe('Plugin | Documentation | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c10 {
         height: 2rem;
+      }
+
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c10[aria-disabled='true'] {
@@ -510,8 +517,9 @@ describe('Plugin | Documentation | SettingsPage', () => {
                   </h1>
                 </div>
                 <button
-                  aria-disabled="false"
+                  aria-disabled="true"
                   class="c7 c8 c9 c10"
+                  disabled=""
                   type="submit"
                 >
                   <div
@@ -576,7 +584,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
                         >
                           <label
                             class="c5 c21 c22"
-                            for="1"
+                            for=":r0:"
                           >
                             Restricted Access
                           </label>
@@ -614,11 +622,11 @@ describe('Plugin | Documentation | SettingsPage', () => {
                               </span>
                             </div>
                             <input
-                              aria-describedby="1-hint"
+                              aria-describedby=":r0:-hint"
                               aria-disabled="false"
                               aria-required="false"
                               class="c33"
-                              id="1"
+                              id=":r0:"
                               name="restrictedAccess"
                               type="checkbox"
                             />
@@ -626,7 +634,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
                         </label>
                         <p
                           class="c5 c34"
-                          id="1-hint"
+                          id=":r0:-hint"
                         >
                           Make the documentation endpoint private
                         </p>

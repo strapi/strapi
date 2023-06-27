@@ -1,12 +1,13 @@
 import React from 'react';
+
+import { Flex, lightTheme, ThemeProvider, Typography } from '@strapi/design-system';
+import { act, fireEvent, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { Flex, ThemeProvider, lightTheme, Typography } from '@strapi/design-system';
-import { render, fireEvent, act } from '@testing-library/react';
 
 import { FolderCard } from '../FolderCard';
 import { FolderCardBody } from '../FolderCardBody';
-import { FolderCardCheckbox } from '../FolderCardCheckbox';
 import { FolderCardBodyAction } from '../FolderCardBodyAction';
+import { FolderCardCheckbox } from '../FolderCardCheckbox';
 
 const ID_FIXTURE = 'folder';
 

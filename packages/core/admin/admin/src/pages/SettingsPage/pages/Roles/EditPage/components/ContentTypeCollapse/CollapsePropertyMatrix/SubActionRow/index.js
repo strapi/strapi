@@ -1,10 +1,12 @@
 import React, { memo, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
+import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
+
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';

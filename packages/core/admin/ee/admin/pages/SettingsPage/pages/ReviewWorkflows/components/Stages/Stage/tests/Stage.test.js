@@ -1,19 +1,18 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
 import { FormikProvider, useFormik } from 'formik';
-import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../../admin/src/core/store/configureStore';
-import { Stage } from '../Stage';
-import { reducer } from '../../../../reducer';
-
 import { STAGE_COLOR_DEFAULT } from '../../../../constants';
+import { reducer } from '../../../../reducer';
+import { Stage } from '../Stage';
 
 const STAGES_FIXTURE = {
   id: 1,
@@ -61,7 +60,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { container, getByRole, getByText, queryByRole } = setup();
+    const { container, getByRole, queryByRole } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
@@ -73,7 +72,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(getByRole('textbox').value).toBe('something');
     expect(getByRole('textbox').getAttribute('name')).toBe('stages.0.name');
 
-    expect(getByText(/blue/i)).toBeInTheDocument();
+    expect(getByRole('combobox')).toHaveTextContent('Blue');
 
     expect(
       queryByRole('button', {

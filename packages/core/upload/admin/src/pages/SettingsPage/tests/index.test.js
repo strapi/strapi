@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import { SettingsPage } from '../index';
+
 import server from './utils/server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -49,62 +52,16 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c3 {
-        min-width: 0;
-      }
-
-      .c7 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
-      }
-
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c15 {
-        padding-bottom: 56px;
-      }
-
-      .c18 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c29 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c31 {
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
+      .c28 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c6 {
@@ -170,6 +127,64 @@ describe('Upload | SettingsPage', () => {
         font-weight: 600;
         color: #b72b1a;
         text-transform: uppercase;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c3 {
+        min-width: 0;
+      }
+
+      .c7 {
+        background: #4945ff;
+        padding: 8px;
+        padding-right: 16px;
+        padding-left: 16px;
+        border-radius: 4px;
+        border-color: #4945ff;
+        border: 1px solid #4945ff;
+        cursor: pointer;
+      }
+
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-bottom: 56px;
+      }
+
+      .c18 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c29 {
+        background: #f6f6f9;
+        padding: 4px;
+        border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #dcdce4;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c31 {
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
       }
 
       .c2 {
@@ -331,20 +346,13 @@ describe('Upload | SettingsPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c28 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c10 {
         height: 2rem;
+      }
+
+      .c10 svg {
+        height: 0.75rem;
+        width: auto;
       }
 
       .c10[aria-disabled='true'] {
@@ -615,7 +623,7 @@ describe('Upload | SettingsPage', () => {
                                 >
                                   <label
                                     class="c5 c25 c26"
-                                    for="1"
+                                    for=":r0:"
                                   >
                                     Responsive friendly upload
                                   </label>
@@ -653,14 +661,14 @@ describe('Upload | SettingsPage', () => {
                                       </span>
                                     </div>
                                     <input
-                                      aria-describedby="1-hint"
+                                      aria-describedby=":r0:-hint"
                                       aria-disabled="false"
                                       aria-label="responsiveDimensions"
                                       aria-required="false"
                                       checked=""
                                       class="c37"
                                       data-testid="responsiveDimensions"
-                                      id="1"
+                                      id=":r0:"
                                       name="responsiveDimensions"
                                       type="checkbox"
                                     />
@@ -668,7 +676,7 @@ describe('Upload | SettingsPage', () => {
                                 </label>
                                 <p
                                   class="c5 c38"
-                                  id="1-hint"
+                                  id=":r0:-hint"
                                 >
                                   Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
                                 </p>
@@ -689,7 +697,7 @@ describe('Upload | SettingsPage', () => {
                                 >
                                   <label
                                     class="c5 c25 c26"
-                                    for="3"
+                                    for=":r2:"
                                   >
                                     Size optimization
                                   </label>
@@ -727,13 +735,13 @@ describe('Upload | SettingsPage', () => {
                                       </span>
                                     </div>
                                     <input
-                                      aria-describedby="3-hint"
+                                      aria-describedby=":r2:-hint"
                                       aria-disabled="false"
                                       aria-label="sizeOptimization"
                                       aria-required="false"
                                       class="c37"
                                       data-testid="sizeOptimization"
-                                      id="3"
+                                      id=":r2:"
                                       name="sizeOptimization"
                                       type="checkbox"
                                     />
@@ -741,7 +749,7 @@ describe('Upload | SettingsPage', () => {
                                 </label>
                                 <p
                                   class="c5 c38"
-                                  id="3-hint"
+                                  id=":r2:-hint"
                                 >
                                   Enabling this option will reduce the image size and slightly reduce its quality.
                                 </p>
@@ -762,7 +770,7 @@ describe('Upload | SettingsPage', () => {
                                 >
                                   <label
                                     class="c5 c25 c26"
-                                    for="5"
+                                    for=":r4:"
                                   >
                                     Auto orientation
                                   </label>
@@ -800,14 +808,14 @@ describe('Upload | SettingsPage', () => {
                                       </span>
                                     </div>
                                     <input
-                                      aria-describedby="5-hint"
+                                      aria-describedby=":r4:-hint"
                                       aria-disabled="false"
                                       aria-label="autoOrientation"
                                       aria-required="false"
                                       checked=""
                                       class="c37"
                                       data-testid="autoOrientation"
-                                      id="5"
+                                      id=":r4:"
                                       name="autoOrientation"
                                       type="checkbox"
                                     />
@@ -815,7 +823,7 @@ describe('Upload | SettingsPage', () => {
                                 </label>
                                 <p
                                   class="c5 c38"
-                                  id="5-hint"
+                                  id=":r4:-hint"
                                 >
                                   Enabling this option will automatically rotate the image according to EXIF orientation tag.
                                 </p>

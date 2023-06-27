@@ -103,4 +103,4 @@ const setFieldSize = (name, size, layouts = []) => {
   });
 };
 
-export { createLayout, formatLayout, getFieldSize, setFieldSize, getRowSize, unformatLayout };
+export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize, unformatLayout };

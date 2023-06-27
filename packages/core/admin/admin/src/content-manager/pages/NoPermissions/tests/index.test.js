@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';
@@ -32,6 +34,21 @@ describe('<NoPermissions />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -62,21 +79,6 @@ describe('<NoPermissions />', () => {
 
       .c11 {
         padding-bottom: 16px;
-      }
-
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-        text-align: center;
       }
 
       .c2 {
