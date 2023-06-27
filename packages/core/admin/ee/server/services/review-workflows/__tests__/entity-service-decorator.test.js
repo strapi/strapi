@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const { WORKFLOW_UPDATE_STAGE } = require('../../../constants/webhookEvents');
-const { STAGE_MODEL_UID } = require('../../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../../constants/workflows');
 const { decorator } = require('../entity-service-decorator')();
 
 jest.mock('../../../utils');
@@ -109,22 +109,23 @@ describe('Entity service decorator', () => {
       const stageToId = 3;
 
       const defaultService = {
-        update: jest.fn(() => Promise.resolve({ id: entityId })),
+        update: jest.fn(() =>
+          Promise.resolve({
+            id: entityId,
+            [ENTITY_STAGE_ATTRIBUTE]: {
+              id: stageToId,
+              name: `Stage ${stageToId}`,
+              workflow: { id: workflowId },
+            },
+          })
+        ),
       };
 
       const emit = jest.fn();
       global.strapi = {
         ...global.strapi,
         entityService: {
-          findOne: jest.fn((uid, id) => {
-            if (uid === STAGE_MODEL_UID) {
-              return {
-                id,
-                name: `Stage ${id}`,
-                workflow: { id: workflowId },
-              };
-            }
-
+          findOne: jest.fn(() => {
             return {
               strapi_reviewWorkflows_stage: {
                 id: stageFromId,

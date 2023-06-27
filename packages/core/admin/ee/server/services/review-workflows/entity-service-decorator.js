@@ -1,7 +1,7 @@
 'use strict';
 
 const { isNil, isNull } = require('lodash/fp');
-const { ENTITY_STAGE_ATTRIBUTE, STAGE_MODEL_UID } = require('../../constants/workflows');
+const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
 const { WORKFLOW_UPDATE_STAGE } = require('../../constants/webhookEvents');
 const { hasReviewWorkflow, getDefaultWorkflow } = require('../../utils/review-workflows');
 
@@ -66,15 +66,11 @@ const decorator = (service) => ({
       return service.update.call(this, uid, entityId, { ...opts, data });
     }
 
-    const newStage = await strapi.entityService.findOne(
-      STAGE_MODEL_UID,
-      data[ENTITY_STAGE_ATTRIBUTE]
-    );
     const previousStage = await getEntityStage(uid, entityId);
 
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
 
-    if (previousStage?.id && previousStage.id !== newStage.id) {
+    if (previousStage?.id && previousStage.id !== updatedEntity[ENTITY_STAGE_ATTRIBUTE].id) {
       const model = strapi.getModel(uid);
 
       strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {
@@ -91,8 +87,8 @@ const decorator = (service) => ({
               name: previousStage.name,
             },
             to: {
-              id: newStage.id,
-              name: newStage.name,
+              id: updatedEntity[ENTITY_STAGE_ATTRIBUTE].id,
+              name: updatedEntity[ENTITY_STAGE_ATTRIBUTE].name,
             },
           },
         },
