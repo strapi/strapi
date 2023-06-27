@@ -2,6 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const { WORKFLOW_UPDATE_STAGE } = require('../../../constants/webhookEvents');
+const { STAGE_MODEL_UID } = require('../../../constants/workflows');
 const { decorator } = require('../entity-service-decorator')();
 
 jest.mock('../../../utils');
@@ -102,20 +103,35 @@ describe('Entity service decorator', () => {
     });
 
     test('Assigns a stage to new review workflow entity', async () => {
-      const entry = {
-        id: 1,
-      };
+      const entityId = 10;
+      const workflowId = 1;
+      const stageFromId = 2;
+      const stageToId = 3;
 
       const defaultService = {
-        update: jest.fn(() => Promise.resolve(entry)),
+        update: jest.fn(() => Promise.resolve({ id: entityId })),
       };
 
       const emit = jest.fn();
       global.strapi = {
         ...global.strapi,
         entityService: {
-          findOne: jest.fn(() => {
-            return { strapi_reviewWorkflows_stage: { id: 2, workflow: { id: 1 } } };
+          findOne: jest.fn((uid, id) => {
+            if (uid === STAGE_MODEL_UID) {
+              return {
+                id,
+                name: `Stage ${id}`,
+                workflow: { id: workflowId },
+              };
+            }
+
+            return {
+              strapi_reviewWorkflows_stage: {
+                id: stageFromId,
+                name: `Stage ${stageFromId}`,
+                workflow: { id: workflowId },
+              },
+            };
           }),
           emitEvent: jest.fn(),
         },
@@ -133,28 +149,27 @@ describe('Entity service decorator', () => {
 
       const service = decorator(defaultService);
 
-      const id = 1;
-      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: 1 } };
-      await service.update(uid, id, input);
+      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: stageToId } };
+      await service.update(uid, entityId, input);
+
+      expect(defaultService.update).toHaveBeenCalledWith(uid, entityId, input);
 
       expect(emit).toHaveBeenCalledWith(WORKFLOW_UPDATE_STAGE, {
-        entity: { id: 1 },
+        entity: { id: entityId },
         model: uid,
         uid,
         workflow: {
-          id: 1,
+          id: workflowId,
           stages: {
-            from: 2,
-            to: 1,
+            from: {
+              id: stageFromId,
+              name: `Stage ${stageFromId}`,
+            },
+            to: {
+              id: stageToId,
+              name: `Stage ${stageToId}`,
+            },
           },
-        },
-      });
-
-      expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
-        ...input,
-        data: {
-          ...input.data,
-          strapi_reviewWorkflows_stage: 1,
         },
       });
     });
