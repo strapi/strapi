@@ -41,7 +41,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', async () => {

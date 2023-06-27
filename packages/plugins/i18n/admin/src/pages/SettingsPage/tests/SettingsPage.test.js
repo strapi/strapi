@@ -104,7 +104,7 @@ describe('i18n settings page', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('initial state', () => {
