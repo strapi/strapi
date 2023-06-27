@@ -38,7 +38,7 @@ export interface ILocalFileSourceProviderOptions {
   };
 
   compression: {
-    enabled: boolean; // if the file in compressed (and should be decompressed)
+    enabled: boolean; // if the file is compressed (and should be decompressed)
   };
 }
 

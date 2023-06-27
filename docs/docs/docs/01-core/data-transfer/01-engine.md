@@ -23,7 +23,7 @@ Note: Schema differences during this stage can be resolved programmatically by a
 Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
 
 1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
-2. entities - all entities (including media data records, not files) _without their relations_
+2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
 3. assets - the files from the /uploads folder
 4. links - the relations between entities
 5. configuration - the Strapi project configuration data
@@ -157,7 +157,7 @@ const diffHandler = async (context, next) => {
 engine.onSchemaDiff(diffHandler);
 ```
 
-After all the schemaDiffHandler middleware has been run, another diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
+After all the schemaDiffHandler middlewares have been run, another diff is run between `context.ignoredDiffs` and `context.diffs` and any remaining diffs that have not been ignored are thrown as fatal errors and the engine will abort the transfer.
 
 ### Progress Tracking events
 

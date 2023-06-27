@@ -20,8 +20,8 @@ import { ProviderTransferError } from '../../../errors/providers';
 
 export interface ILocalFileDestinationProviderOptions {
   encryption: {
-    enabled: boolean; // if the file should be decrypted
-    key?: string; // the key to use when enabled is true
+    enabled: boolean; // if the file should be encrypted
+    key?: string; // the key to use when encryption.enabled is true
   };
 
   compression: {

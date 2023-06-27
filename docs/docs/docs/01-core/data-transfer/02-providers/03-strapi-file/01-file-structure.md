@@ -54,4 +54,4 @@ Any number of files may be provided for each stage, as long as the sequence numb
 
 ### JSONL files
 
-JSON Lines files are essentially JSON files, except that newline characters are used to delimit the JSON objects. This allows the provider to read in a single line at a time, rather than loading the entire file into memory, minimizing RAM usage during a transfer and allowing files containing any amount of data.
+[JSON Lines](https://jsonlines.org/) files are essentially JSON files, except that newline characters are used to delimit the JSON objects. This allows the provider to read in a single line at a time, rather than loading the entire file into memory, minimizing RAM usage during a transfer and allowing files containing any amount of data.
