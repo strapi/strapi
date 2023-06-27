@@ -40,6 +40,7 @@ const LocaleSelect = React.memo(({ value, onClear, onLocaleChange, error }) => {
         id: getTrad('Settings.locales.modal.locales.label'),
         defaultMessage: 'Locales',
       })}
+      autocomplete="list"
       value={computedValue}
       onClear={value ? onClear : undefined}
       onChange={(selectedLocaleKey) => {
