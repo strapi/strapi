@@ -83,7 +83,10 @@ const Table = ({
               <Td>
                 {token.lastUsedAt && (
                   <Typography textColor="neutral800">
-                    <RelativeTime timestamp={new Date(token.lastUsedAt)} />
+                    <RelativeTime
+                      timestamp={new Date(token.lastUsedAt)}
+                      customIntervals={[{ unit: 'hours', threshold: 1, text: 'last hour' }]}
+                    />
                   </Typography>
                 )}
               </Td>
