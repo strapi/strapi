@@ -201,24 +201,38 @@ The engine includes a diagnostics reporter which can be used to listen for diagn
 
 Here is an example for creating a diagnostics listener:
 
-```
+```typescript
 // listener function
 const diagnosticListener: DiagnosticListener = (data: GenericDiagnostic) => {
   // handle the diagnostics event, for example with custom logging
-}
+};
 
 // add a generic listener
 engine.diagnostics.onDiagnostic(diagnosticsListener);
-// OR
-engine.diagnostics.addListener('diagnostic', diagnosticListener);
 
 // add an error listener
-engine.diagnostics.addListener('diagnostic.error', diagnosticListener);
+engine.diagnostics.on('error', diagnosticListener);
 
 // add a warning listener
-engine.diagnostics.addListener('diagnostic.warning', diagnosticListener);
+engine.diagnostics.on('warning', diagnosticListener);
+```
 
-// engine/diagnostics.ts
+To emit your own diagnostics event:
+
+```typescript
+const event: Diagnostic = {
+  kind: 'error',
+  details: {
+    message: "Your error"
+    createdAt: new Date(),
+  }
+}
+```
+
+Here is an excerpt of the relevant types used in the previous examples:
+
+```typescript
+// engine/diagnostic.ts
 // format of the data sent to the listener
 export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
   kind: K;
@@ -229,6 +243,33 @@ export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
 };
 
 export type DiagnosticKind = 'error' | 'warning' | 'info';
+
+export type Diagnostic = ErrorDiagnostic | WarningDiagnostic | InfoDiagnostic;
+
+export type ErrorDiagnosticSeverity = 'fatal' | 'error' | 'silly';
+
+export type ErrorDiagnostic = GenericDiagnostic<
+  'error',
+  {
+    name: string;
+    severity: ErrorDiagnosticSeverity;
+    error: Error;
+  }
+>;
+
+export type WarningDiagnostic = GenericDiagnostic<
+  'warning',
+  {
+    origin?: string;
+  }
+>;
+
+export type InfoDiagnostic<T = unknown> = GenericDiagnostic<
+  'info',
+  {
+    params?: T;
+  }
+>;
 ```
 
 ### Transforms
