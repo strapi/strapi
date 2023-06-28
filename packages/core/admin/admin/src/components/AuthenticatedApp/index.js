@@ -86,7 +86,7 @@ const AuthenticatedApp = () => {
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   const shouldShowNotDependentQueriesLoader =
-    (isFetching && isFetched) || status === 'loading' || fetchPermissionsStatus === 'loading';
+    isFetching || status === 'loading' || fetchPermissionsStatus === 'loading';
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
