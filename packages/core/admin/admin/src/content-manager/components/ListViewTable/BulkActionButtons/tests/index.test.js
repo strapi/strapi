@@ -21,7 +21,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-// TODO: add layout somewhere
 jest.mock('react-redux', () => ({
   useSelector() {
     return {
@@ -45,18 +44,6 @@ jest.mock('../../../../../shared/hooks', () => ({
 
 const user = userEvent.setup();
 const history = createMemoryHistory();
-
-useTableContext();
-
-<Table.Root rows={myMockData}>
-  <Table.Root>
-  <MyComonentToTest />
-  </Table.Root>
-</Table.Root>
-
-<ContextProvider data={}>
-  <Component />
-</ContextProvider>
 
 const setup = (props) =>
   render(
