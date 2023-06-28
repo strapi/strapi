@@ -673,7 +673,7 @@ const createEntityManager = (db) => {
 
           // add inv_order value
           if (hasInverseOrderColumn(attribute)) {
-            const maxResults = await db
+            const maxResults = db
               .getConnection()
               .select(inverseJoinColumn.name)
               .max(inverseOrderColumnName, { as: 'max' })
@@ -683,13 +683,8 @@ const createEntityManager = (db) => {
               .from(joinTable.name)
               .transacting(trx);
 
-            const maxMap = maxResults.reduce(
-              (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-              {}
-            );
-
             insert.forEach((rel) => {
-              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
+              rel[inverseOrderColumnName] = maxResults[0]?.max +1 || 1
             });
           }
 
@@ -968,7 +963,7 @@ const createEntityManager = (db) => {
                   map(inverseJoinColumn.name, currentMovingRels)
                 );
 
-                const maxResults = await db
+                const maxResults = db
                   .getConnection()
                   .select(inverseJoinColumn.name)
                   .max(inverseOrderColumnName, { as: 'max' })
@@ -978,13 +973,9 @@ const createEntityManager = (db) => {
                   .from(joinTable.name)
                   .transacting(trx);
 
-                const maxMap = maxResults.reduce(
-                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-                  {}
-                );
 
                 insert.forEach((row) => {
-                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                  row[inverseOrderColumnName] = maxResults[0]?.max +1 || 1
                 });
               }
 
@@ -1064,13 +1055,8 @@ const createEntityManager = (db) => {
                   .from(joinTable.name)
                   .transacting(trx);
 
-                const maxMap = maxResults.reduce(
-                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-                  {}
-                );
-
                 insert.forEach((row) => {
-                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                  row[inverseOrderColumnName] = maxResults[0]?.max +1 || 1
                 });
               }
 
