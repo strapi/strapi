@@ -8560,10 +8560,15 @@ __metadata:
   resolution: "@strapi/utils@workspace:packages/core/utils"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    "@types/koa": 2.13.4
     date-fns: 2.30.0
+    eslint-config-custom: "*"
     http-errors: 1.8.1
+    koa: 2.13.4
+    koa-body: 4.2.0
     lodash: 4.17.21
     p-map: 4.0.0
+    tsconfig: "*"
     yup: 0.32.9
   languageName: unknown
   linkType: soft
@@ -16418,7 +16423,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-custom@4.11.2, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
+"eslint-config-custom@*, eslint-config-custom@4.11.2, eslint-config-custom@workspace:packages/utils/eslint-config-custom":
   version: 0.0.0-use.local
   resolution: "eslint-config-custom@workspace:packages/utils/eslint-config-custom"
   languageName: unknown
@@ -31492,7 +31497,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig@4.11.2, tsconfig@workspace:packages/utils/tsconfig":
+"tsconfig@*, tsconfig@4.11.2, tsconfig@workspace:packages/utils/tsconfig":
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   languageName: unknown
