@@ -1,7 +1,24 @@
 'use strict';
 
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
+const { STAGE_MODEL_UID } = require('../../../constants/workflows');
+
+/**
+ *
+ * @param { Strapi } strapi - Strapi instance
+ * @param userAbility
+ * @return { (Stage) => SanitizedStage }
+ */
+function sanitizeStage({ strapi }, userAbility) {
+  const permissionChecker = strapi
+    .plugin('content-manager')
+    .service('permission-checker')
+    .create({ userAbility, model: STAGE_MODEL_UID });
+
+  return (entity) => permissionChecker.sanitizeOutput(entity);
+}
 
 module.exports = {
   /**
@@ -12,14 +29,15 @@ module.exports = {
     const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
+    const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
-    const data = await stagesService.find({
+    const stages = await stagesService.find({
       workflowId,
       populate,
     });
 
     ctx.body = {
-      data,
+      data: await mapAsync(stages, sanitizer),
     };
   },
   /**
@@ -30,14 +48,15 @@ module.exports = {
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
+    const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
-    const data = await stagesService.findById(id, {
+    const stage = await stagesService.findById(id, {
       workflowId,
       populate,
     });
 
     ctx.body = {
-      data,
+      data: await sanitizer(stage),
     };
   },
 
@@ -57,8 +76,14 @@ module.exports = {
   async updateEntity(ctx) {
     const stagesService = getService('stages');
     const workflowService = getService('workflows');
+
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
     const entityId = Number(entityIdString);
+
+    const { sanitizeOutput } = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     const { id: stageId } = await validateUpdateStageOnEntity(
       ctx.request?.body?.data,
@@ -68,8 +93,8 @@ module.exports = {
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    const data = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
+    const entity = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
 
-    ctx.body = { data };
+    ctx.body = { data: await sanitizeOutput(entity) };
   },
 };
