@@ -10,6 +10,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
 import DeleteButton from './DeleteButton';
@@ -28,6 +29,7 @@ const Table = ({
   const { canDelete, canUpdate, canRead } = permissions;
   const withBulkActions = canDelete || canUpdate || canRead;
   const [{ query }] = useQueryParams();
+  const { formatMessage } = useIntl();
   const [, sortOrder] = query ? query.sort.split(':') : 'ASC';
   const {
     push,
@@ -83,7 +85,19 @@ const Table = ({
               <Td>
                 {token.lastUsedAt && (
                   <Typography textColor="neutral800">
-                    <RelativeTime timestamp={new Date(token.lastUsedAt)} />
+                    <RelativeTime
+                      timestamp={new Date(token.lastUsedAt)}
+                      customIntervals={[
+                        {
+                          unit: 'hours',
+                          threshold: 1,
+                          text: formatMessage({
+                            id: 'Settings.apiTokens.lastHour',
+                            defaultMessage: 'last hour',
+                          }),
+                        },
+                      ]}
+                    />
                   </Typography>
                 )}
               </Td>
