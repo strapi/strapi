@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
+
 import ProtectedAdvancedSettingsPage from '../index';
-import server from './utils/server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -35,19 +36,12 @@ const App = (
 );
 
 describe('ADMIN | Pages | Settings | Advanced Settings', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
   afterAll(() => {
-    jest.resetAllMocks();
-    server.close();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -790,8 +784,9 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                   </h1>
                 </div>
                 <button
-                  aria-disabled="false"
+                  aria-disabled="true"
                   class="c7 c8 c9 c10"
+                  disabled=""
                   type="submit"
                 >
                   <div

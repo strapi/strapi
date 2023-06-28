@@ -5,9 +5,11 @@
  */
 
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoPermissions from '../index';

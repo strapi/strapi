@@ -5,30 +5,30 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import parseISO from 'date-fns/parseISO';
-import formatISO from 'date-fns/formatISO';
-import { useIntl } from 'react-intl';
 
 import {
   Checkbox,
   DatePicker,
   DateTimePicker,
   Icon,
+  JSONInput,
   NumberInput,
+  Option,
   Select,
   Textarea,
   TextInput,
   TimePicker,
   ToggleInput,
-  JSONInput,
-  Option,
 } from '@strapi/design-system';
-import { EyeStriked, Eye } from '@strapi/icons';
+import { Eye, EyeStriked } from '@strapi/icons';
+import formatISO from 'date-fns/formatISO';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
-import NotSupported from './NotSupported';
 import useFieldHint from '../../hooks/useFieldHint';
 import pxToRem from '../../utils/pxToRem';
+
+import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
@@ -240,12 +240,6 @@ const GenericInput = ({
       );
     }
     case 'date': {
-      let selectedDate = null;
-
-      if (value) {
-        selectedDate = parseISO(value);
-      }
-
       return (
         <DatePicker
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -264,7 +258,7 @@ const GenericInput = ({
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          selectedDate={selectedDate}
+          selectedDate={value ? new Date(value) : undefined}
           selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         />
       );

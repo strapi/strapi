@@ -1,17 +1,19 @@
 import React from 'react';
-import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
+
 import {
   Box,
   FieldLabel,
+  Flex,
   Grid,
   GridItem,
-  Flex,
-  TextInput,
   TextButton,
+  TextInput,
 } from '@strapi/design-system';
+import { RemoveRoundedButton } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+
 import Combobox from './Combobox';
 
 const HeadersInput = () => {

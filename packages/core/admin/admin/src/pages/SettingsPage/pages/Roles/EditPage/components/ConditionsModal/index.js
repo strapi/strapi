@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
 import {
   Button,
+  ModalBody,
   ModalFooter,
   ModalHeader,
   ModalLayout,
-  ModalBody,
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
@@ -13,8 +13,11 @@ import produce from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import { usePermissionsDataManager } from '../../../../../../../hooks';
+
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 

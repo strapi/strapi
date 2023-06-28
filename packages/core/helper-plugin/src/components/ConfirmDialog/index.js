@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Dialog, DialogBody, DialogFooter, Flex, Typography, Button } from '@strapi/design-system';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 
 const ConfirmDialog = ({
   bodyText,

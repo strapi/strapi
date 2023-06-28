@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
+
+import { BaseButton, Flex, Typography } from '@strapi/design-system';
+import { PlusCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { PlusCircle } from '@strapi/icons';
-import { BaseButton, Flex, Typography } from '@strapi/design-system';
 
 export const AddComponentButton = ({ hasError, isDisabled, isOpen, children, onClick }) => {
   return (

@@ -1,11 +1,13 @@
 import React from 'react';
+
+import { MenuItem, SimpleMenu } from '@strapi/design-system';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
-import get from 'lodash/get';
-import { MenuItem, SimpleMenu } from '@strapi/design-system';
+
 import useDataManager from '../../../../hooks/useDataManager';
-import { ON_CHANGE_RELATION_TARGET } from '../../../FormModal/constants';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
+import { ON_CHANGE_RELATION_TARGET } from '../../../FormModal/constants';
 
 const RelationTargetPicker = ({ oneThatIsCreatingARelationWithAnother, target }) => {
   const { contentTypes, sortedContentTypesList } = useDataManager();

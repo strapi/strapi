@@ -1,6 +1,8 @@
 import React from 'react';
-import { IntlProvider } from 'react-intl';
+
 import { renderHook } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+
 import useRegenerate from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

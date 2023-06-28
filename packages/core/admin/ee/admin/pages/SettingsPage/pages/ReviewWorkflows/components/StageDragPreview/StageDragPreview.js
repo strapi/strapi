@@ -1,9 +1,10 @@
 import * as React from 'react';
+
+import { Flex, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { CarretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Flex, Typography } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
-import { pxToRem } from '@strapi/helper-plugin';
 
 const Toggle = styled(Flex)`
   svg path {
