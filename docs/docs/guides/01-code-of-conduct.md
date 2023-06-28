@@ -4,7 +4,7 @@ hide_title: true
 ---
 
 ```mdx-code-block
-import CodeOfConduct, {toc as CodeOfConductTOC} from "../../../CODE_OF_CONDUCT.md"
+import CodeOfConduct, {toc as CodeOfConductTOC} from "@site/../CODE_OF_CONDUCT.md"
 
 <CodeOfConduct />
 
