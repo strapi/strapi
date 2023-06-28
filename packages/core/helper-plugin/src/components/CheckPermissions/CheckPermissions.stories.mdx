@@ -14,7 +14,7 @@ This component is used in order to apply RBAC to a component. If the user does n
 ```
 import { CheckPermissions } from '@strapi/helper-plugin';
 
-const permissions = [{ action: 'plugins::my-plugin.read', subject: null }];
+const permissions = [{ action: 'plugin::my-plugin.read', subject: null }];
 
 const HomePage = () => {
   return (
