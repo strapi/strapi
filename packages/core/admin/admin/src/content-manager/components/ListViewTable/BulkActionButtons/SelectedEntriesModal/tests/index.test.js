@@ -2,7 +2,7 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table } from '@strapi/helper-plugin';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as renderRTL, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
@@ -44,21 +44,26 @@ jest.mock('react-redux', () => ({
 
 const user = userEvent.setup();
 
+const render = (ui) => ({
+  ...renderRTL(ui, {
+    wrapper: ({ children }) => (
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={{}} defaultLocale="en">
+          <Router history={history}>{children}</Router>
+        </IntlProvider>
+      </ThemeProvider>
+    ),
+  }),
+});
+
 describe('Bulk publish selected entries modal', () => {
   it('renders the selected items in the modal', async () => {
-    const onToggle = jest.fn();
     const onConfirm = jest.fn();
 
     render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <Router history={history}>
-            <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={24}>
-              <SelectedEntriesModal onConfirm={onConfirm} onToggle={onToggle} isOpen />
-            </Table.Root>
-          </Router>
-        </IntlProvider>
-      </ThemeProvider>
+      <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
+        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+      </Table.Root>
     );
 
     expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
@@ -66,6 +71,14 @@ describe('Bulk publish selected entries modal', () => {
     // Nested table should render the selected items from the parent table
     expect(screen.getByText('Entry 1')).toBeInTheDocument();
     expect(screen.queryByText('Entry 3')).not.toBeInTheDocument();
+  });
+
+  it('reacts to selection updates', async () => {
+    render(
+      <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
+        <SelectedEntriesModal onConfirm={jest.fn()} onToggle={jest.fn()} />
+      </Table.Root>
+    );
 
     // User can toggle selected entries in the modal
     const checkboxEntry1 = screen.getByRole('checkbox', { name: 'Select 1' });
@@ -91,7 +104,19 @@ describe('Bulk publish selected entries modal', () => {
     fireEvent.click(checkboxEntry1);
     expect(count).toHaveTextContent('1 entry selected');
     expect(publishButton).not.toBeDisabled();
+  });
+
+  it('triggers validation dialog for selected items', async () => {
+    const onConfirm = jest.fn();
+
+    render(
+      <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
+        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+      </Table.Root>
+    );
+
+    const publishButton = screen.getByRole('button', { name: /publish/i });
     await user.click(publishButton);
-    expect(onConfirm).toHaveBeenCalledWith([1]);
+    expect(onConfirm).toHaveBeenCalledWith([1, 2]);
   });
 });
