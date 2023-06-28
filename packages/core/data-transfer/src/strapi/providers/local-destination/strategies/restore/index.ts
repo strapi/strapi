@@ -3,16 +3,16 @@ import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
 
 export interface IRestoreOptions {
-  assets?: boolean;
+  assets?: boolean; // delete media library files before transfer
   configuration?: {
-    webhook?: boolean;
-    coreStore?: boolean;
+    webhook?: boolean; // delete webhooks before transfer
+    coreStore?: boolean; // delete core store before transfer
   };
   entities?: {
-    include?: string[];
-    exclude?: string[];
-    filters?: ((contentType: Schema.ContentType) => boolean)[];
-    params?: { [uid: string]: unknown };
+    include?: string[]; // only delete these stage entities before transfer
+    exclude?: string[]; // exclude these stage entities from deletion
+    filters?: ((contentType: Schema.ContentType) => boolean)[]; // custom filters to exclude a content type from deletion
+    params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions
   };
 }
 

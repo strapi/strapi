@@ -1,10 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useRBAC } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useRBAC } from '@strapi/helper-plugin';
-import server from './server';
+
 import { ProvidersPage } from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -33,15 +34,9 @@ const App = (
 );
 
 describe('Admin | containers | ProvidersPage', () => {
-  beforeAll(() => server.listen());
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  afterEach(() => server.resetHandlers());
-
-  afterAll(() => server.close());
 
   it('renders and matches the snapshot', () => {
     useRBAC.mockImplementation(() => ({

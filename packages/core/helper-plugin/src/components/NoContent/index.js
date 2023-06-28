@@ -1,6 +1,7 @@
 import React from 'react';
-import { EmptyDocuments } from '@strapi/icons';
+
 import { EmptyStateLayout } from '@strapi/design-system';
+import { EmptyDocuments } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

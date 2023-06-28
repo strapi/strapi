@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
+
+import { Box, Button } from '@strapi/design-system';
+import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
+import { Filter } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box, Button } from '@strapi/design-system';
-import { Filter } from '@strapi/icons';
-import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {
   const [isVisible, setIsVisible] = useState(false);

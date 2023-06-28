@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { useSelectionState } from '../index';
 
@@ -126,5 +126,56 @@ describe('useSelectionState', () => {
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[0]]);
+  });
+
+  test('selectMultiple - no previously selected + multiple keys', () => {
+    const { result } = setup(['id', 'name'], []);
+
+    act(() => {
+      result.current[1].selectMultiple(FIXTURE);
+    });
+
+    expect(result.current[0]).toStrictEqual(FIXTURE);
+  });
+
+  test('selectMultiple - already selected item + multiple keys', () => {
+    const alreadySelectedItem = { id: 0, name: 'already selected' };
+    const { result } = setup(['id', 'name'], [alreadySelectedItem]);
+
+    act(() => {
+      result.current[1].selectMultiple(FIXTURE);
+    });
+
+    expect(result.current[0]).toStrictEqual([alreadySelectedItem, ...FIXTURE]);
+  });
+
+  test('selectMultiple - no duplicates + multiple keys', () => {
+    const { result } = setup(['id', 'name'], FIXTURE);
+
+    act(() => {
+      result.current[1].selectMultiple(FIXTURE);
+    });
+
+    expect(result.current[0]).toStrictEqual(FIXTURE);
+  });
+
+  test('deselectMultiple - multiple keys', () => {
+    const { result } = setup(['id', 'name'], FIXTURE);
+
+    act(() => {
+      result.current[1].deselectMultiple(FIXTURE);
+    });
+
+    expect(result.current[0]).toStrictEqual([]);
+  });
+
+  test('deselectMultiple - some items to deselect + multiple keys', () => {
+    const { result } = setup(['id', 'name'], FIXTURE);
+
+    act(() => {
+      result.current[1].deselectMultiple([FIXTURE[0]]);
+    });
+
+    expect(result.current[0]).toStrictEqual([FIXTURE[1]]);
   });
 });

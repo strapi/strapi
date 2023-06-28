@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
+
 import DefaultButton from '../DefaultButton';
 
 const UpdateButton = ({ tokenName, tokenId }) => {

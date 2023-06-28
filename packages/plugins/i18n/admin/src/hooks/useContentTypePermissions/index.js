@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+
 import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
 
 const useContentTypePermissions = (slug) => {

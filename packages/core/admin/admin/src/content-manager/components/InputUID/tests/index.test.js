@@ -1,10 +1,11 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
 
 import InputUID from '../index';
 
@@ -81,7 +82,6 @@ describe('Content-Manager | <InputUID />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders', async () => {

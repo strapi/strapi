@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { CarouselAssets } from '../CarouselAssets';
 

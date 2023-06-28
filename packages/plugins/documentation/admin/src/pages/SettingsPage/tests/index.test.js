@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 import SettingsPage from '../index';
+
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -515,8 +517,9 @@ describe('Plugin | Documentation | SettingsPage', () => {
                   </h1>
                 </div>
                 <button
-                  aria-disabled="false"
+                  aria-disabled="true"
                   class="c7 c8 c9 c10"
+                  disabled=""
                   type="submit"
                 >
                   <div

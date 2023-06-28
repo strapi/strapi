@@ -1,8 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { Grid, GridItem } from '@strapi/design-system';
-import Inputs from '../../../components/Inputs';
+import PropTypes from 'prop-types';
+
 import FieldComponent from '../../../components/FieldComponent';
+import Inputs from '../../../components/Inputs';
 
 const GridRow = ({ columns, customFieldInputs }) => {
   return (

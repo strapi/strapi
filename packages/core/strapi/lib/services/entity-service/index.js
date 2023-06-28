@@ -16,6 +16,7 @@ const {
   createComponents,
   updateComponents,
   deleteComponents,
+  cloneComponents,
 } = require('./components');
 const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
@@ -267,6 +268,55 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return entityToDelete;
   },
 
+  async clone(uid, cloneId, opts) {
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'clone' });
+    const { data, files } = wrappedParams;
+
+    const model = strapi.getModel(uid);
+
+    const entityToClone = await db.query(uid).findOne({ where: { id: cloneId } });
+
+    if (!entityToClone) {
+      return null;
+    }
+    const isDraft = contentTypesUtils.isDraft(entityToClone, model);
+
+    const validData = await entityValidator.validateEntityUpdate(
+      model,
+      data,
+      {
+        isDraft,
+      },
+      entityToClone
+    );
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+
+    // TODO: wrap into transaction
+    const componentData = await cloneComponents(uid, entityToClone, validData);
+
+    const entityData = creationPipeline(
+      Object.assign(omitComponentData(model, validData), componentData),
+      {
+        contentType: model,
+      }
+    );
+
+    let entity = await db.query(uid).clone(cloneId, {
+      ...query,
+      data: entityData,
+    });
+
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, Object.assign(entityData, entity), files);
+      entity = await this.findOne(uid, entity.id, wrappedParams);
+    }
+
+    const { ENTRY_CREATE } = ALLOWED_WEBHOOK_EVENTS;
+    await this.emitEvent(uid, ENTRY_CREATE, entity);
+
+    return entity;
+  },
   // FIXME: used only for the CM to be removed
   async deleteMany(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });

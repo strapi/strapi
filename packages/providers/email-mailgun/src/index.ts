@@ -1,8 +1,6 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
-import utils from '@strapi/utils';
 import Options from 'mailgun.js/interfaces/Options';
-import { MailgunMessageData } from 'mailgun.js/interfaces/Messages';
 
 interface Settings {
   defaultFrom: string;
@@ -73,9 +71,9 @@ export = {
           text,
           html,
           ...rest,
-        } as MailgunMessageData;
+        };
 
-        return mg.messages.create(providerOptions.domain as string, utils.removeUndefined(data));
+        return mg.messages.create(providerOptions.domain as string, data);
       },
     };
   },

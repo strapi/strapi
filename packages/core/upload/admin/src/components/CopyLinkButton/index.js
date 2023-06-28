@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { IconButton } from '@strapi/design-system';
+import { useClipboard, useNotification } from '@strapi/helper-plugin';
+import { Link as LinkIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system';
-import { useNotification, useClipboard } from '@strapi/helper-plugin';
-import { Link as LinkIcon } from '@strapi/icons';
+
 import getTrad from '../../utils/getTrad';
 
 export const CopyLinkButton = ({ url }) => {

@@ -1,10 +1,13 @@
 import React from 'react';
-import { useGuidedTour, useTracking, LinkButton } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import { Flex, Box, Typography, Button } from '@strapi/design-system';
+
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { LinkButton, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
-import StepperHomepage from './components/Stepper';
+import { useIntl } from 'react-intl';
+
 import layout from '../layout';
+
+import StepperHomepage from './components/Stepper';
 
 const GuidedTourHomepage = () => {
   const { guidedTourState, setSkipped } = useGuidedTour();
