@@ -16,12 +16,13 @@ In the colocation approach, type definitions are colocated with the correspondin
 
 **This approach is suitable when the types are specific to a particular module**.
 
-_Note: In some situations, colocated types can still be exported if needed by other modules_
+_Note: In some situations, colocated types can still be exported if needed by other modules (e.g. React Component Props)_
 
 Example:
 
 ```typescript
 // config.ts
+
 interface Config {
   prop1: string;
   prop2: number;
@@ -30,6 +31,22 @@ interface Config {
 function update(config: Config): Config {
   // ...
 }
+```
+
+```typescript
+// Box.tsx
+
+import * as React from 'react';
+
+export interface TaskProps {
+  name: string;
+  priority: 'high' | 'medium' | 'low';
+  due: Date;
+}
+
+export const TaskProps = ({ name, priority, due }: TaskProps) => {
+  // ...
+};
 ```
 
 ### b. Definitions Files
