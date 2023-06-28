@@ -157,13 +157,14 @@ const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displa
 const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
-  const previousKind = builder.contentTypes.get(uid).schema.kind;
+  const previousSchema = builder.contentTypes.get(uid).schema;
+  const previousKind = previousSchema.kind;
   const newKind = contentType.kind || previousKind;
 
   // Restore non-visible attributes from previous schema
-  const previousAttributes = builder.contentTypes.get(uid).schema.attributes;
+  const previousAttributes = previousSchema.attributes;
   const prevNonVisibleAttributes = contentTypesUtils
-    .getNonVisibleAttributes(builder.contentTypes.get(uid).schema)
+    .getNonVisibleAttributes(previousSchema)
     .reduce((acc, key) => {
       if (key in previousAttributes) {
         acc[key] = previousAttributes[key];
