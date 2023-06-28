@@ -2,7 +2,7 @@ import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table } from '@strapi/helper-plugin';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
@@ -65,7 +65,7 @@ describe('Bulk publish selected entries modal', () => {
 
     // Nested table should render the selected items from the parent table
     expect(screen.getByText('Entry 1')).toBeInTheDocument();
-    expect(screen.getByText('Entry 3')).not.toBeInTheDocument();
+    expect(screen.queryByText('Entry 3')).not.toBeInTheDocument();
 
     // User can toggle selected entries in the modal
     const checkboxEntry1 = screen.getByRole('checkbox', { name: 'Select 1' });
@@ -76,9 +76,22 @@ describe('Bulk publish selected entries modal', () => {
     expect(checkboxEntry2).toBeChecked();
 
     // User can unselect items
-    await user.click(checkboxEntry1);
+    fireEvent.click(checkboxEntry1);
     expect(checkboxEntry1).not.toBeChecked();
-    await user.click(checkboxEntry2);
+    fireEvent.click(checkboxEntry2);
     expect(checkboxEntry2).not.toBeChecked();
+
+    // Publish button should be disabled if no items are selected
+    const count = screen.getByText('entries selected', { exact: false });
+    expect(count).toHaveTextContent('0 entries selected');
+    const publishButton = screen.getByRole('button', { name: /publish/i });
+    expect(publishButton).toBeDisabled();
+
+    // If at least one item is selected, the publish button should work
+    fireEvent.click(checkboxEntry1);
+    expect(count).toHaveTextContent('1 entry selected');
+    expect(publishButton).not.toBeDisabled();
+    await user.click(publishButton);
+    expect(onConfirm).toHaveBeenCalledWith([1]);
   });
 });

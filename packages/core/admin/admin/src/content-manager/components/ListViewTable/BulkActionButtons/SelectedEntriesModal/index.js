@@ -87,7 +87,10 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
           </Button>
         }
         endActions={
-          <Button onClick={onConfirm} disabled={entriesToPublish.length === 0}>
+          <Button
+            onClick={() => onConfirm(entriesToPublish)}
+            disabled={entriesToPublish.length === 0}
+          >
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
         }
