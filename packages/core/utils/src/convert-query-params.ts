@@ -158,7 +158,6 @@ const convertSortQueryParams = (sortQuery: SortParams): OrderByQuery => {
     return convertNestedSortQueryParam(sortQuery);
   }
 
-  console.log(sortQuery);
 
   throw new InvalidSortError();
 };
