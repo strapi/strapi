@@ -8,14 +8,67 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Tbody,
+  Tr,
+  Td,
 } from '@strapi/design-system';
 import { useTableContext, Table } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
+import { listViewDomain } from '../../../../pages/ListView/selectors';
 import { getTrad } from '../../../../utils';
+import { Body } from '../../Body';
 
-import SelectedEntriesTableContent from './SelectedEntriesTableContent';
+/* -------------------------------------------------------------------------------------------------
+ * SelectedEntriesTableContent
+ * -----------------------------------------------------------------------------------------------*/
+
+const SelectedEntriesTableContent = ({ notifySelectionChange }) => {
+  const { selectedEntries, rows } = useTableContext();
+
+  // Get main field from list view layout
+  const listViewStore = useSelector(listViewDomain());
+  const { mainField } = listViewStore.contentType.settings;
+  const shouldDisplayMainField = mainField != null && mainField !== 'id';
+
+  // Notify parent component when selection changes
+  React.useEffect(() => {
+    notifySelectionChange(selectedEntries);
+  }, [selectedEntries, notifySelectionChange]);
+
+  return (
+    <Table.Content>
+      <Table.Head>
+        <Table.HeaderCheckboxCell />
+        <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+        {shouldDisplayMainField && (
+          <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+        )}
+      </Table.Head>
+      <Tbody>
+        {rows.map((entry, index) => (
+          <Tr key={entry.id}>
+            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+            <Td>
+              <Typography>{entry.id}</Typography>
+            </Td>
+            {shouldDisplayMainField && (
+              <Td>
+                <Typography>{entry[mainField]}</Typography>
+              </Td>
+            )}
+          </Tr>
+        ))}
+      </Tbody>
+    </Table.Content>
+  );
+};
+
+SelectedEntriesTableContent.propTypes = {
+  notifySelectionChange: PropTypes.func.isRequired,
+};
 
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
@@ -27,7 +80,7 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
+const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
   const { rows, selectedEntries } = useTableContext();
 
@@ -42,10 +95,6 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
       return selectedEntries.includes(row.id);
     });
   }, [rows, selectedEntries]);
-
-  if (!isOpen) {
-    return null;
-  }
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -100,7 +149,6 @@ const SelectedEntriesModal = ({ isOpen, onToggle, onConfirm }) => {
 };
 
 SelectedEntriesModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
 };

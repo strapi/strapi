@@ -42,6 +42,8 @@ jest.mock('../../../../../shared/hooks', () => ({
   useInjectionZone: () => [],
 }));
 
+jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>);
+
 const user = userEvent.setup();
 const history = createMemoryHistory();
 
@@ -126,55 +128,14 @@ describe('BulkActionsBar', () => {
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
 
-  it.only('should show selected entries modal if publish button is clicked', async () => {
-    useTableContext.mockReturnValue({
-      selectedEntries: [1, 2, 3],
-      setSelectedEntries: jest.fn(),
-      rows: [
-        { id: 1, name: 'Row 1' },
-        { id: 2, name: 'Row 2' },
-        { id: 3, name: 'Row 3' },
-      ],
-    });
-
-    const onConfirmPublishAll = jest.fn();
-    setup({ showPublish: true, onConfirmPublishAll });
-
-    // Trigger bulk publish modal
-    await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
-    await waitFor(() => expect(screen.getByText('Publish entries')).toBeInTheDocument());
-
-    // Items should be listed in modal
-    expect(screen.getByText('Row 1')).toBeInTheDocument();
-    expect(screen.getByText('Row 2')).toBeInTheDocument();
-    expect(screen.getByText('Row 3')).toBeInTheDocument();
-
-    // Only selected items should be checked
-    expect(screen.getByRole('checkbox', { name: 'Select 1' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Select 3' })).toBeChecked();
-
-    // When clicking publish on the modal, the confirmation dialog should appear
-    await user.click(
-      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
-    );
-    const confirmationDialog = screen.getByRole('dialog', { name: 'Confirmation' });
-    await user.click(within(confirmationDialog).getByRole('button', { name: /\bpublish\b/i }));
-    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2, 3]);
-  });
-
   it('should show publish modal if publish button is clicked', async () => {
     const onConfirmPublishAll = jest.fn();
     setup({ showPublish: true, onConfirmPublishAll });
 
     await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
 
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
-
-    await user.click(
-      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
-    );
-
-    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2]);
+    // Only test that a mock component is rendered. The modal is tested in its own file.
+    expect(screen.getByText('SelectedEntriesModal')).toBeInTheDocument();
   });
 
   it('should show unpublish modal if unpublish button is clicked', async () => {

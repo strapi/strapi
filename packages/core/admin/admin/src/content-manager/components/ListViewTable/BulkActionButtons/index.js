@@ -273,11 +273,12 @@ const BulkActionButtons = ({
           <Button variant="tertiary" onClick={() => setIsSelectedEntriesModalOpen(true)}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
-          <SelectedEntriesModal
-            isOpen={isSelectedEntriesModalOpen}
-            onToggle={handleToggleSelectedEntriesModal}
-            onConfirm={togglePublishDialog}
-          />
+          {isSelectedEntriesModalOpen && (
+            <SelectedEntriesModal
+              onToggle={handleToggleSelectedEntriesModal}
+              onConfirm={togglePublishDialog}
+            />
+          )}
           <ConfirmDialogPublishAll
             isOpen={dialogToOpen === 'publish'}
             onToggleDialog={togglePublishDialog}
