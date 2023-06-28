@@ -29,16 +29,16 @@ const METADATA_FILE_PATH = 'metadata.json';
  */
 export interface ILocalFileSourceProviderOptions {
   file: {
-    path: string;
+    path: string; // the file to load
   };
 
   encryption: {
-    enabled: boolean;
-    key?: string;
+    enabled: boolean; // if the file is encrypted (and should be decrypted)
+    key?: string; // the key to decrypt the file
   };
 
   compression: {
-    enabled: boolean;
+    enabled: boolean; // if the file is compressed (and should be decompressed)
   };
 }
 
@@ -103,7 +103,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect<Schema>(this.createSchemasReadStream());
+    const schemas = await collect<Schema.Schema>(this.createSchemasReadStream());
 
     if (isEmpty(schemas)) {
       throw new ProviderInitializationError('Could not load schemas from Strapi data file.');

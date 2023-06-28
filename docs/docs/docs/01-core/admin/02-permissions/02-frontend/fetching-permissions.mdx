@@ -77,7 +77,7 @@ Because permissions are based on users in this case the individual logged in, we
 }
 ```
 
-An explanation on how these work can be found [here](/core/permissions/how-they-work). But as a quick overview we can see that permissions
+An explanation on how these work can be found [here](../01-how-they-work.mdx). But as a quick overview we can see that permissions
 typically associate to actions and in the case of the content manager they have subjects to be more granular and then fields & locales to
 be even more granular. These actions are defined by domains of the application registered via the application as they also have effect
 when calling APIs.
@@ -93,4 +93,4 @@ as well as injecting the information into the global `redux` store – see diagr
 />
 
 Inside the `RBACProviderContext` we also pass the ability to refetch the permissions. These two inconjunction with one another are accessed
-via the `useRBACProvider` hook. You can see the API for this hook [here](/core/permissions/frontend/using-permissions#typescript)
+via the `useRBACProvider` hook. You can see the API for this hook [here](../../02-permissions/02-frontend/using-permissions.mdx#typescript)

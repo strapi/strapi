@@ -14,7 +14,7 @@ This hook is used in order to facilitate the select / partial selection of a glo
 import { useSelectionState } from '@strapi/helper-plugin';
 
 const Modal = ({ onToggle, isOpen }) => {
-  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
+  const [selectedAssets, { selectOne, selectAll, selectOnly, selectMultiple, deselectMultiple, setSelections }] = useSelectionState(
     ['id'], // This are the comparaison attribute names
     []
   );
@@ -24,6 +24,8 @@ const Modal = ({ onToggle, isOpen }) => {
   // selectOne({ id: 1 name: 'Hello' }) add the object to the selection list
   // selectOnly({ id: 1 name: 'Hello' }) add the object to the selection list and remove every others in the list
   // selectAll(assets) select all or remove all
+  // selectMultiple(assets) add the objects to the selection list - does not change already selected objects
+  // deselectMultiple(assets) remove the objects from the selection list - does not change already selected objects
   // setSelections(): regular state used in react
 
   return (

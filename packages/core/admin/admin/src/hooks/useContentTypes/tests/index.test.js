@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { setupServer } from 'msw/node';
+
+import { renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
-import { renderHook } from '@testing-library/react-hooks';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -109,7 +110,7 @@ describe('useContentTypes', () => {
   });
 
   test('fetches models and content-types', async () => {
-    const { result, waitFor } = setup();
+    const { result } = setup();
 
     expect(result.current.isLoading).toBe(true);
 

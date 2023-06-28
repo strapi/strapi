@@ -143,7 +143,6 @@ describe('Permissions Manager', () => {
     global.strapi = {
       getModel() {
         return {
-          privateAttributes: [],
           attributes: {
             title: {
               type: 'text',

@@ -1,10 +1,11 @@
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
 
 import InputUID from '../index';
 
@@ -20,12 +21,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
   useNotification: jest.fn().mockReturnValue(() => {}),
 }));
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 const server = setupServer(
   rest.post('*/uid/generate', async (req, res, ctx) => {
@@ -49,30 +44,31 @@ const server = setupServer(
   })
 );
 
-const ComponentFixture = (props) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}}>
-      <InputUID
-        attribute={{ targetField: 'target', required: true }}
-        contentTypeUID="api::test.test"
-        intlLabel={{
-          id: 'test',
-          defaultMessage: 'Label',
-        }}
-        name="name"
-        onChange={jest.fn()}
-        {...props}
-      />
-    </IntlProvider>
-  </ThemeProvider>
-);
-
 function setup(props) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(render(<ComponentFixture {...props} />));
-    });
-  });
+  return render(
+    <InputUID
+      attribute={{ targetField: 'target', required: true }}
+      contentTypeUID="api::test.test"
+      intlLabel={{
+        id: 'test',
+        defaultMessage: 'Label',
+      }}
+      name="name"
+      onChange={jest.fn()}
+      {...props}
+    />,
+    {
+      wrapper({ children }) {
+        return (
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}}>
+              {children}
+            </IntlProvider>
+          </ThemeProvider>
+        );
+      },
+    }
+  );
 }
 
 describe('Content-Manager | <InputUID />', () => {
@@ -86,7 +82,6 @@ describe('Content-Manager | <InputUID />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders', async () => {
@@ -132,9 +127,7 @@ describe('Content-Manager | <InputUID />', () => {
     const spy = jest.fn();
     const { getByRole, queryByTestId } = await setup({ onChange: spy, value: '' });
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /regenerate/i }));
-    });
+    await user.click(getByRole('button', { name: /regenerate/i }));
 
     await waitFor(() => expect(queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
@@ -200,9 +193,9 @@ describe('Content-Manager | <InputUID />', () => {
 
     expect(getByText('Available')).toBeInTheDocument();
 
-    await sleep(4500);
-
-    expect(queryByText('Available')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+      timeout: 10000,
+    });
   });
 
   test('Checks the initial availability (!isAvailable)', async () => {
@@ -218,9 +211,9 @@ describe('Content-Manager | <InputUID />', () => {
 
     expect(getByText('Unavailable')).toBeInTheDocument();
 
-    await sleep(4500);
-
-    expect(queryByText('Available')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByText('Available')).not.toBeInTheDocument(), {
+      timeout: 10000,
+    });
   });
 
   test('Does not check the initial availability without a value', async () => {

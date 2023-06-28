@@ -1,6 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
+.c19 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c17 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #666687;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -35,6 +61,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  width: 100%;
   height: 124px;
 }
 
@@ -48,20 +75,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   margin-bottom: 12px;
   width: 30px;
   height: 24px;
-}
-
-.c3 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #666687;
 }
 
 .c1 {
@@ -148,18 +161,6 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   fill: #4945ff;
 }
 
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c7 {
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
@@ -200,13 +201,13 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
       >
         <label
           class="c3 c4"
-          for="1"
+          for=":r0:"
         >
           default
         </label>
         <div
           class=""
-          id="1"
+          id=":r0:"
         >
           <div
             class="c5"

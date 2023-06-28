@@ -5,16 +5,17 @@
  */
 
 import React from 'react';
-import get from 'lodash/get';
-import PropTypes from 'prop-types';
+
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { ComponentIcon } from './ComponentIcon';
-
 import useDataManager from '../../hooks/useDataManager';
+
+import { ComponentIcon } from './ComponentIcon';
 
 const CloseButton = styled(Box)`
   position: absolute;
@@ -59,6 +60,12 @@ const ComponentBox = styled(Flex)`
     > div:first-child {
       background: ${({ theme }) => theme.colors.primary200};
       color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
     }
   }
 `;
@@ -66,7 +73,7 @@ const ComponentBox = styled(Flex)`
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
-    schema: { displayName },
+    schema: { icon, displayName },
   } = get(modifiedData, ['components', component], { schema: {} });
 
   const onClose = (e) => {
@@ -76,7 +83,6 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
 
   return (
     <ComponentBox
-      as="button"
       alignItems="center"
       direction="column"
       className={isActive ? 'active' : ''}
@@ -85,10 +91,15 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       paddingLeft={4}
       paddingRight={4}
       shrink={0}
-      type="button"
       onClick={onClick}
+      role="tab"
+      tabIndex={isActive ? 0 : -1}
+      cursor="pointer"
+      aria-selected={isActive}
+      aria-controls={`dz-${dzName}-panel-${index}`}
+      id={`dz-${dzName}-tab-${index}`}
     >
-      <ComponentIcon isActive={isActive} />
+      <ComponentIcon icon={icon} isActive={isActive} />
 
       <Box marginTop={1} maxWidth="100%">
         <Typography variant="pi" fontWeight="bold" ellipsis>
@@ -97,7 +108,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="button" onClick={onClose} type="button">
+        <CloseButton as="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

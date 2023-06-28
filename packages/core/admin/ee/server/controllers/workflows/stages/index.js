@@ -1,6 +1,6 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils/lib/errors');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../../../utils');
 const { hasReviewWorkflow } = require('../../../utils/review-workflows');
 const {

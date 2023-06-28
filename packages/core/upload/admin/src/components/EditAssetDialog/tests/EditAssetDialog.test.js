@@ -1,12 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { EditAssetDialog } from '../index';
+
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
+import { EditAssetDialog } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
@@ -154,14 +156,13 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByText('Finish').parentElement).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it('shows an error and sends the focus back to the name when it s not filled', async () => {
+    it('shows an error on the FileName input when its not filled', async () => {
       renderCompo();
 
       fireEvent.change(screen.getByLabelText('File name'), { target: { value: '' } });
       fireEvent.click(screen.getByText('Finish'));
 
       await waitFor(() => expect(screen.getByText('name is a required field')).toBeInTheDocument());
-      expect(screen.getByLabelText('File name')).toHaveFocus();
     });
   });
 

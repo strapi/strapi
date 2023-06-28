@@ -33,7 +33,7 @@ describe('Audit logs service', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     jest.useRealTimers();
   });
 

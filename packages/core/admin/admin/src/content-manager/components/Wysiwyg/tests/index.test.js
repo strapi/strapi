@@ -1,8 +1,10 @@
 import * as React from 'react';
-import { IntlProvider } from 'react-intl';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { IntlProvider } from 'react-intl';
+
 import Wysiwyg from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({

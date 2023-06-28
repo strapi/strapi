@@ -1,12 +1,14 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+
+import { Box, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/helper-plugin';
-import { Box, Main, Flex, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+
+import Logo from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../../../../components/UnauthenticatedLogo';
 
 const ForgotPasswordSuccess = () => {
   const { formatMessage } = useIntl();

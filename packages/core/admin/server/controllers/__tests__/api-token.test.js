@@ -277,7 +277,7 @@ describe('API Token Controller', () => {
       expect(deleted).toHaveBeenCalledWith({ data: token });
     });
 
-    test('Does not return an error if the ressource does not exists', async () => {
+    test('Does not return an error if the resource does not exists', async () => {
       const revoke = jest.fn().mockResolvedValue(null);
       const deleted = jest.fn();
       const ctx = createContext({ params: { id: token.id } }, { deleted });

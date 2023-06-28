@@ -1,7 +1,9 @@
 import React from 'react';
+
 import { IconButton } from '@strapi/design-system';
 import { Minus } from '@strapi/icons';
 import styled from 'styled-components';
+
 import pxToRem from '../../utils/pxToRem';
 
 const StyledIconButton = styled(IconButton)(

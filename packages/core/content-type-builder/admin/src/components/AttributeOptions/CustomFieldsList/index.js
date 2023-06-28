@@ -1,11 +1,13 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
-import { Box, Grid, GridItem, KeyboardNavigable, Flex, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import EmptyAttributes from '../EmptyAttributes';
-import CustomFieldOption from '../CustomFieldOption';
-import getPadding from '../utils/getPadding';
+
 import { getTrad } from '../../../utils';
+import CustomFieldOption from '../CustomFieldOption';
+import EmptyAttributes from '../EmptyAttributes';
+import getPadding from '../utils/getPadding';
 
 const CustomFieldsList = () => {
   const { formatMessage } = useIntl();

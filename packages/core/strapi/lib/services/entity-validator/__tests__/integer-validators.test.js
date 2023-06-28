@@ -27,7 +27,6 @@ describe('Integer validator', () => {
       kind: 'contentType',
       uid: 'test-uid',
       modelName: 'test-model',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrIntegerUnique: { type: 'integer', unique: true },
