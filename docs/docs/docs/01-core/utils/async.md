@@ -18,7 +18,7 @@ Available functions:
 - mapAsync
 - reduceAsync
 
-[See API reference](../../api/Utils) (TODO)
+[See API reference](../../../api/api.mdx) (TODO)
 
 ### When to use
 

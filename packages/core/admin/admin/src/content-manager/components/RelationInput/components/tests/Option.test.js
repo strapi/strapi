@@ -1,45 +1,47 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-/**
- * TODO: this will come in another PR.
- */
-// eslint-disable-next-line no-restricted-imports
-import { ReactSelect } from '@strapi/helper-plugin';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { ThemeProvider, lightTheme, Combobox } from '@strapi/design-system';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
 import { Option } from '../Option';
 
-const setup = (props) =>
-  render(
+const setup = (props) => ({
+  user: userEvent.setup(),
+  ...render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}}>
-        <ReactSelect components={{ Option }} {...props} />
+        <Combobox>
+          {props.options.map((opt) => (
+            <Option {...opt} />
+          ))}
+        </Combobox>
       </IntlProvider>
     </ThemeProvider>
-  );
+  ),
+});
 
 describe('Content-Manager || RelationInput || Option', () => {
-  it('should render custom Option with published state title', () => {
-    setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'published' }] });
-
-    act(() => {
-      fireEvent.mouseDown(screen.getByRole('combobox'));
+  it('should render custom Option with published state title', async () => {
+    const { user, getByRole, getByText, getByTitle } = setup({
+      options: [{ id: 1, mainField: 'relation 1', publicationState: 'published' }],
     });
 
-    expect(screen.getByText('relation 1')).toBeInTheDocument();
-    expect(screen.getByTitle('State: Published')).toBeInTheDocument();
+    await user.click(getByRole('combobox'));
+
+    expect(getByText('relation 1')).toBeInTheDocument();
+    expect(getByTitle('State: Published')).toBeInTheDocument();
   });
 
-  it('should render custom Option with draft state title', () => {
-    setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'draft' }] });
-
-    act(() => {
-      fireEvent.mouseDown(screen.getByRole('combobox'));
+  it('should render custom Option with draft state title', async () => {
+    const { user, getByRole, getByText, getByTitle } = setup({
+      options: [{ id: 1, mainField: 'relation 1', publicationState: 'draft' }],
     });
 
-    expect(screen.getByText('relation 1')).toBeInTheDocument();
-    expect(screen.getByTitle('State: Draft')).toBeInTheDocument();
+    await user.click(getByRole('combobox'));
+
+    expect(getByText('relation 1')).toBeInTheDocument();
+    expect(getByTitle('State: Draft')).toBeInTheDocument();
   });
 });
