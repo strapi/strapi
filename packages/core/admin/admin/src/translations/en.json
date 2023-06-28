@@ -97,6 +97,7 @@
   "Settings.apiTokens.emptyStateLayout": "You don’t have any content yet...",
   "Settings.apiTokens.regenerate": "Regenerate",
   "Settings.apiTokens.title": "API Tokens",
+  "Settings.apiTokens.lastHour": "last hour",
   "Settings.application.customization": "Customization",
   "Settings.application.customization.auth-logo.carousel-hint": "Replace the logo in the authentication pages",
   "Settings.application.customization.carousel-hint": "Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)",
