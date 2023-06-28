@@ -15,7 +15,7 @@ export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
 export type DiagnosticKind = 'error' | 'warning' | 'info';
 
 export type DiagnosticListener<T extends DiagnosticKind = DiagnosticKind> = (
-  diagnostic: { kind: T } & Diagnostic extends infer U ? U : 'foo'
+  diagnostic: { kind: T } & Diagnostic extends infer U ? U : never
 ) => void | Promise<void>;
 
 export type DiagnosticEvent = 'diagnostic' | `diagnostic.${DiagnosticKind}`;

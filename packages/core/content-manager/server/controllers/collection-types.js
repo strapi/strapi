@@ -3,7 +3,7 @@
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
-const { getService, pickWritableAttributes } = require('../utils');
+const { getService } = require('../utils');
 const { validateBulkActionInput } = require('./validation');
 const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
 
@@ -90,11 +90,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
 
@@ -141,10 +140,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
     const sanitizedBody = await sanitizeFn(body);
 
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
@@ -175,17 +173,11 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
     const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
 
-    const sanitizeFn = pipeAsync(
-      pickWritables,
-      pickPermittedFields,
-      setCreator,
-      excludeNotCreatable
-    );
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator, excludeNotCreatable);
 
     const sanitizedBody = await sanitizeFn(body);
 

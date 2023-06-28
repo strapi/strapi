@@ -102,7 +102,7 @@ const setup = ({ path, ...props } = {}) =>
 
 describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should show a list of api tokens', async () => {

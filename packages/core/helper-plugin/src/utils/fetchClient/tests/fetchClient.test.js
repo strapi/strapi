@@ -26,7 +26,7 @@ describe('HELPER-PLUGIN | utils | fetchClient', () => {
     describe('Test the addInterceptor function', () => {
       afterEach(() => {
         // restore the spy created with spyOn
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
       });
       it('should add a response interceptor to the fetchClient instance', () => {
         const apiInstance = fetchClient({
