@@ -8,4 +8,11 @@ module.exports = {
   ENTITY_STAGE_ATTRIBUTE: 'strapi_stage',
   MAX_WORKFLOWS: 200,
   MAX_STAGES_PER_WORKFLOW: 200,
+  ERRORS: {
+    WORKFLOW_WITHOUT_STAGES: 'A workflow must have at least one stage.',
+    WORKFLOWS_LIMIT:
+      'You’ve reached the limit of workflows in your plan. Delete a workflow or contact Sales to enable more workflows.',
+    STAGES_LIMIT:
+      'You have reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
+  },
 };

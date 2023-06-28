@@ -6,6 +6,7 @@ const {
   WORKFLOW_MODEL_UID,
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,
+  ERRORS,
 } = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
 const {
@@ -72,9 +73,8 @@ module.exports = ({ strapi }) => {
     async create(opts) {
       let createOpts = { ...opts, populate: { stages: true } };
 
-      if (!opts.data.stages || opts.data.stages.length === 0) {
-        throw new ValidationError('Can not create a workflow without stages');
-      }
+      this.validateWorkflowStages(opts.data.stages);
+      await this.validateWorkflowCount(1);
 
       return strapi.db.transaction(async () => {
         // Create stages
@@ -109,9 +109,12 @@ module.exports = ({ strapi }) => {
       let updateOpts = { ...opts, populate: { stages: true } };
       let updatedStageIds;
 
+      await this.validateWorkflowCount();
+
       return strapi.db.transaction(async () => {
         // Update stages
         if (opts.data.stages) {
+          this.validateWorkflowStages(opts.data.stages);
           opts.data.stages.forEach((stage) =>
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
@@ -220,6 +223,22 @@ module.exports = ({ strapi }) => {
       const belongs = workflow.stages.some((stage) => stage.id === stageId);
       if (!belongs) {
         throw new ApplicationError(`Stage does not belong to workflow "${workflow.name}"`);
+      }
+    },
+
+    validateWorkflowStages(stages) {
+      if (!stages || stages.length === 0) {
+        throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
+      }
+      if (stages.length > limits.stagesPerWorkflow) {
+        throw new ValidationError(ERRORS.STAGES_LIMIT);
+      }
+    },
+
+    async validateWorkflowCount(countAddedWorkflows = 0) {
+      const countWorkflows = await this.count();
+      if (countWorkflows + countAddedWorkflows > limits.workflows) {
+        throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },
   };
