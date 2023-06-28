@@ -2,6 +2,7 @@
 
 const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 
 const { getService } = require('../utils');
 
@@ -170,7 +171,8 @@ const decorator = (service) => ({
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         // TODO Fix so this won't break lower lying find many wrappers
         const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-        return strapi.db.query(uid).findMany(wrappedParams);
+        const query = transformParamsToQuery(uid, wrappedParams);
+        return strapi.db.query(uid).findMany(query);
       }
 
       // This one gets transformed into a findOne on a lower layer
