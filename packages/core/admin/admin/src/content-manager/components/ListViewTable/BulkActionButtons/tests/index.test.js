@@ -4,7 +4,9 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table, useTableContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
 
 import BulkActionButtons from '../index';
 
@@ -19,13 +21,21 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
+// TODO: add layout somewhere
 jest.mock('react-redux', () => ({
-  useSelector: () => ({
-    data: [
-      { id: 1, publishedAt: null },
-      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
-    ],
-  }),
+  useSelector() {
+    return {
+      data: [
+        { id: 1, publishedAt: null },
+        { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+      ],
+      contentType: {
+        settings: {
+          mainField: 'name',
+        },
+      },
+    };
+  },
 }));
 
 jest.mock('../../../../../shared/hooks', () => ({
@@ -34,14 +44,29 @@ jest.mock('../../../../../shared/hooks', () => ({
 }));
 
 const user = userEvent.setup();
+const history = createMemoryHistory();
+
+useTableContext();
+
+<Table.Root rows={myMockData}>
+  <Table.Root>
+  <MyComonentToTest />
+  </Table.Root>
+</Table.Root>
+
+<ContextProvider data={}>
+  <Component />
+</ContextProvider>
 
 const setup = (props) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Table.Root>
-          <BulkActionButtons {...props} />
-        </Table.Root>
+        <Router history={history}>
+          <Table.Root>
+            <BulkActionButtons {...props} />
+          </Table.Root>
+        </Router>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -76,7 +101,7 @@ describe('BulkActionsBar', () => {
   it('should show delete modal if delete button is clicked', async () => {
     setup({ showDelete: true });
 
-    await userEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
   });
@@ -112,6 +137,42 @@ describe('BulkActionsBar', () => {
 
     expect(screen.queryByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
+  });
+
+  it.only('should show selected entries modal if publish button is clicked', async () => {
+    useTableContext.mockReturnValue({
+      selectedEntries: [1, 2, 3],
+      setSelectedEntries: jest.fn(),
+      rows: [
+        { id: 1, name: 'Row 1' },
+        { id: 2, name: 'Row 2' },
+        { id: 3, name: 'Row 3' },
+      ],
+    });
+
+    const onConfirmPublishAll = jest.fn();
+    setup({ showPublish: true, onConfirmPublishAll });
+
+    // Trigger bulk publish modal
+    await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
+    await waitFor(() => expect(screen.getByText('Publish entries')).toBeInTheDocument());
+
+    // Items should be listed in modal
+    expect(screen.getByText('Row 1')).toBeInTheDocument();
+    expect(screen.getByText('Row 2')).toBeInTheDocument();
+    expect(screen.getByText('Row 3')).toBeInTheDocument();
+
+    // Only selected items should be checked
+    expect(screen.getByRole('checkbox', { name: 'Select 1' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Select 3' })).toBeChecked();
+
+    // When clicking publish on the modal, the confirmation dialog should appear
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
+    );
+    const confirmationDialog = screen.getByRole('dialog', { name: 'Confirmation' });
+    await user.click(within(confirmationDialog).getByRole('button', { name: /\bpublish\b/i }));
+    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2, 3]);
   });
 
   it('should show publish modal if publish button is clicked', async () => {

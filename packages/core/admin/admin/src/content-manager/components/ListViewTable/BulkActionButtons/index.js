@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import makeSelectListView, { listViewDomain } from '../../../pages/ListView/selectors';
+import { listViewDomain } from '../../../pages/ListView/selectors';
 import { getTrad } from '../../../utils';
 import InjectionZoneList from '../../InjectionZoneList';
 import { Body } from '../Body';
@@ -222,9 +222,8 @@ const SelectedEntriesTableContent = ({ notifySelectionChange }) => {
   const { selectedEntries, setSelectedEntries, rows } = useTableContext();
 
   // Get main field from list view layout
-  const listViewSelector = React.useMemo(makeSelectListView, []);
-  const layout = useSelector(listViewSelector);
-  const { mainField } = layout.contentType.settings;
+  const listViewStore = useSelector(listViewDomain());
+  const { mainField } = listViewStore.contentType.settings;
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
   // Select all entries by default
