@@ -14,7 +14,13 @@ import WebhookForm from '../index';
 jest.mock('../../../../../../../../hooks/useContentTypes');
 
 const makeApp = (component) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };
@@ -78,7 +84,8 @@ describe('Create Webhook', () => {
     fireEvent.change(screen.getByLabelText(/url/i), { target: { value: 'https://google.fr' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /entry.create/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /Save/i }));
+    const saveButton = screen.getByRole('button', { name: /Save/i });
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -89,5 +96,7 @@ describe('Create Webhook', () => {
         headers: [{ key: '', value: '' }],
       });
     });
+
+    expect(saveButton).toHaveAttribute('aria-disabled', 'true');
   });
 });

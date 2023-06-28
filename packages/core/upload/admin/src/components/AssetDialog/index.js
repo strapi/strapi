@@ -92,27 +92,32 @@ export const AssetDialog = ({
     query: queryObject,
   });
 
-  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
-    ['id'],
-    initiallySelectedAssets
-  );
+  const [
+    selectedAssets,
+    { selectOne, selectOnly, setSelections, selectMultiple, deselectMultiple },
+  ] = useSelectionState(['id'], initiallySelectedAssets);
 
   const [initialSelectedTabIndex, setInitialSelectedTabIndex] = useState(
     selectedAssets.length > 0 ? 1 : 0
   );
 
   const handleSelectAllAssets = () => {
-    const hasAllAssets = assets.every(
-      (asset) => selectedAssets.findIndex((curr) => curr.id === asset.id) !== -1
-    );
-
-    if (hasAllAssets) {
-      return multiple ? selectAll(assets) : undefined;
-    }
-
     const allowedAssets = getAllowedFiles(allowedTypes, assets);
 
-    return multiple ? selectAll(allowedAssets) : undefined;
+    if (!multiple) {
+      return undefined;
+    }
+
+    // selected files in current folder
+    const alreadySelected = allowedAssets.filter(
+      (asset) => selectedAssets.findIndex((selectedAsset) => selectedAsset.id === asset.id) !== -1
+    );
+
+    if (alreadySelected.length > 0) {
+      deselectMultiple(alreadySelected);
+    } else {
+      selectMultiple(allowedAssets);
+    }
   };
 
   const handleSelectAsset = (asset) => {

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
 import {
@@ -11,7 +12,9 @@ import {
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { createStore } from 'redux';
 
 import ListView from '../index';
 
@@ -40,13 +43,19 @@ const queryClient = new QueryClient({
 const render = (props) => ({
   ...renderRTL(<ListView {...props} />, {
     wrapper: ({ children }) => (
-      <ThemeProvider theme={lightTheme}>
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-            <MemoryRouter>{children}</MemoryRouter>
-          </IntlProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
+      <Provider
+        store={createStore((state) => state, {
+          admin_app: { permissions: fixtures.permissions.app },
+        })}
+      >
+        <ThemeProvider theme={lightTheme}>
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+              <MemoryRouter>{children}</MemoryRouter>
+            </IntlProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </Provider>
     ),
   }),
 });

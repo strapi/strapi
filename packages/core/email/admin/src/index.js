@@ -9,7 +9,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import pluginPkg from '../../package.json';
 
-import pluginPermissions from './permissions';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
@@ -38,7 +38,7 @@ export default {
 
             return component;
           },
-          permissions: pluginPermissions.settings,
+          permissions: PERMISSIONS.settings,
         },
       ]
     );

@@ -45,12 +45,11 @@ import { PaginationFooter } from '../../../components/PaginationFooter';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-import { localStorageKeys, viewOptions } from '../../../constants';
+import { localStorageKeys, PERMISSIONS, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import pluginPermissions from '../../../permissions';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
@@ -257,7 +256,7 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <CheckPermissions permissions={pluginPermissions.configureView}>
+              <CheckPermissions permissions={PERMISSIONS.configureView}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}

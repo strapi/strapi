@@ -36,7 +36,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
-import permissions from '../../../permissions';
+import { PERMISSIONS } from '../../../constants';
 import pluginId from '../../../pluginId';
 import { getTrad } from '../../../utils';
 
@@ -60,10 +60,10 @@ const RoleListPage = () => {
 
   const updatePermissions = useMemo(() => {
     return {
-      create: permissions.createRole,
-      read: permissions.readRoles,
-      update: permissions.updateRole,
-      delete: permissions.deleteRole,
+      create: PERMISSIONS.createRole,
+      read: PERMISSIONS.readRoles,
+      update: PERMISSIONS.updateRole,
+      delete: PERMISSIONS.deleteRole,
     };
   }, []);
 
@@ -157,7 +157,7 @@ const RoleListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={permissions.createRole}>
+            <CheckPermissions permissions={PERMISSIONS.createRole}>
               <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
                 {formatMessage({
                   id: getTrad('List.button.roles'),
@@ -220,7 +220,7 @@ const RoleListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
-                permissions={permissions}
+                permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}
               />
