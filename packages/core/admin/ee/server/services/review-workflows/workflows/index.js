@@ -226,6 +226,11 @@ module.exports = ({ strapi }) => {
       }
     },
 
+    /**
+     * Validates the stages of a workflow.
+     * @param {Array} stages - Array of stages to be validated.
+     * @throws {ValidationError} - If the workflow has no stages or exceeds the limit.
+     */
     validateWorkflowStages(stages) {
       if (!stages || stages.length === 0) {
         throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
@@ -235,6 +240,12 @@ module.exports = ({ strapi }) => {
       }
     },
 
+    /**
+     * Validates the count of existing and added workflows.
+     * @param {number} [countAddedWorkflows=0] - The count of workflows to be added.
+     * @throws {ValidationError} - If the total count of workflows exceeds the limit.
+     * @returns {Promise<void>} - A Promise that resolves when the validation is completed.
+     */
     async validateWorkflowCount(countAddedWorkflows = 0) {
       const countWorkflows = await this.count();
       if (countWorkflows + countAddedWorkflows > limits.workflows) {
