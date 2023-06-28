@@ -28,7 +28,7 @@ module.exports = ({ strapi }) => {
       const isMediaAttribute = isMedia(attribute);
       const isMorphAttribute = isMorphRelation(attribute);
 
-      const targetUID = isMediaAttribute ? 'plugins::upload.file' : attribute.target;
+      const targetUID = isMediaAttribute ? 'plugin::upload.file' : attribute.target;
       const isToMany = isMediaAttribute ? attribute.multiple : attribute.relation.endsWith('Many');
 
       const targetContentType = strapi.getModel(targetUID);
