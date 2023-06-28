@@ -230,6 +230,8 @@ const event: ErrorDiagnostic = {
   severity: 'fatal',
   error: new Error("my error")
 }
+
+engine.diagnostics.report(event);
 ```
 
 Here is an excerpt of the relevant types used in the previous examples:
