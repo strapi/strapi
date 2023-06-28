@@ -42,7 +42,17 @@ export = {
           config.folder = file.path;
         }
 
-        const uploadStream = cloudinary.uploader.upload_chunked_stream(
+        // For files smaller than 99 MB use regular upload as it tends to be faster
+        // and fallback to chunked upload for larger files as that's required by Cloudinary.
+        // https://support.cloudinary.com/hc/en-us/community/posts/360009586100-Upload-movie-video-with-large-size?page=1#community_comment_360002140099
+        // The Cloudinary's max limit for regular upload is actually 100 MB but add some headroom
+        // for size counting shenanigans. (Strapi provides the size in kilobytes rounded to two decimal places here).
+        const upload_method =
+          file.size && file.size < 1000 * 99
+            ? cloudinary.uploader.upload_stream
+            : cloudinary.uploader.upload_chunked_stream;
+
+        const uploadStream = upload_method(
           { ...config, ...customConfig },
           (err, image) => {
             if (err) {
