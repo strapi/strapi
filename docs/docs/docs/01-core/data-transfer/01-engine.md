@@ -220,12 +220,15 @@ engine.diagnostics.on('warning', diagnosticListener);
 To emit your own diagnostics event:
 
 ```typescript
-const event: Diagnostic = {
+const event: ErrorDiagnostic = {
   kind: 'error',
   details: {
     message: "Your error"
     createdAt: new Date(),
-  }
+  },
+  name: "myError",
+  severity: 'fatal',
+  error: new Error("my error")
 }
 ```
 
