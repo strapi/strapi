@@ -90,7 +90,7 @@ const Table = ({
                       customIntervals={[
                         {
                           unit: 'hours',
-                          threshold: 2,
+                          threshold: 1,
                           text: formatMessage({
                             id: 'Settings.apiTokens.lastHour',
                             defaultMessage: 'last hour',
