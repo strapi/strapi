@@ -202,12 +202,24 @@ The engine includes a diagnostics reporter which can be used to listen for diagn
 Here is an example for creating a diagnostics listener:
 
 ```
-// your listener
-engine.diagnostics.onDiagnostic(async (data: GenericDiagnostic) => {
-  // handle the diagnostics, for example with custom logging
-});
+// listener function
+const diagnosticListener: DiagnosticListener = (data: GenericDiagnostic) => {
+  // handle the diagnostics event, for example with custom logging
+}
 
-// engine/diagnostics.ts - format of the data sent to the listener
+// add a generic listener
+engine.diagnostics.onDiagnostic(diagnosticsListener);
+// OR
+engine.diagnostics.addListener('diagnostic', diagnosticListener);
+
+// add an error listener
+engine.diagnostics.addListener('diagnostic.error', diagnosticListener);
+
+// add a warning listener
+engine.diagnostics.addListener('diagnostic.warning', diagnosticListener);
+
+// engine/diagnostics.ts
+// format of the data sent to the listener
 export type GenericDiagnostic<K extends DiagnosticKind, T = unknown> = {
   kind: K;
   details: {
