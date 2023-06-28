@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
-import { useTracking, onRowClick, useTableContext } from '@strapi/helper-plugin';
+import { BaseCheckbox, IconButton, Tbody, Td, Flex } from '@strapi/design-system';
+import { useTracking, useTableContext } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -57,6 +57,7 @@ const EntityActionsDataCell = ({
   canCreate,
   canDelete,
   setIsConfirmDeleteRowOpen,
+  handleCloneClick,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -92,17 +93,13 @@ const EntityActionsDataCell = ({
             { target: itemLineText }
           )}
           noBorder
-          icon={<Pencil />}
-        />
+        >
+          <Pencil />
+        </IconButton>
 
         {canCreate && (
           <IconButton
-            forwardedAs={Link}
-            to={{
-              pathname: `${pathname}/create/clone/${rowId}`,
-              state: { from: pathname },
-              search: pluginsQueryParams,
-            }}
+            onClick={handleCloneClick(rowId)}
             label={formatMessage(
               {
                 id: 'app.component.table.duplicate',
@@ -111,8 +108,9 @@ const EntityActionsDataCell = ({
               { target: itemLineText }
             )}
             noBorder
-            icon={<Duplicate />}
-          />
+          >
+            <Duplicate />
+          </IconButton>
         )}
 
         {canDelete && (
@@ -127,8 +125,9 @@ const EntityActionsDataCell = ({
               { target: itemLineText }
             )}
             noBorder
-            icon={<Trash />}
-          />
+          >
+            <Trash />
+          </IconButton>
         )}
       </Flex>
     </Td>
@@ -144,44 +143,9 @@ EntityActionsDataCell.propTypes = {
   rowId: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
   setIsConfirmDeleteRowOpen: PropTypes.func.isRequired,
+  handleCloneClick: PropTypes.func.isRequired,
   canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Row
- * -----------------------------------------------------------------------------------------------*/
-
-const Row = ({ children, rowId }) => {
-  const pluginsQueryParams = usePluginsQueryParams();
-  const {
-    push,
-    location: { pathname },
-  } = useHistory();
-  const { trackUsage } = useTracking();
-
-  return (
-    <Tr
-      {...onRowClick({
-        fn() {
-          trackUsage('willEditEntryFromList');
-          push({
-            pathname: `${pathname}/${rowId}`,
-            state: { from: pathname },
-            search: pluginsQueryParams,
-          });
-        },
-        condition: true, // Always has bulk actions
-      })}
-    >
-      {children}
-    </Tr>
-  );
-};
-
-Row.propTypes = {
-  children: PropTypes.node.isRequired,
-  rowId: PropTypes.number.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -225,4 +189,4 @@ Root.propTypes = {
   setIsConfirmDeleteRowOpen: PropTypes.func.isRequired,
 };
 
-export const Body = { CheckboxDataCell, EntityActionsDataCell, Root, Row };
+export const Body = { CheckboxDataCell, EntityActionsDataCell, Root };

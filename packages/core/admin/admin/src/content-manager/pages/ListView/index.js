@@ -11,6 +11,7 @@ import {
   useNotifyAT,
   Flex,
   Td,
+  Tr,
 } from '@strapi/design-system';
 import {
   NoPermissions,
@@ -31,7 +32,7 @@ import {
   PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -444,6 +445,44 @@ function ListView({
       </Button>
     ) : null;
 
+  /**
+   *
+   * @param {string} id
+   * @returns void
+   */
+  const handleRowClick = (id) => () => {
+    trackUsage('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+      search: pluginsQueryParams,
+    });
+  };
+
+  const handleCloneClick = (id) => async () => {
+    try {
+      const { data } = await post(
+        `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
+      );
+
+      if ('id' in data) {
+        push({
+          pathname: `${pathname}/${data.id}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        });
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        push({
+          pathname: `${pathname}/create/clone/${id}`,
+          state: { from: pathname, error: formatAPIError(err) },
+          search: pluginsQueryParams,
+        });
+      }
+    }
+  };
+
   // Add 1 column for the checkbox and 1 for the actions
   const colCount = tableHeaders.length + 2;
 
@@ -559,7 +598,7 @@ function ListView({
                 >
                   {data.map((rowData, index) => {
                     return (
-                      <Body.Row key={rowData.id} rowId={rowData.id}>
+                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(data.id)}>
                         {/* Bulk action row checkbox */}
                         <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                         {/* Field data */}
@@ -592,9 +631,10 @@ function ListView({
                             setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
                             canCreate={canCreate}
                             canDelete={canDelete}
+                            handleCloneClick={handleCloneClick}
                           />
                         )}
-                      </Body.Row>
+                      </Tr>
                     );
                   })}
                 </Body.Root>
