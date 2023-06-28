@@ -223,12 +223,12 @@ To emit your own diagnostics event:
 const event: ErrorDiagnostic = {
   kind: 'error',
   details: {
-    message: "Your error"
+    message: 'Your diagnostics message'
     createdAt: new Date(),
   },
-  name: "myError",
+  name: 'yourError',
   severity: 'fatal',
-  error: new Error("my error")
+  error: new Error('your error message')
 }
 
 engine.diagnostics.report(event);
