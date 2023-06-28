@@ -134,7 +134,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     return this.provider?.[action]();
   },
 
-  // TODO: Optimize performances (batching, client packets reconstruction, etc...)
   async flush(this: PullHandler, stage: Exclude<Client.TransferPullStep, 'assets'>, id) {
     type Stage = typeof stage;
     const batchSize = 1024 * 1024;
@@ -186,7 +185,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       const flushUUID = randomUUID();
 
       await this.createReadableStreamForStep(step);
-      console.log('flushing', step);
       this.flush(step, flushUUID);
 
       return { ok: true, id: flushUUID };
@@ -214,18 +212,46 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       configuration: () => this.provider?.createConfigurationReadStream(),
       assets: () => {
         const assets = this.provider?.createAssetsReadStream();
+        let batch: Protocol.Client.TransferAssetFlow[] = [];
+
+        const batchLength = () => {
+          return batch.reduce(
+            (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
+            0
+          );
+        };
+
+        const batchSize = 1024 * 1024; // 1MB
 
         if (!assets) {
           throw new Error('bad');
         }
 
         async function* generator(stream: Readable) {
+          let hasStarted = false;
+          let assetID = '';
+
           for await (const chunk of stream) {
-            const { stream: assetStream, ...rest } = chunk as IAsset;
+            const { stream: assetStream, ...assetData } = chunk as IAsset;
+            if (!hasStarted) {
+              assetID = randomUUID();
+              batch.push({ action: 'start', assetID, data: assetData });
+              hasStarted = true;
+            }
 
             for await (const assetChunk of assetStream) {
-              yield { ...rest, chunk: assetChunk };
+              batch.push({ action: 'stream', assetID, data: assetChunk });
+              if (batchLength() >= batchSize) {
+                yield batch;
+                batch = [];
+              }
             }
+
+            // end
+            hasStarted = false;
+            batch.push({ action: 'end', assetID });
+            yield batch;
+            batch = [];
           }
         }
 

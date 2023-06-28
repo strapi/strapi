@@ -1,5 +1,5 @@
 import type { Schema, Utils } from '@strapi/strapi';
-import { PassThrough, Readable } from 'stream';
+import { PassThrough, Readable, Writable } from 'stream';
 import { WebSocket } from 'ws';
 
 import type {
@@ -8,6 +8,7 @@ import type {
   ISourceProvider,
   ISourceProviderTransferResults,
   MaybePromise,
+  Protocol,
   ProviderType,
   TransferStage,
 } from '../../../../types';
@@ -107,36 +108,58 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return this.#createStageReadStream('links');
   }
 
+  writeAsync = <T>(stream: Writable, data: T) => {
+    return new Promise<void>((resolve, reject) => {
+      stream.write(data, (error) => {
+        if (error) {
+          reject(error);
+        }
+
+        resolve();
+      });
+    });
+  };
+
   async createAssetsReadStream(): Promise<Readable> {
-    const assets: { [filename: string]: Readable } = {};
+    const assets: {
+      [filename: string]: IAsset & {
+        stream: PassThrough;
+      };
+    } = {};
 
     const stream = await this.#createStageReadStream('assets');
     const pass = new PassThrough({ objectMode: true });
 
     stream
-      .on(
-        'data',
-        (asset: Omit<IAsset, 'stream'> & { chunk: { type: 'Buffer'; data: Uint8Array } }) => {
-          const { chunk, ...rest } = asset;
-
-          if (!(asset.filename in assets)) {
-            const assetStream = new PassThrough();
-            assets[asset.filename] = assetStream;
-
-            pass.push({ ...rest, stream: assetStream });
+      .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
+        for (const item of payload) {
+          const { action } = item;
+          if (action === 'start') {
+            assets[item.assetID] = { ...item.data, stream: new PassThrough() };
+            await this.writeAsync(pass, assets[item.assetID]);
           }
+          if (action === 'stream') {
+            const rawBuffer = item.data as unknown as {
+              type: 'Buffer';
+              data: Uint8Array;
+            };
+            const chunk = Buffer.from(rawBuffer.data);
 
-          if (asset.filename in assets) {
-            // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-            // We need to transform it back into a Buffer instance
-            assets[asset.filename].push(Buffer.from(chunk.data));
+            await this.writeAsync(assets[item.assetID].stream, chunk);
+          }
+          if (action === 'end') {
+            await new Promise<void>((resolve, reject) => {
+              const { stream: assetStream } = assets[item.assetID];
+              assetStream
+                .on('close', () => {
+                  delete assets[item.assetID];
+                  resolve();
+                })
+                .on('error', reject)
+                .end();
+            });
           }
         }
-      )
-      .on('end', () => {
-        Object.values(assets).forEach((s) => {
-          s.push(null);
-        });
       })
       .on('close', () => {
         pass.end();
