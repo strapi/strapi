@@ -393,9 +393,12 @@ module.exports = ({ strapi }) => ({
       return 0;
     }
 
-    const totalNumberDraftRelations = await ids.reduce(async (acc, id) => {
-      const entity = await strapi.entityService.findOne(uid, id, { populate });
-      const sumDraftRelations = await sumDraftCounts(entity, uid);
+    const entities = await strapi.entityService.findMany(uid, {
+      populate,
+    });
+
+    const totalNumberDraftRelations = entities.reduce(async (acc, entity) => {
+      const sumDraftRelations = sumDraftCounts(entity, uid);
       const prevCounter = await acc;
       return sumDraftRelations + prevCounter;
     }, 0);

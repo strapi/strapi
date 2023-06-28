@@ -348,7 +348,7 @@ module.exports = {
 
     const entities = await entityManager.find(ids, model);
 
-    if (!entities) {
+    if (!entities || entities.length !== ids.length) {
       return ctx.notFound();
     }
 
