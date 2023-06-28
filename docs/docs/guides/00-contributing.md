@@ -4,7 +4,7 @@ hide_title: true
 ---
 
 ```mdx-code-block
-import Contributing, {toc as ContributingTOC} from "@site/../CONTRIBUTING.md"
+import Contributing, {toc as ContributingTOC} from "../../../CONTRIBUTING.md"
 
 <Contributing />
 
