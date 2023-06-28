@@ -684,7 +684,7 @@ const createEntityManager = (db) => {
               .transacting(trx);
 
             insert.forEach((rel) => {
-              rel[inverseOrderColumnName] = maxResults?[0]?.max +1 || 1
+              rel[inverseOrderColumnName] =  maxResults && maxResults[0]?.max +1 || 1
             });
           }
 
@@ -975,7 +975,7 @@ const createEntityManager = (db) => {
 
 
                 insert.forEach((row) => {
-                  row[inverseOrderColumnName] = maxResults?[0]?.max +1 || 1
+                  row[inverseOrderColumnName] =  maxResults && maxResults[0]?.max +1 || 1
                 });
               }
 
@@ -1056,7 +1056,7 @@ const createEntityManager = (db) => {
                   .transacting(trx);
 
                 insert.forEach((row) => {
-                  row[inverseOrderColumnName] = maxResults?[0]?.max +1 || 1
+                  row[inverseOrderColumnName] = maxResults && maxResults["0"]?.max +1 || 1
                 });
               }
 
