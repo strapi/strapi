@@ -385,4 +385,21 @@ module.exports = ({ strapi }) => ({
 
     return sumDraftCounts(entity, uid);
   },
+
+  async getMultipleEntriesNumberOfDraftRelations(ids, uid) {
+    const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
+
+    if (!hasRelations) {
+      return 0;
+    }
+
+    const totalNumberDraftRelations = await ids.reduce(async (acc, id) => {
+      const entity = await strapi.entityService.findOne(uid, id, { populate });
+      const sumDraftRelations = await sumDraftCounts(entity, uid);
+      const prevCounter = await acc;
+      return sumDraftRelations + prevCounter;
+    }, 0);
+
+    return totalNumberDraftRelations;
+  },
 });

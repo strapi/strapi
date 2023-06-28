@@ -342,36 +342,17 @@ module.exports = {
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    if (permissionChecker.cannot.publish()) {
+    if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
+    const entities = await entityManager.find(ids, model);
 
-    if (ids.length <= 0) {
-      return {
-        data: 0,
-      };
+    if (!entities) {
+      return ctx.notFound();
     }
 
-    let number = 0;
-
-    for (const id of ids) {
-      const entity = await entityManager.findOne(id, model, { populate });
-
-      if (!entity) {
-        return ctx.notFound();
-      }
-
-      if (permissionChecker.cannot.read(entity)) {
-        return ctx.forbidden();
-      }
-
-      number += await entityManager.getNumberOfDraftRelations(id, model);
-    }
+    const number = await entityManager.getMultipleEntriesNumberOfDraftRelations(ids, model);
 
     return {
       data: number,
