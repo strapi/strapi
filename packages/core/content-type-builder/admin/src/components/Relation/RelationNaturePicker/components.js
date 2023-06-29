@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { Box, Flex } from '@strapi/design-system';
+import styled from 'styled-components';
 
 const Wrapper = styled(Box)`
   position: relative;

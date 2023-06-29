@@ -144,7 +144,7 @@ module.exports = ({ strapi }) => {
      * @param {string} contentTypeUID
      * @param {number} fromStageId
      * @param {number} toStageId
-     * @param {KnexTransaction} trx
+     * @param {import('knex').Knex.Transaction} trx
      * @returns
      */
     async updateEntitiesStage(contentTypeUID, { fromStageId, toStageId, trx = null }) {
@@ -208,7 +208,7 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
 
       if (!srcStage) {
         acc.created.push(stageToCompare);
-      } else if (srcStage.name !== stageToCompare.name) {
+      } else if (srcStage.name !== stageToCompare.name || srcStage.color !== stageToCompare.color) {
         acc.updated.push(stageToCompare);
       }
       return acc;

@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import PageSizeURLQuery from '../index';
 
 jest.mock('../../../features/Tracking', () => ({
@@ -41,20 +43,6 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        background: #ffffff;
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
-        position: relative;
-        overflow: hidden;
-        cursor: default;
-      }
-
-      .c13 {
-        padding-left: 8px;
-      }
-
       .c3 {
         font-size: 0.75rem;
         line-height: 1.33;
@@ -62,7 +50,7 @@ describe('<PageSizeURLQuery />', () => {
         color: #32324d;
       }
 
-      .c9 {
+      .c10 {
         font-size: 0.875rem;
         line-height: 1.43;
         display: block;
@@ -72,10 +60,31 @@ describe('<PageSizeURLQuery />', () => {
         color: #32324d;
       }
 
-      .c14 {
+      .c15 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
+      }
+
+      .c5 {
+        background: #ffffff;
+        padding-right: 12px;
+        padding-left: 12px;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        cursor: default;
+      }
+
+      .c8 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c14 {
+        padding-left: 8px;
       }
 
       .c0 {
@@ -126,22 +135,7 @@ describe('<PageSizeURLQuery />', () => {
         justify-content: space-between;
       }
 
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 16px;
-      }
-
-      .c11 {
+      .c9 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -191,15 +185,21 @@ describe('<PageSizeURLQuery />', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c12 > svg {
+      .c13 > svg {
         width: 0.375rem;
       }
 
-      .c12 > svg > path {
+      .c13 > svg > path {
         fill: #666687;
       }
 
-      .c10 {
+      .c11 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -210,7 +210,7 @@ describe('<PageSizeURLQuery />', () => {
         flex-wrap: wrap;
       }
 
-      .c15[data-state='checked'] .c2 {
+      .c16[data-state='checked'] .c2 {
         font-weight: bold;
         color: #4945ff;
       }
@@ -226,40 +226,40 @@ describe('<PageSizeURLQuery />', () => {
           >
             <label
               class="c2 c3 c4"
-              for="1"
+              for=":r0:"
             />
             <div
               aria-autocomplete="none"
-              aria-controls="radix-0"
-              aria-describedby="1-hint 1-error"
+              aria-controls="radix-:r3:"
+              aria-describedby=":r0:-hint :r0:-error"
               aria-expanded="false"
               class="c5 c6 c7"
               data-state="closed"
               dir="ltr"
-              id="1"
+              id=":r0:"
               overflow="hidden"
               role="combobox"
               tabindex="0"
             >
               <span
-                class="c8"
+                class="c8 c9"
               >
                 <span
-                  class="c2 c9"
+                  class="c2 c10 c11"
                 >
                   <span
-                    class="c10"
+                    class="c12"
                   >
                     10
                   </span>
                 </span>
               </span>
               <span
-                class="c11"
+                class="c9"
               >
                 <span
                   aria-hidden="true"
-                  class="c12"
+                  class="c13"
                 >
                   <svg
                     fill="none"
@@ -281,10 +281,10 @@ describe('<PageSizeURLQuery />', () => {
           </div>
         </div>
         <div
-          class="c13"
+          class="c14"
         >
           <label
-            class="c2 c14"
+            class="c2 c15"
             for="page-size"
           >
             Entries per page

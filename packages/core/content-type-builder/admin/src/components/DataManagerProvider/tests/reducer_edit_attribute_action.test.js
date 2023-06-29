@@ -1,5 +1,5 @@
-import reducer, { initialState } from '../reducer';
 import { EDIT_ATTRIBUTE } from '../constants';
+import reducer, { initialState } from '../reducer';
 
 describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {

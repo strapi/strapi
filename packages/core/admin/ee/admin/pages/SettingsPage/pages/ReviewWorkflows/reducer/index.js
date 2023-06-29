@@ -2,10 +2,12 @@ import { current, produce } from 'immer';
 import isEqual from 'lodash/isEqual';
 
 import {
-  ACTION_SET_WORKFLOWS,
-  ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
+  ACTION_DELETE_STAGE,
+  ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGE_POSITION,
+  STAGE_COLOR_DEFAULT,
 } from '../constants';
 
 export const initialState = {
@@ -29,8 +31,18 @@ export function reducer(state = initialState, action) {
 
         draft.status = status;
 
-        if (workflows) {
-          const defaultWorkflow = workflows[0];
+        if (workflows?.length > 0) {
+          let defaultWorkflow = workflows[0];
+
+          // A safety net in case a stage does not have a color assigned;
+          // this normallly should not happen
+          defaultWorkflow = {
+            ...defaultWorkflow,
+            stages: defaultWorkflow.stages.map((stage) => ({
+              ...stage,
+              color: stage?.color ?? STAGE_COLOR_DEFAULT,
+            })),
+          };
 
           draft.serverState.workflows = workflows;
           draft.serverState.currentWorkflow = defaultWorkflow;
@@ -69,6 +81,7 @@ export function reducer(state = initialState, action) {
 
         draft.clientState.currentWorkflow.data.stages.push({
           ...payload,
+          color: payload?.color ?? STAGE_COLOR_DEFAULT,
           __temp_key__: newTempKey,
         });
 
@@ -87,6 +100,27 @@ export function reducer(state = initialState, action) {
               }
             : stage
         );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGE_POSITION: {
+        const {
+          currentWorkflow: {
+            data: { stages },
+          },
+        } = state.clientState;
+        const { newIndex, oldIndex } = payload;
+
+        if (newIndex >= 0 && newIndex < stages.length) {
+          const stage = stages[oldIndex];
+          let newStages = [...stages];
+
+          newStages.splice(oldIndex, 1);
+          newStages.splice(newIndex, 0, stage);
+
+          draft.clientState.currentWorkflow.data.stages = newStages;
+        }
 
         break;
       }

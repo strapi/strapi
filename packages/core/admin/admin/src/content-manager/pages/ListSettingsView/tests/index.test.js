@@ -1,19 +1,20 @@
 import React from 'react';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import ListSettingsView from '../index';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
+
 import ModelsContext from '../../../contexts/ModelsContext';
+import ListSettingsView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const client = new QueryClient({
@@ -126,9 +127,11 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
     const history = createMemoryHistory();
-    history.push(
-      '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
-    );
+    act(() => {
+      history.push(
+        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
+      );
+    });
 
     const { container } = render(makeApp(history));
     await waitFor(() =>

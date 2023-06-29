@@ -1,6 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RemoveAssetDialog snapshots the component 1`] = `
+.c2 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c11 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.22;
+  color: #32324d;
+}
+
+.c15 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #32324d;
+}
+
+.c22 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -50,26 +83,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
-}
-
-.c11 {
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
 }
 
 .c1 {
@@ -169,22 +182,15 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c2 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c21 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
+}
+
+.c21 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c21[aria-disabled='true'] {
@@ -234,6 +240,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   height: 2rem;
   border: 1px solid #f5c0b8;
   background: #fcecea;
+}
+
+.c23 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
 .c23[aria-disabled='true'] {
@@ -369,7 +380,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       <div>
         <div>
           <div
-            aria-labelledby="0-label"
+            aria-labelledby=":r0:-label"
             aria-modal="true"
             class="c5 c6"
             role="dialog"
@@ -379,7 +390,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
             >
               <h2
                 class="c10 c11"
-                id="0-label"
+                id=":r0:-label"
               >
                 Confirmation
               </h2>

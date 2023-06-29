@@ -2,24 +2,24 @@ import { WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { once } from 'lodash/fp';
+import type { Schema, Utils } from '@strapi/strapi';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
-import type { client, server } from '../../../../types/remote/protocol';
+import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITransferTokenAuth {
-  type: 'token';
-  token: string;
-}
-
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
-  url: URL;
-  auth?: ITransferTokenAuth;
+  url: URL; // the url of the remote Strapi admin
+  auth?: Auth.ITransferTokenAuth;
+  retryMessageOptions?: {
+    retryMessageTimeout: number; // milliseconds to wait for a response from a message
+    retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
+  };
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -52,18 +52,18 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       params: { options: { strategy, restore }, transfer: 'push' },
     });
 
-    const res = (await query) as server.Payload<server.InitMessage>;
+    const res = (await query) as Server.Payload<Server.InitMessage>;
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
     }
     return res.transferID;
   }
 
-  #startStepOnce(stage: client.TransferPushStep) {
+  #startStepOnce(stage: Client.TransferPushStep) {
     return once(() => this.#startStep(stage));
   }
 
-  async #startStep<T extends client.TransferPushStep>(step: T) {
+  async #startStep<T extends Client.TransferPushStep>(step: T) {
     try {
       await this.dispatcher?.dispatchTransferStep({ action: 'start', step });
     } catch (e) {
@@ -81,7 +81,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return null;
   }
 
-  async #endStep<T extends client.TransferPushStep>(step: T) {
+  async #endStep<T extends Client.TransferPushStep>(step: T) {
     try {
       await this.dispatcher?.dispatchTransferStep({ action: 'end', step });
     } catch (e) {
@@ -99,9 +99,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return null;
   }
 
-  async #streamStep<T extends client.TransferPushStep>(
+  async #streamStep<T extends Client.TransferPushStep>(
     step: T,
-    data: client.GetTransferPushStreamData<T>
+    data: Client.GetTransferPushStreamData<T>
   ) {
     try {
       await this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data });
@@ -120,13 +120,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     return null;
   }
 
-  #writeStream(step: Exclude<client.TransferPushStep, 'assets'>): Writable {
+  #writeStream(step: Exclude<Client.TransferPushStep, 'assets'>): Writable {
     type Step = typeof step;
 
     const batchSize = 1024 * 1024; // 1MB;
     const startTransferOnce = this.#startStepOnce(step);
 
-    let batch = [] as client.GetTransferPushStreamData<Step>;
+    let batch = [] as Client.GetTransferPushStreamData<Step>;
 
     const batchLength = () => jsonLength(batch);
 
@@ -213,7 +213,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     }
 
     this.ws = ws;
-    this.dispatcher = createDispatcher(this.ws);
+    const { retryMessageOptions } = this.options;
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
 
     this.transferID = await this.initTransfer();
 
@@ -257,12 +258,12 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     await this.dispatcher?.dispatchTransferAction('rollback');
   }
 
-  getSchemas(): Promise<Strapi.Schemas | null> {
+  getSchemas() {
     if (!this.dispatcher) {
       return Promise.resolve(null);
     }
 
-    return this.dispatcher.dispatchTransferAction<Strapi.Schemas>('getSchemas');
+    return this.dispatcher.dispatchTransferAction<Utils.String.Dict<Schema.Schema>>('getSchemas');
   }
 
   createEntitiesWriteStream(): Writable {
@@ -278,7 +279,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createAssetsWriteStream(): Writable | Promise<Writable> {
-    let batch: client.TransferAssetFlow[] = [];
+    let batch: Client.TransferAssetFlow[] = [];
     let hasStarted = false;
 
     const batchSize = 1024 * 1024; // 1MB;
@@ -296,7 +297,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       return streamError;
     };
 
-    const safePush = async (chunk: client.TransferAssetFlow) => {
+    const safePush = async (chunk: Client.TransferAssetFlow) => {
       batch.push(chunk);
 
       if (batchLength() >= batchSize) {
@@ -315,8 +316,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         }
 
         if (hasStarted) {
-          await this.#streamStep('assets', null);
-
           const endStepError = await this.#endStep('assets');
 
           if (endStepError) {

@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Box, Flex, IconButton, Td, Tr, Typography } from '@strapi/design-system';
+import { onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { Box, Flex, Td, Tr, Typography, IconButton } from '@strapi/design-system';
-import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 const RoleRow = ({ id, name, description, usersCount, icons, rowIndex, canUpdate }) => {

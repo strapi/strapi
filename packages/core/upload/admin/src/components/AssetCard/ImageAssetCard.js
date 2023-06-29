@@ -1,16 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { CardAsset } from '@strapi/design-system';
+import PropTypes from 'prop-types';
 
 import { AssetCardBase } from './AssetCardBase';
 
 export const ImageAssetCard = ({ height, width, thumbnail, size, alt, ...props }) => {
   // Prevents the browser from caching the URL for all sizes and allow react-query to make a smooth update
   // instead of a full refresh
+  const urlWithCacheBusting = props.updatedAt ? `${thumbnail}?${props.updatedAt}` : thumbnail;
 
   return (
     <AssetCardBase {...props} subtitle={height && width && ` - ${width}✕${height}`} variant="Image">
-      <CardAsset src={thumbnail} size={size} alt={alt} />
+      <CardAsset src={urlWithCacheBusting} size={size} alt={alt} />
     </AssetCardBase>
   );
 };
@@ -23,6 +25,7 @@ ImageAssetCard.defaultProps = {
   onSelect: undefined,
   onRemove: undefined,
   size: 'M',
+  updatedAt: undefined,
 };
 
 ImageAssetCard.propTypes = {
@@ -37,4 +40,5 @@ ImageAssetCard.propTypes = {
   thumbnail: PropTypes.string.isRequired,
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),
+  updatedAt: PropTypes.string,
 };

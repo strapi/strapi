@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { Route } from 'react-router-dom';
-import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 
 const LazyCompo = ({ loadComponent }) => {
   const [Compo, setCompo] = useState(null);

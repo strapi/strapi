@@ -57,6 +57,7 @@ window.strapi = {
     isEnabled: () => false,
   },
   projectType: 'Community',
+  telemetryDisabled: true,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -200,3 +201,16 @@ Object.defineProperty(window, 'PointerEvent', {
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 window.HTMLElement.prototype.releasePointerCapture = jest.fn();
 window.HTMLElement.prototype.hasPointerCapture = jest.fn();
+
+/* -------------------------------------------------------------------------------------------------
+ * Navigator
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Navigator is a large object so we only mock the properties we need.
+ */
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn(),
+  },
+});

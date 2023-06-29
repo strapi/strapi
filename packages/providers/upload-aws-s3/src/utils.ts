@@ -5,6 +5,29 @@ interface BucketInfo {
   err?: string;
 }
 
+export function isUrlFromBucket(fileUrl: string, bucketName: string, bucketBaseUrl = ''): boolean {
+  const url = new URL(fileUrl);
+
+  // Check if the file URL is using a base URL (e.g. a CDN).
+  // In this case, check if the file URL starts with the same base URL as the bucket URL.
+  if (bucketBaseUrl) {
+    const baseUrl = new URL(bucketBaseUrl);
+    return url.href.startsWith(baseUrl.href);
+  }
+
+  const { bucket } = getBucketFromAwsUrl(fileUrl);
+
+  if (bucket) {
+    return bucket === bucketName;
+  }
+
+  // File URL might be of an S3-compatible provider. (or an invalid URL)
+  // In this case, check if the bucket name appears in the URL host or path.
+  // e.g. https://minio.example.com/bucket-name/object-key
+  // e.g. https://bucket.nyc3.digitaloceanspaces.com/folder/img.png
+  return url.host.startsWith(`${bucketName}.`) || url.pathname.includes(`/${bucketName}/`);
+}
+
 /**
  * Parse the bucket name from a URL.
  * See all URL formats in https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-bucket-intro.html
@@ -14,49 +37,49 @@ interface BucketInfo {
  * @returns {string} result.bucket - the bucket name
  * @returns {string} result.err - if any
  */
-export function getBucketFromUrl(fileUrl: string): BucketInfo {
-  const uri = new URL(fileUrl);
+function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
+  const url = new URL(fileUrl);
 
   // S3://<bucket-name>/<key>
-  if (uri.protocol === 's3:') {
-    const bucket = uri.host;
+  if (url.protocol === 's3:') {
+    const bucket = url.host;
 
     if (!bucket) {
-      return { err: `Invalid S3 URI: no bucket: ${uri}` };
+      return { err: `Invalid S3 url: no bucket: ${url}` };
     }
     return { bucket };
   }
 
-  if (!uri.host) {
-    return { err: `Invalid S3 URI: no hostname: ${uri}` };
+  if (!url.host) {
+    return { err: `Invalid S3 url: no hostname: ${url}` };
   }
 
-  const matches = uri.host.match(ENDPOINT_PATTERN);
+  const matches = url.host.match(ENDPOINT_PATTERN);
   if (!matches) {
-    return { err: `Invalid S3 URI: hostname does not appear to be a valid S3 endpoint: ${uri}` };
+    return { err: `Invalid S3 url: hostname does not appear to be a valid S3 endpoint: ${url}` };
   }
 
   const prefix = matches[1];
   // https://s3.amazonaws.com/<bucket-name>
   if (!prefix) {
-    if (uri.pathname === '/') {
+    if (url.pathname === '/') {
       return { bucket: null };
     }
 
-    const index = uri.pathname.indexOf('/', 1);
+    const index = url.pathname.indexOf('/', 1);
 
     // https://s3.amazonaws.com/<bucket-name>
     if (index === -1) {
-      return { bucket: uri.pathname.substring(1) };
+      return { bucket: url.pathname.substring(1) };
     }
 
     // https://s3.amazonaws.com/<bucket-name>/
-    if (index === uri.pathname.length - 1) {
-      return { bucket: uri.pathname.substring(1, index) };
+    if (index === url.pathname.length - 1) {
+      return { bucket: url.pathname.substring(1, index) };
     }
 
     // https://s3.amazonaws.com/<bucket-name>/key
-    return { bucket: uri.pathname.substring(1, index) };
+    return { bucket: url.pathname.substring(1, index) };
   }
 
   // https://<bucket-name>.s3.amazonaws.com/

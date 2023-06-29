@@ -1,7 +1,5 @@
-import { Database } from '@strapi/database';
+import type { Database, ID } from '@strapi/database';
 import { Strapi } from '../../';
-
-type ID = number | string;
 
 type EntityServiceAction =
   | 'findMany'
@@ -84,6 +82,11 @@ export interface EntityService {
   delete<K extends keyof AllTypes, T extends AllTypes[K]>(
     uid: K,
     entityId: ID,
+    params: Params<T>
+  ): Promise<any>;
+  clone<K extends keyof AllTypes, T extends AllTypes[K]>(
+    uid: K,
+    cloneId: ID,
     params: Params<T>
   ): Promise<any>;
 }

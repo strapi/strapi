@@ -10,9 +10,9 @@ import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
+  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
 
-  autoDestroy?: boolean;
+  autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
 }
 
 export const createLocalStrapiSourceProvider = (options: ILocalStrapiSourceProviderOptions) => {

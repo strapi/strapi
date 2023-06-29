@@ -1,9 +1,11 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Flex, Tooltip, Icon, GridItem, Typography } from '@strapi/design-system';
+
+import { Flex, GridItem, Icon, Tooltip, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { ExternalLink, ExclamationMarkCircle } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
+import { ExclamationMarkCircle, ExternalLink } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+
 import { useLicenseLimits } from '../../../../../../hooks';
 
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';

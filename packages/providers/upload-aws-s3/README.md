@@ -74,7 +74,7 @@ module.exports = ({ env }) => ({
 
 If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure that the signed URL is generated with the correct permissions.
 
-You can also define the expiration time of the signed URL by setting the `signedUrlExpires` option in the `params` object. The default value is 7 days.
+You can also define the expiration time of the signed URL by setting the `signedUrlExpires` option in the `params` object. The default value is 15 minutes.
 
 `./config/plugins.js`
 
@@ -90,7 +90,7 @@ module.exports = ({ env }) => ({
         region: env('AWS_REGION'),
         params: {
           ACL: 'private', // <== set ACL to private
-          signedUrlExpires: env('AWS_SIGNED_URL_EXPIRES', 60 * 60 * 24 * 7),
+          signedUrlExpires: env('AWS_SIGNED_URL_EXPIRES', 15 * 60),
           Bucket: env('AWS_BUCKET'),
         },
       },
@@ -150,14 +150,14 @@ module.exports = [
             "'self'",
             'data:',
             'blob:',
-            'dl.airtable.com',
+            'market-assets.strapi.io',
             'yourBucketName.s3.yourRegion.amazonaws.com',
           ],
           'media-src': [
             "'self'",
             'data:',
             'blob:',
-            'dl.airtable.com',
+            'market-assets.strapi.io',
             'yourBucketName.s3.yourRegion.amazonaws.com',
           ],
           upgradeInsecureRequests: null,

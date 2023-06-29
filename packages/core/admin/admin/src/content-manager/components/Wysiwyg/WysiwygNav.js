@@ -1,36 +1,29 @@
 import React, { useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import {
-  FocusTrap,
-  Button,
-  IconButtonGroup,
-  Option,
-  Select,
-  Popover,
-  Flex,
-} from '@strapi/design-system';
+
+import { Button, Flex, IconButtonGroup, Option, Popover, Select } from '@strapi/design-system';
 import {
   Bold,
-  Italic,
-  Underline,
-  StrikeThrough,
   BulletList,
-  NumberList,
   Code,
-  Picture as Image,
+  Italic,
   Link,
-  Quote,
   More,
+  NumberList,
+  Picture as Image,
+  Quote,
+  StrikeThrough,
+  Underline,
 } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import {
-  MainButtons,
   CustomIconButton,
-  MoreButton,
-  IconButtonGroupMargin,
   CustomLinkIconButton,
+  IconButtonGroupMargin,
+  MainButtons,
+  MoreButton,
 } from './WysiwygStyles';
 
 /**
@@ -146,68 +139,72 @@ const WysiwygNav = ({
           icon={<More />}
         />
         {visiblePopover && (
-          <Popover centered source={buttonMoreRef} spacing={4} id="popover">
-            <FocusTrap onEscape={handleTogglePopover} restoreFocus={false}>
-              <Flex>
-                <IconButtonGroupMargin>
-                  <CustomIconButton
-                    onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
-                    id="Strikethrough"
-                    label="Strikethrough"
-                    name="Strikethrough"
-                    icon={<StrikeThrough />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
-                    id="BulletList"
-                    label="BulletList"
-                    name="BulletList"
-                    icon={<BulletList />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
-                    id="NumberList"
-                    label="NumberList"
-                    name="NumberList"
-                    icon={<NumberList />}
-                  />
-                </IconButtonGroupMargin>
-                <IconButtonGroup>
-                  <CustomIconButton
-                    onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
-                    id="Code"
-                    label="Code"
-                    name="Code"
-                    icon={<Code />}
-                  />
-                  <CustomIconButton
-                    onClick={() => {
-                      handleTogglePopover();
-                      onToggleMediaLib();
-                    }}
-                    id="Image"
-                    label="Image"
-                    name="Image"
-                    icon={<Image />}
-                  />
-                  <CustomLinkIconButton
-                    onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
-                    id="Link"
-                    label="Link"
-                    name="Link"
-                    // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                    icon={<Link />}
-                  />
-                  <CustomIconButton
-                    onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
-                    id="Quote"
-                    label="Quote"
-                    name="Quote"
-                    icon={<Quote />}
-                  />
-                </IconButtonGroup>
-              </Flex>
-            </FocusTrap>
+          <Popover
+            onDismiss={handleTogglePopover}
+            centered
+            source={buttonMoreRef}
+            spacing={4}
+            id="popover"
+          >
+            <Flex>
+              <IconButtonGroupMargin>
+                <CustomIconButton
+                  onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
+                  id="Strikethrough"
+                  label="Strikethrough"
+                  name="Strikethrough"
+                  icon={<StrikeThrough />}
+                />
+                <CustomIconButton
+                  onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
+                  id="BulletList"
+                  label="BulletList"
+                  name="BulletList"
+                  icon={<BulletList />}
+                />
+                <CustomIconButton
+                  onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
+                  id="NumberList"
+                  label="NumberList"
+                  name="NumberList"
+                  icon={<NumberList />}
+                />
+              </IconButtonGroupMargin>
+              <IconButtonGroup>
+                <CustomIconButton
+                  onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
+                  id="Code"
+                  label="Code"
+                  name="Code"
+                  icon={<Code />}
+                />
+                <CustomIconButton
+                  onClick={() => {
+                    handleTogglePopover();
+                    onToggleMediaLib();
+                  }}
+                  id="Image"
+                  label="Image"
+                  name="Image"
+                  icon={<Image />}
+                />
+                <CustomLinkIconButton
+                  onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
+                  id="Link"
+                  label="Link"
+                  name="Link"
+                  // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                  icon={<Link />}
+                />
+                <CustomIconButton
+                  onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
+                  id="Quote"
+                  label="Quote"
+                  name="Quote"
+                  icon={<Quote />}
+                />
+              </IconButtonGroup>
+            </Flex>
           </Popover>
         )}
       </StyledFlex>

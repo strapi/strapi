@@ -1,9 +1,10 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Typography, Flex, GridItem } from '@strapi/design-system';
+
+import { Flex, GridItem, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import without from 'lodash/without';
+import { useIntl } from 'react-intl';
 
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';

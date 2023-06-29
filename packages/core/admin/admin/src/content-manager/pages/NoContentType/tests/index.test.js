@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+
 import Theme from '../../../../components/Theme';
 import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
@@ -30,6 +32,21 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c12 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+        text-align: center;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -60,20 +77,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
 
       .c11 {
         padding-bottom: 16px;
-      }
-
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
       }
 
       .c2 {
@@ -109,6 +112,10 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       }
 
       .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -116,11 +123,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
       }
 
       .c10 svg {

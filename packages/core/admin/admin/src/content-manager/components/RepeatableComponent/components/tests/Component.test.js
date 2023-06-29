@@ -1,9 +1,10 @@
 import * as React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { IntlProvider } from 'react-intl';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
 
 import Component from '../Component';
 
@@ -24,7 +25,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 describe('RepeatableComponent | Component', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {
