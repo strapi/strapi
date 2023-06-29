@@ -38,7 +38,7 @@ Used for switching between stages of a transfer and streaming the actual data of
 Accepts the following `action` values:
 
 - `start`: sent with a `step` value for the name of the step/stage
-  - any number of `stream`: sent with a `step` value and the `data` being sent (ie, an entity)
+  - any number of `stream`: sent with a `step` value and the `data` being sent (ie, an array of entities)
 - `end`: sent with a `step` value for the step being ended
 
 ### dispatchTransferAction
