@@ -563,6 +563,7 @@ function ListView({
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
+                  fetchData={() => fetchData(`/content-manager/collection-types/${slug}${params}`)}
                 />
               </Table.ActionBar>
               <Table.Content>

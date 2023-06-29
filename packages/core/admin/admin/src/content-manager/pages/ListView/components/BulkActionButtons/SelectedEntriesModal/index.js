@@ -165,7 +165,7 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm, fetchData }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, rows } = useTableContext();
   const { contentType, components } = useSelector(listViewDomain());
@@ -173,7 +173,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
   /**
    * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
    */
-  const validateEntriesToPublish = () => {
+  const validateEntriesToPublish = React.useCallback(() => {
     const validations = { validIds: [], errors: {} };
     // Create the validation schema based on the contentType
     const schema = createYupSchema(contentType, { components: components }, { isDraft: false });
@@ -188,7 +188,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
     });
 
     return validations;
-  };
+  }, [rows, contentType, components]);
 
   const { errors } = validateEntriesToPublish();
 
@@ -231,7 +231,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={() => validateEntriesToPublish} variant="tertiary">
+            <Button onClick={fetchData} variant="tertiary">
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -256,7 +256,7 @@ SelectedEntriesModalContent.propTypes = {
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
+const SelectedEntriesModal = ({ onToggle, onConfirm, fetchData }) => {
   const { rows, selectedEntries } = useTableContext();
 
   // Get the selected entries full data, and keep the list view order
@@ -269,7 +269,11 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
 
   return (
     <Table.Root rows={entries} defaultSelectedEntries={selectedEntries} colCount={4}>
-      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} />
+      <SelectedEntriesModalContent
+        onToggle={onToggle}
+        onConfirm={onConfirm}
+        fetchData={fetchData}
+      />
     </Table.Root>
   );
 };
@@ -277,6 +281,7 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
 SelectedEntriesModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
+  fetchData: PropTypes.func.isRequired,
 };
 
 export default SelectedEntriesModal;

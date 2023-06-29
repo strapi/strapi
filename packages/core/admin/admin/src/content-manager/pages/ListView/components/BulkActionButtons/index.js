@@ -204,6 +204,7 @@ const BulkActionButtons = ({
   onConfirmDeleteAll,
   onConfirmPublishAll,
   onConfirmUnpublishAll,
+  fetchData,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -277,6 +278,7 @@ const BulkActionButtons = ({
             <SelectedEntriesModal
               onToggle={handleToggleSelectedEntriesModal}
               onConfirm={togglePublishDialog}
+              fetchData={fetchData}
             />
           )}
           <ConfirmDialogPublishAll
@@ -323,6 +325,7 @@ BulkActionButtons.defaultProps = {
   onConfirmDeleteAll() {},
   onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
+  fetchData() {},
 };
 
 BulkActionButtons.propTypes = {
@@ -331,6 +334,7 @@ BulkActionButtons.propTypes = {
   onConfirmDeleteAll: PropTypes.func,
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
+  fetchData: PropTypes.func,
 };
 
 export default BulkActionButtons;
