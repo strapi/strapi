@@ -41,7 +41,6 @@
   ],
   "dependencies": {
     "@strapi/logger": "4.11.2",
-    "@strapi/strapi": "4.11.2",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",
@@ -51,6 +50,9 @@
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "4.11.2"
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",

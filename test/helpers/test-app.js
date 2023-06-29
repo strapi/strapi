@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const rimraf = require('rimraf');
 const execa = require('execa');
 const generateNew = require('../../packages/generators/app/dist/generate-new').default;
@@ -47,12 +48,23 @@ const generateTestApp = async ({ appPath, database, template }) => {
       '@strapi/plugin-graphql',
       '@strapi/plugin-documentation',
       '@strapi/plugin-i18n',
+      '@strapi/admin',
     ],
     additionalsDependencies: {},
     template: template ? path.resolve(template) : template,
   };
 
   await generateNew(scope);
+  await linkPackages(appPath);
+};
+
+const linkPackages = async (appPath) => {
+  const rootPath = path.resolve(__dirname, '../..');
+  fs.writeFileSync(path.join(appPath, 'yarn.lock'), '');
+  await execa('yarn', ['link', '-A', rootPath], {
+    cwd: appPath,
+    stdio: 'inherit',
+  });
 };
 
 /**

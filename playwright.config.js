@@ -9,7 +9,7 @@ const config = {
   // globalSetup: require.resolve('./e2e/global-setup'),
   testDir: './e2e',
   /* Maximum time one test can run for. */
-  timeout: 30 * 1000,
+  timeout: 3000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -30,7 +30,7 @@ const config = {
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:1337',
+    baseURL: 'http://127.0.0.1:1337',
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
 
@@ -96,7 +96,7 @@ const config = {
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'cd test-apps/playwright && yarn start',
-    port: 1337,
+    url: 'http://127.0.0.1:1337',
     timeout: 30 * 1000,
     reuseExistingServer: !process.env.CI,
   },

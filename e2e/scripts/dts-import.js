@@ -65,7 +65,7 @@ const createSourceProvider = (filePath) =>
 
 const createDestinationProvider = () =>
   createRemoteStrapiDestinationProvider({
-    url: new URL('http://localhost:1337/admin'),
+    url: new URL('http://127.0.0.1:1337/admin'),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {
