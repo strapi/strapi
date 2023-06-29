@@ -63,7 +63,7 @@ export function InformationBoxEE() {
           type: 'success',
           message: {
             id: 'content-manager.reviewWorkflows.stage.notification.saved',
-            defaultMessage: 'Success: Review stage updated',
+            defaultMessage: 'Review stage updated',
           },
         });
       },

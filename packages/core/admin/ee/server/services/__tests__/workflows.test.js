@@ -37,7 +37,7 @@ const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
 
 describe('Review workflows - Workflows service', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('find', () => {
