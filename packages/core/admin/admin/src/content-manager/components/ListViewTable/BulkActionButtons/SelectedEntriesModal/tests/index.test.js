@@ -4,13 +4,14 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table } from '@strapi/helper-plugin';
 import { render as renderRTL, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { combineReducers, createStore } from 'redux';
 
 import SelectedEntriesModal from '..';
+import reducers from '../../../../../../reducers';
 
-const history = createMemoryHistory();
 const listViewRows = [
   {
     id: 1,
@@ -26,30 +27,27 @@ const listViewRows = [
   },
 ];
 
-jest.mock('react-redux', () => ({
-  useSelector() {
-    return {
-      data: [
-        { id: 1, publishedAt: null },
-        { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
-      ],
-      contentType: {
-        settings: {
-          mainField: 'name',
-        },
-      },
-    };
-  },
-}));
-
 const user = userEvent.setup();
+
+const rootReducer = combineReducers(reducers);
+const store = createStore(rootReducer, {
+  'content-manager_listView': {
+    contentType: {
+      settings: {
+        mainField: 'name',
+      },
+    },
+  },
+});
 
 const render = (ui) => ({
   ...renderRTL(ui, {
     wrapper: ({ children }) => (
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <Router history={history}>{children}</Router>
+          <Provider store={store}>
+            <MemoryRouter>{children}</MemoryRouter>
+          </Provider>
         </IntlProvider>
       </ThemeProvider>
     ),

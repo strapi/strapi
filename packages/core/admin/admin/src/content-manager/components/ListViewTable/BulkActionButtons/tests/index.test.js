@@ -4,10 +4,12 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { Table, useTableContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { combineReducers, createStore } from 'redux';
 
+import reducers from '../../../../../reducers';
 import BulkActionButtons from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -21,22 +23,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('react-redux', () => ({
-  useSelector() {
-    return {
-      data: [
-        { id: 1, publishedAt: null },
-        { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
-      ],
-      contentType: {
-        settings: {
-          mainField: 'name',
-        },
-      },
-    };
-  },
-}));
-
 jest.mock('../../../../../shared/hooks', () => ({
   ...jest.requireActual('../../../../../shared/hooks'),
   useInjectionZone: () => [],
@@ -45,17 +31,33 @@ jest.mock('../../../../../shared/hooks', () => ({
 jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>);
 
 const user = userEvent.setup();
-const history = createMemoryHistory();
+
+const rootReducer = combineReducers(reducers);
+const store = createStore(rootReducer, {
+  'content-manager_listView': {
+    data: [
+      { id: 1, publishedAt: null },
+      { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
+    ],
+    contentType: {
+      settings: {
+        mainField: 'name',
+      },
+    },
+  },
+});
 
 const setup = (props) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Router history={history}>
-          <Table.Root>
-            <BulkActionButtons {...props} />
-          </Table.Root>
-        </Router>
+        <Provider store={store}>
+          <MemoryRouter>
+            <Table.Root>
+              <BulkActionButtons {...props} />
+            </Table.Root>
+          </MemoryRouter>
+        </Provider>
       </IntlProvider>
     </ThemeProvider>
   );
