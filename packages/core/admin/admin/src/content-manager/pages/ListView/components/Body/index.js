@@ -17,10 +17,9 @@ const stopPropagation = (e) => e.stopPropagation();
  * -----------------------------------------------------------------------------------------------*/
 
 const CheckboxDataCell = ({ rowId, index }) => {
-  const { selectedEntries } = useTableContext();
+  const { selectedEntries, onSelectRow } = useTableContext();
   const { formatMessage } = useIntl();
   const isChecked = selectedEntries.findIndex((id) => id === rowId) !== -1;
-  const { onSelectRow } = useTableContext();
   const ariaLabel = formatMessage(
     {
       id: 'app.component.table.select.one-entry',

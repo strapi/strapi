@@ -5,7 +5,11 @@ import { Table, useTableContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { combineReducers, createStore } from 'redux';
 
+import reducers from '../../../../../../reducers';
 import BulkActionButtons from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -19,29 +23,41 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('react-redux', () => ({
-  useSelector: () => ({
+jest.mock('../../../../../../shared/hooks', () => ({
+  ...jest.requireActual('../../../../../../shared/hooks'),
+  useInjectionZone: () => [],
+}));
+
+jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>);
+
+const user = userEvent.setup();
+
+const rootReducer = combineReducers(reducers);
+const store = createStore(rootReducer, {
+  'content-manager_listView': {
     data: [
       { id: 1, publishedAt: null },
       { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
     ],
-  }),
-}));
-
-jest.mock('../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../shared/hooks'),
-  useInjectionZone: () => [],
-}));
-
-const user = userEvent.setup();
+    contentType: {
+      settings: {
+        mainField: 'name',
+      },
+    },
+  },
+});
 
 const setup = (props) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <Table.Root>
-          <BulkActionButtons {...props} />
-        </Table.Root>
+        <Provider store={store}>
+          <MemoryRouter>
+            <Table.Root>
+              <BulkActionButtons {...props} />
+            </Table.Root>
+          </MemoryRouter>
+        </Provider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -76,7 +92,7 @@ describe('BulkActionsBar', () => {
   it('should show delete modal if delete button is clicked', async () => {
     setup({ showDelete: true });
 
-    await userEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
   });
@@ -120,13 +136,8 @@ describe('BulkActionsBar', () => {
 
     await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
 
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
-
-    await user.click(
-      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
-    );
-
-    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2]);
+    // Only test that a mock component is rendered. The modal is tested in its own file.
+    expect(screen.getByText('SelectedEntriesModal')).toBeInTheDocument();
   });
 
   it('should show unpublish modal if unpublish button is clicked', async () => {
