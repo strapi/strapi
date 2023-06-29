@@ -210,9 +210,32 @@ Choose meaningful names for type parameters that accurately describe their purpo
 
 When making changes to the Strapi types, it is important to consider the impact on existing users. To avoid breaking changes, follow these guidelines:
 
-- **Avoid removing or changing public APIs:** Public types APIs include functions, classes, or interfaces/types exposed to users as part of the official/documented Strapi API. Removing or changing them without providing appropriate deprecations or migration paths can break users' existing code.
-- **Use deprecation warnings instead:** If you need to deprecate an existing API, provide deprecation warnings and suggest alternative approaches. Give users a reasonable amount of time to adapt their code to the changes.
-- **Release breaking changes in major versions:** Breaking changes should be released as part of major version updates (e.g., from v4.x.x to v5.x.x). Major versions indicate significant changes that may require code modifications from users.
+- **Avoid removing or changing public APIs:**
+
+  Public types APIs include functions, classes, or interfaces/types exposed to users as part of the official/documented Strapi API. Removing or changing them without providing appropriate deprecations or migration paths can break users' existing code.
+
+  This also applies to public React components (through their props).
+
+- **Use deprecation warnings instead:**
+
+  If you need to deprecate an existing type, provide deprecation warnings and suggest alternative approaches. Give users a reasonable amount of time to adapt their code to the changes.
+
+  Example:
+
+  ```ts
+  /**
+   * @deprecated The Writer interface is deprecated and will be removed in the next major version. Please consider using Author instead
+   */
+  export interface Writer {
+    id: string;
+    firstname: string;
+    lastname: string;
+  }
+  ```
+
+- **Release breaking changes in major versions:**
+
+  Breaking changes should be released as part of major version updates (e.g., from v4.x.x to v5.x.x). Major versions indicate significant changes that may require code modifications from users.
 
 By following these guidelines, you can minimize the impact on users' code when introducing changes to the Strapi types.
 
