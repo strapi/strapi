@@ -1,7 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, RBACContext } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -66,13 +67,27 @@ const ComponentFixture = (props) => <InformationBoxEE {...props} />;
 const setup = (props) => ({
   ...render(<ComponentFixture {...props} />, {
     wrapper({ children }) {
-      const store = createStore((state = {}) => state, {});
+      const store = createStore((state = {}) => state, {
+        admin_app: {
+          permissions: fixtures.permissions.app,
+        },
+      });
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const rbacContextValue = React.useMemo(
+        () => ({
+          allPermissions: fixtures.permissions.allPermissions,
+        }),
+        []
+      );
 
       return (
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <IntlProvider locale="en" defaultLocale="en">
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              <ThemeProvider theme={lightTheme}>
+                <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
+              </ThemeProvider>
             </IntlProvider>
           </QueryClientProvider>
         </Provider>
