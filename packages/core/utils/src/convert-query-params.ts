@@ -18,7 +18,6 @@ import {
   mergeAll,
   isArray,
   isString,
-  isDate,
 } from 'lodash/fp';
 import _ from 'lodash';
 import parseType from './parse-type';
