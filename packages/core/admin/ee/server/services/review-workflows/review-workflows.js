@@ -113,7 +113,7 @@ module.exports = ({ strapi }) => {
       await registerWebhookEvents({ strapi });
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
-    async register({ options }) {
+    async register({ options } = { options: {} }) {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
 

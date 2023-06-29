@@ -11,9 +11,16 @@ const workflowsServiceMock = {
   getAssignedWorkflow: jest.fn(),
 };
 
+const reviewWorkflowsValidationMock = {
+  register: jest.fn(),
+  validateWorkflowCount: jest.fn().mockResolvedValue(true),
+  validateWorkflowStages: jest.fn(),
+};
+
 const getServiceMock = {
   stages: stagesServiceMock,
   workflows: workflowsServiceMock,
+  'review-workflows-validation': reviewWorkflowsValidationMock,
 };
 
 jest.mock('../../../../utils', () => {

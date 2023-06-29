@@ -47,9 +47,19 @@ const pluginsMock = {
   },
 };
 
+const reviewWorkflowsValidationMock = {
+  validateWorkflowCount: jest.fn().mockResolvedValue(true),
+  validateWorkflowStages: jest.fn(),
+};
+
+const servicesMock = {
+  'admin::review-workflows-validation': reviewWorkflowsValidationMock,
+};
+
 const strapiMock = {
   entityService: entityServiceMock,
   plugin: jest.fn((name) => pluginsMock[name]),
+  service: jest.fn((serviceName) => servicesMock[serviceName]),
 };
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
