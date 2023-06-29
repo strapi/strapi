@@ -2,33 +2,18 @@
 
 const {
   mapAsync,
-  errors: { ApplicationError },
+  errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
 const { map } = require('lodash/fp');
 
-const {
-  STAGE_MODEL_UID,
-  ENTITY_STAGE_ATTRIBUTE,
-  MAX_STAGES_PER_WORKFLOW,
-} = require('../../constants/workflows');
+const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
-const { clampMaxStagesPerWorkflow } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
-  const limits = {
-    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-  };
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
-    register({ stagesPerWorkflow }) {
-      if (!Object.isFrozen(limits)) {
-        limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
-          stagesPerWorkflow || limits.stagesPerWorkflow
-        );
-        Object.freeze(limits);
-      }
-    },
     find({ workflowId, populate }) {
       const params = {
         filters: { workflow: workflowId },
@@ -46,6 +31,17 @@ module.exports = ({ strapi }) => {
 
     async createMany(stagesList, { fields }) {
       const params = { select: fields };
+      const groupByWorkflow = (workflows, stage) => {
+        if (!workflows[stage.workflowId]) {
+          workflows[stage.workflowId] = [];
+        }
+        workflows[stage.workflowId].push(stage);
+        return workflows;
+      };
+      // As we can create several stages, we need to make sure that we don't exceed the licence threshold
+      Object.entries(stagesList.reduce(groupByWorkflow, {})).forEach((workflowStages) => {
+        workflowsValidationService.validateWorkflowStages(workflowStages);
+      });
 
       const stages = await Promise.all(
         stagesList.map((stage) =>
@@ -90,6 +86,8 @@ module.exports = ({ strapi }) => {
       const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
       assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
+
+      workflowsValidationService.validateWorkflowStages(destStages);
 
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
@@ -140,6 +138,8 @@ module.exports = ({ strapi }) => {
     async updateEntity(entityInfo, stageId) {
       const stage = await this.findById(stageId);
 
+      await workflowsValidationService.validateWorkflowCount();
+
       if (!stage) {
         throw new ApplicationError(`Selected stage does not exist`);
       }
@@ -173,6 +173,8 @@ module.exports = ({ strapi }) => {
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
+
+      await workflowsValidationService.validateWorkflowCount();
 
       return strapi.db.transaction(async ({ trx }) => {
         // Update all already existing links to the new stage
@@ -273,13 +275,13 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
  * @param {Array} diffStages.deleted - An array of stages that are planned to be deleted from the workflow.
  * @param {Array} diffStages.created - An array of stages that are planned to be created in the workflow.
  *
- * @throws {ApplicationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
+ * @throws {ValidationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
  */
 function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   const remainingStagesCount =
     workflowStages.length - diffStages.deleted.length + diffStages.created.length;
   if (remainingStagesCount < 1) {
-    throw new ApplicationError('At least one stage must remain in the workflow.');
+    throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
   }
 }
 

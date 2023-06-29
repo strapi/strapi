@@ -106,6 +106,7 @@ const registerWebhookEvents = async ({ strapi }) =>
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     async bootstrap() {
@@ -117,8 +118,7 @@ module.exports = ({ strapi }) => {
       strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
 
       const reviewWorkflowsOptions = defaultsDeep(DEFAULT_OPTIONS, options);
-      workflowsService.register(reviewWorkflowsOptions);
-      stagesService.register(reviewWorkflowsOptions);
+      workflowsValidationService.register(reviewWorkflowsOptions);
     },
   };
 };

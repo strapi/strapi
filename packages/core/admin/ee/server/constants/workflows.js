@@ -13,6 +13,6 @@ module.exports = {
     WORKFLOWS_LIMIT:
       'You’ve reached the limit of workflows in your plan. Delete a workflow or contact Sales to enable more workflows.',
     STAGES_LIMIT:
-      'You have reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
+      'You’ve reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
   },
 };

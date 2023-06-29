@@ -1,19 +1,10 @@
 'use strict';
 
 const { set, isString } = require('lodash/fp');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
-const {
-  WORKFLOW_MODEL_UID,
-  MAX_WORKFLOWS,
-  MAX_STAGES_PER_WORKFLOW,
-  ERRORS,
-} = require('../../../constants/workflows');
+const { ApplicationError } = require('@strapi/utils').errors;
+const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
-const {
-  getWorkflowContentTypeFilter,
-  clampMaxWorkflows,
-  clampMaxStagesPerWorkflow,
-} = require('../../../utils/review-workflows');
+const { getWorkflowContentTypeFilter } = require('../../../utils/review-workflows');
 const workflowsContentTypesFactory = require('./content-types');
 
 const processFilters = ({ strapi }, filters = {}) => {
@@ -28,21 +19,9 @@ const processFilters = ({ strapi }, filters = {}) => {
 
 module.exports = ({ strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
-  const limits = {
-    workflows: MAX_WORKFLOWS,
-    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-  };
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
-    register({ workflows, stagesPerWorkflow }) {
-      if (!Object.isFrozen(limits)) {
-        limits.workflows = clampMaxWorkflows(workflows || limits.workflows);
-        limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
-          stagesPerWorkflow || limits.stagesPerWorkflow
-        );
-        Object.freeze(limits);
-      }
-    },
     /**
      * Returns all the workflows matching the user-defined filters.
      * @param {object} opts - Options for the query.
@@ -73,8 +52,8 @@ module.exports = ({ strapi }) => {
     async create(opts) {
       let createOpts = { ...opts, populate: { stages: true } };
 
-      this.validateWorkflowStages(opts.data.stages);
-      await this.validateWorkflowCount(1);
+      workflowsValidationService.validateWorkflowStages(opts.data.stages);
+      await workflowsValidationService.validateWorkflowCount(1);
 
       return strapi.db.transaction(async () => {
         // Create stages
@@ -109,12 +88,12 @@ module.exports = ({ strapi }) => {
       let updateOpts = { ...opts, populate: { stages: true } };
       let updatedStageIds;
 
-      await this.validateWorkflowCount();
+      await workflowsValidationService.validateWorkflowCount();
 
       return strapi.db.transaction(async () => {
         // Update stages
         if (opts.data.stages) {
-          this.validateWorkflowStages(opts.data.stages);
+          workflowsValidationService.validateWorkflowStages(opts.data.stages);
           opts.data.stages.forEach((stage) =>
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
@@ -161,10 +140,13 @@ module.exports = ({ strapi }) => {
         await stageService.deleteMany(workflow.stages.map((stage) => stage.id));
 
         // Unassign all content types, this will migrate the content types to null
-        await workflowsContentTypes.migrate({
-          srcContentTypes: workflow.contentTypes,
-          destContentTypes: [],
-        });
+        await workflowsContentTypes.migrate(
+          {
+            srcContentTypes: workflow.contentTypes,
+            destContentTypes: [],
+          },
+          true
+        );
 
         // Delete Workflow
         return strapi.entityService.delete(WORKFLOW_MODEL_UID, workflow.id, opts);
@@ -223,33 +205,6 @@ module.exports = ({ strapi }) => {
       const belongs = workflow.stages.some((stage) => stage.id === stageId);
       if (!belongs) {
         throw new ApplicationError(`Stage does not belong to workflow "${workflow.name}"`);
-      }
-    },
-
-    /**
-     * Validates the stages of a workflow.
-     * @param {Array} stages - Array of stages to be validated.
-     * @throws {ValidationError} - If the workflow has no stages or exceeds the limit.
-     */
-    validateWorkflowStages(stages) {
-      if (!stages || stages.length === 0) {
-        throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
-      }
-      if (stages.length > limits.stagesPerWorkflow) {
-        throw new ValidationError(ERRORS.STAGES_LIMIT);
-      }
-    },
-
-    /**
-     * Validates the count of existing and added workflows.
-     * @param {number} [countAddedWorkflows=0] - The count of workflows to be added.
-     * @throws {ValidationError} - If the total count of workflows exceeds the limit.
-     * @returns {Promise<void>} - A Promise that resolves when the validation is completed.
-     */
-    async validateWorkflowCount(countAddedWorkflows = 0) {
-      const countWorkflows = await this.count();
-      if (countWorkflows + countAddedWorkflows > limits.workflows) {
-        throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },
   };

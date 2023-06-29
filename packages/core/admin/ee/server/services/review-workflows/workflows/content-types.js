@@ -28,12 +28,17 @@ module.exports = ({ strapi }) => {
      * @param {Array<string>} options.srcContentTypes - The content types assigned to the previous workflow
      * @param {Array<string>} options.destContentTypes - The content types assigned to the new workflow
      * @param {Workflow.Stage} options.stageId - The new stage to assign the entities to
+     * @param {boolean} force - Override validations to force the migration (e.g. on workflow deletion)
      */
-    async migrate({ srcContentTypes = [], destContentTypes, stageId }) {
+    async migrate({ srcContentTypes = [], destContentTypes, stageId }, force = false) {
       // Workflows service is using this content-types service, to avoid an infinite loop, we need to get the service in the method
       const workflowsService = getService('workflows', { strapi });
+      const workflowsValidationService = getService('review-workflows-validation', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
+      if (!force) {
+        await workflowsValidationService.validateWorkflowCount();
+      }
       await mapAsync(created, async (uid) => {
         // If it was assigned to another workflow, transfer it from the previous workflow
         const srcWorkflow = await workflowsService.getAssignedWorkflow(uid);
