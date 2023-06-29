@@ -3,6 +3,7 @@
 const _ = require('lodash');
 
 const { yup } = require('@strapi/utils');
+const { castArray } = require('lodash/fp');
 
 /**
  * @type {import('yup').StringSchema} StringSchema
@@ -122,11 +123,18 @@ const addStringRegexValidator = (validator, { attr }) =>
  *
  * @returns {AnySchema}
  */
-const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }) => {
+const addUniqueValidator = (validator, metas) => {
+  const { attr, model, updatedAttribute, entity } = metas;
+
+  // TODO we can get all the neighbor values in the entity
+  // consst valuesInEntity = getNeighbourAttributesValues(key, createdEntity, uid) -> ['Text', 'Text']
+  // new Set(valuesInEntity).size !== valuesInEntity.length;
+
   if (!attr.unique && attr.type !== 'uid') {
     return validator;
   }
 
+  const entities = entity ? castArray(entity) : [];
   return validator.test('unique', 'This attribute must be unique', async (value) => {
     /**
      * If the attribute value is `null` we want to skip the unique validation.
@@ -146,9 +154,23 @@ const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }
       return true;
     }
 
+    // TODO check if every value is unique with current entity
+    const valuesInEntity = [
+      ...entities.map((e) => e[updatedAttribute.name]),
+      updatedAttribute.value,
+    ];
+
+    if (new Set(valuesInEntity).size !== valuesInEntity.length) {
+      return false;
+    }
+
+    // Check against existing entries in the database
     const whereParams = entity
-      ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
-      : { [updatedAttribute.name]: value };
+      ? {
+          $and: [{ [updatedAttribute.name]: value }, { id: { $notIn: entities.map((e) => e.id) } }],
+        }
+      : // ? { $and: [{ [updatedAttribute.name]: value }, { $notIn: { id: entity.id } }] }
+        { [updatedAttribute.name]: value };
 
     const record = await strapi.db.query(model.uid).findOne({
       select: ['id'],

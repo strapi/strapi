@@ -20,6 +20,7 @@ const {
 } = require('./components');
 const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
+const { getDeepPopulate } = require('../../../../content-manager/server/services/utils/populate');
 
 const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) => {
   return {
@@ -153,6 +154,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const model = strapi.getModel(uid);
 
     const isDraft = contentTypesUtils.isDraft(data, model);
+
+    // TODO on creation we should check that every unique field within the
+    // entity is unique and also against every other entity of the same type in
+    // the DB
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
@@ -192,7 +197,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const model = strapi.getModel(uid);
 
-    const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
+    // TODO This populates the DZs and Components so they can then be used in
+    // the unique validator
+    const entityToUpdate = await db
+      .query(uid)
+      .findOne({ where: { id: entityId }, populate: getDeepPopulate(uid) });
 
     if (!entityToUpdate) {
       return null;

@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { uniqBy, castArray, isNil, isArray, mergeWith } = require('lodash');
+const { uniqBy, castArray, isNil, isArray, mergeWith, update } = require('lodash');
 const { has, assoc, prop, isObject, isEmpty } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
@@ -26,6 +26,33 @@ const addMinMax = (validator, { attr, updatedAttribute }) => {
   if (Number.isInteger(attr.max)) {
     nextValidator = nextValidator.max(attr.max);
   }
+  return nextValidator;
+};
+
+// TODO this validator check that all the unique values are unique within the entity
+const addUniqueWithinEntityValidation = (validator, { value, model, item }) => {
+  let nextValidator = validator;
+
+  nextValidator = validator.test(
+    'entity values are unqiue',
+    'All values must be unique',
+    (value) => {
+      const uniqueKeys = [];
+      Object.entries(model.attributes).forEach(([key, attr]) => {
+        if (attr.unique) {
+          uniqueKeys.push(key);
+        }
+      });
+
+      uniqueKeys.forEach((key) => {
+        const valuesInEntity = value.map((item) => {
+          return item[key];
+        });
+        return new Set(valuesInEntity).size !== valuesInEntity.length;
+      });
+    }
+  );
+
   return nextValidator;
 };
 
@@ -70,7 +97,8 @@ const preventCast = (validator) => validator.transform((val, originalVal) => ori
 
 const createComponentValidator =
   (createOrUpdate) =>
-  ({ attr, updatedAttribute }, { isDraft }) => {
+  (metas, { isDraft }) => {
+    const { attr, updatedAttribute, entity } = metas;
     let validator;
 
     const model = strapi.getModel(attr.component);
@@ -79,15 +107,46 @@ const createComponentValidator =
     }
 
     if (prop('repeatable', attr) === true) {
-      validator = yup
-        .array()
-        .of(
-          yup.lazy((item) =>
-            createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }).notNull()
-          )
-        );
+      const validateFunction = (value) => {
+        const uniqueKeys = [];
+        Object.entries(model.attributes).forEach(([key, attr]) => {
+          if (attr.unique) {
+            uniqueKeys.push(key);
+          }
+        });
+
+        uniqueKeys.forEach((key) => {
+          const valuesInEntity = value.map((item) => {
+            return item[key];
+          });
+          return new Set(valuesInEntity).size !== valuesInEntity.length;
+        });
+      };
+
+      validator = yup.array().of(
+        yup.lazy((item) => {
+          const schema = createModelValidator(createOrUpdate)(
+            {
+              model,
+              data: item,
+              entity: entity?.[updatedAttribute.name] ?? null,
+              // TODO if we can pass a validation function from here to
+              // packages/core/strapi/lib/services/entity-validator/validators.js
+              // then we could perform the within entity validation per field
+              // there allowing to scope the errors to the correct field
+              additionalValidation: () => validateFunction(updatedAttribute.value),
+            },
+            { isDraft }
+          ).notNull();
+          return schema;
+        })
+      );
       validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
       validator = addMinMax(validator, { attr, updatedAttribute });
+      validator = addUniqueWithinEntityValidation(validator, {
+        model,
+        value: updatedAttribute.value,
+      });
     } else {
       validator = createModelValidator(createOrUpdate)({ model, updatedAttribute }, { isDraft });
       validator = addRequiredValidation(createOrUpdate)(validator, {
@@ -185,7 +244,7 @@ const createAttributeValidator = (createOrUpdate) => (metas, options) => {
 
 const createModelValidator =
   (createOrUpdate) =>
-  ({ model, data, entity }, options) => {
+  ({ model, data, entity, additionalValidation }, options) => {
     const writableAttributes = model ? getWritableAttributes(model) : [];
 
     const schema = writableAttributes.reduce((validators, attributeName) => {
@@ -195,6 +254,7 @@ const createModelValidator =
           updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
           model,
           entity,
+          additionalValidation,
         },
         options
       );
