@@ -156,7 +156,7 @@ const decorator = (service) => ({
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async findMany(uid, opts = {}) {
+  async findMany(uid, opts) {
     const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
@@ -165,13 +165,13 @@ const decorator = (service) => ({
       return service.findMany.call(this, uid, opts);
     }
 
-    const { kind } = strapi.getModel(uid);
+    const { kind } = model;
 
     if (kind === 'singleType') {
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         // TODO Fix so this won't break lower lying find many wrappers
-        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-        const query = transformParamsToQuery(uid, wrappedParams);
+        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' }) || {};
+        const query = transformParamsToQuery(model, wrappedParams);
         return strapi.db.query(uid).findMany(query);
       }
 
