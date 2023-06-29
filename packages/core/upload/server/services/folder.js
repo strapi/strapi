@@ -24,12 +24,17 @@ const setPathIdAndPath = async (folder) => {
 const create = async (folderData, { user } = {}) => {
   const folderService = getService('folder');
 
-  let enrichedFolder = await folderService.setPathIdAndPath(folderData);
-  if (user) {
-    enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
-  }
+  // Wrap in transaction to lock folder table and prevent race conditions
+  const folder = await strapi.db.transaction(async () => {
+    let enrichedFolder = await folderService.setPathIdAndPath(folderData);
+    if (user) {
+      enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
+    }
 
-  const folder = await strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
+    enrichedFolder.name = enrichedFolder.name.trim() + enrichedFolder.pathId;
+
+    return strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
+  });
 
   strapi.eventHub.emit('media-folder.create', { folder });
 
