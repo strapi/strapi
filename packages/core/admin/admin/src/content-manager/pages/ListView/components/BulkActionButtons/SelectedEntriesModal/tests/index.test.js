@@ -10,7 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import SelectedEntriesModal from '..';
-import reducers from '../../../../../../reducers';
+import reducers from '../../../../../../../reducers';
 
 const listViewRows = [
   {

@@ -17,8 +17,8 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { listViewDomain } from '../../../../pages/ListView/selectors';
-import { getTrad } from '../../../../utils';
+import { getTrad } from '../../../../../utils';
+import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
 
 /* -------------------------------------------------------------------------------------------------

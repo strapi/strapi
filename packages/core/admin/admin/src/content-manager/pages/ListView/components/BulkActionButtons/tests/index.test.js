@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
-import reducers from '../../../../../reducers';
+import reducers from '../../../../../../reducers';
 import BulkActionButtons from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -23,8 +23,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.mock('../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../shared/hooks'),
+jest.mock('../../../../../../shared/hooks', () => ({
+  ...jest.requireActual('../../../../../../shared/hooks'),
   useInjectionZone: () => [],
 }));
 
