@@ -60,7 +60,7 @@ describe('Bulk publish selected entries modal', () => {
 
     render(
       <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
-        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} fetchData={jest.fn()} />
       </Table.Root>
     );
 
@@ -74,7 +74,7 @@ describe('Bulk publish selected entries modal', () => {
   it('reacts to selection updates', async () => {
     render(
       <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
-        <SelectedEntriesModal onConfirm={jest.fn()} onToggle={jest.fn()} />
+        <SelectedEntriesModal onConfirm={jest.fn()} onToggle={jest.fn()} fetchData={jest.fn()} />
       </Table.Root>
     );
 
@@ -109,7 +109,7 @@ describe('Bulk publish selected entries modal', () => {
 
     render(
       <Table.Root rows={listViewRows} defaultSelectedEntries={[1, 2]} colCount={2}>
-        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} fetchData={jest.fn()} />
       </Table.Root>
     );
 
