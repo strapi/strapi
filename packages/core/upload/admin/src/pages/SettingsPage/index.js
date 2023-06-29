@@ -27,7 +27,7 @@ import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getRequestUrl, getTrad } from '../../utils';
 
 import init from './init';
@@ -275,7 +275,7 @@ export const SettingsPage = () => {
 };
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
+  <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
 );

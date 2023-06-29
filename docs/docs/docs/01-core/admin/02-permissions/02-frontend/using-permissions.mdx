@@ -7,12 +7,11 @@ tags:
 ---
 
 Currently, there are a few different ways to use permissions in the application. This document will explain the different ways, how to use them and suggestions
-on when is best to use them. It's advised that you've read [how they work](/core/permissions/how-they-work) and [fetching permissions](/core/permissions/frontend/fetching-permissions)
-before reading this document so you have the full context.
+on when is best to use them. It's advised that you've read [how they work](../01-how-they-work.mdx) and [fetching permissions](fetching-permissions.mdx) before reading this document so you have the full context.
 
 ## useRBACProvider
 
-In [fetching permissions](/core/permissions/frontend/fetching-permissions) we briefly mentioned the `useRBACProvider` hook which is used to access the [context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
+In [fetching permissions](./fetching-permissions.mdx) we briefly mentioned the `useRBACProvider` hook which is used to access the [context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
 that contains the permissions. This is very low level and does nothing but give you access to _every_ permission for the user and a way to refetch them from the API.
 
 ### Usage

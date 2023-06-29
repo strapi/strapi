@@ -232,6 +232,36 @@ module.exports = {
       },
     },
     {
+      method: 'POST',
+      path: '/collection-types/:model/clone/:sourceId',
+      handler: 'collection-types.clone',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.create'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/auto-clone/:sourceId',
+      handler: 'collection-types.autoClone',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.create'] },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/collection-types/:model/:id',
       handler: 'collection-types.findOne',

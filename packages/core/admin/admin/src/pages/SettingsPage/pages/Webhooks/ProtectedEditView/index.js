@@ -1,14 +1,19 @@
 import React from 'react';
 
 import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import EditView from '../EditView';
 
-const ProtectedEditView = () => (
-  <CheckPagePermissions permissions={adminPermissions.settings.webhooks.update}>
-    <EditView />
-  </CheckPagePermissions>
-);
+const ProtectedEditView = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.webhooks.update}>
+      <EditView />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedEditView;

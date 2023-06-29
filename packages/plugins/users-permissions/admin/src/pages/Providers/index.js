@@ -35,7 +35,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import FormModal from '../../components/FormModal';
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
 import { fetchData, putProvider } from './utils/api';
@@ -56,7 +56,7 @@ export const ProvidersPage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
 
   const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateProviders };
+    return { update: PERMISSIONS.updateProviders };
   }, []);
 
   const {
@@ -267,7 +267,7 @@ export const ProvidersPage = () => {
 };
 
 const ProtectedProvidersPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readProviders}>
+  <CheckPagePermissions permissions={PERMISSIONS.readProviders}>
     <ProvidersPage />
   </CheckPagePermissions>
 );

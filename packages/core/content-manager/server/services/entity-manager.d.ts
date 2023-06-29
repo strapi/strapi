@@ -1,11 +1,9 @@
 interface EntityManager {
-  assocCreatorRoles(): any;
+  mapEntity<T = any>(entity: T): T;
+  mapEntitiesResponse<T = any>(entities: T[], uid: string): T[];
   find(): any;
   findPage(): any;
-  findWithRelationCountsPage(): any;
-  count(): any;
   findOne(): any;
-  findOneWithCreatorRoles(): any;
   create(): any;
   update(): any;
   delete(): any;

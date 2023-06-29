@@ -1,54 +1,62 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import * as React from 'react';
 
 import {
-  ActionLayout,
+  IconButton,
+  Main,
   Box,
+  ActionLayout,
   Button,
   ContentLayout,
   HeaderLayout,
-  IconButton,
-  Main,
   useNotifyAT,
+  Flex,
+  Td,
+  Tr,
 } from '@strapi/design-system';
 import {
-  CheckPermissions,
-  getYupInnerErrors,
-  Link,
   NoPermissions,
+  CheckPermissions,
   SearchURLQuery,
-  useAPIErrorHandler,
   useFetchClient,
   useFocusWhenNavigate,
-  useNotification,
   useQueryParams,
+  useNotification,
   useRBACProvider,
   useTracking,
+  Link,
+  useAPIErrorHandler,
+  getYupInnerErrors,
+  useStrapiApp,
+  Table,
+  PaginationURLQuery,
+  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { connect } from 'react-redux';
-import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-dom';
+import { connect, useSelector } from 'react-redux';
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
-import permissions from '../../../permissions';
+import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
-import ListViewTable from '../../components/ListViewTable';
+import { PublicationState } from '../../components/ListViewTable/CellContent/PublicationState';
 import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
-import FieldPicker from './FieldPicker';
-import PaginationFooter from './PaginationFooter';
-import makeSelectListView from './selectors';
+import { Body } from './components/Body';
+import BulkActionButtons from './components/BulkActionButtons';
+import CellContent from './components/CellContent';
+import { FieldPicker } from './components/FieldPicker';
+import makeSelectListView, { selectDisplayedHeaders } from './selectors';
 import { buildQueryString } from './utils';
-
-const cmPermissions = permissions.contentManager;
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -74,17 +82,20 @@ function ListView({
   const { total } = pagination;
   const { contentType } = layout;
   const {
+    info,
+    options,
     metadatas,
     settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   } = contentType;
-
+  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-  const trackUsageRef = useRef(trackUsage);
-  const fetchPermissionsRef = useRef(refetchPermissions);
+  const trackUsageRef = React.useRef(trackUsage);
+  const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const permissions = useSelector(selectAdminPermissions);
 
   useFocusWhenNavigate();
 
@@ -95,7 +106,7 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = contentType.options?.draftAndPublish ?? false;
+  const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
@@ -146,9 +157,12 @@ function ListView({
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
-  const requestUrlRef = useRef('');
+  const requestUrlRef = React.useRef('');
 
-  const fetchData = useCallback(
+  /**
+   * TODO: re-write all of this, it's a mess.
+   */
+  const fetchData = React.useCallback(
     async (endPoint, source) => {
       getData();
 
@@ -210,7 +224,7 @@ function ListView({
     [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
   );
 
-  const handleConfirmDeleteAllData = useCallback(
+  const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
         await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
@@ -230,7 +244,7 @@ function ListView({
     [fetchData, params, slug, toggleNotification, formatAPIError, post]
   );
 
-  const handleConfirmDeleteData = useCallback(
+  const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
         await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
@@ -316,7 +330,7 @@ function ListView({
     return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
@@ -339,9 +353,73 @@ function ListView({
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
-    id: contentType.info.displayName,
-    defaultMessage: contentType.info.displayName || defaultHeaderLayoutTitle,
+    id: info.displayName,
+    defaultMessage: info.displayName || defaultHeaderLayoutTitle,
   });
+
+  const { runHookWaterfall } = useStrapiApp();
+  const displayedHeaders = useSelector(selectDisplayedHeaders);
+
+  const tableHeaders = React.useMemo(() => {
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
+      displayedHeaders,
+      layout,
+    });
+
+    const formattedHeaders = headers.displayedHeaders.map((header) => {
+      const { metadatas } = header;
+
+      if (header.fieldSchema.type === 'relation') {
+        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
+
+        return {
+          ...header,
+          metadatas: {
+            ...metadatas,
+            label: formatMessage({
+              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+              defaultMessage: metadatas.label,
+            }),
+          },
+          name: sortFieldValue,
+        };
+      }
+
+      return {
+        ...header,
+        metadatas: {
+          ...metadatas,
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            defaultMessage: metadatas.label,
+          }),
+        },
+      };
+    });
+
+    if (!hasDraftAndPublish) {
+      return formattedHeaders;
+    }
+
+    return [
+      ...formattedHeaders,
+      {
+        key: '__published_at_temp_key__',
+        name: 'publishedAt',
+        fieldSchema: {
+          type: 'custom',
+        },
+        metadatas: {
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+            defaultMessage: 'publishedAt',
+          }),
+          searchable: false,
+          sortable: true,
+        },
+      },
+    ];
+  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -377,6 +455,47 @@ function ListView({
       </Button>
     ) : null;
 
+  /**
+   *
+   * @param {string} id
+   * @returns void
+   */
+  const handleRowClick = (id) => () => {
+    trackUsage('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+      search: pluginsQueryParams,
+    });
+  };
+
+  const handleCloneClick = (id) => async () => {
+    try {
+      const { data } = await post(
+        `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
+      );
+
+      if ('id' in data) {
+        push({
+          pathname: `${pathname}/${data.id}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        });
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        push({
+          pathname: `${pathname}/create/clone/${id}`,
+          state: { from: pathname, error: formatAPIError(err) },
+          search: pluginsQueryParams,
+        });
+      }
+    }
+  };
+
+  // Add 1 column for the checkbox and 1 for the actions
+  const colCount = tableHeaders.length + 2;
+
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
@@ -401,7 +520,9 @@ function ListView({
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
-              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+              <CheckPermissions
+                permissions={permissions.contentManager.collectionTypesConfigurations}
+              >
                 <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
                   <IconButton
                     onClick={() => {
@@ -443,25 +564,97 @@ function ListView({
       )}
       <ContentLayout>
         {canRead ? (
-          <>
-            <ListViewTable
-              canCreate={canCreate}
-              canDelete={canDelete}
-              canPublish={canPublish}
-              contentTypeName={headerLayoutTitle}
-              onConfirmDelete={handleConfirmDeleteData}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
-              onConfirmPublishAll={handleConfirmPublishAllData}
-              onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-              withEntityActions={(canDelete || canPublish) && isBulkable}
-              isLoading={isLoading}
-              // FIXME: remove the layout props drilling
-              layout={layout}
-              rows={data}
-              action={getCreateAction({ variant: 'secondary' })}
-            />
-            <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
-          </>
+          <Flex gap={4} direction="column" alignItems="stretch">
+            <Table.Root rows={data} isLoading={isLoading} colCount={colCount}>
+              <Table.ActionBar>
+                <BulkActionButtons
+                  showPublish={canPublish && hasDraftAndPublish}
+                  showDelete={canDelete}
+                  onConfirmDeleteAll={handleConfirmDeleteAllData}
+                  onConfirmPublishAll={handleConfirmPublishAllData}
+                  onConfirmUnpublishAll={handleConfirmUnpublishAllData}
+                />
+              </Table.ActionBar>
+              <Table.Content>
+                <Table.Head>
+                  {/* Bulk action select all checkbox */}
+                  <Table.HeaderCheckboxCell />
+                  {/* Dynamic headers based on fields */}
+                  {tableHeaders.map(({ fieldSchema, key, name, metadatas }) => (
+                    <Table.HeaderCell
+                      key={key}
+                      name={name}
+                      fieldSchemaType={fieldSchema.type}
+                      relationFieldName={metadatas.mainField?.name}
+                      isSortable={metadatas.sortable}
+                      label={metadatas.label}
+                    />
+                  ))}
+                  {/* Visually hidden header for actions */}
+                  <Table.HeaderHiddenActionsCell />
+                </Table.Head>
+                {/* Loading content */}
+                <Table.LoadingBody />
+                {/* Empty content */}
+                <Table.EmptyBody
+                  contentType={headerLayoutTitle}
+                  aciton={getCreateAction({ variant: 'secondary' })}
+                />
+                {/* Content */}
+                <Body.Root
+                  onConfirmDelete={handleConfirmDeleteData}
+                  isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
+                  setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                >
+                  {data.map((rowData, index) => {
+                    return (
+                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
+                        {/* Bulk action row checkbox */}
+                        <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        {/* Field data */}
+                        {tableHeaders.map(({ key, name, ...rest }) => {
+                          if (name === 'publishedAt') {
+                            return (
+                              <Td key={key}>
+                                <PublicationState isPublished={Boolean(rowData.publishedAt)} />
+                              </Td>
+                            );
+                          }
+
+                          return (
+                            <Td key={key}>
+                              <CellContent
+                                content={rowData[name.split('.')[0]]}
+                                name={name}
+                                contentType={layout.contentType}
+                                {...rest}
+                                rowId={rowData.id}
+                              />
+                            </Td>
+                          );
+                        })}
+                        {/* Actions: edit, duplicate, delete */}
+                        {(canDelete || canPublish) && isBulkable && (
+                          <Body.EntityActionsDataCell
+                            rowId={rowData.id}
+                            index={index}
+                            setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                            canCreate={canCreate}
+                            canDelete={canDelete}
+                            handleCloneClick={handleCloneClick}
+                          />
+                        )}
+                      </Tr>
+                    );
+                  })}
+                </Body.Root>
+              </Table.Content>
+            </Table.Root>
+            <Flex alignItems="flex-end" justifyContent="space-between">
+              <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+              <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
+            </Flex>
+          </Flex>
         ) : (
           <NoPermissions />
         )}
@@ -513,4 +706,4 @@ export function mapDispatchToProps(dispatch) {
 }
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect)(memo(ListView, isEqual));
+export default compose(withConnect)(React.memo(ListView, isEqual));

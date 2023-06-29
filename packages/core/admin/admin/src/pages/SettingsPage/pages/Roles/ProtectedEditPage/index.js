@@ -1,23 +1,28 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { LoadingIndicatorPage, useRBAC } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
-  const permissions = useMemo(() => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  // TODO: this is necessary because otherwise we run into an
+  // infinite rendering loop
+  const permissionsMemoized = React.useMemo(() => {
     return {
-      read: adminPermissions.settings.roles.read,
-      update: adminPermissions.settings.roles.update,
+      read: permissions.settings.roles.read,
+      update: permissions.settings.roles.update,
     };
-  }, []);
+  }, [permissions.settings.roles.read, permissions.settings.roles.update]);
 
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(permissions);
+  } = useRBAC(permissionsMemoized);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;

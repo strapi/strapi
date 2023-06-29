@@ -26,25 +26,30 @@ import {
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
-import adminPermissions from '../../../../../../admin/src/permissions';
+import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
 import { getRequestUrl } from '../../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
-const ssoPermissions = {
-  ...adminPermissions.settings.sso,
-  readRoles: adminPermissions.settings.roles.read,
-};
-
 export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
 
+  // TODO: this is necessary because otherwise we run into an
+  // infinite rendering loop
+  const permissionsMemoized = React.useMemo(() => {
+    return {
+      ...permissions.settings.sso,
+      readRoles: permissions.settings.roles.read,
+    };
+  }, [permissions.settings.roles.read, permissions.settings.sso]);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(ssoPermissions);
+  } = useRBAC(permissionsMemoized);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
@@ -247,10 +252,14 @@ export const SingleSignOn = () => {
   );
 };
 
-const ProtectedSSO = () => (
-  <CheckPagePermissions permissions={ssoPermissions.main}>
-    <SingleSignOn />
-  </CheckPagePermissions>
-);
+const ProtectedSSO = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.settings.sso.main}>
+      <SingleSignOn />
+    </CheckPagePermissions>
+  );
+};
 
 export default ProtectedSSO;
