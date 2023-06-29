@@ -58,13 +58,13 @@ test.describe('Sign Up', () => {
     await expect(page.getByText('The value must be a lowercase string')).toBeVisible();
 
     await fillEmailAndSubmit('notanemail');
-    await expect(page.getByText('Value is an invalid email')).toBeVisible();
+    await expect(page.getByText('This is an invalid email')).toBeVisible();
   });
 
   test("a user cannot submit the form if a password isn't provided or doesn't meet the password validation requirements", async ({
     page,
   }) => {
-    const passwordInput = page.getByRole('textbox', { name: 'Password *' });
+    const passwordInput = page.getByRole('textbox', { name: 'Password *', exact: true });
     const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
     const fillPasswordAndSubmit = async (passwordValue) => {
@@ -85,7 +85,7 @@ test.describe('Sign Up', () => {
     ).toBeVisible();
 
     await fillPasswordAndSubmit('S4ort');
-    await expect(page.getByText('Value is shorter than the minimum')).toBeVisible();
+    await expect(page.getByText('The value is too short')).toBeVisible();
 
     await fillPasswordAndSubmit('doesNotMatch');
     await expect(page.getByText('Passwords do not match')).toBeVisible();
