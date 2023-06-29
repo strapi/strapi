@@ -13,9 +13,12 @@ import { useContentTypes } from '../../../../../../../../admin/src/hooks/useCont
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
+import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
+import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
+import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 
@@ -32,6 +35,9 @@ export function ReviewWorkflowsCreateView() {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const [showLimitModal, setShowLimitModal] = React.useState(false);
+  const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
+  const { pagination, isLoading: isWorkflowLoading } = useReviewWorkflows();
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -88,6 +94,23 @@ export function ReviewWorkflowsCreateView() {
     dispatch(resetWorkflow());
   }, [dispatch]);
 
+  React.useEffect(() => {
+    if (!isWorkflowLoading && !isLicenseLoading) {
+      if (pagination?.total >= limits?.workflows) {
+        setShowLimitModal('workflow');
+      } else if (currentWorkflow.stages.length >= limits.stagesPerWorkflow) {
+        setShowLimitModal('stage');
+      }
+    }
+  }, [
+    currentWorkflow.stages.length,
+    isLicenseLoading,
+    isWorkflowLoading,
+    limits.stagesPerWorkflow,
+    limits?.workflows,
+    pagination?.total,
+  ]);
+
   return (
     <>
       <Layout.DragLayerRendered />
@@ -141,6 +164,44 @@ export function ReviewWorkflowsCreateView() {
           </Layout.Root>
         </Form>
       </FormikProvider>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.workflows.limit.title',
+            defaultMessage: 'You’ve reached the limit of workflows in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.workflows.limit.body',
+            defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'stage'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.stages.limit.title',
+            defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'Settings.review-workflows.create.page.stages.limit.body',
+            defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
     </>
   );
 }
