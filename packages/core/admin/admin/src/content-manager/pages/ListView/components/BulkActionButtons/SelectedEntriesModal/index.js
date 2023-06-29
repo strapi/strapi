@@ -11,27 +11,98 @@ import {
   Tbody,
   Tr,
   Td,
+  IconButton,
+  Flex,
+  Icon,
 } from '@strapi/design-system';
-import { useTableContext, Table } from '@strapi/helper-plugin';
+import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
+import { useTableContext, Table, getYupInnerErrors } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
+import { Link, useHistory } from 'react-router-dom';
 
 import { getTrad } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
+import { createYupSchema } from '../../../../../utils';
+
+/* -------------------------------------------------------------------------------------------------
+ * EntryValidationText
+ * -----------------------------------------------------------------------------------------------*/
+
+const EntryValidationText = ({ errors, isPublished }) => {
+  const { formatMessage } = useIntl();
+
+  if (errors) {
+    return (
+      <Flex gap={2}>
+        <Icon color="danger600" as={CrossCircle} />
+        <Typography textColor="danger600" variant="omega" fontWeight="semiBold">
+          {Object.keys(errors)
+            .map((key) =>
+              formatMessage(
+                { id: `${errors[key].id}.withField`, defaultMessage: errors[key].defaultMessage },
+                { field: key }
+              )
+            )
+            .join(' ')}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  if (isPublished) {
+    return (
+      <Flex gap={2}>
+        <Icon color="success600" as={CheckCircle} />
+        <Typography textColor="success600" fontWeight="bold">
+          {formatMessage({
+            id: 'TODO',
+            defaultMessage: 'Published',
+          })}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex gap={2}>
+      <Icon color="success600" as={CheckCircle} />
+      <Typography fontWeight="bold">
+        {formatMessage({
+          id: 'TODO',
+          defaultMessage: 'Ready to publish',
+        })}
+      </Typography>
+    </Flex>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = () => {
+const SelectedEntriesTableContent = ({ errors }) => {
   const { rows } = useTableContext();
+  const {
+    location: { pathname },
+  } = useHistory();
+  const { formatMessage } = useIntl();
 
   // Get main field from list view layout
   const listViewStore = useSelector(listViewDomain());
   const { mainField } = listViewStore.contentType.settings;
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
+
+  const getItemLineText = (count) =>
+    formatMessage(
+      {
+        id: 'content-manager.components.ListViewTable.row-line',
+        defaultMessage: 'item line {number}',
+      },
+      { number: count + 1 }
+    );
 
   return (
     <Table.Content>
@@ -54,6 +125,29 @@ const SelectedEntriesTableContent = () => {
                 <Typography>{entry[mainField]}</Typography>
               </Td>
             )}
+            <Td>
+              <EntryValidationText
+                errors={errors[entry.id]}
+                isPublished={entry.publishedAt !== null}
+              />
+            </Td>
+            <Td>
+              <IconButton
+                forwardedAs={Link}
+                to={{
+                  pathname: `${pathname}/${entry.id}`,
+                  state: { from: pathname },
+                }}
+                label={formatMessage(
+                  { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                  { target: getItemLineText(index) }
+                )}
+                noBorder
+                target="_blank"
+              >
+                <Pencil />
+              </IconButton>
+            </Td>
           </Tr>
         ))}
       </Tbody>
@@ -73,7 +167,30 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
 
 const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries } = useTableContext();
+  const { selectedEntries, rows } = useTableContext();
+  const { contentType, components } = useSelector(listViewDomain());
+
+  /**
+   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
+   */
+  const validateEntriesToPublish = () => {
+    const validations = { validIds: [], errors: {} };
+    // Create the validation schema based on the contentType
+    const schema = createYupSchema(contentType, { components: components }, { isDraft: false });
+    // Validate each entry
+    rows.forEach((entry) => {
+      try {
+        schema.validateSync(entry, { abortEarly: false });
+        validations.validIds.push(entry.id);
+      } catch (e) {
+        validations.errors[entry.id] = getYupInnerErrors(e);
+      }
+    });
+
+    return validations;
+  };
+
+  const { errors } = validateEntriesToPublish();
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -100,7 +217,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
           )}
         </Typography>
         <Box marginTop={5}>
-          <SelectedEntriesTableContent />
+          <SelectedEntriesTableContent errors={errors} />
         </Box>
       </ModalBody>
       <ModalFooter
@@ -113,12 +230,17 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
           </Button>
         }
         endActions={
-          <Button
-            onClick={() => onConfirm(selectedEntries)}
-            disabled={selectedEntries.length === 0}
-          >
-            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-          </Button>
+          <Flex gap={2}>
+            <Button onClick={() => validateEntriesToPublish} variant="tertiary">
+              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
+            </Button>
+            <Button
+              onClick={() => onConfirm(selectedEntries)}
+              disabled={selectedEntries.length === 0}
+            >
+              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+            </Button>
+          </Flex>
         }
       />
     </ModalLayout>
