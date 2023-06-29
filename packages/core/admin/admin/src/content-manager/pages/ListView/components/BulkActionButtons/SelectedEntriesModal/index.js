@@ -25,18 +25,13 @@ import { Body } from '../../Body';
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = ({ notifySelectionChange }) => {
-  const { selectedEntries, rows } = useTableContext();
+const SelectedEntriesTableContent = () => {
+  const { rows } = useTableContext();
 
   // Get main field from list view layout
   const listViewStore = useSelector(listViewDomain());
   const { mainField } = listViewStore.contentType.settings;
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
-
-  // Notify parent component when selection changes
-  React.useEffect(() => {
-    notifySelectionChange(selectedEntries);
-  }, [selectedEntries, notifySelectionChange]);
 
   return (
     <Table.Content>
@@ -66,10 +61,6 @@ const SelectedEntriesTableContent = ({ notifySelectionChange }) => {
   );
 };
 
-SelectedEntriesTableContent.propTypes = {
-  notifySelectionChange: PropTypes.func.isRequired,
-};
-
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
  * -----------------------------------------------------------------------------------------------*/
@@ -77,24 +68,12 @@ SelectedEntriesTableContent.propTypes = {
 const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography>;
 
 /* -------------------------------------------------------------------------------------------------
- * SelectedEntriesModal
+ * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
   const { formatMessage } = useIntl();
-  const { rows, selectedEntries } = useTableContext();
-
-  // Only used to mirror the state of the nested table component
-  // setEntriesToPublish should not be called directly
-  const [entriesToPublish, setEntriesToPublish] = React.useState([]);
-
-  // Get the selected entries full data, and keep the list view order
-  // Memoize to prevent infinite useEffect runs in SelectedEntriesTableContent
-  const entries = React.useMemo(() => {
-    return rows.filter((row) => {
-      return selectedEntries.includes(row.id);
-    });
-  }, [rows, selectedEntries]);
+  const { selectedEntries } = useTableContext();
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -115,16 +94,14 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
                 '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
             },
             {
-              count: entriesToPublish.length,
+              count: selectedEntries.length,
               b: BoldChunk,
             }
           )}
         </Typography>
-        <Table.Root rows={entries} defaultSelectedEntries={selectedEntries} colCount={4}>
-          <Box marginTop={5}>
-            <SelectedEntriesTableContent notifySelectionChange={setEntriesToPublish} />
-          </Box>
-        </Table.Root>
+        <Box marginTop={5}>
+          <SelectedEntriesTableContent />
+        </Box>
       </ModalBody>
       <ModalFooter
         startActions={
@@ -137,14 +114,41 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
         }
         endActions={
           <Button
-            onClick={() => onConfirm(entriesToPublish)}
-            disabled={entriesToPublish.length === 0}
+            onClick={() => onConfirm(selectedEntries)}
+            disabled={selectedEntries.length === 0}
           >
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
         }
       />
     </ModalLayout>
+  );
+};
+
+SelectedEntriesModalContent.propTypes = {
+  onToggle: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * SelectedEntriesModal
+ * -----------------------------------------------------------------------------------------------*/
+
+const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
+  const { rows, selectedEntries } = useTableContext();
+
+  // Get the selected entries full data, and keep the list view order
+  // Memoize to prevent infinite useEffect runs in SelectedEntriesTableContent
+  const entries = React.useMemo(() => {
+    return rows.filter((row) => {
+      return selectedEntries.includes(row.id);
+    });
+  }, [rows, selectedEntries]);
+
+  return (
+    <Table.Root rows={entries} defaultSelectedEntries={selectedEntries} colCount={4}>
+      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} />
+    </Table.Root>
   );
 };
 
