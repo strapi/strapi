@@ -31,8 +31,6 @@ const create = async (folderData, { user } = {}) => {
       enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
     }
 
-    enrichedFolder.name = enrichedFolder.name.trim() + enrichedFolder.pathId;
-
     return strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
   });
 
