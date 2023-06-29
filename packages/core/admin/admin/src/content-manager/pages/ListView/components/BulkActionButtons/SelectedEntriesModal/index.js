@@ -84,7 +84,7 @@ const EntryValidationText = ({ errors, isPublished }) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesTableContent = ({ errors }) => {
-  const { rows } = useTableContext();
+  const { rows, isLoading } = useTableContext();
   const {
     location: { pathname },
   } = useHistory();
@@ -113,44 +113,48 @@ const SelectedEntriesTableContent = ({ errors }) => {
           <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
       </Table.Head>
-      <Tbody>
-        {rows.map((entry, index) => (
-          <Tr key={entry.id}>
-            <Body.CheckboxDataCell rowId={entry.id} index={index} />
-            <Td>
-              <Typography>{entry.id}</Typography>
-            </Td>
-            {shouldDisplayMainField && (
+      {isLoading ? (
+        <Table.LoadingBody />
+      ) : (
+        <Tbody>
+          {rows.map((entry, index) => (
+            <Tr key={entry.id}>
+              <Body.CheckboxDataCell rowId={entry.id} index={index} />
               <Td>
-                <Typography>{entry[mainField]}</Typography>
+                <Typography>{entry.id}</Typography>
               </Td>
-            )}
-            <Td>
-              <EntryValidationText
-                errors={errors[entry.id]}
-                isPublished={entry.publishedAt !== null}
-              />
-            </Td>
-            <Td>
-              <IconButton
-                forwardedAs={Link}
-                to={{
-                  pathname: `${pathname}/${entry.id}`,
-                  state: { from: pathname },
-                }}
-                label={formatMessage(
-                  { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                  { target: getItemLineText(index) }
-                )}
-                noBorder
-                target="_blank"
-              >
-                <Pencil />
-              </IconButton>
-            </Td>
-          </Tr>
-        ))}
-      </Tbody>
+              {shouldDisplayMainField && (
+                <Td>
+                  <Typography>{entry[mainField]}</Typography>
+                </Td>
+              )}
+              <Td>
+                <EntryValidationText
+                  errors={errors[entry.id]}
+                  isPublished={entry.publishedAt !== null}
+                />
+              </Td>
+              <Td>
+                <IconButton
+                  forwardedAs={Link}
+                  to={{
+                    pathname: `${pathname}/${entry.id}`,
+                    state: { from: pathname },
+                  }}
+                  label={formatMessage(
+                    { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                    { target: getItemLineText(index) }
+                  )}
+                  noBorder
+                  target="_blank"
+                >
+                  <Pencil />
+                </IconButton>
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      )}
     </Table.Content>
   );
 };
@@ -165,7 +169,7 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm, fetchData }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRefreshing }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, rows } = useTableContext();
   const { contentType, components } = useSelector(listViewDomain());
@@ -191,6 +195,8 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, fetchData }) => {
   }, [rows, contentType, components]);
 
   const { errors } = validateEntriesToPublish();
+
+  console.log('loading...', isRefreshing);
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -231,7 +237,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, fetchData }) => {
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={fetchData} variant="tertiary">
+            <Button onClick={onRefreshData} variant="tertiary">
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -250,13 +256,15 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, fetchData }) => {
 SelectedEntriesModalContent.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  isRefreshing: PropTypes.bool.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ onToggle, onConfirm, fetchData }) => {
+const SelectedEntriesModal = ({ onToggle, onConfirm, onRefreshData, isRefreshing }) => {
   const { rows, selectedEntries } = useTableContext();
 
   // Get the selected entries full data, and keep the list view order
@@ -268,11 +276,17 @@ const SelectedEntriesModal = ({ onToggle, onConfirm, fetchData }) => {
   }, [rows, selectedEntries]);
 
   return (
-    <Table.Root rows={entries} defaultSelectedEntries={selectedEntries} colCount={4}>
+    <Table.Root
+      rows={entries}
+      defaultSelectedEntries={selectedEntries}
+      colCount={4}
+      isLoading={isRefreshing}
+    >
       <SelectedEntriesModalContent
         onToggle={onToggle}
         onConfirm={onConfirm}
-        fetchData={fetchData}
+        onRefreshData={onRefreshData}
+        isRefreshing={isRefreshing}
       />
     </Table.Root>
   );
@@ -281,7 +295,8 @@ const SelectedEntriesModal = ({ onToggle, onConfirm, fetchData }) => {
 SelectedEntriesModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  fetchData: PropTypes.func.isRequired,
+  onRefreshData: PropTypes.func.isRequired,
+  isRefreshing: PropTypes.bool.isRequired,
 };
 
 export default SelectedEntriesModal;

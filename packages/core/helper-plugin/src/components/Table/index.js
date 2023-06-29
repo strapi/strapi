@@ -283,7 +283,7 @@ HeaderCell.propTypes = {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, defaultSelectedEntries, rows, isLoading, colCount }) => {
+const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading }) => {
   const [selectedEntries, setSelectedEntries] = React.useState(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
