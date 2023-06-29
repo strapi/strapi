@@ -134,11 +134,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
         for (const item of payload) {
           const { action } = item;
+
+          // Creates the stream to send the incoming asset through
           if (action === 'start') {
+            // Each asset has its own stream identified by its assetID
             assets[item.assetID] = { ...item.data, stream: new PassThrough() };
             await this.writeAsync(pass, assets[item.assetID]);
           }
+
+          // Writes the asset data to the created stream
           if (action === 'stream') {
+            // Converts data into buffer
             const rawBuffer = item.data as unknown as {
               type: 'Buffer';
               data: Uint8Array;
@@ -147,11 +153,14 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
             await this.writeAsync(assets[item.assetID].stream, chunk);
           }
+
+          // The asset has been transferred
           if (action === 'end') {
             await new Promise<void>((resolve, reject) => {
               const { stream: assetStream } = assets[item.assetID];
               assetStream
                 .on('close', () => {
+                  // Deletes the stream for the asset
                   delete assets[item.assetID];
                   resolve();
                 })

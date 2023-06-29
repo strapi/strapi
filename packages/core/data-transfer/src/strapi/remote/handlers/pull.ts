@@ -221,12 +221,17 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
           );
         };
 
-        const batchSize = 1024 * 1024; // 1MB
+        const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
 
         if (!assets) {
           throw new Error('bad');
         }
-
+        /**
+         * Generates batches of 1MB of data from the assets stream to avoid
+         * sending too many small chunks
+         *
+         * @param stream Assets stream from the local source provider
+         */
         async function* generator(stream: Readable) {
           let hasStarted = false;
           let assetID = '';
@@ -235,19 +240,23 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
             const { stream: assetStream, ...assetData } = chunk as IAsset;
             if (!hasStarted) {
               assetID = randomUUID();
+              // Start the transfer of a new asset
               batch.push({ action: 'start', assetID, data: assetData });
               hasStarted = true;
             }
 
             for await (const assetChunk of assetStream) {
+              // Add the asset data to the batch
               batch.push({ action: 'stream', assetID, data: assetChunk });
-              if (batchLength() >= batchSize) {
+
+              // if the batch size is bigger than BATCH_MAX_SIZE stream the batch
+              if (batchLength() >= BATCH_MAX_SIZE) {
                 yield batch;
                 batch = [];
               }
             }
 
-            // end
+            // All the asset data has been streamed and gets ready for the next one
             hasStarted = false;
             batch.push({ action: 'end', assetID });
             yield batch;
