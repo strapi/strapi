@@ -1,10 +1,12 @@
 import { useFetchClient, useRBAC } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
 
-import adminPermissions from '../../../../admin/src/permissions';
+import { selectAdminPermissions } from '../../../../admin/src/pages/App/selectors';
 
 const useLicenseLimits = () => {
-  const rbac = useRBAC(adminPermissions.settings.users);
+  const permissions = useSelector(selectAdminPermissions);
+  const rbac = useRBAC(permissions.settings.users);
 
   const {
     isLoading: isRBACLoading,

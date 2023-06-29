@@ -1,9 +1,12 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
-import { fireEvent, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, getByLabelText, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
 import { SingleSignOn } from '../index';
 
@@ -17,13 +20,36 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
 }));
 
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <SingleSignOn />
-    </IntlProvider>
-  </ThemeProvider>
-);
+const setup = (props) =>
+  render(<SingleSignOn {...props} />, {
+    wrapper({ children }) {
+      return (
+        <Provider
+          store={createStore((state) => state, {
+            admin_app: {
+              permissions: {
+                ...fixtures.permissions.app,
+                settings: {
+                  ...fixtures.permissions.app.settings,
+                  sso: {
+                    main: [{ action: 'admin::provider-login.read', subject: null }],
+                    read: [{ action: 'admin::provider-login.read', subject: null }],
+                    update: [{ action: 'admin::provider-login.update', subject: null }],
+                  },
+                },
+              },
+            },
+          })}
+        >
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} textComponent="span">
+              {children}
+            </IntlProvider>
+          </ThemeProvider>
+        </Provider>
+      );
+    },
+  });
 
 describe('Admin | ee | SettingsPage | SSO', () => {
   beforeAll(() => server.listen());
@@ -42,12 +68,10 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    render(App);
+    const { getByText } = setup();
 
     await waitFor(() =>
-      expect(
-        screen.getByText('Create new user on SSO login if no account exists')
-      ).toBeInTheDocument()
+      expect(getByText('Create new user on SSO login if no account exists')).toBeInTheDocument()
     );
   });
 
@@ -57,12 +81,10 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    const { getByTestId } = render(App);
+    const { getByTestId, getByText } = setup();
 
     await waitFor(() =>
-      expect(
-        screen.getByText('Create new user on SSO login if no account exists')
-      ).toBeInTheDocument()
+      expect(getByText('Create new user on SSO login if no account exists')).toBeInTheDocument()
     );
 
     expect(getByTestId('save-button')).toHaveAttribute('aria-disabled');
@@ -74,15 +96,15 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       allowedActions: { canUpdate: true, canReadRoles: true },
     }));
 
-    const { container } = render(App);
+    const { container, getByTestId } = setup();
     let el;
 
     await waitFor(() => {
-      el = getByLabelText(container, 'autoRegister');
+      return (el = getByLabelText(container, 'autoRegister'));
     });
 
     fireEvent.click(el);
 
-    expect(screen.getByTestId('save-button')).not.toBeDisabled();
+    expect(getByTestId('save-button')).not.toBeDisabled();
   });
 });

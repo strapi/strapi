@@ -15,7 +15,7 @@ import { Route, Switch } from 'react-router-dom';
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider';
 import FormModalNavigationProvider from '../../components/FormModalNavigationProvider';
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import pluginId from '../../pluginId';
 import RecursivePath from '../RecursivePath';
 
@@ -39,7 +39,7 @@ const App = () => {
   }, []);
 
   return (
-    <CheckPagePermissions permissions={pluginPermissions.main}>
+    <CheckPagePermissions permissions={PERMISSIONS.main}>
       <Helmet title={title} />
       <FormModalNavigationProvider>
         <DataManagerProvider>

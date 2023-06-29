@@ -40,7 +40,7 @@ const createModel = (opts) => ({
 
 describe('Content types utils', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('Verify constants exist', () => {

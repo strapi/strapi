@@ -37,7 +37,7 @@ import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
-import permissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 import openWithNewTab from '../../utils/openWithNewTab';
 import useReactQuery from '../utils/useReactQuery';
@@ -107,7 +107,7 @@ const PluginPage = () => {
           })}
           primaryAction={
             //  eslint-disable-next-line
-            <CheckPermissions permissions={permissions.open}>
+            <CheckPermissions permissions={PERMISSIONS.open}>
               <Button onClick={() => openDocVersion(data?.currentVersion)} startIcon={<Show />}>
                 {formatMessage({
                   id: getTrad('pages.PluginPage.Button.open'),
@@ -166,7 +166,7 @@ const PluginPage = () => {
                               { target: `${doc.version}` }
                             )}
                           />
-                          <CheckPermissions permissions={permissions.regenerate}>
+                          <CheckPermissions permissions={PERMISSIONS.regenerate}>
                             <IconButton
                               onClick={() => handleRegenerateDoc(doc.version)}
                               noBorder
@@ -180,7 +180,7 @@ const PluginPage = () => {
                               )}
                             />
                           </CheckPermissions>
-                          <CheckPermissions permissions={permissions.update}>
+                          <CheckPermissions permissions={PERMISSIONS.update}>
                             {doc.version !== data.currentVersion && (
                               <IconButton
                                 onClick={() => handleClickDelete(doc.version)}

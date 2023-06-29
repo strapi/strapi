@@ -11,7 +11,7 @@ import pluginPkg from '../../package.json';
 import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
 import PluginIcon from './components/PluginIcon';
-import pluginPermissions from './permissions';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
@@ -26,7 +26,7 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Media Library',
       },
-      permissions: pluginPermissions.main,
+      permissions: PERMISSIONS.main,
       async Component() {
         const component = await import(/* webpackChunkName: "upload" */ './pages/App');
 
@@ -57,7 +57,7 @@ export default {
 
         return component;
       },
-      permissions: pluginPermissions.settings,
+      permissions: PERMISSIONS.settings,
     });
   },
   async registerTrads({ locales }) {

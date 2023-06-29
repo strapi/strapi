@@ -11,13 +11,13 @@ import PublishModalAdditionalInfos from './components/CMListViewInjectedComponen
 import UnpublishModalAdditionalInfos from './components/CMListViewInjectedComponents/UnpublishModalAdditionalInfos';
 import Initializer from './components/Initializer';
 import LocalePicker from './components/LocalePicker';
+import { PERMISSIONS } from './constants';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
 import i18nReducers from './hooks/reducers';
 import middlewares from './middlewares';
-import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 import LOCALIZED_FIELDS from './utils/localizedFields';
@@ -68,7 +68,7 @@ export default {
 
         return component;
       },
-      permissions: pluginPermissions.accessMain,
+      permissions: PERMISSIONS.accessMain,
     });
 
     app.injectContentManagerComponent('editView', 'informations', {

@@ -16,10 +16,11 @@ import {
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
 import { formatAPIErrors } from '../../../../../utils';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import { TRANSFER_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import FormHead from '../../../components/Tokens/FormHead';
 import TokenBox from '../../../components/Tokens/TokenBox';
@@ -46,9 +47,10 @@ const TransferTokenCreateView = () => {
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(adminPermissions.settings['transfer-tokens']);
+  } = useRBAC(permissions.settings['transfer-tokens']);
   const {
     params: { id },
   } = useRouteMatch('/settings/transfer-tokens/:id');
