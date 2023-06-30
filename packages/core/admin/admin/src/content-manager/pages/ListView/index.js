@@ -165,17 +165,6 @@ function ListView({
   const fetchData = React.useCallback(
     async (endPoint, source) => {
       getData();
-
-      // TODO: to remove, it is just a test to check the API
-      try {
-        const data = await fetchClient.get(
-          '/content-manager/collection-types/api::category.category/actions/countManyEntriesDraftRelations?ids=[1,2]'
-        );
-        console.log('data', data);
-      } catch (err) {
-        console.error(err);
-      }
-
       try {
         const opts = source ? { cancelToken: source.token } : null;
         const {
