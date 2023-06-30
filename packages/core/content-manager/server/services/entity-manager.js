@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
-const { mapAsync, reduceAsync } = require('@strapi/utils');
+const { mapAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
