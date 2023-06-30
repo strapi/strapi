@@ -1,13 +1,16 @@
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
-import PropTypes from 'prop-types';
+
+import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system';
 import { difference } from '@strapi/helper-plugin';
-import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system/Tabs';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import ContentTypes from '../ContentTypes';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import PluginsAndSettings from '../PluginsAndSettings';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
 import formatPermissionsToAPI from './utils/formatPermissionsToAPI';

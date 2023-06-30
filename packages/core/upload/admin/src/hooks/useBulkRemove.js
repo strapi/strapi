@@ -1,13 +1,14 @@
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useMutation, useQueryClient } from 'react-query';
-import { useNotification } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl, getTrad } from '../utils';
+import { getRequestUrl, getTrad } from '../utils';
 
 export const useBulkRemove = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
   const url = getRequestUrl('actions/bulk-delete');
+  const { post } = useFetchClient();
 
   const bulkRemoveQuery = (filesAndFolders) => {
     const payload = filesAndFolders.reduce((acc, selected) => {
@@ -23,7 +24,7 @@ export const useBulkRemove = () => {
       return acc;
     }, {});
 
-    return axiosInstance.post(url, payload);
+    return post(url, payload);
   };
 
   const mutation = useMutation(bulkRemoveQuery, {

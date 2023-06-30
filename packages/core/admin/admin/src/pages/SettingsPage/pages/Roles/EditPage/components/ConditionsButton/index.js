@@ -1,7 +1,8 @@
 import React from 'react';
+
+import { Button } from '@strapi/design-system';
+import { Cog } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import Cog from '@strapi/icons/Cog';
-import { Button } from '@strapi/design-system/Button';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 

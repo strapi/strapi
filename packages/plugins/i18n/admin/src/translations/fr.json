@@ -55,10 +55,8 @@
   "plugin.description.short": "Créez, lisez et modifiez votre contenu en différentes langues depuis le panel d'administration et votre API.",
   "plugin.name": "Internationalisation",
   "plugin.schema.i18n.ensure-unique-localization": "Les champs uniques doivent avoir une locale",
-  "plugin.schema.i18n.localized.description": "Donne la possibilité d'avoir du contenu dans différentes locales",
   "plugin.schema.i18n.localized.description-content-type": "Donne la possibilité d'avoir du contenu dans différentes locales",
   "plugin.schema.i18n.localized.description-field": "Le champ peut avoir des valeurs différentes dans chaque locale",
-  "plugin.schema.i18n.localized.label": "Activer la localisation pour ce type de contenu",
   "plugin.schema.i18n.localized.label-content-type": "Activer la localisation pour ce type de contenu",
   "plugin.schema.i18n.localized.label-field": "Activer la localisation pour ce champ"
   }

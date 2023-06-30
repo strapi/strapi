@@ -1,12 +1,10 @@
 import React from 'react';
+
+import { Flex, Grid, GridItem, Tooltip, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 const SSOButton = styled.a`
   width: ${136 / 16}rem;
@@ -38,7 +36,7 @@ const SSOProvidersWrapper = styled(Flex)`
 const SSOProviderButton = ({ provider }) => {
   return (
     <Tooltip label={provider.displayName}>
-      <SSOButton href={`${strapi.backendURL}/admin/connect/${provider.uid}`}>
+      <SSOButton href={`${window.strapi.backendURL}/admin/connect/${provider.uid}`}>
         {provider.icon ? (
           <img src={provider.icon} aria-hidden alt="" height="32px" />
         ) : (

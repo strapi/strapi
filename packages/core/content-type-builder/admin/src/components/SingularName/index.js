@@ -5,9 +5,11 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+
+import { TextInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { TextInput } from '@strapi/design-system/TextInput';
+
 import nameToSlug from '../../utils/nameToSlug';
 
 const SingularName = ({ description, error, intlLabel, modifiedData, name, onChange, value }) => {

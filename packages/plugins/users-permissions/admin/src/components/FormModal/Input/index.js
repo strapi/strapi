@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { TextInput } from '@strapi/design-system/TextInput';
+
+import { TextInput, ToggleInput } from '@strapi/design-system';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const Input = ({
   description,
@@ -24,7 +24,9 @@ const Input = ({
 }) => {
   const { formatMessage } = useIntl();
   const inputValue =
-    name === 'noName' ? `${strapi.backendURL}/api/connect/${providerToEditName}/callback` : value;
+    name === 'noName'
+      ? `${window.strapi.backendURL}/api/connect/${providerToEditName}/callback`
+      : value;
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },

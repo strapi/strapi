@@ -1,11 +1,11 @@
 import React from 'react';
+
+import { Box, Icon, Typography } from '@strapi/design-system';
+import { useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
+import { Check } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Icon } from '@strapi/design-system/Icon';
-import { Typography } from '@strapi/design-system/Typography';
-import Check from '@strapi/icons/Check';
+
 import CardButton from './CardButton';
 
 const InstallPluginButton = ({
@@ -19,14 +19,18 @@ const InstallPluginButton = ({
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { copy } = useClipboard();
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(commandToCopy);
-    trackUsage('willInstallPlugin');
-    toggleNotification({
-      type: 'success',
-      message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
-    });
+  const handleCopy = async () => {
+    const didCopy = await copy(commandToCopy);
+
+    if (didCopy) {
+      trackUsage('willInstallPlugin');
+      toggleNotification({
+        type: 'success',
+        message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+      });
+    }
   };
 
   // Already installed

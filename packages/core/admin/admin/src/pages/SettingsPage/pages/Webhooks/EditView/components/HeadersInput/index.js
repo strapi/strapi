@@ -1,15 +1,19 @@
 import React from 'react';
+
+import {
+  Box,
+  FieldLabel,
+  Flex,
+  Grid,
+  GridItem,
+  TextButton,
+  TextInput,
+} from '@strapi/design-system';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import { Box } from '@strapi/design-system/Box';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { TextButton } from '@strapi/design-system/TextButton';
+import { Plus } from '@strapi/icons';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+
 import Combobox from './Combobox';
 
 const HeadersInput = () => {
@@ -17,7 +21,7 @@ const HeadersInput = () => {
   const { values, errors } = useFormikContext();
 
   return (
-    <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.headers',
@@ -30,25 +34,19 @@ const HeadersInput = () => {
           name="headers"
           render={({ push, remove }) => (
             <Grid gap={4}>
-              {values.headers?.map((header, i) => (
+              {values.headers.map((header, index) => (
                 // eslint-disable-next-line
-                <React.Fragment key={i}>
+                <React.Fragment key={`${index}.${header.key}`}>
                   <GridItem col={6}>
                     <Field
                       as={Combobox}
-                      name={`headers.${i}.key`}
-                      aria-label={`row ${i + 1} key`}
+                      name={`headers.${index}.key`}
+                      aria-label={`row ${index + 1} key`}
                       label={formatMessage({
                         id: 'Settings.webhooks.key',
                         defaultMessage: 'Key',
                       })}
-                      error={
-                        errors.headers?.[i]?.key &&
-                        formatMessage({
-                          id: errors.headers[i]?.key,
-                          defaultMessage: errors.headers[i]?.key,
-                        })
-                      }
+                      error={errors.headers?.[index]?.key && errors.headers[index].key}
                     />
                   </GridItem>
                   <GridItem col={6}>
@@ -56,34 +54,29 @@ const HeadersInput = () => {
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
-                          aria-label={`row ${i + 1} value`}
+                          name={`headers.${index}.value`}
+                          aria-label={`row ${index + 1} value`}
                           label={formatMessage({
                             id: 'Settings.webhooks.value',
                             defaultMessage: 'Value',
                           })}
-                          name={`headers.${i}.value`}
-                          error={
-                            errors.headers?.[i]?.value &&
-                            formatMessage({
-                              id: errors.headers[i]?.value,
-                              defaultMessage: errors.headers[i]?.value,
-                            })
-                          }
+                          error={errors.headers?.[index]?.value && errors.headers[index].value}
                         />
                       </Box>
                       <Flex
                         paddingLeft={2}
                         style={{ alignSelf: 'center' }}
-                        paddingTop={errors.headers?.[i]?.value ? 0 : 5}
+                        paddingTop={errors.headers?.[index]?.value ? 0 : 5}
                       >
                         <RemoveRoundedButton
-                          onClick={() => values.headers.length !== 1 && remove(i)}
+                          disabled={values.headers.length === 1}
+                          onClick={() => remove(index)}
                           label={formatMessage(
                             {
                               id: 'Settings.webhooks.headers.remove',
                               defaultMessage: 'Remove header row {number}',
                             },
-                            { number: i + 1 }
+                            { number: index + 1 }
                           )}
                         />
                       </Flex>
@@ -109,7 +102,7 @@ const HeadersInput = () => {
           )}
         />
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 

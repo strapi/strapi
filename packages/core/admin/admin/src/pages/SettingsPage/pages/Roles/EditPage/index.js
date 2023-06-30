@@ -1,25 +1,24 @@
 import React, { useRef, useState } from 'react';
+
+import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import {
-  request,
+  Link,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
+  useFetchClient,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  Link,
 } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
+import { ArrowLeft } from '@strapi/icons';
 import { Formik } from 'formik';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { Permissions, RoleForm } from './components';
+
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
+
+import { Permissions, RoleForm } from './components';
 import schema from './utils/schema';
 
 const EditPage = () => {
@@ -41,6 +40,8 @@ const EditPage = () => {
     onSubmitSucceeded,
   } = useFetchRole(id);
 
+  const { put } = useFetchClient();
+
   const handleEditRoleSubmit = async (data) => {
     try {
       lockApp();
@@ -48,17 +49,11 @@ const EditPage = () => {
 
       const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
 
-      await request(`/admin/roles/${id}`, {
-        method: 'PUT',
-        body: data,
-      });
+      await put(`/admin/roles/${id}`, data);
 
       if (role.code !== 'strapi-super-admin') {
-        await request(`/admin/roles/${id}/permissions`, {
-          method: 'PUT',
-          body: {
-            permissions: permissionsToSend,
-          },
+        await put(`/admin/roles/${id}/permissions`, {
+          permissions: permissionsToSend,
         });
 
         if (didUpdateConditions) {
@@ -108,7 +103,7 @@ const EditPage = () => {
           <form onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
-                <Stack horizontal spacing={2}>
+                <Flex gap={2}>
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     onClick={handleSubmit}
@@ -120,7 +115,7 @@ const EditPage = () => {
                       defaultMessage: 'Save',
                     })}
                   </Button>
-                </Stack>
+                </Flex>
               }
               title={formatMessage({
                 id: 'Settings.roles.edit.title',
@@ -140,7 +135,7 @@ const EditPage = () => {
               }
             />
             <ContentLayout>
-              <Stack spacing={6}>
+              <Flex direction="column" alignItems="stretch" gap={6}>
                 <RoleForm
                   isLoading={isRoleLoading}
                   disabled={isFormDisabled}
@@ -164,7 +159,7 @@ const EditPage = () => {
                     <LoadingIndicatorPage />
                   </Box>
                 )}
-              </Stack>
+              </Flex>
             </ContentLayout>
           </form>
         )}

@@ -4,34 +4,40 @@
  *
  */
 
-import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
-import { useIntl } from 'react-intl';
-import isEqual from 'lodash/isEqual';
-import styled from 'styled-components';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Button } from '@strapi/design-system/Button';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { getFileExtension, Form, pxToRem, useTracking } from '@strapi/helper-plugin';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+
+import {
+  Button,
+  FieldLabel,
+  Flex,
+  Grid,
+  GridItem,
+  Loader,
+  ModalBody,
+  ModalFooter,
+  ModalLayout,
+  TextInput,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Form, getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
+import isEqual from 'lodash/isEqual';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import * as yup from 'yup';
+
+import { AssetDefinition } from '../../constants';
+import { useEditAsset } from '../../hooks/useEditAsset';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import formatBytes from '../../utils/formatBytes';
+import { ContextInfo } from '../ContextInfo';
+import SelectTree from '../SelectTree';
 
 import { DialogHeader } from './DialogHeader';
 import { PreviewBox } from './PreviewBox';
-import { ContextInfo } from '../ContextInfo';
-import { AssetDefinition } from '../../constants';
-import { getTrad, findRecursiveFolderByValue } from '../../utils';
-import formatBytes from '../../utils/formatBytes';
-import { useEditAsset } from '../../hooks/useEditAsset';
-import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
-import SelectTree from '../SelectTree';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -190,7 +196,7 @@ export const EditAssetDialog = ({
               </GridItem>
               <GridItem xs={12} col={6}>
                 <Form noValidate>
-                  <Stack spacing={3}>
+                  <Flex direction="column" alignItems="stretch" gap={3}>
                     <ContextInfo
                       blocks={[
                         {
@@ -276,7 +282,7 @@ export const EditAssetDialog = ({
                       disabled={formDisabled}
                     />
 
-                    <Stack spacing={1}>
+                    <Flex direction="column" alignItems="stretch" gap={1}>
                       <FieldLabel htmlFor="asset-folder">
                         {formatMessage({
                           id: getTrad('form.input.label.file-location'),
@@ -297,8 +303,8 @@ export const EditAssetDialog = ({
                         error={errors?.parent}
                         ariaErrorMessage="folder-parent-error"
                       />
-                    </Stack>
-                  </Stack>
+                    </Flex>
+                  </Flex>
 
                   <VisuallyHidden>
                     <button

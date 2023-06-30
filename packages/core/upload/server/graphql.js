@@ -4,8 +4,10 @@ const path = require('path');
 const os = require('os');
 const mime = require('mime-types');
 const fse = require('fs-extra');
+const {
+  file: { getStreamSize },
+} = require('@strapi/utils');
 const { FILE_MODEL_UID } = require('./constants');
-const { getStreamSize } = require('./utils/file');
 
 const UPLOAD_MUTATION_NAME = 'upload';
 const MULTIPLE_UPLOAD_MUTATION_NAME = 'multipleUpload';

@@ -1,6 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
+const {
+  template: { createStrictInterpolationRegExp },
+  keysDeep,
+} = require('@strapi/utils');
 
 const getProviderSettings = () => {
   return strapi.config.get('plugin.email');
@@ -26,10 +30,19 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
     );
   }
 
+  const allowedInterpolationVariables = keysDeep(data);
+  const interpolate = createStrictInterpolationRegExp(allowedInterpolationVariables, 'g');
+
   const templatedAttributes = attributes.reduce(
     (compiled, attribute) =>
       emailTemplate[attribute]
-        ? Object.assign(compiled, { [attribute]: _.template(emailTemplate[attribute])(data) })
+        ? Object.assign(compiled, {
+            [attribute]: _.template(emailTemplate[attribute], {
+              interpolate,
+              evaluate: false,
+              escape: false,
+            })(data),
+          })
         : compiled,
     {}
   );

@@ -1,15 +1,13 @@
-import React, { useState, useRef } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Typography } from '@strapi/design-system/Typography';
-import { Popover } from '@strapi/design-system/Popover';
+import React, { useRef, useState } from 'react';
+
+import { Box, Flex, Popover, Tooltip, Typography } from '@strapi/design-system';
 import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import { getTrad } from '../../utils';
 
@@ -119,7 +117,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
               <SortIcon />
 
               {visible && (
-                <Popover source={buttonRef} spacing={16} centered>
+                <Popover onDismiss={handleTogglePopover} source={buttonRef} spacing={16} centered>
                   <ul>
                     {localesArray.map((name) => (
                       <Box key={name} padding={3} as="li">

@@ -1,12 +1,14 @@
 import { hasPermissions } from '@strapi/helper-plugin';
+
 import getGeneralLinks from '../getGeneralLinks';
 
-jest.mock('@strapi/helper-plugin');
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  hasPermissions: jest.fn().mockResolvedValue(true),
+}));
 
 describe('getGeneralLinks', () => {
   it('resolves valid general links from real data', async () => {
-    hasPermissions.mockImplementation(() => Promise.resolve(true));
-
     const permissions = [
       {
         id: 458,
@@ -67,14 +69,6 @@ describe('getGeneralLinks', () => {
             action: 'admin::marketplace.read',
             subject: null,
           },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
-            subject: null,
-          },
         ],
         notificationsCount: 0,
       },
@@ -86,14 +80,6 @@ describe('getGeneralLinks', () => {
         permissions: [
           {
             action: 'admin::marketplace.read',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
             subject: null,
           },
         ],
@@ -120,14 +106,6 @@ describe('getGeneralLinks', () => {
             action: 'admin::marketplace.read',
             subject: null,
           },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
-            subject: null,
-          },
         ],
         notificationsCount: 0,
       },
@@ -139,14 +117,6 @@ describe('getGeneralLinks', () => {
         permissions: [
           {
             action: 'admin::marketplace.read',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.install',
-            subject: null,
-          },
-          {
-            action: 'admin::marketplace.plugins.uninstall',
             subject: null,
           },
         ],

@@ -1,4 +1,5 @@
 import formatLayoutForSettingsAndPlugins from '../formatLayoutForSettingsAndPlugins';
+
 import permissionsLayout from './data';
 
 describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSettingsAndPlugins', () => {
@@ -128,18 +129,6 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
                 action: 'admin::marketplace.read',
                 category: 'plugins and marketplace',
                 subCategory: 'marketplace',
-              },
-            ],
-          },
-          {
-            subCategoryName: 'plugins',
-            subCategoryId: 'plugins',
-            actions: [
-              {
-                displayName: 'Install (only for dev env)',
-                action: 'admin::marketplace.plugins.install',
-                category: 'plugins and marketplace',
-                subCategory: 'plugins',
               },
             ],
           },

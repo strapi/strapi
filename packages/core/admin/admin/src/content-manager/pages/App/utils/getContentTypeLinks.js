@@ -1,37 +1,42 @@
-import { axiosInstance } from '../../../../core/utils';
-import generateModelsLinks from './generateModelsLinks';
-import checkPermissions from './checkPermissions';
+import { getFetchClient } from '@strapi/helper-plugin';
+
 import { getRequestUrl } from '../../../utils';
 
-const getContentTypeLinks = async (models, userPermissions, toggleNotification) => {
+import checkPermissions from './checkPermissions';
+import generateModelsLinks from './generateModelsLinks';
+
+const getContentTypeLinks = async ({ models, userPermissions, toggleNotification }) => {
+  const { get } = getFetchClient();
   try {
     const {
       data: { data: contentTypeConfigurations },
-    } = await axiosInstance.get(getRequestUrl('content-types-settings'));
+    } = await get(getRequestUrl('content-types-settings'));
 
-    const { collectionTypesSectionLinks, singleTypesSectionLinks } = generateModelsLinks(
+    const { collectionTypeSectionLinks, singleTypeSectionLinks } = generateModelsLinks(
       models,
       contentTypeConfigurations
     );
 
-    // Content Types verifications
-    const ctLinksPermissionsPromises = checkPermissions(
-      userPermissions,
-      collectionTypesSectionLinks
+    // Collection Types verifications
+    const collectionTypeLinksPermissions = await Promise.all(
+      checkPermissions(userPermissions, collectionTypeSectionLinks)
     );
-    const ctLinksPermissions = await Promise.all(ctLinksPermissionsPromises);
-    const authorizedCtLinks = collectionTypesSectionLinks.filter(
-      (_, index) => ctLinksPermissions[index]
+    const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
+      (_, index) => collectionTypeLinksPermissions[index]
     );
 
     // Single Types verifications
-    const stLinksPermissionsPromises = checkPermissions(userPermissions, singleTypesSectionLinks);
-    const stLinksPermissions = await Promise.all(stLinksPermissionsPromises);
-    const authorizedStLinks = singleTypesSectionLinks.filter(
-      (_, index) => stLinksPermissions[index]
+    const singleTypeLinksPermissions = await Promise.all(
+      checkPermissions(userPermissions, singleTypeSectionLinks)
+    );
+    const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
+      (_, index) => singleTypeLinksPermissions[index]
     );
 
-    return { authorizedCtLinks, authorizedStLinks };
+    return {
+      authorizedCollectionTypeLinks,
+      authorizedSingleTypeLinks,
+    };
   } catch (err) {
     console.error(err);
 
@@ -40,7 +45,7 @@ const getContentTypeLinks = async (models, userPermissions, toggleNotification) 
       message: { id: 'notification.error' },
     });
 
-    return { authorizedCtLinks: [], authorizedStLinks: [], contentTypes: [] };
+    return { authorizedCollectionTypeLinks: [], authorizedSingleTypeLinks: [] };
   }
 };
 

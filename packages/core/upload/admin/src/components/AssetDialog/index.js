@@ -1,30 +1,40 @@
 import React, { useState } from 'react';
+
+import {
+  Badge,
+  Button,
+  Divider,
+  Flex,
+  Loader,
+  ModalBody,
+  ModalHeader,
+  ModalLayout,
+  Tab,
+  TabGroup,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Typography,
+} from '@strapi/design-system';
+import { AnErrorOccurred, NoPermissions, pxToRem, useSelectionState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { ModalLayout, ModalBody, ModalHeader } from '@strapi/design-system/ModalLayout';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { Typography } from '@strapi/design-system/Typography';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Badge } from '@strapi/design-system/Badge';
-import { Loader } from '@strapi/design-system/Loader';
-import { Stack } from '@strapi/design-system/Stack';
-import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
-import { getTrad, containsAssetFilter } from '../../utils';
-import { SelectedStep } from './SelectedStep';
-import { BrowseStep } from './BrowseStep';
-import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import styled from 'styled-components';
+
+import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
-import { AssetDefinition } from '../../constants';
+import { containsAssetFilter, getTrad } from '../../utils';
 import getAllowedFiles from '../../utils/getAllowedFiles';
-import { DialogFooter } from './DialogFooter';
-import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
+import { EditAssetDialog } from '../EditAssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog';
+
+import { BrowseStep } from './BrowseStep';
+import { DialogFooter } from './DialogFooter';
+import { SelectedStep } from './SelectedStep';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -82,27 +92,32 @@ export const AssetDialog = ({
     query: queryObject,
   });
 
-  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
-    ['id'],
-    initiallySelectedAssets
-  );
+  const [
+    selectedAssets,
+    { selectOne, selectOnly, setSelections, selectMultiple, deselectMultiple },
+  ] = useSelectionState(['id'], initiallySelectedAssets);
 
   const [initialSelectedTabIndex, setInitialSelectedTabIndex] = useState(
     selectedAssets.length > 0 ? 1 : 0
   );
 
   const handleSelectAllAssets = () => {
-    const hasAllAssets = assets.every(
-      (asset) => selectedAssets.findIndex((curr) => curr.id === asset.id) !== -1
-    );
-
-    if (hasAllAssets) {
-      return multiple ? selectAll(assets) : undefined;
-    }
-
     const allowedAssets = getAllowedFiles(allowedTypes, assets);
 
-    return multiple ? selectAll(allowedAssets) : undefined;
+    if (!multiple) {
+      return undefined;
+    }
+
+    // selected files in current folder
+    const alreadySelected = allowedAssets.filter(
+      (asset) => selectedAssets.findIndex((selectedAsset) => selectedAsset.id === asset.id) !== -1
+    );
+
+    if (alreadySelected.length > 0) {
+      deselectMultiple(alreadySelected);
+    } else {
+      selectMultiple(allowedAssets);
+    }
   };
 
   const handleSelectAsset = (asset) => {
@@ -242,7 +257,7 @@ export const AssetDialog = ({
               <Badge marginLeft={2}>{selectedAssets.length}</Badge>
             </Tab>
           </Tabs>
-          <Stack horizontal spacing={2}>
+          <Flex gap={2}>
             <Button
               variant="secondary"
               onClick={() => onAddFolder({ folderId: queryObject?.folder })}
@@ -258,7 +273,7 @@ export const AssetDialog = ({
                 defaultMessage: 'Add more assets',
               })}
             </Button>
-          </Stack>
+          </Flex>
         </Flex>
         <Divider />
         <TabPanels>
@@ -274,8 +289,8 @@ export const AssetDialog = ({
                 selectedAssets={selectedAssets}
                 multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
-                onEditAsset={canUpdate ? setAssetToEdit : undefined}
-                onEditFolder={canUpdate ? setFolderToEdit : undefined}
+                onEditAsset={setAssetToEdit}
+                onEditFolder={setFolderToEdit}
                 pagination={pagination}
                 queryObject={queryObject}
                 onAddAsset={onAddAsset}

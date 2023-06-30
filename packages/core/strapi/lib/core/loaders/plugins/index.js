@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 const fse = require('fs-extra');
-const { defaultsDeep, getOr, get } = require('lodash/fp');
+const { defaultsDeep, defaults, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 const loadFiles = require('../../../load/load-files');
@@ -85,7 +85,15 @@ const loadPlugins = async (strapi) => {
   for (const pluginName of Object.keys(enabledPlugins)) {
     const enabledPlugin = enabledPlugins[pluginName];
 
-    const serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+    let serverEntrypointPath;
+
+    try {
+      serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+    } catch (e) {
+      throw new Error(
+        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove it's configuration.`
+      );
+    }
 
     // only load plugins with a server entrypoint
     if (!(await fse.pathExists(serverEntrypointPath))) {
@@ -93,7 +101,12 @@ const loadPlugins = async (strapi) => {
     }
 
     const pluginServer = loadConfigFile(serverEntrypointPath);
-    plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+    plugins[pluginName] = {
+      ...defaultPlugin,
+      ...pluginServer,
+      config: defaults(defaultPlugin.config, pluginServer.config),
+      routes: pluginServer.routes ?? defaultPlugin.routes,
+    };
   }
 
   // TODO: validate plugin format

@@ -1,6 +1,8 @@
 'use strict';
 
-const { UnauthorizedError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { UnauthorizedError },
+} = require('@strapi/utils');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenStrategy = require('../api-token');
 
@@ -43,11 +45,66 @@ describe('API Token Auth Strategy', () => {
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+
+      expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
+    });
+
+    test('Updates lastUsedAt if the token has not been used in the last hour', async () => {
+      // Mock lastUsedAt to be less than an hour ago
+      const getBy = jest.fn(() => ({
+        ...apiToken,
+        lastUsedAt: new Date(Date.now() - 3600000).toISOString(),
+      }));
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+            },
+          },
+        },
+        query() {
+          return { update };
+        },
+      };
+
+      await apiTokenStrategy.authenticate(ctx);
+      // It should update the lastUsedAt field if the token has not been used in the last hour
       expect(update).toHaveBeenCalledWith({
         data: { lastUsedAt: expect.any(Date) },
         where: { id: apiToken.id },
       });
-      expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
+    });
+
+    test('Does not update lastUsedAt if the token has been used in the last hour', async () => {
+      // Mock lastUsedAt to be less than an hour ago
+      const getBy = jest.fn(() => ({
+        ...apiToken,
+        lastUsedAt: new Date().toISOString(),
+      }));
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+            },
+          },
+        },
+        query() {
+          return { update };
+        },
+      };
+
+      await apiTokenStrategy.authenticate(ctx);
+      expect(update).not.toHaveBeenCalled();
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {
@@ -152,6 +209,13 @@ describe('API Token Auth Strategy', () => {
       })),
     };
 
+    const strapiMock = {
+      container,
+      telemetry: {
+        send: jest.fn(),
+      },
+    };
+
     // mock ability.can (since normally it only gets added to credentials in authenticate)
     const ability = {
       can: jest.fn((ability) => {
@@ -161,9 +225,7 @@ describe('API Token Auth Strategy', () => {
     };
 
     test('Verify read-only access', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -174,9 +236,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify full-access access', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -187,9 +247,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify custom access', async () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -200,9 +258,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Verify with expiration in future', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(
         apiTokenStrategy.verify(
@@ -218,9 +274,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws with expired token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(() => {
         apiTokenStrategy.verify(
@@ -236,9 +290,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if trying to access a `full-access` action with a read only access key', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -253,9 +305,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if trying to access an action with a custom access key without the permission', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -270,9 +320,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if the credentials are not passed in the auth object', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -284,17 +332,13 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('A `full-access` token is needed when no scope is passed', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect(apiTokenStrategy.verify({ credentials: fullAccessApiToken }, {})).toBeUndefined();
     });
 
     test('Throws an error if no scope is passed with a `read-only` token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 
@@ -306,9 +350,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if no scope is passed with a `custom` token', () => {
-      global.strapi = {
-        container,
-      };
+      global.strapi = strapiMock;
 
       expect.assertions(1);
 

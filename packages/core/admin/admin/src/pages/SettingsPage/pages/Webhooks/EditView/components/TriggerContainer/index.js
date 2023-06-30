@@ -1,16 +1,11 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Check, Cross, Loader } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
-import Check from '@strapi/icons/Check';
-import Cross from '@strapi/icons/Cross';
-import Loader from '@strapi/icons/Loader';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 
 // Being discussed in Notion: create a <Icon /> component in Parts
 const Icon = styled.svg(
@@ -29,34 +24,34 @@ const Status = ({ isPending, statusCode }) => {
 
   if (isPending) {
     return (
-      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
+      <Flex gap={2} alignItems="center">
         <Icon as={Loader} />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
         </Typography>
-      </Stack>
+      </Flex>
     );
   }
 
   if (statusCode >= 200 && statusCode < 300) {
     return (
-      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
+      <Flex gap={2} alignItems="center">
         <Icon as={Check} color="success700" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
         </Typography>
-      </Stack>
+      </Flex>
     );
   }
 
   if (statusCode >= 300) {
     return (
-      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
+      <Flex gap={2} alignItems="center">
         <Icon as={Cross} color="danger700" />
         <Typography>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
         </Typography>
-      </Stack>
+      </Flex>
     );
   }
 
@@ -115,12 +110,12 @@ const CancelButton = ({ onCancel }) => {
   return (
     <Flex justifyContent="flex-end">
       <button onClick={onCancel} type="button">
-        <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
+        <Flex gap={2} alignItems="center">
           <Typography textColor="neutral400">
             {formatMessage({ id: 'Settings.webhooks.trigger.cancel', defaultMessage: 'cancel' })}
           </Typography>
           <Icon as={Cross} color="neutral400" />
-        </Stack>
+        </Flex>
       </button>
     </Flex>
   );

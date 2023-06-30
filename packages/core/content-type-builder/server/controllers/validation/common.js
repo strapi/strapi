@@ -22,6 +22,12 @@ const isValidName = {
   test: (val) => val === '' || NAME_REGEX.test(val),
 };
 
+const isValidIcon = {
+  name: 'isValidIcon',
+  message: `\${path} is not a valid icon name. Make sure your icon name starts with an alphanumeric character and only includes alphanumeric characters or dashes.`,
+  test: (val) => val === '' || ICON_REGEX.test(val),
+};
+
 const isValidUID = {
   name: 'isValidUID',
   message: `\${path} must match the following regex: ${UID_REGEX}`,
@@ -38,12 +44,6 @@ const isValidCollectionName = {
   name: 'isValidCollectionName',
   message: `\${path} must match the following regex: ${COLLECTION_NAME_REGEX}`,
   test: (val) => val === '' || COLLECTION_NAME_REGEX.test(val),
-};
-
-const isValidIcon = {
-  name: 'isValidIcon',
-  message: `\${path} must match the following regex: ${ICON_REGEX}`,
-  test: (val) => val === '' || ICON_REGEX.test(val),
 };
 
 const isValidKey = (key) => ({

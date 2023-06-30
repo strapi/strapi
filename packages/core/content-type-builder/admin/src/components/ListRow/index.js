@@ -1,22 +1,19 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
+
+import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
+import { onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
+import { Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import Lock from '@strapi/icons/Lock';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
-import { stopPropagation, onRowClick, pxToRem } from '@strapi/helper-plugin';
+
 import useDataManager from '../../hooks/useDataManager';
-import getTrad from '../../utils/getTrad';
 import Curve from '../../icons/Curve';
-import UpperFist from '../UpperFirst';
-import BoxWrapper from './BoxWrapper';
+import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
+import UpperFist from '../UpperFirst';
+
+import BoxWrapper from './BoxWrapper';
 import DisplayedType from './DisplayedType';
 
 function ListRow({
@@ -87,10 +84,10 @@ function ListRow({
     >
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
-        <Stack paddingLeft={2} spacing={4} horizontal>
+        <Flex paddingLeft={2} gap={4}>
           <AttributeIcon type={src} customField={customField} />
           <Typography fontWeight="bold">{name}</Typography>
-        </Stack>
+        </Flex>
       </td>
       <td>
         {target ? (
@@ -120,7 +117,7 @@ function ListRow({
         {isInDevelopmentMode ? (
           <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <Stack horizontal spacing={1}>
+              <Flex gap={1}>
                 {!isMorph && (
                   <IconButton
                     onClick={handleClick}
@@ -148,7 +145,7 @@ function ListRow({
                   noBorder
                   icon={<Trash />}
                 />
-              </Stack>
+              </Flex>
             ) : (
               <Lock />
             )}

@@ -10,6 +10,7 @@ const routes = require('./routes');
 const services = require('./services');
 const controllers = require('./controllers');
 const contentTypes = require('./content-types');
+const middlewares = require('./middlewares');
 
 module.exports = {
   register,
@@ -21,4 +22,5 @@ module.exports = {
   services,
   controllers,
   contentTypes,
+  middlewares,
 };

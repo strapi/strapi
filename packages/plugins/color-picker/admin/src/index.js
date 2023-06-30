@@ -1,6 +1,7 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
-import pluginId from './pluginId';
+
 import ColorPickerIcon from './components/ColorPicker/ColorPickerIcon';
+import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
 
 export default {
@@ -33,6 +34,7 @@ export default {
             },
             name: 'regex',
             type: 'text',
+            defaultValue: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
             description: {
               id: getTrad('color-picker.options.advanced.regex.description'),
               defaultMessage: 'The text of the regular expression',

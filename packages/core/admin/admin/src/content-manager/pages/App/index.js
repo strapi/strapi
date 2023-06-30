@@ -1,33 +1,70 @@
 import React, { useEffect, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
+
+import { HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
+  AnErrorOccurred,
   CheckPagePermissions,
   LoadingIndicatorPage,
-  NotFound,
   useGuidedTour,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
-import permissions from '../../../permissions';
-import getTrad from '../../utils/getTrad';
-import DragLayer from '../../components/DragLayer';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+
+import { DragLayer } from '../../../components/DragLayer';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import ModelsContext from '../../contexts/ModelsContext';
+import getTrad from '../../utils/getTrad';
+import ItemTypes from '../../utils/ItemTypes';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
 import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
-import LeftMenu from './LeftMenu';
-import useModels from './useModels';
 
-const cmPermissions = permissions.contentManager;
+import { CardDragPreview } from './components/CardDragPreview';
+import { ComponentDragPreview } from './components/ComponentDragPreview';
+import { RelationDragPreview } from './components/RelationDragPreview';
+import LeftMenu from './LeftMenu';
+import useContentManagerInitData from './useContentManagerInitData';
+
+function renderDraglayerItem({ type, item }) {
+  if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
+    return <CardDragPreview labelField={item.labelField} />;
+  }
+
+  /**
+   * Because a user may have multiple relations / dynamic zones / repeable fields in the same content type,
+   * we append the fieldName for the item type to make them unique, however, we then want to extract that
+   * first type to apply the correct preview.
+   */
+  const [actualType] = type.split('_');
+
+  switch (actualType) {
+    case ItemTypes.COMPONENT:
+    case ItemTypes.DYNAMIC_ZONE:
+      return <ComponentDragPreview displayedValue={item.displayedValue} />;
+
+    case ItemTypes.RELATION:
+      return (
+        <RelationDragPreview
+          displayedValue={item.displayedValue}
+          status={item.status}
+          width={item.width}
+        />
+      );
+
+    default:
+      return null;
+  }
+}
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/content-manager/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } = useModels();
+  const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } =
+    useContentManagerInitData();
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], (model) =>
     model.title.toLowerCase()
   );
@@ -35,6 +72,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
+  const permissions = useSelector(selectAdminPermissions);
 
   useEffect(() => {
     if (startSectionRef.current) {
@@ -85,11 +123,11 @@ const App = () => {
 
   return (
     <Layout sideNav={<LeftMenu />}>
-      <DragLayer />
+      <DragLayer renderItem={renderDraglayerItem} />
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
           <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
               <ComponentSettingsView />
             </CheckPagePermissions>
           </Route>
@@ -105,7 +143,7 @@ const App = () => {
           <Route path="/content-manager/no-content-types">
             <NoContentType />
           </Route>
-          <Route path="" component={NotFound} />
+          <Route path="" component={AnErrorOccurred} />
         </Switch>
       </ModelsContext.Provider>
     </Layout>

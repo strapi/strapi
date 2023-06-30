@@ -55,10 +55,8 @@
   "plugin.description.short": "Dette plugin gør det muligt at oprette, læse og redigere indhold på forskellige sprog, både fra admin panelt og igennem API.",
   "plugin.name": "Internationalisering",
   "plugin.schema.i18n.ensure-unique-localization": "Unikke felter skal udfyldes for alle sprogvarianter",
-  "plugin.schema.i18n.localized.description": "Muliggør indhold på forskellige sprog",
   "plugin.schema.i18n.localized.description-content-type": "Muliggør indhold på forskellige sprog",
   "plugin.schema.i18n.localized.description-field": "Feltet kan have forskellige værdier for hver sprogvariant",
-  "plugin.schema.i18n.localized.label": "Aktivér sprogvarianter for denne indholdstype",
   "plugin.schema.i18n.localized.label-content-type": "Aktivér sprogvarianter for denne indholdstype",
   "plugin.schema.i18n.localized.label-field": "Aktivér sprogvarianter for dette felt"
 }

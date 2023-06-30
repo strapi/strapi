@@ -47,6 +47,7 @@ module.exports = {
       minLength: 1,
       configurable: false,
       required: true,
+      searchable: false,
     },
     lastUsedAt: {
       type: 'datetime',
@@ -67,7 +68,7 @@ module.exports = {
       required: false,
     },
     lifespan: {
-      type: 'integer',
+      type: 'biginteger',
       configurable: false,
       required: false,
     },

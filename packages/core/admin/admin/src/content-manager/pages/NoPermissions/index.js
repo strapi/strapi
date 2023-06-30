@@ -1,8 +1,9 @@
 import React from 'react';
-import { useFocusWhenNavigate, NoPermissions as NoPermissionsCompo } from '@strapi/helper-plugin';
-import { Main } from '@strapi/design-system/Main';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+
+import { ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { NoPermissions as NoPermissionsCompo, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../utils';
 
 const NoPermissions = () => {

@@ -1,15 +1,14 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Stack } from '@strapi/design-system/Stack';
+
 import AttributeOption from '../AttributeOption';
 import getPadding from '../utils/getPadding';
 
 const AttributeList = ({ attributes }) => (
   <KeyboardNavigable tagName="button">
-    <Stack spacing={8}>
+    <Flex direction="column" alignItems="stretch" gap={8}>
       {attributes.map((attributeRow, index) => {
         return (
           // eslint-disable-next-line react/no-array-index-key
@@ -33,7 +32,7 @@ const AttributeList = ({ attributes }) => (
           </Grid>
         );
       })}
-    </Stack>
+    </Flex>
   </KeyboardNavigable>
 );
 

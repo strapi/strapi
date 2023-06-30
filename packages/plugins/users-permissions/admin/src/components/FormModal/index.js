@@ -5,20 +5,23 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Stack } from '@strapi/design-system/Stack';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
+
 import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
   ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+} from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { Form } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import Input from './Input';
 
 const FormModal = ({
@@ -41,8 +44,10 @@ const FormModal = ({
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
-          {headerBreadcrumbs.map((crumb) => (
-            <Crumb key={crumb}>{crumb}</Crumb>
+          {headerBreadcrumbs.map((crumb, index, arr) => (
+            <Crumb isCurrent={index === arr.length - 1} key={crumb}>
+              {crumb}
+            </Crumb>
           ))}
         </Breadcrumbs>
       </ModalHeader>
@@ -56,7 +61,7 @@ const FormModal = ({
           return (
             <Form>
               <ModalBody>
-                <Stack spacing={1}>
+                <Flex direction="column" alignItems="stretch" gap={1}>
                   <Grid gap={5}>
                     {layout.form.map((row) => {
                       return row.map((input) => {
@@ -74,7 +79,7 @@ const FormModal = ({
                       });
                     })}
                   </Grid>
-                </Stack>
+                </Flex>
               </ModalBody>
               <ModalFooter
                 startActions={

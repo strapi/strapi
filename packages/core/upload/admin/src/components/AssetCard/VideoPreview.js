@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from 'react';
+
+import { Box, VisuallyHidden } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
 // According to MDN
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState#value

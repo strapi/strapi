@@ -1,0 +1,104 @@
+name: 'Tests'
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '**.mdx?'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      nonDoc: ${{ steps.filter.outputs.nonDoc }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: .github/filters.yaml
+
+  lint:
+    name: 'lint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - run: echo "Skipped"
+
+  unit_back:
+    name: 'unit_back (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - run: echo "Skipped"
+
+  unit_front:
+    name: 'unit_front (node: ${{ matrix.node }})'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - run: echo "Skipped"
+
+  build:
+    name: 'build (node: ${{ matrix.node }})'
+    needs: [changes, lint, unit_front]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - run: echo "Skipped"
+
+  api_ce_pg:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - run: echo "Skipped"
+
+  api_ce_mysql:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - run: echo "Skipped"
+
+  api_ce_mysql_5:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+    steps:
+      - run: echo "Skipped"
+
+  api_ce_sqlite:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    steps:
+      - run: echo "Skipped"

@@ -61,7 +61,7 @@ describe('Default Service', () => {
         await service.createOrUpdate({ data: input });
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
-          publicationState: 'live',
+          publicationState: 'preview',
         });
 
         expect(strapi.entityService.create).toHaveBeenCalledWith('testModel', { data: input });
@@ -90,7 +90,7 @@ describe('Default Service', () => {
 
         expect(strapi.entityService.findMany).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          publicationState: 'live',
+          publicationState: 'preview',
         });
 
         expect(strapi.entityService.update).toHaveBeenCalledWith('testModel', 1, {

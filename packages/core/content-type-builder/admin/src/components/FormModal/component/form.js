@@ -29,7 +29,7 @@ const componentForm = {
         items: [
           {
             name: `${prefix}icon`,
-            type: 'component-icon-picker',
+            type: 'icon-picker',
             size: 12,
             intlLabel: {
               id: getTrad('modalForm.components.icon.label'),

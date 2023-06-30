@@ -1,39 +1,30 @@
 import { useState } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
-import { useDispatch } from 'react-redux';
+
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
+import { useDispatch } from 'react-redux';
+
 import { getTrad } from '../../utils';
 import { ADD_LOCALE } from '../constants';
-
-const addLocale = async ({ code, name, isDefault }, toggleNotification) => {
-  const data = await request('/i18n/locales', {
-    method: 'POST',
-    body: {
-      name,
-      code,
-      isDefault,
-    },
-  });
-
-  toggleNotification({
-    type: 'success',
-    message: { id: getTrad('Settings.locales.modal.create.success') },
-  });
-
-  return data;
-};
 
 const useAddLocale = () => {
   const [isLoading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
+  const { post } = useFetchClient();
 
   const persistLocale = async (locale) => {
     setLoading(true);
 
     try {
-      const newLocale = await addLocale(locale, toggleNotification);
-      dispatch({ type: ADD_LOCALE, newLocale });
+      const { data } = await post('/i18n/locales', locale);
+
+      toggleNotification({
+        type: 'success',
+        message: { id: getTrad('Settings.locales.modal.create.success') },
+      });
+
+      dispatch({ type: ADD_LOCALE, newLocale: data });
     } catch (e) {
       const message = get(e, 'response.payload.message', null);
 

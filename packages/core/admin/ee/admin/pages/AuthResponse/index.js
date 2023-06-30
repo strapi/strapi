@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { useIntl } from 'react-intl';
+import React, { useCallback, useEffect, useRef } from 'react';
+
+import { auth, LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import Cookies from 'js-cookie';
-import { auth, LoadingIndicatorPage, request } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+
 import { getRequestUrl } from '../../../../admin/src/utils';
 
-const AuthResponse = () => {
+export const AuthResponse = () => {
   const {
     params: { authResponse },
   } = useRouteMatch('/auth/login/:authResponse');
@@ -24,6 +26,8 @@ const AuthResponse = () => {
     );
   }, [push]);
 
+  const { get } = useFetchClient();
+
   const fetchUserInfo = useCallback(async () => {
     try {
       const jwtToken = Cookies.get('jwtToken');
@@ -33,7 +37,9 @@ const AuthResponse = () => {
       if (jwtToken) {
         auth.setToken(jwtToken, true);
         const requestUrl = getRequestUrl('users/me');
-        const { data } = await request(requestUrl, { method: 'GET' });
+        const {
+          data: { data },
+        } = await get(requestUrl);
 
         auth.setUserInfo(data, true);
 
@@ -44,7 +50,7 @@ const AuthResponse = () => {
     } catch (e) {
       redirectToOops();
     }
-  }, [push, redirectToOops]);
+  }, [get, push, redirectToOops]);
 
   useEffect(() => {
     if (authResponse === 'error') {

@@ -1,34 +1,43 @@
 import React, { useEffect, useReducer, useRef } from 'react';
-import { Helmet } from 'react-helmet';
-import { useIntl } from 'react-intl';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Layout,
+  Main,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
+  useFetchClient,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import Check from '@strapi/icons/Check';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { ContentLayout, HeaderLayout, Layout } from '@strapi/design-system/Layout';
+import { Check } from '@strapi/icons';
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { axiosInstance, getRequestUrl, getTrad } from '../../utils';
+import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+
+import { PERMISSIONS } from '../../constants';
+import { getRequestUrl, getTrad } from '../../utils';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
-import pluginPermissions from '../../permissions';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
+  const { get, put } = useFetchClient();
   useFocusWhenNavigate();
 
   const [{ initialData, isLoading, isSubmiting, modifiedData }, dispatch] = useReducer(
@@ -47,7 +56,7 @@ export const SettingsPage = () => {
       try {
         const {
           data: { data },
-        } = await axiosInstance.get(getRequestUrl('settings'), {
+        } = await get(getRequestUrl('settings'), {
           cancelToken: source.token,
         });
 
@@ -85,7 +94,7 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      await axiosInstance.put(getRequestUrl('settings'), modifiedData);
+      await put(getRequestUrl('settings'), modifiedData);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
@@ -151,9 +160,9 @@ export const SettingsPage = () => {
             <LoadingIndicatorPage />
           ) : (
             <Layout>
-              <Stack spacing={12}>
+              <Flex direction="column" alignItems="stretch" gap={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Stack spacing={4}>
+                  <Flex direction="column" alignItems="stretch" gap={4}>
                     <Flex>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
@@ -254,9 +263,9 @@ export const SettingsPage = () => {
                         />
                       </GridItem>
                     </Grid>
-                  </Stack>
+                  </Flex>
                 </Box>
-              </Stack>
+              </Flex>
             </Layout>
           )}
         </ContentLayout>
@@ -266,7 +275,7 @@ export const SettingsPage = () => {
 };
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
+  <CheckPagePermissions permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </CheckPagePermissions>
 );

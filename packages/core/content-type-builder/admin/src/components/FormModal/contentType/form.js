@@ -12,28 +12,42 @@ const nameField = {
 const forms = {
   advanced: {
     default() {
+      const items = [
+        {
+          intlLabel: {
+            id: getTrad('contentType.draftAndPublish.label'),
+            defaultMessage: 'Draft & publish',
+          },
+          description: {
+            id: getTrad('contentType.draftAndPublish.description'),
+            defaultMessage: 'Allows writing a draft version of an entry, before it is published',
+          },
+          name: 'draftAndPublish',
+          type: 'toggle-draft-publish',
+          validations: {},
+        },
+      ];
+
+      if (window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)) {
+        items.push({
+          intlLabel: {
+            id: getTrad('contentType.reviewWorkflows.label'),
+            defaultMessage: 'Review Workflows',
+          },
+          description: {
+            id: getTrad('contentType.reviewWorkflows.description'),
+            defaultMessage: 'Allows having content in different review stages',
+          },
+          name: 'reviewWorkflows',
+          type: 'toggle-review-workflows',
+          validations: {},
+        });
+      }
+
       return {
         sections: [
           {
-            sectionTitle: {
-              id: getTrad('form.contentType.divider.draft-publish'),
-              defaultMessage: 'Draft/Publish',
-            },
-            items: [
-              {
-                intlLabel: {
-                  id: getTrad('contentType.draftAndPublish.label'),
-                  defaultMessage: 'Draft/publish system',
-                },
-                description: {
-                  id: getTrad('contentType.draftAndPublish.description'),
-                  defaultMessage: 'Write a draft version of each entry before publishing it',
-                },
-                name: 'draftAndPublish',
-                type: 'toggle-draft-publish',
-                validations: {},
-              },
-            ],
+            items,
           },
         ],
       };

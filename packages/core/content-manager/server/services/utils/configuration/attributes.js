@@ -139,11 +139,6 @@ const hasEditableAttribute = (schema, name) => {
     return false;
   }
 
-  if (isRelation(schema.attributes[name])) {
-    if (schema.modelType === 'component') return true;
-    return false;
-  }
-
   return true;
 };
 

@@ -1,16 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Box, Flex, IconButton, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Plus from '@strapi/icons/Plus';
-import DraggableCard from './DraggableCard';
+import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
+
+import DraggableCard from './DraggableCard';
 
 const FlexWrapper = styled(Box)`
   flex: ${({ size }) => size};
@@ -75,7 +73,7 @@ const SortDisplayedFields = ({
         hasRadius
       >
         <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
-          <Stack horizontal spacing={3}>
+          <Flex gap={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
                 key={field}
@@ -89,7 +87,7 @@ const SortDisplayedFields = ({
                 setIsDraggingSibling={setIsDraggingSibling}
               />
             ))}
-          </Stack>
+          </Flex>
         </ScrollableContainer>
         <SelectContainer size="auto" paddingBottom={4}>
           <SimpleMenu

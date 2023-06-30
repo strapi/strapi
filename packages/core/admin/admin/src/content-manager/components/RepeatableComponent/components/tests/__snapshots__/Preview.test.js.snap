@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RepeatableComponent | Preview should render and match the snapshot 1`] = `
+.c1 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c0 {
+  display: block;
+  background-color: #f0f0ff;
+  outline: 1px dashed #7b79ff;
+  outline-offset: -1px;
+  padding: 24px;
+}
+
+<div>
+  <span
+    class="c0"
+  />
+  <div
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

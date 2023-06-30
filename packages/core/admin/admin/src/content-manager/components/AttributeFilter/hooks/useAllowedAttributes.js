@@ -1,5 +1,5 @@
+import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import { useRBACProvider, findMatchingPermissions } from '@strapi/helper-plugin';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];

@@ -1,8 +1,10 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import styled from 'styled-components';
+
+import { Box } from '@strapi/design-system';
 import sortBy from 'lodash/sortBy';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+
 import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';
 

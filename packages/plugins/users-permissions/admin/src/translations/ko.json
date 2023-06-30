@@ -54,7 +54,6 @@
   "PopUpForm.header.edit.email-templates": "이메일 템플릿 수정",
   "PopUpForm.header.edit.providers": "프로바이더 수정",
   "Providers.data.loaded": "프로바이더를 불러왔습니다.",
-  "Providers.image": "이미지",
   "Providers.status": "상태",
   "Roles.empty": "아직 역할이 없습니다.",
   "Roles.empty.search": "검색과 일치하는 역할이 없습니다.",

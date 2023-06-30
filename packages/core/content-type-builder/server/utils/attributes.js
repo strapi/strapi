@@ -48,6 +48,7 @@ const formatAttribute = (key, attribute) => {
       multiple: !!attribute.multiple,
       required: !!required,
       configurable: configurable === false ? false : undefined,
+      private: !!attribute.private,
       allowedTypes: attribute.allowedTypes,
       pluginOptions,
     };

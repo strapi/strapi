@@ -2,6 +2,8 @@
 
 const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
+
 const { getService } = require('../utils');
 
 const LOCALE_QUERY_FILTER = 'locale';
@@ -78,8 +80,19 @@ const assignValidLocale = async (data) => {
  */
 const decorator = (service) => ({
   /**
+   * Wraps result
+   * @param {object} result - result object of query
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async wrapResult(result = {}, ctx = {}) {
+    return service.wrapResult.call(this, result, ctx);
+  },
+
+
+    /**
    * Wraps query options. In particular will add default locale to query params
-   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} params - Query options object (params, data, files, populate)
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
@@ -94,7 +107,7 @@ const decorator = (service) => ({
       return wrappedParams;
     }
 
-    return wrapParams(params, ctx);
+    return wrapParams(wrappedParams, ctx);
   },
 
   /**
@@ -147,6 +160,38 @@ const decorator = (service) => ({
 
     await syncNonLocalizedAttributes(entry, { model });
     return entry;
+  },
+
+  /**
+   * Find an entry or several if fetching all locales
+   * @param {string} uid - Model uid
+   * @param {object} opts - Query options object (params, data, files, populate)
+   */
+  async findMany(uid, opts) {
+    const model = strapi.getModel(uid);
+
+    const { isLocalizedContentType } = getService('content-types');
+
+    if (!isLocalizedContentType(model)) {
+      return service.findMany.call(this, uid, opts);
+    }
+
+    const { kind } = model;
+
+    if (kind === 'singleType') {
+      if (opts[LOCALE_QUERY_FILTER] === 'all') {
+        // TODO Fix so this won't break lower lying find many wrappers
+        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
+        const query = transformParamsToQuery(uid, wrappedParams);
+        const entities = await strapi.db.query(uid).findMany(query);
+        return this.wrapResult(entities, { uid, action: 'findMany' });
+      }
+
+      // This one gets transformed into a findOne on a lower layer
+      return service.findMany.call(this, uid, opts);
+    }
+
+    return service.findMany.call(this, uid, opts);
   },
 });
 

@@ -31,6 +31,8 @@ const create = async (folderData, { user } = {}) => {
 
   const folder = await strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
 
+  strapi.eventHub.emit('media-folder.create', { folder });
+
   return folder;
 };
 
@@ -54,18 +56,26 @@ const deleteByIds = async (ids = []) => {
   // delete files
   const filesToDelete = await strapi.db.query(FILE_MODEL_UID).findMany({
     where: {
-      $or: pathsToDelete.map((path) => ({ folderPath: { $startsWith: path } })),
+      $or: pathsToDelete.flatMap((path) => [
+        { folderPath: { $eq: path } },
+        { folderPath: { $startsWith: `${path}/` } },
+      ]),
     },
   });
 
   await Promise.all(filesToDelete.map((file) => getService('upload').remove(file)));
 
-  // delete folders
+  // delete folders and subfolders
   const { count: totalFolderNumber } = await strapi.db.query(FOLDER_MODEL_UID).deleteMany({
     where: {
-      $or: pathsToDelete.map((path) => ({ path: { $startsWith: path } })),
+      $or: pathsToDelete.flatMap((path) => [
+        { path: { $eq: path } },
+        { path: { $startsWith: `${path}/` } },
+      ]),
     },
   });
+
+  strapi.eventHub.emit('media-folder.delete', { folders });
 
   return {
     folders,
@@ -103,7 +113,7 @@ const update = async (id, { name, parent }, { user }) => {
         .queryBuilder(FOLDER_MODEL_UID)
         .select(['pathId', 'path'])
         .where({ id })
-        .transacting(trx)
+        .transacting(trx.get())
         .forUpdate()
         .first()
         .execute();
@@ -112,7 +122,7 @@ const update = async (id, { name, parent }, { user }) => {
       const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
       await strapi.db
         .queryBuilder(joinTable.name)
-        .transacting(trx)
+        .transacting(trx.get())
         .delete()
         .where({ [joinTable.joinColumn.name]: id })
         .execute();
@@ -120,7 +130,7 @@ const update = async (id, { name, parent }, { user }) => {
       if (parent !== null) {
         await strapi.db
           .queryBuilder(joinTable.name)
-          .transacting(trx)
+          .transacting(trx.get())
           .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
           .where({ [joinTable.joinColumn.name]: id })
           .execute();
@@ -133,7 +143,7 @@ const update = async (id, { name, parent }, { user }) => {
           .queryBuilder(FOLDER_MODEL_UID)
           .select('path')
           .where({ id: parent })
-          .transacting(trx)
+          .transacting(trx.get())
           .first()
           .execute();
         destinationFolderPath = destinationFolder.path;
@@ -147,8 +157,8 @@ const update = async (id, { name, parent }, { user }) => {
 
       // update folders below
       await strapi.db
-        .connection(folderTable)
-        .transacting(trx)
+        .getConnection(folderTable)
+        .transacting(trx.get())
         .where(pathColumnName, existingFolder.path)
         .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
@@ -162,8 +172,8 @@ const update = async (id, { name, parent }, { user }) => {
 
       // update files below
       await strapi.db
-        .connection(fileTable)
-        .transacting(trx)
+        .getConnection(fileTable)
+        .transacting(trx.get())
         .where(folderPathColumnName, existingFolder.path)
         .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
@@ -184,6 +194,8 @@ const update = async (id, { name, parent }, { user }) => {
     // update less critical information (name + updatedBy)
     const newFolder = setCreatorFields({ user, isEdition: true })({ name });
     const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+
+    strapi.eventHub.emit('media-folder.update', { folder });
     return folder;
   }
 };

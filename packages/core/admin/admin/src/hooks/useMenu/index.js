@@ -1,51 +1,86 @@
-import { useEffect, useReducer, useRef } from 'react';
-import { useRBACProvider, useAppInfos, useStrapiApp } from '@strapi/helper-plugin';
-import getPluginSectionLinks from './utils/getPluginSectionLinks';
+import * as React from 'react';
+
+import { useAppInfo, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
+import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
+import { useSelector } from 'react-redux';
+
+import { selectAdminPermissions } from '../../pages/App/selectors';
+
 import getGeneralLinks from './utils/getGeneralLinks';
-import reducer, { initialState } from './reducer';
+import getPluginSectionLinks from './utils/getPluginSectionLinks';
 
 const useMenu = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { allPermissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfos();
+  const { allPermissions: userPermissions } = useRBACProvider();
+  const { shouldUpdateStrapi } = useAppInfo();
   const { menu } = useStrapiApp();
-
-  // We are using a ref because we don't want our effect to have this in its dependencies array
-  const generalSectionLinksRef = useRef(state.generalSectionLinks);
-  const shouldUpdateStrapiRef = useRef(shouldUpdateStrapi);
-  // Once in the app lifecycle the menu should not be added into any dependencies array
-
-  const resolvePermissions = async (permissions = allPermissions) => {
-    const pluginsSectionLinks = menu;
-
-    const authorizedPluginSectionLinks = await getPluginSectionLinks(
-      permissions,
-      pluginsSectionLinks
-    );
-
-    const authorizedGeneralSectionLinks = await getGeneralLinks(
-      permissions,
-      generalSectionLinksRef.current,
-      shouldUpdateStrapiRef.current
-    );
-
-    dispatch({
-      type: 'SET_SECTION_LINKS',
-      data: {
-        authorizedGeneralSectionLinks,
-        authorizedPluginSectionLinks,
+  const permissions = useSelector(selectAdminPermissions);
+  const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState({
+    generalSectionLinks: [
+      {
+        icon: Puzzle,
+        intlLabel: {
+          id: 'global.plugins',
+          defaultMessage: 'Plugins',
+        },
+        to: '/list-plugins',
+        permissions: permissions.marketplace.main,
       },
-    });
-    dispatch({ type: 'UNSET_IS_LOADING' });
-  };
+      {
+        icon: ShoppingCart,
+        intlLabel: {
+          id: 'global.marketplace',
+          defaultMessage: 'Marketplace',
+        },
+        to: '/marketplace',
+        permissions: permissions.marketplace.main,
+      },
+      {
+        icon: Cog,
+        intlLabel: {
+          id: 'global.settings',
+          defaultMessage: 'Settings',
+        },
+        to: '/settings',
+        // Permissions of this link are retrieved in the init phase
+        // using the settings menu
+        permissions: [],
+        notificationsCount: 0,
+      },
+    ],
+    pluginsSectionLinks: [],
+    isLoading: true,
+  });
+  const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);
 
-  const resolvePermissionsRef = useRef(resolvePermissions);
+  React.useEffect(() => {
+    async function applyMenuPermissions() {
+      const authorizedPluginSectionLinks = await getPluginSectionLinks(userPermissions, menu);
 
-  useEffect(() => {
-    resolvePermissionsRef.current(allPermissions);
-  }, [allPermissions, dispatch]);
+      const authorizedGeneralSectionLinks = await getGeneralLinks(
+        userPermissions,
+        generalSectionLinksRef.current,
+        shouldUpdateStrapi
+      );
 
-  return state;
+      setMenuWithUserPermissions((state) => ({
+        ...state,
+        generalSectionLinks: authorizedGeneralSectionLinks,
+        pluginsSectionLinks: authorizedPluginSectionLinks,
+        isLoading: false,
+      }));
+    }
+
+    applyMenuPermissions();
+  }, [
+    setMenuWithUserPermissions,
+    generalSectionLinksRef,
+    userPermissions,
+    menu,
+    permissions,
+    shouldUpdateStrapi,
+  ]);
+
+  return menuWithUserPermissions;
 };
 
 export default useMenu;

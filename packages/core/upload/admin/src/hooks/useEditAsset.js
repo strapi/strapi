@@ -1,13 +1,14 @@
-import axios from 'axios';
 import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import axios from 'axios';
 import { useIntl } from 'react-intl';
-import { useNotification } from '@strapi/helper-plugin';
+import { useMutation, useQueryClient } from 'react-query';
 
-import { axiosInstance, getTrad } from '../utils';
 import pluginId from '../pluginId';
+import { getTrad } from '../utils';
 
-const editAssetRequest = (asset, file, cancelToken, onProgress) => {
+const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
 
   const formData = new FormData();
@@ -26,10 +27,7 @@ const editAssetRequest = (asset, file, cancelToken, onProgress) => {
     })
   );
 
-  return axiosInstance({
-    method: 'post',
-    url: endpoint,
-    data: formData,
+  return post(endpoint, formData, {
     cancelToken: cancelToken.token,
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
@@ -43,9 +41,10 @@ export const useEditAsset = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
   const tokenRef = useRef(axios.CancelToken.source());
+  const { post } = useFetchClient();
 
   const mutation = useMutation(
-    ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress),
+    ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress, post),
     {
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });

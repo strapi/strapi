@@ -1,1 +1,23 @@
-{}
+{
+  "link": "連結",
+  "Settings.email.plugin.button.test-email": "寄送測試電子郵件",
+  "Settings.email.plugin.label.defaultFrom": "預設寄送電子郵件地址",
+  "Settings.email.plugin.label.defaultReplyTo": "預設回應電子郵件地址",
+  "Settings.email.plugin.label.provider": "電子郵件供應者",
+  "Settings.email.plugin.label.testAddress": "收件者電子郵件地址",
+  "Settings.email.plugin.notification.config.error": "無法取得電子郵件設定",
+  "Settings.email.plugin.notification.data.loaded": "已載入電子郵件設定資料",
+  "Settings.email.plugin.notification.test.error": "無法將測試郵件寄送至 {to}",
+  "Settings.email.plugin.notification.test.success": "電子郵件測試成功，請檢查 {to} 收件匣",
+  "Settings.email.plugin.placeholder.defaultFrom": "例如：Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "例如：Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "例如：developer@example.com",
+  "Settings.email.plugin.subTitle": "測試電子郵件外掛程式的設定",
+  "Settings.email.plugin.text.configuration": "此外掛程式是透過 {file} 檔案來設定，請查閱此說明文件：{link}。",
+  "Settings.email.plugin.title": "設定",
+  "Settings.email.plugin.title.config": "設定",
+  "Settings.email.plugin.title.test": "測試電子郵件寄送",
+  "SettingsNav.link.settings": "設定",
+  "SettingsNav.section-label": "Email 外掛程式",
+  "components.Input.error.validation.email": "此電子郵件無效"
+}

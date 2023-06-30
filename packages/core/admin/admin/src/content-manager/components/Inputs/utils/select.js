@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { get } from 'lodash';
+
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 
 function useSelect(keys) {
   const {

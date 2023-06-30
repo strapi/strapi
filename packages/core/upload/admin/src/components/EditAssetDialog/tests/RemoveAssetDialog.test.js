@@ -1,11 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
 import en from '../../../translations/en.json';
+import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
 import server from './server';
 
 jest.mock('../../../utils/deleteRequest', () => ({
@@ -84,7 +87,7 @@ const asset = {
   updatedAt: '2021-10-04T09:42:31.670Z',
 };
 
-const renderCompo = (handleCloseSpy = jest.fn(), toggleNotificationSpy = jest.fn()) => {
+const renderCompo = (handleCloseSpy = jest.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -96,11 +99,11 @@ const renderCompo = (handleCloseSpy = jest.fn(), toggleNotificationSpy = jest.fn
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
-        <NotificationsProvider toggleNotification={toggleNotificationSpy}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+        <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <NotificationsProvider>
             <RemoveAssetDialog onClose={handleCloseSpy} asset={asset} />
-          </IntlProvider>
-        </NotificationsProvider>
+          </NotificationsProvider>
+        </IntlProvider>
       </ThemeProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
@@ -130,21 +133,13 @@ describe('RemoveAssetDialog', () => {
   describe('remove asset', () => {
     it('closes the dialog when everything is going okay when removing', async () => {
       const handleCloseSpy = jest.fn();
-      const toggleNotificationSpy = jest.fn();
-      renderCompo(handleCloseSpy, toggleNotificationSpy);
+      renderCompo(handleCloseSpy);
 
       fireEvent.click(screen.getByText('Confirm'));
 
       await waitFor(() => expect(handleCloseSpy).toHaveBeenCalled());
-      await waitFor(() =>
-        expect(toggleNotificationSpy).toHaveBeenCalledWith({
-          message: {
-            defaultMessage: 'Elements have been successfully deleted.',
-            id: 'modal.remove.success-label',
-          },
-          type: 'success',
-        })
-      );
+
+      expect(screen.getByText(/Elements have been successfully deleted/)).toBeInTheDocument();
     });
   });
 });

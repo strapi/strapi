@@ -1,18 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Box } from '@strapi/design-system/Box';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { useIntl } from 'react-intl';
+
+import { Box, Checkbox, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { usePermissionsDataManager } from '../../../../../../../../hooks';
-import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
+import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
+
 import { formatActions, getConditionsButtonState } from './utils';
 
 const Border = styled.div`
@@ -81,7 +79,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <Box paddingLeft={4}>
             <Checkbox
               name={pathToData.join('..')}
-              disabled={isFormDisabled || IS_DISABLED}
+              disabled={isFormDisabled}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
               onValueChange={(value) => {
                 onChangeParentCheckbox({
@@ -103,13 +101,10 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
                 <GridItem col={3} key={action}>
-                  <CheckboxWrapper
-                    disabled={isFormDisabled || IS_DISABLED}
-                    hasConditions={hasConditions}
-                  >
+                  <CheckboxWrapper disabled={isFormDisabled} hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onValueChange={(value) => {
                         onChangeSimpleCheckbox({

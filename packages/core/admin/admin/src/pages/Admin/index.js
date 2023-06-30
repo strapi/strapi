@@ -4,18 +4,21 @@
  *
  */
 
-import React, { Suspense, useEffect, useMemo, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { lazy, Suspense, useEffect, useMemo } from 'react';
+
+import { LoadingIndicatorPage, useStrapiApp, useTracking } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useDispatch, useSelector } from 'react-redux';
+import { Route, Switch } from 'react-router-dom';
+
 import GuidedTourModal from '../../components/GuidedTour/Modal';
 import LeftMenu from '../../components/LeftMenu';
+import { useConfigurations, useMenu } from '../../hooks';
 import AppLayout from '../../layouts/AppLayout';
-import { useMenu } from '../../hooks';
 import { createRoute } from '../../utils';
 import { SET_APP_RUNTIME_STATUS } from '../App/constants';
+
 import Onboarding from './Onboarding';
 
 const CM = lazy(() =>
@@ -43,6 +46,9 @@ const SettingsPage = lazy(() =>
 );
 
 // Simple hook easier for testing
+/**
+ * TODO: remove this, it's bad.
+ */
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
@@ -65,6 +71,7 @@ const Admin = () => {
   useTrackUsage();
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
+  const { showTutorials } = useConfigurations();
 
   const routes = useMemo(() => {
     return menu
@@ -106,7 +113,8 @@ const Admin = () => {
           </Switch>
         </Suspense>
         <GuidedTourModal />
-        <Onboarding />
+
+        {showTutorials && <Onboarding />}
       </AppLayout>
     </DndProvider>
   );

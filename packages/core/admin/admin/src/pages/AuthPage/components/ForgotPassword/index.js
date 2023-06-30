@@ -1,20 +1,16 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
+import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Form, Link } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
 import { Formik } from 'formik';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
+import Logo from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../../../../components/UnauthenticatedLogo';
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const { formatMessage } = useIntl();
@@ -59,7 +55,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack spacing={6}>
+                <Flex direction="column" alignItems="stretch" gap={6}>
                   <TextInput
                     error={
                       errors.email
@@ -85,7 +81,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                       defaultMessage: 'Send Email',
                     })}
                   </Button>
-                </Stack>
+                </Flex>
               </Form>
             )}
           </Formik>

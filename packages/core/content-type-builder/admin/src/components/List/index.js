@@ -6,21 +6,21 @@
 
 /* eslint-disable import/no-cycle */
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { Box, Button, Table, TFooter, Th, Thead, Tr, Typography } from '@strapi/design-system';
 import { EmptyBodyTable, useTracking } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Typography } from '@strapi/design-system/Typography';
-import { Table, Thead, Tr, Th, TFooter } from '@strapi/design-system/Table';
-import Plus from '@strapi/icons/Plus';
+import { Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+
 import useDataManager from '../../hooks/useDataManager';
-import DynamicZoneList from '../DynamicZoneList';
-import ComponentList from '../ComponentList';
-import BoxWrapper from './BoxWrapper';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getTrad from '../../utils/getTrad';
+import ComponentList from '../ComponentList';
+import DynamicZoneList from '../DynamicZoneList';
 import NestedTFooter from '../NestedTFooter';
+
+import BoxWrapper from './BoxWrapper';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */

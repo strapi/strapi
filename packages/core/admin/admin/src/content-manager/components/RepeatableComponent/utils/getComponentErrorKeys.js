@@ -1,4 +1,4 @@
-export default function getComponentErrorKeys(name, formErrors) {
+export default function getComponentErrorKeys(name, formErrors = {}) {
   return Object.keys(formErrors)
     .filter((errorKey) => errorKey.startsWith(name))
     .map((errorKey) =>

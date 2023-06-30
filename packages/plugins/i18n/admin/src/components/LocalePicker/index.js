@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+
+import { Option, Select } from '@strapi/design-system';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
-import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRouteMatch } from 'react-router-dom';
+
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';

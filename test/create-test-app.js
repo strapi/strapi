@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'test';
 
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
+const { cleanTestApp, generateTestApp } = require('./test-app-generator');
 
 const appName = 'testApp';
 
@@ -16,6 +16,7 @@ const databases = {
       database: 'strapi_test',
       username: 'strapi',
       password: 'strapi',
+      schema: 'myschema',
     },
   },
   mysql: {
@@ -33,6 +34,7 @@ const databases = {
     connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 

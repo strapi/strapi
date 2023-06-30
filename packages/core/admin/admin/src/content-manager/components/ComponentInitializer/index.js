@@ -1,13 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import PlusCircle from '@strapi/icons/PlusCircle';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
+import { PlusCircle } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import { getTrad } from '../../utils';
 
 const IconWrapper = styled.span`
@@ -39,7 +38,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
         paddingBottom={9}
         type="button"
       >
-        <Stack spacing={2}>
+        <Flex direction="column" gap={2}>
           <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
             <IconWrapper>
               <PlusCircle />
@@ -53,17 +52,11 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
               })}
             </Typography>
           </Flex>
-        </Stack>
+        </Flex>
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">
-          {formatMessage(
-            {
-              id: error.id,
-              defaultMessage: error.id,
-            },
-            { ...error.values }
-          )}
+          {formatMessage(error, { ...error.values })}
         </Typography>
       )}
     </>

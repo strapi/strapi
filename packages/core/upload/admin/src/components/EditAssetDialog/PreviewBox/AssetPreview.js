@@ -1,11 +1,12 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { forwardRef } from 'react';
-import PropTypes from 'prop-types';
-import FileIcon from '@strapi/icons/File';
-import FilePdfIcon from '@strapi/icons/FilePdf';
-import { Flex } from '@strapi/design-system/Flex';
-import styled from 'styled-components';
+
+import { Flex } from '@strapi/design-system';
 import { usePersistentState } from '@strapi/helper-plugin';
+import { File, FilePdf } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+
 import { AssetType } from '../../../constants';
 
 const CardAsset = styled(Flex)`
@@ -39,14 +40,14 @@ export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
   if (mime.includes('pdf')) {
     return (
       <CardAsset justifyContent="center" {...props}>
-        <FilePdfIcon aria-label={name} />
+        <FilePdf aria-label={name} />
       </CardAsset>
     );
   }
 
   return (
     <CardAsset justifyContent="center" {...props}>
-      <FileIcon aria-label={name} />
+      <File aria-label={name} />
     </CardAsset>
   );
 });

@@ -1,0 +1,385 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c12 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c16 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c0 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c7 {
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 12px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  cursor: default;
+}
+
+.c10 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c3 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c9 {
+  border: 1px solid #dcdce4;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c9[aria-disabled='true'] {
+  color: #666687;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c15 > svg {
+  width: 0.375rem;
+}
+
+.c15 > svg > path {
+  fill: #666687;
+}
+
+.c13 {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.c14 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c18[data-state='checked'] .c4 {
+  font-weight: bold;
+  color: #4945ff;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c2 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+@media (max-width:68.75rem) {
+  .c2 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c2 {
+    grid-column: span;
+  }
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class="c1"
+    >
+      <div
+        class="c2"
+      >
+        <div
+          class=""
+        >
+          <div
+            class="c3"
+          >
+            <label
+              class="c4 c5 c6"
+              for=":r0:"
+            >
+              Entries per page
+            </label>
+            <div
+              aria-autocomplete="none"
+              aria-controls="radix-:r3:"
+              aria-describedby=":r0:-hint :r0:-error"
+              aria-expanded="false"
+              aria-label="Entries per page"
+              class="c7 c8 c9"
+              data-state="closed"
+              dir="ltr"
+              id=":r0:"
+              overflow="hidden"
+              role="combobox"
+              tabindex="0"
+            >
+              <span
+                class="c10 c11"
+              >
+                <span
+                  class="c4 c12 c13"
+                >
+                  <span
+                    class="c14"
+                  >
+                    10
+                  </span>
+                </span>
+              </span>
+              <span
+                class="c11"
+              >
+                <span
+                  aria-hidden="true"
+                  class="c15"
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 14 8"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                      fill="#32324D"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </span>
+            </div>
+            <p
+              class="c4 c16"
+              id=":r0:-hint"
+            >
+              Number of assets displayed by default in the Media Library
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="c2"
+      >
+        <div
+          class=""
+        >
+          <div
+            class="c3"
+          >
+            <label
+              class="c4 c5 c6"
+              for=":r4:"
+            >
+              Default sort order
+            </label>
+            <div
+              aria-autocomplete="none"
+              aria-controls="radix-:r7:"
+              aria-describedby=":r4:-hint :r4:-error"
+              aria-expanded="false"
+              aria-label="Default sort order"
+              class="c7 c8 c9"
+              data-state="closed"
+              dir="ltr"
+              id=":r4:"
+              overflow="hidden"
+              role="combobox"
+              tabindex="0"
+            >
+              <span
+                class="c10 c11"
+              >
+                <span
+                  class="c4 c12 c13"
+                >
+                  <span
+                    class="c14"
+                  >
+                    createdAt:DESC
+                  </span>
+                </span>
+              </span>
+              <span
+                class="c11"
+              >
+                <span
+                  aria-hidden="true"
+                  class="c15"
+                >
+                  <svg
+                    fill="none"
+                    height="1rem"
+                    viewBox="0 0 14 8"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                      fill="#32324D"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </span>
+            </div>
+            <p
+              class="c4 c16"
+              id=":r4:-hint"
+            >
+              Note: You can override this value in the media library.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c17"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

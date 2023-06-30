@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
+
+import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import generateHeadersFromActions from './utils/generateHeadersFromActions';
-import Header from './Header';
+
 import ActionRow from './ActionRow';
+import Header from './Header';
+import generateHeadersFromActions from './utils/generateHeadersFromActions';
 
 const Wrapper = styled.div`
   display: inline-flex;

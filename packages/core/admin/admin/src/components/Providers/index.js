@@ -1,17 +1,23 @@
 import React from 'react';
+
+import {
+  AutoReloadOverlayBlockerProvider,
+  CustomFieldsProvider,
+  LibraryProvider,
+  NotificationsProvider,
+  OverlayBlockerProvider,
+  StrapiAppProvider,
+} from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { LibraryProvider, CustomFieldsProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
+
 import { AdminContext } from '../../contexts';
 import ConfigurationsProvider from '../ConfigurationsProvider';
-import LanguageProvider from '../LanguageProvider';
 import GuidedTour from '../GuidedTour';
-import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
-import Notifications from '../Notifications';
-import OverlayBlocker from '../OverlayBlocker';
-import ThemeToggleProvider from '../ThemeToggleProvider';
+import LanguageProvider from '../LanguageProvider';
 import Theme from '../Theme';
+import ThemeToggleProvider from '../ThemeToggleProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,46 +50,46 @@ const Providers = ({
   themes,
 }) => {
   return (
-    <ThemeToggleProvider themes={themes}>
-      <Theme>
-        <QueryClientProvider client={queryClient}>
-          <Provider store={store}>
-            <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-              <ConfigurationsProvider
-                authLogo={authLogo}
-                menuLogo={menuLogo}
-                showReleaseNotification={showReleaseNotification}
-                showTutorials={showTutorials}
-              >
-                <StrapiAppProvider
-                  getPlugin={getPlugin}
-                  menu={menu}
-                  plugins={plugins}
-                  runHookParallel={runHookParallel}
-                  runHookWaterfall={runHookWaterfall}
-                  runHookSeries={runHookSeries}
-                  settings={settings}
+    <LanguageProvider messages={messages} localeNames={localeNames}>
+      <ThemeToggleProvider themes={themes}>
+        <Theme>
+          <QueryClientProvider client={queryClient}>
+            <Provider store={store}>
+              <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+                <ConfigurationsProvider
+                  authLogo={authLogo}
+                  menuLogo={menuLogo}
+                  showReleaseNotification={showReleaseNotification}
+                  showTutorials={showTutorials}
                 >
-                  <LibraryProvider components={components} fields={fields}>
-                    <CustomFieldsProvider customFields={customFields}>
-                      <LanguageProvider messages={messages} localeNames={localeNames}>
+                  <StrapiAppProvider
+                    getPlugin={getPlugin}
+                    menu={menu}
+                    plugins={plugins}
+                    runHookParallel={runHookParallel}
+                    runHookWaterfall={runHookWaterfall}
+                    runHookSeries={runHookSeries}
+                    settings={settings}
+                  >
+                    <LibraryProvider components={components} fields={fields}>
+                      <CustomFieldsProvider customFields={customFields}>
                         <AutoReloadOverlayBlockerProvider>
-                          <OverlayBlocker>
+                          <OverlayBlockerProvider>
                             <GuidedTour>
-                              <Notifications>{children}</Notifications>
+                              <NotificationsProvider>{children}</NotificationsProvider>
                             </GuidedTour>
-                          </OverlayBlocker>
+                          </OverlayBlockerProvider>
                         </AutoReloadOverlayBlockerProvider>
-                      </LanguageProvider>
-                    </CustomFieldsProvider>
-                  </LibraryProvider>
-                </StrapiAppProvider>
-              </ConfigurationsProvider>
-            </AdminContext.Provider>
-          </Provider>
-        </QueryClientProvider>
-      </Theme>
-    </ThemeToggleProvider>
+                      </CustomFieldsProvider>
+                    </LibraryProvider>
+                  </StrapiAppProvider>
+                </ConfigurationsProvider>
+              </AdminContext.Provider>
+            </Provider>
+          </QueryClientProvider>
+        </Theme>
+      </ThemeToggleProvider>
+    </LanguageProvider>
   );
 };
 

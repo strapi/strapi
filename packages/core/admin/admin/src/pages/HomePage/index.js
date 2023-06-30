@@ -4,36 +4,39 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
-import { useHistory } from 'react-router-dom';
+
+import { Box, Grid, GridItem, Layout, Main } from '@strapi/design-system';
 import { LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import Logo from '../../assets/images/homepage-logo.png';
-import { useModels } from '../../hooks';
-import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
+import { Helmet } from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+
 import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
-import SocialLinks from './SocialLinks';
-import HomeHeader from './HomeHeader';
+import isGuidedTourCompleted from '../../components/GuidedTour/utils/isGuidedTourCompleted';
+import { useContentTypes } from '../../hooks/useContentTypes';
+
+import cornerOrnamentPath from './assets/corner-ornament.svg';
 import ContentBlocks from './ContentBlocks';
+import HomeHeader from './HomeHeader';
+import SocialLinks from './SocialLinks';
 
 const LogoContainer = styled(Box)`
   position: absolute;
   top: 0;
   right: 0;
+
   img {
     width: ${150 / 16}rem;
   }
 `;
 
 const HomePage = () => {
-  // // Temporary until we develop the menu API
-  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
+  // Temporary until we develop the menu API
+  const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  useLicenseLimitNotification();
 
   const showGuidedTour =
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
@@ -64,7 +67,7 @@ const HomePage = () => {
       </FormattedMessage>
       <Main>
         <LogoContainer>
-          <img alt="" aria-hidden src={Logo} />
+          <img alt="" aria-hidden src={cornerOrnamentPath} />
         </LogoContainer>
         <Box padding={10}>
           <Grid>

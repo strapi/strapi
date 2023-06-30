@@ -140,6 +140,14 @@
     "name":"Assamese (India) (as-IN)"
   },
   {
+    "code":"ast",
+    "name":"Asturian (ast)"
+  },
+  {
+    "code":"ast-ES",
+    "name":"Asturian (Spain) (ast-ES)"
+  },
+  {
     "code":"asa",
     "name":"Asu (asa)"
   },
@@ -345,7 +353,7 @@
   },
   {
     "code":"zh-Hans-HK",
-    "name":"Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK) "
+    "name":"Chinese (Simplified, Hong Kong SAR China) (zh-Hans-HK)"
   },
   {
     "code":"zh-Hans-MO",
@@ -592,22 +600,6 @@
     "name":"English (Guernsey) (en-GG)"
   },
   {
-    "code":"en-CA",
-    "name":"English (Canada) (en-CA)"
-  },
-  {
-    "code":"en-EG",
-    "name":"English (Egypt) (en-EG)"
-  },
-  {
-    "code":"en-EU",
-    "name":"English (Europe) (en-EU)"
-  },
-  {
-    "code":"en-GU",
-    "name":"English (Guam) (en-GU)"
-  },
-  {
     "code":"en-GY",
     "name":"English (Guyana) (en-GY)"
   },
@@ -648,6 +640,10 @@
     "name":"English (Kiribati) (en-KI)"
   },
   {
+    "code":"en-KW",
+    "name":"English (Kuwait) (en-KW)"
+  },
+  {
     "code":"en-LS",
     "name":"English (Lesotho) (en-LS)"
   },
@@ -666,10 +662,6 @@
   {
     "code":"en-MY",
     "name":"English (Malaysia) (en-MY)"
-  },
-  {
-    "code":"en-JM",
-    "name":"English (Jamaica) (en-JM)"
   },
   {
     "code":"en-MT",
@@ -718,14 +710,6 @@
   {
     "code":"en-NF",
     "name":"English (Norfolk Island) (en-NF)"
-  },
-  {
-    "code":"en-NA",
-    "name":"English (Namibia) (en-NA)"
-  },
-  {
-    "code":"en-NZ",
-    "name":"English (New Zealand) (en-NZ)"
   },
   {
     "code":"en-MP",
@@ -796,10 +780,6 @@
     "name":"English (Solomon Islands) (en-SB)"
   },
   {
-    "code":"en-ZA",
-    "name":"English (South Africa) (en-ZA)"
-  },
-  {
     "code":"en-SS",
     "name":"English (South Sudan) (en-SS)"
   },
@@ -860,24 +840,8 @@
     "name":"English (Tuvalu) (en-TV)"
   },
   {
-    "code":"en-PH",
-    "name":"English (Philippines) (en-PH)"
-  },
-  {
-    "code":"en-SA",
-    "name":"English (Saudi Arabia) (en-SA)"
-  },
-  {
-    "code":"en-SG",
-    "name":"English (Singapore) (en-SG)"
-  },
-  {
     "code":"en-ZA",
     "name":"English (South Africa) (en-ZA)"
-  },
-  {
-    "code":"en-TT",
-    "name":"English (Trinidad and Tobago) (en-TT)"
   },
   {
     "code":"en-AE",
@@ -1100,6 +1064,10 @@
     "name":"French (Saint Martin) (fr-MF)"
   },
   {
+    "code":"fr-MU",
+    "name":"French (Mauritius) (fr-MU)"
+  },
+  {
     "code":"fr-SN",
     "name":"French (Senegal) (fr-SN)"
   },
@@ -1126,6 +1094,10 @@
   {
     "code":"gl-ES",
     "name":"Galician (Spain) (gl-ES)"
+  },
+  {
+    "code":"lao",
+    "name":"Laotian (Laos) (lao)"
   },
   {
     "code":"lg",

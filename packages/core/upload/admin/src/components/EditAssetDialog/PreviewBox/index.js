@@ -1,31 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Flex, IconButton } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Trash from '@strapi/icons/Trash';
-import DownloadIcon from '@strapi/icons/Download';
-import Resize from '@strapi/icons/Crop';
-import { useTracking } from '@strapi/helper-plugin';
-import getTrad from '../../../utils/getTrad';
-import { downloadFile } from '../../../utils/downloadFile';
-import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
+import { AssetDefinition, AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
-import {
-  RelativeBox,
-  ActionRow,
-  Wrapper,
-  BadgeOverride,
-  UploadProgressWrapper,
-} from './components';
-import { CroppingActions } from './CroppingActions';
+import { createAssetUrl } from '../../../utils';
+import { downloadFile } from '../../../utils/downloadFile';
+import getTrad from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
-import { AssetType, AssetDefinition } from '../../../constants';
+import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
 import { AssetPreview } from './AssetPreview';
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import {
+  ActionRow,
+  BadgeOverride,
+  RelativeBox,
+  UploadProgressWrapper,
+  Wrapper,
+} from './components';
+import { CroppingActions } from './CroppingActions';
+
+import 'cropperjs/dist/cropper.css';
 
 export const PreviewBox = ({
   asset,
@@ -89,7 +91,7 @@ export const PreviewBox = ({
   }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   const handleCropping = async () => {
-    const nextAsset = { ...asset, width, height };
+    const nextAsset = { ...asset, width, height, folder: asset.folder?.id };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
     // Making sure that when persisting the new asset, the URL changes with width and height
@@ -123,7 +125,7 @@ export const PreviewBox = ({
     const nextAsset = { ...asset, width, height };
     const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
 
-    await upload({ name: file.name, rawFile: file });
+    await upload({ name: file.name, rawFile: file }, asset.folder?.id);
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 
@@ -151,7 +153,7 @@ export const PreviewBox = ({
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
-          <Stack spacing={1} horizontal>
+          <Flex gap={1}>
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
@@ -183,7 +185,7 @@ export const PreviewBox = ({
                 onClick={handleCropStart}
               />
             )}
-          </Stack>
+          </Flex>
         </ActionRow>
 
         <Wrapper>

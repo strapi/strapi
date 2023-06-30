@@ -1,12 +1,15 @@
 import produce from 'immer';
-import pluralize from 'pluralize';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
+import pluralize from 'pluralize';
+
 import getRelationType from '../../utils/getRelationType';
 import nameToSlug from '../../utils/nameToSlug';
-import { createComponentUid } from './utils/createUid';
-import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
+
 import * as actions from './constants';
+import { createComponentUid } from './utils/createUid';
+import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
+import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
 const initialState = {
   formErrors: {},
@@ -300,6 +303,19 @@ const reducer = (state = initialState, action) =>
         }
 
         draftState.modifiedData = { ...options, type: customField.type };
+
+        const allOptions = [
+          ...(customField?.options?.base || []),
+          ...(customField?.options?.advanced || []),
+        ];
+
+        const optionDefaults = allOptions.reduce(customFieldDefaultOptionsReducer, []);
+
+        if (optionDefaults.length) {
+          optionDefaults.forEach(({ name, defaultValue }) =>
+            set(draftState.modifiedData, name, defaultValue)
+          );
+        }
 
         break;
       }

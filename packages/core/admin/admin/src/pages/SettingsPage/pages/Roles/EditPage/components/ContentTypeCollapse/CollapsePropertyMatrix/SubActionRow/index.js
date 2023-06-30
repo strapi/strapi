@@ -1,14 +1,12 @@
 import React, { memo, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+
+import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
+
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
@@ -153,7 +151,7 @@ const SubActionRow = ({
                         return (
                           <Cell key={propertyLabel} justifyContent="center" alignItems="center">
                             <BaseCheckbox
-                              disabled={isFormDisabled || IS_DISABLED}
+                              disabled={isFormDisabled}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
                                 {
@@ -184,7 +182,7 @@ const SubActionRow = ({
                         <Cell key={propertyLabel} justifyContent="center" alignItems="center">
                           <BaseCheckbox
                             key={propertyLabel}
-                            disabled={isFormDisabled || IS_DISABLED}
+                            disabled={isFormDisabled}
                             name={checkboxName.join('..')}
                             aria-label={formatMessage(
                               {

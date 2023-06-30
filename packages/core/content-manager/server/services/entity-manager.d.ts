@@ -1,17 +1,16 @@
 interface EntityManager {
-  assocCreatorRoles(): any;
+  mapEntity<T = any>(entity: T): T;
+  mapEntitiesResponse<T = any>(entities: T[], uid: string): T[];
   find(): any;
   findPage(): any;
-  findWithRelationCountsPage(): any;
-  count(): any;
   findOne(): any;
-  findOneWithCreatorRoles(): any;
   create(): any;
   update(): any;
   delete(): any;
   deleteMany(): any;
   publish(): any;
   unpublish(): any;
+  getNumberOfDraftRelations(id: string, uid: string): number;
 }
 
-export default function(opts: { strapi: Strapi }): EntityManager;
+export default function (opts: { strapi: Strapi }): EntityManager;

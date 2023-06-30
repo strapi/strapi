@@ -1,8 +1,11 @@
-import { getRequestURL, axiosInstance } from '../../../../utils';
+import { getFetchClient } from '@strapi/helper-plugin';
+
+import { getRequestURL } from '../../../../utils';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
-    const { data } = await axiosInstance.get(getRequestURL('roles'));
+    const { get } = getFetchClient();
+    const { data } = await get(getRequestURL('roles'));
     notifyStatus('The roles have loaded successfully');
 
     return data;
@@ -12,13 +15,14 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
       message: { id: 'notification.error' },
     });
 
-    throw new Error('error');
+    throw new Error(err);
   }
 };
 
 export const deleteData = async (id, toggleNotification) => {
   try {
-    await axiosInstance.delete(`${getRequestURL('roles')}/${id}`);
+    const { del } = getFetchClient();
+    await del(`${getRequestURL('roles')}/${id}`);
   } catch (error) {
     toggleNotification({
       type: 'warning',

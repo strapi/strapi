@@ -1,16 +1,16 @@
 import React from 'react';
+
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { LinkButton, pxToRem } from '@strapi/helper-plugin';
+import { ArrowRight } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { pxToRem, LinkButton } from '@strapi/helper-plugin';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import ArrowRight from '@strapi/icons/ArrowRight';
-import Content from './Content';
+
+import { IS_ACTIVE, IS_DONE } from '../../constants';
 import StepLine from '../../Stepper/StepLine';
+
+import Content from './Content';
 import StepNumberWithPadding from './StepNumberWithPadding';
-import { IS_DONE, IS_ACTIVE } from '../../constants';
 
 const StepperModal = ({
   title,

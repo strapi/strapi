@@ -13,36 +13,53 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   width: 1px;
 }
 
-.c5 {
+.c4 {
   padding-right: 4px;
   padding-left: 4px;
 }
 
-.c12 {
-  padding-left: 8px;
+.c7 {
+  background: #4945ff;
+  padding: 8px;
+  padding-top: 4px;
+  padding-right: 12px;
+  padding-bottom: 4px;
+  padding-left: 12px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c14 {
+.c13 {
   padding-top: 4px;
   padding-right: 8px;
   padding-bottom: 4px;
   padding-left: 8px;
 }
 
-.c7 {
-  color: #8e8ea9;
+.c6 {
   font-size: 0.75rem;
   line-height: 1.33;
+  color: #8e8ea9;
 }
 
-.c11 {
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
   font-weight: 600;
   color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
-.c1 {
+.c0 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -56,7 +73,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c3 {
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -70,11 +87,26 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   flex-direction: row;
 }
 
-.c2:first-child {
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c1:first-child {
   margin-left: calc(-1*8px);
 }
 
-.c4 {
+.c3 {
   border-radius: 4px;
   color: #666687;
   font-size: 0.75rem;
@@ -84,41 +116,32 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   text-decoration: none;
 }
 
-.c4:hover,
-.c4:focus {
+.c3:hover,
+.c3:focus {
   background-color: #dcdce4;
   color: #4a4a6a;
 }
 
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c9 {
   position: relative;
   outline: none;
 }
 
-.c8 svg {
+.c9 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c8 svg > g,
-.c8 svg path {
+.c9 > svg > g,
+.c9 > svg path {
   fill: #ffffff;
 }
 
-.c8[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c8:after {
+.c9:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -133,11 +156,11 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c8:focus-visible {
+.c9:focus-visible {
   outline: none;
 }
 
-.c8:focus-visible:after {
+.c9:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -148,219 +171,184 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c9 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
+.c10 {
+  height: 2rem;
   border: 1px solid transparent;
   background: transparent;
 }
 
-.c9 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c10 svg {
+  height: 0.75rem;
+  width: auto;
 }
 
-.c9 .c6 {
-  color: #ffffff;
-}
-
-.c9[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c9[aria-disabled='true'] .c6 {
+.c10[aria-disabled='true'] .c5 {
   color: #666687;
 }
 
-.c9[aria-disabled='true'] svg > g,
-.c9[aria-disabled='true'] svg path {
+.c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c9[aria-disabled='true']:active {
+.c10[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c9[aria-disabled='true']:active .c6 {
+.c10[aria-disabled='true']:active .c5 {
   color: #666687;
 }
 
-.c9[aria-disabled='true']:active svg > g,
-.c9[aria-disabled='true']:active svg path {
+.c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c9:hover {
+.c10:hover {
   background-color: #f6f6f9;
 }
 
-.c9:active {
+.c10:active {
   border: 1px solid undefined;
   background: undefined;
 }
 
-.c9 .c6 {
+.c10 .c5 {
   color: #32324d;
 }
 
-.c9 svg > g,
-.c9 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #8e8ea9;
 }
 
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c13 svg {
-  height: 4px;
-  width: 6px;
-}
-
-.c10 {
+.c11 {
   padding: 4px 12px;
 }
 
-.c10:hover,
-.c10:focus {
+.c11:hover,
+.c11:focus {
   background-color: #dcdce4;
 }
 
 <div>
   <nav
     aria-label="Navigation"
-    class="c0 "
+    class=""
   >
     <ol
-      class="c0 c1 c2"
+      class="c0 c1"
     >
       <li
-        class="c0 c3"
+        class="c2"
       >
         <a
           aria-current="page"
-          class="c4 active"
+          class="c3 active"
           href="/"
         >
           Media Library
         </a>
         <div
           aria-hidden="true"
-          class="c0 c5"
+          class="c4"
         >
           <span
-            class="c6 c7"
+            class="c5 c6"
           >
             /
           </span>
         </div>
       </li>
       <li
-        class="c0 c3"
+        class="c2"
       >
-        <div>
-          <button
-            aria-controls="simplemenu-1"
-            aria-disabled="false"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-label="Get more ascendants folders"
-            class="c8 c9 c10"
-            label="..."
-            type="button"
+        <button
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="Get more ascendants folders"
+          class="c7 c8 c9 c10 c11 sc-dcgwPl c10"
+          data-state="closed"
+          id="radix-:r1:"
+          label="..."
+          type="button"
+        >
+          <span
+            class="c5 c12"
           >
             <span
-              class="c6 c11"
+              class="c5 c12"
             >
               ...
             </span>
             <div
               aria-hidden="true"
-              class="c0 c12"
+              class="c0"
             >
-              <span
-                class="c13"
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="0.25rem"
+                viewBox="0 0 14 8"
+                width="0.375rem"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  aria-hidden="true"
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 14 8"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    clip-rule="evenodd"
-                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                    fill="#32324D"
-                    fill-rule="evenodd"
-                  />
-                </svg>
-              </span>
+                <path
+                  clip-rule="evenodd"
+                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                  fill="#32324D"
+                  fill-rule="evenodd"
+                />
+              </svg>
             </div>
-          </button>
-        </div>
+          </span>
+        </button>
         <div
           aria-hidden="true"
-          class="c0 c5"
+          class="c4"
         >
           <span
-            class="c6 c7"
+            class="c5 c6"
           >
             /
           </span>
         </div>
       </li>
       <li
-        class="c0 c3"
+        class="c2"
       >
         <a
           aria-current="page"
-          class="c4 active"
+          class="c3 active"
           href="/"
         >
           parent folder
         </a>
         <div
           aria-hidden="true"
-          class="c0 c5"
+          class="c4"
         >
           <span
-            class="c6 c7"
+            class="c5 c6"
           >
             /
           </span>
         </div>
       </li>
       <li
-        class="c0 c3"
+        class="c2"
       >
         <div
-          class="c0 c14"
+          class="c13"
         >
           <span
             aria-current="true"
-            class="c6 c11"
+            class="c5 c14"
           >
             current folder
           </span>

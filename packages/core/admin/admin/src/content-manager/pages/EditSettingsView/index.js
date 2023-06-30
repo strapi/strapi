@@ -1,36 +1,44 @@
 import React, { useReducer, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Divider,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  Option,
+  Select,
+  Typography,
+} from '@strapi/design-system';
+import { ConfirmDialog, Link, useNotification, useTracking } from '@strapi/helper-plugin';
+import { ArrowLeft, Check } from '@strapi/icons';
+import cloneDeep from 'lodash/cloneDeep';
+import flatMap from 'lodash/flatMap';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import upperFirst from 'lodash/upperFirst';
-import pick from 'lodash/pick';
-import cloneDeep from 'lodash/cloneDeep';
-import flatMap from 'lodash/flatMap';
-import isEqual from 'lodash/isEqual';
-import get from 'lodash/get';
-import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Main } from '@strapi/design-system/Main';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Stack } from '@strapi/design-system/Stack';
-import { Divider } from '@strapi/design-system/Divider';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
+
 import { getTrad } from '../../utils';
-import reducer, { initialState } from './reducer';
-import init from './init';
+import { selectFieldSizes } from '../App/selectors';
+
 import DisplayedFields from './components/DisplayedFields';
-import RelationalFields from './components/RelationalFields';
 import ModalForm from './components/FormModal';
-import LayoutDndProvider from '../../components/LayoutDndProvider';
-import { unformatLayout } from './utils/layout';
+import { LayoutDndProvider } from './components/LayoutDndProvider';
+import init from './init';
+import reducer, { initialState } from './reducer';
 import putCMSettingsEV from './utils/api';
+import { unformatLayout } from './utils/layout';
 
 const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, updateLayout }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -46,6 +54,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const { formatMessage } = useIntl();
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
+  const fieldSizes = useSelector(selectFieldSizes);
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
@@ -67,23 +76,10 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   });
   const editLayout = get(modifiedData, ['layouts', 'edit'], []);
   const displayedFields = flatMap(editLayout, 'rowContent');
-  const editLayoutRemainingFields = Object.keys(modifiedData.attributes)
-    .filter((attr) => {
-      if (!isContentTypeView) {
-        return true;
-      }
-
-      return get(modifiedData, ['attributes', attr, 'type'], '') !== 'relation';
-    })
+  const editLayoutFields = Object.keys(modifiedData.attributes)
     .filter((attr) => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
-    .filter((attr) => {
-      return displayedFields.findIndex((el) => el.name === attr) === -1;
-    })
+    .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
-  const relationsLayout = get(modifiedData, ['layouts', 'editRelations'], []);
-  const editRelationsLayoutRemainingFields = Object.keys(attributes)
-    .filter((attr) => attributes[attr].type === 'relation')
-    .filter((attr) => relationsLayout.indexOf(attr) === -1);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -274,7 +270,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack spacing={4}>
+              <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -319,39 +315,27 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                     defaultMessage: 'View',
                   })}
                 </Typography>
-                <Grid gap={4}>
-                  <GridItem col={isContentTypeView ? 8 : 12} s={12}>
-                    <DisplayedFields
-                      attributes={attributes}
-                      editLayout={editLayout}
-                      editLayoutRemainingFields={editLayoutRemainingFields}
-                      onAddField={(field) => {
-                        dispatch({
-                          type: 'ON_ADD_FIELD',
-                          name: field,
-                        });
-                      }}
-                      onRemoveField={(rowId, index) => {
-                        dispatch({
-                          type: 'REMOVE_FIELD',
-                          rowIndex: rowId,
-                          fieldIndex: index,
-                        });
-                      }}
-                    />
-                  </GridItem>
-                  {isContentTypeView && (
-                    <GridItem col={4} s={12}>
-                      <RelationalFields
-                        editRelationsLayoutRemainingFields={editRelationsLayoutRemainingFields}
-                        relationsLayout={relationsLayout}
-                        onAddField={(name) => dispatch({ type: 'ADD_RELATION', name })}
-                        onRemoveField={(index) => dispatch({ type: 'REMOVE_RELATION', index })}
-                      />
-                    </GridItem>
-                  )}
-                </Grid>
-              </Stack>
+
+                <DisplayedFields
+                  attributes={attributes}
+                  editLayout={editLayout}
+                  fields={editLayoutFields}
+                  onAddField={(field) => {
+                    dispatch({
+                      type: 'ON_ADD_FIELD',
+                      name: field,
+                      fieldSizes,
+                    });
+                  }}
+                  onRemoveField={(rowId, index) => {
+                    dispatch({
+                      type: 'REMOVE_FIELD',
+                      rowIndex: rowId,
+                      fieldIndex: index,
+                    });
+                  }}
+                />
+              </Flex>
             </Box>
           </ContentLayout>
           <ConfirmDialog
@@ -395,7 +379,6 @@ EditSettingsView.propTypes = {
     info: PropTypes.object.isRequired,
     layouts: PropTypes.shape({
       list: PropTypes.array.isRequired,
-      editRelations: PropTypes.array.isRequired,
       edit: PropTypes.array.isRequired,
     }).isRequired,
     metadatas: PropTypes.object.isRequired,

@@ -1,11 +1,10 @@
 import React from 'react';
-import semver from 'semver';
+
+import { Box, Button, Tooltip } from '@strapi/design-system';
+import { Duplicate } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import Duplicate from '@strapi/icons/Duplicate';
+import semver from 'semver';
 
 const TooltipButton = ({ description, installMessage, disabled, handleCopy, pluginName }) => (
   <Tooltip data-testid={`tooltip-${pluginName}`} description={description}>

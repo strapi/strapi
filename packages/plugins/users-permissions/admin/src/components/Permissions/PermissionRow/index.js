@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
+
+import { Box } from '@strapi/design-system';
 import sortBy from 'lodash/sortBy';
-import { Box } from '@strapi/design-system/Box';
+import PropTypes from 'prop-types';
+
 import SubCategory from './SubCategory';
 
 const PermissionRow = ({ name, permissions }) => {

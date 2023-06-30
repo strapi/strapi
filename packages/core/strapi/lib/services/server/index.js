@@ -92,8 +92,8 @@ const createServer = (strapi) => {
       return this;
     },
 
-    async initRouting() {
-      await registerAllRoutes(strapi);
+    initRouting() {
+      registerAllRoutes(strapi);
 
       return this;
     },

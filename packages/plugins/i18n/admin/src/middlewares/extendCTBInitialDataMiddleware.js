@@ -1,5 +1,3 @@
-import { has } from 'lodash';
-
 const extendCTBInitialDataMiddleware = () => {
   return () => (next) => (action) => {
     if (
@@ -20,7 +18,7 @@ const extendCTBInitialDataMiddleware = () => {
 
       // Override the action if the pluginOption config does not contain i18n
       // In this case we need to set the proper initialData shape
-      if (!has(action.data.pluginOptions, 'i18n.localized')) {
+      if (!action.data.pluginOptions?.i18n?.localized) {
         return next({ ...action, data });
       }
     }

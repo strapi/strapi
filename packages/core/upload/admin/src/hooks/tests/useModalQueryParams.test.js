@@ -1,11 +1,53 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { act, renderHook } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import useModalQueryParams from '../useModalQueryParams';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+const refetchQueriesMock = jest.fn();
+
+jest.mock('react-query', () => ({
+  ...jest.requireActual('react-query'),
+  useQueryClient: () => ({
+    refetchQueries: refetchQueriesMock,
+  }),
 }));
+
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+// eslint-disable-next-line react/prop-types
+function ComponentFixture({ children }) {
+  return (
+    <Router>
+      <Route>
+        <QueryClientProvider client={client}>
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </NotificationsProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </Route>
+    </Router>
+  );
+}
+
+function setup(...args) {
+  return renderHook(() => useModalQueryParams(...args), { wrapper: ComponentFixture });
+}
 
 const FIXTURE_QUERY = {
   page: 1,
@@ -16,17 +58,17 @@ const FIXTURE_QUERY = {
   },
 };
 
-function setup(...args) {
-  return renderHook(() => useModalQueryParams(...args));
-}
-
 describe('useModalQueryParams', () => {
-  test('setup proper defaults', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('setup proper defaults', async () => {
     const {
       result: {
         current: [{ queryObject, rawQuery }, callbacks],
       },
-    } = setup();
+    } = await setup();
 
     expect(queryObject).toStrictEqual(FIXTURE_QUERY);
     expect(rawQuery).toBe('page=1&sort=updatedAt:DESC&pageSize=10');
@@ -41,18 +83,18 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('set initial state', () => {
+  test('set initial state', async () => {
     const {
       result: { current },
-    } = setup();
+    } = await setup();
 
     expect(current[0].queryObject).toStrictEqual(FIXTURE_QUERY);
   });
 
-  test('handles initial state', () => {
+  test('handles initial state', async () => {
     const {
       result: { current },
-    } = setup({ state: true });
+    } = await setup({ state: true });
 
     expect(current[0].queryObject).toStrictEqual({
       ...FIXTURE_QUERY,
@@ -60,8 +102,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeFilters', () => {
-    const { result } = setup();
+  test('onChangeFilters', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangeFilters([{ some: 'thing' }]);
@@ -80,8 +122,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeFolder', () => {
-    const { result } = setup();
+  test('onChangeFolder', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangeFolder({ id: 1 });
@@ -95,8 +137,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangePage', () => {
-    const { result } = setup();
+  test('onChangePage', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangePage({ id: 1 });
@@ -110,8 +152,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangePageSize', () => {
-    const { result } = setup();
+  test('onChangePageSize', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangePageSize(5);
@@ -123,8 +165,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangePageSize - converts string to numbers', () => {
-    const { result } = setup();
+  test('onChangePageSize - converts string to numbers', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangePageSize('5');
@@ -136,8 +178,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSort', () => {
-    const { result } = setup();
+  test('onChangeSort', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangeSort('something:else');
@@ -149,8 +191,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSearch', () => {
-    const { result } = setup();
+  test('onChangeSearch', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangeSearch('something');
@@ -162,8 +204,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSearch - empty string resets all values and removes _q and page', () => {
-    const { result } = setup();
+  test('onChangeSearch - empty string resets all values and removes _q and page', async () => {
+    const { result } = await setup();
 
     act(() => {
       result.current[1].onChangePage({ id: 1 });

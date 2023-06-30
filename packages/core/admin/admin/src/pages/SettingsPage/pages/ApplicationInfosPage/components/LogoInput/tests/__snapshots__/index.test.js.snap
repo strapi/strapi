@@ -1,10 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ApplicationsInfosPage || LogoInput from computer should render upload modal with from computer tab 1`] = `
-<body
-  class="lock-body-scroll"
->
-  .c20 {
+.c18 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -16,6 +13,74 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 1px;
 }
 
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c35 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c37 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c47 {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #32324d;
+}
+
+.c52 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
+.c54 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
 .c4 {
   background: #f6f6f9;
   padding: 8px;
@@ -25,17 +90,29 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 }
 
 .c5 {
+  display: grid;
   position: relative;
 }
 
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
-.c9 {
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
   height: 124px;
+}
+
+.c12 {
+  max-width: 40%;
+  max-height: 40%;
 }
 
 .c13 {
@@ -44,33 +121,107 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   width: 100%;
 }
 
-.c17 {
+.c21 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+  position: absolute;
+}
+
+.c15 {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c19 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c24 {
+  padding-right: 40px;
+  padding-left: 40px;
+  position: fixed;
+  z-index: 4;
 }
 
-.c18 {
-  color: #666687;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c26 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+  width: 51.875rem;
 }
 
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c27 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c31 {
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c33 {
+  padding: 16px;
+}
+
+.c38 {
+  background: #eaeaef;
+}
+
+.c40 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c42 {
+  background: #f6f6f9;
+  padding-top: 48px;
+  padding-bottom: 32px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+  position: relative;
+}
+
+.c44 {
+  color: #4945ff;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.c46 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c49 {
+  background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c53 {
+  padding-top: 24px;
 }
 
 .c0 {
@@ -85,9 +236,10 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c3 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -101,7 +253,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   flex-direction: row;
 }
 
-.c10 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -119,70 +271,115 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   justify-content: center;
 }
 
-.c6 {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'startAction slides endAction';
-}
-
-.c8 {
-  grid-area: slides;
-}
-
-.c1 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c1 > * + * {
-  margin-top: 4px;
-}
-
-.c14 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c14 > * + * {
-  margin-left: 4px;
-}
-
-.c11 {
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c15 {
+.c29 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c41 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c43 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c50 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c45 path {
+  fill: #4945ff;
+}
+
+.c16 {
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c16 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c16 > svg > g,
+.c16 > svg path {
   fill: #ffffff;
 }
 
-.c15[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c15:after {
+.c16:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -197,11 +394,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid transparent;
 }
 
-.c15:focus-visible {
+.c16:focus-visible {
   outline: none;
 }
 
-.c15:focus-visible:after {
+.c16:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -212,7 +409,125 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 2px solid #4945ff;
 }
 
-.c16 {
+.c51 {
+  height: 2rem;
+}
+
+.c51 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c51[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c51[aria-disabled='true'] .c1 {
+  color: #666687;
+}
+
+.c51[aria-disabled='true'] svg > g,.c51[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c51[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c51[aria-disabled='true']:active .c1 {
+  color: #666687;
+}
+
+.c51[aria-disabled='true']:active svg > g,.c51[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c51:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c51:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c51 svg > g,
+.c51 svg path {
+  fill: #ffffff;
+}
+
+.c56 {
+  height: 2rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c56 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c56[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c56[aria-disabled='true'] .c1 {
+  color: #666687;
+}
+
+.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c56[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c56[aria-disabled='true']:active .c1 {
+  color: #666687;
+}
+
+.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c56:hover {
+  background-color: #f6f6f9;
+}
+
+.c56:active {
+  background-color: #eaeaef;
+}
+
+.c56 .c1 {
+  color: #32324d;
+}
+
+.c56 svg > g,
+.c56 svg path {
+  fill: #32324d;
+}
+
+.c22 {
+  z-index: 4;
+  display: none;
+}
+
+.c6 {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'startAction slides endAction';
+}
+
+.c9 {
+  grid-area: slides;
+}
+
+.c3 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -221,80 +536,112 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
 }
 
-.c16 svg > g,
-.c16 svg path {
+.c39 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.c17 svg > g,
+.c17 svg path {
   fill: #8e8ea9;
 }
 
-.c16:hover svg > g,
-.c16:hover svg path {
+.c17:hover svg > g,
+.c17:hover svg path {
   fill: #666687;
 }
 
-.c16:active svg > g,
-.c16:active svg path {
+.c17:active svg > g,
+.c17:active svg path {
   fill: #a5a5ba;
 }
 
-.c16[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c16[aria-disabled='true'] svg path {
+.c17[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
+.c25 {
+  background: #32324d1F;
+  inset: 0;
 }
 
-<div>
-    <div>
+.c28 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c55 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c34 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c36 {
+  border-bottom: 2px solid transparent;
+}
+
+.c32[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c48 {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+<body
+  class="lock-body-scroll"
+>
+  <div>
+    <div
+      class=""
+    >
       <div
-        class="c0 c1"
-        spacing="1"
+        class="c0"
       >
         <label
-          class="c2"
-          for="carouselinput-4"
+          class="c1 c2 c3"
+          for=":r14:"
         >
-          <div
-            class="c3"
-          >
-            Logo
-          </div>
+          logo input label
         </label>
         <div
           class=""
-          id="carouselinput-4"
+          id=":r14:"
         >
           <div
             class="c4"
           >
             <section
-              aria-label="Logo"
+              aria-label="logo input label"
               aria-roledescription="carousel"
               class="c5 c6"
+              display="grid"
             >
               <div
                 aria-live="polite"
-                class="c7 c8"
-                width="100%"
+                class="c7 c8 c9"
+                overflow="hidden"
               >
                 <div
                   aria-label="Logo slide"
                   aria-roledescription="slide"
-                  class="c9 c10 c11"
-                  height="124px"
+                  class="c10 c11"
+                  display="flex"
                   role="group"
                 >
                   <img
@@ -305,27 +652,32 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                 </div>
               </div>
               <div
-                class="c13 c10 c14"
-                spacing="1"
-                width="100%"
+                class="c13 c14"
               >
                 <span>
                   <button
                     aria-disabled="false"
-                    aria-labelledby="tooltip-3"
-                    class="c15 c16"
+                    aria-labelledby=":r16:"
+                    class="c15 c11 c16 c17"
                     tabindex="0"
                     type="button"
                   >
+                    <span
+                      class="c18"
+                    >
+                      Change logo
+                    </span>
                     <svg
+                      aria-hidden="true"
                       fill="none"
-                      height="1em"
+                      focusable="false"
+                      height="1rem"
                       viewBox="0 0 24 24"
-                      width="1em"
+                      width="1rem"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                        d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
                         fill="#212134"
                       />
                     </svg>
@@ -334,16 +686,16 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               </div>
             </section>
             <div
-              class="c17"
+              class="c19"
             >
               <span>
                 <div
-                  aria-labelledby="tooltip-5"
-                  class="c10"
+                  aria-labelledby=":r18:"
+                  class="c11"
                   tabindex="0"
                 >
                   <span
-                    class="c18"
+                    class="c1 c20"
                   >
                     logo.png
                   </span>
@@ -352,16 +704,10 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
             </div>
           </div>
         </div>
-        <p
-          class="c19"
-          id="carouselinput-4-hint"
-        >
-          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
-        </p>
       </div>
     </div>
     <div
-      class="c20"
+      class="c18"
     >
       <p
         aria-live="polite"
@@ -383,822 +729,251 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       />
     </div>
   </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-<div
-    data-react-portal="true"
+  <div
+    class=""
   >
     <div
-      class="c0 c1"
-      id="tooltip-3"
+      class="c21 c22"
+      id=":r16:"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c1 c23"
       >
         Change logo
       </p>
     </div>
   </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-<div
-    data-react-portal="true"
+  <div
+    class=""
   >
     <div
-      class="c0 c1"
-      id="tooltip-5"
+      class="c21 c22"
+      id=":r18:"
       role="tooltip"
     >
       <p
-        class="c2"
+        class="c1 c23"
       >
         logo.png
       </p>
     </div>
   </div>
-  .c9 {
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
-}
-
-.c25 {
-  padding-top: 12px;
-  padding-bottom: 20px;
-}
-
-.c32 {
-  padding-top: 24px;
-}
-
-.c1 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c3 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
-}
-
-.c0 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d1F;
-  padding: 0 40px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c2 {
-  width: 51.875rem;
-}
-
-.c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c34 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c36 > * + * {
-  margin-left: 8px;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c26 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c33 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c15 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c12 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c14 {
-  border-bottom: 2px solid transparent;
-}
-
-.c10[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c16 {
-  background: #eaeaef;
-}
-
-.c17 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c19 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 8px;
-}
-
-.c21 {
-  background: #f6f6f9;
-  padding-top: 48px;
-  padding-bottom: 32px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-  position: relative;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c23 {
-  color: #4945ff;
-  width: 3.75rem;
-  height: 3.75rem;
-}
-
-.c24 path {
-  fill: #4945ff;
-}
-
-.c31 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c28 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c28 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c28 svg > g,
-.c28 svg path {
-  fill: #ffffff;
-}
-
-.c28[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c28:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c28:focus-visible {
-  outline: none;
-}
-
-.c28:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c29 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c29 .sc-eZhRLC {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c29 .c30 {
-  color: #ffffff;
-}
-
-.c29[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c29[aria-disabled='true'] .c30 {
-  color: #666687;
-}
-
-.c29[aria-disabled='true'] svg > g,
-.c29[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c29[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c29[aria-disabled='true']:active .c30 {
-  color: #666687;
-}
-
-.c29[aria-disabled='true']:active svg > g,
-.c29[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c29:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c29:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c29 svg > g,
-.c29 svg path {
-  fill: #ffffff;
-}
-
-.c37 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c37 .sc-eZhRLC {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c37 .c30 {
-  color: #ffffff;
-}
-
-.c37[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c37[aria-disabled='true'] .c30 {
-  color: #666687;
-}
-
-.c37[aria-disabled='true'] svg > g,
-.c37[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c37[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c37[aria-disabled='true']:active .c30 {
-  color: #666687;
-}
-
-.c37[aria-disabled='true']:active svg > g,
-.c37[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c37:hover {
-  background-color: #f6f6f9;
-}
-
-.c37:active {
-  background-color: #eaeaef;
-}
-
-.c37 .c30 {
-  color: #32324d;
-}
-
-.c37 svg > g,
-.c37 svg path {
-  fill: #32324d;
-}
-
-.c27 {
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1;
-}
-
-<div
-    data-react-portal="true"
+  <div
+    class=""
   >
     <div
-      class="c0"
+      class="c24 c11 c25"
     >
       <div>
-        <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c26"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c27 c28"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c29"
               >
-                <button
-                  aria-controls="tabgroup-1-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-1-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
+                <h2
+                  class="c1 c30"
+                  id="modal"
                 >
-                  <div
-                    class="c11 c12"
-                  >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
+                  Upload logo
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-1-1-tab"
-                  role="tab"
-                  tabindex="-1"
+                  class="c15 c11 c16 c17"
                   type="button"
                 >
-                  <div
-                    class="c11 c14"
+                  <span
+                    class="c18"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-1-0-tab"
-                id="tabgroup-1-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c31"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-controls=":r1a:-0-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c32"
+                    id=":r1a:-0-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
                   >
-                    <div>
-                      <label
-                        for="logo-upload"
+                    <div
+                      class="c33 c34"
+                    >
+                      <span
+                        class="c1 c35"
                       >
-                        <div
-                          class="c19 c20"
-                          spacing="2"
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c32"
+                    id=":r1a:-1-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <div
+                      class="c33 c36"
+                    >
+                      <span
+                        class="c1 c37"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c38 c39"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby=":r1a:-0-tab"
+                  id=":r1a:-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c40"
+                    >
+                      <div
+                        class=""
+                      >
+                        <label
+                          for="logo-upload"
                         >
                           <div
-                            class="c21 c22"
+                            class="c41"
                           >
-                            <svg
-                              aria-hidden="true"
-                              class="c23 c24"
-                              fill="none"
-                              height="3.75rem"
-                              viewBox="0 0 24 20"
-                              width="3.75rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                fill="#32324D"
-                              />
-                            </svg>
                             <div
-                              class="c25"
+                              class="c42 c43"
                             >
-                              <span
-                                class="c26"
+                              <svg
+                                aria-hidden="true"
+                                class="c44 c45"
+                                fill="none"
+                                height="1rem"
+                                viewBox="0 0 24 20"
+                                width="1rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                Drag and Drop here or
-                              </span>
-                            </div>
-                            <input
-                              accept="image/jpeg,image/png,image/svg+xml"
-                              class="c27"
-                              cursor="pointer"
-                              id="logo-upload"
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                            />
-                            <button
-                              aria-disabled="false"
-                              class="c28 c29"
-                              type="button"
-                            >
-                              <span
-                                class="c30 c31"
+                                <path
+                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 0 0-.74-.55 2.214 2.214 0 0 0-.912-.196 2.215 2.215 0 0 0-.912.191 2.131 2.131 0 0 0-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 0 0-.741-.545 2.228 2.228 0 0 0-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 0 0 .504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 0 0-.652-1.81 2.706 2.706 0 0 0-1.776-.87Z"
+                                  fill="#32324D"
+                                />
+                                <path
+                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585ZM3.303 6.408h.826V3.997h2.477V2.41H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826Z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                              <div
+                                class="c46"
                               >
-                                Browse files
-                              </span>
-                            </button>
-                            <div
-                              class="c32"
-                            >
-                              <span
-                                class="c33"
+                                <span
+                                  class="c1 c47"
+                                >
+                                  Drag and Drop here or
+                                </span>
+                              </div>
+                              <input
+                                accept="image/jpeg,image/png,image/svg+xml"
+                                class="c48"
+                                cursor="pointer"
+                                id="logo-upload"
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                              />
+                              <button
+                                aria-disabled="false"
+                                class="c49 c50 c16 c51"
+                                type="button"
                               >
-                                Max dimension: 750x750, Max size: 100KB
-                              </span>
+                                <span
+                                  class="c1 c52"
+                                >
+                                  Browse files
+                                </span>
+                              </button>
+                              <div
+                                class="c53"
+                              >
+                                <span
+                                  class="c1 c54"
+                                >
+                                  Max dimension: 750x750, Max size: 100KB
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </label>
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                </form>
-                <div
-                  class="c3 c34"
-                >
+                  </form>
                   <div
-                    class="c5"
+                    class="c27 c55"
                   >
                     <div
-                      class="c35 c36"
+                      class="c29"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c28 c37"
-                        type="button"
+                      <div
+                        class="c50"
                       >
-                        <span
-                          class="c30 c31"
+                        <button
+                          aria-disabled="false"
+                          class="c49 c50 c16 c56"
+                          type="button"
                         >
-                          Cancel
-                        </span>
-                      </button>
+                          <span
+                            class="c1 c52"
+                          >
+                            Cancel
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="c50"
+                      />
                     </div>
-                    <div
-                      class="c35 c36"
-                    />
                   </div>
                 </div>
               </div>
@@ -1212,10 +987,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 `;
 
 exports[`ApplicationsInfosPage || LogoInput from url should render upload modal with from url tab 1`] = `
-<body
-  class="lock-body-scroll"
->
-  .c20 {
+.c18 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1227,6 +999,61 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 1px;
 }
 
+.c2 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c23 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c20 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c37 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #4945ff;
+}
+
+.c35 {
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c47 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  line-height: 0;
+  color: #ffffff;
+}
+
 .c4 {
   background: #f6f6f9;
   padding: 8px;
@@ -1236,17 +1063,29 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 }
 
 .c5 {
+  display: grid;
   position: relative;
 }
 
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
-.c9 {
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
   height: 124px;
+}
+
+.c12 {
+  max-width: 40%;
+  max-height: 40%;
 }
 
 .c13 {
@@ -1255,432 +1094,45 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   width: 100%;
 }
 
-.c17 {
+.c21 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+  position: absolute;
+}
+
+.c15 {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.c19 {
   padding-top: 8px;
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c2 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c18 {
-  color: #666687;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c0 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c10 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c6 {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'startAction slides endAction';
-}
-
-.c8 {
-  grid-area: slides;
-}
-
-.c1 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c1 > * + * {
-  margin-top: 4px;
-}
-
-.c14 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c14 > * + * {
-  margin-left: 4px;
-}
-
-.c11 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c15 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c15 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c15 svg > g,
-.c15 svg path {
-  fill: #ffffff;
-}
-
-.c15[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c15:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c15:focus-visible {
-  outline: none;
-}
-
-.c15:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c16 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c16 svg > g,
-.c16 svg path {
-  fill: #8e8ea9;
-}
-
-.c16:hover svg > g,
-.c16:hover svg path {
-  fill: #666687;
-}
-
-.c16:active svg > g,
-.c16:active svg path {
-  fill: #a5a5ba;
-}
-
-.c16[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c16[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
-}
-
-<div>
-    <div>
-      <div
-        class="c0 c1"
-        spacing="1"
-      >
-        <label
-          class="c2"
-          for="carouselinput-49"
-        >
-          <div
-            class="c3"
-          >
-            Logo
-          </div>
-        </label>
-        <div
-          class=""
-          id="carouselinput-49"
-        >
-          <div
-            class="c4"
-          >
-            <section
-              aria-label="Logo"
-              aria-roledescription="carousel"
-              class="c5 c6"
-            >
-              <div
-                aria-live="polite"
-                class="c7 c8"
-                width="100%"
-              >
-                <div
-                  aria-label="Logo slide"
-                  aria-roledescription="slide"
-                  class="c9 c10 c11"
-                  height="124px"
-                  role="group"
-                >
-                  <img
-                    alt="Logo"
-                    class="c12"
-                    src="/admin/defaultLogo.png"
-                  />
-                </div>
-              </div>
-              <div
-                class="c13 c10 c14"
-                spacing="1"
-                width="100%"
-              >
-                <span>
-                  <button
-                    aria-disabled="false"
-                    aria-labelledby="tooltip-33"
-                    class="c15 c16"
-                    tabindex="0"
-                    type="button"
-                  >
-                    <svg
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 24 24"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                        fill="#212134"
-                      />
-                    </svg>
-                  </button>
-                </span>
-              </div>
-            </section>
-            <div
-              class="c17"
-            >
-              <span>
-                <div
-                  aria-labelledby="tooltip-50"
-                  class="c10"
-                  tabindex="0"
-                >
-                  <span
-                    class="c18"
-                  >
-                    logo.png
-                  </span>
-                </div>
-              </span>
-            </div>
-          </div>
-        </div>
-        <p
-          class="c19"
-          id="carouselinput-49-hint"
-        >
-          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
-        </p>
-      </div>
-    </div>
-    <div
-      class="c20"
-    >
-      <p
-        aria-live="polite"
-        aria-relevant="all"
-        id="live-region-log"
-        role="log"
-      />
-      <p
-        aria-live="polite"
-        aria-relevant="all"
-        id="live-region-status"
-        role="status"
-      />
-      <p
-        aria-live="assertive"
-        aria-relevant="all"
-        id="live-region-alert"
-        role="alert"
-      />
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-33"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Change logo
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-50"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        logo.png
-      </p>
-    </div>
-  </div>
-  .c9 {
+.c24 {
   padding-right: 40px;
   padding-left: 40px;
+  position: fixed;
+  z-index: 4;
 }
 
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
-}
-
-.c1 {
+.c26 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+  width: 51.875rem;
 }
 
-.c3 {
+.c27 {
   background: #f6f6f9;
   padding-top: 16px;
   padding-right: 20px;
@@ -1688,429 +1140,38 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   padding-left: 20px;
 }
 
-.c0 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d1F;
-  padding: 0 40px;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c2 {
-  width: 51.875rem;
-}
-
-.c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c26 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
-}
-
-.c28 > * + * {
-  margin-left: 8px;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c15 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c13 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c14 {
-  border-bottom: 2px solid #4945ff;
-}
-
-.c12 {
-  border-bottom: 2px solid transparent;
-}
-
-.c10[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c16 {
-  background: #eaeaef;
-}
-
-.c17 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c32 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c29 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c29 svg > g,
-.c29 svg path {
-  fill: #ffffff;
-}
-
-.c29[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c29:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c29:focus-visible {
-  outline: none;
-}
-
-.c29:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+.c31 {
+  padding-right: 40px;
+  padding-left: 40px;
 }
 
 .c33 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
+  padding: 16px;
+}
+
+.c38 {
+  background: #eaeaef;
+}
+
+.c40 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c45 {
   background: #4945ff;
+  padding: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #4945ff;
   border: 1px solid #4945ff;
+  cursor: pointer;
 }
 
-.c33 .sc-eZhRLC {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c33 .c31 {
-  color: #ffffff;
-}
-
-.c33[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c33[aria-disabled='true'] .c31 {
-  color: #666687;
-}
-
-.c33[aria-disabled='true'] svg > g,
-.c33[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c33[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c33[aria-disabled='true']:active .c31 {
-  color: #666687;
-}
-
-.c33[aria-disabled='true']:active svg > g,
-.c33[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c33:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c33:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c33 svg > g,
-.c33 svg path {
-  fill: #ffffff;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c30 .sc-eZhRLC {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c30 .c31 {
-  color: #ffffff;
-}
-
-.c30[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true'] .c31 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true'] svg > g,
-.c30[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c30[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true']:active .c31 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true']:active svg > g,
-.c30[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c30:hover {
-  background-color: #f6f6f9;
-}
-
-.c30:active {
-  background-color: #eaeaef;
-}
-
-.c30 .c31 {
-  color: #32324d;
-}
-
-.c30 svg > g,
-.c30 svg path {
-  fill: #32324d;
-}
-
-.c19 {
+.c0 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -2122,9 +1183,10 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c22 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2138,7 +1200,44 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   flex-direction: row;
 }
 
-.c23 {
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c29 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2156,14 +1255,209 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   justify-content: space-between;
 }
 
-.c21 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
 }
 
-.c25 {
+.c16 {
+  position: relative;
+  outline: none;
+}
+
+.c16 > svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c16 > svg > g,
+.c16 > svg path {
+  fill: #ffffff;
+}
+
+.c16[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c16:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c16:focus-visible {
+  outline: none;
+}
+
+.c16:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c48 {
+  height: 2rem;
+}
+
+.c48 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c48[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c48[aria-disabled='true'] .c1 {
+  color: #666687;
+}
+
+.c48[aria-disabled='true'] svg > g,.c48[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c48[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c48[aria-disabled='true']:active .c1 {
+  color: #666687;
+}
+
+.c48[aria-disabled='true']:active svg > g,.c48[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c48:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c48:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c48 svg > g,
+.c48 svg path {
+  fill: #ffffff;
+}
+
+.c46 {
+  height: 2rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c46 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c46[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c46[aria-disabled='true'] .c1 {
+  color: #666687;
+}
+
+.c46[aria-disabled='true'] svg > g,.c46[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c46[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c46[aria-disabled='true']:active .c1 {
+  color: #666687;
+}
+
+.c46[aria-disabled='true']:active svg > g,.c46[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c46:hover {
+  background-color: #f6f6f9;
+}
+
+.c46:active {
+  background-color: #eaeaef;
+}
+
+.c46 .c1 {
+  color: #32324d;
+}
+
+.c46 svg > g,
+.c46 svg path {
+  fill: #32324d;
+}
+
+.c22 {
+  z-index: 4;
+  display: none;
+}
+
+.c6 {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'startAction slides endAction';
+}
+
+.c9 {
+  grid-area: slides;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c39 {
+  height: 1px;
+  border: none;
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.c42 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -2178,36 +1472,36 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: inherit;
 }
 
-.c25::-webkit-input-placeholder {
+.c42::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::-moz-placeholder {
+.c42::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:-ms-input-placeholder {
+.c42:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::placeholder {
+.c42::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25[aria-disabled='true'] {
+.c42[aria-disabled='true'] {
   color: inherit;
 }
 
-.c25:focus {
+.c42:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c24 {
+.c41 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -2219,200 +1513,399 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   transition-duration: 0.2s;
 }
 
-.c24:focus-within {
+.c41:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c17 svg > g,
+.c17 svg path {
+  fill: #8e8ea9;
 }
 
-.c20 > * + * {
-  margin-top: 4px;
+.c17:hover svg > g,
+.c17:hover svg path {
+  fill: #666687;
 }
 
-<div
-    data-react-portal="true"
-  >
+.c17:active svg > g,
+.c17:active svg path {
+  fill: #a5a5ba;
+}
+
+.c17[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c25 {
+  background: #32324d1F;
+  inset: 0;
+}
+
+.c28 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c43 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c36 {
+  border-bottom: 2px solid #4945ff;
+}
+
+.c34 {
+  border-bottom: 2px solid transparent;
+}
+
+.c32[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+<body
+  class="lock-body-scroll"
+>
+  <div>
     <div
-      class="c0"
+      class=""
     >
-      <div>
+      <div
+        class="c0"
+      >
+        <label
+          class="c1 c2 c3"
+          for=":r2o:"
+        >
+          logo input label
+        </label>
         <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
+          class=""
+          id=":r2o:"
         >
           <div
-            class="c3 c4"
+            class="c4"
           >
-            <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+            <section
+              aria-label="logo input label"
+              aria-roledescription="carousel"
+              class="c5 c6"
+              display="grid"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                aria-live="polite"
+                class="c7 c8 c9"
+                overflow="hidden"
               >
-                <button
-                  aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-10-0-tab"
-                  role="tab"
-                  tabindex="-1"
-                  type="button"
+                <div
+                  aria-label="Logo slide"
+                  aria-roledescription="slide"
+                  class="c10 c11"
+                  display="flex"
+                  role="group"
                 >
-                  <div
-                    class="c11 c12"
+                  <img
+                    alt="Logo"
+                    class="c12"
+                    src="/admin/defaultLogo.png"
+                  />
+                </div>
+              </div>
+              <div
+                class="c13 c14"
+              >
+                <span>
+                  <button
+                    aria-disabled="false"
+                    aria-labelledby=":r2q:"
+                    class="c15 c11 c16 c17"
+                    tabindex="0"
+                    type="button"
                   >
                     <span
-                      class="c13"
+                      class="c18"
                     >
-                      From computer
+                      Change logo
                     </span>
-                  </div>
-                </button>
-                <button
-                  aria-controls="tabgroup-10-1-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-10-1-tab"
-                  role="tab"
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      focusable="false"
+                      height="1rem"
+                      viewBox="0 0 24 24"
+                      width="1rem"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              </div>
+            </section>
+            <div
+              class="c19"
+            >
+              <span>
+                <div
+                  aria-labelledby=":r2s:"
+                  class="c11"
                   tabindex="0"
+                >
+                  <span
+                    class="c1 c20"
+                  >
+                    logo.png
+                  </span>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="c18"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
+  </div>
+  <div
+    class=""
+  >
+    <div
+      class="c21 c22"
+      id=":r2q:"
+      role="tooltip"
+    >
+      <p
+        class="c1 c23"
+      >
+        Change logo
+      </p>
+    </div>
+  </div>
+  <div
+    class=""
+  >
+    <div
+      class="c21 c22"
+      id=":r2s:"
+      role="tooltip"
+    >
+      <p
+        class="c1 c23"
+      >
+        logo.png
+      </p>
+    </div>
+  </div>
+  <div
+    class=""
+  >
+    <div
+      class="c24 c11 c25"
+    >
+      <div>
+        <div>
+          <div
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c26"
+            role="dialog"
+          >
+            <div
+              class="c27 c28"
+            >
+              <div
+                class="c29"
+              >
+                <h2
+                  class="c1 c30"
+                  id="modal"
+                >
+                  Upload logo
+                </h2>
+                <button
+                  aria-disabled="false"
+                  class="c15 c11 c16 c17"
                   type="button"
                 >
-                  <div
-                    class="c11 c14"
+                  <span
+                    class="c18"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    Close the modal
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-10-1-tab"
-                id="tabgroup-10-1-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c31"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c32"
+                    id=":r2u:-0-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
                   >
-                    <div>
+                    <div
+                      class="c33 c34"
+                    >
+                      <span
+                        class="c1 c35"
+                      >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-controls=":r2u:-1-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c32"
+                    id=":r2u:-1-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <div
+                      class="c33 c36"
+                    >
+                      <span
+                        class="c1 c37"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c38 c39"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby=":r2u:-1-tab"
+                  id=":r2u:-1-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c40"
+                    >
                       <div>
                         <div
-                          class="c19 c20"
-                          spacing="1"
+                          class=""
                         >
-                          <label
-                            class="c21"
-                            for="textinput-1"
+                          <div
+                            class="c0"
                           >
-                            <div
-                              class="c22"
+                            <label
+                              class="c1 c2 c3"
+                              for=":r30:"
                             >
                               URL
+                            </label>
+                            <div
+                              class="c29 c41"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                aria-required="false"
+                                class="c42"
+                                id=":r30:"
+                                name="logo-url"
+                                value=""
+                              />
                             </div>
-                          </label>
-                          <div
-                            class="c23 c24"
-                          >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              class="c25"
-                              id="textinput-1"
-                              name="logo-url"
-                              value=""
-                            />
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    class="c3 c26"
-                  >
                     <div
-                      class="c5"
+                      class="c27 c43"
                     >
                       <div
-                        class="c27 c28"
+                        class="c29"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c30"
-                          type="button"
+                        <div
+                          class="c44"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c45 c44 c16 c46"
+                            type="button"
                           >
-                            Cancel
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="c27 c28"
-                      >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c33"
-                          type="submit"
+                            <span
+                              class="c1 c47"
+                            >
+                              Cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c44"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c45 c44 c16 c48"
+                            type="submit"
                           >
-                            Next
-                          </span>
-                        </button>
+                            <span
+                              class="c1 c47"
+                            >
+                              Next
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -2424,7 +1917,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 `;
 
 exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`] = `
-.c20 {
+.c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2436,7 +1929,24 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   width: 1px;
 }
 
-.c4 {
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c19 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c3 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
@@ -2444,66 +1954,53 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   border: 1px solid #dcdce4;
 }
 
-.c5 {
+.c4 {
+  display: grid;
   position: relative;
 }
 
-.c7 {
+.c6 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
 .c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
   height: 124px;
 }
 
-.c13 {
+.c11 {
+  max-width: 40%;
+  max-height: 40%;
+}
+
+.c12 {
   position: absolute;
   bottom: 4px;
   width: 100%;
 }
 
-.c17 {
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c24 {
-  background: #212134;
+.c14 {
+  background: #ffffff;
   padding: 8px;
   border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
 }
 
 .c18 {
-  color: #666687;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c19 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c26 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-left: 16px;
 }
 
 .c0 {
@@ -2518,9 +2015,10 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  gap: 4px;
 }
 
-.c3 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2552,87 +2050,37 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   justify-content: center;
 }
 
-.c25 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-.c6 {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'startAction slides endAction';
-}
-
-.c8 {
-  grid-area: slides;
-}
-
-.c1 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c1 > * + * {
-  margin-top: 4px;
-}
-
-.c14 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c14 > * + * {
-  margin-left: 4px;
-}
-
-.c11 {
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c21 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c23 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c22 {
-  position: absolute;
-  z-index: 4;
-  display: none;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 4px;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
 .c15 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c15 svg {
+.c15 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c15 svg > g,
-.c15 svg path {
+.c15 > svg > g,
+.c15 > svg path {
   fill: #ffffff;
 }
 
@@ -2670,7 +2118,16 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   border: 2px solid #4945ff;
 }
 
-.c16 {
+.c5 {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'startAction slides endAction';
+}
+
+.c8 {
+  grid-area: slides;
+}
+
+.c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2679,12 +2136,6 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
 }
 
 .c16 svg > g,
@@ -2702,175 +2153,131 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
   fill: #a5a5ba;
 }
 
-.c16[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
 .c16[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c12 {
-  max-width: 40%;
-  max-height: 40%;
-}
-
-<body>
-  <div>
-    <div>
-      <div
-        class="c0 c1"
-        spacing="1"
+<div>
+  <div
+    class=""
+  >
+    <div
+      class="c0"
+    >
+      <label
+        class="c1 c2"
+        for=":r0:"
       >
-        <label
-          class="c2"
-          for="carouselinput-1"
-        >
-          <div
-            class="c3"
-          >
-            Logo
-          </div>
-        </label>
+        logo input label
+      </label>
+      <div
+        class=""
+        id=":r0:"
+      >
         <div
-          class=""
-          id="carouselinput-1"
+          class="c3"
         >
-          <div
-            class="c4"
+          <section
+            aria-label="logo input label"
+            aria-roledescription="carousel"
+            class="c4 c5"
+            display="grid"
           >
-            <section
-              aria-label="Logo"
-              aria-roledescription="carousel"
-              class="c5 c6"
+            <div
+              aria-live="polite"
+              class="c6 c7 c8"
+              overflow="hidden"
             >
               <div
-                aria-live="polite"
-                class="c7 c8"
-                width="100%"
+                aria-label="Logo slide"
+                aria-roledescription="slide"
+                class="c9 c10"
+                display="flex"
+                role="group"
               >
-                <div
-                  aria-label="Logo slide"
-                  aria-roledescription="slide"
-                  class="c9 c10 c11"
-                  height="124px"
-                  role="group"
-                >
-                  <img
-                    alt="Logo"
-                    class="c12"
-                    src="/admin/defaultLogo.png"
-                  />
-                </div>
+                <img
+                  alt="Logo"
+                  class="c11"
+                  src="/admin/defaultLogo.png"
+                />
               </div>
-              <div
-                class="c13 c10 c14"
-                spacing="1"
-                width="100%"
-              >
-                <span>
-                  <button
-                    aria-disabled="false"
-                    aria-labelledby="tooltip-1"
-                    class="c15 c16"
-                    tabindex="0"
-                    type="button"
-                  >
-                    <svg
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 24 24"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                        fill="#212134"
-                      />
-                    </svg>
-                  </button>
-                </span>
-              </div>
-            </section>
+            </div>
             <div
-              class="c17"
+              class="c12 c13"
             >
               <span>
-                <div
-                  aria-labelledby="tooltip-2"
-                  class="c10"
+                <button
+                  aria-disabled="false"
+                  aria-labelledby=":r2:"
+                  class="c14 c10 c15 c16"
                   tabindex="0"
+                  type="button"
                 >
                   <span
-                    class="c18"
+                    class="c17"
                   >
-                    logo.png
+                    Change logo
                   </span>
-                </div>
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="1rem"
+                    viewBox="0 0 24 24"
+                    width="1rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </button>
               </span>
             </div>
+          </section>
+          <div
+            class="c18"
+          >
+            <span>
+              <div
+                aria-labelledby=":r4:"
+                class="c10"
+                tabindex="0"
+              >
+                <span
+                  class="c19"
+                >
+                  logo.png
+                </span>
+              </div>
+            </span>
           </div>
         </div>
-        <p
-          class="c19"
-          id="carouselinput-1-hint"
-        >
-          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
-        </p>
       </div>
     </div>
-    <div
-      class="c20"
-    >
-      <p
-        aria-live="polite"
-        aria-relevant="all"
-        id="live-region-log"
-        role="log"
-      />
-      <p
-        aria-live="polite"
-        aria-relevant="all"
-        id="live-region-status"
-        role="status"
-      />
-      <p
-        aria-live="assertive"
-        aria-relevant="all"
-        id="live-region-alert"
-        role="alert"
-      />
-    </div>
   </div>
   <div
-    data-react-portal="true"
+    class="c17"
   >
-    <div
-      class="c21 c22"
-      id="tooltip-1"
-      role="tooltip"
-    >
-      <p
-        class="c23"
-      >
-        Change logo
-      </p>
-    </div>
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
   </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c24 c25"
-      id="tooltip-2"
-      role="tooltip"
-    >
-      <p
-        class="c26"
-      >
-        logo.png
-      </p>
-    </div>
-  </div>
-</body>
+</div>
 `;

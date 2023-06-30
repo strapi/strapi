@@ -1,8 +1,18 @@
 import React from 'react';
+
+import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { getTrad } from '../../../utils';
+
 import useHasI18n from '../../../hooks/useHasI18n';
+import { getTrad } from '../../../utils';
+
+const Emphasis = (chunks) => {
+  return (
+    <Typography fontWeight="semiBold" textColor="danger500">
+      {chunks}
+    </Typography>
+  );
+};
 
 const DeleteModalAdditionalInfos = () => {
   const hasI18nEnabled = useHasI18n();
@@ -21,11 +31,7 @@ const DeleteModalAdditionalInfos = () => {
             'This will delete the active locale versions <em>(from Internationalization)</em>',
         },
         {
-          em: (chunks) => (
-            <Typography fontWeight="semiBold" textColor="danger500">
-              {chunks}
-            </Typography>
-          ),
+          em: Emphasis,
         }
       )}
     </Typography>

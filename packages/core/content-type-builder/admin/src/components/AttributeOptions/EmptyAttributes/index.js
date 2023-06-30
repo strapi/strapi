@@ -1,13 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
+
+import { Box, Flex, Icon, LinkButton, Typography } from '@strapi/design-system';
+import { EmptyDocuments, Plus } from '@strapi/icons';
+import qs from 'qs';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/LinkButton';
-import { Icon } from '@strapi/design-system/Icon';
-import Plus from '@strapi/icons/Plus';
-import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
+import styled from 'styled-components';
+
 import { getTrad } from '../../../utils';
 
 const EmptyCard = styled(Box)`
@@ -42,7 +40,7 @@ const EmptyAttributes = () => {
       <EmptyCardGrid />
       <Box position="absolute" top={6} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
-          <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
+          <Icon as={EmptyDocuments} color="" width="160px" height="88px" />
           <Box paddingTop={6} paddingBottom={4}>
             <Box textAlign="center">
               <Typography variant="delta" as="p" textColor="neutral600">
@@ -62,7 +60,11 @@ const EmptyAttributes = () => {
               </Box>
             </Box>
           </Box>
-          <LinkButton to="/marketplace" variant="secondary" startIcon={<Plus />}>
+          <LinkButton
+            to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
+            variant="secondary"
+            startIcon={<Plus />}
+          >
             {formatMessage({
               id: getTrad('modalForm.empty.button'),
               defaultMessage: 'Add custom fields',

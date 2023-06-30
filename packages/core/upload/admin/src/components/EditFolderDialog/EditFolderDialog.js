@@ -1,28 +1,34 @@
-import * as yup from 'yup';
-import { Formik } from 'formik';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import isEmpty from 'lodash/isEmpty';
-import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { FieldLabel } from '@strapi/design-system/Field';
-import { Flex } from '@strapi/design-system/Flex';
-import { Loader } from '@strapi/design-system/Loader';
-import { Stack } from '@strapi/design-system/Stack';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Typography } from '@strapi/design-system/Typography';
-import { Form, useNotification, getAPIInnerErrors, useTracking } from '@strapi/helper-plugin';
 
-import { getTrad, findRecursiveFolderByValue } from '../../utils';
+import {
+  Button,
+  FieldLabel,
+  Flex,
+  Grid,
+  GridItem,
+  Loader,
+  ModalBody,
+  ModalFooter,
+  ModalLayout,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
+import { Form, getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
+import { Formik } from 'formik';
+import isEmpty from 'lodash/isEmpty';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import * as yup from 'yup';
+
 import { FolderDefinition } from '../../constants';
-import { useEditFolder } from '../../hooks/useEditFolder';
 import { useBulkRemove } from '../../hooks/useBulkRemove';
+import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { findRecursiveFolderByValue, getTrad } from '../../utils';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
+
 import { EditFolderModalHeader } from './ModalHeader';
 import RemoveFolderDialog from './RemoveFolderDialog';
 
@@ -203,7 +209,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </GridItem>
 
                   <GridItem xs={12} col={6}>
-                    <Stack spacing={1}>
+                    <Flex direction="column" alignItems="stretch" gap={1}>
                       <FieldLabel htmlFor="folder-parent">
                         {formatMessage({
                           id: getTrad('form.input.label.folder-location'),
@@ -236,7 +242,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                           {errors.parent}
                         </Typography>
                       )}
-                    </Stack>
+                    </Flex>
                   </GridItem>
                 </Grid>
               </ModalBody>
@@ -248,7 +254,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                   </Button>
                 }
                 endActions={
-                  <Stack horizontal spacing={2}>
+                  <Flex gap={2}>
                     {isEditing && canUpdate && (
                       <Button
                         type="button"
@@ -258,7 +264,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         disabled={!canUpdate || isEditFolderLoading}
                       >
                         {formatMessage({
-                          id: 'modal.folder.create.delete',
+                          id: getTrad('modal.folder.create.delete'),
                           defaultMessage: 'Delete folder',
                         })}
                       </Button>
@@ -272,11 +278,11 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     >
                       {formatMessage(
                         isEditing
-                          ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
-                          : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+                          ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                          : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
                       )}
                     </Button>
-                  </Stack>
+                  </Flex>
                 }
               />
             </Form>

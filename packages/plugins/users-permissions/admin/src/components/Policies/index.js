@@ -1,9 +1,11 @@
 import React from 'react';
+
+import { Flex, GridItem, Typography } from '@strapi/design-system';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import without from 'lodash/without';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { GridItem } from '@strapi/design-system/Grid';
-import { get, isEmpty, without } from 'lodash';
+
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import BoundRoute from '../BoundRoute';
 
@@ -30,14 +32,14 @@ const Policies = () => {
       style={{ minHeight: '100%' }}
     >
       {selectedAction ? (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           {displayedRoutes.map((route, key) => (
             // eslint-disable-next-line react/no-array-index-key
             <BoundRoute key={key} route={route} />
           ))}
-        </Stack>
+        </Flex>
       ) : (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'users-permissions.Policies.header.title',
@@ -51,7 +53,7 @@ const Policies = () => {
                 "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
             })}
           </Typography>
-        </Stack>
+        </Flex>
       )}
     </GridItem>
   );

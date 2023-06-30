@@ -1,11 +1,11 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
+
+import { BaseCheckbox, Flex } from '@strapi/design-system';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import { Flex } from '@strapi/design-system/Flex';
-import get from 'lodash/get';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
+
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
@@ -15,6 +15,7 @@ import { getCheckboxState } from '../../../utils';
 import { activeStyle } from '../../utils';
 import CarretIcon from '../CarretIcon';
 import SubActionRow from '../SubActionRow';
+
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
 const Cell = styled(Flex)`
@@ -134,7 +135,7 @@ const ActionRow = ({
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     <BaseCheckbox
-                      disabled={isFormDisabled || IS_DISABLED}
+                      disabled={isFormDisabled}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
                         {
@@ -165,7 +166,7 @@ const ActionRow = ({
               return (
                 <Cell key={label} justifyContent="center" alignItems="center">
                   <BaseCheckbox
-                    disabled={isFormDisabled || IS_DISABLED}
+                    disabled={isFormDisabled}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={(value) => {

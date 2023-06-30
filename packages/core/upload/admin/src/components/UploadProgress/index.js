@@ -1,17 +1,15 @@
 import React from 'react';
+
+import { Flex, ProgressBar, Typography } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import Cross from '@strapi/icons/Cross';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { ProgressBar } from '@strapi/design-system/ProgressBar';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 const BoxWrapper = styled(Flex)`
+  border-radius: ${({ theme }) => `${theme.borderRadius} ${theme.borderRadius} 0 0`};
   width: 100%;
   height: 100%;
-  flex-direction: column;
 
   svg {
     path {
@@ -23,16 +21,21 @@ const BoxWrapper = styled(Flex)`
 const CancelButton = styled.button`
   border: none;
   background: none;
-  display: flex;
-  align-items: center;
+  width: min-content;
+  color: ${({ theme }) => theme.colors.neutral600};
+
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.colors.neutral700};
+  }
 
   svg {
-    path {
-      fill: ${({ theme }) => theme.colors.neutral200};
-    }
-
     height: 10px;
     width: 10px;
+
+    path {
+      fill: currentColor;
+    }
   }
 `;
 
@@ -40,34 +43,26 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <BoxWrapper
-      background={error ? 'danger100' : 'neutral700'}
-      justifyContent="center"
-      error={error}
-      hasRadius
-    >
+    <BoxWrapper alignItems="center" background={error ? 'danger100' : 'neutral150'} error={error}>
       {error ? (
         <Cross aria-label={error?.message} />
       ) : (
-        <>
-          <Box paddingBottom={2}>
-            <ProgressBar value={progress} size="S">
-              {`${progress}/100%`}
-            </ProgressBar>
-          </Box>
+        <Flex direction="column" alignItems="center" gap={2} width="100%">
+          <ProgressBar value={progress}>{`${progress}/100%`}</ProgressBar>
 
           <CancelButton type="button" onClick={onCancel}>
-            <Typography variant="pi" as="span" textColor="neutral200">
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Typography>
-            <Box as="span" paddingLeft={2} aria-hidden>
-              <Cross />
-            </Box>
+            <Flex gap={2}>
+              <Typography variant="pi" as="span" textColor="inherit">
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Typography>
+
+              <Cross aria-hidden />
+            </Flex>
           </CancelButton>
-        </>
+        </Flex>
       )}
     </BoxWrapper>
   );

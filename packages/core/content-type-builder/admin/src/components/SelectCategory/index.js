@@ -5,9 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
+
+import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { ComboboxOption, CreatableCombobox } from '@strapi/design-system/Combobox';
+import { useIntl } from 'react-intl';
+
 import useDataManager from '../../hooks/useDataManager';
 
 const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {

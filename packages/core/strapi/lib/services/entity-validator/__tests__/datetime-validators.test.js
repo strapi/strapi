@@ -1,7 +1,9 @@
 'use strict';
 
 const strapiUtils = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { YupValidationError },
+} = require('@strapi/utils');
 const validators = require('../validators');
 
 describe('Datetime validator', () => {
@@ -25,7 +27,6 @@ describe('Datetime validator', () => {
       kind: 'contentType',
       modelName: 'test-model',
       uid: 'test-uid',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrDateTimeUnique: { type: 'datetime', unique: true },

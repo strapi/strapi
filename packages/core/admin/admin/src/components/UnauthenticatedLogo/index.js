@@ -1,5 +1,7 @@
 import React from 'react';
+
 import styled from 'styled-components';
+
 import { useConfigurations } from '../../hooks';
 
 const Img = styled.img`
@@ -11,7 +13,7 @@ const Logo = () => {
     logos: { auth },
   } = useConfigurations();
 
-  return <Img src={auth.default} aria-hidden alt="" />;
+  return <Img src={auth?.custom ?? auth.default} aria-hidden alt="" />;
 };
 
 export default Logo;

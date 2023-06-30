@@ -1,7 +1,8 @@
-import ReactDOM from 'react-dom';
-import { Components, Fields, Middlewares, Reducers } from './core/apis';
-import { axiosInstance } from './core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
+import { createRoot } from 'react-dom/client';
+
 import appCustomisations from './app';
+import { Components, Fields, Middlewares, Reducers } from './core/apis';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
 import appReducers from './reducers';
@@ -12,6 +13,8 @@ window.strapi = {
   telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED ?? false,
   features: {
     SSO: 'sso',
+    AUDIT_LOGS: 'audit-logs',
+    REVIEW_WORKFLOWS: 'review-workflows',
   },
   projectType: 'Community',
 };
@@ -28,18 +31,18 @@ const reducers = Reducers({ appReducers });
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
+  const { get } = getFetchClient();
   try {
     const {
       data: {
         data: { isEE, features },
       },
-    } = await axiosInstance.get('/admin/project-type');
+    } = await get('/admin/project-type');
 
     window.strapi.isEE = isEE;
     window.strapi.features = {
       ...window.strapi.features,
-      allFeatures: features,
-      isEnabled: (f) => features.includes(f),
+      isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
 
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
@@ -66,7 +69,8 @@ const run = async () => {
 
   await app.loadTrads();
 
-  ReactDOM.render(app.render(), MOUNT_NODE);
+  const root = createRoot(MOUNT_NODE);
+  root.render(app.render());
 };
 
 run();

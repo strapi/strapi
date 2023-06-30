@@ -1,26 +1,22 @@
 import React from 'react';
-import { useTracking, Link } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Check from '@strapi/icons/Check';
-import Pencil from '@strapi/icons/Pencil';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
+
+import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
+import { Link, useTracking } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { Prompt, useRouteMatch } from 'react-router-dom';
+
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
+
 import LinkToCMSettingsView from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
@@ -120,7 +116,7 @@ const ListView = () => {
         id="title"
         primaryAction={
           isInDevelopmentMode && (
-            <Stack horizontal spacing={2}>
+            <Flex gap={2}>
               {/* DON'T display the add field button when the content type has not been created */}
               {!isCreatingFirstContentType && (
                 <Button
@@ -144,7 +140,7 @@ const ListView = () => {
                   defaultMessage: 'Save',
                 })}
               </Button>
-            </Stack>
+            </Flex>
           )
         }
         secondaryAction={
@@ -174,9 +170,9 @@ const ListView = () => {
         }
       />
       <ContentLayout>
-        <Stack spacing={4}>
+        <Flex direction="column" alignItems="stretch" gap={4}>
           <Flex justifyContent="flex-end">
-            <Stack horizontal spacing={2}>
+            <Flex gap={2}>
               <LinkToCMSettingsView
                 key="link-to-cm-settings-view"
                 targetUid={targetUid}
@@ -185,7 +181,7 @@ const ListView = () => {
                 contentTypeKind={contentTypeKind}
                 disabled={isCreatingFirstContentType}
               />
-            </Stack>
+            </Flex>
           </Flex>
           <Box background="neutral0" shadow="filterShadow" hasRadius>
             <List
@@ -197,7 +193,7 @@ const ListView = () => {
               isMain
             />
           </Box>
-        </Stack>
+        </Flex>
       </ContentLayout>
     </>
   );

@@ -1,10 +1,11 @@
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+
+import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import { Search } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useTracking } from '@strapi/helper-plugin';
-import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
-import { IconButton } from '@strapi/design-system/IconButton';
-import SearchIcon from '@strapi/icons/Search';
+
 import getTrad from '../../../../utils/getTrad';
 
 const SearchAsset = ({ onChangeSearch, queryValue }) => {
@@ -65,7 +66,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     );
   }
 
-  return <IconButton icon={<SearchIcon />} label="Search" onClick={handleToggle} />;
+  return <IconButton icon={<Search />} label="Search" onClick={handleToggle} />;
 };
 
 SearchAsset.defaultProps = {

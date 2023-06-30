@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-template-curly-in-string */
+
 const { isValidEmailTemplate } = require('../email-template');
 
 describe('isValidEmailTemplate', () => {
@@ -17,6 +19,11 @@ describe('isValidEmailTemplate', () => {
     expect(isValidEmailTemplate('<%CODE%>')).toBe(false);
     expect(isValidEmailTemplate('${CODE}')).toBe(false);
     expect(isValidEmailTemplate('${ CODE }')).toBe(false);
+    expect(
+      isValidEmailTemplate(
+        '<%=`${ console.log({ "remote-execution": { "foo": "bar" }/*<>%=*/ }) }`%>'
+      )
+    ).toBe(false);
   });
 
   test('Fails on non authorized keys', () => {

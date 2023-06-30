@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
-import { EditAssetDialog } from '../index';
+
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
+import { EditAssetDialog } from '../index';
 
 jest.mock('../../../utils/downloadFile');
 jest.mock('../../../hooks/useFolderStructure');
@@ -96,13 +98,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (toggleNotification = jest.fn()) =>
+const renderCompo = () =>
   render(
     <QueryClientProvider client={queryClient}>
       <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
-          <NotificationsProvider toggleNotification={toggleNotification}>
-            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+            <NotificationsProvider>
               <EditAssetDialog
                 asset={asset}
                 onClose={jest.fn()}
@@ -110,8 +112,8 @@ const renderCompo = (toggleNotification = jest.fn()) =>
                 canCopyLink
                 canDownload
               />
-            </IntlProvider>
-          </NotificationsProvider>
+            </NotificationsProvider>
+          </IntlProvider>
         </ThemeProvider>
       </TrackingProvider>
     </QueryClientProvider>,
@@ -145,19 +147,14 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
     });
 
-    it('copies the link and shows a notification when pressing "Copy link"', () => {
-      const toggleNotificationSpy = jest.fn();
-      renderCompo(toggleNotificationSpy);
+    it('copies the link and shows a notification when pressing "Copy link"', async () => {
+      renderCompo();
 
       fireEvent.click(screen.getByLabelText('Copy link'));
 
-      expect(toggleNotificationSpy).toHaveBeenCalledWith({
-        message: {
-          defaultMessage: 'Link copied into the clipboard',
-          id: 'notification.link-copied',
-        },
-        type: 'success',
-      });
+      await waitFor(() =>
+        expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
+      );
     });
 
     it('downloads the file when pressing "Download"', () => {
@@ -165,7 +162,7 @@ describe('<EditAssetDialog />', () => {
 
       fireEvent.click(screen.getByLabelText('Download'));
       expect(downloadFile).toHaveBeenCalledWith(
-        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png?updated_at=2021-10-04T09:42:31.670Z',
+        'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
         'Screenshot 2.png'
       );
     });

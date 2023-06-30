@@ -7,9 +7,11 @@
 /* eslint-disable no-irregular-whitespace */
 
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
+
 import { DraftAndPublishBadge } from '../index';
 
 const makeApp = (props) => (
@@ -29,6 +31,19 @@ describe('<DraftAndPublishBadge />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #2f6846;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #2f6846;
+      }
+
       .c0 {
         background: #eafbe7;
         padding-top: 16px;
@@ -58,19 +73,6 @@ describe('<DraftAndPublishBadge />', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #2f6846;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c5 {
-        font-weight: 600;
-        color: #2f6846;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c2 {
         width: 0.375rem;
         height: 0.375rem;
@@ -84,14 +86,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-hKwDye edbsOG"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect
@@ -129,6 +131,19 @@ describe('<DraftAndPublishBadge />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #006096;
+      }
+
+      .c5 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 600;
+        color: #006096;
+      }
+
       .c0 {
         background: #eaf5ff;
         padding-top: 16px;
@@ -158,19 +173,6 @@ describe('<DraftAndPublishBadge />', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #006096;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c5 {
-        font-weight: 600;
-        color: #006096;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c2 {
         width: 0.375rem;
         height: 0.375rem;
@@ -184,14 +186,14 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-hKwDye edbsOG"
         >
           <svg
             class="c2"
             fill="none"
-            height="1em"
+            height="1rem"
             viewBox="0 0 4 4"
-            width="1em"
+            width="1rem"
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect

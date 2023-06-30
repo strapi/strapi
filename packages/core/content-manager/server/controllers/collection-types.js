@@ -1,11 +1,11 @@
 'use strict';
 
-const { prop, pick } = require('lodash/fp');
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
-const { getService, pickWritableAttributes } = require('../utils');
-const { validateBulkDeleteInput, validatePagination } = require('./validation');
+const { getService } = require('../utils');
+const { validateBulkActionInput } = require('./validation');
+const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
 
 module.exports = {
   async find(ctx) {
@@ -20,10 +20,15 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
-    const { results, pagination } = await entityManager.findWithRelationCountsPage(
-      permissionQuery,
+    const populate = await getService('populate-builder')(model)
+      .populateDeep(1)
+      .countRelations({ toOne: false, toMany: true })
+      .build();
+
+    const { results, pagination } = await entityManager.findPage(
+      { ...permissionQuery, populate },
       model
     );
 
@@ -48,15 +53,25 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
     }
 
+    // if the user has condition that needs populated content, it's not applied because entity don't have relations populated
     if (permissionChecker.cannot.read(entity)) {
       return ctx.forbidden();
     }
+
+    // TODO: Count populated relations by permissions
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
   },
@@ -75,19 +90,26 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
+
     const entity = await entityManager.create(sanitizedBody, model);
+
+    // TODO: Revert the creation if create permission conditions are not met
+    // if (permissionChecker.cannot.create(entity)) {
+    //   return ctx.forbidden();
+    // }
 
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
     if (totalEntries === 0) {
-      strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      strapi.telemetry.send('didCreateFirstContentTypeEntry', {
+        eventProperties: { model },
+      });
     }
   },
 
@@ -103,7 +125,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const permissionQuery = await permissionChecker.sanitizedQuery.update(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -113,16 +140,64 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
-
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
-
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
     const sanitizedBody = await sanitizeFn(body);
+
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
+  },
+
+  async clone(ctx) {
+    const { userAbility, user } = ctx.state;
+    const { model, sourceId: id } = ctx.params;
+    const { body } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.create()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.create(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
+
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    const pickPermittedFields = permissionChecker.sanitizeCreateInput;
+    const setCreator = setCreatorFields({ user });
+    const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
+
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator, excludeNotCreatable);
+
+    const sanitizedBody = await sanitizeFn(body);
+
+    const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
+
+    ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
+  },
+
+  async autoClone(ctx) {
+    const { model } = ctx.params;
+
+    // Trying to automatically clone the entity and model has unique or relational fields
+    if (hasProhibitedCloningFields(model)) {
+      throw new ApplicationError(
+        'Entity could not be cloned as it has unique and/or relational fields. ' +
+          'Please edit those fields manually and save to complete the cloning.'
+      );
+    }
+
+    await this.clone(ctx);
   },
 
   async delete(ctx) {
@@ -136,7 +211,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const permissionQuery = await permissionChecker.sanitizedQuery.delete(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -162,7 +242,14 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -174,11 +261,87 @@ module.exports = {
 
     const result = await entityManager.publish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
+  },
+
+  async bulkPublish(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body } = ctx.request;
+    const { ids } = body;
+
+    await validateBulkActionInput(body);
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.publish()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
+      .build();
+
+    const entityPromises = ids.map((id) => entityManager.findOne(id, model, { populate }));
+    const entities = await Promise.all(entityPromises);
+
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.publishMany(entities, model);
+    ctx.body = { count };
+  },
+
+  async bulkUnpublish(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+    const { body } = ctx.request;
+    const { ids } = body;
+
+    await validateBulkActionInput(body);
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.unpublish()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entityPromises = ids.map((id) => entityManager.findOne(id, model, { populate }));
+    const entities = await Promise.all(entityPromises);
+
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.publish(entity)) {
+        return ctx.forbidden();
+      }
+    }
+
+    const { count } = await entityManager.unpublishMany(entities, model);
+    ctx.body = { count };
   },
 
   async unpublish(ctx) {
@@ -192,7 +355,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const permissionQuery = await permissionChecker.sanitizedQuery.unpublish(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
@@ -204,8 +372,8 @@ module.exports = {
 
     const result = await entityManager.unpublish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(result);
@@ -217,7 +385,7 @@ module.exports = {
     const { query, body } = ctx.request;
     const { ids } = body;
 
-    await validateBulkDeleteInput(body);
+    await validateBulkActionInput(body);
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -227,7 +395,7 @@ module.exports = {
     }
 
     // TODO: fix
-    const permissionQuery = permissionChecker.buildDeleteQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.delete(query);
 
     const idsWhereClause = { id: { $in: ids } };
     const params = {
@@ -242,14 +410,10 @@ module.exports = {
     ctx.body = { count };
   },
 
-  async previewManyRelations(ctx) {
+  async getNumberOfDraftRelations(ctx) {
     const { userAbility } = ctx.state;
-    const { model, id, targetField } = ctx.params;
-    const { pageSize = 10, page = 1 } = ctx.request.query;
+    const { model, id } = ctx.params;
 
-    validatePagination({ page, pageSize });
-
-    const contentTypeService = getService('content-types');
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -257,58 +421,25 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const modelDef = strapi.getModel(model);
-    const assoc = modelDef.attributes[targetField];
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
-    if (!assoc || !MANY_RELATIONS.includes(assoc.relation)) {
-      return ctx.badRequest('Invalid target field');
-    }
-
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOne(id, model, { populate });
 
     if (!entity) {
       return ctx.notFound();
     }
 
-    if (permissionChecker.cannot.read(entity, targetField)) {
+    if (permissionChecker.cannot.read(entity)) {
       return ctx.forbidden();
     }
 
-    let relationList;
-    // FIXME: load relations using query.load
-    if (!assoc.inversedBy && !assoc.mappedBy) {
-      const populatedEntity = await entityManager.findOne(id, model, [targetField]);
-      const relationsListIds = populatedEntity[targetField].map(prop('id'));
+    const number = await entityManager.getNumberOfDraftRelations(id, model);
 
-      relationList = await entityManager.findPage(
-        {
-          page,
-          pageSize,
-          filters: {
-            id: relationsListIds,
-          },
-        },
-        assoc.target
-      );
-    } else {
-      relationList = await entityManager.findPage(
-        {
-          page,
-          pageSize,
-          filters: {
-            [assoc.inversedBy || assoc.mappedBy]: entity.id,
-          },
-        },
-        assoc.target
-      );
-    }
-
-    const config = await contentTypeService.findConfiguration({ uid: model });
-    const mainField = prop(['metadatas', targetField, 'edit', 'mainField'], config);
-
-    ctx.body = {
-      pagination: relationList.pagination,
-      results: relationList.results.map(pick(['id', mainField])),
+    return {
+      data: number,
     };
   },
 };

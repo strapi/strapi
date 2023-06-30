@@ -1,15 +1,13 @@
 import React from 'react';
+
+import { Box, Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Stack } from '@strapi/design-system/Stack';
-import { Link } from '@strapi/design-system/Link';
 import { useIntl } from 'react-intl';
-import EmptyAttributes from '../EmptyAttributes';
-import CustomFieldOption from '../CustomFieldOption';
-import getPadding from '../utils/getPadding';
+
 import { getTrad } from '../../../utils';
+import CustomFieldOption from '../CustomFieldOption';
+import EmptyAttributes from '../EmptyAttributes';
+import getPadding from '../utils/getPadding';
 
 const CustomFieldsList = () => {
   const { formatMessage } = useIntl();
@@ -27,7 +25,7 @@ const CustomFieldsList = () => {
 
   return (
     <KeyboardNavigable tagName="button">
-      <Stack spacing={3}>
+      <Flex direction="column" alignItems="stretch" gap={3}>
         <Grid gap={0}>
           {sortedCustomFields.map(([uid, customField], index) => {
             const { paddingLeft, paddingRight } = getPadding(index);
@@ -55,7 +53,7 @@ const CustomFieldsList = () => {
             defaultMessage: 'How to add custom fields',
           })}
         </Link>
-      </Stack>
+      </Flex>
     </KeyboardNavigable>
   );
 };

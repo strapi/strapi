@@ -54,7 +54,6 @@
   "PopUpForm.header.edit.email-templates": "Editar Plantillas de Email",
   "PopUpForm.header.edit.providers": "Editar proveedor",
   "Providers.data.loaded": "Los proveedores se han cargado",
-  "Providers.image": "Imagen",
   "Providers.status": "Estado",
   "Roles.empty": "Aún no tienes ningún rol.",
   "Roles.empty.search": "Ningún rol coincide con la búsqueda.",

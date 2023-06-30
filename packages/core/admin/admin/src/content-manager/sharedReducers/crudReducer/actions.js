@@ -1,4 +1,5 @@
 import {
+  CLEAR_SET_MODIFIED_DATA_ONLY,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_FORM,
@@ -41,4 +42,8 @@ export const setStatus = (status) => ({
 export const submitSucceeded = (data) => ({
   type: SUBMIT_SUCCEEDED,
   data,
+});
+
+export const clearSetModifiedDataOnly = () => ({
+  type: CLEAR_SET_MODIFIED_DATA_ONLY,
 });

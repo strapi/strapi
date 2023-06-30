@@ -1,5 +1,7 @@
-import axios from 'axios';
+import { getFetchClient } from '@strapi/helper-plugin';
+
 import { AssetSource } from '../constants';
+
 import { typeFromMime } from './typeFromMime';
 
 function getFilenameFromURL(url) {
@@ -7,24 +9,23 @@ function getFilenameFromURL(url) {
 }
 
 export const urlsToAssets = async (urls) => {
+  const { get } = getFetchClient();
   const assetPromises = urls.map((url) =>
-    axios
-      .get(url, {
-        responseType: 'blob',
-        timeout: 60000,
-      })
-      .then((res) => {
-        const loadedFile = new File([res.data], getFilenameFromURL(res.config.url), {
-          type: res.headers['content-type'],
-        });
+    get(url, {
+      responseType: 'blob',
+      timeout: 60000,
+    }).then((res) => {
+      const loadedFile = new File([res.data], getFilenameFromURL(res.config.url), {
+        type: res.headers['content-type'],
+      });
 
-        return {
-          name: loadedFile.name,
-          url: res.config.url,
-          mime: res.headers['content-type'],
-          rawFile: loadedFile,
-        };
-      })
+      return {
+        name: loadedFile.name,
+        url: res.config.url,
+        mime: res.headers['content-type'],
+        rawFile: loadedFile,
+      };
+    })
   );
   // Retrieve the assets metadata
   const assetsResults = await Promise.all(assetPromises);

@@ -1,10 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { ConfirmDialog } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 
 export const RemoveAssetDialog = ({ onClose, asset }) => {
-  const { isLoading, removeAsset } = useRemoveAsset(onClose);
+  // `null` means asset is deleted
+  const { isLoading, removeAsset } = useRemoveAsset(() => onClose(null));
 
   const handleConfirm = () => {
     removeAsset(asset.id);

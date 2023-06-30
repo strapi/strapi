@@ -14,9 +14,15 @@ describe('diffSchemas', () => {
     });
 
     diffSchemas = schemaDiff.diff.bind(schemaDiff);
+
+    global.strapi = {
+      store: {
+        get: () => [],
+      },
+    };
   });
 
-  test('New Table', () => {
+  test('New Table', async () => {
     const testTable = {
       name: 'my_table',
     };
@@ -29,7 +35,7 @@ describe('diffSchemas', () => {
       tables: [testTable],
     };
 
-    expect(diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
       status: 'CHANGED',
       diff: {
         tables: {
@@ -42,7 +48,7 @@ describe('diffSchemas', () => {
     });
   });
 
-  test('Removed Table', () => {
+  test('Removed Table', async () => {
     const testTable = {
       name: 'my_table',
     };
@@ -55,7 +61,7 @@ describe('diffSchemas', () => {
       tables: [],
     };
 
-    expect(diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
       status: 'CHANGED',
       diff: {
         tables: {
@@ -68,7 +74,7 @@ describe('diffSchemas', () => {
     });
   });
 
-  test('Unchanged Table', () => {
+  test('Unchanged Table', async () => {
     const testTable = {
       name: 'my_table',
       columns: [],
@@ -84,7 +90,7 @@ describe('diffSchemas', () => {
       tables: [testTable],
     };
 
-    expect(diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
       status: 'UNCHANGED',
       diff: {
         tables: {
@@ -98,7 +104,7 @@ describe('diffSchemas', () => {
   });
 
   describe('Changed table', () => {
-    test('added column', () => {
+    test('added column', async () => {
       const srcSchema = {
         tables: [
           {
@@ -125,7 +131,7 @@ describe('diffSchemas', () => {
         ],
       };
 
-      expect(diffSchemas(srcSchema, destSchema)).toStrictEqual({
+      expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
         status: 'CHANGED',
         diff: {
           tables: {
@@ -177,5 +183,49 @@ describe('diffSchemas', () => {
     test.todo('updated foreign key');
     test.todo('unchanged foreign key');
     test.todo('removed foreign key');
+  });
+
+  test('With persisted DB tables', async () => {
+    const testTables = [
+      {
+        name: 'my_table',
+      },
+      {
+        name: 'my_table_1',
+      },
+    ];
+
+    const coreStoreTable = {
+      name: 'strapi_core_store_settings',
+      columns: [],
+      indexes: [],
+      foreignKeys: [],
+    };
+
+    global.strapi = {
+      store: {
+        get: async () => [testTables[0].name, 'table2'],
+      },
+    };
+
+    const srcSchema = {
+      tables: [...testTables, coreStoreTable],
+    };
+
+    const destSchema = {
+      tables: [coreStoreTable],
+    };
+
+    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+      status: 'CHANGED',
+      diff: {
+        tables: {
+          added: [],
+          updated: [],
+          unchanged: [coreStoreTable],
+          removed: [testTables[1]],
+        },
+      },
+    });
   });
 });

@@ -1,11 +1,11 @@
 import React from 'react';
+
+import { Box, CardAsset } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { CardAsset } from '@strapi/design-system/Card';
-import { Box } from '@strapi/design-system/Box';
 
-import { AudioPreview } from './AudioPreview';
 import { AssetCardBase } from './AssetCardBase';
+import { AudioPreview } from './AudioPreview';
 
 const AudioPreviewWrapper = styled(Box)`
   canvas,

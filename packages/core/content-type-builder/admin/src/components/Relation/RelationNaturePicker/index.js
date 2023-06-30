@@ -1,23 +1,25 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
+import { Flex, KeyboardNavigable, Typography } from '@strapi/design-system';
+import {
+  ManyToMany,
+  ManyToOne,
+  ManyWays as ManyWay,
+  OneToMany,
+  OneToOne,
+  OneWay,
+} from '@strapi/icons';
 import get from 'lodash/get';
 import truncate from 'lodash/truncate';
 import pluralize from 'pluralize';
-import OneToOne from '@strapi/icons/OneToOne';
-import OneWay from '@strapi/icons/OneWay';
-import ManyWay from '@strapi/icons/ManyWays';
-import OneToMany from '@strapi/icons/OneToMany';
-import ManyToOne from '@strapi/icons/ManyToOne';
-import ManyToMany from '@strapi/icons/ManyToMany';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Stack } from '@strapi/design-system/Stack';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
+
 import useDataManager from '../../../hooks/useDataManager';
-import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
 import getTrad from '../../../utils/getTrad';
+import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
+
 import { IconWrapper, InfosWrapper, Wrapper } from './components';
 
 const relations = {
@@ -72,7 +74,7 @@ const RelationNaturePicker = ({
       <Wrapper>
         <Flex paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
-            <Stack spacing={3} horizontal>
+            <Flex gap={3}>
               {relationsType.map((relation) => {
                 const Asset = relations[relation];
                 const isEnabled =
@@ -103,7 +105,7 @@ const RelationNaturePicker = ({
                   </IconWrapper>
                 );
               })}
-            </Stack>
+            </Flex>
           </KeyboardNavigable>
         </Flex>
       </Wrapper>

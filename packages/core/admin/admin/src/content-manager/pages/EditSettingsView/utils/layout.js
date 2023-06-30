@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 const getRowSize = (arr) => arr.reduce((sum, value) => sum + value.size, 0);
 
 const createLayout = (arr) => {
@@ -75,26 +74,6 @@ const unformatLayout = (arr) => {
   }, []);
 };
 
-const getDefaultInputSize = (type) => {
-  switch (type) {
-    case 'boolean':
-    case 'date':
-    case 'integer':
-    case 'float':
-    case 'biginteger':
-    case 'decimal':
-    case 'time':
-      return 4;
-    case 'json':
-    case 'component':
-    case 'richtext':
-    case 'dynamiczone':
-      return 12;
-    default:
-      return 6;
-  }
-};
-
 const getFieldSize = (name, layouts = []) => {
   return layouts.reduce((acc, { rowContent }) => {
     const size = rowContent.find((row) => row.name === name)?.size ?? null;
@@ -124,12 +103,4 @@ const setFieldSize = (name, size, layouts = []) => {
   });
 };
 
-export {
-  createLayout,
-  formatLayout,
-  getDefaultInputSize,
-  getFieldSize,
-  setFieldSize,
-  getRowSize,
-  unformatLayout,
-};
+export { createLayout, formatLayout, getFieldSize, getRowSize, setFieldSize, unformatLayout };

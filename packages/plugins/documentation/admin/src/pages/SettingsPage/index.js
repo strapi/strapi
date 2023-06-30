@@ -1,34 +1,35 @@
 import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
-import { Formik } from 'formik';
+
+// Strapi Parts
+import {
+  Box,
+  Button,
+  ContentLayout,
+  Flex,
+  Grid,
+  GridItem,
+  HeaderLayout,
+  Main,
+  TextInput,
+  ToggleInput,
+  Typography,
+} from '@strapi/design-system';
 import {
   CheckPermissions,
   Form,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-
-// Strapi Parts
-import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { ToggleInput } from '@strapi/design-system/ToggleInput';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-
 // Strapi Icons
-import Show from '@strapi/icons/Eye';
-import Hide from '@strapi/icons/EyeStriked';
-import Check from '@strapi/icons/Check';
+import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
 
-import permissions from '../../permissions';
-import { getTrad } from '../../utils';
-import useReactQuery from '../utils/useReactQuery';
 import FieldActionWrapper from '../../components/FieldActionWrapper';
+import { PERMISSIONS } from '../../constants';
+import { getTrad } from '../../utils';
 import schema from '../utils/schema';
+import useReactQuery from '../utils/useReactQuery';
 
 const SettingsPage = () => {
   useFocusWhenNavigate();
@@ -56,7 +57,15 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
+          {({
+            handleSubmit,
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            setFieldValue,
+            dirty,
+          }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -69,8 +78,8 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={permissions.update}>
-                      <Button type="submit" startIcon={<Check />}>
+                    <CheckPermissions permissions={PERMISSIONS.update}>
+                      <Button type="submit" startIcon={<Check />} disabled={!dirty}>
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.Button.save'),
                           defaultMessage: 'Save',
@@ -89,7 +98,7 @@ const SettingsPage = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack spacing={4}>
+                    <Flex direction="column" alignItems="stretch" gap={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
                           id: 'global.settings',
@@ -166,7 +175,7 @@ const SettingsPage = () => {
                           </GridItem>
                         )}
                       </Grid>
-                    </Stack>
+                    </Flex>
                   </Box>
                 </ContentLayout>
               </Form>

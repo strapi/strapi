@@ -1,52 +1,38 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { useNotification, ContentBox } from '@strapi/helper-plugin';
-import Duplicate from '@strapi/icons/Duplicate';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useIntl } from 'react-intl';
 
-// FIXME replace with parts when ready
-const Envelope = () => (
-  <svg xmlns="http://www.w3.org/2000/svg">
-    <text
-      transform="translate(-23 -9)"
-      fill="#4B515A"
-      fillRule="evenodd"
-      fontSize="32"
-      fontFamily="AppleColorEmoji, Apple Color Emoji"
-    >
-      <tspan x="23" y="36">
-        ✉️
-      </tspan>
-    </text>
-  </svg>
-);
+import { IconButton } from '@strapi/design-system';
+import { ContentBox, useClipboard, useNotification } from '@strapi/helper-plugin';
+import { Duplicate } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const MagicLinkWrapper = ({ children, target }) => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-
-  const handleCopy = () => {
-    toggleNotification({ type: 'info', message: { id: 'notification.link-copied' } });
-  };
+  const { copy } = useClipboard();
 
   const copyLabel = formatMessage({
     id: 'app.component.CopyToClipboard.label',
     defaultMessage: 'Copy to clipboard',
   });
 
+  const handleClick = async () => {
+    const didCopy = await copy(target);
+
+    if (didCopy) {
+      toggleNotification({ type: 'info', message: { id: 'notification.link-copied' } });
+    }
+  };
+
   return (
     <ContentBox
       endAction={
-        <CopyToClipboard onCopy={handleCopy} text={target}>
-          <IconButton label={copyLabel} noBorder icon={<Duplicate />} />
-        </CopyToClipboard>
+        <IconButton label={copyLabel} noBorder icon={<Duplicate />} onClick={handleClick} />
       }
       title={target}
       titleEllipsis
       subtitle={children}
-      icon={<Envelope />}
+      icon={<span style={{ fontSize: 32 }}>✉️</span>}
       iconBackground="neutral100"
     />
   );
