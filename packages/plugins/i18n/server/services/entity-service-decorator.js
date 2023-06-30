@@ -182,8 +182,6 @@ const decorator = (service) => ({
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         // TODO Fix so this won't break lower lying find many wrappers
         const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-        console.log("ABC")
-        console.log(wrappedParams)
         const query = transformParamsToQuery(uid, wrappedParams);
         const entities = await strapi.db.query(uid).findMany(query);
         return this.wrapResult(entities, { uid, action: 'findMany' });
