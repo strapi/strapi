@@ -15,17 +15,16 @@ import {
   Flex,
   Icon,
 } from '@strapi/design-system';
-import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { useTableContext, Table, getYupInnerErrors } from '@strapi/helper-plugin';
+import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 
-import { getTrad } from '../../../../../utils';
+import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
-import { createYupSchema } from '../../../../../utils';
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
@@ -77,6 +76,19 @@ const EntryValidationText = ({ errors, isPublished }) => {
       </Typography>
     </Flex>
   );
+};
+
+EntryValidationText.defaultProps = {
+  errors: null,
+  isPublished: false,
+};
+
+EntryValidationText.propTypes = {
+  errors: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  isPublished: PropTypes.bool,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -159,6 +171,19 @@ const SelectedEntriesTableContent = ({ errors }) => {
   );
 };
 
+SelectedEntriesTableContent.defaultProps = {
+  errors: {},
+};
+
+SelectedEntriesTableContent.propTypes = {
+  errors: PropTypes.shape({
+    [PropTypes.number]: PropTypes.shape({
+      id: PropTypes.string,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
+};
+
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
  * -----------------------------------------------------------------------------------------------*/
@@ -169,9 +194,9 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRefreshing }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows } = useTableContext();
+  const { selectedEntries, rows, isLoading } = useTableContext();
   const { contentType, components } = useSelector(listViewDomain());
 
   /**
@@ -180,7 +205,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRef
   const validateEntriesToPublish = React.useCallback(() => {
     const validations = { validIds: [], errors: {} };
     // Create the validation schema based on the contentType
-    const schema = createYupSchema(contentType, { components: components }, { isDraft: false });
+    const schema = createYupSchema(contentType, { components }, { isDraft: false });
     // Validate each entry
     rows.forEach((entry) => {
       try {
@@ -196,7 +221,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRef
 
   const { errors } = validateEntriesToPublish();
 
-  console.log('loading...', isRefreshing);
+  const atLeastOneEntryHasNoErrors = selectedEntries.some((entryId) => !errors[entryId]);
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -241,8 +266,8 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRef
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
-              onClick={() => onConfirm(selectedEntries)}
-              disabled={selectedEntries.length === 0}
+              onClick={() => onConfirm(selectedEntries.map)}
+              disabled={selectedEntries.length === 0 || !atLeastOneEntryHasNoErrors || isLoading}
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
             </Button>
@@ -256,8 +281,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData, isRef
 SelectedEntriesModalContent.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  onRefresh: PropTypes.func.isRequired,
-  isRefreshing: PropTypes.bool.isRequired,
+  onRefreshData: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------

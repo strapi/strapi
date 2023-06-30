@@ -259,63 +259,7 @@ function ListView({
     [slug, params, fetchData, toggleNotification, formatAPIError, del]
   );
 
-  /**
-   * @param {number[]} selectedEntries - Array of ids to publish
-   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
-   */
-  const validateEntriesToPublish = async (selectedEntries) => {
-    const validations = { validIds: [], errors: {} };
-    // Create the validation schema based on the contentType
-    const schema = createYupSchema(
-      contentType,
-      { components: layout.components },
-      { isDraft: false }
-    );
-    // Get the selected entries
-    const entries = data.filter((entry) => {
-      return selectedEntries.includes(entry.id);
-    });
-    // Validate each entry and map the unresolved promises
-    const validationPromises = entries.map((entry) =>
-      schema.validate(entry, { abortEarly: false })
-    );
-    // Resolve all the promises in one go
-    const resolvedPromises = await Promise.allSettled(validationPromises);
-    // Set the validations
-    resolvedPromises.forEach((promise) => {
-      if (promise.status === 'rejected') {
-        const entityId = promise.reason.value.id;
-        validations.errors[entityId] = getYupInnerErrors(promise.reason);
-      }
-
-      if (promise.status === 'fulfilled') {
-        validations.validIds.push(promise.value.id);
-      }
-    });
-
-    return validations;
-  };
-
   const handleConfirmPublishAllData = async (selectedEntries) => {
-    const validations = await validateEntriesToPublish(selectedEntries);
-
-    if (Object.values(validations.errors).length) {
-      toggleNotification({
-        type: 'warning',
-        title: {
-          id: 'content-manager.listView.validation.errors.title',
-          defaultMessage: 'Action required',
-        },
-        message: {
-          id: 'content-manager.listView.validation.errors.message',
-          defaultMessage:
-            'Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)',
-        },
-      });
-
-      throw new Error('Validation error');
-    }
-
     return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
   };
 

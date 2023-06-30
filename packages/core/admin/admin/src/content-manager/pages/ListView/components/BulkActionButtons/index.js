@@ -328,6 +328,7 @@ BulkActionButtons.defaultProps = {
   onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
   onRefreshData() {},
+  isRefreshing: false,
 };
 
 BulkActionButtons.propTypes = {
@@ -337,6 +338,7 @@ BulkActionButtons.propTypes = {
   onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
   onRefreshData: PropTypes.func,
+  isRefreshing: PropTypes.bool,
 };
 
 export default BulkActionButtons;
