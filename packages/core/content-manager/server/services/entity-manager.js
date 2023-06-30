@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
-const { mapAsync } = require('@strapi/utils');
+const { mapAsync, reduceAsync } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
@@ -310,12 +310,11 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findMany(uid, {
       populate,
+      where: { id: { $in: ids } },
     });
 
-    const totalNumberDraftRelations = entities.reduce(async (acc, entity) => {
-      const sumDraftRelations = sumDraftCounts(entity, uid);
-      const prevCounter = await acc;
-      return sumDraftRelations + prevCounter;
+    const totalNumberDraftRelations = await reduceAsync(entities)(async (count, entity) => {
+      return sumDraftCounts(entity, uid) + count;
     }, 0);
 
     return totalNumberDraftRelations;
