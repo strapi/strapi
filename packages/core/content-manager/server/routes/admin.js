@@ -188,7 +188,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/single-types/:model/actions/numberOfDraftRelations',
+      path: '/single-types/:model/actions/countDraftRelations',
       handler: 'single-types.countDraftRelations',
       config: {
         middlewares: [routing],
@@ -387,7 +387,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/collection-types/:model/:id/actions/numberOfDraftRelations',
+      path: '/collection-types/:model/:id/actions/countDraftRelations',
       handler: 'collection-types.countDraftRelations',
       config: {
         middlewares: [routing],

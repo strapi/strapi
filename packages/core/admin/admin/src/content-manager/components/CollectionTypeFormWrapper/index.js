@@ -298,9 +298,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(
-        `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
-      );
+      const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/countDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
