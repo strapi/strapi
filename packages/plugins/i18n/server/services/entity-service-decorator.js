@@ -81,12 +81,12 @@ const assignValidLocale = async (data) => {
 const decorator = (service) => ({
   /**
    * Wraps result
-   * @param {object} params - Query options object (params, data, files, populate)
+   * @param {object} result - result object of query
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async wrapResult(params = {}, ctx = {}) {
-    return service.wrapResult.call(this, params, ctx);
+  async wrapResult(result = {}, ctx = {}) {
+    return service.wrapResult.call(this, result, ctx);
   },
 
 
