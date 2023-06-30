@@ -57,7 +57,7 @@ const strapiMock = {
 
 describe('Review Workflows', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('content types service', () => {
