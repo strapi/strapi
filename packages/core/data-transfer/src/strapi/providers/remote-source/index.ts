@@ -141,7 +141,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
 
           // Writes the asset data to the created stream
-          if (action === 'stream') {
+          else if (action === 'stream') {
             // Converts data into buffer
             const rawBuffer = item.data as unknown as {
               type: 'Buffer';
