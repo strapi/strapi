@@ -310,12 +310,13 @@ module.exports = ({ strapi }) => ({
 
     const entities = await strapi.entityService.findMany(uid, {
       populate,
-      where: { id: { $in: ids } },
+      filters: { id: { $in: ids } },
     });
 
-    const totalNumberDraftRelations = await reduceAsync(entities)(async (count, entity) => {
-      return sumDraftCounts(entity, uid) + count;
-    }, 0);
+    const totalNumberDraftRelations = entities.reduce(
+      (count, entity) => sumDraftCounts(entity, uid) + count,
+      0
+    );
 
     return totalNumberDraftRelations;
   },

@@ -440,9 +440,7 @@ module.exports = {
   },
   async countManyEntriesDraftRelations(ctx) {
     const { userAbility } = ctx.state;
-
-    const params = new URLSearchParams(ctx.querystring);
-    const ids = JSON.parse(params.get('ids'));
+    const ids = JSON.parse(ctx.request.query.ids);
     const { model } = ctx.params;
 
     const entityManager = getService('entity-manager');
@@ -459,9 +457,11 @@ module.exports = {
 
     const entities = await entityManager.find(ids, model, { populate });
 
-    if (!entities || entities.length !== ids.length) {
+    if (!entities) {
       return ctx.notFound();
     }
+
+    console.log('ids', ids);
 
     const number = await entityManager.countManyEntriesDraftRelations(ids, model);
 
