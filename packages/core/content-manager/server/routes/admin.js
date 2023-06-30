@@ -402,7 +402,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/collection-types/:model/actions/multipleEntriesNumberOfDraftRelations',
+      path: '/collection-types/:model/actions/countManyEntriesDraftRelations',
       handler: 'collection-types.countManyEntriesDraftRelations',
       config: {
         middlewares: [routing],

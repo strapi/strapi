@@ -461,8 +461,6 @@ module.exports = {
       return ctx.notFound();
     }
 
-    console.log('ids', ids);
-
     const number = await entityManager.countManyEntriesDraftRelations(ids, model);
 
     return {
