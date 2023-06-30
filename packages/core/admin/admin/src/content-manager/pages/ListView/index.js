@@ -25,7 +25,6 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
-  getYupInnerErrors,
   useStrapiApp,
   Table,
   PaginationURLQuery,
@@ -48,7 +47,7 @@ import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
 import { PublicationState } from '../../components/ListViewTable/CellContent/PublicationState';
-import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { Body } from './components/Body';

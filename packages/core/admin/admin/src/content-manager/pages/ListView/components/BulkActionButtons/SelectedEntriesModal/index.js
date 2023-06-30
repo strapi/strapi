@@ -266,7 +266,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
-              onClick={() => onConfirm(selectedEntries.map)}
+              onClick={() => onConfirm(selectedEntries)}
               disabled={selectedEntries.length === 0 || !atLeastOneEntryHasNoErrors || isLoading}
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
