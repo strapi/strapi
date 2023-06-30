@@ -153,7 +153,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
 
           // The asset has been transferred
-          if (action === 'end') {
+          else if (action === 'end') {
             await new Promise<void>((resolve, reject) => {
               const { stream: assetStream } = assets[item.assetID];
               assetStream
