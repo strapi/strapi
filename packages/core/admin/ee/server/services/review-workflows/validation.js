@@ -6,19 +6,18 @@ const { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } = require('../../consta
 const { clampMaxWorkflows, clampMaxStagesPerWorkflow } = require('../../utils/review-workflows');
 
 module.exports = ({ strapi }) => {
-  const limits = {
-    workflows: MAX_WORKFLOWS,
-    stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
-  };
-
   return {
+    limits: {
+      workflows: MAX_WORKFLOWS,
+      stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+    },
     register({ workflows, stagesPerWorkflow }) {
-      if (!Object.isFrozen(limits)) {
-        limits.workflows = clampMaxWorkflows(workflows || limits.workflows);
-        limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
-          stagesPerWorkflow || limits.stagesPerWorkflow
+      if (!Object.isFrozen(this.limits)) {
+        this.limits.workflows = clampMaxWorkflows(workflows || this.limits.workflows);
+        this.limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
+          stagesPerWorkflow || this.limits.stagesPerWorkflow
         );
-        Object.freeze(limits);
+        Object.freeze(this.limits);
       }
     },
     /**
@@ -30,7 +29,7 @@ module.exports = ({ strapi }) => {
       if (!stages || stages.length === 0) {
         throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
       }
-      if (stages.length > limits.stagesPerWorkflow) {
+      if (stages.length > this.limits.stagesPerWorkflow) {
         throw new ValidationError(ERRORS.STAGES_LIMIT);
       }
     },
@@ -44,7 +43,7 @@ module.exports = ({ strapi }) => {
     async validateWorkflowCount(countAddedWorkflows = 0) {
       const workflowsService = getService('workflows', { strapi });
       const countWorkflows = await workflowsService.count();
-      if (countWorkflows + countAddedWorkflows > limits.workflows) {
+      if (countWorkflows + countAddedWorkflows > this.limits.workflows) {
         throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },
