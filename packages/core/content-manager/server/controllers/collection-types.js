@@ -440,7 +440,7 @@ module.exports = {
   },
   async countManyEntriesDraftRelations(ctx) {
     const { userAbility } = ctx.state;
-    const ids = JSON.parse(ctx.request.query.ids);
+    const ids = ctx.request.query.ids;
     const { model } = ctx.params;
 
     const entityManager = getService('entity-manager');
