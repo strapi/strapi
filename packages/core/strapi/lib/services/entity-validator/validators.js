@@ -124,11 +124,7 @@ const addStringRegexValidator = (validator, { attr }) =>
  * @returns {AnySchema}
  */
 const addUniqueValidator = (validator, metas) => {
-  const { attr, model, updatedAttribute, entity } = metas;
-
-  // TODO we can get all the neighbor values in the entity
-  // consst valuesInEntity = getNeighbourAttributesValues(key, createdEntity, uid) -> ['Text', 'Text']
-  // new Set(valuesInEntity).size !== valuesInEntity.length;
+  const { attr, model, updatedAttribute, entity, validateUniqueFieldWithinEntity } = metas;
 
   if (!attr.unique && attr.type !== 'uid') {
     return validator;
@@ -144,6 +140,10 @@ const addUniqueValidator = (validator, metas) => {
       return true;
     }
 
+    if (validateUniqueFieldWithinEntity && !validateUniqueFieldWithinEntity(updatedAttribute)) {
+      return false;
+    }
+
     /**
      * If the attribute is unchanged we skip the unique verification. This will
      * prevent the validator to be triggered in case the user activated the
@@ -154,23 +154,12 @@ const addUniqueValidator = (validator, metas) => {
       return true;
     }
 
-    // TODO check if every value is unique with current entity
-    const valuesInEntity = [
-      ...entities.map((e) => e[updatedAttribute.name]),
-      updatedAttribute.value,
-    ];
-
-    if (new Set(valuesInEntity).size !== valuesInEntity.length) {
-      return false;
-    }
-
     // Check against existing entries in the database
     const whereParams = entity
       ? {
           $and: [{ [updatedAttribute.name]: value }, { id: { $notIn: entities.map((e) => e.id) } }],
         }
-      : // ? { $and: [{ [updatedAttribute.name]: value }, { $notIn: { id: entity.id } }] }
-        { [updatedAttribute.name]: value };
+      : { [updatedAttribute.name]: value };
 
     const record = await strapi.db.query(model.uid).findOne({
       select: ['id'],
