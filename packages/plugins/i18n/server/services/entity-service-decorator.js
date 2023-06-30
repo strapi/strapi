@@ -80,8 +80,19 @@ const assignValidLocale = async (data) => {
  */
 const decorator = (service) => ({
   /**
+   * Wraps result
+   * @param {object} params - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async wrapResult(params = {}, ctx = {}) {
+    return service.wrapResult.call(this, params, ctx);
+  },
+
+
+    /**
    * Wraps query options. In particular will add default locale to query params
-   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} params - Query options object (params, data, files, populate)
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
@@ -156,7 +167,7 @@ const decorator = (service) => ({
    * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
    */
-  async findMany(uid, opts) {
+  async findMany(uid, opts = {}) {
     const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
@@ -170,9 +181,12 @@ const decorator = (service) => ({
     if (kind === 'singleType') {
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         // TODO Fix so this won't break lower lying find many wrappers
-        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' }) || {};
-        const query = transformParamsToQuery(model, wrappedParams);
-        return strapi.db.query(uid).findMany(query);
+        const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
+        console.log("ABC")
+        console.log(wrappedParams)
+        const query = transformParamsToQuery(uid, wrappedParams);
+        const entities = await strapi.db.query(uid).findMany(query);
+        return this.wrapResult(entities, { uid, action: 'findMany' });
       }
 
       // This one gets transformed into a findOne on a lower layer
