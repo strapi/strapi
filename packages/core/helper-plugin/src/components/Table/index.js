@@ -283,8 +283,8 @@ HeaderCell.propTypes = {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, rows, isLoading, colCount }) => {
-  const [selectedEntries, setSelectedEntries] = React.useState([]);
+const Root = ({ children, defaultSelectedEntries, rows, isLoading, colCount }) => {
+  const [selectedEntries, setSelectedEntries] = React.useState(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
   const onSelectRow = React.useCallback(({ name, value }) => {
@@ -314,6 +314,7 @@ const Root = ({ children, rows, isLoading, colCount }) => {
 
 Root.defaultProps = {
   rows: [],
+  defaultSelectedEntries: [],
   isLoading: false,
   colCount: 0,
 };
@@ -321,6 +322,7 @@ Root.defaultProps = {
 Root.propTypes = {
   children: PropTypes.node.isRequired,
   rows: PropTypes.arrayOf(PropTypes.object),
+  defaultSelectedEntries: PropTypes.arrayOf(PropTypes.number),
   colCount: PropTypes.number,
   isLoading: PropTypes.bool,
 };
