@@ -1,4 +1,4 @@
-import cqp from '../convert-query-params';
+import convertQueryParams from '../convert-query-params';
 import { Model } from '../types';
 
 const schema: Model = {
@@ -40,7 +40,7 @@ describe('convert-query-params', () => {
     ])('keeps: %s', (key, input) => {
       const expectedOutput = { ...input };
 
-      const res = cqp.convertFiltersQueryParams(input, schema);
+      const res = convertQueryParams.convertFiltersQueryParams(input, schema);
       expect(res).toEqual(expectedOutput);
     });
 
@@ -50,7 +50,7 @@ describe('convert-query-params', () => {
       ['invalid operator', { $nope: 'test' }],
       ['uppercase operator', { $GT: new Date() }],
     ])('removes: %s', (key, input) => {
-      const res = cqp.convertFiltersQueryParams(input, schema);
+      const res = convertQueryParams.convertFiltersQueryParams(input, schema);
       expect(res).toEqual({});
     });
 
