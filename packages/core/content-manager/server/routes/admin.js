@@ -189,7 +189,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/single-types/:model/actions/numberOfDraftRelations',
-      handler: 'single-types.getNumberOfDraftRelations',
+      handler: 'single-types.countDraftRelations',
       config: {
         middlewares: [routing],
         policies: [
@@ -388,7 +388,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/collection-types/:model/:id/actions/numberOfDraftRelations',
-      handler: 'collection-types.getNumberOfDraftRelations',
+      handler: 'collection-types.countDraftRelations',
       config: {
         middlewares: [routing],
         policies: [
@@ -403,7 +403,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/collection-types/:model/actions/multipleEntriesNumberOfDraftRelations',
-      handler: 'collection-types.getMultipleEntriesNumberOfDraftRelations',
+      handler: 'collection-types.countManyEntriesDraftRelations',
       config: {
         middlewares: [routing],
         policies: [

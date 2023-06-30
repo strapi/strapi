@@ -289,7 +289,7 @@ module.exports = ({ strapi }) => ({
     return mappedEntity;
   },
 
-  async getNumberOfDraftRelations(id, uid) {
+  async countDraftRelations(id, uid) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {
@@ -301,7 +301,7 @@ module.exports = ({ strapi }) => ({
     return sumDraftCounts(entity, uid);
   },
 
-  async getMultipleEntriesNumberOfDraftRelations(ids, uid) {
+  async countManyEntriesDraftRelations(ids, uid) {
     const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
     if (!hasRelations) {

@@ -406,7 +406,7 @@ module.exports = {
     ctx.body = { count };
   },
 
-  async getNumberOfDraftRelations(ctx) {
+  async countDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const { model, id } = ctx.params;
 
@@ -432,13 +432,13 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.getNumberOfDraftRelations(id, model);
+    const number = await entityManager.countDraftRelations(id, model);
 
     return {
       data: number,
     };
   },
-  async getMultipleEntriesNumberOfDraftRelations(ctx) {
+  async countManyEntriesDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const params = new URLSearchParams(ctx.querystring);
     const ids = params.get('ids').split(',');
@@ -462,7 +462,7 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const number = await entityManager.getMultipleEntriesNumberOfDraftRelations(ids, model);
+    const number = await entityManager.countManyEntriesDraftRelations(ids, model);
 
     return {
       data: number,
