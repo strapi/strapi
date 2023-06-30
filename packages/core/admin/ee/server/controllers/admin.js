@@ -42,6 +42,7 @@ module.exports = {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      features: ee.features.list() ?? [],
     };
 
     return { data };
