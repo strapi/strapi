@@ -38,7 +38,7 @@ const AuthenticatedApp = () => {
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },
-    { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
+    { data: permissions, status: fetchPermissionsStatus, refetch, isFetching },
     { data: userRoles },
   ] = useQueries([
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
