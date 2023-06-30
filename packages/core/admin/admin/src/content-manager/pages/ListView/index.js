@@ -165,6 +165,7 @@ function ListView({
   const fetchData = React.useCallback(
     async (endPoint, source) => {
       getData();
+
       try {
         const opts = source ? { cancelToken: source.token } : null;
         const {
