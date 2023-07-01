@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { getService } = require('../../utils');
 const {
   isListable,
   hasEditableAttribute,
@@ -51,7 +52,25 @@ const createMetadasSchema = (schema) => {
               placeholder: yup.string(),
               editable: yup.boolean(),
               visible: yup.boolean(),
-              mainField: yup.string(),
+              mainField: yup.lazy((value) => {
+                if (!value) {
+                  return yup.string();
+                }
+
+                const targetSchema = getService('content-types').findContentType(
+                  schema.attributes[key].targetModel
+                );
+
+                if (!targetSchema) {
+                  return yup.string();
+                }
+
+                const validAttributes = Object.keys(targetSchema.attributes).filter((key) =>
+                  isListable(targetSchema, key)
+                );
+
+                return yup.string().oneOf(validAttributes.concat('id')).default('id');
+              }),
               step: yup
                 .number()
                 .integer()
