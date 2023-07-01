@@ -527,6 +527,7 @@
   "content-manager.DynamicTable.relation-more": "Deze relatie bevat meer entiteiten dan weergegeven",
   "content-manager.EditRelations.title": "Gerelateerde data",
   "content-manager.HeaderLayout.button.label-add-entry": "Nieuwe invoer",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Voeg nog een invoer toe",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "Filters",
   "content-manager.components.AddFilterCTA.hide": "Filters",

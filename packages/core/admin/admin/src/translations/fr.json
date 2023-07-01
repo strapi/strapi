@@ -469,6 +469,7 @@
   "content-manager.DynamicTable.relation-loaded": "Les relations on été chargées",
   "content-manager.EditRelations.title": "Données associées",
   "content-manager.HeaderLayout.button.label-add-entry": "Créer une nouvelle entrée",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Ajouter une autre entrée",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "Filtres",
   "content-manager.components.AddFilterCTA.hide": "Filtres",

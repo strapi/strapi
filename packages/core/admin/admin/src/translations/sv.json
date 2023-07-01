@@ -527,6 +527,7 @@
   "content-manager.DynamicTable.relation-more": "Denna relation innehåller mer data än vad som visas",
   "content-manager.EditRelations.title": "Relationsdata",
   "content-manager.HeaderLayout.button.label-add-entry": "Skapa innehåll",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Lägg till en annan innehåll",
   "content-manager.api.id": "API-id",
   "content-manager.components.AddFilterCTA.add": "Filter",
   "content-manager.components.AddFilterCTA.hide": "Filter",

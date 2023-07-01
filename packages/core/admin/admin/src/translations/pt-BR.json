@@ -486,6 +486,7 @@
   "content-manager.DynamicTable.relation-more": "Esta relação contém mais entidades do que as exibidas",
   "content-manager.EditRelations.title": "Dados relacionais",
   "content-manager.HeaderLayout.button.label-add-entry": "Criar novo registro",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Adicionar outro registro",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "Filtros",
   "content-manager.components.AddFilterCTA.hide": "Filtros",

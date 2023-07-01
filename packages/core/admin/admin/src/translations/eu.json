@@ -531,6 +531,7 @@
   "content-manager.DynamicTable.relation-more": "Erlazio honek bistaratzen diren baino entitate gehiago ditu",
   "content-manager.EditRelations.title": "Datu erlazionalak",
   "content-manager.HeaderLayout.button.label-add-entry": "Sortu sarrera berria",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Beste sarrera gehitu",
   "content-manager.api.id": "API IDa",
   "content-manager.components.AddFilterCTA.add": "Iragazkiak",
   "content-manager.components.AddFilterCTA.hide": "Iragazkiak",

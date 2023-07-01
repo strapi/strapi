@@ -398,6 +398,7 @@
   "content-manager.DynamicTable.relation-loaded": "Las relaciones se han cargado",
   "content-manager.EditRelations.title": "Datos relacionados",
   "content-manager.HeaderLayout.button.label-add-entry": "Crear nueva entrada",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Añadir otra entrada",
   "content-manager.api.id": "ID de API",
   "content-manager.components.AddFilterCTA.add": "Filtros",
   "content-manager.components.AddFilterCTA.hide": "Filtros",

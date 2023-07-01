@@ -451,6 +451,7 @@
   "content-manager.DynamicTable.relation-more": "इस संबंध में प्रदर्शित की तुलना में अधिक इकाइयां हैं",
   "content-manager.EditRelations.title": "संबंधपरक डेटा",
   "content-manager.HeaderLayout.button.label-add-entry": "नई प्रविष्टि बनाएं",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "एक और प्रविष्टि बनाएं",
   "content-manager.api.id": "एपीआई आईडी",
   "content-manager.components.AddFilterCTA.add": "फिल्टर",
   "content-manager.components.AddFilterCTA.hide": "फिल्टर",

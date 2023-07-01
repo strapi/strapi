@@ -10,15 +10,15 @@ import {
   HeaderLayout,
   Typography,
 } from '@strapi/design-system';
-import { Link } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, ExclamationMarkCircle } from '@strapi/icons';
+import { Link, LinkButton, useTracking } from '@strapi/helper-plugin';
+import { ArrowLeft, Check, ExclamationMarkCircle, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import isEqualFastCompare from 'lodash/isEqual';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
@@ -45,6 +45,9 @@ const Header = ({
   onPublishPromptDismissal,
 }) => {
   const { goBack } = useHistory();
+  const { pathname } = useLocation();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = React.useRef(trackUsage);
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
   const { formatMessage } = useIntl();
 
@@ -113,7 +116,27 @@ const Header = ({
             {formatMessage(pubishButtonLabel)}
           </Button>
         )}
-        <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
+        {canCreate && (
+          <Box paddingLeft={shouldShowPublishButton ? 2 : 0}>
+            <LinkButton
+              onClick={() => {
+                const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+
+                trackUsageRef.current('willCreateEntry', trackerProperty);
+              }}
+              // Replace the last parameter with 'create'
+              to={`${pathname.replace(/\/\d+$/, '/create')}`}
+              startIcon={<Plus />}
+              style={{ textDecoration: 'none', border: 'none' }}
+            >
+              {formatMessage({
+                id: getTrad('HeaderLayout.button.label-add-another-entry'),
+                defaultMessage: 'Create new entry',
+              })}
+            </LinkButton>
+          </Box>
+        )}
+        <Box paddingLeft={2}>
           <Button disabled={!didChangeData} loading={status === 'submit-pending'} type="submit">
             {formatMessage({
               id: getTrad('containers.Edit.submit'),

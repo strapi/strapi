@@ -620,6 +620,7 @@
   "content-manager.DynamicTable.relation-more": "This relation contains more entities than displayed",
   "content-manager.EditRelations.title": "Relational data",
   "content-manager.HeaderLayout.button.label-add-entry": "Create new entry",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Add another entry",
   "content-manager.api.id": "API ID",
   "content-manager.apiError.This attribute must be unique": "{field} must be unique",
   "content-manager.components.AddFilterCTA.add": "Filters",

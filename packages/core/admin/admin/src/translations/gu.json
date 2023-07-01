@@ -370,6 +370,7 @@
   "content-manager.DynamicTable.relation-more": "આ સંબંધમાં પ્રદર્શિત કરતાં વધુ એકમો છે",
   "content-manager.EditRelations.title": "રિલેશનલ ડેટા",
   "content-manager.HeaderLayout.button.label-add-entry": "નવી એન્ટ્રી બનાવો",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "બીજી એન્ટ્રી ઉમેરો",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "ફિલ્ટર્સ",
   "content-manager.components.AddFilterCTA.hide": "ફિલ્ટર્સ",

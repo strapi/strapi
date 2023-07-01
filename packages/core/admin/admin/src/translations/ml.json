@@ -451,6 +451,7 @@
   "content-manager.DynamicTable.relation-more": "പ്രദർശിപ്പിച്ചതിനേക്കാൾ കൂടുതൽ എന്റിറ്റികൾ ഈ ബന്ധത്തിൽ അടങ്ങിയിരിക്കുന്നു",
   "content-manager.EditRelations.title": "റിലേഷണൽ ഡാറ്റ",
   "content-manager.HeaderLayout.button.label-add-entry": "പുതിയ എൻട്രി സൃഷ്ടിക്കുക",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "മറ്റ് എന്ട്രി ചേർക്കുക",
   "content-manager.api.id": "API ഐഡി",
   "content-manager.components.AddFilterCTA.add": "ഫിൽട്ടറുകൾ",
   "content-manager.components.AddFilterCTA.hide": "ഫിൽട്ടറുകൾ",

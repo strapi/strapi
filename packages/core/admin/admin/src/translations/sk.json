@@ -407,6 +407,7 @@
   "content-manager.DynamicTable.relation-more": "Toto prepojenie obsahuje viac záznamov, ako je zobrazených",
   "content-manager.EditRelations.title": "Relačné dáta",
   "content-manager.HeaderLayout.button.label-add-entry": "Nový záznam",
+  "content-manager.HeaderLayout.button.label-add-another-entry": "Pridať ďalší záznam",
   "content-manager.api.id": "API ID",
   "content-manager.components.AddFilterCTA.add": "Filtre",
   "content-manager.components.AddFilterCTA.hide": "Filtre",
