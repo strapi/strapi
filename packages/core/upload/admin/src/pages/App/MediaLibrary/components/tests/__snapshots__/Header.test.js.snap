@@ -366,7 +366,7 @@ exports[`Header renders 1`] = `
         <a
           aria-current="page"
           class="c2 active"
-          href="/?folder=2"
+          href="/?folder=2&folderPath=/1"
         >
           <span
             aria-hidden="true"
