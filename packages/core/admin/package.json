@@ -145,7 +145,7 @@
     "glob": "8.0.3",
     "msw": "1.2.1",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.8.0"
+    "webpack-bundle-analyzer": "^4.9.0"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"
