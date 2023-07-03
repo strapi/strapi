@@ -85,11 +85,10 @@ const createContentType = (uid, definition) => {
     relation: 'oneToOne',
     target: 'admin::user',
     configurable: false,
-    writable: true,
+    writable: false,
     visible: false,
     useJoinTable: false,
     private: isPrivate,
-    hidden: true,
   };
 
   schema.attributes[UPDATED_BY_ATTRIBUTE] = {
