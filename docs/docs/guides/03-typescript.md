@@ -197,7 +197,7 @@ function query<TValue extends object, TKey extends keyof TValue>(
   // ...
 }
 
-// ❌ avoid
+// ✅ ok
 type NonEmpty<TValue extends string> = TValue extends '' ? never : TValue;
 
 // ✅ prefer
