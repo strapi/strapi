@@ -47,12 +47,12 @@ export = {
         // https://support.cloudinary.com/hc/en-us/community/posts/360009586100-Upload-movie-video-with-large-size?page=1#community_comment_360002140099
         // The Cloudinary's max limit for regular upload is actually 100 MB but add some headroom
         // for size counting shenanigans. (Strapi provides the size in kilobytes rounded to two decimal places here).
-        const upload_method =
+        const uploadMethod =
           file.size && file.size < 1000 * 99
             ? cloudinary.uploader.upload_stream
             : cloudinary.uploader.upload_chunked_stream;
 
-        const uploadStream = upload_method(
+        const uploadStream = uploadMethod(
           { ...config, ...customConfig },
           (err, image) => {
             if (err) {
