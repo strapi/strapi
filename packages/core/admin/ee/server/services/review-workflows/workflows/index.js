@@ -1,6 +1,6 @@
 'use strict';
 
-const { set, isString } = require('lodash/fp');
+const { set, isString, omit } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
@@ -50,29 +50,32 @@ module.exports = ({ strapi }) => {
      * @throws {ValidationError} - If the workflow has no stages.
      */
     async create(opts) {
-      let createOpts = { ...opts, populate: { stages: true } };
-
       workflowsValidationService.validateWorkflowStages(opts.data.stages);
       await workflowsValidationService.validateWorkflowCount(1);
 
       return strapi.db.transaction(async () => {
-        // Create stages
-        const stageIds = await getService('stages', { strapi })
-          .replaceStages([], opts.data.stages)
-          .then((stages) => stages.map((stage) => stage.id));
+        // Create Workflow
+        const workflow = await strapi.entityService.create(WORKFLOW_MODEL_UID, {
+          select: '*',
+          data: omit('stages')(opts.data),
+        });
 
-        createOpts = set('data.stages', stageIds, createOpts);
+        const stagesToCreate = opts.data.stages.map((stage) => ({
+          ...stage,
+          workflow: workflow.id,
+        }));
+        // Create stages
+        const stages = await getService('stages', { strapi }).createMany(stagesToCreate);
 
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
             destContentTypes: opts.data.contentTypes,
-            stageId: stageIds[0],
+            stageId: stages[0].id,
           });
         }
 
-        // Create Workflow
-        return strapi.entityService.create(WORKFLOW_MODEL_UID, createOpts);
+        return { ...workflow, stages };
       });
     },
 
