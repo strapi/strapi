@@ -34,7 +34,7 @@
     "react-intl": "6.4.1",
     "react-router-dom": "5.3.4",
     "sqlite3": "5.1.2",
-    "styled-components": "5.3.3"
+    "styled-components": "6.0.2"
   },
   "strapi": {
     "uuid": "getstarted"
