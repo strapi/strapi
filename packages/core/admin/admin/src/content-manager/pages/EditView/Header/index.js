@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, CheckCircle, CrossCircle, ExclamationMarkCircle } from '@strapi/icons';
+import { ArrowLeft, CheckCircle, CrossCircle, ExclamationMarkCircle } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import isEqualFastCompare from 'lodash/isEqual';
