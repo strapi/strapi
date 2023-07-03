@@ -31,31 +31,27 @@ const useAllowedAttributes = (contentType, slug) => {
 
   const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
   const attributesArray = Object.keys(get(contentType, ['attributes']), {});
-  const allowedAttributes = attributesArray
-    .filter((attr) => {
-      const current = get(contentType, ['attributes', attr], {});
+  const allowedAttributes = attributesArray.filter((attr) => {
+    const current = get(contentType, ['attributes', attr], {});
 
-      if (!current.type) {
-        return false;
-      }
+    if (!current.type) {
+      return false;
+    }
 
-      if (NOT_ALLOWED_FILTERS.includes(current.type)) {
-        return false;
-      }
+    if (NOT_ALLOWED_FILTERS.includes(current.type)) {
+      return false;
+    }
 
-      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
-        return false;
-      }
+    if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
+      return false;
+    }
 
-      if (CREATOR_ATTRIBUTES.includes(attr) && !canReadAdminUsers) {
-        return false;
-      }
+    return true;
+  });
 
-      return true;
-    })
-    .sort((a, b) => formatter.compare(a, b));
-
-  return allowedAttributes;
+  return [...allowedAttributes, ...(canReadAdminUsers ? CREATOR_ATTRIBUTES : [])].sort((a, b) =>
+    formatter.compare(a, b)
+  );
 };
 
 export default useAllowedAttributes;
