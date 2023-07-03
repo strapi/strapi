@@ -239,14 +239,7 @@ const reducer = (state, action) =>
           (value) => {
             return value.type === 'relation';
           },
-          (value, { path }) => {
-            const relationFieldName = path[path.length - 1];
-
-            // We don't want to fetch the relations with creator fields because we already have it, only when editing
-            if (value && (relationFieldName === 'createdBy' || relationFieldName === 'updatedBy')) {
-              return value;
-            }
-
+          (_, { path }) => {
             if (state.modifiedData?.id === data.id && get(state.modifiedData, path)) {
               return get(state.modifiedData, path);
             }
