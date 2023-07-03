@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => {
             const { args, resourceUID } = parent;
             const { start, limit } = args;
             const safeLimit = Math.max(limit, 1);
-            const contentType = strapi.contentTypes[resourceUID];
+            const contentType = strapi.getModel(resourceUID);
 
             const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
               auth: ctx?.state?.auth,
