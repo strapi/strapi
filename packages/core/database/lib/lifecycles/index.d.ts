@@ -38,6 +38,8 @@ export interface Event {
   action: Action;
   model: Model;
   params: Params;
+  result?: any;
+  state?: any;
 }
 
 export interface LifecycleProvider {
