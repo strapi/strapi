@@ -140,13 +140,10 @@ module.exports = ({ strapi }) => {
         await stageService.deleteMany(workflow.stages.map((stage) => stage.id));
 
         // Unassign all content types, this will migrate the content types to null
-        await workflowsContentTypes.migrate(
-          {
-            srcContentTypes: workflow.contentTypes,
-            destContentTypes: [],
-          },
-          true
-        );
+        await workflowsContentTypes.migrate({
+          srcContentTypes: workflow.contentTypes,
+          destContentTypes: [],
+        });
 
         // Delete Workflow
         return strapi.entityService.delete(WORKFLOW_MODEL_UID, workflow.id, opts);
