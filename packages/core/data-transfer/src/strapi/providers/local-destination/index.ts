@@ -217,7 +217,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async #removeAssetsBackup() {
     if (strapi.config.get('plugin.upload').provider === 'local') {
-      await fse.rm(this.uploadsBackupDirectoryName, { recursive: true, force: true });
+      assertValidStrapi(this.strapi);
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+      await fse.rm(backupDirectory, { recursive: true, force: true });
     }
   }
 
@@ -225,7 +230,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
-    const removeAssetsBackup = this.#removeAssetsBackup;
+    const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
     return new Writable({
