@@ -106,7 +106,7 @@ module.exports = ({ strapi }) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            [...srcStages, ...createdStages],
+            srcStages,
             srcStages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
