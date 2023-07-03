@@ -4,7 +4,7 @@ const {
   mapAsync,
   errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
-const { map } = require('lodash/fp');
+const { map, pipe, flatMap, groupBy, has, filter, get } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
@@ -29,19 +29,21 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    async createMany(stagesList, { fields }) {
-      const params = { select: fields };
-      const groupByWorkflow = (workflows, stage) => {
-        if (!workflows[stage.workflowId]) {
-          workflows[stage.workflowId] = [];
-        }
-        workflows[stage.workflowId].push(stage);
-        return workflows;
+    async createMany(stagesList, { fields } = {}) {
+      const params = { select: fields ?? '*' };
+      const filterStagesWithoutWorkflow = has('workflowId');
+      const groupByWorkflow = get('workflowId');
+      const validateEachWorkflow = async (stages, workflowId) => {
+        await workflowsValidationService.validateWorkflowCountStages(workflowId, stages.length);
       };
+      const validationPipe = pipe(
+        filter(filterStagesWithoutWorkflow),
+        groupBy(groupByWorkflow),
+        flatMap(validateEachWorkflow)
+      );
+
       // As we can create several stages, we need to make sure that we don't exceed the licence threshold
-      Object.entries(stagesList.reduce(groupByWorkflow, {})).forEach((workflowStages) => {
-        workflowsValidationService.validateWorkflowStages(workflowStages);
-      });
+      await Promise.all(validationPipe(stagesList));
 
       const stages = await Promise.all(
         stagesList.map((stage) =>
@@ -78,8 +80,15 @@ module.exports = ({ strapi }) => {
       });
     },
 
-    count() {
-      return strapi.entityService.count(STAGE_MODEL_UID);
+    count({ workflowId } = {}) {
+      const opts = {};
+
+      if (workflowId) {
+        opts.where = {
+          workflow: workflowId,
+        };
+      }
+      return strapi.entityService.count(STAGE_MODEL_UID, opts);
     },
 
     async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
