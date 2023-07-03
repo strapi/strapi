@@ -15,6 +15,8 @@ const Permissions = (props) => {
     return <LoadingIndicatorPage />;
   }
 
+  console.log({ props });
+
   return <ListView {...props} {...allowedActions} />;
 };
 

@@ -110,7 +110,7 @@ function ListView({
   const { post, del } = fetchClient;
 
   // Here we save the loading state on background
-  const [isLoadingOnBackground, setIsLoadingOnBackground] = React.useState(false);
+  const [isLoadingBackgroundData, setIsLoadingBackgroundData] = React.useState(false);
 
   const bulkPublishMutation = useMutation(
     (data) =>
@@ -430,8 +430,8 @@ function ListView({
   };
 
   // Refetch the data and update the main data without loading
-  const refreshDataOnBackground = async () => {
-    setIsLoadingOnBackground(true);
+  const refetchBackgroundData = async () => {
+    setIsLoadingBackgroundData(true);
     const endpoint = getRequestUrl(`collection-types/${slug}${params}`);
 
     const {
@@ -439,7 +439,7 @@ function ListView({
     } = await fetchClient.get(endpoint);
 
     getDataSucceeded(paginationResult, results);
-    setIsLoadingOnBackground(false);
+    setIsLoadingBackgroundData(false);
   };
 
   // Add 1 column for the checkbox and 1 for the actions
@@ -522,8 +522,8 @@ function ListView({
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                  onRefreshData={refreshDataOnBackground}
-                  isRefreshing={isLoadingOnBackground}
+                  onRefreshData={refetchBackgroundData}
+                  isRefreshing={isLoadingBackgroundData}
                 />
               </Table.ActionBar>
               <Table.Content>

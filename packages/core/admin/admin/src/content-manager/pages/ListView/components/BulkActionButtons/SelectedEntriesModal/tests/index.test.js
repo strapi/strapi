@@ -107,14 +107,14 @@ describe('Bulk publish selected entries modal', () => {
     expect(checkboxEntry2).not.toBeChecked();
 
     // Publish button should be disabled if no items are selected
-    const count = screen.getByText('entries selected', { exact: false });
-    expect(count).toHaveTextContent('0 entries selected');
+    const count = screen.getByText('entries ready to publish', { exact: false });
+    expect(count).toHaveTextContent('0 entries ready to publish');
     const publishButton = screen.getByRole('button', { name: /publish/i });
     expect(publishButton).toBeDisabled();
 
     // If at least one item is selected, the publish button should work
     fireEvent.click(checkboxEntry1);
-    expect(count).toHaveTextContent('1 entry selected');
+    expect(count).toHaveTextContent('1 entry ready to publish');
     expect(publishButton).not.toBeDisabled();
   });
 

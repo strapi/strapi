@@ -38,10 +38,10 @@ const EntryValidationText = ({ errors, isPublished }) => {
       <Flex gap={2}>
         <Icon color="danger600" as={CrossCircle} />
         <Typography textColor="danger600" variant="omega" fontWeight="semiBold">
-          {Object.keys(errors)
-            .map((key) =>
+          {Object.entries(errors)
+            .map(([key, value]) =>
               formatMessage(
-                { id: `${errors[key].id}.withField`, defaultMessage: errors[key].defaultMessage },
+                { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
                 { field: key }
               )
             )
@@ -57,7 +57,7 @@ const EntryValidationText = ({ errors, isPublished }) => {
         <Icon color="success600" as={CheckCircle} />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
-            id: 'TODO',
+            id: 'app.utils.published',
             defaultMessage: 'Published',
           })}
         </Typography>
@@ -68,9 +68,9 @@ const EntryValidationText = ({ errors, isPublished }) => {
   return (
     <Flex gap={2}>
       <Icon color="success600" as={CheckCircle} />
-      <Typography fontWeight="bold">
+      <Typography>
         {formatMessage({
-          id: 'TODO',
+          id: 'app.utils.ready-to-publish',
           defaultMessage: 'Ready to publish',
         })}
       </Typography>
@@ -125,11 +125,10 @@ const SelectedEntriesTableContent = ({ errors }) => {
           <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
       </Table.Head>
-      {isLoading ? (
-        <Table.LoadingBody />
-      ) : (
-        <Tbody>
-          {rows.map((entry, index) => (
+      <Table.LoadingBody />
+      <Tbody>
+        {!isLoading &&
+          rows.map((entry, index) => (
             <Tr key={entry.id}>
               <Body.CheckboxDataCell rowId={entry.id} index={index} />
               <Td>
@@ -165,8 +164,7 @@ const SelectedEntriesTableContent = ({ errors }) => {
               </Td>
             </Tr>
           ))}
-        </Tbody>
-      )}
+      </Tbody>
     </Table.Content>
   );
 };
@@ -221,7 +219,8 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
 
   const { errors } = validateEntriesToPublish();
 
-  const atLeastOneEntryHasNoErrors = selectedEntries.some((entryId) => !errors[entryId]);
+  const selectedEntriesWithNoErrors = selectedEntries.filter((entryId) => !errors[entryId]);
+  const selectedEntriesWithErrors = selectedEntries.filter((entryId) => errors[entryId]);
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -239,10 +238,11 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
             {
               id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
               defaultMessage:
-                '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
+                '<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} awaiting for action.',
             },
             {
-              count: selectedEntries.length,
+              readyToPublishCount: selectedEntriesWithNoErrors.length,
+              withErrorsCount: selectedEntriesWithErrors.length,
               b: BoldChunk,
             }
           )}
@@ -267,7 +267,11 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
             </Button>
             <Button
               onClick={() => onConfirm(selectedEntries)}
-              disabled={selectedEntries.length === 0 || !atLeastOneEntryHasNoErrors || isLoading}
+              disabled={
+                selectedEntries.length === 0 ||
+                selectedEntries.length === selectedEntriesWithErrors.length ||
+                isLoading
+              }
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
             </Button>
