@@ -7778,7 +7778,7 @@ __metadata:
     styled-components: 5.3.3
     typescript: 5.1.3
     webpack: ^5.86.0
-    webpack-bundle-analyzer: ^4.8.0
+    webpack-bundle-analyzer: ^4.9.0
     webpack-cli: ^5.1.0
     webpack-dev-server: ^4.15.0
     webpackbar: ^5.0.2
@@ -8414,7 +8414,7 @@ __metadata:
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
     "@types/jest": 29.2.0
-    aws-sdk: 2.1399.0
+    aws-sdk: 2.1409.0
     eslint-config-custom: 4.11.3
     lodash: 4.17.21
     tsconfig: 4.11.3
@@ -11890,9 +11890,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1399.0":
-  version: 2.1399.0
-  resolution: "aws-sdk@npm:2.1399.0"
+"aws-sdk@npm:2.1409.0":
+  version: 2.1409.0
+  resolution: "aws-sdk@npm:2.1409.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -11904,7 +11904,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: 74dc46a921cd449749e6a9ba318eb959db0004a21b0c8257660a0cb9727c09b3260f5adb460429d9f362b5c432897df9f7dab3b72dc8c599fdbb96681b132dbc
+  checksum: f0046c83916e12b07b28699fd20aea11d78a3f41b1aa6add2ed645f92dec8b424640ef9439596545eba5f3d3a4254c08ce12b7d48504656dd37d2cc9b5ba9994
   languageName: node
   linkType: hard
 
@@ -32618,9 +32618,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-bundle-analyzer@npm:^4.8.0":
-  version: 4.8.0
-  resolution: "webpack-bundle-analyzer@npm:4.8.0"
+"webpack-bundle-analyzer@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "webpack-bundle-analyzer@npm:4.9.0"
   dependencies:
     "@discoveryjs/json-ext": 0.5.7
     acorn: ^8.0.4
@@ -32634,7 +32634,7 @@ __metadata:
     ws: ^7.3.1
   bin:
     webpack-bundle-analyzer: lib/bin/analyzer.js
-  checksum: acd86f68abb2bcb1a240043c6e2d8e53079499363afed94b96c0ec1abcc4fca2b7a7cbeeb5e13027d02a993c6ea8153194c69e7697faf47528bdaff1e2ce297e
+  checksum: e439aea4e88e18bfdc16eb69782c1bb17b2e581905a5cfa8d34058dc6677f6e202f896189268e58b49fa14ae12f5ef4c25cdca9f98f3de7e6699ac62def2f0af
   languageName: node
   linkType: hard
 
