@@ -1,14 +1,14 @@
 import { Writable, Readable } from 'stream';
-import path from 'path';
 import * as fse from 'fs-extra';
+import path from 'path';
 import { isFunction } from 'lodash/fp';
 import type {
   IAsset,
   IDestinationProvider,
+  IFile,
   IMetadata,
   ProviderType,
   Transaction,
-  IFile,
 } from '../../../../types';
 
 import { restore } from './strategies';
@@ -49,6 +49,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   transaction?: Transaction;
 
+  uploadsBackupDirectoryName: string;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -57,6 +59,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
     this.#entitiesMapper = {};
+    this.uploadsBackupDirectoryName = `uploads_backup_${Date.now()}`;
   }
 
   async bootstrap(): Promise<void> {
@@ -91,6 +94,32 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
+  async #deleteAllAssets() {
+    assertValidStrapi(this.strapi);
+    // delete all the assets (if local: remove uplaods folder, if external: remove using the provider api)
+    // query files and do for loop to delete them using the delete method in provider
+    if (strapi.config.get('plugin.upload').provider === 'local') {
+      const uploadsDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+      await fse.rm(uploadsDirectory, { recursive: true, force: true });
+    } else {
+      // external providers
+
+      // TODO use bulk delete when exists in providers
+      const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
+      for (const file of files) {
+        await strapi.plugin('upload').provider.delete(file);
+        if (file.formats) {
+          for (const fileFormat of Object.values(file.formats)) {
+            await strapi.plugin('upload').provider.delete(fileFormat);
+          }
+        }
+      }
+    }
+  }
+
   async rollback() {
     await this.transaction?.rollback();
   }
@@ -101,8 +130,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     await this.transaction?.attach(async () => {
+      await this.#handleAssetsBackup();
       try {
         if (this.options.strategy === 'restore') {
+          await this.#deleteAllAssets();
           await this.#deleteAll();
         }
       } catch (error) {
@@ -160,31 +191,48 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  async #handleAssetsBackup() {
+    assertValidStrapi(this.strapi, 'Not able to create the assets backup');
+
+    if (strapi.config.get('plugin.upload').provider === 'local') {
+      const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+
+      try {
+        await fse.move(assetsDirectory, backupDirectory);
+        await fse.mkdir(assetsDirectory);
+        // Create a .gitkeep file to ensure the directory is not empty
+        await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+      } catch (err) {
+        throw new ProviderTransferError(
+          'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
+        );
+      }
+      return backupDirectory;
+    }
+  }
+
+  async #removeAssetsBackup() {
+    if (strapi.config.get('plugin.upload').provider === 'local') {
+      await fse.rm(this.uploadsBackupDirectoryName, { recursive: true, force: true });
+    }
+  }
+
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
-    // const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
-    // const backupDirectory = path.join(
-    //   this.strapi.dirs.static.public,
-    //   `uploads_backup_${Date.now()}`
-    // );
-
-    // try {
-    //   await fse.move(assetsDirectory, backupDirectory);
-    //   await fse.mkdir(assetsDirectory);
-    //   // Create a .gitkeep file to ensure the directory is not empty
-    //   await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
-    // } catch (err) {
-    //   throw new ProviderTransferError(
-    //     'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
-    //   );
-    // }
+    const removeAssetsBackup = this.#removeAssetsBackup;
     const strapi = this.strapi;
     const transaction = this.transaction;
     return new Writable({
       objectMode: true,
       async final(next) {
+        // Deletes the backup folder
+        removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
@@ -197,37 +245,39 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           try {
             if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
-              console.log('uploading stream');
               await strapi.plugin('upload').provider.uploadStream(uploadData);
-              console.log('uploaded stream');
             } else {
               uploadData.buffer = await streamToBuffer(uploadData.stream);
-              console.log('uploading buffer');
               await strapi.plugin('upload').provider.upload(uploadData);
-              console.log('uploaded buffer');
             }
-            // uploadData.buffer = await streamToBuffer(uploadData.stream);
-            // uploadData.size = uploadData.buffer.length;
-            // console.log('uploading buffer', uploadData.url);
-            // // plugin::upload.file
-            // await strapi.plugin('upload').provider.upload(uploadData);
-            // console.log('uploaded buffer', uploadData.url);
-            // if (uploadData?.type) {
-            //   const [entry]: IFile[] = await strapi.db.query('plugin::upload.file').findMany({
-            //     where: { hash: uploadData.mainHash },
-            //   });
-            //   const specificFormat = entry?.formats?.[uploadData.type];
-            //   if (specificFormat) {
-            //     specificFormat.url = uploadData.url;
-            //   }
-            // }
-            // const entries = await strapi.db.query('plugin::upload.file').findMany({
-            //   where: { hash: uploadData.hash },
-            // });
-            // console.log('entries', JSON.stringify(entries, null, 2));
+            if (uploadData?.type) {
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+                where: { hash: uploadData.mainHash },
+              });
+              const specificFormat = entry?.formats?.[uploadData.type];
+              if (specificFormat) {
+                specificFormat.url = uploadData.url;
+              }
+              await strapi.db.query('plugin::upload.file').update({
+                where: { hash: uploadData.mainHash },
+                data: {
+                  formats: entry.formats,
+                },
+              });
+              return callback();
+            }
+            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+              where: { hash: uploadData.hash },
+            });
+            entry.url = uploadData.url;
+            await strapi.db.query('plugin::upload.file').update({
+              where: { hash: uploadData.hash },
+              data: {
+                url: entry.url,
+              },
+            });
             callback();
           } catch (error) {
-            console.log(error);
             callback(new Error(`Error while uploading asset ${chunk.filename}`));
           }
         });
