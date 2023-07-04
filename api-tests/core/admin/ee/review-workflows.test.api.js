@@ -177,6 +177,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(200);
         expect(res.body.data).toBeInstanceOf(Object);
         expect(res.body.data).toEqual(testWorkflow);
+        expect(typeof res.body.meta.workflowCount).toBe('number');
       } else {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
@@ -486,8 +487,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
           { body: { data: { contentTypes: [productUID] } } }
         );
-
-        console.log(workflow);
       });
 
       test('Should update the accordingly on an entity', async () => {
