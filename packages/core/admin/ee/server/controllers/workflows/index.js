@@ -145,10 +145,15 @@ module.exports = {
     const { populate } = await sanitizedQuery.read(query);
 
     const workflowService = getService('workflows');
-    const workflow = await workflowService.findById(id, { populate });
+
+    const [workflow, workflowCount] = await Promise.all([
+      workflowService.findById(id, { populate }),
+      workflowService.count(),
+    ]);
 
     ctx.body = {
       data: await sanitizeOutput(workflow),
+      meta: { workflowCount },
     };
   },
 };
