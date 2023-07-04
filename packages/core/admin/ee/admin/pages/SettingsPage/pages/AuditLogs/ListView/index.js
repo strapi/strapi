@@ -32,12 +32,18 @@ import tableHeaders from './utils/tableHeaders';
 const ListView = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
+
+  // TODO: this is necessary because otherwise we run into an
+  // infinite rendering loop
+  const permissionsMemoized = React.useMemo(() => {
+    return {
+      ...permissions.settings.auditLogs,
+      readUsers: permissions.settings.users.read,
+    };
+  }, [permissions.settings.auditLogs, permissions.settings.users.read]);
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
-  } = useRBAC({
-    ...permissions.settings.auditLogs,
-    readUsers: permissions.settings.users.read,
-  });
+  } = useRBAC(permissionsMemoized);
 
   const [{ query }, setQuery] = useQueryParams();
   const { auditLogs, users, isLoading, hasError } = useAuditLogsData({

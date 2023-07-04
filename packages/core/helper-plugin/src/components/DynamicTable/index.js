@@ -1,6 +1,6 @@
 import React, { Children, cloneElement, useState } from 'react';
 
-import { Box, Button, Flex, Table as TableCompo, Typography } from '@strapi/design-system';
+import { Button, Flex, Table as TableCompo, Typography } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -129,35 +129,29 @@ const Table = ({
   return (
     <>
       {selectedEntries.length > 0 && (
-        <Box>
-          <Box paddingBottom={4}>
-            <Flex justifyContent="space-between">
-              <Flex gap={3}>
-                <Typography variant="epsilon" textColor="neutral600">
-                  {formatMessage(
-                    {
-                      id: 'content-manager.components.TableDelete.label',
-                      defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
-                    },
-                    { number: selectedEntries.length }
-                  )}
-                </Typography>
-                {renderBulkActionsBar ? (
-                  renderBulkActionsBar({ selectedEntries, clearSelectedEntries })
-                ) : (
-                  <Button
-                    onClick={handleToggleConfirmDeleteAll}
-                    startIcon={<Trash />}
-                    size="L"
-                    variant="danger-light"
-                  >
-                    {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
-                  </Button>
-                )}
-              </Flex>
-            </Flex>
-          </Box>
-        </Box>
+        <Flex gap={3}>
+          <Typography variant="omega" textColor="neutral500">
+            {formatMessage(
+              {
+                id: 'content-manager.components.TableDelete.label',
+                defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
+              },
+              { number: selectedEntries.length }
+            )}
+          </Typography>
+          {renderBulkActionsBar ? (
+            renderBulkActionsBar({ selectedEntries, clearSelectedEntries })
+          ) : (
+            <Button
+              onClick={handleToggleConfirmDeleteAll}
+              startIcon={<Trash />}
+              size="L"
+              variant="danger-light"
+            >
+              {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
+            </Button>
+          )}
+        </Flex>
       )}
       <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT} footer={footer}>
         <TableHead
