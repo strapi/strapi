@@ -39,7 +39,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   let strapi;
 
   const createWorkflow = async (data) => {
-    const name = `${data.name}-${Math.random().toString(36)}`;
+    const name = `workflow-${Math.random().toString(36)}`;
     return requests.admin.post('/admin/review-workflows/workflows?populate=*', {
       body: { data: { ...baseWorkflow, name, ...data } },
     });
@@ -108,10 +108,13 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
 
     describe('Create workflow and assign content type', () => {
       test('It should create a workflow and assign a content type', async () => {
-        const res = await createWorkflow({ contentTypes: [productUID] });
+        const res = await createWorkflow({ name: 'test-workflow', contentTypes: [productUID] });
 
         expect(res.status).toBe(200);
-        expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
+        expect(res.body.data).toMatchObject({
+          name: expect.any(String),
+          contentTypes: [productUID],
+        });
         workflow1 = res.body.data;
       });
 

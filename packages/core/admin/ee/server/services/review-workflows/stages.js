@@ -4,7 +4,7 @@ const {
   mapAsync,
   errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
-const { map, pipe, flatMap, groupBy, has, filter, get } = require('lodash/fp');
+const { map } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
@@ -31,19 +31,6 @@ module.exports = ({ strapi }) => {
 
     async createMany(stagesList, { fields } = {}) {
       const params = { select: fields ?? '*' };
-      const filterStagesWithoutWorkflow = has('workflowId');
-      const groupByWorkflow = get('workflowId');
-      const validateEachWorkflow = async (stages, workflowId) => {
-        await workflowsValidationService.validateWorkflowCountStages(workflowId, stages.length);
-      };
-      const validationPipe = pipe(
-        filter(filterStagesWithoutWorkflow),
-        groupBy(groupByWorkflow),
-        flatMap(validateEachWorkflow)
-      );
-
-      // As we can create several stages, we need to make sure that we don't exceed the licence threshold
-      await Promise.all(validationPipe(stagesList));
 
       const stages = await Promise.all(
         stagesList.map((stage) =>
@@ -95,8 +82,6 @@ module.exports = ({ strapi }) => {
       const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
       assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
-
-      workflowsValidationService.validateWorkflowStages(destStages);
 
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
