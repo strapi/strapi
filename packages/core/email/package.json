@@ -27,8 +27,8 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.8.0",
-    "@strapi/icons": "1.8.0",
+    "@strapi/design-system": "1.8.1",
+    "@strapi/icons": "1.8.1",
     "@strapi/provider-email-sendmail": "4.11.3",
     "@strapi/utils": "4.11.3",
     "lodash": "4.17.21",

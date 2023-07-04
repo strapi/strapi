@@ -53,6 +53,7 @@
     "qs": "6.11.1",
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
+    "react-query": "3.39.3",
     "react-select": "5.7.0"
   },
   "devDependencies": {
@@ -62,14 +63,15 @@
     "@storybook/builder-webpack5": "6.5.15",
     "@storybook/manager-webpack5": "6.5.15",
     "@storybook/react": "^6.5.16",
-    "@strapi/design-system": "1.8.0",
-    "@strapi/icons": "1.8.0",
+    "@strapi/design-system": "1.8.1",
+    "@strapi/icons": "1.8.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "browserslist-to-esbuild": "1.2.0",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^2.21.0",
     "history": "^4.9.0",
+    "msw": "1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
@@ -80,8 +82,8 @@
     "webpack-cli": "^5.1.0"
   },
   "peerDependencies": {
-    "@strapi/design-system": "1.8.0",
-    "@strapi/icons": "1.8.0",
+    "@strapi/design-system": "1.8.1",
+    "@strapi/icons": "1.8.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^5.3.4",
