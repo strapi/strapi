@@ -6,13 +6,14 @@ const addLocaleToSingleTypesLinks = ({ stLinks, models }, store) => {
   }
 
   const storeState = store.getState();
-  const { locales } = storeState.i18n_locales;
+  const { locales, preferredLocale } = storeState.i18n_locales;
   const { collectionTypesRelatedPermissions } = storeState.rbacProvider;
 
   const mutatedLinks = addLocaleToLinksSearch(
     stLinks,
     'singleType',
     models,
+    preferredLocale,
     locales,
     collectionTypesRelatedPermissions
   );

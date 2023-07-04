@@ -3,11 +3,22 @@ import set from 'lodash/set';
 
 import pluginId from '../pluginId';
 
-import { ADD_LOCALE, DELETE_LOCALE, RESOLVE_LOCALES, UPDATE_LOCALE } from './constants';
+import {
+  ADD_LOCALE,
+  DELETE_LOCALE,
+  RESOLVE_LOCALES,
+  UPDATE_LOCALE,
+  SET_PREFERRED_LOCALE,
+} from './constants';
+
+const PREFERRED_LOCALE_KEY = `${pluginId}_preferredLocale`;
 
 export const initialState = {
   isLoading: true,
   locales: [],
+  preferredLocale: sessionStorage.getItem(PREFERRED_LOCALE_KEY)
+    ? JSON.parse(sessionStorage.getItem(PREFERRED_LOCALE_KEY))
+    : null,
 };
 
 const localeReducer = produce((draftState = initialState, action = {}) => {
@@ -48,6 +59,12 @@ const localeReducer = produce((draftState = initialState, action = {}) => {
       );
 
       set(draftState.locales, indexToEdit, action.editedLocale);
+      break;
+    }
+
+    case SET_PREFERRED_LOCALE: {
+      sessionStorage.setItem(PREFERRED_LOCALE_KEY, JSON.stringify(action.preferredLocale));
+      draftState.preferredLocale = action.preferredLocale;
       break;
     }
 

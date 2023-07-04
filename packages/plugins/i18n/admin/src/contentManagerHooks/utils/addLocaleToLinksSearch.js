@@ -1,9 +1,16 @@
 import get from 'lodash/get';
 import { parse, stringify } from 'qs';
 
-import getDefaultLocale from '../../utils/getDefaultLocale';
+import getPreferredOrDefaultLocale from '../../utils/getDefaultLocale';
 
-const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permissions) => {
+const addLocaleToLinksSearch = (
+  links,
+  kind,
+  contentTypeSchemas,
+  preferredLocale,
+  locales,
+  permissions
+) => {
   return links.map((link) => {
     const contentTypeUID = link.to.split(`/${kind}/`)[1];
 
@@ -36,7 +43,11 @@ const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permis
       {}
     );
 
-    const defaultLocale = getDefaultLocale(contentTypeNeededPermissions, locales);
+    const defaultLocale = getPreferredOrDefaultLocale(
+      preferredLocale,
+      contentTypeNeededPermissions,
+      locales
+    );
 
     if (!defaultLocale) {
       return { ...link, isDisplayed: false };

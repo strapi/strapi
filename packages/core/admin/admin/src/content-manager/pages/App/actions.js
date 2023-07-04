@@ -1,4 +1,4 @@
-import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA } from './constants';
+import { GET_INIT_DATA, RESET_INIT_DATA, SET_INIT_DATA, SET_LINK_DATA } from './constants';
 
 export const getInitData = () => ({
   type: GET_INIT_DATA,
@@ -20,5 +20,13 @@ export const setInitData = ({
     components,
     contentTypeSchemas,
     fieldSizes,
+  },
+});
+
+export const setLinkData = ({ authorizedCollectionTypeLinks, authorizedSingleTypeLinks }) => ({
+  type: SET_LINK_DATA,
+  data: {
+    authorizedCollectionTypeLinks,
+    authorizedSingleTypeLinks,
   },
 });

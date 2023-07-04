@@ -11,12 +11,11 @@ import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getTrad } from '../../utils';
 
 import { getInitData, resetInitData, setInitData } from './actions';
 import { selectAppDomain } from './selectors';
-import getContentTypeLinks from './utils/getContentTypeLinks';
+import gatherContentTypeLinks from './utils/gatherContentTypeLinks';
 
 const useContentManagerInitData = () => {
   const dispatch = useDispatch();
@@ -47,23 +46,13 @@ const useContentManagerInitData = () => {
         })
       );
 
-      const unmutatedContentTypeLinks = await getContentTypeLinks({
-        models,
-        userPermissions: allPermissions,
-        toggleNotification,
-      });
-
-      const { ctLinks: authorizedCollectionTypeLinks } = runHookWaterfall(
-        MUTATE_COLLECTION_TYPES_LINKS,
-        {
-          ctLinks: unmutatedContentTypeLinks.authorizedCollectionTypeLinks,
+      const { authorizedCollectionTypeLinks, authorizedSingleTypeLinks } =
+        await gatherContentTypeLinks({
           models,
-        }
-      );
-      const { stLinks: authorizedSingleTypeLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
-        stLinks: unmutatedContentTypeLinks.authorizedSingleTypeLinks,
-        models,
-      });
+          userPermissions: allPermissions,
+          toggleNotification,
+          runHookWaterfall,
+        });
 
       const actionToDispatch = setInitData({
         authorizedCollectionTypeLinks,

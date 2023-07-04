@@ -9,12 +9,14 @@ import { useRouteMatch } from 'react-router-dom';
 
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
+import useLocales from '../../hooks/useLocales';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
 import getTrad from '../../utils/getTrad';
 
 const LocalePicker = () => {
   const { formatMessage } = useIntl();
+  const { preferredLocale, setPreferredLocale } = useLocales();
   const dispatch = useDispatch();
   const locales = useSelector(selectI18NLocales);
   const [{ query }, setQuery] = useQueryParams();
@@ -25,7 +27,7 @@ const LocalePicker = () => {
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
-  const [selected, setSelected] = useState(initialLocale?.code || '');
+  const [selected, setSelected] = useState(initialLocale?.code || preferredLocale?.code || '');
 
   if (!isFieldLocalized) {
     return null;
@@ -50,6 +52,8 @@ const LocalePicker = () => {
     if (code === selected) {
       return;
     }
+
+    setPreferredLocale({ code });
 
     setSelected(code);
 

@@ -7,6 +7,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 
+import useLocales from '../../../hooks/useLocales';
 import { getTrad } from '../../../utils';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 
@@ -27,6 +28,7 @@ const CMEditViewLocalePicker = ({
   slug,
 }) => {
   const { formatMessage } = useIntl();
+  const { setPreferredLocale } = useLocales();
 
   const currentLocale = get(query, 'plugins.i18n.locale', false);
 
@@ -36,6 +38,8 @@ const CMEditViewLocalePicker = ({
     if (value === currentLocale) {
       return;
     }
+
+    setPreferredLocale({ code: value });
 
     const nextLocale = options.find((option) => {
       return option.value === value;
