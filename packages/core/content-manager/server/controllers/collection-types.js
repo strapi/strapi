@@ -450,12 +450,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const populate = await getService('populate-builder')(model)
-      .populateDeep()
-      .countRelations()
-      .build();
-
-    const entities = await entityManager.find(ids, model, { populate });
+    const entities = await entityManager.find(ids, model);
 
     if (!entities) {
       return ctx.notFound();
