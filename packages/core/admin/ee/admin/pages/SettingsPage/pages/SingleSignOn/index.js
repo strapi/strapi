@@ -38,18 +38,13 @@ export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
-  // TODO: this is necessary because otherwise we run into an
-  // infinite rendering loop
-  const permissionsMemoized = React.useMemo(() => {
-    return {
-      ...permissions.settings.sso,
-      readRoles: permissions.settings.roles.read,
-    };
-  }, [permissions.settings.roles.read, permissions.settings.sso]);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(permissionsMemoized);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },

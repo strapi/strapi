@@ -72,7 +72,7 @@ export { default as useLockScroll } from './hooks/useLockScroll';
 export { default as usePersistentState } from './hooks/usePersistentState';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useQueryParams } from './hooks/useQueryParams';
-export { default as useRBAC } from './hooks/useRBAC';
+export { useRBAC } from './hooks/useRBAC';
 export { useSelectionState } from './hooks/useSelectionState';
 
 /* -------------------------------------------------------------------------------------------------

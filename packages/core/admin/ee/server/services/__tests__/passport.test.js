@@ -12,7 +12,7 @@ const { init } = require('../../../../server/services/passport');
 describe('Passport', () => {
   afterEach(() => {
     // Reset the mock on passport.use.toHaveBeenCalledTimes
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     // Reset the mock on strapi/ee so we can change its behavior
     jest.resetModules();
   });

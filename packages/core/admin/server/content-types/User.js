@@ -99,4 +99,14 @@ module.exports = {
       searchable: false,
     },
   },
+  config: {
+    attributes: {
+      resetPasswordToken: {
+        hidden: true,
+      },
+      registrationToken: {
+        hidden: true,
+      },
+    },
+  },
 };

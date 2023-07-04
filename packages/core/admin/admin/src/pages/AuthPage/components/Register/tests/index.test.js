@@ -87,7 +87,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('Render form elements', () => {
