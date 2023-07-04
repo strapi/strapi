@@ -243,7 +243,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
+      const endPoint = getRequestUrl(`${slug}/actions/countDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
