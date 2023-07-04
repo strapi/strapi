@@ -8018,7 +8018,6 @@ __metadata:
     date-fns: 2.30.0
     esbuild-loader: ^2.21.0
     formik: ^2.4.0
-    history: ^4.9.0
     immer: 9.0.19
     lodash: 4.17.21
     msw: 1.2.1
