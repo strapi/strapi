@@ -249,6 +249,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             buffer: chunk?.buffer,
           };
 
+          const provider = strapi.config.get('plugin.upload').provider;
+
           try {
             if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
               await strapi.plugin('upload').provider.uploadStream(uploadData);
@@ -268,6 +270,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
                 where: { hash: uploadData.mainHash },
                 data: {
                   formats: entry.formats,
+                  provider,
                 },
               });
               return callback();
@@ -280,6 +283,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               where: { hash: uploadData.hash },
               data: {
                 url: entry.url,
+                provider,
               },
             });
             callback();
