@@ -328,7 +328,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
       async write(asset: IAsset, _encoding, callback) {
         const startError = await startAssetsTransferOnce();
-        // console.log('asset', asset);
         if (startError) {
           return callback(startError);
         }
