@@ -311,7 +311,7 @@ SelectedEntriesModalContent.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
-  const { selectedEntries } = useTableContext();
+  const { selectedEntries, rows } = useTableContext();
   const { contentType } = useSelector(listViewDomain());
 
   // We want to keep the selected entries order same as the list view
@@ -332,23 +332,26 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
   const { get } = useFetchClient();
   const queryString = stringify(queryParams);
 
-  const { data, isRefetching, refetch } = useQuery(
+  const { data, isFetching, refetch } = useQuery(
     ['entries', contentType.uid, queryParams],
     async () => {
       const { data } = await get(
         `content-manager/collection-types/${contentType.uid}?${queryString}`
       );
 
-      return data;
+      return data.results;
+    },
+    {
+      initialData: () => rows.filter((row) => selectedEntries.includes(row.id)),
     }
   );
 
   return (
     <Table.Root
-      rows={data?.results}
+      rows={data}
       defaultSelectedEntries={selectedEntries}
       colCount={4}
-      isLoading={isRefetching}
+      isLoading={isFetching}
     >
       <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} onRefresh={refetch} />
     </Table.Root>
