@@ -1,7 +1,6 @@
 import { Writable, Readable } from 'stream';
 import * as fse from 'fs-extra';
 import path from 'path';
-import { isFunction } from 'lodash/fp';
 import type {
   IAsset,
   IDestinationProvider,
@@ -26,18 +25,6 @@ export interface ILocalStrapiDestinationProviderOptions {
   restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
-
-const streamToBuffer = (stream: any): Promise<Buffer> =>
-  new Promise((resolve, reject) => {
-    const chunks: any[] = [];
-    stream.on('data', (chunk: any) => {
-      chunks.push(chunk);
-    });
-    stream.on('end', () => {
-      resolve(Buffer.concat(chunks));
-    });
-    stream.on('error', reject);
-  });
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
   name = 'destination::local-strapi';
