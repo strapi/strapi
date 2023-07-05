@@ -68,6 +68,21 @@ const addDefault = (createOrUpdate) => {
 
 const preventCast = (validator) => validator.transform((val, originalVal) => originalVal);
 
+const validateUniqueFieldWithinEntity = (model, uniqueFieldValues, attribute) => {
+  const fieldValues = uniqueFieldValues[model.uid][attribute.name];
+
+  if (new Set(fieldValues).size === fieldValues.length) {
+    // If every instance of this field within the entity is unique then validation passes
+    return true;
+  }
+  if (fieldValues.filter((v) => v === attribute.value).length < 2) {
+    // If this field is not one that is duplicated within the entity then validation passes
+    return true;
+  }
+
+  return false;
+};
+
 const createComponentValidator =
   (createOrUpdate) =>
   (metas, { isDraft }) => {
@@ -79,21 +94,6 @@ const createComponentValidator =
       throw new Error('Validation failed: Model not found');
     }
 
-    const validateUniqueFieldWithinEntity = (updatedAttribute) => {
-      const fieldValues = uniqueFieldValues[model.uid][updatedAttribute.name];
-
-      if (new Set(fieldValues).size === fieldValues.length) {
-        // If every instance of this field within the entity is unique then validation passes
-        return true;
-      }
-      if (fieldValues.filter((v) => v === updatedAttribute.value).length < 2) {
-        // If this field is not one that is duplicated within the entity then validation passes
-        return true;
-      }
-
-      return false;
-    };
-
     if (prop('repeatable', attr) === true) {
       validator = yup.array().of(
         yup.lazy((item) => {
@@ -102,7 +102,8 @@ const createComponentValidator =
               model,
               data: item,
               entity: entity?.[updatedAttribute.name] ?? null,
-              validateUniqueFieldWithinEntity,
+              validateUniqueFieldWithinEntity: (attribute) =>
+                validateUniqueFieldWithinEntity(model, uniqueFieldValues, attribute),
             },
             { isDraft }
           ).notNull();
@@ -116,7 +117,8 @@ const createComponentValidator =
         {
           model,
           data: updatedAttribute.value,
-          validateUniqueFieldWithinEntity,
+          validateUniqueFieldWithinEntity: (attribute) =>
+            validateUniqueFieldWithinEntity(model, uniqueFieldValues, attribute),
         },
         { isDraft }
       );
@@ -130,7 +132,7 @@ const createComponentValidator =
 
 const createDzValidator =
   (createOrUpdate) =>
-  ({ attr, updatedAttribute }, { isDraft }) => {
+  ({ attr, updatedAttribute, uniqueFieldValues }, { isDraft }) => {
     let validator;
 
     validator = yup.array().of(
@@ -144,7 +146,17 @@ const createDzValidator =
           .notNull();
 
         return model
-          ? schema.concat(createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }))
+          ? schema.concat(
+              createModelValidator(createOrUpdate)(
+                {
+                  model,
+                  data: item,
+                  validateUniqueFieldWithinEntity: (args) =>
+                    validateUniqueFieldWithinEntity(model, uniqueFieldValues, args),
+                },
+                { isDraft }
+              )
+            )
           : schema;
       })
     );
@@ -258,27 +270,36 @@ const createValidateEntity =
 
         const attribute = model.attributes[attributeName];
 
-        // TODO support DZs
-        if (!['component'].includes(attribute?.type ?? '')) {
+        if (!['component', 'dynamiczone'].includes(attribute?.type ?? '')) {
           return acc;
         }
 
-        const componentModel = strapi.getModel(attribute.component);
+        const components = castArray(attributeValue);
 
-        Object.entries(componentModel.attributes).forEach(([key, value]) => {
-          if (!value.unique) {
-            return;
-          }
+        const models = [];
+        if (attribute.component) {
+          models.push(strapi.getModel(attribute.component));
+        } else {
+          // When it is a dynamic zone there can be multiple components
+          models.push(...components.map((component) => strapi.getModel(component.__component)));
+        }
 
-          acc[componentModel.uid] = {
-            ...acc[componentModel.uid],
-            [key]: [...(acc?.[componentModel.uid]?.[key] ?? [])],
-          };
+        models.forEach((componentModel) => {
+          Object.entries(componentModel.attributes).forEach(([key, value]) => {
+            if (!value.unique) {
+              return;
+            }
 
-          castArray(attributeValue).forEach((item) => {
-            acc[componentModel.uid][key].push(item[key]);
-          });
-        }, {});
+            acc[componentModel.uid] = {
+              ...acc[componentModel.uid],
+              [key]: [...(acc?.[componentModel.uid]?.[key] ?? [])],
+            };
+
+            components.forEach((item) => {
+              acc[componentModel.uid][key].push(item[key]);
+            });
+          }, {});
+        });
 
         return acc;
       },
