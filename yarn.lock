@@ -8065,7 +8065,7 @@ __metadata:
     rimraf: 3.0.2
     semver: 7.5.1
     stream-chain: 2.2.5
-    stream-json: 1.7.4
+    stream-json: 1.8.0
     tar: 6.1.13
     tar-stream: 2.2.0
     typescript: 5.1.3
@@ -30974,12 +30974,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-json@npm:1.7.4":
-  version: 1.7.4
-  resolution: "stream-json@npm:1.7.4"
+"stream-json@npm:1.8.0":
+  version: 1.8.0
+  resolution: "stream-json@npm:1.8.0"
   dependencies:
     stream-chain: ^2.2.5
-  checksum: 50aca250cedde7b35fcc12b3f4936d28431f351392f25f1baa7898b618d363368f8049af07c486ce7c47ee19ea15fd31642df0819e62e514c6193f1e2b05d85e
+  checksum: c17ac72228815850fc5226d8c0a80afd6c2ffbfa71c572ad99ad2eac145dc836a3fc6f62a298b3df716f1726cc1ed8a448892ed9fb6123f46abf2f89c908749f
   languageName: node
   linkType: hard
 
