@@ -29,9 +29,10 @@ const createSettingsSchema = (schema) => {
 
   // TODO V5: Refactor non visible fields to be a part of content-manager schema
   const model = strapi.getModel(schema.uid);
-  const nonVisibleAttributes = getNonVisibleAttributes(model);
-  const writableAttributes = getWritableAttributes(model);
-  const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+  const nonVisibleWritableAttributes = intersection(
+    getNonVisibleAttributes(model),
+    getWritableAttributes(model)
+  );
 
   return yup
     .object()
