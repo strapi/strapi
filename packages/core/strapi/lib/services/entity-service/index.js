@@ -155,9 +155,6 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const isDraft = contentTypesUtils.isDraft(data, model);
 
-    // TODO on creation we should check that every unique field within the
-    // entity is unique and also against every other entity of the same type in
-    // the DB
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
@@ -197,8 +194,6 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const model = strapi.getModel(uid);
 
-    // TODO This populates the DZs and Components so they can then be used in
-    // the unique validator
     const entityToUpdate = await db
       .query(uid)
       .findOne({ where: { id: entityId }, populate: getDeepPopulate(uid) });

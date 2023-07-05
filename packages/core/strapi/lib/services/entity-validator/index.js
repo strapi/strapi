@@ -68,8 +68,16 @@ const addDefault = (createOrUpdate) => {
 
 const preventCast = (validator) => validator.transform((val, originalVal) => originalVal);
 
-const validateUniqueFieldWithinEntity = (model, uniqueFieldValues, attribute) => {
-  const fieldValues = uniqueFieldValues[model.uid][attribute.name];
+/**
+ * Validate that all the unique fields within the entity are unique
+ *
+ * @param {String} uid
+ * @param {Object} uniqueFieldValues
+ * @param {Object} attribute
+ * @returns
+ */
+const validateUniqueFieldWithinEntity = (uid, uniqueFieldValues, attribute) => {
+  const fieldValues = uniqueFieldValues[uid][attribute.name];
 
   if (new Set(fieldValues).size === fieldValues.length) {
     // If every instance of this field within the entity is unique then validation passes
@@ -103,7 +111,7 @@ const createComponentValidator =
               data: item,
               entity: entity?.[updatedAttribute.name] ?? null,
               validateUniqueFieldWithinEntity: (attribute) =>
-                validateUniqueFieldWithinEntity(model, uniqueFieldValues, attribute),
+                validateUniqueFieldWithinEntity(model.uid, uniqueFieldValues, attribute),
             },
             { isDraft }
           ).notNull();
@@ -118,7 +126,7 @@ const createComponentValidator =
           model,
           data: updatedAttribute.value,
           validateUniqueFieldWithinEntity: (attribute) =>
-            validateUniqueFieldWithinEntity(model, uniqueFieldValues, attribute),
+            validateUniqueFieldWithinEntity(model.uid, uniqueFieldValues, attribute),
         },
         { isDraft }
       );
@@ -151,8 +159,8 @@ const createDzValidator =
                 {
                   model,
                   data: item,
-                  validateUniqueFieldWithinEntity: (args) =>
-                    validateUniqueFieldWithinEntity(model, uniqueFieldValues, args),
+                  validateUniqueFieldWithinEntity: (attribute) =>
+                    validateUniqueFieldWithinEntity(model.uid, uniqueFieldValues, attribute),
                 },
                 { isDraft }
               )
