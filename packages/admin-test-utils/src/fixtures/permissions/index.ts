@@ -4,10 +4,11 @@
  * from that package and use them here.
  */
 
-import { admin, Admin } from './admin-permissions';
+import { admin, Admin, app, App } from './admin-permissions';
 import { contentManager, ContentManager } from './content-manager-permissions';
 import { contentTypeBuilder, ContentTypeBuilder } from './content-type-builder-permissions';
 
+// TODO: this should be called userPermissions
 const allPermissions = [...admin, ...contentManager, ...contentTypeBuilder];
 
 type AdminPermissions = typeof allPermissions;
@@ -15,6 +16,8 @@ type AdminPermissions = typeof allPermissions;
 export {
   admin,
   Admin,
+  app,
+  App,
   contentManager,
   ContentManager,
   contentTypeBuilder,

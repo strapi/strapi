@@ -47,7 +47,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -729,7 +728,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
