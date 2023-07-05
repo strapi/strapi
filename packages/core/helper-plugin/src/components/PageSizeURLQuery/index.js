@@ -6,14 +6,14 @@
 
 import React from 'react';
 
-import { Box, Flex, Option, Select, Typography } from '@strapi/design-system';
+import { Flex, Option, SingleSelect, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useTracking } from '../../features/Tracking';
 import useQueryParams from '../../hooks/useQueryParams';
 
-const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
+export const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const { trackUsage } = useTracking();
@@ -31,8 +31,8 @@ const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
   const pageSize = query?.pageSize || defaultValue;
 
   return (
-    <Flex>
-      <Select
+    <Flex gap={2}>
+      <SingleSelect
         size="S"
         aria-label={formatMessage({
           id: 'components.PageFooter.select',
@@ -46,15 +46,13 @@ const PageSizeURLQuery = ({ trackedEvent, options, defaultValue }) => {
             {option}
           </Option>
         ))}
-      </Select>
-      <Box paddingLeft={2}>
-        <Typography textColor="neutral600" as="label" htmlFor="page-size">
-          {formatMessage({
-            id: 'components.PageFooter.select',
-            defaultMessage: 'Entries per page',
-          })}
-        </Typography>
-      </Box>
+      </SingleSelect>
+      <Typography textColor="neutral600" as="span">
+        {formatMessage({
+          id: 'components.PageFooter.select',
+          defaultMessage: 'Entries per page',
+        })}
+      </Typography>
     </Flex>
   );
 };
@@ -70,5 +68,3 @@ PageSizeURLQuery.propTypes = {
   options: PropTypes.arrayOf(PropTypes.string.isRequired),
   defaultValue: PropTypes.string,
 };
-
-export default PageSizeURLQuery;
