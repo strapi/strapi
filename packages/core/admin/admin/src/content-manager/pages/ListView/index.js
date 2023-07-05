@@ -614,11 +614,24 @@ function ListView({
                         {/* Bulk action row checkbox */}
                         <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                         {/* Field data */}
-                        {tableHeaders.map(({ key, name, ...rest }) => {
+                        {tableHeaders.map(({ key, name, cellFormatter, ...rest }) => {
                           if (name === 'publishedAt') {
                             return (
                               <Td key={key}>
                                 <PublicationState isPublished={Boolean(rowData.publishedAt)} />
+                              </Td>
+                            );
+                          }
+
+                          if (typeof cellFormatter === 'function') {
+                            return (
+                              <Td key={key}>
+                                {cellFormatter(rowData, {
+                                  key,
+                                  name,
+                                  formatMessage,
+                                  ...rest,
+                                })}
                               </Td>
                             );
                           }
