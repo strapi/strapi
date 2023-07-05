@@ -4,7 +4,7 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import AdminSeatInfo from '..';
+import { AdminSeatInfoEE } from '..';
 import { useLicenseLimits } from '../../../../../../../hooks';
 
 const LICENSE_MOCK = {
@@ -32,7 +32,7 @@ jest.mock('../../../../../../../hooks', () => ({
 }));
 
 const setup = (props) =>
-  render(<AdminSeatInfo {...props} />, {
+  render(<AdminSeatInfoEE {...props} />, {
     wrapper({ children }) {
       return (
         <ThemeProvider theme={lightTheme}>
