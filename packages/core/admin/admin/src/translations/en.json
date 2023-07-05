@@ -819,6 +819,7 @@
   "content-manager.popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Yes, publish",
   "content-manager.popUpwarning.warning.has-draft-relations.message": "<b>{count, plural, one { relation is } other { relations are } }</b> not published yet and might lead to unexpected behavior.",
+  "content-manager.popUpwarning.warning.bulk-has-draft-relations.message": "<b>{count} {count, plural, one { relation } other { relations } } out of {entities} { entities, plural, one { entry } other { entries } } {count, plural, one { is } other { are } }</b> not published yet and might lead to unexpected behavior. ",
   "content-manager.popover.display-relations.label": "Display relations",
   "content-manager.relation.add": "Add relation",
   "content-manager.relation.disconnect": "Remove",
