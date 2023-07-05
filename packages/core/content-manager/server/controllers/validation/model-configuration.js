@@ -1,11 +1,15 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
+const { yup, contentTypes } = require('@strapi/utils');
+const { intersection } = require('lodash/fp');
 const { getService } = require('../../utils');
 const {
   isListable,
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
+
+const { getNonVisibleAttributes, getWritableAttributes } = contentTypes;
+
 /**
  * Creates the validation schema for content-type configurations
  */
@@ -23,6 +27,12 @@ module.exports = (schema, opts = {}) =>
 const createSettingsSchema = (schema) => {
   const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
 
+  // TODO V5: Refactor non visible fields to be a part of content-manager schema
+  const model = strapi.getModel(schema.uid);
+  const nonVisibleAttributes = getNonVisibleAttributes(model);
+  const writableAttributes = getWritableAttributes(model);
+  const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
+
   return yup
     .object()
     .shape({
@@ -33,7 +43,10 @@ const createSettingsSchema = (schema) => {
       // should be reset when the type changes
       mainField: yup.string().oneOf(validAttributes.concat('id')).default('id'),
       // should be reset when the type changes
-      defaultSortBy: yup.string().oneOf(validAttributes.concat('id')).default('id'),
+      defaultSortBy: yup
+        .string()
+        .oneOf(validAttributes.concat(['id', ...nonVisibleWritableAttributes]))
+        .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
     .noUnknown();
