@@ -8416,7 +8416,7 @@ __metadata:
     graphql: ^15.5.1
     graphql-depth-limit: ^1.1.0
     graphql-playground-middleware-koa: ^1.6.21
-    graphql-scalars: 1.20.1
+    graphql-scalars: 1.22.2
     graphql-upload: ^13.0.0
     koa: ^2.13.4
     koa-compose: ^4.1.0
@@ -19325,14 +19325,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-scalars@npm:1.20.1":
-  version: 1.20.1
-  resolution: "graphql-scalars@npm:1.20.1"
+"graphql-scalars@npm:1.22.2":
+  version: 1.22.2
+  resolution: "graphql-scalars@npm:1.22.2"
   dependencies:
-    tslib: ~2.4.0
+    tslib: ^2.5.0
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 4d3d3f804a31e8db76feb51f089f5e1a0fceacbd98390c0c7b825707bdd7d53754496fa178f47139fa92ba2598605f47a61adbc92bf6f292293c78eb18865e4c
+  checksum: 4a5e7aa2d81fbdeeef10ca77b44b4d171f5798640db4b57f65dd3285ce9d17e55714cc3e0460e917041c0432f25881955204552937876397f135fd95eddb8b0a
   languageName: node
   linkType: hard
 
@@ -32341,10 +32341,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:~2.4.0":
+"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0":
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.5.0":
+  version: 2.6.0
+  resolution: "tslib@npm:2.6.0"
+  checksum: c01066038f950016a18106ddeca4649b4d76caa76ec5a31e2a26e10586a59fceb4ee45e96719bf6c715648e7c14085a81fee5c62f7e9ebee68e77a5396e5538f
   languageName: node
   linkType: hard
 
