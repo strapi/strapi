@@ -11,7 +11,7 @@ describe('checkPermissions', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('creates an array of boolean corresponding to the permission state', async () => {

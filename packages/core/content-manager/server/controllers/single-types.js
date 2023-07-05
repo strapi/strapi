@@ -2,7 +2,7 @@
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
-const { getService, pickWritableAttributes } = require('../utils');
+const { getService } = require('../utils');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
@@ -63,8 +63,6 @@ module.exports = {
     const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
     const entity = await findEntity(sanitizedQuery, model);
 
-    const pickWritables = pickWritableAttributes({ model });
-
     const pickPermittedFields = entity
       ? permissionChecker.sanitizeUpdateInput(entity)
       : permissionChecker.sanitizeCreateInput;
@@ -73,7 +71,7 @@ module.exports = {
       ? setCreatorFields({ user, isEdition: true })
       : setCreatorFields({ user });
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
 
     if (!entity) {
       const sanitizedBody = await sanitizeFn(body);

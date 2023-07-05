@@ -41,14 +41,15 @@ import {
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 
 const ListView = () => {
   const [showModal, setShowModal] = useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = useState([]);
-
+  const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
@@ -59,7 +60,7 @@ const ListView = () => {
   const {
     isLoading: isRBACLoading,
     allowedActions: { canCreate, canUpdate, canDelete },
-  } = useRBAC(adminPermissions.settings.webhooks);
+  } = useRBAC(permissions.settings.webhooks);
   const { get, post, put } = useFetchClient();
   const { notifyStatus } = useNotifyAT();
 

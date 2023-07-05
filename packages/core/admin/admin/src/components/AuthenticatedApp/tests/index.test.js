@@ -85,7 +85,7 @@ describe('Admin | components | AuthenticatedApp', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should not crash', () => {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import {
   Box,
@@ -51,11 +51,10 @@ const AdvancedSettingsPage = () => {
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
 
-  const updatePermissions = useMemo(() => ({ update: PERMISSIONS.updateAdvancedSettings }), []);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateAdvancedSettings });
 
   const { status: isLoadingData, data } = useQuery('advanced', () => fetchData(), {
     onSuccess() {
@@ -143,7 +142,7 @@ const AdvancedSettingsPage = () => {
         validationSchema={schema}
         enableReinitialize
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
@@ -155,7 +154,7 @@ const AdvancedSettingsPage = () => {
                   <Button
                     loading={isSubmitting}
                     type="submit"
-                    disabled={!canUpdate}
+                    disabled={canUpdate ? !dirty : !canUpdate}
                     startIcon={<Check />}
                     size="S"
                   >

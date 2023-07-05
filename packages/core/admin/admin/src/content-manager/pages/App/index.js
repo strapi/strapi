@@ -10,10 +10,11 @@ import {
 import sortBy from 'lodash/sortBy';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { Redirect, Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
 
 import { DragLayer } from '../../../components/DragLayer';
-import permissions from '../../../permissions';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import ModelsContext from '../../contexts/ModelsContext';
 import getTrad from '../../utils/getTrad';
 import ItemTypes from '../../utils/ItemTypes';
@@ -28,8 +29,6 @@ import { ComponentDragPreview } from './components/ComponentDragPreview';
 import { RelationDragPreview } from './components/RelationDragPreview';
 import LeftMenu from './LeftMenu';
 import useContentManagerInitData from './useContentManagerInitData';
-
-const cmPermissions = permissions.contentManager;
 
 function renderDraglayerItem({ type, item }) {
   if ([ItemTypes.EDIT_FIELD, ItemTypes.FIELD].includes(type)) {
@@ -73,6 +72,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { startSection } = useGuidedTour();
   const startSectionRef = useRef(startSection);
+  const permissions = useSelector(selectAdminPermissions);
 
   useEffect(() => {
     if (startSectionRef.current) {
@@ -127,7 +127,7 @@ const App = () => {
       <ModelsContext.Provider value={{ refetchData }}>
         <Switch>
           <Route path="/content-manager/components/:uid/configurations/edit">
-            <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
+            <CheckPagePermissions permissions={permissions.contentManager.componentsConfigurations}>
               <ComponentSettingsView />
             </CheckPagePermissions>
           </Route>

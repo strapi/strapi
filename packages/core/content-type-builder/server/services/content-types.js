@@ -157,8 +157,22 @@ const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displa
 const editContentType = async (uid, { contentType, components = [] }) => {
   const builder = createBuilder();
 
-  const previousKind = builder.contentTypes.get(uid).schema.kind;
+  const previousSchema = builder.contentTypes.get(uid).schema;
+  const previousKind = previousSchema.kind;
   const newKind = contentType.kind || previousKind;
+
+  // Restore non-visible attributes from previous schema
+  const previousAttributes = previousSchema.attributes;
+  const prevNonVisibleAttributes = contentTypesUtils
+    .getNonVisibleAttributes(previousSchema)
+    .reduce((acc, key) => {
+      if (key in previousAttributes) {
+        acc[key] = previousAttributes[key];
+      }
+
+      return acc;
+    }, {});
+  contentType.attributes = _.merge(prevNonVisibleAttributes, contentType.attributes);
 
   if (newKind !== previousKind && newKind === 'singleType') {
     const entryCount = await strapi.query(uid).count();

@@ -70,9 +70,11 @@ module.exports = ({ env }) => ({
 });
 ```
 
-### Configuration for a private S3 bucket
+### Configuration for a private S3 bucket and signed URLs
 
-If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure that the signed URL is generated with the correct permissions.
+If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure file URLs are signed.
+
+**Note:** If you are using a CDN, the URLs will not be signed.
 
 You can also define the expiration time of the signed URL by setting the `signedUrlExpires` option in the `params` object. The default value is 15 minutes.
 
