@@ -13,7 +13,6 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
-import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
@@ -21,9 +20,11 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../App/selectors';
 import Filters from '../../../components/Filters';
 
+import { CreateActionCE } from './CreateAction';
 import TableRows from './DynamicTable/TableRows';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
@@ -55,6 +56,15 @@ const ListPage = () => {
   } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
     enabled: canRead,
   });
+  const CreateAction = useEnterprise(
+    CreateActionCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/CreateAction'
+        )
+      ).CreateActionEE
+  );
 
   const headers = tableHeaders.map((header) => ({
     ...header,
@@ -96,6 +106,11 @@ const ListPage = () => {
       },
     }
   );
+
+  // block rendering until the EE component is fully loaded
+  if (!CreateAction) {
+    return null;
+  }
 
   return (
     <Main aria-busy={isLoading}>
