@@ -3215,13 +3215,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:8.0.2":
-  version: 8.0.2
-  resolution: "@faker-js/faker@npm:8.0.2"
-  checksum: cf73daf9a50397eb0b3f04a7ef3fbb6f54acc026b167707136a7e58a517fd805a46c9e8c5f017f3022f104a4ff984765daaeee2cb98b3c34646db05c2acad441
-  languageName: node
-  linkType: hard
-
 "@fingerprintjs/fingerprintjs@npm:3.4.1":
   version: 3.4.1
   resolution: "@fingerprintjs/fingerprintjs@npm:3.4.1"
@@ -18497,8 +18490,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
-    "@faker-js/faker": 8.0.2
-    "@strapi/icons": 1.8.0
+    "@strapi/icons": 1.8.1
     "@strapi/plugin-color-picker": 4.11.3
     "@strapi/plugin-documentation": 4.11.3
     "@strapi/plugin-graphql": 4.11.3
