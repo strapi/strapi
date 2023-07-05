@@ -244,8 +244,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
        */
       const endPoint =
         typeof origin === 'string'
-          ? `${getRequestUrl(`collection-types/${slug}/clone/${origin}`)}`
-          : `${getRequestUrl(`collection-types/${slug}`)}`;
+          ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
+          : getRequestUrl(`collection-types/${slug}`);
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
