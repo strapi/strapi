@@ -88,6 +88,7 @@
   "Settings.apiTokens.emptyStateLayout": "Encara no tens cap contingut...",
   "Settings.tokens.notification.copied": "Token copiat al porta-retalls.",
   "Settings.apiTokens.title": "Tokens d'API",
+  "Settings.apiTokens.lastHour": "darrera hora",
   "Settings.tokens.types.full-access": "Accés complet",
   "Settings.tokens.types.read-only": "Només lectura",
   "Settings.application.Strapi-version": "versió de Strapi",

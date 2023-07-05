@@ -2,6 +2,40 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    groups:
+      babel:
+        patterns:
+          - '@babel/*'
+          - 'babel-*'
+        exclude-patterns:
+          - '@strapi/babel-plugin-switch-ee-ce'
+
+      jest:
+        patterns:
+          - 'jest'
+          - 'jest-circus'
+          - 'jest-cli'
+
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+
+      richtext-editor:
+        patterns:
+          - 'markdown-it'
+          - 'markdown-it-*'
+
+      testing-library:
+        patterns:
+          - '@testing-library/*'
+
+      webpack:
+        patterns:
+          - 'webpack'
+          - 'webpack-cli'
+          - 'webpack-dev-server'
+
     schedule:
       interval: weekly
       day: sunday

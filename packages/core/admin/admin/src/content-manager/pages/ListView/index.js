@@ -33,6 +33,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
+import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -389,6 +390,17 @@ function ListView({
 
     if (!hasDraftAndPublish) {
       return formattedHeaders;
+    }
+
+    // this should not exist. Ideally we would use registerHook() similar to what has been done
+    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
+    // a future iteration we need to find a better pattern.
+
+    // In CE this will return null - in EE a column definition including the custom formatting component.
+    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
+
+    if (reviewWorkflowColumn) {
+      formattedHeaders.push(reviewWorkflowColumn);
     }
 
     return [

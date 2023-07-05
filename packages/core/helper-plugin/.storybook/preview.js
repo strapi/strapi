@@ -1,4 +1,4 @@
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -15,13 +15,13 @@ export const parameters = {
 export const decorators = [
   (Story) => (
     <MemoryRouter>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider locale="en">
         <IntlProvider messages={{}} textComponent="span" locale="en">
           <main>
             <Story />
           </main>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </MemoryRouter>
   ),
 ];

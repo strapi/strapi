@@ -100,6 +100,7 @@
   "Settings.apiTokens.createPage.BoundRoute.title": "Route rattachée à",
   "Settings.apiTokens.createPage.permissions.header.title": "Paramètres avancés",
   "Settings.apiTokens.createPage.permissions.header.hint": "Sélectionner les actions de l'application ou du plugin et sur l'icône de la roue crantée pour afficher la route rattachée",
+  "Settings.apiTokens.lastHour": "dernière heure",
   "Settings.tokens.duration.30-days": "30 jours",
   "Settings.tokens.duration.7-days": "7 jours",
   "Settings.tokens.duration.90-days": "90 jours",

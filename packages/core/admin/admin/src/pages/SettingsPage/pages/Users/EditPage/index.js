@@ -183,13 +183,13 @@ const EditPage = ({ canUpdate }) => {
         validateOnChange={false}
         validationSchema={editValidation}
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
                 primaryAction={
                   <Button
-                    disabled={isSubmitting || !canUpdate}
+                    disabled={(isSubmitting || !canUpdate) ? true : !dirty}
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"

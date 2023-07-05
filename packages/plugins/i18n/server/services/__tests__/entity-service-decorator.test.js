@@ -37,6 +37,7 @@ const singleTypeModel = {
       localized: true,
     },
   },
+  attributes: {}
 };
 
 const models = {
@@ -355,6 +356,7 @@ describe('Entity service decorator', () => {
       };
 
       const defaultService = {
+        wrapResult: jest.fn((input) => Promise.resolve(input)),
         wrapParams: jest.fn(() => Promise.resolve(entry)),
         findMany: jest.fn(() => Promise.resolve(entry)),
       };

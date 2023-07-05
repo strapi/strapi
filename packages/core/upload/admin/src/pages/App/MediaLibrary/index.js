@@ -367,7 +367,10 @@ export const MediaLibrary = () => {
                       (currentFolder) => currentFolder.id === folder.id
                     );
 
-                    const url = getFolderURL(pathname, query, folder?.id);
+                    const url = getFolderURL(pathname, query, {
+                      folder: folder?.id,
+                      folderPath: folder?.path,
+                    });
 
                     return (
                       <GridItem col={3} key={`folder-${folder.id}`}>
