@@ -18,6 +18,11 @@ const server = setupServer(
         ctx.json({
           data: {
             attribute: 1,
+
+            features: [
+              { name: 'without-options' },
+              { name: 'with-options', options: { something: true } },
+            ],
           },
         })
       );
@@ -64,8 +69,9 @@ const setup = (...args) =>
 describe('useLicenseLimits', () => {
   beforeAll(() => server.listen());
 
-  afterEach(() => {
-    server.resetHandlers();
+  afterAll(() => server.resetHandlers());
+
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
@@ -76,9 +82,12 @@ describe('useLicenseLimits', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
-    expect(result.current.license).toEqual({
-      attribute: 1,
-    });
+    expect(result.current.license).toEqual(
+      expect.objectContaining({
+        attribute: 1,
+        features: expect.any(Array),
+      })
+    );
   });
 
   it.each(['canRead', 'canCreate', 'canUpdate', 'canDelete'])(
@@ -93,7 +102,7 @@ describe('useLicenseLimits', () => {
 
       allowedActions[permission] = false;
 
-      useRBAC.mockReturnValue({
+      useRBAC.mockReturnValueOnce({
         isLoading: false,
         allowedActions,
       });
@@ -105,4 +114,16 @@ describe('useLicenseLimits', () => {
       expect(result.current.license).toEqual({});
     }
   );
+
+  it('exposes a getFeature() method as a shortcut to feature options', async () => {
+    const { result } = setup();
+
+    expect(result.current.getFeature('without-options')).toStrictEqual({});
+    expect(result.current.getFeature('with-options')).toStrictEqual({});
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    expect(result.current.getFeature('without-options')).toStrictEqual({});
+    expect(result.current.getFeature('with-options')).toStrictEqual({ something: true });
+  });
 });
