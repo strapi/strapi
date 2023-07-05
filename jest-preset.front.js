@@ -2,29 +2,10 @@
 
 const path = require('path');
 
-const IS_EE = process.env.IS_EE === 'true';
-
 const moduleNameMapper = {
   '.*\\.(css|less|styl|scss|sass)$': '@strapi/admin-test-utils/file-mock',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '@strapi/admin-test-utils/file-mock',
-  '^ee_else_ce(/.*)$': IS_EE
-    ? [
-        path.join(__dirname, 'packages/core/admin/ee/admin$1'),
-        path.join(__dirname, 'packages/core/content-manager/ee/admin/src$1'),
-        path.join(__dirname, 'packages/core/content-type-builder/ee/admin/src$1'),
-        path.join(__dirname, 'packages/core/upload/ee/admin/src$1'),
-        path.join(__dirname, 'packages/core/email/ee/admin/src$1'),
-        path.join(__dirname, 'packages/plugins/*/ee/admin/src$1'),
-      ]
-    : [
-        path.join(__dirname, 'packages/core/admin/admin/src$1'),
-        path.join(__dirname, 'packages/core/content-manager/admin/src$1'),
-        path.join(__dirname, 'packages/core/content-type-builder/admin/src$1'),
-        path.join(__dirname, 'packages/core/upload/admin/src$1'),
-        path.join(__dirname, 'packages/core/email/admin/src$1'),
-        path.join(__dirname, 'packages/plugins/*/admin/src$1'),
-      ],
 };
 
 module.exports = {
