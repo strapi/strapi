@@ -48,7 +48,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   font-size: 0.75rem;
   line-height: 1.33;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 
@@ -227,7 +226,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c11 {
-  padding: 4px 12px;
+  padding: 4px 8px;
+  height: unset;
 }
 
 .c11:hover,
@@ -286,26 +286,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
             >
               ...
             </span>
-            <div
-              aria-hidden="true"
-              class="c0"
-            >
-              <svg
-                aria-hidden="true"
-                fill="none"
-                height="0.25rem"
-                viewBox="0 0 14 8"
-                width="0.375rem"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  clip-rule="evenodd"
-                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                  fill="#32324D"
-                  fill-rule="evenodd"
-                />
-              </svg>
-            </div>
           </span>
         </button>
         <div

@@ -24,7 +24,6 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   line-height: 1.43;
   font-weight: 600;
-  line-height: 0;
   color: #ffffff;
 }
 

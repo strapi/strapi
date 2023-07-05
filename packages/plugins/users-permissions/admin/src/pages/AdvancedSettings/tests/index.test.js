@@ -41,7 +41,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -79,7 +79,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 
@@ -784,8 +783,9 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                   </h1>
                 </div>
                 <button
-                  aria-disabled="false"
+                  aria-disabled="true"
                   class="c7 c8 c9 c10"
+                  disabled=""
                   type="submit"
                 >
                   <div

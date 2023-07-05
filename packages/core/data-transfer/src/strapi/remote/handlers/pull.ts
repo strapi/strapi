@@ -6,6 +6,7 @@ import { handlerControllerFactory, isDataTransferMessage } from './utils';
 import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, TransferStage, Protocol } from '../../../../types';
+import { Client } from '../../../../types/remote/protocol';
 
 const TRANSFER_KIND = 'pull';
 const VALID_TRANSFER_ACTIONS = ['bootstrap', 'close', 'getMetadata', 'getSchemas'] as const;
@@ -133,9 +134,22 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     return this.provider?.[action]();
   },
 
-  // TODO: Optimize performances (batching, client packets reconstruction, etc...)
-  async flush(this: PullHandler, stage: TransferStage, id) {
+  async flush(this: PullHandler, stage: Exclude<Client.TransferPullStep, 'assets'>, id) {
+    type Stage = typeof stage;
+    const batchSize = 1024 * 1024;
+    let batch = [] as Client.GetTransferPullStreamData<Stage>;
     const stream = this.streams?.[stage];
+
+    const batchLength = () => Buffer.byteLength(JSON.stringify(batch));
+    const sendBatch = async () => {
+      await this.confirm({
+        type: 'transfer',
+        data: batch,
+        ended: false,
+        error: null,
+        id,
+      });
+    };
 
     if (!stream) {
       throw new ProviderTransferError(`No available stream found for ${stage}`);
@@ -143,9 +157,17 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     try {
       for await (const chunk of stream) {
-        await this.confirm({ type: 'transfer', data: chunk, ended: false, error: null, id });
+        batch.push(chunk);
+        if (batchLength() >= batchSize) {
+          await sendBatch();
+          batch = [];
+        }
       }
 
+      if (batch.length > 0) {
+        await sendBatch();
+        batch = [];
+      }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
       await this.confirm({ type: 'transfer', data: null, ended: true, error: e, id });
@@ -163,7 +185,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       const flushUUID = randomUUID();
 
       await this.createReadableStreamForStep(step);
-
       this.flush(step, flushUUID);
 
       return { ok: true, id: flushUUID };
@@ -191,18 +212,55 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       configuration: () => this.provider?.createConfigurationReadStream(),
       assets: () => {
         const assets = this.provider?.createAssetsReadStream();
+        let batch: Protocol.Client.TransferAssetFlow[] = [];
+
+        const batchLength = () => {
+          return batch.reduce(
+            (acc, chunk) => (chunk.action === 'stream' ? acc + chunk.data.byteLength : acc),
+            0
+          );
+        };
+
+        const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
 
         if (!assets) {
           throw new Error('bad');
         }
-
+        /**
+         * Generates batches of 1MB of data from the assets stream to avoid
+         * sending too many small chunks
+         *
+         * @param stream Assets stream from the local source provider
+         */
         async function* generator(stream: Readable) {
+          let hasStarted = false;
+          let assetID = '';
+
           for await (const chunk of stream) {
-            const { stream: assetStream, ...rest } = chunk as IAsset;
+            const { stream: assetStream, ...assetData } = chunk as IAsset;
+            if (!hasStarted) {
+              assetID = randomUUID();
+              // Start the transfer of a new asset
+              batch.push({ action: 'start', assetID, data: assetData });
+              hasStarted = true;
+            }
 
             for await (const assetChunk of assetStream) {
-              yield { ...rest, chunk: assetChunk };
+              // Add the asset data to the batch
+              batch.push({ action: 'stream', assetID, data: assetChunk });
+
+              // if the batch size is bigger than BATCH_MAX_SIZE stream the batch
+              if (batchLength() >= BATCH_MAX_SIZE) {
+                yield batch;
+                batch = [];
+              }
             }
+
+            // All the asset data has been streamed and gets ready for the next one
+            hasStarted = false;
+            batch.push({ action: 'end', assetID });
+            yield batch;
+            batch = [];
           }
         }
 

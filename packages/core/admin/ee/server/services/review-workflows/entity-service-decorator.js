@@ -69,22 +69,31 @@ const decorator = (service) => ({
     const previousStage = await getEntityStage(uid, entityId);
 
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
-    if (
-      previousStage?.workflow?.id &&
-      previousStage?.id &&
-      previousStage.id !== data[ENTITY_STAGE_ATTRIBUTE]
-    ) {
-      const webhookPayload = {
-        entityId,
+    const updatedStage = updatedEntity[ENTITY_STAGE_ATTRIBUTE];
+
+    if (previousStage?.id && previousStage.id !== updatedStage.id) {
+      const model = strapi.getModel(uid);
+
+      strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {
+        model: model.modelName,
+        uid: model.uid,
+        entity: {
+          id: entityId,
+        },
         workflow: {
           id: previousStage.workflow.id,
           stages: {
-            from: previousStage.id,
-            to: data[ENTITY_STAGE_ATTRIBUTE],
+            from: {
+              id: previousStage.id,
+              name: previousStage.name,
+            },
+            to: {
+              id: updatedStage.id,
+              name: updatedStage.name,
+            },
           },
         },
-      };
-      await strapi.entityService.emitEvent(uid, WORKFLOW_UPDATE_STAGE, webhookPayload);
+      });
     }
 
     return updatedEntity;

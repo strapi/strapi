@@ -82,10 +82,8 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folder: {
-              id: {
-                $null: true,
-              },
+            folderPath: {
+              $eq: '/',
             },
           },
         ],
@@ -100,7 +98,7 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if a query was set', async () => {
-    const { result } = await setup({ query: { folder: 1 } });
+    const { result } = await setup({ query: { folderPath: '/1/2' } });
 
     await waitFor(() => result.current.isSuccess);
     const { get } = useFetchClient();
@@ -109,8 +107,8 @@ describe('useAssets', () => {
       filters: {
         $and: [
           {
-            folder: {
-              id: 1,
+            folderPath: {
+              $eq: '/1/2',
             },
           },
         ],
@@ -126,7 +124,7 @@ describe('useAssets', () => {
 
   test('allows to merge filter query params using filters.$and', async () => {
     const { result } = await setup({
-      query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
@@ -139,8 +137,8 @@ describe('useAssets', () => {
             something: true,
           },
           {
-            folder: {
-              id: 5,
+            folderPath: {
+              $eq: '/1/2',
             },
           },
         ],
@@ -154,9 +152,9 @@ describe('useAssets', () => {
     );
   });
 
-  test('does not use folder filter in params if _q', async () => {
+  test('does not use folderPath filter in params if _q', async () => {
     const { result } = await setup({
-      query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
@@ -183,7 +181,7 @@ describe('useAssets', () => {
   test('correctly encodes the search query _q', async () => {
     const _q = 'something&else';
     const { result } = await setup({
-      query: { folder: 5, _q, filters: { $and: [{ something: 'true' }] } },
+      query: { folderPath: '/1/2', _q, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
