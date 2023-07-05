@@ -109,9 +109,6 @@ function ListView({
   const fetchClient = useFetchClient();
   const { post, del } = fetchClient;
 
-  // Here we save the loading state on background
-  const [isLoadingBackgroundData, setIsLoadingBackgroundData] = React.useState(false);
-
   const bulkPublishMutation = useMutation(
     (data) =>
       post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
@@ -429,21 +426,13 @@ function ListView({
     }
   };
 
-  // Refetch the data and update the main data without loading
-  const refetchBackgroundData = async () => {
-    setIsLoadingBackgroundData(true);
-    const endpoint = getRequestUrl(`collection-types/${slug}${params}`);
-
-    const {
-      data: { results, pagination: paginationResult },
-    } = await fetchClient.get(endpoint);
-
-    getDataSucceeded(paginationResult, results);
-    setIsLoadingBackgroundData(false);
-  };
-
   // Add 1 column for the checkbox and 1 for the actions
   const colCount = tableHeaders.length + 2;
+
+  // We have this function to refetch data when selected entries modal is closed
+  const refetchData = () => {
+    fetchData(`/content-manager/collection-types/${slug}${params}`);
+  };
 
   return (
     <Main aria-busy={isLoading}>
@@ -522,8 +511,7 @@ function ListView({
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                  onRefreshData={refetchBackgroundData}
-                  isRefreshing={isLoadingBackgroundData}
+                  refetchData={refetchData}
                 />
               </Table.ActionBar>
               <Table.Content>

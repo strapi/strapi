@@ -14,17 +14,31 @@ import {
   IconButton,
   Flex,
   Icon,
+  Tooltip,
 } from '@strapi/design-system';
-import { useTableContext, Table, getYupInnerErrors } from '@strapi/helper-plugin';
+import {
+  useTableContext,
+  Table,
+  getYupInnerErrors,
+  useFetchClient,
+  useQueryParams,
+} from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 300px;
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
@@ -34,19 +48,23 @@ const EntryValidationText = ({ errors, isPublished }) => {
   const { formatMessage } = useIntl();
 
   if (errors) {
+    const errorMessages = Object.entries(errors)
+      .map(([key, value]) =>
+        formatMessage(
+          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+          { field: key }
+        )
+      )
+      .join(' ');
+
     return (
       <Flex gap={2}>
         <Icon color="danger600" as={CrossCircle} />
-        <Typography textColor="danger600" variant="omega" fontWeight="semiBold">
-          {Object.entries(errors)
-            .map(([key, value]) =>
-              formatMessage(
-                { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-                { field: key }
-              )
-            )
-            .join(' ')}
-        </Typography>
+        <Tooltip description={errorMessages}>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+            {errorMessages}
+          </TypographyMaxWidth>
+        </Tooltip>
       </Flex>
     );
   }
@@ -192,7 +210,7 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, rows, isLoading } = useTableContext();
   const { contentType, components } = useSelector(listViewDomain());
@@ -262,7 +280,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={onRefreshData} variant="tertiary">
+            <Button onClick={onRefresh} variant="tertiary">
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -285,37 +303,54 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefreshData }) => 
 SelectedEntriesModalContent.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  onRefreshData: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ onToggle, onConfirm, onRefreshData, isRefreshing }) => {
-  const { rows, selectedEntries } = useTableContext();
+const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
+  const { selectedEntries } = useTableContext();
+  const { contentType } = useSelector(listViewDomain());
 
-  // Get the selected entries full data, and keep the list view order
-  // Memoize to prevent infinite useEffect runs in SelectedEntriesTableContent
-  const entries = React.useMemo(() => {
-    return rows.filter((row) => {
-      return selectedEntries.includes(row.id);
-    });
-  }, [rows, selectedEntries]);
+  // We want to keep the selected entries order same as the list view
+  const [
+    {
+      query: { sort },
+    },
+  ] = useQueryParams();
+  const queryParams = {
+    sort,
+    filters: {
+      id: {
+        $in: selectedEntries,
+      },
+    },
+  };
+
+  const { get } = useFetchClient();
+  const queryString = stringify(queryParams);
+
+  const { data, isRefetching, refetch } = useQuery(
+    ['entries', contentType.uid, queryParams],
+    async () => {
+      const { data } = await get(
+        `content-manager/collection-types/${contentType.uid}?${queryString}`
+      );
+
+      return data;
+    }
+  );
 
   return (
     <Table.Root
-      rows={entries}
+      rows={data?.results}
       defaultSelectedEntries={selectedEntries}
       colCount={4}
-      isLoading={isRefreshing}
+      isLoading={isRefetching}
     >
-      <SelectedEntriesModalContent
-        onToggle={onToggle}
-        onConfirm={onConfirm}
-        onRefreshData={onRefreshData}
-        isRefreshing={isRefreshing}
-      />
+      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} onRefresh={refetch} />
     </Table.Root>
   );
 };
@@ -323,8 +358,6 @@ const SelectedEntriesModal = ({ onToggle, onConfirm, onRefreshData, isRefreshing
 SelectedEntriesModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
-  onRefreshData: PropTypes.func.isRequired,
-  isRefreshing: PropTypes.bool.isRequired,
 };
 
 export default SelectedEntriesModal;
