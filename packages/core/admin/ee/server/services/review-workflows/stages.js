@@ -85,13 +85,20 @@ module.exports = ({ strapi }) => {
 
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
-        // ⚠️ Delete first as we can have a limit on stages
+        // Create the new stages
+        const createdStages = await this.createMany(created, { fields: ['id'] });
+        // Put all the newly created stages ids
+        const createdStagesIds = map('id', createdStages);
+
+        // Update the workflow stages
+        await mapAsync(updated, (stage) => this.update(stage.id, stage));
+
         // Delete the stages that are not in the new stages list
         await mapAsync(deleted, async (stage) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
-            srcStages,
+            [...srcStages, ...createdStages],
             srcStages.findIndex((s) => s.id === stage.id),
             (targetStage) => {
               return !deleted.find((s) => s.id === targetStage.id);
@@ -109,13 +116,6 @@ module.exports = ({ strapi }) => {
 
           return this.delete(stage.id);
         });
-        // Create the new stages
-        const createdStages = await this.createMany(created, { fields: ['id'] });
-        // Put all the newly created stages ids
-        const createdStagesIds = map('id', createdStages);
-
-        // Update the workflow stages
-        await mapAsync(updated, (stage) => this.update(stage.id, stage));
 
         return destStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
       });
