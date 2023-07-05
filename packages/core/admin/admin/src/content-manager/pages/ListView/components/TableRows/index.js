@@ -87,7 +87,7 @@ export const TableRows = ({
       const { data } = await post(
         `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}`,
         {},
-        { params: { plugins: query?.plugins } || {} }
+        { params: { plugins: query?.plugins } }
       );
 
       if ('id' in data) {

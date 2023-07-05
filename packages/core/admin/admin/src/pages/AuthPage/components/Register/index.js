@@ -61,8 +61,6 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   useEffect(() => {
     if (registrationToken) {
       const getData = async () => {
-        console.log('register');
-
         try {
           const {
             data: { data },

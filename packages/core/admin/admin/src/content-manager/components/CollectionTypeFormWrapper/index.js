@@ -270,7 +270,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        replace(`/content-manager/collectionType/${slug}/${data.id}`);
+        replace(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
 
         return Promise.resolve(data);
       } catch (err) {
@@ -293,6 +293,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       setCurrentStep,
       queryClient,
       post,
+      rawQuery,
     ]
   );
 

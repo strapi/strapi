@@ -13,18 +13,18 @@ describe('buildValidQueryParams', () => {
 
     const params = buildValidGetParams(queryParams);
 
-    const expectedParams = {
-      page: '1',
-      pageSize: '10',
-      sort: 'name:ASC',
-      locale: 'en',
-    };
-
-    expect(params).toStrictEqual(expectedParams);
+    expect(params).toMatchInlineSnapshot(`
+      {
+        "locale": "en",
+        "page": "1",
+        "pageSize": "10",
+        "sort": "name:ASC",
+      }
+    `);
   });
 
   it('should encode a search query', () => {
-    const _q = `test&query`;
+    const _q = `test query`;
     const queryParams = {
       page: '1',
       pageSize: '10',
@@ -33,13 +33,14 @@ describe('buildValidQueryParams', () => {
     };
 
     const params = buildValidGetParams(queryParams);
-    const expectedParams = {
-      page: '1',
-      pageSize: '10',
-      sort: 'name:ASC',
-      _q: encodeURIComponent(_q),
-    };
 
-    expect(params).toStrictEqual(expectedParams);
+    expect(params).toMatchInlineSnapshot(`
+      {
+        "_q": "test%20query",
+        "page": "1",
+        "pageSize": "10",
+        "sort": "name:ASC",
+      }
+    `);
   });
 });

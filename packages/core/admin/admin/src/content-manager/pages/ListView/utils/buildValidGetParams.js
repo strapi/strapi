@@ -20,6 +20,7 @@ const buildValidGetParams = (query = {}) => {
   };
 
   if (searchQuery) {
+    // Encode the search query here since the paramsSerializer will not
     validQueryParams._q = encodeURIComponent(searchQuery);
   }
 

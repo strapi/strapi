@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 
 import {
   formatContentTypeData,
@@ -40,7 +40,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
-  const params = buildValidGetParams(query);
+  const params = useMemo(() => buildValidGetParams(query), [query]);
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
@@ -56,7 +56,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(getData());
       setIsCreatingEntry(true);
 
-      return fetchClient.get(getRequestUrl(`${slug}`), { params, signal });
+      return fetchClient.get(getRequestUrl(slug), { params, signal });
     },
     {
       onSuccess(result) {
@@ -143,6 +143,53 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
   }, [allLayoutData, dispatch]);
 
+  // Check if creation mode or editing mode
+  useEffect(() => {
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+
+    const fetchData = async (source) => {
+      dispatch(getData());
+
+      setIsCreatingEntry(true);
+
+      try {
+        const { data } = await fetchClient.get(getRequestUrl(slug), {
+          cancelToken: source.token,
+          params,
+        });
+
+        dispatch(getDataSucceeded(cleanReceivedData(data)));
+
+        setIsCreatingEntry(false);
+      } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+
+        const responseStatus = get(err, 'response.status', null);
+
+        // Creating a single type
+        if (responseStatus === 404) {
+          dispatch(initForm(rawQuery, true));
+        }
+
+        if (responseStatus === 403) {
+          toggleNotification({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
+
+          push('/');
+        }
+      }
+    };
+
+    fetchData(source);
+
+    return () => source.cancel('Operation canceled by the user.');
+  }, [fetchClient, cleanReceivedData, push, slug, dispatch, params, rawQuery, toggleNotification]);
+
   const displayErrors = useCallback(
     (err) => {
       toggleNotification({ type: 'warning', message: formatAPIError(err) });
@@ -155,7 +202,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await del(getRequestUrl(`${slug}`), {
+        const { data } = await del(getRequestUrl(slug), {
           params: query,
         });
 
@@ -183,7 +230,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}`);
+      const endPoint = getRequestUrl(slug);
 
       try {
         dispatch(setStatus('submit-pending'));
@@ -288,7 +335,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}`);
+      const endPoint = getRequestUrl(slug);
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
