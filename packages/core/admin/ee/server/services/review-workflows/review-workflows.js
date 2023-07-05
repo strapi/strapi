@@ -88,7 +88,7 @@ function persistStagesJoinTables({ strapi }) {
 
     const joinTablesToPersist = pipe([
       getVisibleContentTypesUID,
-      filter(hasStageAttribute),
+      filter((uid) => hasStageAttribute(contentTypes[uid])),
       map(getStageTableToPersist),
     ])(contentTypes);
 
