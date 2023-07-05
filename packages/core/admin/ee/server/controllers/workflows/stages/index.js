@@ -78,6 +78,8 @@ module.exports = {
     const workflowService = getService('workflows');
 
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
+    const { body } = ctx.request;
+
     const entityId = Number(entityIdString);
 
     const { sanitizeOutput } = strapi
@@ -86,7 +88,7 @@ module.exports = {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     const { id: stageId } = await validateUpdateStageOnEntity(
-      ctx.request?.body?.data,
+      { id: Number(body?.data?.id) },
       'You should pass an id to the body of the put request.'
     );
 

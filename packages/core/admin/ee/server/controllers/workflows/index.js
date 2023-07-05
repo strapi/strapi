@@ -133,6 +133,8 @@ module.exports = {
   },
   /**
    * Get one workflow based on its id contained in request parameters
+   * Returns count of workflows in meta, used to prevent workflow edition when
+   * max workflow count is reached for the current plan
    * @param {import('koa').BaseContext} ctx - koa context
    */
   async findById(ctx) {
@@ -145,10 +147,15 @@ module.exports = {
     const { populate } = await sanitizedQuery.read(query);
 
     const workflowService = getService('workflows');
-    const workflow = await workflowService.findById(id, { populate });
+
+    const [workflow, workflowCount] = await Promise.all([
+      workflowService.findById(id, { populate }),
+      workflowService.count(),
+    ]);
 
     ctx.body = {
       data: await sanitizeOutput(workflow),
+      meta: { workflowCount },
     };
   },
 };
