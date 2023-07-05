@@ -234,6 +234,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
+    const backupDirectory = this.uploadsBackupDirectoryName;
     return new Writable({
       objectMode: true,
       async final(next) {
@@ -243,6 +244,39 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       },
       async write(chunk: IAsset, _encoding, callback) {
         await transaction?.attach(async () => {
+          // TODO: Remove this logic in V5
+          if (!chunk.metadata) {
+            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
+            const entryPath = path.join(assetsDirectory, chunk.filename);
+            const writableStream = fse.createWriteStream(entryPath);
+            chunk.stream
+              .pipe(writableStream)
+              .on('close', () => {
+                callback(null);
+              })
+              .on('error', async (error: NodeJS.ErrnoException) => {
+                const errorMessage =
+                  error.code === 'ENOSPC'
+                    ? " Your server doesn't have space to proceed with the import. "
+                    : ' ';
+
+                try {
+                  await fse.rm(assetsDirectory, { recursive: true, force: true });
+                  this.destroy(
+                    new ProviderTransferError(
+                      `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
+                    )
+                  );
+                } catch (err) {
+                  throw new ProviderTransferError(
+                    `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
+                  );
+                } finally {
+                  callback(error);
+                }
+              });
+            return;
+          }
           const uploadData = {
             ...chunk.metadata,
             stream: Readable.from(chunk.stream),
