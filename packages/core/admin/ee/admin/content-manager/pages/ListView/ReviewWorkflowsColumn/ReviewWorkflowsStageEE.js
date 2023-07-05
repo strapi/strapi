@@ -4,7 +4,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
-import { getStageColorByHex } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
+import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
 export function ReviewWorkflowsStageEE({ color, name }) {
   const { themeColorName } = getStageColorByHex(color);

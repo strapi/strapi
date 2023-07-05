@@ -33,7 +33,6 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
 import axios from 'axios';
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -45,6 +44,7 @@ import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -66,6 +66,8 @@ const ConfigureLayoutBox = styled(Box)`
     }
   }
 `;
+
+const REVIEW_WORKFLOW_COLUMNS_CE = null;
 
 function ListView({
   canCreate,
@@ -109,6 +111,19 @@ function ListView({
   const { formatMessage } = useIntl();
   const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+        )
+      ).REVIEW_WORKFLOW_COLUMNS_EE,
+    {
+      enabled: !!options?.reviewWorkflows,
+    }
+  );
+
   const { post, del } = fetchClient;
 
   const bulkPublishMutation = useMutation(
@@ -388,24 +403,8 @@ function ListView({
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    // this should not exist. Ideally we would use registerHook() similar to what has been done
-    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
-    // a future iteration we need to find a better pattern.
-
-    // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
-
-    if (reviewWorkflowColumn) {
-      formattedHeaders.push(reviewWorkflowColumn);
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -435,9 +434,23 @@ function ListView({
             </Status>
           );
         },
-      },
-    ];
-  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
+      });
+    }
+
+    if (reviewWorkflowColumns) {
+      reviewWorkflowColumns.metadatas.label = formatMessage(reviewWorkflowColumns.metadatas.label);
+      formattedHeaders.push(reviewWorkflowColumns);
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    reviewWorkflowColumns,
+    hasDraftAndPublish,
+    formatMessage,
+  ]);
 
   const subtitle = canRead
     ? formatMessage(

@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Typography } from '@strapi/design-system';
 
-import getTrad from '../../../../../../../admin/src/content-manager/utils/getTrad';
-import { STAGE_COLOR_DEFAULT } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
+import getTrad from '../../../../../../admin/src/content-manager/utils/getTrad';
+import { STAGE_COLOR_DEFAULT } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 
 import ReviewWorkflowsStage from '.';
 
