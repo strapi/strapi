@@ -9,22 +9,22 @@ import { useTracking } from '../../features/Tracking';
 import useQueryParams from '../../hooks/useQueryParams';
 
 const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
-  const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
   const iconButtonRef = useRef(null);
 
   const [{ query }, setQuery] = useQueryParams();
+
   const [value, setValue] = useState(query?._q || '');
   const [isOpen, setIsOpen] = useState(!!value);
+
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
   const handleToggle = () => setIsOpen((prev) => !prev);
 
   useLayoutEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        wrapperRef.current.querySelector('input').focus();
-      }, 0);
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
     }
   }, [isOpen]);
 
@@ -49,21 +49,20 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
 
   if (isOpen) {
     return (
-      <div ref={wrapperRef}>
-        <SearchForm onSubmit={handleSubmit}>
-          <Searchbar
-            name="search"
-            onChange={({ target: { value } }) => setValue(value)}
-            value={value}
-            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-            onClear={handleClear}
-            size="S"
-            placeholder={placeholder}
-          >
-            {label}
-          </Searchbar>
-        </SearchForm>
-      </div>
+      <SearchForm onSubmit={handleSubmit}>
+        <Searchbar
+          ref={inputRef}
+          name="search"
+          onChange={({ target: { value } }) => setValue(value)}
+          value={value}
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          onClear={handleClear}
+          size="S"
+          placeholder={placeholder}
+        >
+          {label}
+        </Searchbar>
+      </SearchForm>
     );
   }
 
