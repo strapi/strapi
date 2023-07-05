@@ -27,5 +27,13 @@ export function useLicenseLimits() {
     }
   );
 
-  return { license: data ?? {}, isError, isLoading };
+  const license = data ?? {};
+
+  const getFeature = (name) => {
+    const feature = (license?.features ?? []).find((feature) => feature.name === name);
+
+    return feature?.options ?? {};
+  };
+
+  return { license, getFeature, isError, isLoading };
 }
