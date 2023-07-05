@@ -2,7 +2,7 @@ import { pipeline } from 'stream';
 import fs, { ReadStream } from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
-import utils from '@strapi/utils';
+import * as utils from '@strapi/utils';
 
 interface File {
   name: string;

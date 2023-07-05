@@ -17,9 +17,10 @@ import { Plus } from '@strapi/icons';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import Table from '../../../components/Tokens/Table';
 
@@ -30,9 +31,10 @@ const ApiTokenListView = () => {
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canUpdate, canRead },
-  } = useRBAC(adminPermissions.settings['api-tokens']);
+  } = useRBAC(permissions.settings['api-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
   const { startSection } = useGuidedTour();

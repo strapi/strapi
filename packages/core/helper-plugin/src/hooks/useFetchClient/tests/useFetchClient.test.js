@@ -1,49 +1,63 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
-import { useFetchClient } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
+import { render, renderHook, waitFor } from '@tests/utils';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      data: {
-        results: [
-          { id: 2, name: 'newest', publishedAt: null },
-          { id: 1, name: 'oldest', publishedAt: null },
-        ],
-        pagination: { page: 1, pageCount: 10 },
-      },
-    }),
-    post: jest.fn(),
-    put: jest.fn(),
-    del: jest.fn(),
-  }),
-}));
+import useFetchClient from '../index';
 
-const TestComponent = (props) => {
+const Component = () => {
   const { get } = useFetchClient();
-  useEffect(() => {
-    get('/foo');
+  const [data, setData] = React.useState(null);
+  const [dataCalls, setDataCalls] = React.useState(0);
+
+  React.useEffect(() => {
+    setDataCalls((s) => s + 1);
+    get('/use-fetch-client-test').then(({ data }) => setData(data));
   }, [get]);
 
-  // eslint-disable-next-line react/prop-types
-  return <div {...props}>{props.children}</div>;
+  if (data === null) {
+    return null;
+  }
+
+  return <h1>called data times {dataCalls}</h1>;
 };
 
 describe('useFetchClient', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('should be able to fetch data from a server', async () => {
+    const { result } = renderHook(() => useFetchClient());
+
+    const { data } = await result.current.get('/use-fetch-client-test');
+
+    expect(data).toMatchInlineSnapshot(`
+      {
+        "data": {
+          "pagination": {
+            "page": 1,
+            "pageCount": 10,
+          },
+          "results": [
+            {
+              "id": 2,
+              "name": "newest",
+              "publishedAt": null,
+            },
+            {
+              "id": 1,
+              "name": "oldest",
+              "publishedAt": null,
+            },
+          ],
+        },
+      }
+    `);
   });
-  it('Should call once the GET method even when we rerender the Component', async () => {
-    const { rerender } = render(<TestComponent>content</TestComponent>);
 
-    const { get } = useFetchClient();
+  it('should call the GET method once even when we rerender the Component', async () => {
+    const { rerender, getByRole, queryByRole } = render(<Component />);
 
-    expect(get).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(queryByRole('heading')).toHaveTextContent('called data times 1'));
 
-    rerender();
+    rerender(<Component />);
 
-    expect(get).toHaveBeenCalledTimes(1);
+    expect(getByRole('heading')).toHaveTextContent('called data times 1');
   });
 });

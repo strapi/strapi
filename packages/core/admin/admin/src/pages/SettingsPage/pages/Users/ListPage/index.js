@@ -17,10 +17,11 @@ import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/Cre
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 import Filters from '../../../components/Filters';
 
 import TableRows from './DynamicTable/TableRows';
@@ -35,9 +36,10 @@ const ListPage = () => {
   const { post } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = useState(false);
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canRead },
-  } = useRBAC(adminPermissions.settings.users);
+  } = useRBAC(permissions.settings.users);
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();

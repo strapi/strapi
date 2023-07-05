@@ -6,6 +6,7 @@ const {
   isSortable,
   isSearchable,
   isVisible,
+  isListable,
   isRelation,
   getDefaultMainField,
 } = require('./attributes');
@@ -121,7 +122,7 @@ async function syncMetadatas(configuration, schema) {
 
     if (!targetSchema) return acc;
 
-    if (!isSortable(targetSchema, edit.mainField)) {
+    if (!isSortable(targetSchema, edit.mainField) && !isListable(targetSchema, edit.mainField)) {
       _.set(updatedMeta, ['edit', 'mainField'], getDefaultMainField(targetSchema));
       _.set(acc, [key], updatedMeta);
       return acc;
