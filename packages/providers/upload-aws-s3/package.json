@@ -49,7 +49,7 @@
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@types/jest": "29.2.0",
+    "@types/jest": "29.5.2",
     "eslint-config-custom": "4.11.3",
     "tsconfig": "4.11.3"
   },
