@@ -97,8 +97,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async #deleteAllAssets() {
     assertValidStrapi(this.strapi);
-    // delete all the assets (if local: remove uplaods folder, if external: remove using the provider api)
-    // query files and do for loop to delete them using the delete method in provider
+
     if (strapi.config.get('plugin.upload').provider === 'local') {
       const uploadsDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -246,6 +245,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         await transaction?.attach(async () => {
           // TODO: Remove this logic in V5
           if (!chunk.metadata) {
+            // If metadata does not exist is because it is an old backup file
             const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
             const entryPath = path.join(assetsDirectory, chunk.filename);
             const writableStream = fse.createWriteStream(entryPath);
@@ -286,12 +286,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
           const provider = strapi.config.get('plugin.upload').provider;
 
           try {
-            if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
-              await strapi.plugin('upload').provider.uploadStream(uploadData);
-            } else {
-              uploadData.buffer = await streamToBuffer(uploadData.stream);
-              await strapi.plugin('upload').provider.upload(uploadData);
-            }
+            await strapi.plugin('upload').provider.uploadStream(uploadData);
+
+            // Files formats are stored within the parent file entity
             if (uploadData?.type) {
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
                 where: { hash: uploadData.mainHash },
