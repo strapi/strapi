@@ -267,11 +267,14 @@ We're using the [consistent-type-imports](https://typescript-eslint.io/rules/con
 
 ### c. Exports
 
-In most cases, it is recommended to use named exports (`export`) instead of the default export (`export default`). Named exports provide more flexibility and clarity when importing and using modules. They allow importing specific members of a module explicitly, which improves code readability and maintainability.
+In most cases, it is recommended to use _named exports_ (`export`) instead of the _default export_ (`export default`). Named exports provide more flexibility and clarity when importing and using modules. They allow importing specific members of a module explicitly, which improves code readability and maintainability. However, there are a few exceptions where using default exports might be appropriate.
 
-However, there are a few exceptions where using export default might be appropriate. For example, when exporting a single primary entity or class from a module, or when working with modules that have a natural default export, such as a configuration object.
+- **Use _named exports_ when** there are **multiple entities or functions** that need to be exported from a module.
+- Consider using **_default exports_ when**:
+  - there is only a **single primary entity or class** that needs to be exported from a module.
+  - working with modules that have **natural default export**, such as configuration objects or factories.
 
-Using regular exports provides a clearer and more explicit interface for module consumers, promoting better code organization and maintainability. However, it is important to consider the context before deciding whether to use default exports.
+Using _named exports_ provides a clearer and more explicit interface for module consumers, promoting better code organization and maintainability. However, it is important to consider the context before deciding whether to use _default exports_.
 
 ## 3. Parameters for Generics
 
