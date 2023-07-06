@@ -9,13 +9,13 @@ import {
   fireEvent,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
 
 import SelectedEntriesModal from '..';
 import reducers from '../../../../../../../reducers';
@@ -77,7 +77,7 @@ const store = createStore(rootReducer, {
 
 const render = (ui) => ({
   ...renderRTL(ui, {
-    wrapper: ({ children }) => {
+    wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
           queries: {

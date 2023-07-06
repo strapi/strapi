@@ -312,6 +312,7 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
         const rows = data.results.map((entry) => {
           try {
             schema.validateSync(entry, { abortEarly: false });
+
             return entry;
           } catch (e) {
             return {
