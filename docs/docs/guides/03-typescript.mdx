@@ -277,8 +277,8 @@ Using regular exports provides a clearer and more explicit interface for module 
 
 When working with generic types, it is required to follow naming conventions and use descriptive names for type parameters. This helps improve code readability and maintainability over the whole codebase.
 
-- For simple types with a single self-explanatory parameter, it is allowed to **use `T`**
-- For any other generic types' parameters, it is required to **use a meaningful PascalCased variable name prefixed by `T`**
+- Any generic with **one parameter** can **use `T`**
+- For **any other** generic types' parameters, it is required to **use a meaningful PascalCased variable name prefixed by `T`**
 
 <Tabs>
 
@@ -410,3 +410,37 @@ export function contentType(uid: UID.Schema): Schema.Schema {
 :::info
 If no types are generated, shared registries will resolve to their generic representation.
 :::
+
+## 6. Lint Configurations
+
+The Strapi lint configuration includes some rules to enforce the guidelines mentioned above and can be found [here](https://github.com/strapi/strapi/blob/main/packages/utils/eslint-config-custom/typescript.js).
+
+To use it in a package, create a file named `.eslintrc.js` at the package's root and include the following:
+
+```js
+module.exports = {
+  root: true,
+  extends: ['custom/typescript'],
+};
+```
+
+It is also possible to modify the base TypeScript config by adding the following
+
+```js
+module.exports = {
+  root: true,
+  extends: ['custom/typescript'],
+  rules: {
+    // ...
+  },
+};
+```
+
+:::note
+Referencing the `custom/` eslint configs only works for packages that are part of the Strapi mono-repository
+:::
+
+## 7. TSConfig
+
+- [All](https://github.com/strapi/strapi/blob/main/packages/utils/tsconfig)
+  - [Base](https://github.com/strapi/strapi/blob/main/packages/utils/tsconfig/base.json)
