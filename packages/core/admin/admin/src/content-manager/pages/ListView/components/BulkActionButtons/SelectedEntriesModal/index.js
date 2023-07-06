@@ -115,7 +115,7 @@ EntryValidationText.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesTableContent = () => {
-  const { rows, isLoading } = useTableContext();
+  const { rows } = useTableContext();
   const {
     location: { pathname },
   } = useHistory();
@@ -146,25 +146,25 @@ const SelectedEntriesTableContent = () => {
       </Table.Head>
       <Table.LoadingBody />
       <Table.Body>
-        {rows.map((entry, index) => (
-          <Tr key={entry.id}>
-            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+        {rows.map(({ entity, errors }, index) => (
+          <Tr key={entity.id}>
+            <Body.CheckboxDataCell rowId={entity.id} index={index} />
             <Td>
-              <Typography>{entry.id}</Typography>
+              <Typography>{entity.id}</Typography>
             </Td>
             {shouldDisplayMainField && (
               <Td>
-                <Typography>{entry[mainField]}</Typography>
+                <Typography>{entity[mainField]}</Typography>
               </Td>
             )}
             <Td>
-              <EntryValidationText errors={entry.errors} isPublished={entry.publishedAt !== null} />
+              <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
             </Td>
             <Td>
               <IconButton
                 forwardedAs={Link}
                 to={{
-                  pathname: `${pathname}/${entry.id}`,
+                  pathname: `${pathname}/${entity.id}`,
                   state: { from: pathname },
                 }}
                 label={formatMessage(
@@ -199,7 +199,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
 
   const selectedEntriesWithErrorsCount = rows.filter(
-    ({ id, errors }) => selectedEntries.includes(id) && errors
+    ({ entity, errors }) => selectedEntries.includes(entity.id) && errors
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
@@ -308,10 +308,10 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
           try {
             schema.validateSync(entry, { abortEarly: false });
 
-            return entry;
+            return { entity: entry };
           } catch (e) {
             return {
-              ...entry,
+              entity: entry,
               errors: getYupInnerErrors(e),
             };
           }
