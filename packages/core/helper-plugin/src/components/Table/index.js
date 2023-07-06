@@ -283,7 +283,7 @@ HeaderCell.propTypes = {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading }) => {
+const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading, isFetching }) => {
   const [selectedEntries, setSelectedEntries] = React.useState(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
@@ -304,10 +304,20 @@ const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading }) =
       onSelectRow,
       rows,
       isLoading,
+      isFetching,
       colCount,
       rowCount,
     };
-  }, [onSelectRow, selectedEntries, setSelectedEntries, rows, isLoading, colCount, rowCount]);
+  }, [
+    onSelectRow,
+    selectedEntries,
+    setSelectedEntries,
+    rows,
+    isLoading,
+    isFetching,
+    colCount,
+    rowCount,
+  ]);
 
   return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
@@ -316,6 +326,7 @@ Root.defaultProps = {
   rows: [],
   defaultSelectedEntries: [],
   isLoading: false,
+  isFetching: false,
   colCount: 0,
 };
 
@@ -325,6 +336,7 @@ Root.propTypes = {
   defaultSelectedEntries: PropTypes.arrayOf(PropTypes.number),
   colCount: PropTypes.number,
   isLoading: PropTypes.bool,
+  isFetching: PropTypes.bool,
 };
 
 /* -------------------------------------------------------------------------------------------------

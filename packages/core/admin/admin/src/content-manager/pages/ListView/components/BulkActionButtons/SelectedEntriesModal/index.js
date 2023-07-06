@@ -103,8 +103,10 @@ EntryValidationText.defaultProps = {
 
 EntryValidationText.propTypes = {
   errors: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
+    [PropTypes.string]: PropTypes.shape({
+      id: PropTypes.string,
+      defaultMessage: PropTypes.string,
+    }),
   }),
   isPublished: PropTypes.bool,
 };
@@ -113,7 +115,7 @@ EntryValidationText.propTypes = {
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = ({ errors }) => {
+const SelectedEntriesTableContent = () => {
   const { rows, isLoading } = useTableContext();
   const {
     location: { pathname },
@@ -159,7 +161,7 @@ const SelectedEntriesTableContent = ({ errors }) => {
               )}
               <Td>
                 <EntryValidationText
-                  errors={errors[entry.id]}
+                  errors={entry.errors}
                   isPublished={entry.publishedAt !== null}
                 />
               </Td>
@@ -187,19 +189,6 @@ const SelectedEntriesTableContent = ({ errors }) => {
   );
 };
 
-SelectedEntriesTableContent.defaultProps = {
-  errors: {},
-};
-
-SelectedEntriesTableContent.propTypes = {
-  errors: PropTypes.shape({
-    [PropTypes.number]: PropTypes.shape({
-      id: PropTypes.string,
-      defaultMessage: PropTypes.string,
-    }),
-  }),
-};
-
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
  * -----------------------------------------------------------------------------------------------*/
@@ -212,33 +201,12 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
 
 const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, isLoading } = useTableContext();
-  const { contentType, components } = useSelector(listViewDomain());
+  const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
 
-  /**
-   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
-   */
-  const validateEntriesToPublish = React.useCallback(() => {
-    const validations = { validIds: [], errors: {} };
-    // Create the validation schema based on the contentType
-    const schema = createYupSchema(contentType, { components }, { isDraft: false });
-    // Validate each entry
-    rows.forEach((entry) => {
-      try {
-        schema.validateSync(entry, { abortEarly: false });
-        validations.validIds.push(entry.id);
-      } catch (e) {
-        validations.errors[entry.id] = getYupInnerErrors(e);
-      }
-    });
-
-    return validations;
-  }, [rows, contentType, components]);
-
-  const { errors } = validateEntriesToPublish();
-
-  const selectedEntriesWithNoErrors = selectedEntries.filter((entryId) => !errors[entryId]);
-  const selectedEntriesWithErrors = selectedEntries.filter((entryId) => errors[entryId]);
+  const selectedEntriesWithErrorsCount = rows
+    .filter(({ id }) => selectedEntries.includes(id))
+    .filter((row) => row.errors).length;
+  const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -259,14 +227,14 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
                 '<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} awaiting for action.',
             },
             {
-              readyToPublishCount: selectedEntriesWithNoErrors.length,
-              withErrorsCount: selectedEntriesWithErrors.length,
+              readyToPublishCount: selectedEntriesWithNoErrorsCount,
+              withErrorsCount: selectedEntriesWithErrorsCount,
               b: BoldChunk,
             }
           )}
         </Typography>
         <Box marginTop={5}>
-          <SelectedEntriesTableContent errors={errors} />
+          <SelectedEntriesTableContent />
         </Box>
       </ModalBody>
       <ModalFooter
@@ -280,14 +248,14 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={onRefresh} variant="tertiary">
+            <Button onClick={onRefresh} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
               onClick={() => onConfirm(selectedEntries)}
               disabled={
                 selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrors.length ||
+                selectedEntries.length === selectedEntriesWithErrorsCount ||
                 isLoading
               }
             >
@@ -311,8 +279,8 @@ SelectedEntriesModalContent.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
-  const { selectedEntries, rows } = useTableContext();
-  const { contentType } = useSelector(listViewDomain());
+  const { selectedEntries } = useTableContext();
+  const { contentType, components } = useSelector(listViewDomain());
 
   // We want to keep the selected entries order same as the list view
   const [
@@ -332,17 +300,31 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
   const { get } = useFetchClient();
   const queryString = stringify(queryParams);
 
-  const { data, isFetching, refetch } = useQuery(
+  const { data, isLoading, isFetching, refetch } = useQuery(
     ['entries', contentType.uid, queryParams],
     async () => {
       const { data } = await get(
         `content-manager/collection-types/${contentType.uid}?${queryString}`
       );
 
-      return data.results;
-    },
-    {
-      initialData: () => rows.filter((row) => selectedEntries.includes(row.id)),
+      if (data.results) {
+        const schema = createYupSchema(contentType, { components }, { isDraft: false });
+        const rows = data.results.map((entry) => {
+          try {
+            schema.validateSync(entry, { abortEarly: false });
+            return entry;
+          } catch (e) {
+            return {
+              ...entry,
+              errors: getYupInnerErrors(e),
+            };
+          }
+        });
+
+        return rows;
+      }
+
+      return [];
     }
   );
 
@@ -351,7 +333,8 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
       rows={data}
       defaultSelectedEntries={selectedEntries}
       colCount={4}
-      isLoading={isFetching}
+      isLoading={isLoading}
+      isFetching={isFetching}
     >
       <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} onRefresh={refetch} />
     </Table.Root>
