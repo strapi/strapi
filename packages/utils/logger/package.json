@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
-    "winston": "3.3.3"
+    "winston": "3.9.0"
   },
   "devDependencies": {
     "eslint-config-custom": "4.11.4",
