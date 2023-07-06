@@ -344,7 +344,7 @@ Root.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const EmptyBody = ({ contentType, ...rest }) => {
-  const { rows, colCount } = useTableContext();
+  const { rows, colCount, isLoading } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
   const content = hasFilters
@@ -355,7 +355,7 @@ const EmptyBody = ({ contentType, ...rest }) => {
       }
     : undefined;
 
-  if (rows?.length > 0) {
+  if (rows?.length > 0 || isLoading) {
     return null;
   }
 
@@ -408,6 +408,23 @@ const LoadingBody = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * Body
+ * -----------------------------------------------------------------------------------------------*/
+const Body = ({ children }) => {
+  const { rows } = useTableContext();
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return <Tbody>{children}</Tbody>;
+};
+
+Body.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+/* -------------------------------------------------------------------------------------------------
  * Content
  * -----------------------------------------------------------------------------------------------*/
 
@@ -433,6 +450,7 @@ Content.propTypes = {
 const Table = {
   Content,
   Root,
+  Body,
   ActionBar,
   Head,
   HeaderCell,

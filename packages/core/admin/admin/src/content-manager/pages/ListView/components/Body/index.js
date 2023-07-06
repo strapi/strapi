@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { BaseCheckbox, IconButton, Tbody, Td, Flex } from '@strapi/design-system';
-import { useTracking, useTableContext } from '@strapi/helper-plugin';
+import { BaseCheckbox, IconButton, Td, Flex } from '@strapi/design-system';
+import { useTracking, useTableContext, Table } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -169,7 +169,7 @@ const Root = ({ children, onConfirmDelete, isConfirmDeleteRowOpen, setIsConfirmD
   };
 
   return (
-    <Tbody>
+    <Table.Body>
       {children}
       <ConfirmDialogDelete
         isConfirmButtonLoading={isLoading}
@@ -177,7 +177,7 @@ const Root = ({ children, onConfirmDelete, isConfirmDeleteRowOpen, setIsConfirmD
         onToggleDialog={() => setIsConfirmDeleteRowOpen(!isConfirmDeleteRowOpen)}
         isOpen={isConfirmDeleteRowOpen}
       />
-    </Tbody>
+    </Table.Body>
   );
 };
 
