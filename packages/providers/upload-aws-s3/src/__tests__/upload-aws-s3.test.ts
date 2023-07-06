@@ -143,4 +143,36 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toEqual('https://cdn.test/dir/dir2/tmp/test/test.json');
     });
   });
+
+  describe('isPrivate', () => {
+    test('Should sign files if ACL is private', async () => {
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          params: {
+            Bucket: 'test',
+            ACL: 'private',
+          },
+        },
+      });
+
+      const isPrivate = providerInstance.isPrivate();
+
+      expect(isPrivate).toBe(true);
+    });
+
+    test('Should not sign files if ACL is public', async () => {
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          params: {
+            Bucket: 'test',
+            ACL: 'public',
+          },
+        },
+      });
+
+      const isPrivate = providerInstance.isPrivate();
+
+      expect(isPrivate).toBe(false);
+    });
+  });
 });

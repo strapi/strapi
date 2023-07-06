@@ -79,7 +79,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 
