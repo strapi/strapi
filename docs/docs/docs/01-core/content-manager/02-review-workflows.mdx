@@ -8,7 +8,7 @@ tags:
 
 ## Summary
 
-Review workflows are disabled for all content-types by default and have to be enabled for each of them. More about how to [enable review-workflows for a content-type](/content-type-builder/review-workflows).
+Review workflows are disabled for all content-types by default and have to be enabled for each of them. More about how to [enable review-workflows for a content-type](../content-type-builder/01-review-workflows.mdx).
 
 The feature is visible in two locations of the content-manager:
 
@@ -50,7 +50,7 @@ This means at any place where the UI displays a stage, it has to be prepared to 
 ## List view
 
 The information which stage is current assigned to an entity is send as part of the content-type response payload for each entity in the attribute `strapi_reviewWorkflows_stage`.
-Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
+Please see [Data Shapes](../admin/03-settings/01-review-workflows.mdx#data-shapes) for type definitions.
 
 ```ts
 {
@@ -67,7 +67,7 @@ add an additional check if the feature toggle returned in `http://localhost:1337
 ## Edit View
 
 The information which stage is current assigned to an entity is send as part of the entity response payload in the attribute `strapi_reviewWorkflows_stage`.
-Please see [Data Shapes](/settings/review-workflows#data-shapes) for type definitions.
+Please see [Data Shapes](../admin/03-settings/01-review-workflows.mdx#data-shapes) for type definitions.
 
 ```ts
 {

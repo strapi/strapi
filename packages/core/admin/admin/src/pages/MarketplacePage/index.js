@@ -23,10 +23,11 @@ import {
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 
 import useDebounce from '../../hooks/useDebounce';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
-import adminPermissions from '../../permissions';
+import { selectAdminPermissions } from '../App/selectors';
 
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesFilters from './components/NpmPackagesFilters';
@@ -249,11 +250,15 @@ const MarketPlacePage = () => {
   );
 };
 
-const ProtectedMarketPlace = () => (
-  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-    <MarketPlacePage />
-  </CheckPagePermissions>
-);
+const ProtectedMarketPlace = () => {
+  const permissions = useSelector(selectAdminPermissions);
+
+  return (
+    <CheckPagePermissions permissions={permissions.marketplace.main}>
+      <MarketPlacePage />
+    </CheckPagePermissions>
+  );
+};
 
 export { MarketPlacePage };
 export default ProtectedMarketPlace;

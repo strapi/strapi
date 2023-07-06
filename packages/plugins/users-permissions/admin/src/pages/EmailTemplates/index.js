@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
@@ -40,14 +40,10 @@ const EmailTemplatesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
 
-  const updatePermissions = useMemo(() => {
-    return { update: PERMISSIONS.updateEmailTemplates };
-  }, []);
-
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateEmailTemplates });
 
   const { status: isLoadingData, data } = useQuery('email-templates', () => fetchData(), {
     onSuccess() {

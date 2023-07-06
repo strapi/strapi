@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { RelationInputDataManager } from '..';
@@ -108,58 +109,63 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const RelationInputDataManagerComponent = (props) => (
-  <MemoryRouter>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <DndProvider backend={HTML5Backend}>
-          <IntlProvider locale="en">
-            <RelationInputDataManager
-              description="Description"
-              intlLabel={{
-                id: 'label',
-                defaultMessage: 'Label',
-              }}
-              labelAction={<>Action</>}
-              mainField={{
-                name: 'relation',
-                schema: {
-                  type: 'relation',
-                },
-              }}
-              name="relation"
-              placeholder={{
-                id: 'placeholder',
-                defaultMessage: 'Placeholder',
-              }}
-              relationType="oneToOne"
-              size={6}
-              targetModel="something"
-              queryInfos={{
-                shouldDisplayRelationLink: true,
-              }}
-              {...props}
-            />
-          </IntlProvider>
-        </DndProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </MemoryRouter>
+  <RelationInputDataManager
+    description="Description"
+    intlLabel={{
+      id: 'label',
+      defaultMessage: 'Label',
+    }}
+    labelAction={<>Action</>}
+    mainField={{
+      name: 'relation',
+      schema: {
+        type: 'relation',
+      },
+    }}
+    name="relation"
+    placeholder={{
+      id: 'placeholder',
+      defaultMessage: 'Placeholder',
+    }}
+    relationType="oneToOne"
+    size={6}
+    targetModel="something"
+    queryInfos={{
+      shouldDisplayRelationLink: true,
+    }}
+    {...props}
+  />
 );
 
-const setup = (props) => render(<RelationInputDataManagerComponent {...props} />);
+const setup = (props) => ({
+  ...render(<RelationInputDataManagerComponent {...props} />, {
+    wrapper: ({ children }) => (
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider theme={lightTheme}>
+            <DndProvider backend={HTML5Backend}>
+              <IntlProvider locale="en">{children}</IntlProvider>
+            </DndProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </MemoryRouter>
+    ),
+  }),
+  user: userEvent.setup(),
+});
 
 describe('RelationInputDataManager', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('Does pass through props from the CM', async () => {
-    const { findByText } = setup();
+    const { findByText, getByRole } = setup();
 
     expect(await findByText(/Label/)).toBeInTheDocument();
     expect(await findByText('Description')).toBeInTheDocument();
     expect(await findByText('Action')).toBeInTheDocument();
-    expect(await findByText('Placeholder')).toBeInTheDocument();
+    expect(getByRole('combobox')).toBeInTheDocument();
   });
 
   test('Does pass through an error from the CM', async () => {
@@ -305,11 +311,9 @@ describe('RelationInputDataManager', () => {
 
   test('Disconnect new entity', async () => {
     const { relationDisconnect } = useCMEditViewDataManager();
-    const { findByTestId } = setup();
+    const { findByTestId, user } = setup();
 
-    await act(async () => {
-      fireEvent.click(await findByTestId('remove-relation-1'));
-    });
+    await user.click(await findByTestId('remove-relation-1'));
 
     expect(relationDisconnect).toBeCalledWith(
       expect.objectContaining({
@@ -318,10 +322,10 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Do not render Load More when an entity is created', async () => {
+  test('Do not render Load More when an entity is created', () => {
     const { queryByText } = setup();
 
-    expect(await queryByText('Load More')).not.toBeInTheDocument();
+    expect(queryByText('Load More')).not.toBeInTheDocument();
   });
 
   test('Load more entities', async () => {
@@ -338,33 +342,28 @@ describe('RelationInputDataManager', () => {
       relationLoad: jest.fn(),
     });
 
-    const { queryByText } = setup();
-    const loadMoreNode = await queryByText('Load More');
+    const { queryByText, user } = setup();
+    const loadMoreNode = queryByText('Load More');
 
     expect(loadMoreNode).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(loadMoreNode);
-    });
+    await user.click(loadMoreNode);
 
     expect(relations.fetchNextPage).toBeCalledTimes(1);
   });
 
   test('Open search', async () => {
     const { searchFor } = useRelation();
-    const { container } = setup();
+    const { user, getByRole } = setup();
 
-    act(() => {
-      const target = container.querySelector('input');
-      fireEvent.keyDown(target, { key: 'ArrowDown', code: 'ArrowDown' });
-    });
+    await user.click(getByRole('combobox'));
 
     expect(searchFor).toBeCalledWith('', { idsToInclude: [], idsToOmit: [] });
   });
 
   test('Connect new entity', async () => {
     const { relationConnect } = useCMEditViewDataManager();
-    const { container, findByText } = setup({
+    const { user, findByText, getByRole } = setup({
       mainField: {
         name: 'title',
         schema: {
@@ -373,17 +372,9 @@ describe('RelationInputDataManager', () => {
       },
     });
 
-    act(() => {
-      fireEvent.change(container.querySelector('input'), {
-        target: { value: 'search' },
-      });
-    });
+    await user.type(getByRole('combobox'), 'S');
 
-    const searchResult = await findByText('Search 1');
-
-    act(() => {
-      fireEvent.click(searchResult);
-    });
+    await user.click(await findByText('Search 1'));
 
     expect(relationConnect).toBeCalledWith(
       expect.objectContaining({
@@ -398,9 +389,9 @@ describe('RelationInputDataManager', () => {
 
   test('Reorder an entity', () => {
     const { relationReorder } = useCMEditViewDataManager();
-    setup({ relationType: 'manyToMany' });
+    const { getAllByText } = setup({ relationType: 'manyToMany' });
 
-    const [draggedItem, dropZone] = screen.getAllByText('Drag');
+    const [draggedItem, dropZone] = getAllByText('Drag');
 
     fireEvent.dragStart(draggedItem);
     fireEvent.dragEnter(dropZone);
@@ -412,57 +403,57 @@ describe('RelationInputDataManager', () => {
 
   describe('Accessibility', () => {
     it('should have have description text', () => {
-      setup({ relationType: 'manyToMany' });
+      const { queryByText } = setup({ relationType: 'manyToMany' });
 
-      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+      expect(queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
     });
 
     it('should update the live text when an item has been grabbed', async () => {
-      setup({ relationType: 'manyToMany' });
+      const { queryByText, getAllByText } = setup({ relationType: 'manyToMany' });
 
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
 
       expect(
-        screen.queryByText(
+        queryByText(
           /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
         )
       ).toBeInTheDocument();
     });
 
     it('should change the live text when an item has been moved', () => {
-      setup({ relationType: 'manyToMany' });
+      const { queryByText, getAllByText } = setup({ relationType: 'manyToMany' });
 
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
 
-      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+      expect(queryByText(/New position in list/)).toBeInTheDocument();
     });
 
     it('should change the live text when an item has been dropped', () => {
-      setup({ relationType: 'manyToMany' });
+      const { queryByText, getAllByText } = setup({ relationType: 'manyToMany' });
 
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
 
-      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+      expect(queryByText(/Final position in list/)).toBeInTheDocument();
     });
 
     it('should change the live text after the reordering interaction has been cancelled', () => {
-      setup({ relationType: 'manyToMany' });
+      const { getAllByText, queryByText } = setup({ relationType: 'manyToMany' });
 
-      const [draggedItem] = screen.getAllByText('Drag');
+      const [draggedItem] = getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
 
-      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
+      expect(queryByText(/Re-order cancelled/)).toBeInTheDocument();
     });
   });
 
