@@ -483,7 +483,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         // Update workflow to unassign content type
-        const workflow = await requests.admin.put(
+        await requests.admin.put(
           `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
           { body: { data: { contentTypes: [productUID] } } }
         );

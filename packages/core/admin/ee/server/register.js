@@ -32,7 +32,7 @@ module.exports = async ({ strapi }) => {
     const reviewWorkflowService = getService('review-workflows');
 
     reviewWorkflowsMiddlewares.contentTypeMiddleware(strapi);
-    await reviewWorkflowService.register();
+    await reviewWorkflowService.register(features.get('review-workflows'));
   }
   await executeCERegister({ strapi });
 };

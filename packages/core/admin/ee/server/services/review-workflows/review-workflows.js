@@ -1,12 +1,16 @@
 'use strict';
 
-const { filter, set, forEach, pipe, map, stubTrue, cond } = require('lodash/fp');
+const { filter, set, forEach, pipe, map, stubTrue, cond, defaultsDeep } = require('lodash/fp');
 const { getService } = require('../../utils');
 const { getVisibleContentTypesUID, hasStageAttribute } = require('../../utils/review-workflows');
 
 const defaultStages = require('../../constants/default-stages.json');
 const defaultWorkflow = require('../../constants/default-workflow.json');
-const { ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const {
+  ENTITY_STAGE_ATTRIBUTE,
+  MAX_WORKFLOWS,
+  MAX_STAGES_PER_WORKFLOW,
+} = require('../../constants/workflows');
 
 const { persistTables, removePersistedTablesWithSuffix } = require('../../utils/persisted-tables');
 const webhookEvents = require('../../constants/webhookEvents');
@@ -16,6 +20,11 @@ const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
 const MAX_JOIN_TABLE_NAME_SUFFIX =
   1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
 const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
+
+const DEFAULT_OPTIONS = {
+  workflows: MAX_WORKFLOWS,
+  stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
+};
 
 async function initDefaultWorkflow({ workflowsService, stagesService }) {
   const wfCount = await workflowsService.count();
@@ -79,7 +88,7 @@ function persistStagesJoinTables({ strapi }) {
 
     const joinTablesToPersist = pipe([
       getVisibleContentTypesUID,
-      filter(hasStageAttribute),
+      filter((uid) => hasStageAttribute(contentTypes[uid])),
       map(getStageTableToPersist),
     ])(contentTypes);
 
@@ -97,15 +106,19 @@ const registerWebhookEvents = async ({ strapi }) =>
 module.exports = ({ strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     async bootstrap() {
       await registerWebhookEvents({ strapi });
       await initDefaultWorkflow({ workflowsService, stagesService, strapi });
     },
-    async register() {
+    async register({ options } = { options: {} }) {
       extendReviewWorkflowContentTypes({ strapi });
       strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
+
+      const reviewWorkflowsOptions = defaultsDeep(DEFAULT_OPTIONS, options);
+      workflowsValidationService.register(reviewWorkflowsOptions);
     },
   };
 };

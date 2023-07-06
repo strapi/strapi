@@ -73,6 +73,11 @@ const servicesMock = {
     sendDidDeleteStage: jest.fn(),
     sendDidChangeEntryStage: jest.fn(),
   },
+  'admin::review-workflows-validation': {
+    register: jest.fn(),
+    validateWorkflowCount: jest.fn().mockResolvedValue(true),
+    validateWorkflowStages: jest.fn(),
+  },
 };
 
 const queryUpdateMock = jest.fn(() => Promise.resolve());

@@ -2,15 +2,16 @@
 
 const {
   mapAsync,
-  errors: { ApplicationError },
+  errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
 const { map } = require('lodash/fp');
 
-const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE } = require('../../constants/workflows');
+const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
 module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     find({ workflowId, populate }) {
@@ -28,8 +29,8 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    async createMany(stagesList, { fields }) {
-      const params = { select: fields };
+    async createMany(stagesList, { fields } = {}) {
+      const params = { select: fields ?? '*' };
 
       const stages = await Promise.all(
         stagesList.map((stage) =>
@@ -66,8 +67,15 @@ module.exports = ({ strapi }) => {
       });
     },
 
-    count() {
-      return strapi.entityService.count(STAGE_MODEL_UID);
+    count({ workflowId } = {}) {
+      const opts = {};
+
+      if (workflowId) {
+        opts.where = {
+          workflow: workflowId,
+        };
+      }
+      return strapi.entityService.count(STAGE_MODEL_UID, opts);
     },
 
     async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
@@ -124,6 +132,8 @@ module.exports = ({ strapi }) => {
     async updateEntity(entityInfo, stageId) {
       const stage = await this.findById(stageId);
 
+      await workflowsValidationService.validateWorkflowCount();
+
       if (!stage) {
         throw new ApplicationError(`Selected stage does not exist`);
       }
@@ -157,6 +167,8 @@ module.exports = ({ strapi }) => {
       const joinTable = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable;
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
+
+      await workflowsValidationService.validateWorkflowCount();
 
       return strapi.db.transaction(async ({ trx }) => {
         // Update all already existing links to the new stage
@@ -257,13 +269,13 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
  * @param {Array} diffStages.deleted - An array of stages that are planned to be deleted from the workflow.
  * @param {Array} diffStages.created - An array of stages that are planned to be created in the workflow.
  *
- * @throws {ApplicationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
+ * @throws {ValidationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
  */
 function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   const remainingStagesCount =
     workflowStages.length - diffStages.deleted.length + diffStages.created.length;
   if (remainingStagesCount < 1) {
-    throw new ApplicationError('At least one stage must remain in the workflow.');
+    throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
   }
 }
 

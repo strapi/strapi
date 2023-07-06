@@ -67,6 +67,12 @@ const containerMock = {
   }),
 };
 
+const reviewWorkflowsValidationMock = {
+  register: jest.fn(),
+  validateWorkflowCount: jest.fn().mockResolvedValue(true),
+  validateWorkflowStages: jest.fn(),
+};
+
 const hookMock = jest.fn().mockReturnValue({ register: jest.fn() });
 
 const strapiMock = {
@@ -80,6 +86,8 @@ const strapiMock = {
         return stagesServiceMock;
       case 'admin::workflows':
         return workflowsServiceMock;
+      case 'admin::review-workflows-validation':
+        return reviewWorkflowsValidationMock;
       default:
         return null;
     }

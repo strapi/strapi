@@ -1,7 +1,7 @@
 'use strict';
 
-const { set, isString } = require('lodash/fp');
-const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const { set, isString, map, get } = require('lodash/fp');
+const { ApplicationError } = require('@strapi/utils').errors;
 const { WORKFLOW_MODEL_UID } = require('../../../constants/workflows');
 const { getService } = require('../../../utils');
 const { getWorkflowContentTypeFilter } = require('../../../utils/review-workflows');
@@ -19,6 +19,7 @@ const processFilters = ({ strapi }, filters = {}) => {
 
 module.exports = ({ strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
+  const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     /**
@@ -51,23 +52,21 @@ module.exports = ({ strapi }) => {
     async create(opts) {
       let createOpts = { ...opts, populate: { stages: true } };
 
-      if (!opts.data.stages || opts.data.stages.length === 0) {
-        throw new ValidationError('Can not create a workflow without stages');
-      }
+      workflowsValidationService.validateWorkflowStages(opts.data.stages);
+      await workflowsValidationService.validateWorkflowCount(1);
 
       return strapi.db.transaction(async () => {
         // Create stages
-        const stageIds = await getService('stages', { strapi })
-          .replaceStages([], opts.data.stages)
-          .then((stages) => stages.map((stage) => stage.id));
+        const stages = await getService('stages', { strapi }).createMany(opts.data.stages);
+        const mapIds = map(get('id'));
 
-        createOpts = set('data.stages', stageIds, createOpts);
+        createOpts = set('data.stages', mapIds(stages), createOpts);
 
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
             destContentTypes: opts.data.contentTypes,
-            stageId: stageIds[0],
+            stageId: stages[0].id,
           });
         }
 
@@ -88,9 +87,12 @@ module.exports = ({ strapi }) => {
       let updateOpts = { ...opts, populate: { stages: true } };
       let updatedStageIds;
 
+      await workflowsValidationService.validateWorkflowCount();
+
       return strapi.db.transaction(async () => {
         // Update stages
         if (opts.data.stages) {
+          workflowsValidationService.validateWorkflowStages(opts.data.stages);
           opts.data.stages.forEach((stage) =>
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
