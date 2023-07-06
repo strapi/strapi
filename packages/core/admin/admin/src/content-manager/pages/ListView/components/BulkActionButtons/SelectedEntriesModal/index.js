@@ -204,8 +204,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
 
   const selectedEntriesWithErrorsCount = rows
-    .filter(({ id }) => selectedEntries.includes(id))
-    .filter((row) => row.errors).length;
+    .filter(({ id, errors }) => selectedEntries.includes(id) && errors).length
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
   return (
