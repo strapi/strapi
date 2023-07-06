@@ -12,7 +12,7 @@ import {
 import axios from 'axios';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -49,50 +49,6 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
-
-  useQuery(
-    [slug, params],
-    ({ signal }) => {
-      dispatch(getData());
-      setIsCreatingEntry(true);
-
-      return fetchClient.get(getRequestUrl(slug), { params, signal });
-    },
-    {
-      onSuccess(result) {
-        dispatch(getDataSucceeded(cleanReceivedData(result.data)));
-        setIsCreatingEntry(false);
-      },
-      onError(err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-
-        const responseStatus = get(err, 'response.status', null);
-
-        if (responseStatus === 403) {
-          toggleNotification({
-            type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
-          });
-
-          push('/');
-        }
-      },
-      retry(_, error) {
-        const responseStatus = get(error, 'response.status', null);
-
-        // FIXME: Don't use an error to determine the create or update state
-        if (responseStatus === 404) {
-          dispatch(initForm(rawQuery, true));
-
-          return false;
-        }
-
-        return true;
-      },
-    }
-  );
 
   const cleanReceivedData = useCallback(
     (data) => {
