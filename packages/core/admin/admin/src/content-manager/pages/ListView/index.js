@@ -10,8 +10,6 @@ import {
   HeaderLayout,
   useNotifyAT,
   Flex,
-  Typography,
-  Status,
 } from '@strapi/design-system';
 import {
   NoPermissions,
@@ -109,8 +107,11 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
+
+  const hasDraftAndPublish = options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
+
   const reviewWorkflowColumns = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CE,
     async () =>
@@ -418,27 +419,17 @@ function ListView({
           searchable: false,
           sortable: true,
         },
-        // eslint-disable-next-line react/no-unstable-nested-components
-        cellFormatter(cellData) {
-          const isPublished = cellData.publishedAt;
-          const variant = isPublished ? 'success' : 'secondary';
-
-          return (
-            <Status width="min-content" showBullet={false} variant={variant} size="S">
-              <Typography fontWeight="bold" textColor={`${variant}700`}>
-                {formatMessage({
-                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-                  defaultMessage: isPublished ? 'Published' : 'Draft',
-                })}
-              </Typography>
-            </Status>
-          );
-        },
       });
     }
 
     if (reviewWorkflowColumns) {
-      reviewWorkflowColumns.metadatas.label = formatMessage(reviewWorkflowColumns.metadatas.label);
+      // Make sure the column header label is translated
+      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
+        reviewWorkflowColumns.metadatas.label = formatMessage(
+          reviewWorkflowColumns.metadatas.label
+        );
+      }
+
       formattedHeaders.push(reviewWorkflowColumns);
     }
 
@@ -593,6 +584,10 @@ function ListView({
                 canCreate={canCreate}
                 canDelete={canDelete}
                 contentType={contentType}
+                features={{
+                  hasDraftAndPublish,
+                  hasReviewWorkflows,
+                }}
                 headers={tableHeaders}
                 rows={data}
                 withBulkActions
