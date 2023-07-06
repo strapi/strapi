@@ -411,9 +411,9 @@ const LoadingBody = () => {
  * Body
  * -----------------------------------------------------------------------------------------------*/
 const Body = ({ children }) => {
-  const { rows } = useTableContext();
+  const { rows, isLoading } = useTableContext();
 
-  if (rows.length === 0) {
+  if (isLoading || rows.length === 0) {
     return null;
   }
 
