@@ -64,7 +64,6 @@ describe('Admin | UseCasePage', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 
@@ -96,7 +95,6 @@ describe('Admin | UseCasePage', () => {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 

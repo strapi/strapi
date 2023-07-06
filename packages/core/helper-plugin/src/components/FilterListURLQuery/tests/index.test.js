@@ -1,83 +1,18 @@
-/**
- *
- * Tests for FilterListURLQuery
- *
- */
-
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { act, render, screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { render } from '@tests/utils';
 import qs from 'qs';
-import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
 
-import FilterListURLQuery from '../index';
+import { FilterListURLQuery } from '../index';
 
-// TO BE REMOVED: we have added this mock to prevent errors in the snapshots caused by the Unicode space character
-// before AM/PM in the dates, after the introduction of node 18.13
-jest.mock('react-intl', () => {
-  const reactIntl = jest.requireActual('react-intl');
-  const intl = reactIntl.createIntl({
-    locale: 'en',
-    messages: {
-      'components.FilterOptions.FILTER_TYPES.$eq': 'is',
-      'components.FilterOptions.FILTER_TYPES.$ne': 'is not',
-      'components.FilterOptions.FILTER_TYPES.$contains': 'contains (case sensitive)',
-      'components.FilterOptions.FILTER_TYPES.$notContains': 'does not contain (case sensitive)',
-      'components.FilterOptions.FILTER_TYPES.$gt': 'is greater than',
-      'components.FilterOptions.FILTER_TYPES.$gte': 'is greater than or equal to',
-      'components.FilterOptions.FILTER_TYPES.$lt': 'is lower than',
-      'components.FilterOptions.FILTER_TYPES.$lte': 'is lower than or equal to',
-      'components.FilterOptions.FILTER_TYPES.$startsWith': 'starts with',
-      'components.FilterOptions.FILTER_TYPES.$endsWith': 'ends with',
-      'components.FilterOptions.FILTER_TYPES.$null': 'is null',
-      'components.FilterOptions.FILTER_TYPES.$notNull': 'is not null',
-    },
-    textComponent: 'span',
+describe('FilterListURLQuery', () => {
+  it('should render nothing if there is no query', () => {
+    const { queryAllByRole } = render(<FilterListURLQuery filtersSchema={[]} />);
+
+    expect(queryAllByRole('button')).toEqual([]);
   });
 
-  intl.formatDate = jest.fn(() => 'Wednesday, September 1, 2021');
-  intl.formatTime = jest.fn(() => '12:45 AM');
-
-  return {
-    ...reactIntl,
-    useIntl: () => intl,
-  };
-});
-
-const makeApp = (history, filtersSchema) => (
-  <Router history={history}>
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider
-        locale="en"
-        messages={{
-          'components.FilterOptions.FILTER_TYPES.$eq': 'is',
-          'components.FilterOptions.FILTER_TYPES.$ne': 'is not',
-          'components.FilterOptions.FILTER_TYPES.$contains': 'contains (case sensitive)',
-          'components.FilterOptions.FILTER_TYPES.$notContains': 'does not contain (case sensitive)',
-          'components.FilterOptions.FILTER_TYPES.$gt': 'is greater than',
-          'components.FilterOptions.FILTER_TYPES.$gte': 'is greater than or equal to',
-          'components.FilterOptions.FILTER_TYPES.$lt': 'is lower than',
-          'components.FilterOptions.FILTER_TYPES.$lte': 'is lower than or equal to',
-          'components.FilterOptions.FILTER_TYPES.$startsWith': 'starts with',
-          'components.FilterOptions.FILTER_TYPES.$endsWith': 'ends with',
-          'components.FilterOptions.FILTER_TYPES.$null': 'is null',
-          'components.FilterOptions.FILTER_TYPES.$notNull': 'is not null',
-        }}
-        defaultLocale="en"
-        textComponent="span"
-      >
-        <FilterListURLQuery filtersSchema={filtersSchema} />
-      </IntlProvider>
-    </ThemeProvider>
-  </Router>
-);
-
-describe('<FilterListURLQuery />', () => {
   it('renders and matches the snapshot', () => {
-    const history = createMemoryHistory();
     const filtersSchema = [
       {
         name: 'bool',
@@ -158,20 +93,14 @@ describe('<FilterListURLQuery />', () => {
       },
     };
 
-    act(() => {
-      history.push({
-        pathname: '/',
-        search: qs.stringify(search, { encode: false }),
-      });
+    const { getAllByRole } = render(<FilterListURLQuery filtersSchema={filtersSchema} />, {
+      initialEntries: [{ pathname: '/', search: qs.stringify(search, { encode: false }) }],
     });
 
-    const { container } = render(makeApp(history, filtersSchema));
-
-    expect(container).toMatchSnapshot();
+    expect(getAllByRole('button')).toHaveLength(13);
   });
 
   it('displays the label for a custom input providing options with custom values', () => {
-    const history = createMemoryHistory();
     const displayedFilters = [
       {
         name: 'action',
@@ -198,12 +127,11 @@ describe('<FilterListURLQuery />', () => {
         ],
       },
     };
-    history.push({
-      pathname: '/',
-      search: qs.stringify(search),
+
+    const { getByRole } = render(<FilterListURLQuery filtersSchema={displayedFilters} />, {
+      initialEntries: [{ pathname: '/', search: qs.stringify(search, { encode: false }) }],
     });
 
-    render(makeApp(history, displayedFilters));
-    expect(screen.getByRole('button', { name: /action is create entry/i })).toBeVisible();
+    expect(getByRole('button', { name: /create entry/i })).toBeVisible();
   });
 });

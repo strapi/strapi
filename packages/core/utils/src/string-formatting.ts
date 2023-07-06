@@ -2,7 +2,8 @@ import _, { kebabCase } from 'lodash';
 import { trimChars, trimCharsEnd, trimCharsStart } from 'lodash/fp';
 import slugify from '@sindresorhus/slugify';
 
-const nameToSlug = (name: string, options: slugify.Options = { separator: '-' }) => slugify(name, options);
+const nameToSlug = (name: string, options: slugify.Options = { separator: '-' }) =>
+  slugify(name, options);
 
 const nameToCollectionName = (name: string) => slugify(name, { separator: '_' });
 

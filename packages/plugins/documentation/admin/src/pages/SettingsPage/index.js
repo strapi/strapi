@@ -57,7 +57,15 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-            {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue, dirty }) => {
+          {({
+            handleSubmit,
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            setFieldValue,
+            dirty,
+          }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout

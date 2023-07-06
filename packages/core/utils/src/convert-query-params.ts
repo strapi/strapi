@@ -158,7 +158,6 @@ const convertSortQueryParams = (sortQuery: SortParams): OrderByQuery => {
     return convertNestedSortQueryParam(sortQuery);
   }
 
-
   throw new InvalidSortError();
 };
 
@@ -531,7 +530,7 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): Where
         // Sanitize each filter
         .map((filter) => convertAndSanitizeFilters(filter, schema))
         // Filter out empty filters
-        .filter((filter) => !isObject(filter) || !isEmpty(filter))
+        .filter((filter) => !isPlainObject(filter) || !isEmpty(filter))
     );
   }
 
