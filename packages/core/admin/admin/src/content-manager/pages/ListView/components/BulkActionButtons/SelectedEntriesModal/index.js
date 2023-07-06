@@ -8,7 +8,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Tbody,
   Tr,
   Td,
   IconButton,
@@ -146,45 +145,41 @@ const SelectedEntriesTableContent = () => {
         )}
       </Table.Head>
       <Table.LoadingBody />
-      <Tbody>
-        {!isLoading &&
-          rows.map((entry, index) => (
-            <Tr key={entry.id}>
-              <Body.CheckboxDataCell rowId={entry.id} index={index} />
+      <Table.Body>
+        {rows.map((entry, index) => (
+          <Tr key={entry.id}>
+            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+            <Td>
+              <Typography>{entry.id}</Typography>
+            </Td>
+            {shouldDisplayMainField && (
               <Td>
-                <Typography>{entry.id}</Typography>
+                <Typography>{entry[mainField]}</Typography>
               </Td>
-              {shouldDisplayMainField && (
-                <Td>
-                  <Typography>{entry[mainField]}</Typography>
-                </Td>
-              )}
-              <Td>
-                <EntryValidationText
-                  errors={entry.errors}
-                  isPublished={entry.publishedAt !== null}
-                />
-              </Td>
-              <Td>
-                <IconButton
-                  forwardedAs={Link}
-                  to={{
-                    pathname: `${pathname}/${entry.id}`,
-                    state: { from: pathname },
-                  }}
-                  label={formatMessage(
-                    { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                    { target: getItemLineText(index) }
-                  )}
-                  noBorder
-                  target="_blank"
-                >
-                  <Pencil />
-                </IconButton>
-              </Td>
-            </Tr>
-          ))}
-      </Tbody>
+            )}
+            <Td>
+              <EntryValidationText errors={entry.errors} isPublished={entry.publishedAt !== null} />
+            </Td>
+            <Td>
+              <IconButton
+                forwardedAs={Link}
+                to={{
+                  pathname: `${pathname}/${entry.id}`,
+                  state: { from: pathname },
+                }}
+                label={formatMessage(
+                  { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                  { target: getItemLineText(index) }
+                )}
+                noBorder
+                target="_blank"
+              >
+                <Pencil />
+              </IconButton>
+            </Td>
+          </Tr>
+        ))}
+      </Table.Body>
     </Table.Content>
   );
 };
@@ -203,8 +198,9 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
 
-  const selectedEntriesWithErrorsCount = rows
-    .filter(({ id, errors }) => selectedEntries.includes(id) && errors).length
+  const selectedEntriesWithErrorsCount = rows.filter(
+    ({ id, errors }) => selectedEntries.includes(id) && errors
+  ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
   return (
