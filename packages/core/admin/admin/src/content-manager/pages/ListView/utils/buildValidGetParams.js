@@ -1,5 +1,5 @@
-const createPluginsFilter = (obj) =>
-  Object.values(obj || {}).reduce((acc, current) => Object.assign(acc, current), {});
+const createPluginsFilter = (obj = {}) =>
+  Object.values(obj).reduce((acc, current) => Object.assign(acc, current), {});
 
 /**
  * @description
