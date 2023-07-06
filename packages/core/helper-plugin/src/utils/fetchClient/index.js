@@ -1,5 +1,6 @@
 import axios from 'axios';
 import auth from '../auth';
+import qs from 'qs';
 
 export const reqInterceptor = async (config) => {
   config.headers = {
@@ -36,6 +37,9 @@ export const fetchClient = () => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+    },
+    paramsSerializer: (params) => {
+      return qs.stringify(params, { encode: false });
     },
   });
   addInterceptors(instance);

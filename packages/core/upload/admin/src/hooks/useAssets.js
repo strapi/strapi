@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 import { useNotifyAT } from '@strapi/design-system';
 import { useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
@@ -39,14 +38,9 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   }
 
   const { data, error, isLoading } = useQuery(
-    [pluginId, 'assets', stringify(params)],
+    [pluginId, 'assets', params],
     async () => {
-      const { data } = await get(
-        `${dataRequestURL}${stringify(params, {
-          encode: false,
-          addQueryPrefix: true,
-        })}`
-      );
+      const { data } = await get(dataRequestURL, { params });
 
       return data;
     },

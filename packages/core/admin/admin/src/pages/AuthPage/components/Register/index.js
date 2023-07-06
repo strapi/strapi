@@ -64,7 +64,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
         try {
           const {
             data: { data },
-          } = await get(`/admin/registration-info?registrationToken=${registrationToken}`);
+          } = await get(`/admin/registration-info`, {
+            params: {
+              registrationToken,
+            },
+          });
 
           if (data) {
             setUserInfo(data);

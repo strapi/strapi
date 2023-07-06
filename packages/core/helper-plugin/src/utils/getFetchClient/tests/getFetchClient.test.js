@@ -12,6 +12,7 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
     expect(response).toHaveProperty('put');
     expect(response).toHaveProperty('del');
   });
+
   it('should contain the headers config values and the data when we try to reach an unknown API and the passed URL', async () => {
     const response = getFetchClient();
     try {
@@ -22,6 +23,7 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
       expect(url).toBe('/test');
     }
   });
+
   it('should contain the normalized URL when we try to reach an unknown API with an URL without prepending slash', async () => {
     const response = getFetchClient();
     try {
@@ -31,6 +33,7 @@ describe('HELPER-PLUGIN | utils | getFetchClient', () => {
       expect(url).toBe('/test');
     }
   });
+
   it('should contain the URL passed when we try to reach an unknown API with a full URL', async () => {
     const response = getFetchClient();
     try {

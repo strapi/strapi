@@ -55,7 +55,7 @@ import { ConfirmDialogDeleteAll } from './components/ConfirmDialogDeleteAll';
 import { FieldPicker } from './components/FieldPicker';
 import { TableRows } from './components/TableRows';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
-import { buildQueryString } from './utils';
+import { buildValidGetParams } from './utils';
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -101,7 +101,7 @@ function ListView({
   useFocusWhenNavigate();
 
   const [{ query }] = useQueryParams();
-  const params = buildQueryString(query);
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
@@ -137,7 +137,7 @@ function ListView({
           message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
         });
 
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({
@@ -160,7 +160,7 @@ function ListView({
           },
         });
 
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({
@@ -175,19 +175,17 @@ function ListView({
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
   const requestUrlRef = React.useRef('');
-
   /**
    * TODO: re-write all of this, it's a mess.
    */
   const fetchData = React.useCallback(
-    async (endPoint, source) => {
+    async (endPoint, options) => {
       getData();
 
       try {
-        const opts = source ? { cancelToken: source.token } : null;
         const {
           data: { results, pagination: paginationResult },
-        } = await fetchClient.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, options);
 
         notifyStatus(
           formatMessage(
@@ -234,12 +232,12 @@ function ListView({
   const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
-        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
           ids,
         });
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
+
         trackUsageRef.current('didBulkDeleteEntries');
       } catch (err) {
         toggleNotification({
@@ -248,16 +246,16 @@ function ListView({
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, formatAPIError, post]
+    [slug, toggleNotification, formatAPIError, post, fetchData, params]
   );
 
   const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
-        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        const requestUrl = getRequestUrl(`collection-types/${slug}`);
+        fetchData(requestUrl, { params });
 
         toggleNotification({
           type: 'success',
@@ -270,7 +268,7 @@ function ListView({
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatAPIError, del]
+    [slug, toggleNotification, formatAPIError, del, fetchData, params]
   );
 
   /**
@@ -342,10 +340,10 @@ function ListView({
     const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+    const requestUrl = getRequestUrl(`collection-types/${slug}`);
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
+      fetchData(requestUrl, { cancelToken: source.token, params });
     }
 
     return () => {
