@@ -55,14 +55,10 @@ export const ProvidersPage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
 
-  const updatePermissions = useMemo(() => {
-    return { update: PERMISSIONS.updateProviders };
-  }, []);
-
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateProviders });
 
   const {
     isLoading: isLoadingForData,
