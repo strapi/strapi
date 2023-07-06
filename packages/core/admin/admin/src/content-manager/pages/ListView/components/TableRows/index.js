@@ -1,6 +1,16 @@
 import React from 'react';
 
-import { BaseCheckbox, IconButton, Tbody, Td, Tr, Flex } from '@strapi/design-system';
+import {
+  BaseCheckbox,
+  IconButton,
+  Tbody,
+  Td,
+  Tr,
+  Flex,
+  lightTheme,
+  Status,
+  Typography,
+} from '@strapi/design-system';
 import { useTracking, useFetchClient, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { AxiosError } from 'axios';
@@ -8,15 +18,19 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link, useHistory } from 'react-router-dom';
 
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { getFullName } from '../../../../../utils';
 import { usePluginsQueryParams } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import CellContent from '../CellContent';
 
+const REVIEW_WORKFLOW_COLUMNS_CE = () => null;
+
 export const TableRows = ({
   canCreate,
   canDelete,
   contentType,
+  features: { hasDraftAndPublish, hasReviewWorkflows },
   headers,
   entriesToDelete,
   onClickDelete,
@@ -33,6 +47,18 @@ export const TableRows = ({
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const ReviewWorkflowsStage = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+        )
+      ).ReviewWorkflowsStageEE,
+    {
+      enabled: hasReviewWorkflows,
+    }
+  );
 
   /**
    *
@@ -74,6 +100,11 @@ export const TableRows = ({
     }
   };
 
+  // block rendering until the review stage component is fully loaded in EE
+  if (!ReviewWorkflowsStage) {
+    return null;
+  }
+
   /**
    * Table Cells with actions e.g edit, delete, duplicate have `stopPropagation`
    * to prevent the row from being selected.
@@ -113,20 +144,59 @@ export const TableRows = ({
                 />
               </Td>
             )}
+
             {headers.map(({ key, cellFormatter, name, ...rest }) => {
+              if (hasDraftAndPublish && name === 'publishedAt') {
+                return (
+                  <Td key={key}>
+                    <Status
+                      width="min-content"
+                      showBullet={false}
+                      variant={data.publishedAt ? 'success' : 'secondary'}
+                      size="S"
+                    >
+                      <Typography
+                        fontWeight="bold"
+                        textColor={`${data.publishedAt ? 'success' : 'secondary'}700`}
+                      >
+                        {formatMessage({
+                          id: getTrad(
+                            `containers.List.${data.publishedAt ? 'published' : 'draft'}`
+                          ),
+                          defaultMessage: data.publishedAt ? 'Published' : 'Draft',
+                        })}
+                      </Typography>
+                    </Status>
+                  </Td>
+                );
+              }
+
+              if (hasReviewWorkflows && name === 'strapi_reviewWorkflows_stage') {
+                return (
+                  <Td key={key}>
+                    {data.strapi_reviewWorkflows_stage ? (
+                      <ReviewWorkflowsStage
+                        color={
+                          data.strapi_reviewWorkflows_stage.color ?? lightTheme.colors.primary600
+                        }
+                        name={data.strapi_reviewWorkflows_stage.name}
+                      />
+                    ) : (
+                      <Typography textColor="neutral800">-</Typography>
+                    )}
+                  </Td>
+                );
+              }
+
               return (
                 <Td key={key}>
-                  {typeof cellFormatter === 'function' ? (
-                    cellFormatter(data, { key, name, ...rest })
-                  ) : (
-                    <CellContent
-                      content={data[name.split('.')[0]]}
-                      name={name}
-                      contentType={contentType}
-                      {...rest}
-                      rowId={data.id}
-                    />
-                  )}
+                  <CellContent
+                    content={data[name.split('.')[0]]}
+                    name={name}
+                    contentType={contentType}
+                    {...rest}
+                    rowId={data.id}
+                  />
                 </Td>
               );
             })}
@@ -212,6 +282,10 @@ TableRows.propTypes = {
     uid: PropTypes.string.isRequired,
   }).isRequired,
   entriesToDelete: PropTypes.array,
+  features: PropTypes.shape({
+    hasDraftAndPublish: PropTypes.bool.isRequired,
+    hasReviewWorkflows: PropTypes.bool.isRequired,
+  }).isRequired,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,
   onSelectRow: PropTypes.func,

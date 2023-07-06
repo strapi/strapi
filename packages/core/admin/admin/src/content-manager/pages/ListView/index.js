@@ -10,8 +10,6 @@ import {
   HeaderLayout,
   useNotifyAT,
   Flex,
-  Typography,
-  Status,
 } from '@strapi/design-system';
 import {
   NoPermissions,
@@ -33,7 +31,6 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
 import axios from 'axios';
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/DynamicTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -45,6 +42,7 @@ import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
@@ -66,6 +64,8 @@ const ConfigureLayoutBox = styled(Box)`
     }
   }
 `;
+
+const REVIEW_WORKFLOW_COLUMNS_CE = null;
 
 function ListView({
   canCreate,
@@ -107,8 +107,24 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
+
+  const hasDraftAndPublish = options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
+
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+        )
+      ).REVIEW_WORKFLOW_COLUMNS_EE,
+    {
+      enabled: !!options?.reviewWorkflows,
+    }
+  );
+
   const { post, del } = fetchClient;
 
   const bulkPublishMutation = useMutation(
@@ -388,24 +404,8 @@ function ListView({
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    // this should not exist. Ideally we would use registerHook() similar to what has been done
-    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
-    // a future iteration we need to find a better pattern.
-
-    // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
-
-    if (reviewWorkflowColumn) {
-      formattedHeaders.push(reviewWorkflowColumn);
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -419,25 +419,29 @@ function ListView({
           searchable: false,
           sortable: true,
         },
-        // eslint-disable-next-line react/no-unstable-nested-components
-        cellFormatter(cellData) {
-          const isPublished = cellData.publishedAt;
-          const variant = isPublished ? 'success' : 'secondary';
+      });
+    }
 
-          return (
-            <Status width="min-content" showBullet={false} variant={variant} size="S">
-              <Typography fontWeight="bold" textColor={`${variant}700`}>
-                {formatMessage({
-                  id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-                  defaultMessage: isPublished ? 'Published' : 'Draft',
-                })}
-              </Typography>
-            </Status>
-          );
-        },
-      },
-    ];
-  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
+    if (reviewWorkflowColumns) {
+      // Make sure the column header label is translated
+      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
+        reviewWorkflowColumns.metadatas.label = formatMessage(
+          reviewWorkflowColumns.metadatas.label
+        );
+      }
+
+      formattedHeaders.push(reviewWorkflowColumns);
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    reviewWorkflowColumns,
+    hasDraftAndPublish,
+    formatMessage,
+  ]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -580,6 +584,10 @@ function ListView({
                 canCreate={canCreate}
                 canDelete={canDelete}
                 contentType={contentType}
+                features={{
+                  hasDraftAndPublish,
+                  hasReviewWorkflows,
+                }}
                 headers={tableHeaders}
                 rows={data}
                 withBulkActions
