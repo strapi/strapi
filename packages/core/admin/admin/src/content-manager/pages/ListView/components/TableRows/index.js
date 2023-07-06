@@ -7,7 +7,6 @@ import {
   Td,
   Tr,
   Flex,
-  lightTheme,
   Status,
   Typography,
 } from '@strapi/design-system';
@@ -176,9 +175,7 @@ export const TableRows = ({
                   <Td key={key}>
                     {data.strapi_reviewWorkflows_stage ? (
                       <ReviewWorkflowsStage
-                        color={
-                          data.strapi_reviewWorkflows_stage.color ?? lightTheme.colors.primary600
-                        }
+                        color={data.strapi_reviewWorkflows_stage.color}
                         name={data.strapi_reviewWorkflows_stage.name}
                       />
                     ) : (
