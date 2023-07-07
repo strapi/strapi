@@ -129,6 +129,12 @@ module.exports = {
 
     ctx.body = {
       data: await mapAsync(workflows, sanitizeOutput),
+      pagination: {
+        page: 1,
+        pageCount: 1,
+        pageSize: workflows.length,
+        total: workflows.length,
+      },
     };
   },
   /**
