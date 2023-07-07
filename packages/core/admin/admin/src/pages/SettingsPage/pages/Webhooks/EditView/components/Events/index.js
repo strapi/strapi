@@ -54,8 +54,10 @@ const StyledTable = styled(Table)`
   }
 
   tbody tr td:first-child {
-    // Add padding to the start of the first column to avoid the checkbox appearing
-    // too close to the edge of the table
+    /**
+     * Add padding to the start of the first column to avoid the checkbox appearing
+     * too close to the edge of the table
+     */
     padding-inline-start: ${({ theme }) => theme.spaces[2]};
   }
 `;

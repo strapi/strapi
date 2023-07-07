@@ -197,13 +197,13 @@ const ProfilePage = () => {
         validationSchema={schema}
         enableReinitialize
       >
-        {({ errors, values, handleChange, isSubmitting }) => {
+        {({ errors, values, handleChange, isSubmitting, dirty }) => {
           return (
             <Form>
               <HeaderLayout
                 title={data.username || getFullName(data.firstname, data.lastname)}
                 primaryAction={
-                  <Button startIcon={<Check />} loading={isSubmitting} type="submit">
+                  <Button startIcon={<Check />} loading={isSubmitting} type="submit" disabled={!dirty}>
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
                 }

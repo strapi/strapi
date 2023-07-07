@@ -31,10 +31,11 @@ import {
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { useRolesList } from '../../../../../hooks';
-import adminPermissions from '../../../../../permissions';
+import { selectAdminPermissions } from '../../../../App/selectors';
 
 import EmptyRole from './components/EmptyRole';
 import BaseRoleRow from './components/RoleRow';
@@ -43,10 +44,11 @@ import reducer, { initialState } from './reducer';
 const useSortedRoles = () => {
   useFocusWhenNavigate();
   const { locale } = useIntl();
+  const permissions = useSelector(selectAdminPermissions);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useRBAC(adminPermissions.settings.roles);
+  } = useRBAC(permissions.settings.roles);
 
   const { getData, roles, isLoading } = useRolesList(false);
   const [{ query }] = useQueryParams();

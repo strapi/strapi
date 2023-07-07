@@ -14,14 +14,15 @@ import * as utils from '../../../utils';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { assertValidStrapi } from '../../../utils/providers';
 
-export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
+export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
-  autoDestroy?: boolean;
-  restore?: restore.IRestoreOptions;
-  strategy: 'restore' | 'merge';
+  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+
+  autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
+  restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
+  strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {

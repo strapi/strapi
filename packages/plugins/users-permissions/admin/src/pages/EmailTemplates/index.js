@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
@@ -14,7 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import pluginPermissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 
 import EmailForm from './components/EmailForm';
@@ -22,7 +22,7 @@ import EmailTable from './components/EmailTable';
 import { fetchData, putEmailTemplate } from './utils/api';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
   </CheckPagePermissions>
 );
@@ -40,14 +40,10 @@ const EmailTemplatesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
 
-  const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateEmailTemplates };
-  }, []);
-
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateEmailTemplates });
 
   const { status: isLoadingData, data } = useQuery('email-templates', () => fetchData(), {
     onSuccess() {

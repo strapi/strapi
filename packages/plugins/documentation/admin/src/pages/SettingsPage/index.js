@@ -26,7 +26,7 @@ import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
 import FieldActionWrapper from '../../components/FieldActionWrapper';
-import permissions from '../../permissions';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 import schema from '../utils/schema';
 import useReactQuery from '../utils/useReactQuery';
@@ -57,7 +57,15 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
+          {({
+            handleSubmit,
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            setFieldValue,
+            dirty,
+          }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -70,8 +78,8 @@ const SettingsPage = () => {
                     defaultMessage: 'Configure the documentation plugin',
                   })}
                   primaryAction={
-                    <CheckPermissions permissions={permissions.update}>
-                      <Button type="submit" startIcon={<Check />}>
+                    <CheckPermissions permissions={PERMISSIONS.update}>
+                      <Button type="submit" startIcon={<Check />} disabled={!dirty}>
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.Button.save'),
                           defaultMessage: 'Save',

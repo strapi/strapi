@@ -1,5 +1,3 @@
-import adminPermissions from '../../../../admin/src/permissions';
-
 export const LINKS_EE = {
   global: [
     ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
@@ -8,7 +6,6 @@ export const LINKS_EE = {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/single-sign-on',
             id: 'sso',
-            permissions: adminPermissions.settings.sso.main,
           },
         ]
       : []),
@@ -22,7 +19,6 @@ export const LINKS_EE = {
             },
             to: '/settings/review-workflows',
             id: 'review-workflows',
-            permissions: adminPermissions.settings['review-workflows'].main,
           },
         ]
       : []),
@@ -35,7 +31,6 @@ export const LINKS_EE = {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/audit-logs?pageSize=50&page=1&sort=date:DESC',
             id: 'auditLogs',
-            permissions: adminPermissions.settings.auditLogs.main,
           },
         ]
       : []),

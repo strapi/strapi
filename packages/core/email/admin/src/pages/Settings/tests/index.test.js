@@ -38,7 +38,7 @@ describe('Email | Pages | Settings', () => {
 
   afterAll(() => {
     server.close();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot', async () => {
@@ -96,7 +96,6 @@ describe('Email | Pages | Settings', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
-        line-height: 0;
         color: #ffffff;
       }
 

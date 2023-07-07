@@ -46,6 +46,11 @@ export interface Strapi {
   readonly config: any;
 
   /**
+   * Getter for the Strapi admin container
+   */
+  readonly admin: any;
+
+  /**
    * Getter for the Strapi auth container
    */
   readonly auth: any;

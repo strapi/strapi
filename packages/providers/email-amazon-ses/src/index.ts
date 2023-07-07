@@ -1,5 +1,4 @@
 import nodeSES from 'node-ses';
-import utils from '@strapi/utils';
 
 interface Settings {
   defaultFrom: string;
@@ -35,17 +34,17 @@ export = {
 
           const msg: nodeSES.sendEmailOptions = {
             from: from || settings.defaultFrom,
+            subject,
+            message: html,
             to,
             cc,
             bcc,
             replyTo: replyTo || settings.defaultReplyTo,
-            subject,
             altText: text,
-            message: html,
             ...rest,
           };
 
-          client.sendEmail(utils.removeUndefined(msg), (err) => {
+          client.sendEmail(msg, (err) => {
             if (err) {
               if (err.Message) {
                 // eslint-disable-next-line prefer-promise-reject-errors
