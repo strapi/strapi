@@ -43,7 +43,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
-  const [{ rawQuery }] = useQueryParams();
+  const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
@@ -244,13 +244,15 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
        */
       const endPoint =
         typeof origin === 'string'
-          ? `${getRequestUrl(`collection-types/${slug}/clone/${origin}`)}${rawQuery}`
-          : `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
+          ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
+          : getRequestUrl(`collection-types/${slug}`);
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await post(endPoint, body);
+        const { data } = await post(endPoint, body, {
+          params: query,
+        });
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -286,11 +288,12 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       replace,
       slug,
       dispatch,
-      rawQuery,
+      query,
       toggleNotification,
       setCurrentStep,
       queryClient,
       post,
+      rawQuery,
     ]
   );
 

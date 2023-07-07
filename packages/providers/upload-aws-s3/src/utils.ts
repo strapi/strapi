@@ -5,14 +5,13 @@ interface BucketInfo {
   err?: string;
 }
 
-export function isUrlFromBucket(fileUrl: string, bucketName: string, bucketBaseUrl = ''): boolean {
+export function isUrlFromBucket(fileUrl: string, bucketName: string, baseUrl = ''): boolean {
   const url = new URL(fileUrl);
 
   // Check if the file URL is using a base URL (e.g. a CDN).
-  // In this case, check if the file URL starts with the same base URL as the bucket URL.
-  if (bucketBaseUrl) {
-    const baseUrl = new URL(bucketBaseUrl);
-    return url.href.startsWith(baseUrl.href);
+  // In this case do not sign the URL.
+  if (baseUrl) {
+    return false;
   }
 
   const { bucket } = getBucketFromAwsUrl(fileUrl);

@@ -54,14 +54,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c47 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -388,10 +380,72 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c48 {
+.c47 {
   height: 2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
+}
+
+.c47 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c47[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c47[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c47[aria-disabled='true'] svg > g,.c47[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c47[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c47[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c47[aria-disabled='true']:active svg > g,.c47[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c47:hover {
+  background-color: #ffffff;
+}
+
+.c47:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c47:active .c5 {
+  color: #4945ff;
+}
+
+.c47:active svg > g,
+.c47:active svg path {
+  fill: #4945ff;
+}
+
+.c47 .c5 {
+  color: #271fe0;
+}
+
+.c47 svg > g,
+.c47 svg path {
+  fill: #271fe0;
+}
+
+.c48 {
+  height: 2rem;
 }
 
 .c48 svg {
@@ -426,79 +480,17 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c48:hover {
-  background-color: #ffffff;
-}
-
-.c48:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c48:active .c5 {
-  color: #4945ff;
-}
-
-.c48:active svg > g,
-.c48:active svg path {
-  fill: #4945ff;
-}
-
-.c48 .c5 {
-  color: #271fe0;
-}
-
-.c48 svg > g,
-.c48 svg path {
-  fill: #271fe0;
-}
-
-.c49 {
-  height: 2rem;
-}
-
-.c49 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c49[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c49[aria-disabled='true'] .c5 {
-  color: #666687;
-}
-
-.c49[aria-disabled='true'] svg > g,.c49[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c49[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c49[aria-disabled='true']:active .c5 {
-  color: #666687;
-}
-
-.c49[aria-disabled='true']:active svg > g,.c49[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c49:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c49:active {
+.c48:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c49 svg > g,
-.c49 svg path {
+.c48 svg > g,
+.c48 svg path {
   fill: #ffffff;
 }
 
@@ -1305,7 +1297,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                     type="button"
                   >
                     <span
-                      class="c5 c47"
+                      class="c5 c6"
                     >
                       Cancel
                     </span>
@@ -1316,11 +1308,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                 >
                   <button
                     aria-disabled="false"
-                    class="c45 c44 c16 c48"
+                    class="c45 c44 c16 c47"
                     type="button"
                   >
                     <span
-                      class="c5 c47"
+                      class="c5 c6"
                     >
                       Replace media
                     </span>
@@ -1338,11 +1330,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                   </div>
                   <button
                     aria-disabled="false"
-                    class="c45 c44 c16 c49"
+                    class="c45 c44 c16 c48"
                     type="button"
                   >
                     <span
-                      class="c5 c47"
+                      class="c5 c6"
                     >
                       Finish
                     </span>

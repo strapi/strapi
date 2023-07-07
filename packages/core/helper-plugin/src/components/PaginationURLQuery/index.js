@@ -24,206 +24,101 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import useQueryParams from '../../hooks/useQueryParams';
 
-const PaginationURLQuery = ({ pagination: { pageCount } }) => {
+export const PaginationURLQuery = ({ pagination: { pageCount }, boundaryCount, siblingCount }) => {
   const [{ query }] = useQueryParams();
   const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const makeSearch = (page) => stringify({ ...query, page }, { encode: false });
+
   const nextSearch = makeSearch(activePage + (pageCount > 1 ? 1 : 0));
 
   const previousSearch = makeSearch(activePage - 1);
 
-  const firstLinks = [
-    <PageLink as={NavLink} key={1} number={1} to={`${pathname}?${makeSearch(1)}`}>
-      {formatMessage(
-        { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
-        { page: 1 }
-      )}
-    </PageLink>,
+  const range = (start, end) => {
+    const length = end - start + 1;
+
+    return Array.from({ length }, (_, i) => start + i);
+  };
+
+  const startPages = range(1, Math.min(boundaryCount, pageCount));
+  const endPages = range(Math.max(pageCount - boundaryCount + 1, boundaryCount + 1), pageCount);
+
+  const siblingsStart = Math.max(
+    Math.min(
+      // Natural start
+      activePage - siblingCount,
+      // Lower boundary when page is high
+      pageCount - boundaryCount - siblingCount * 2 - 1
+    ),
+    // Greater than startPages
+    boundaryCount + 2
+  );
+
+  const siblingsEnd = Math.min(
+    Math.max(
+      // Natural end
+      activePage + siblingCount,
+      // Upper boundary when page is low
+      boundaryCount + siblingCount * 2 + 2
+    ),
+    // Less than endPages
+    endPages.length > 0 ? endPages[0] - 2 : pageCount - 1
+  );
+
+  const items = [
+    ...startPages,
+
+    // Start ellipsis
+    // eslint-disable-next-line no-nested-ternary
+    ...(siblingsStart > boundaryCount + 2
+      ? ['start-ellipsis']
+      : boundaryCount + 1 < pageCount - boundaryCount
+      ? [boundaryCount + 1]
+      : []),
+
+    // Sibling pages
+    ...range(siblingsStart, siblingsEnd),
+
+    // End ellipsis
+    // eslint-disable-next-line no-nested-ternary
+    ...(siblingsEnd < pageCount - boundaryCount - 1
+      ? ['end-ellipsis']
+      : pageCount - boundaryCount > boundaryCount
+      ? [pageCount - boundaryCount]
+      : []),
+
+    ...endPages,
   ];
-
-  if (pageCount <= 4) {
-    const links = Array.from({ length: pageCount })
-      .map((_, i) => i + 1)
-      .map((number) => {
-        return (
-          <PageLink
-            as={NavLink}
-            key={number}
-            number={number}
-            to={`${pathname}?${makeSearch(number)}`}
-          >
-            {formatMessage(
-              { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
-              { page: number }
-            )}
-          </PageLink>
-        );
-      });
-
-    return (
-      <Pagination activePage={activePage} pageCount={pageCount}>
-        <PreviousLink as={NavLink} to={`${pathname}?${previousSearch}`}>
-          {formatMessage({
-            id: 'components.pagination.go-to-previous',
-            defaultMessage: 'Go to previous page',
-          })}
-        </PreviousLink>
-        {links}
-        <NextLink as={NavLink} to={`${pathname}?${nextSearch}`}>
-          {formatMessage({
-            id: 'components.pagination.go-to-next',
-            defaultMessage: 'Go to next page',
-          })}
-        </NextLink>
-      </Pagination>
-    );
-  }
-
-  let firstLinksToCreate = [];
-  let lastLinks = [];
-  let lastLinksToCreate = [];
-  const middleLinks = [];
-
-  if (pageCount > 1) {
-    lastLinks.push(
-      <PageLink
-        as={NavLink}
-        key={pageCount}
-        number={pageCount}
-        to={`${pathname}?${makeSearch(pageCount)}`}
-      >
-        {formatMessage(
-          { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
-          { page: pageCount }
-        )}
-      </PageLink>
-    );
-  }
-
-  if (activePage === 1 && pageCount >= 3) {
-    firstLinksToCreate = [2];
-  }
-
-  if (activePage === 2 && pageCount >= 3) {
-    if (pageCount === 5) {
-      firstLinksToCreate = [2, 3, 4];
-    } else if (pageCount === 3) {
-      firstLinksToCreate = [2];
-    } else {
-      firstLinksToCreate = [2, 3];
-    }
-  }
-
-  if (activePage === 4 && pageCount >= 3) {
-    firstLinksToCreate = [2];
-  }
-
-  if (activePage === pageCount && pageCount >= 3) {
-    lastLinksToCreate = [pageCount - 1];
-  }
-
-  if (activePage === pageCount - 2 && pageCount > 3) {
-    lastLinksToCreate = [activePage + 1, activePage, activePage - 1];
-  }
-
-  if (activePage === pageCount - 3 && pageCount > 3 && activePage > 5) {
-    lastLinksToCreate = [activePage + 2, activePage + 1, activePage, activePage - 1];
-  }
-
-  if (activePage === pageCount - 1 && pageCount > 3) {
-    lastLinksToCreate = [activePage, activePage - 1];
-  }
-
-  lastLinksToCreate.forEach((number) => {
-    lastLinks.unshift(
-      <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
-        Go to page {number}
-      </PageLink>
-    );
-  });
-
-  firstLinksToCreate.forEach((number) => {
-    firstLinks.push(
-      <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
-        {formatMessage(
-          { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
-          { page: number }
-        )}
-      </PageLink>
-    );
-  });
-
-  if (
-    ![1, 2].includes(activePage) &&
-    activePage <= pageCount - 3 &&
-    firstLinks.length + lastLinks.length < 6
-  ) {
-    const middleLinksToCreate = [activePage - 1, activePage, activePage + 1];
-
-    middleLinksToCreate.forEach((number) => {
-      middleLinks.push(
-        <PageLink
-          as={NavLink}
-          key={number}
-          number={number}
-          to={`${pathname}?${makeSearch(number)}`}
-        >
-          {formatMessage(
-            { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
-            { page: number }
-          )}
-        </PageLink>
-      );
-    });
-  }
-
-  const shouldShowDotsAfterFirstLink =
-    pageCount > 5 || (pageCount === 5 && (activePage === 1 || activePage === 5));
-  const shouldShowMiddleDots = middleLinks.length > 2 && activePage > 4 && pageCount > 5;
-
-  const beforeDotsLinksLength = shouldShowMiddleDots
-    ? pageCount - activePage - 1
-    : pageCount - firstLinks.length - lastLinks.length;
-  const afterDotsLength = shouldShowMiddleDots
-    ? pageCount - firstLinks.length - lastLinks.length
-    : pageCount - activePage - 1;
 
   return (
     <Pagination activePage={activePage} pageCount={pageCount}>
-      <PreviousLink as={NavLink} to={`${pathname}?${previousSearch}`}>
+      <PreviousLink as={NavLink} to={{ pathname, search: previousSearch }}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
           defaultMessage: 'Go to previous page',
         })}
       </PreviousLink>
-      {firstLinks}
-      {shouldShowMiddleDots && (
-        <Dots>
-          {formatMessage(
-            {
-              id: 'components.pagination.remaining-links',
-              defaultMessage: 'And {number} other links',
-            },
-            { number: beforeDotsLinksLength }
-          )}
-        </Dots>
-      )}
-      {middleLinks}
-      {shouldShowDotsAfterFirstLink && (
-        <Dots>
-          {formatMessage(
-            {
-              id: 'components.pagination.remaining-links',
-              defaultMessage: 'And {number} other links',
-            },
-            { number: afterDotsLength }
-          )}
-        </Dots>
-      )}
-      {lastLinks}
-      <NextLink as={NavLink} to={`${pathname}?${nextSearch}`}>
+      {items.map((item) => {
+        if (typeof item === 'number') {
+          return (
+            <PageLink
+              as={NavLink}
+              key={item}
+              number={item}
+              to={{ pathname, search: makeSearch(item) }}
+            >
+              {formatMessage(
+                { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+                { page: item }
+              )}
+            </PageLink>
+          );
+        }
+
+        return <Dots key={item} />;
+      })}
+      <NextLink as={NavLink} to={{ pathname, search: nextSearch }}>
         {formatMessage({
           id: 'components.pagination.go-to-next',
           defaultMessage: 'Go to next page',
@@ -233,8 +128,21 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   );
 };
 
-PaginationURLQuery.propTypes = {
-  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
+PaginationURLQuery.defaultProps = {
+  boundaryCount: 1,
+  siblingCount: 1,
 };
 
-export default PaginationURLQuery;
+PaginationURLQuery.propTypes = {
+  /**
+   * Number of always visible pages at the beginning and end.
+   * @default 1
+   */
+  boundaryCount: PropTypes.number,
+  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
+  /**
+   * Number of always visible pages before and after the current page.
+   * @default 1
+   */
+  siblingCount: PropTypes.number,
+};

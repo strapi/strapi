@@ -1,5 +1,6 @@
 'use strict';
 
+const { differenceInHours, parseISO } = require('date-fns');
 const {
   errors: { UnauthorizedError, ForbiddenError },
 } = require('@strapi/utils');
@@ -52,11 +53,14 @@ const authenticate = async (ctx) => {
     }
   }
 
-  // Update token metadata
-  await strapi.query('admin::transfer-token').update({
-    where: { id: transferToken.id },
-    data: { lastUsedAt: currentDate },
-  });
+  // Update token metadata if the token has not been used in the last hour
+  const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(transferToken.lastUsedAt));
+  if (hoursSinceLastUsed >= 1) {
+    await strapi.query('admin::api-token').update({
+      where: { id: transferToken.id },
+      data: { lastUsedAt: currentDate },
+    });
+  }
 
   // Generate an ability based on the token permissions
   const ability = await getService('transfer').permission.engine.generateAbility(

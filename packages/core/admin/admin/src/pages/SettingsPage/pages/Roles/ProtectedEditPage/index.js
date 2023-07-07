@@ -9,6 +9,7 @@ import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
   const permissions = useSelector(selectAdminPermissions);
+
   const {
     isLoading,
     allowedActions: { canRead, canUpdate },

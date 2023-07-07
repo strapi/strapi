@@ -57,7 +57,15 @@ const SettingsPage = () => {
           onSubmit={handleUpdateSettingsSubmit}
           validationSchema={schema}
         >
-          {({ handleSubmit, values, handleChange, errors, setFieldTouched, setFieldValue }) => {
+          {({
+            handleSubmit,
+            values,
+            handleChange,
+            errors,
+            setFieldTouched,
+            setFieldValue,
+            dirty,
+          }) => {
             return (
               <Form noValidate onSubmit={handleSubmit}>
                 <HeaderLayout
@@ -71,7 +79,7 @@ const SettingsPage = () => {
                   })}
                   primaryAction={
                     <CheckPermissions permissions={PERMISSIONS.update}>
-                      <Button type="submit" startIcon={<Check />}>
+                      <Button type="submit" startIcon={<Check />} disabled={!dirty}>
                         {formatMessage({
                           id: getTrad('pages.SettingsPage.Button.save'),
                           defaultMessage: 'Save',

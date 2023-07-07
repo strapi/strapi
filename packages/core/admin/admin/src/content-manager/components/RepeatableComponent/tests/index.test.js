@@ -62,7 +62,7 @@ jest.mock('../../../hooks', () => ({
 
 describe('RepeatableComponents', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {
