@@ -181,10 +181,10 @@ export const TableRows = ({
               if (hasReviewWorkflows && name === 'strapi_reviewWorkflows_stage') {
                 return (
                   <Td key={key}>
-                    {data.strapi_reviewWorkflows_stage ? (
+                    {data.strapi_stage ? (
                       <ReviewWorkflowsStage
-                        color={data.strapi_reviewWorkflows_stage.color}
-                        name={data.strapi_reviewWorkflows_stage.name}
+                        color={data.strapi_stage.color}
+                        name={data.strapi_stage.name}
                       />
                     ) : (
                       <Typography textColor="neutral800">-</Typography>
