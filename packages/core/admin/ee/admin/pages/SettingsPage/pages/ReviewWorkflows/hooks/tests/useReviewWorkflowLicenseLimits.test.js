@@ -24,10 +24,6 @@ jest.mock('../../../../../../hooks', () => ({
           },
         ],
       },
-
-      meta: {
-        workflowCount: 2,
-      },
     },
   })),
 }));
@@ -43,10 +39,6 @@ describe('useReviewWorkflowLicenseLimits', () => {
     expect(result.current.limits).toStrictEqual({
       workflows: 10,
       stagesPerWorkflow: 10,
-    });
-
-    expect(result.current.meta).toStrictEqual({
-      workflowCount: 2,
     });
   });
 });
