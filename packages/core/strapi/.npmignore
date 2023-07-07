@@ -98,5 +98,3 @@ __tests__
 jest.config.js
 testApp
 coverage
-
-!**/lib/commands/actions/build

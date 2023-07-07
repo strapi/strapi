@@ -1,26 +1,26 @@
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
-import { QueryClientProvider, QueryClient } from 'react-query';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useNotification } from '@strapi/helper-plugin';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { useNotification } from '@strapi/helper-plugin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
-import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import ReviewWorkflowsPage from '..';
+import configureStore from '../../../../../../../admin/src/core/store/configureStore';
 import { reducer } from '../reducer';
+
+const notificationMock = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn().mockReturnValue(jest.fn()),
-  useTracking: jest.fn().mockReturnValue({ trackUsage: jest.fn() }),
-  // eslint-disable-next-line react/prop-types
-  CheckPagePermissions({ children }) {
-    return children;
-  },
+  useNotification: jest.fn(() => notificationMock),
 }));
 
 let SHOULD_ERROR = false;
@@ -53,33 +53,32 @@ const server = setupServer(
   })
 );
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const ComponentFixture = () => {
-  const store = configureStore([], [reducer]);
-
-  return (
-    <QueryClientProvider client={client}>
-      <Provider store={store}>
-        <IntlProvider locale="en" messages={{}}>
-          <ThemeProvider theme={lightTheme}>
-            <ReviewWorkflowsPage />
-          </ThemeProvider>
-        </IntlProvider>
-      </Provider>
-    </QueryClientProvider>
-  );
-};
-
 const setup = (props) => {
   return {
-    ...render(<ComponentFixture {...props} />),
+    ...render(<ReviewWorkflowsPage {...props} />, {
+      wrapper({ children }) {
+        const store = configureStore([], [reducer]);
+        const client = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
+          },
+        });
+
+        return (
+          <DndProvider backend={HTML5Backend}>
+            <QueryClientProvider client={client}>
+              <Provider store={store}>
+                <IntlProvider locale="en" messages={{}}>
+                  <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+                </IntlProvider>
+              </Provider>
+            </QueryClientProvider>
+          </DndProvider>
+        );
+      },
+    }),
     user: userEvent.setup(),
   };
 };
@@ -95,7 +94,6 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('handle initial loading state', () => {
@@ -105,14 +103,10 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
     expect(getByText('Workflow is loading')).toBeInTheDocument();
   });
 
-  test('loading state is not present', () => {
-    const { queryByText } = setup();
-
-    expect(queryByText('Workflow is loading')).not.toBeInTheDocument();
-  });
-
   test('display stages', async () => {
-    const { getByText } = setup();
+    const { getByText, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await waitFor(() => expect(getByText('1 stage')).toBeInTheDocument());
     expect(getByText('stage-1')).toBeInTheDocument();
@@ -128,7 +122,9 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Save button is enabled after a stage has been added', async () => {
-    const { user, getByText, getByRole } = setup();
+    const { user, getByText, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -143,8 +139,9 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
   });
 
   test('Successful Stage update', async () => {
-    const toggleNotification = useNotification();
-    const { user, getByRole } = setup();
+    const { user, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -152,24 +149,27 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
       })
     );
 
-    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
-      target: { value: 'stage-2' },
-    });
+    await user.type(getByRole('textbox', { name: /stage name/i }), 'stage-2');
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
-    });
+    /**
+     * @note using `user.click` does not fire the form onSubmit event.
+     */
+    fireEvent.click(getByRole('button', { name: /save/i }));
 
-    expect(toggleNotification).toBeCalledWith({
-      type: 'success',
-      message: expect.any(Object),
-    });
+    await waitFor(() =>
+      expect(notificationMock).toBeCalledWith({
+        type: 'success',
+        message: expect.any(Object),
+      })
+    );
   });
 
   test('Stage update with error', async () => {
     SHOULD_ERROR = true;
     const toggleNotification = useNotification();
-    const { user, getByRole } = setup();
+    const { user, getByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -177,28 +177,30 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
       })
     );
 
-    fireEvent.change(getByRole('textbox', { name: /stage name/i }), {
-      target: { value: 'stage-2' },
-    });
+    await user.type(getByRole('textbox', { name: /stage name/i }), 'stage-2');
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
-    });
+    fireEvent.click(getByRole('button', { name: /save/i }));
 
-    expect(toggleNotification).toBeCalledWith({
-      type: 'warning',
-      message: expect.any(String),
-    });
+    await waitFor(() =>
+      expect(toggleNotification).toBeCalledWith({
+        type: 'warning',
+        message: expect.any(String),
+      })
+    );
   });
 
-  test('Does not show a delete button if only stage is left', () => {
-    const { queryByRole } = setup();
+  test('Does not show a delete button if only stage is left', async () => {
+    const { queryByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     expect(queryByRole('button', { name: /delete stage/i })).not.toBeInTheDocument();
   });
 
   test('Show confirmation dialog when a stage was deleted', async () => {
-    const { user, getByRole, getAllByRole } = setup();
+    const { user, getByRole, getAllByRole, queryByText } = setup();
+
+    await waitFor(() => expect(queryByText('Workflow is loading')).not.toBeInTheDocument());
 
     await user.click(
       getByRole('button', {
@@ -212,10 +214,10 @@ describe('Admin | Settings | Review Workflow | ReviewWorkflowsPage', () => {
 
     await user.click(deleteButtons[0]);
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /save/i }));
-    });
+    fireEvent.click(getByRole('button', { name: /save/i }));
 
-    expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument();
+    await waitFor(() =>
+      expect(getByRole('heading', { name: /confirmation/i })).toBeInTheDocument()
+    );
   });
 });

@@ -1,7 +1,9 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import ContentBox from '../index';
 
 const App = (
@@ -22,6 +24,19 @@ describe('ContentBox', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        font-size: 0.75rem;
+        line-height: 1.33;
+        font-weight: 500;
+        color: #32324d;
+      }
+
+      .c7 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
       .c0 {
         background: #ffffff;
         padding: 24px;
@@ -61,19 +76,6 @@ describe('ContentBox', () => {
         -ms-flex-direction: column;
         flex-direction: column;
         gap: 4px;
-      }
-
-      .c5 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 500;
-        color: #32324d;
-      }
-
-      .c7 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
       }
 
       .c3 {

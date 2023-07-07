@@ -1,5 +1,5 @@
-import { useIntl } from 'react-intl';
 import { AxiosError } from 'axios';
+import { useIntl } from 'react-intl';
 
 import { formatAPIError } from './utils/formatAPIError';
 import { formatAxiosError } from './utils/formatAxiosError';
@@ -8,7 +8,7 @@ import { formatAxiosError } from './utils/formatAxiosError';
  * Hook that exports an error message formatting function.
  *
  * @export
- * @param {function=} - Error message prefix function (usually getTrad())
+ * @param {function} - Error message prefix function (usually getTrad())
  * @return {{ formatAPIError }} - Object containing an formatting function
  */
 

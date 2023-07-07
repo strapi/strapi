@@ -106,12 +106,29 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
   cluster.fork();
 };
 
-const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) => {
-  const strapiInstance = strapi({
+const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject }) => {
+  const strapiInstance = await strapi({
     distDir,
     autoReload: true,
     serveAdminPanel: !watchAdmin,
-  });
+  }).load();
+
+  /**
+   * TypeScript automatic type generation upon dev server restart
+   * Its implementation, configuration and behavior can change in future releases
+   * @experimental
+   */
+  const shouldGenerateTypeScriptTypes = strapiInstance.config.get('typescript.autogenerate', false);
+
+  if (shouldGenerateTypeScriptTypes) {
+    await tsUtils.generators.generate({
+      strapi: strapiInstance,
+      pwd: appDir,
+      rootDir: undefined,
+      logger: { silent: true, debug: false },
+      artifacts: { contentTypes: true, components: true },
+    });
+  }
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
   watchFileChanges({
@@ -179,6 +196,7 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
       '**/*.db*',
       '**/exports/**',
       '**/dist/**',
+      '**/*.d.ts',
       ...watchIgnoreFiles,
     ],
   });

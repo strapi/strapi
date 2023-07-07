@@ -1,14 +1,15 @@
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { TrackingProvider, useNotification, useQuery } from '@strapi/helper-plugin';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { Router } from 'react-router-dom';
-import { TrackingProvider, useQuery, useNotification } from '@strapi/helper-plugin';
 import { createMemoryHistory } from 'history';
-import * as yup from 'yup';
-import { IntlProvider } from 'react-intl';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
+import * as yup from 'yup';
 
 import Register from '..';
 
@@ -86,7 +87,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('Render form elements', () => {
@@ -118,21 +118,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     await user.type(getByLabelText(/^Password/i), ' secret ');
     await user.type(getByLabelText(/Confirm Password/i), ' secret ');
 
-    await act(async () => {
-      await user.click(getByRole('button', { name: /let's start/i }));
-    });
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
 
-    expect(spy).toHaveBeenCalledWith(
-      {
-        firstname: 'First name',
-        lastname: 'Last name',
-        email: 'test@strapi.io',
-        news: false,
-        registrationToken: undefined,
-        confirmPassword: ' secret ',
-        password: ' secret ',
-      },
-      expect.any(Object)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        {
+          firstname: 'First name',
+          lastname: 'Last name',
+          email: 'test@strapi.io',
+          news: false,
+          registrationToken: undefined,
+          confirmPassword: ' secret ',
+          password: ' secret ',
+        },
+        expect.any(Object)
+      )
     );
   });
 
@@ -150,7 +150,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     const query = useQuery();
     query.get.mockReturnValue('my-token');
 
-    const { getByLabelText, getByRole, user } = setup({ onSubmit: spy });
+    const { getByLabelText, getByRole } = setup({ onSubmit: spy });
 
     await waitFor(() => expect(getByLabelText(/Firstname/i)).toHaveValue('Token firstname'));
 
@@ -158,7 +158,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     expect(getByLabelText(/Email/i)).toHaveValue('test+register-token@strapi.io');
 
     await act(async () => {
-      await user.click(getByRole('button', { name: /let's start/i }));
+      fireEvent.click(getByRole('button', { name: /let's start/i }));
     });
 
     expect(spy).toHaveBeenCalledWith(
@@ -189,7 +189,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
   });
 
   it('Violates the yup schema and displays error messages', async () => {
-    const { getByText, getByRole, user } = setup({
+    const { getByText, getByRole } = setup({
       schema: yup.object().shape({
         firstname: yup.string().trim().required(),
         lastname: yup.string(),
@@ -200,7 +200,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     });
 
     await act(async () => {
-      await user.click(getByRole('button', { name: /let's start/i }));
+      fireEvent.click(getByRole('button', { name: /let's start/i }));
     });
 
     expect(getByText(/firstname is a required field/i)).toBeInTheDocument();

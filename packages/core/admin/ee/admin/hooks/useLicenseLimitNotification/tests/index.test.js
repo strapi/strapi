@@ -1,4 +1,5 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
+
 import useLicenseLimitNotification from '..';
 import useLicenseLimits from '../../useLicenseLimits';
 

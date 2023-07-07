@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+
 import { getTrad } from './utils';
 
 export const AssetType = {
@@ -172,4 +173,44 @@ export const sortOptions = [
 export const localStorageKeys = {
   modalView: `STRAPI_UPLOAD_MODAL_VIEW`,
   view: `STRAPI_UPLOAD_LIBRARY_VIEW`,
+};
+
+export const PERMISSIONS = {
+  // This permission regards the main component (App) and is used to tell
+  // If the plugin link should be displayed in the menu
+  // And also if the plugin is accessible. This use case is found when a user types the url of the
+  // plugin directly in the browser
+  main: [
+    { action: 'plugin::upload.read', subject: null },
+    {
+      action: 'plugin::upload.assets.create',
+      subject: null,
+    },
+    {
+      action: 'plugin::upload.assets.update',
+      subject: null,
+    },
+  ],
+  copyLink: [
+    {
+      action: 'plugin::upload.assets.copy-link',
+      subject: null,
+    },
+  ],
+  create: [
+    {
+      action: 'plugin::upload.assets.create',
+      subject: null,
+    },
+  ],
+  download: [
+    {
+      action: 'plugin::upload.assets.download',
+      subject: null,
+    },
+  ],
+  read: [{ action: 'plugin::upload.read', subject: null }],
+  configureView: [{ action: 'plugin::upload.configure-view', subject: null }],
+  settings: [{ action: 'plugin::upload.settings.read', subject: null }],
+  update: [{ action: 'plugin::upload.assets.update', subject: null, fields: null }],
 };

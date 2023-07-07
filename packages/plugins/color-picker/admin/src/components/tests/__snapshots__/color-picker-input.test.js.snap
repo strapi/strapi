@@ -1,6 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
+.c9 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c8 {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
 .c3 {
   background: #ffffff;
   padding: 8px;
@@ -39,31 +64,18 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
 .c5 {
   position: relative;
   outline: none;
 }
 
-.c5 svg {
+.c5 > svg {
   height: 12px;
   width: 12px;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c5 > svg > g,
+.c5 > svg path {
   fill: #ffffff;
 }
 
@@ -99,18 +111,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c9 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c2 {

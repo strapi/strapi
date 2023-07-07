@@ -1,12 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 
 const useReactQuery = () => {
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
-  const { isLoading, data } = useQuery(['get-documentation', pluginId], async () => {
+  const { isLoading, isError, data } = useQuery(['get-documentation', pluginId], async () => {
     try {
       const { data } = await get(`/${pluginId}/getInfos`);
 
@@ -60,7 +61,7 @@ const useReactQuery = () => {
     }
   );
 
-  return { data, isLoading, deleteMutation, submitMutation, regenerateDocMutation };
+  return { data, isLoading, isError, deleteMutation, submitMutation, regenerateDocMutation };
 };
 
 export default useReactQuery;

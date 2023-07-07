@@ -1,5 +1,5 @@
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
 import { getRequestUrl, getTrad } from '../utils';
@@ -11,7 +11,16 @@ export const useFolder = (id, { enabled = true }) => {
 
   const fetchFolder = async () => {
     try {
-      const { data } = await get(`${dataRequestURL}/${id}?populate[parent][populate][parent]=*`);
+      const params = {
+        populate: {
+          parent: {
+            populate: {
+              parent: '*',
+            },
+          },
+        },
+      };
+      const { data } = await get(`${dataRequestURL}/${id}`, { params });
 
       return data.data;
     } catch (err) {

@@ -1,4 +1,5 @@
 import { fixtures } from '@strapi/admin-test-utils';
+
 import addCommonFieldsToInitialDataMiddleware from '../addCommonFieldsToInitialDataMiddleware';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -89,11 +90,6 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
     expect(nextAction).toEqual({
       type: 'ContentManager/CrudReducer/INIT_FORM',
       rawQuery: '?plugins[i18n][relatedEntityId]=1',
-      data: {
-        name: 'test',
-        localizations: ['test'],
-        common: 'test',
-      },
     });
   });
 });

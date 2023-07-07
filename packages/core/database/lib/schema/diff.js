@@ -364,7 +364,9 @@ module.exports = (db) => {
       if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
         const dependencies = persistedTables
           .filter((table) => {
-            return table?.dependsOn?.some((table) => table.name === srcTable.name);
+            const dependsOn = table?.dependsOn;
+            if (!_.isArray(dependsOn)) return;
+            return dependsOn.some((table) => table.name === srcTable.name);
           })
           .map((dependsOnTable) => {
             return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);

@@ -9,6 +9,7 @@ import _ from 'lodash';
 import stopProcess from './utils/stop-process';
 import { trackUsage, captureStderr } from './utils/usage';
 import mergeTemplate from './utils/merge-template.js';
+import tryGitInit from './utils/git';
 
 import packageJSON from './resources/json/common/package.json';
 import { createDatabaseConfig, generateDbEnvariables } from './resources/templates/database';
@@ -87,6 +88,18 @@ export default async function createProject(
       for (const [fileName, path] of Object.entries(filesMap)) {
         const srcPath = join(tsJSONDir, fileName);
         const destPath = join(rootPath, path, 'tsconfig.json');
+
+        const json = require(srcPath).default();
+
+        await fse.writeJSON(destPath, json, { spaces: 2 });
+      }
+    } else {
+      const jsJSONDir = join(__dirname, 'resources/json/js');
+      const filesMap = { 'jsconfig.json.js': '.' };
+
+      for (const [fileName, path] of Object.entries(filesMap)) {
+        const srcPath = join(jsJSONDir, fileName);
+        const destPath = join(rootPath, path, 'jsconfig.json');
 
         const json = require(srcPath).default();
 
@@ -183,6 +196,12 @@ export default async function createProject(
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
+
+  // Init git
+  if (await tryGitInit(rootPath)) {
+    console.log('Initialized a git repository.');
+    console.log();
+  }
 
   console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);

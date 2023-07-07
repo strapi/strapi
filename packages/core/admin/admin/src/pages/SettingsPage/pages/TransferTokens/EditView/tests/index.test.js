@@ -1,10 +1,15 @@
 import React from 'react';
+
+import { fixtures } from '@strapi/admin-test-utils';
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { lightTheme, darkTheme } from '@strapi/design-system';
+import { Provider } from 'react-redux';
+import { Route, Router } from 'react-router-dom';
+import { createStore } from 'redux';
+
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import EditView from '../index';
@@ -14,7 +19,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useRBAC: jest.fn(() => ({
     allowedActions: {
       canCreate: true,
@@ -65,50 +69,42 @@ const client = new QueryClient({
 
 const makeApp = (history) => {
   return (
-    <QueryClientProvider client={client}>
-      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Router history={history}>
-              <Route path="/settings/transfer-tokens/:id">
-                <EditView />
-              </Route>
-            </Router>
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
-    </QueryClientProvider>
+    <Provider
+      store={createStore((state) => state, {
+        admin_app: { permissions: fixtures.permissions.app },
+      })}
+    >
+      <QueryClientProvider client={client}>
+        <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <Router history={history}>
+                <Route path="/settings/transfer-tokens/:id">
+                  <EditView />
+                </Route>
+              </Router>
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 
 describe('ADMIN | Pages | TRANSFER TOKENS | EditView', () => {
   afterAll(() => {
-    jest.resetAllMocks();
-  });
-
-  it('renders and matches the snapshot when creating token', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const { container } = render(App);
-
-    history.push('/settings/transfer-tokens/create');
-
-    expect(container).toMatchSnapshot();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot when editing existing token', async () => {
     const history = createMemoryHistory();
     const App = makeApp(history);
-    const { container, getByText } = render(App);
+    const { getByText } = render(App);
 
     history.push('/settings/transfer-tokens/1');
 
-    await waitFor(() => {
-      expect(getByText('My super token')).toBeInTheDocument();
-      expect(getByText('This describe my super token')).toBeInTheDocument();
-      expect(getByText('Regenerate')).toBeInTheDocument();
-    });
-
-    expect(container).toMatchSnapshot();
+    await waitFor(() => expect(getByText('My super token')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('This describe my super token')).toBeInTheDocument());
+    await waitFor(() => expect(getByText('Regenerate')).toBeInTheDocument());
   });
 });

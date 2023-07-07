@@ -1,5 +1,7 @@
-import { PassThrough, Readable } from 'stream';
+import type { Schema, Utils } from '@strapi/strapi';
+import { PassThrough, Readable, Writable } from 'stream';
 import { WebSocket } from 'ws';
+import { castArray } from 'lodash/fp';
 
 import type {
   IAsset,
@@ -7,27 +9,23 @@ import type {
   ISourceProvider,
   ISourceProviderTransferResults,
   MaybePromise,
+  Protocol,
   ProviderType,
   TransferStage,
 } from '../../../../types';
-import { client, server } from '../../../../types/remote/protocol';
-import {
-  ProviderInitializationError,
-  ProviderTransferError,
-  ProviderValidationError,
-} from '../../../errors/providers';
+import { Client, Server, Auth } from '../../../../types/remote/protocol';
+import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
-interface ITransferTokenAuth {
-  type: 'token';
-  token: string;
-}
-
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
-  url: URL;
-  auth?: ITransferTokenAuth;
+  url: URL; // the url of the remote Strapi admin
+  auth?: Auth.ITransferTokenAuth;
+  retryMessageOptions?: {
+    retryMessageTimeout: number; // milliseconds to wait for a response from a message
+    retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
+  };
 }
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
@@ -87,7 +85,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         return;
       }
 
-      stream.push(data);
+      // if we get a single items instead of a batch
+      // TODO V5: in v5 only allow array
+      for (const item of castArray(data)) {
+        stream.push(item);
+      }
 
       this.ws?.once('message', listener);
 
@@ -107,36 +109,67 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return this.#createStageReadStream('links');
   }
 
+  writeAsync = <T>(stream: Writable, data: T) => {
+    return new Promise<void>((resolve, reject) => {
+      stream.write(data, (error) => {
+        if (error) {
+          reject(error);
+        }
+
+        resolve();
+      });
+    });
+  };
+
   async createAssetsReadStream(): Promise<Readable> {
-    const assets: { [filename: string]: Readable } = {};
+    const assets: {
+      [filename: string]: IAsset & {
+        stream: PassThrough;
+      };
+    } = {};
 
     const stream = await this.#createStageReadStream('assets');
     const pass = new PassThrough({ objectMode: true });
 
     stream
-      .on(
-        'data',
-        (asset: Omit<IAsset, 'stream'> & { chunk: { type: 'Buffer'; data: Uint8Array } }) => {
-          const { chunk, ...rest } = asset;
+      .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
+        for (const item of payload) {
+          const { action } = item;
 
-          if (!(asset.filename in assets)) {
-            const assetStream = new PassThrough();
-            assets[asset.filename] = assetStream;
-
-            pass.push({ ...rest, stream: assetStream });
+          // Creates the stream to send the incoming asset through
+          if (action === 'start') {
+            // Each asset has its own stream identified by its assetID
+            assets[item.assetID] = { ...item.data, stream: new PassThrough() };
+            await this.writeAsync(pass, assets[item.assetID]);
           }
 
-          if (asset.filename in assets) {
-            // The buffer has gone through JSON operations and is now of shape { type: "Buffer"; data: UInt8Array }
-            // We need to transform it back into a Buffer instance
-            assets[asset.filename].push(Buffer.from(chunk.data));
+          // Writes the asset data to the created stream
+          else if (action === 'stream') {
+            // Converts data into buffer
+            const rawBuffer = item.data as unknown as {
+              type: 'Buffer';
+              data: Uint8Array;
+            };
+            const chunk = Buffer.from(rawBuffer.data);
+
+            await this.writeAsync(assets[item.assetID].stream, chunk);
+          }
+
+          // The asset has been transferred
+          else if (action === 'end') {
+            await new Promise<void>((resolve, reject) => {
+              const { stream: assetStream } = assets[item.assetID];
+              assetStream
+                .on('close', () => {
+                  // Deletes the stream for the asset
+                  delete assets[item.assetID];
+                  resolve();
+                })
+                .on('error', reject)
+                .end();
+            });
           }
         }
-      )
-      .on('end', () => {
-        Object.values(assets).forEach((s) => {
-          s.push(null);
-        });
       })
       .on('close', () => {
         pass.end();
@@ -170,56 +203,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async initTransfer(): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.ws
-        ?.on('unexpected-response', (_req, res) => {
-          if (res.statusCode === 401) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Authentication Error'
-              )
-            );
-          }
-
-          if (res.statusCode === 403) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Authorization Error'
-              )
-            );
-          }
-
-          if (res.statusCode === 404) {
-            return reject(
-              new ProviderInitializationError(
-                'Failed to initialize the connection: Data transfer is not enabled on the remote host'
-              )
-            );
-          }
-
-          return reject(
-            new ProviderInitializationError(
-              `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
-            )
-          );
-        })
-        ?.once('open', async () => {
-          const query = this.dispatcher?.dispatchCommand({
-            command: 'init',
-          });
-
-          const res = (await query) as server.Payload<server.InitMessage>;
-
-          if (!res?.transferID) {
-            return reject(
-              new ProviderTransferError('Init failed, invalid response from the server')
-            );
-          }
-
-          resolve(res.transferID);
-        })
-        .once('error', reject);
+    const query = this.dispatcher?.dispatchCommand({
+      command: 'init',
     });
+
+    const res = (await query) as Server.Payload<Server.InitMessage>;
+
+    if (!res?.transferID) {
+      throw new ProviderTransferError('Init failed, invalid response from the server');
+    }
+
+    return res.transferID;
   }
 
   async bootstrap(): Promise<void> {
@@ -253,7 +247,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     }
 
     this.ws = ws;
-    this.dispatcher = createDispatcher(this.ws);
+    const { retryMessageOptions } = this.options;
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
     const transferID = await this.initTransfer();
 
     this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });
@@ -275,14 +270,16 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
   }
 
-  async getSchemas(): Promise<Strapi.Schemas | null> {
+  async getSchemas() {
     const schemas =
-      (await this.dispatcher?.dispatchTransferAction<Strapi.Schemas>('getSchemas')) ?? null;
+      (await this.dispatcher?.dispatchTransferAction<Utils.String.Dict<Schema.Schema>>(
+        'getSchemas'
+      )) ?? null;
 
     return schemas;
   }
 
-  async #startStep<T extends client.TransferPullStep>(step: T) {
+  async #startStep<T extends Client.TransferPullStep>(step: T) {
     try {
       return await this.dispatcher?.dispatchTransferStep({ action: 'start', step });
     } catch (e) {
@@ -310,7 +307,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     });
   }
 
-  async #endStep<T extends client.TransferPullStep>(step: T) {
+  async #endStep<T extends Client.TransferPullStep>(step: T) {
     try {
       await this.dispatcher?.dispatchTransferStep({ action: 'end', step });
     } catch (e) {

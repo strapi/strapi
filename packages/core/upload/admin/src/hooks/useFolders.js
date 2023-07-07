@@ -1,8 +1,8 @@
-import { stringify } from 'qs';
-import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system';
-import { useNotification, useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getRequestUrl } from '../utils';
@@ -48,7 +48,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
 
   const fetchFolders = async () => {
     try {
-      const { data } = await get(`${dataRequestURL}?${stringify(params, { encode: false })}`);
+      const { data } = await get(dataRequestURL, { params });
 
       notifyStatus(
         formatMessage({

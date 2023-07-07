@@ -2,7 +2,7 @@ import { NodePlopAPI, ActionType } from 'plop';
 import { join } from 'path';
 import slugify from '@sindresorhus/slugify';
 import fs from 'fs-extra';
-import utils from '@strapi/utils';
+import * as utils from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';

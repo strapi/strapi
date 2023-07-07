@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+
+import {
+  Box,
+  Button,
+  Flex,
+  Main,
+  Option,
+  Select,
+  TextButton,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
+import { auth, pxToRem, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { parse } from 'qs';
-import { pxToRem, useNotification, auth } from '@strapi/helper-plugin';
-import {
-  Main,
-  Flex,
-  Box,
-  Typography,
-  Select,
-  Option,
-  TextInput,
-  TextButton,
-  Button,
-} from '@strapi/design-system';
+
 import Logo from '../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../layouts/UnauthenticatedLayout';
 
@@ -74,23 +75,22 @@ const UseCasePage = () => {
   const { formatMessage } = useIntl();
   const [role, setRole] = useState();
   const [otherRole, setOtherRole] = useState('');
+  const { post } = useFetchClient();
+
   const { firstname, email } = auth.getUserInfo();
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
-  const handleSubmit = (skipPersona) => {
+  const handleSubmit = async (event, skipPersona) => {
+    event.preventDefault();
     try {
-      axios({
-        method: 'POST',
-        url: 'https://analytics.strapi.io/register',
-        data: {
-          email,
-          username: firstname,
-          firstAdmin: Boolean(!hasAdmin),
-          persona: {
-            role: skipPersona ? undefined : role,
-            otherRole: skipPersona ? undefined : otherRole,
-          },
+      await post('https://analytics.strapi.io/register', {
+        email,
+        username: firstname,
+        firstAdmin: Boolean(!hasAdmin),
+        persona: {
+          role: skipPersona ? undefined : role,
+          otherRole: skipPersona ? undefined : otherRole,
         },
       });
 
@@ -111,7 +111,7 @@ const UseCasePage = () => {
     <UnauthenticatedLayout>
       <Main labelledBy="usecase-title">
         <LayoutContent>
-          <form onSubmit={() => handleSubmit(false)}>
+          <form onSubmit={(e) => handleSubmit(e, false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>

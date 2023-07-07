@@ -21,7 +21,7 @@ import { useAppInfo } from './AppInfo';
  * @typedef {Object} TrackingContextValue
  * @property {string | boolean} uuid
  * @property {string | undefined} deviceId
- * @property {TelemetryProperties} telemetryProperties
+ * @property {TelemetryProperties | undefined} telemetryProperties
  */
 
 /* -------------------------------------------------------------------------------------------------
@@ -32,7 +32,11 @@ import { useAppInfo } from './AppInfo';
  * @preserve
  * @type {React.Context<TrackingContextValue>}
  */
-const TrackingContext = React.createContext();
+const TrackingContext = React.createContext({
+  uuid: false,
+  deviceId: undefined,
+  telemetryProperties: undefined,
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -118,7 +122,10 @@ const useTracking = () => {
               },
             },
             {
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Strapi-Event': event,
+              },
             }
           );
 
@@ -136,4 +143,4 @@ const useTracking = () => {
   return { trackUsage };
 };
 
-export { TrackingProvider, useTracking, TrackingContext };
+export { TrackingContext, TrackingProvider, useTracking };

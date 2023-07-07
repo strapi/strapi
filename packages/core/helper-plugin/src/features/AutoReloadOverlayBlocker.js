@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import PropTypes from 'prop-types';
-import styled, { keyframes } from 'styled-components';
-import { Flex, Box, Typography } from '@strapi/design-system';
-import { Refresh, Clock } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import { createPortal } from 'react-dom';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
+import { Clock, Refresh } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { createPortal } from 'react-dom';
+import { useIntl } from 'react-intl';
+import styled, { keyframes } from 'styled-components';
+
 import pxToRem from '../utils/pxToRem';
 
 /**
@@ -34,8 +35,8 @@ import pxToRem from '../utils/pxToRem';
 /**
  * @preserve
  * @typedef {Object} AutoReloadOverlayBlockerContextValue
- * @property {(config: AutoReloadOverlayBlockerConfig) => void} lockApp
- * @property {() => void} unlockApp
+ * @property {(config: AutoReloadOverlayBlockerConfig) => void} lockAppWithAutoreload
+ * @property {() => void} unlockAppWithAutoreload
  */
 
 /**
@@ -111,8 +112,8 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
 
   const autoReloadValue = React.useMemo(
     () => ({
-      lockApp: lockAppWithAutoreload,
-      unlockApp: unlockAppWithAutoreload,
+      lockAppWithAutoreload,
+      unlockAppWithAutoreload,
     }),
     [lockAppWithAutoreload, unlockAppWithAutoreload]
   );

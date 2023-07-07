@@ -80,6 +80,10 @@ const createRepository = (uid, db) => {
       return db.entityManager.updateMany(uid, params);
     },
 
+    clone(id, params) {
+      return db.entityManager.clone(uid, id, params);
+    },
+
     delete(params) {
       return db.entityManager.delete(uid, params);
     },
@@ -109,6 +113,10 @@ const createRepository = (uid, db) => {
 
     deleteRelations(id) {
       return db.entityManager.deleteRelations(uid, id);
+    },
+
+    cloneRelations(targetId, sourceId, params) {
+      return db.entityManager.cloneRelations(uid, targetId, sourceId, params);
     },
 
     populate(entity, populate) {

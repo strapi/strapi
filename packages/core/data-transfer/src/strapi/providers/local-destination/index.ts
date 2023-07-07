@@ -18,10 +18,11 @@ export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
-  autoDestroy?: boolean;
-  restore?: restore.IRestoreOptions;
-  strategy: 'restore' | 'merge';
+  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+
+  autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
+  restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
+  strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
 
 class LocalStrapiDestinationProvider implements IDestinationProvider {
@@ -156,10 +157,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       `uploads_backup_${Date.now()}`
     );
 
-    await fse.move(assetsDirectory, backupDirectory);
-    await fse.mkdir(assetsDirectory);
-    // Create a .gitkeep file to ensure the directory is not empty
-    await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+    try {
+      await fse.move(assetsDirectory, backupDirectory);
+      await fse.mkdir(assetsDirectory);
+      // Create a .gitkeep file to ensure the directory is not empty
+      await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+    } catch (err) {
+      throw new ProviderTransferError(
+        'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
+      );
+    }
 
     return new Writable({
       objectMode: true,

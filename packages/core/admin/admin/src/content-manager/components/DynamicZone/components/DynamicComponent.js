@@ -1,78 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import get from 'lodash/get';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import {
   Accordion,
-  AccordionToggle,
   AccordionContent,
-  IconButton,
+  AccordionToggle,
   Box,
   Flex,
+  IconButton,
+  VisuallyHidden,
 } from '@strapi/design-system';
+import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Trash, Drag } from '@strapi/icons';
+import { Drag, More, Trash } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { useContentTypeLayout, useDragAndDrop } from '../../../hooks';
 import { composeRefs, getTrad, ItemTypes } from '../../../utils';
-
+import { ComponentIcon } from '../../ComponentIcon';
 import FieldComponent from '../../FieldComponent';
 
-const ActionsFlex = styled(Flex)`
-  /* 
-    we need to remove the background from the button but we can't 
-    wrap the element in styled because it breaks the forwardedAs which
-    we need for drag handler to work on firefox
-  */
-  div[role='button'] {
-    background: transparent;
-  }
-`;
-
-const IconButtonCustom = styled(IconButton)`
-  background-color: transparent;
-
-  svg path {
-    fill: ${({ theme, expanded }) =>
-      expanded ? theme.colors.primary600 : theme.colors.neutral600};
-  }
-`;
-
-// TODO: Delete once https://github.com/strapi/design-system/pull/858
-// is merged and released.
-const StyledBox = styled(Box)`
-  > div:first-child {
-    box-shadow: ${({ theme }) => theme.shadows.tableShadow};
-  }
-`;
-
-const AccordionContentRadius = styled(Box)`
-  border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
-`;
-
-const Rectangle = styled(Box)`
-  width: ${({ theme }) => theme.spaces[2]};
-  height: ${({ theme }) => theme.spaces[4]};
-`;
-
-const Preview = styled.span`
-  display: block;
-  background-color: ${({ theme }) => theme.colors.primary100};
-  outline: 1px dashed ${({ theme }) => theme.colors.primary500};
-  outline-offset: -1px;
-  padding: ${({ theme }) => theme.spaces[6]};
-`;
-
-const ComponentContainer = styled(Box)`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const DynamicZoneComponent = ({
+export const DynamicComponent = ({
   componentUid,
   formErrors,
   index,
@@ -83,6 +34,8 @@ const DynamicZoneComponent = ({
   onGrabItem,
   onDropItem,
   onCancel,
+  dynamicComponentsByCategory,
+  onAddComponent,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
@@ -180,11 +133,70 @@ const DynamicZoneComponent = ({
       >
         <Drag />
       </IconButton>
+      <Menu.Root>
+        <Menu.Trigger size="S" endIcon={undefined} paddingLeft={2} paddingRight={2}>
+          <More aria-hidden focusable={false} />
+          <VisuallyHidden as="span">
+            {formatMessage({
+              id: getTrad('components.DynamicZone.more-actions'),
+              defaultMessage: 'More actions',
+            })}
+          </VisuallyHidden>
+        </Menu.Trigger>
+        <Menu.Content>
+          <Menu.SubRoot>
+            <Menu.SubTrigger>
+              {formatMessage({
+                id: getTrad('components.DynamicZone.add-item-above'),
+                defaultMessage: 'Add component above',
+              })}
+            </Menu.SubTrigger>
+            <Menu.SubContent>
+              {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
+                <React.Fragment key={category}>
+                  <Menu.Label>{category}</Menu.Label>
+                  {components.map(({ componentUid, info: { displayName } }) => (
+                    <MenuItem
+                      key={componentUid}
+                      onSelect={() => onAddComponent(componentUid, index)}
+                    >
+                      {displayName}
+                    </MenuItem>
+                  ))}
+                </React.Fragment>
+              ))}
+            </Menu.SubContent>
+          </Menu.SubRoot>
+          <Menu.SubRoot>
+            <Menu.SubTrigger>
+              {formatMessage({
+                id: getTrad('components.DynamicZone.add-item-below'),
+                defaultMessage: 'Add component below',
+              })}
+            </Menu.SubTrigger>
+            <Menu.SubContent>
+              {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
+                <React.Fragment key={category}>
+                  <Menu.Label>{category}</Menu.Label>
+                  {components.map(({ componentUid, info: { displayName } }) => (
+                    <MenuItem
+                      key={componentUid}
+                      onSelect={() => onAddComponent(componentUid, index + 1)}
+                    >
+                      {displayName}
+                    </MenuItem>
+                  ))}
+                </React.Fragment>
+              ))}
+            </Menu.SubContent>
+          </Menu.SubRoot>
+        </Menu.Content>
+      </Menu.Root>
     </ActionsFlex>
   );
 
   return (
-    <ComponentContainer as="li">
+    <ComponentContainer as="li" width="100%">
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
@@ -194,6 +206,7 @@ const DynamicZoneComponent = ({
         ) : (
           <Accordion expanded={isOpen} onToggle={handleToggle} size="S" error={errorMessage}>
             <AccordionToggle
+              startIcon={<ComponentIcon icon={icon} showBackground={false} size="S" />}
               action={accordionActions}
               title={`${friendlyName}${mainValue}`}
               togglePosition="left"
@@ -215,26 +228,86 @@ const DynamicZoneComponent = ({
   );
 };
 
-DynamicZoneComponent.defaultProps = {
+const ActionsFlex = styled(Flex)`
+  /* 
+    we need to remove the background from the button but we can't 
+    wrap the element in styled because it breaks the forwardedAs which
+    we need for drag handler to work on firefox
+  */
+  div[role='button'] {
+    background: transparent;
+  }
+`;
+
+const IconButtonCustom = styled(IconButton)`
+  background-color: transparent;
+
+  svg path {
+    fill: ${({ theme, expanded }) =>
+      expanded ? theme.colors.primary600 : theme.colors.neutral600};
+  }
+`;
+
+// TODO: Delete once https://github.com/strapi/design-system/pull/858
+// is merged and released.
+const StyledBox = styled(Box)`
+  > div:first-child {
+    box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+  }
+`;
+
+const AccordionContentRadius = styled(Box)`
+  border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
+`;
+
+const Rectangle = styled(Box)`
+  width: ${({ theme }) => theme.spaces[2]};
+  height: ${({ theme }) => theme.spaces[4]};
+`;
+
+const Preview = styled.span`
+  display: block;
+  background-color: ${({ theme }) => theme.colors.primary100};
+  outline: 1px dashed ${({ theme }) => theme.colors.primary500};
+  outline-offset: -1px;
+  padding: ${({ theme }) => theme.spaces[6]};
+`;
+
+const ComponentContainer = styled(Box)`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+DynamicComponent.defaultProps = {
+  dynamicComponentsByCategory: {},
   formErrors: {},
   index: 0,
   isFieldAllowed: true,
+  onAddComponent: undefined,
   onGrabItem: undefined,
   onDropItem: undefined,
   onCancel: undefined,
 };
 
-DynamicZoneComponent.propTypes = {
+DynamicComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  dynamicComponentsByCategory: PropTypes.shape({
+    components: PropTypes.arrayOf(
+      PropTypes.shape({
+        componentUid: PropTypes.string.isRequired,
+        info: PropTypes.object,
+      })
+    ),
+  }),
   formErrors: PropTypes.object,
   index: PropTypes.number,
   isFieldAllowed: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  onAddComponent: PropTypes.func,
   onGrabItem: PropTypes.func,
   onDropItem: PropTypes.func,
   onCancel: PropTypes.func,
   onMoveComponent: PropTypes.func.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
 };
-
-export default DynamicZoneComponent;

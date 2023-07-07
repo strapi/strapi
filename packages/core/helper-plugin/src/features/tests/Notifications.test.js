@@ -1,8 +1,10 @@
 import React from 'react';
-import { render as renderRTL } from '@testing-library/react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { act, render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+
 import { NotificationsProvider, useNotification } from '../Notifications';
 
 const defaultNotificationConfig = {
@@ -66,7 +68,7 @@ describe('Notifications', () => {
 
       expect(getByText(/test/)).toBeInTheDocument();
 
-      jest.advanceTimersByTime(3000);
+      act(() => jest.advanceTimersByTime(3000));
 
       expect(queryByText(/test/)).not.toBeInTheDocument();
 
@@ -76,7 +78,7 @@ describe('Notifications', () => {
 
       expect(getByText('react-intl test title')).toBeInTheDocument();
 
-      jest.advanceTimersByTime(3000);
+      act(() => jest.advanceTimersByTime(3000));
 
       expect(queryByText('react-intl test title')).not.toBeInTheDocument();
     });
@@ -148,7 +150,7 @@ describe('Notifications', () => {
 
       expect(getByText(/test/)).toBeInTheDocument();
 
-      jest.advanceTimersByTime(1001);
+      act(() => jest.advanceTimersByTime(1001));
 
       expect(queryByText(/test/)).not.toBeInTheDocument();
     });
@@ -167,7 +169,7 @@ describe('Notifications', () => {
 
     expect(queryAllByText(/test/)).toHaveLength(2);
 
-    jest.advanceTimersByTime(1000);
+    act(() => jest.advanceTimersByTime(1500));
 
     expect(queryAllByText(/test/)).toHaveLength(1);
   });

@@ -1,15 +1,19 @@
 import React, { useEffect, useReducer } from 'react';
+
+import { auth, useFetchClient, useGuidedTour, useQuery, useTracking } from '@strapi/helper-plugin';
 import axios from 'axios';
 import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
-import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
+import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
+
 import persistStateToLocaleStorage from '../../components/GuidedTour/utils/persistStateToLocaleStorage';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import { useEnterprise } from '../../hooks/useEnterprise';
 import formatAPIErrors from '../../utils/formatAPIErrors';
+
+import { FORMS } from './constants';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -25,10 +29,19 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
-    forms,
-    authType,
-    {}
+  const forms = useEnterprise(
+    FORMS,
+    async () => (await import('../../../../ee/admin/pages/AuthPage/constants')).FORMS,
+    {
+      combine(ceForms, eeForms) {
+        return {
+          ...ceForms,
+          ...eeForms,
+        };
+      },
+
+      defaultValue: FORMS,
+    }
   );
   const [{ formErrors, modifiedData, requestError }, dispatch] = useReducer(
     reducer,
@@ -37,6 +50,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   );
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } =
+    forms?.[authType] ?? {};
 
   useEffect(() => {
     // Cancel request on unmount
@@ -45,6 +60,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { post } = useFetchClient();
 
   // Reset the state on navigation change
   useEffect(() => {
@@ -85,12 +102,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
   const forgotPasswordRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
-      await axios({
-        method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
-        data: body,
-        cancelToken: source.token,
-      });
+      await post(requestURL, body, { cancelToken: source.token });
 
       push('/auth/forgot-password-success');
     } catch (err) {
@@ -108,12 +120,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await axios({
-        method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
-        data: omit(body, fieldsToOmit),
-        cancelToken: source.token,
-      });
+      } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
 
       if (user.preferedLanguage) {
         changeLocale(user.preferedLanguage);
@@ -151,17 +158,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       trackUsage('willCreateFirstAdmin');
-
       const {
         data: {
           data: { token, user },
         },
-      } = await axios({
-        method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
-        data: omit(body, fieldsToOmit),
-        cancelToken: source.token,
-      });
+      } = await post(requestURL, omit(body, fieldsToOmit), { cancelToken: source.token });
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);
@@ -212,12 +213,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         data: {
           data: { token, user },
         },
-      } = await axios({
-        method: 'POST',
-        url: `${strapi.backendURL}${requestURL}`,
-        data: { ...body, resetPasswordToken: query.get('code') },
-        cancelToken: source.token,
-      });
+      } = await post(
+        requestURL,
+        { ...body, resetPasswordToken: query.get('code') },
+        { cancelToken: source.token }
+      );
 
       auth.setToken(token, false);
       auth.setUserInfo(user, false);

@@ -1,55 +1,45 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
-import { usePersistentState } from '@strapi/helper-plugin';
 import {
-  Button,
-  Flex,
-  Box,
-  Divider,
   BaseCheckbox,
+  Box,
+  Button,
+  Divider,
+  Flex,
   GridItem,
-  Typography,
   IconButton,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Pencil, Plus, Grid, List } from '@strapi/icons';
+import { usePersistentState } from '@strapi/helper-plugin';
+import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import {
-  FolderDefinition,
   AssetDefinition,
-  viewOptions,
+  FolderDefinition,
   localStorageKeys,
+  viewOptions,
 } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { useFolder } from '../../../hooks/useFolder';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
+import getTrad from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList';
-import { TableList } from '../../TableList';
-import { FolderGridList } from '../../FolderGridList';
-import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
-import SortPicker from '../../SortPicker';
-import { useFolder } from '../../../hooks/useFolder';
+import { EmptyAssets } from '../../EmptyAssets';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
+import { FolderGridList } from '../../FolderGridList';
+import SortPicker from '../../SortPicker';
+import { TableList } from '../../TableList';
+
 import { Filters } from './Filters';
-import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
+import PaginationFooter from './PaginationFooter';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
-
-const StartBlockActions = styled(Flex)`
-  & > * + * {
-    margin-left: ${({ theme }) => theme.spaces[2]};
-  }
-  margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
-`;
-
-const EndBlockActions = styled(StartBlockActions)`
-  flex-shrink: 0;
-`;
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
@@ -107,9 +97,11 @@ export const BrowseStep = ({
 
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
   const areAllAssetSelected =
+    allAllowedAsset.length > 0 &&
+    selectedAssets.length > 0 &&
     allAllowedAsset.every(
       (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
-    ) && selectedAssets.length > 0;
+    );
   const hasSomeAssetSelected = allAllowedAsset.some(
     (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
@@ -131,7 +123,7 @@ export const BrowseStep = ({
         <Box paddingBottom={4}>
           <Flex justifyContent="space-between" alignItems="flex-start">
             {(assetCount > 0 || folderCount > 0 || isFiltering) && (
-              <StartBlockActions wrap="wrap">
+              <Flex gap={2} wrap="wrap">
                 {multiple && isGridView && (
                   <Flex
                     paddingLeft={2}
@@ -157,11 +149,11 @@ export const BrowseStep = ({
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
                 />
-              </StartBlockActions>
+              </Flex>
             )}
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <EndBlockActions pullRight>
+              <Flex marginLeft="auto" shrink={0}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     icon={isGridView ? <List /> : <Grid />}
@@ -180,7 +172,7 @@ export const BrowseStep = ({
                   />
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-              </EndBlockActions>
+              </Flex>
             )}
           </Flex>
         </Box>
@@ -300,7 +292,7 @@ export const BrowseStep = ({
                           <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
-                              {/* VisuallyHidden dash here allows to separate folder title and count informations 
+                              {/* VisuallyHidden dash here allows to separate folder title and count informations
                               for voice reading structure purpose */}
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>

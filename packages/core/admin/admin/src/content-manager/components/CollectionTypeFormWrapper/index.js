@@ -1,27 +1,23 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useQueryClient } from 'react-query';
-import { useHistory } from 'react-router-dom';
-import axios from 'axios';
-import get from 'lodash/get';
+
 import {
-  useTracking,
-  useNotification,
-  useQueryParams,
-  formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
-  useGuidedTour,
+  formatContentTypeData,
   useAPIErrorHandler,
   useFetchClient,
+  useGuidedTour,
+  useNotification,
+  useQueryParams,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
-import isEqual from 'react-fast-compare';
-import {
-  createDefaultForm,
-  getTrad,
-  getRequestUrl,
-  removePasswordFieldsFromData,
-} from '../../utils';
+import { useQueryClient } from 'react-query';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import { useFindRedirectionLink } from '../../hooks';
 import {
   getData,
@@ -33,6 +29,12 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
+import {
+  createDefaultForm,
+  getRequestUrl,
+  getTrad,
+  removePasswordFieldsFromData,
+} from '../../utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -41,7 +43,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
-  const [{ rawQuery }] = useQueryParams();
+  const [{ query, rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useSelector(selectCrudReducer);
@@ -149,7 +151,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         if (axios.isCancel(err)) {
           return;
         }
-
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
@@ -236,12 +237,22 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
+      /**
+       * If we're cloning we want to post directly to this endpoint
+       * so that the relations even if they're not listed in the EditView
+       * are correctly attached to the entry.
+       */
+      const endPoint =
+        typeof origin === 'string'
+          ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
+          : getRequestUrl(`collection-types/${slug}`);
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await post(endPoint, body);
+        const { data } = await post(endPoint, body, {
+          params: query,
+        });
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -271,16 +282,18 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       }
     },
     [
+      origin,
       cleanReceivedData,
       displayErrors,
       replace,
       slug,
       dispatch,
-      rawQuery,
+      query,
       toggleNotification,
       setCurrentStep,
       queryClient,
       post,
+      rawQuery,
     ]
   );
 

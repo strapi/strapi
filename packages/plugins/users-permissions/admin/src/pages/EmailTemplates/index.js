@@ -1,25 +1,28 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useIntl } from 'react-intl';
+import React, { useRef, useState } from 'react';
+
+import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
 import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
   SettingsPageTitle,
-  useTracking,
+  useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  CheckPagePermissions,
   useRBAC,
-  useFocusWhenNavigate,
-  LoadingIndicatorPage,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useNotifyAT, Main, ContentLayout, HeaderLayout } from '@strapi/design-system';
-import pluginPermissions from '../../permissions';
+import { useIntl } from 'react-intl';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
-import { fetchData, putEmailTemplate } from './utils/api';
-import EmailTable from './components/EmailTable';
+
 import EmailForm from './components/EmailForm';
+import EmailTable from './components/EmailTable';
+import { fetchData, putEmailTemplate } from './utils/api';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
   </CheckPagePermissions>
 );
@@ -37,14 +40,10 @@ const EmailTemplatesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
 
-  const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateEmailTemplates };
-  }, []);
-
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateEmailTemplates });
 
   const { status: isLoadingData, data } = useQuery('email-templates', () => fetchData(), {
     onSuccess() {

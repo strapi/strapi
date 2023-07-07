@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
+
 import { TextInput } from '@strapi/design-system';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { EyeStriked } from '@strapi/icons';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 const StyledIcon = styled(EyeStriked)`
   > path {
