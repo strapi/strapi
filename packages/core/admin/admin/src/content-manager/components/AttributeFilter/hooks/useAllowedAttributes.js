@@ -29,9 +29,12 @@ const useAllowedAttributes = (contentType, slug) => {
       },
     ]).length > 0;
 
-  const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
-  const attributesArray = Object.keys(get(contentType, ['attributes']), {});
-  const allowedAttributes = attributesArray.filter((attr) => {
+  const attributesWithReadPermissions = get(
+    readPermissionsForSlug,
+    ['0', 'properties', 'fields'],
+    []
+  );
+  const allowedAttributes = attributesWithReadPermissions.filter((attr) => {
     const current = get(contentType, ['attributes', attr], {});
 
     if (!current.type) {
@@ -42,16 +45,16 @@ const useAllowedAttributes = (contentType, slug) => {
       return false;
     }
 
-    if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
-      return false;
-    }
-
     return true;
   });
+  const allowedAndDefaultAttributes = [
+    'id',
+    ...allowedAttributes,
+    ...TIMESTAMPS,
+    ...(canReadAdminUsers ? CREATOR_ATTRIBUTES : []),
+  ];
 
-  return [...allowedAttributes, ...(canReadAdminUsers ? CREATOR_ATTRIBUTES : [])].sort((a, b) =>
-    formatter.compare(a, b)
-  );
+  return allowedAndDefaultAttributes.sort((a, b) => formatter.compare(a, b));
 };
 
 export default useAllowedAttributes;
