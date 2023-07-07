@@ -36,7 +36,9 @@ export function useReviewWorkflows(params = {}) {
   }
 
   return {
-    pagination: data?.pagination ?? {},
+    // meta contains e.g. the total of all workflows. we can not use
+    // the pagination object here, because the list is not paginated.
+    meta: data?.meta ?? {},
     workflows,
     isLoading,
     status,

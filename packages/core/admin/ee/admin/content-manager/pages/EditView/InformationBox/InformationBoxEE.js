@@ -39,7 +39,7 @@ export function InformationBoxEE() {
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const {
-    pagination,
+    meta,
     workflows: [workflow],
     isLoading: isWorkflowLoading,
   } = useReviewWorkflows({ filters: { contentTypes: uid } });
@@ -77,22 +77,37 @@ export function InformationBoxEE() {
 
   const handleStageChange = async ({ value: stageId }) => {
     try {
-      if (limits?.workflows > pagination.total) {
+      /**
+       * If the current license has a limit:
+       * check if the total count of workflows exceeds that limit and display
+       * the limits modal.
+       *
+       * If the current license does not have a limit (e.g. offline license):
+       * do nothing (for now).
+       *
+       */
+
+      if (limits?.workflows && limits.workflows > meta.workflowCount) {
         setShowLimitModal('workflow');
 
-        return;
-      }
-      if (limits?.stagesPerWorkflow > workflow.stages.length) {
+        /**
+         * If the current license has a limit:
+         * check if the total count of stages exceeds that limit and display
+         * the limits modal.
+         *
+         * If the current license does not have a limit (e.g. offline license):
+         * do nothing (for now).
+         *
+         */
+      } else if (limits?.stagesPerWorkflow && limits.stagesPerWorkflow > workflow.stages.length) {
         setShowLimitModal('stage');
-
-        return;
+      } else {
+        await mutateAsync({
+          entityId: initialData.id,
+          stageId,
+          uid,
+        });
       }
-
-      await mutateAsync({
-        entityId: initialData.id,
-        stageId,
-        uid,
-      });
     } catch (error) {
       // react-query@v3: the error doesn't have to be handled here
       // see: https://github.com/TanStack/query/issues/121

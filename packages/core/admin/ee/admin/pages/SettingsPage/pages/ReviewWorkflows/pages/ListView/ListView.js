@@ -67,7 +67,7 @@ export function ReviewWorkflowsListView() {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
-  const { pagination, workflows, isLoading, refetch } = useReviewWorkflows();
+  const { meta, workflows, isLoading, refetch } = useReviewWorkflows();
   const [workflowToDelete, setWorkflowToDelete] = React.useState(null);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { del } = useFetchClient();
@@ -138,7 +138,17 @@ export function ReviewWorkflowsListView() {
             size="S"
             to="/settings/review-workflows/create"
             onClick={(event) => {
-              if (pagination?.total >= limits.workflows) {
+              /**
+               * If the current license has a workflow limit:
+               * check if the total count of workflows exceeds that limit. If so,
+               * prevent the navigation and show the limits overlay.
+               *
+               * If the current license does not have a limit (e.g. offline license):
+               * allow the user to navigate to the create-view. In case they exceed the
+               * current hard-limit of 200 they will see an error thrown by the API.
+               */
+
+              if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
                 event.preventDefault();
                 setShowLimitModal(true);
               }
@@ -177,7 +187,16 @@ export function ReviewWorkflowsListView() {
               <TFooter
                 icon={<Plus />}
                 onClick={() => {
-                  if (pagination?.total >= limits?.workflows) {
+                  /**
+                   * If the current license has a workflow limit:
+                   * check if the total count of workflows exceeds that limit
+                   *
+                   * If the current license does not have a limit (e.g. offline license):
+                   * allow the user to navigate to the create-view. In case they exceed the
+                   * current hard-limit of 200 they will see an error thrown by the API.
+                   */
+
+                  if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
                     setShowLimitModal(true);
                   } else {
                     push('/settings/review-workflows/create');
