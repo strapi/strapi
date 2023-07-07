@@ -39,7 +39,6 @@ const populate = traverseFactory()
     return visitedPopulate.filter((item) => !isNil(item));
   })
   // Transform wildcard populate to an exhaustive list of attributes to populate.
-  // Avoid populating attributes from the database that will be sanitized in the output anyway.
   .intercept(isWildCardConstant, (visitor, options, _data, { recurse }) => {
     const attributes = options.schema?.attributes;
 
