@@ -1,5 +1,4 @@
 import sendgrid, { MailDataRequired } from '@sendgrid/mail';
-import utils from '@strapi/utils';
 
 interface Settings {
   defaultFrom: string;
@@ -43,7 +42,7 @@ export = {
             ...rest,
           };
 
-          sendgrid.send(utils.removeUndefined(msg), false, (err) => {
+          sendgrid.send(msg, false, (err) => {
             if (err) {
               reject(err);
             } else {

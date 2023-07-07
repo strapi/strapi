@@ -1,5 +1,4 @@
 import { useFetchClient } from '@strapi/helper-plugin';
-import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 
 export function useReviewWorkflows(params = {}) {
@@ -9,15 +8,16 @@ export function useReviewWorkflows(params = {}) {
   };
 
   const { get } = useFetchClient();
-  const queryString = stringify({ ...defaultQueryParams, ...queryParams }, { encode: false });
 
   const { data, isLoading, status, refetch } = useQuery(
     ['review-workflows', 'workflows', id],
     async () => {
       try {
-        const { data } = await get(
-          `/admin/review-workflows/workflows/${id}${queryString ? `?${queryString}` : ''}`
-        );
+        const {
+          data: { data },
+        } = await get(`/admin/review-workflows/workflows/${id}`, {
+          params: { ...defaultQueryParams, ...queryParams },
+        });
 
         return data;
       } catch (err) {

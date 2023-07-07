@@ -93,7 +93,7 @@ const setup = ({ path, ...props } = {}) =>
 
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders and matches the snapshot when creating token', async () => {

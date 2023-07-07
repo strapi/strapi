@@ -54,7 +54,7 @@ jest.mock('../../FieldComponent', () => () => "I'm a field component");
 
 describe('DynamicZone', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {

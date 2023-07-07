@@ -32,6 +32,7 @@ import tableHeaders from './utils/tableHeaders';
 const ListView = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
+
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
   } = useRBAC({

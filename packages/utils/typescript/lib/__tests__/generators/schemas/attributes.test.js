@@ -16,7 +16,7 @@ const { addImport } = require('../../../generators/common/imports');
 // TODO: emit definition (to a string) & also check snapshots based on that. It would allow checking both the structure & the output.
 describe('Attributes', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Attribute to Property Signature', () => {
