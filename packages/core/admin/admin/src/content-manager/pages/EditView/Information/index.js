@@ -5,7 +5,6 @@ import { useCMEditViewDataManager, getDisplayName } from '@strapi/helper-plugin'
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getFullName } from '../../../../utils';
 import { getTrad } from '../../../utils';
 
 import getUnits from './utils/getUnits';
@@ -42,9 +41,13 @@ const KeyValuePair = ({ label, value }) => {
   );
 };
 
+KeyValuePair.defaultProps = {
+  value: '-',
+};
+
 KeyValuePair.propTypes = {
   label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 };
 
 const Body = () => {
