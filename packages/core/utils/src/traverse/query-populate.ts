@@ -2,6 +2,7 @@ import {
   curry,
   isString,
   isArray,
+  isEmpty,
   split,
   isObject,
   trim,
@@ -77,7 +78,7 @@ const populate = traverseFactory()
           return data;
         }
 
-        return isNil(value) ? root : `${root}.${value}`;
+        return isNil(value) || isEmpty(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
