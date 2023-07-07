@@ -11,8 +11,8 @@ import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
 import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import useLicenseLimits from '../../../../hooks/useLicenseLimits';
 import * as LimitsModal from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
-import { useReviewWorkflowLicenseLimits } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
@@ -35,7 +35,7 @@ export function InformationBoxEE() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { limits } = useReviewWorkflowLicenseLimits();
+  const { getFeature } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const {
@@ -73,6 +73,7 @@ export function InformationBoxEE() {
     }
   );
 
+  const limits = getFeature('review-workflows');
   const formattedError = (error && formatAPIError(error)) || null;
 
   const handleStageChange = async ({ value: stageId }) => {

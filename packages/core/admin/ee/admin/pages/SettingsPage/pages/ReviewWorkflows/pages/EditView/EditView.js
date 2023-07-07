@@ -17,13 +17,13 @@ import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { useLicenseLimits } from '../../../../../../hooks';
 import { setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
-import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
@@ -55,7 +55,7 @@ export function ReviewWorkflowsEditView() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
-  const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
+  const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
 
   const { mutateAsync, isLoading } = useMutation(
@@ -122,6 +122,8 @@ export function ReviewWorkflowsEditView() {
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
+
+  const limits = getFeature('review-workflows');
 
   React.useEffect(() => {
     trackUsage('didViewWorkflow');

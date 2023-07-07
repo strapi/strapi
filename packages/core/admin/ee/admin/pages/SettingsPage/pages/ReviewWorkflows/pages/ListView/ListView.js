@@ -31,9 +31,9 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
+import { useLicenseLimits } from '../../../../../../hooks';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
-import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
@@ -73,7 +73,9 @@ export function ReviewWorkflowsListView() {
   const { del } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { limits } = useReviewWorkflowLicenseLimits();
+  const { getFeature } = useLicenseLimits();
+
+  const limits = getFeature('review-workflows');
 
   const { mutateAsync, isLoading: isLoadingMutation } = useMutation(
     async ({ workflowId, stages }) => {
