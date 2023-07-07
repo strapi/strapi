@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
 import { useTracking } from '@strapi/helper-plugin';
-import { ExclamationMarkCircle, Trash, CheckCircle, CrossCircle } from '@strapi/icons';
+import { ExclamationMarkCircle, Trash, Check } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -81,7 +81,7 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
         <Button
           onClick={onConfirm}
           variant="primary"
-          startIcon={<CheckCircle />}
+          startIcon={<Check />}
           loading={isConfirmButtonLoading}
         >
           {formatMessage({
@@ -123,7 +123,6 @@ const ConfirmDialogUnpublishAll = ({
         <Button
           onClick={onConfirm}
           variant="secondary"
-          startIcon={<CrossCircle />}
           loading={isConfirmButtonLoading}
         >
           {formatMessage({
