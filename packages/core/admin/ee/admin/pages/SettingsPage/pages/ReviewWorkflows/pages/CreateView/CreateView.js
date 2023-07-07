@@ -11,13 +11,13 @@ import { useHistory } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { useLicenseLimits } from '../../../../../../hooks';
 import { resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
-import { useReviewWorkflowLicenseLimits } from '../../hooks/useReviewWorkflowLicenseLimits';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
@@ -36,7 +36,7 @@ export function ReviewWorkflowsCreateView() {
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
-  const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
+  const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const { meta, isLoading: isWorkflowLoading } = useReviewWorkflows();
 
   const { mutateAsync, isLoading } = useMutation(
@@ -78,6 +78,8 @@ export function ReviewWorkflowsCreateView() {
       return null;
     }
   };
+
+  const limits = getFeature('review-workflows');
 
   const formik = useFormik({
     enableReinitialize: true,
