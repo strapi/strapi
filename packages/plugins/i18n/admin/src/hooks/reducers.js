@@ -63,7 +63,11 @@ const localeReducer = produce((draftState = initialState, action = {}) => {
     }
 
     case SET_PREFERRED_LOCALE: {
-      sessionStorage.setItem(PREFERRED_LOCALE_KEY, JSON.stringify(action.preferredLocale));
+      if (action.preferredLocale) {
+        sessionStorage.setItem(PREFERRED_LOCALE_KEY, JSON.stringify(action.preferredLocale));
+      } else {
+        sessionStorage.removeItem(PREFERRED_LOCALE_KEY);
+      }
       draftState.preferredLocale = action.preferredLocale;
       break;
     }

@@ -1,4 +1,10 @@
-import { ADD_LOCALE, DELETE_LOCALE, RESOLVE_LOCALES, UPDATE_LOCALE } from '../constants';
+import {
+  ADD_LOCALE,
+  DELETE_LOCALE,
+  RESOLVE_LOCALES,
+  UPDATE_LOCALE,
+  SET_PREFERRED_LOCALE,
+} from '../constants';
 import reducers, { initialState } from '../reducers';
 
 describe('i18n reducer', () => {
@@ -29,6 +35,7 @@ describe('i18n reducer', () => {
           isDefault: false,
         },
       ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);
@@ -50,6 +57,7 @@ describe('i18n reducer', () => {
           isDefault: false,
         },
       ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);
@@ -84,6 +92,7 @@ describe('i18n reducer', () => {
           isDefault: true,
         },
       ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);
@@ -118,6 +127,7 @@ describe('i18n reducer', () => {
           isDefault: true,
         },
       ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);
@@ -157,6 +167,7 @@ describe('i18n reducer', () => {
           isDefault: false,
         },
       ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);
@@ -196,6 +207,96 @@ describe('i18n reducer', () => {
           isDefault: true,
         },
       ],
+      preferredLocale: null,
+    };
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('sets a preferred locale when triggering SET_PREFERRED_LOCALE', () => {
+    const action = {
+      type: SET_PREFERRED_LOCALE,
+      preferredLocale: { code: 'fr' },
+    };
+
+    const locales = [
+      {
+        displayName: 'English',
+        id: 2,
+        isDefault: true,
+        code: 'en',
+      },
+      {
+        displayName: 'French',
+        id: 3,
+        isDefault: false,
+        code: 'fr',
+      },
+    ];
+
+    const actual = reducers.i18n_locales({ ...initialState, locales }, action);
+    const expected = {
+      isLoading: true,
+      locales: [
+        {
+          displayName: 'English',
+          id: 2,
+          isDefault: true,
+          code: 'en',
+        },
+        {
+          displayName: 'French',
+          id: 3,
+          isDefault: false,
+          code: 'fr',
+        },
+      ],
+      preferredLocale: { code: 'fr' },
+    };
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('can clear the preferred locale when triggering SET_PREFERRED_LOCALE', () => {
+    const action = {
+      type: SET_PREFERRED_LOCALE,
+      preferredLocale: null,
+    };
+
+    const locales = [
+      {
+        displayName: 'English',
+        id: 2,
+        isDefault: true,
+        code: 'en',
+      },
+      {
+        displayName: 'French',
+        id: 3,
+        isDefault: false,
+        code: 'fr',
+      },
+    ];
+    const preferredLocale = { code: 'fr' };
+
+    const actual = reducers.i18n_locales({ ...initialState, locales, preferredLocale }, action);
+    const expected = {
+      isLoading: true,
+      locales: [
+        {
+          displayName: 'English',
+          id: 2,
+          isDefault: true,
+          code: 'en',
+        },
+        {
+          displayName: 'French',
+          id: 3,
+          isDefault: false,
+          code: 'fr',
+        },
+      ],
+      preferredLocale: null,
     };
 
     expect(actual).toEqual(expected);

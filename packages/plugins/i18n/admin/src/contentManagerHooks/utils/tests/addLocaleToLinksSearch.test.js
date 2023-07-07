@@ -62,10 +62,18 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
       { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: false },
     ];
     const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    const preferredLocale = null;
 
-    expect(addLocaleToLinksSearch(links, 'collectionType', schemas, locales, permissions)).toEqual(
-      expected
-    );
+    expect(
+      addLocaleToLinksSearch(
+        links,
+        'collectionType',
+        schemas,
+        preferredLocale,
+        locales,
+        permissions
+      )
+    ).toEqual(expected);
   });
 
   it('should add the locale to a link search', () => {
@@ -129,9 +137,92 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
       },
     ];
     const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    const preferredLocale = null;
 
-    expect(addLocaleToLinksSearch(links, 'collectionType', schemas, locales, permissions)).toEqual(
-      expected
-    );
+    expect(
+      addLocaleToLinksSearch(
+        links,
+        'collectionType',
+        schemas,
+        preferredLocale,
+        locales,
+        permissions
+      )
+    ).toEqual(expected);
+  });
+
+  it('should add the preferred locale if any permissions are provided to the link search', () => {
+    const links = [
+      { uid: 'foo', to: 'cm/collectionType/foo', isDisplayed: true, search: 'page=1' },
+      { uid: 'bar', to: 'cm/collectionType/bar', isDisplayed: true },
+    ];
+    const schemas = [
+      { uid: 'foo', pluginOptions: { i18n: { localized: true } } },
+      { uid: 'bar', pluginOptions: { i18n: { localized: true } } },
+    ];
+    const permissions = {
+      foo: {
+        'plugin::content-manager.explorer.create': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['fr'],
+            },
+          },
+        ],
+        'plugin::content-manager.explorer.read': [
+          {
+            properties: {
+              fields: ['name'],
+            },
+          },
+        ],
+      },
+      bar: {
+        'plugin::content-manager.explorer.create': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['fr'],
+            },
+          },
+        ],
+        'plugin::content-manager.explorer.read': [
+          {
+            properties: {
+              fields: ['name'],
+              locales: ['en'],
+            },
+          },
+        ],
+      },
+    };
+    const expected = [
+      {
+        uid: 'foo',
+        to: 'cm/collectionType/foo',
+        isDisplayed: true,
+        search: 'page=1&plugins[i18n][locale]=fr',
+      },
+      {
+        uid: 'bar',
+        to: 'cm/collectionType/bar',
+        isDisplayed: true,
+        search: 'plugins[i18n][locale]=fr',
+      },
+    ];
+    const locales = [{ code: 'en', isDefault: true }, { code: 'fr' }];
+    const preferredLocale = { code: 'fr' };
+
+    expect(
+      addLocaleToLinksSearch(
+        links,
+        'collectionType',
+        schemas,
+        preferredLocale,
+        locales,
+        permissions
+      )
+    ).toEqual(expected);
   });
 });
