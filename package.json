@@ -109,7 +109,7 @@
     "prettier": "2.8.4",
     "qs": "6.11.1",
     "rimraf": "3.0.2",
-    "stylelint": "13.13.1",
+    "stylelint": "15.10.1",
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-processor-styled-components": "1.10.0",
