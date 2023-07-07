@@ -83,7 +83,28 @@ export function ReviewWorkflowsCreateView() {
     enableReinitialize: true,
     initialValues: currentWorkflow,
     async onSubmit() {
-      submitForm();
+      /**
+       * If the current license has a limit, check if the total count of workflows
+       * exceeds that limit and display the limits modal instead of sending the
+       * update, because it would throw an API error.
+       */
+
+      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+        setShowLimitModal('workflow');
+
+        /**
+         * If the current license has a limit, check if the total count of stages
+         * exceeds that limit and display the limits modal instead of sending the
+         * update, because it would throw an API error.
+         */
+      } else if (
+        limits?.stagesPerWorkflow &&
+        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+      ) {
+        setShowLimitModal('stage');
+      } else {
+        submitForm();
+      }
     },
     validationSchema: getWorkflowValidationSchema({ formatMessage }),
   });
