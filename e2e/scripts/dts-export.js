@@ -12,8 +12,9 @@ const { ALLOWED_CONTENT_TYPES } = require('../constants');
 
 /**
  * Export the data from a strapi project.
- * This script should be run as `node dts-export.js [exportFilePath]` from the
- * root directory of a strapi project e.g. `/examples/getstarted`
+ * This script should be run as `node <path-to>/dts-export.js [exportFilePath]` from the
+ * root directory of a strapi project e.g. `/examples/kitchensink`. Remember to import
+ * the `with-admin` tar file into the project first because the tests rely on the data.
  */
 const exportData = async () => {
   let args = process.argv.slice(2);

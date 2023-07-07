@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 // eslint-disable-next-line import/extensions
-import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
-import { login } from './utils';
+import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { login } from '../../utils/login';
 
 test.describe('Log Out', () => {
   test.beforeEach(async ({ page }) => {

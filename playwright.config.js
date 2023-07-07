@@ -7,7 +7,7 @@ const { devices } = require('@playwright/test');
  */
 const config = {
   // globalSetup: require.resolve('./e2e/global-setup'),
-  testDir: './e2e',
+  testDir: './e2e/tests',
   /* Maximum time one test can run for. */
   timeout: 3000,
   expect: {
@@ -95,7 +95,7 @@ const config = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd test-apps/playwright && yarn start',
+    command: 'cd test-apps/playwright && yarn develop',
     url: 'http://127.0.0.1:1337',
     timeout: 30 * 1000,
     reuseExistingServer: !process.env.CI,
