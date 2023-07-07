@@ -139,16 +139,19 @@ describe('Entity service decorator', () => {
         ...global.strapi,
         entityService: {
           findOne: jest.fn(() => {
-            return { strapi_stage: { id: 2, workflow: { id: 1 } } };
+            return {
+              [ENTITY_STAGE_ATTRIBUTE]: {
+                id: stageFromId,
+                name: `Stage ${stageFromId}`,
+                workflow: { id: workflowId },
+              },
+            };
           }),
           emitEvent: jest.fn(),
         },
         getModel: jest.fn(() => ({
           modelName: uid,
           uid,
-          options: {
-            reviewWorkflows: true,
-          },
         })),
         eventHub: {
           emit,
@@ -157,9 +160,10 @@ describe('Entity service decorator', () => {
 
       const service = decorator(defaultService);
 
-      const id = 1;
-      const input = { data: { title: 'title ', strapi_stage: 1 } };
-      await service.update(uid, id, input);
+      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: stageToId } };
+      await service.update(uid, entityId, input);
+
+      expect(defaultService.update).toHaveBeenCalledWith(uid, entityId, input);
 
       expect(emit).toHaveBeenCalledWith(WORKFLOW_UPDATE_STAGE, {
         entity: { id: entityId },
@@ -177,14 +181,6 @@ describe('Entity service decorator', () => {
               name: `Stage ${stageToId}`,
             },
           },
-        },
-      });
-
-      expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
-        ...input,
-        data: {
-          ...input.data,
-          strapi_stage: 1,
         },
       });
     });
