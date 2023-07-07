@@ -129,6 +129,9 @@ module.exports = {
 
     ctx.body = {
       data: await mapAsync(workflows, sanitizeOutput),
+      meta: {
+        workflowCount: workflows.length,
+      },
     };
   },
   /**
