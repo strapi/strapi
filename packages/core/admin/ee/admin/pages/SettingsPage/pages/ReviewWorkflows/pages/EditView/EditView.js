@@ -38,7 +38,7 @@ export function ReviewWorkflowsEditView() {
   const toggleNotification = useNotification();
   const {
     isLoading: isWorkflowLoading,
-    pagination,
+    meta,
     workflows: [workflow],
     status: workflowStatus,
     refetch,
@@ -132,11 +132,27 @@ export function ReviewWorkflowsEditView() {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
   }, [workflowStatus, workflow, dispatch]);
 
+  /**
+   * If the current license has a limit:
+   * check if the total count of workflows or stages exceeds that limit and display
+   * the limits modal on page load. It can be closed by the user, but the
+   * API will throw an error in case they try to create a new workflow or update the
+   * stages.
+   *
+   * If the current license does not have a limit (e.g. offline license):
+   * do nothing (for now). In case they are trying to create the 201st workflow/ stage
+   * the API will throw an error.
+   *
+   */
+
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (pagination?.total >= limits?.workflows) {
+      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
         setShowLimitModal('workflow');
-      } else if (currentWorkflow.stages.length >= limits?.stagesPerWorkflow) {
+      } else if (
+        limits?.stagesPerWorkflow &&
+        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+      ) {
         setShowLimitModal('stage');
       }
     }
@@ -144,12 +160,13 @@ export function ReviewWorkflowsEditView() {
     currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
-    limits?.stagesPerWorkflow,
-    limits?.workflows,
-    pagination?.total,
+    limits.stagesPerWorkflow,
+    limits.workflows,
+    meta?.workflowCount,
+    meta.workflowsTotal,
   ]);
 
-  // TODO redirect back to list-view if workflow is not found?
+  // TODO: redirect back to list-view if workflow is not found?
 
   return (
     <>

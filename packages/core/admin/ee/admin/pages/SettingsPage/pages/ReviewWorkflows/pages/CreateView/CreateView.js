@@ -37,7 +37,7 @@ export function ReviewWorkflowsCreateView() {
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { limits, isLoading: isLicenseLoading } = useReviewWorkflowLicenseLimits();
-  const { pagination, isLoading: isWorkflowLoading } = useReviewWorkflows();
+  const { meta, isLoading: isWorkflowLoading } = useReviewWorkflows();
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -94,21 +94,34 @@ export function ReviewWorkflowsCreateView() {
     dispatch(resetWorkflow());
   }, [dispatch]);
 
+  /**
+   * If the current license has a limit:
+   * check if the total count of workflows or stages exceeds that limit and display
+   * the limits modal on page load. It can be closed by the user, but the
+   * API will throw an error in case they try to create a new workflow or update the
+   * stages.
+   *
+   * If the current license does not have a limit (e.g. offline license):
+   * do nothing (for now). In case they are trying to create the 201st workflow/ stage
+   * the API will throw an error.
+   *
+   */
+
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (pagination?.total >= limits?.workflows) {
+      if (meta?.workflowsTotal >= limits?.workflows) {
         setShowLimitModal('workflow');
       } else if (currentWorkflow.stages.length >= limits.stagesPerWorkflow) {
         setShowLimitModal('stage');
       }
     }
   }, [
-    currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
     limits.stagesPerWorkflow,
     limits?.workflows,
-    pagination?.total,
+    meta?.workflowsTotal,
+    currentWorkflow.stages.length,
   ]);
 
   return (
