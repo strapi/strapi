@@ -121,16 +121,15 @@ module.exports = {
     );
     const { populate, filters, sort } = await sanitizedQuery.read(query);
 
-    const workflows = await workflowService.find({
-      populate,
-      filters,
-      sort,
-    });
+    const [workflows, workflowCount] = await Promise.all([
+      workflowService.find({ populate, filters, sort }),
+      workflowService.count(),
+    ]);
 
     ctx.body = {
       data: await mapAsync(workflows, sanitizeOutput),
       meta: {
-        workflowCount: workflows.length,
+        workflowCount,
       },
     };
   },
