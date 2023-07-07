@@ -37,44 +37,6 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const displayedFilters = allowedAttributes.map((name) => {
-    if (CREATOR_ATTRIBUTES.includes(name)) {
-      return {
-        name,
-        metadatas: {
-          label: formatMessage({
-            id: `content-manager.components.Filters.${name}`,
-            defaultMessage: name,
-          }),
-          customOperators: [
-            {
-              intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
-              value: '$eq',
-            },
-            {
-              intlLabel: {
-                id: 'components.FilterOptions.FILTER_TYPES.$ne',
-                defaultMessage: 'is not',
-              },
-              value: '$ne',
-            },
-          ],
-          customInput: AdminUsersFilter,
-          options: users.map((user) => ({
-            label: getDisplayName(user, formatMessage),
-            customValue: user.id.toString(),
-          })),
-        },
-        fieldSchema: {
-          type: 'relation',
-          mainField: { name: 'id' },
-          trackedEvent: {
-            name: 'didFilterEntries',
-            properties: { useRelation: true },
-          },
-        },
-      };
-    }
-
     const attribute = contentType.attributes[name];
     const { type, enum: options } = attribute;
 
@@ -85,12 +47,41 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
     const { mainField, label } = metadatas[name].list;
 
-    return {
+    const filter = {
       name,
       metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
       fieldSchema: { type, options, mainField },
       trackedEvent,
     };
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
+      filter.metadatas = {
+        ...filter.metadatas,
+        customOperators: [
+          {
+            intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+            value: '$eq',
+          },
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$ne',
+              defaultMessage: 'is not',
+            },
+            value: '$ne',
+          },
+        ],
+        customInput: AdminUsersFilter,
+        options: users.map((user) => ({
+          label: getDisplayName(user, formatMessage),
+          customValue: user.id.toString(),
+        })),
+      };
+      filter.fieldSchema.mainField = {
+        name: 'id',
+      };
+    }
+
+    return filter;
   });
 
   if (isLoading) {

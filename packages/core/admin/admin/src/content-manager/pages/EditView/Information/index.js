@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
-import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, getDisplayName } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -53,18 +53,16 @@ const Body = () => {
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const { firstname, lastname, username } = initialData[byField] ?? {};
+    const user = initialData[byField] ?? {};
 
-    const userFirstname = firstname ?? '';
-    const userLastname = lastname ?? '';
-    const user = username ?? getFullName(userFirstname, userLastname);
+    const displayName = getDisplayName(user, formatMessage);
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
     const { unit, value } = getUnits(-elapsed);
 
     return {
       at: formatRelativeTime(value, unit, { numeric: 'auto' }),
-      by: isCreatingEntry ? '-' : user,
+      by: isCreatingEntry ? '-' : displayName,
     };
   };
 
