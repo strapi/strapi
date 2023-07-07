@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-import { resetDatabaseAndImportDataFromPath } from '../scripts/dts-import';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
+import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 
 /**
  * Fill in the sign up form with valid values

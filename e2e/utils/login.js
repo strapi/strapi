@@ -1,4 +1,4 @@
-const { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } = require('../../constants');
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
 
 /**
  * Log in to an e2e test app
