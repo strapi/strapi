@@ -24,20 +24,11 @@ const useSettingsMenu = () => {
     async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
     {
       combine(ceLinks, eeLinks) {
-        function addPermissions(link) {
-          if (!link.id) {
-            throw new Error('The settings menu item must have an id attribute.');
-          }
-
-          return {
-            ...link,
-            permissions: permissions.settings?.[link.id]?.main,
-          };
-        }
+        
 
         return {
-          admin: [...eeLinks.admin, ...ceLinks.admin].map(addPermissions),
-          global: [...ceLinks.global, ...eeLinks.global].map(addPermissions),
+          admin: [...eeLinks.admin, ...ceLinks.admin],
+          global: [...ceLinks.global, ...eeLinks.global],
         };
       },
       defaultValue: {
@@ -46,6 +37,17 @@ const useSettingsMenu = () => {
       },
     }
   );
+
+  function addPermissions(link) {
+    if (!link.id) {
+      throw new Error('The settings menu item must have an id attribute.');
+    }
+
+    return {
+      ...link,
+      permissions: permissions.settings?.[link.id]?.main,
+    };
+  }
 
   useEffect(() => {
     const getData = async () => {
@@ -89,7 +91,7 @@ const useSettingsMenu = () => {
     const sections = formatLinks([
       {
         ...settings.global,
-        links: sortLinks([...settings.global.links, ...globalLinks]).map((link) => ({
+        links: sortLinks([...settings.global.links, ...globalLinks.map(addPermissions)]).map((link) => ({
           ...link,
           hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
         })),
@@ -97,12 +99,13 @@ const useSettingsMenu = () => {
       {
         id: 'permissions',
         intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
-        links: adminLinks,
+        links: adminLinks.map(addPermissions),
       },
       ...Object.values(otherSections),
     ]);
 
     getData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminLinks, globalLinks, userPermissions, settings, shouldUpdateStrapi]);
 
   return { isLoading, menu };

@@ -50,17 +50,25 @@ const SettingsNav = ({ menu }) => {
       <SubNavSections>
         {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map((link) => (
-              <SubNavLink
-                as={NavLink}
-                withBullet={link.hasNotification}
-                to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
-                key={link.id}
-              >
-                {formatMessage(link.intlLabel)}
-              </SubNavLink>
-            ))}
+            {section.links.map((link) => {
+              const { isDisplayed } = link;
+
+              if (isDisplayed) {
+                return (
+                  <SubNavLink
+                    as={NavLink}
+                    withBullet={link.hasNotification}
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                    key={link.id}
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </SubNavLink>
+                );
+              }
+
+              return null;
+            })}
           </SubNavSection>
         ))}
       </SubNavSections>
