@@ -7996,7 +7996,7 @@ __metadata:
     react-intl: 6.4.1
     react-is: ^18.2.0
     react-query: 3.39.3
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-refresh: 0.14.0
     react-router-dom: 5.3.4
     react-select: 5.7.0
@@ -8315,7 +8315,7 @@ __metadata:
     react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-router-dom: 5.3.4
     redux: ^4.2.1
     reselect: ^4.1.7
@@ -8355,7 +8355,7 @@ __metadata:
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-router-dom: 5.3.4
     redux: ^4.2.1
     reselect: ^4.1.7
@@ -8455,7 +8455,7 @@ __metadata:
     react-dom: ^18.2.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-router-dom: 5.3.4
     redux: ^4.2.1
     styled-components: 5.3.3
@@ -8521,7 +8521,7 @@ __metadata:
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-router-dom: 5.3.4
     react-select: 5.7.0
     sharp: 0.32.0
@@ -8562,7 +8562,7 @@ __metadata:
     react-dom: ^18.2.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-redux: 8.0.5
+    react-redux: 8.1.1
     react-router-dom: 5.3.4
     styled-components: 5.3.3
     url-join: 4.0.1
@@ -28439,9 +28439,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:8.0.5":
-  version: 8.0.5
-  resolution: "react-redux@npm:8.0.5"
+"react-redux@npm:8.1.1":
+  version: 8.1.1
+  resolution: "react-redux@npm:8.1.1"
   dependencies:
     "@babel/runtime": ^7.12.1
     "@types/hoist-non-react-statics": ^3.3.1
@@ -28455,7 +28455,7 @@ __metadata:
     react: ^16.8 || ^17.0 || ^18.0
     react-dom: ^16.8 || ^17.0 || ^18.0
     react-native: ">=0.59"
-    redux: ^4
+    redux: ^4 || ^5.0.0-beta.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
@@ -28467,7 +28467,7 @@ __metadata:
       optional: true
     redux:
       optional: true
-  checksum: a108f4f7ead6ac005e656d46051474a2bbdb31ede481bbbb3d8d779c1a35e1940b8655577cc5021313411864d305f67fc719aa48d6e5ed8288cf9cbe8b7042e4
+  checksum: 370676330727764d78f35e9c5a0ed0591d79482fe9b70fffcab4aa6bcccc6194e4f1ebd818b4b390351dea5557e70d3bd4d95d7a0ac9baa1f45d6bf2230ee713
   languageName: node
   linkType: hard
 
