@@ -21,6 +21,8 @@ const StyledBullet = styled.div`
 export const Option = ({ publicationState, mainField, id }) => {
   const { formatMessage } = useIntl();
 
+  const nothingFound = !(id === -1);
+
   if (publicationState) {
     const isDraft = publicationState === 'draft';
     const draftMessage = {
@@ -44,7 +46,7 @@ export const Option = ({ publicationState, mainField, id }) => {
   }
 
   return (
-    <ComboboxOption value={id} textValue={mainField ?? id}>
+    <ComboboxOption value={id} disabled={nothingFound} textValue={mainField ?? id}>
       {mainField ?? id}
     </ComboboxOption>
   );

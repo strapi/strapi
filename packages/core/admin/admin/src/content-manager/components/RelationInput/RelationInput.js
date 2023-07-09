@@ -239,9 +239,13 @@ const RelationInput = ({
             onSearch(event.currentTarget.value);
           }}
         >
-          {options.map((opt) => {
-            return <Option key={opt.id} {...opt} />;
-          })}
+          {options.length === 0 ? (
+            <Option mainField="No relations available" id={-1} />
+          ) : (
+            options.map((opt) => {
+              return <Option key={opt.id} {...opt} />;
+            })
+          )}
         </Combobox>
         {shouldDisplayLoadMoreButton && (
           <TextButton
