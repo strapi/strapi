@@ -99,7 +99,7 @@
     "jest": "29.6.0",
     "jest-circus": "29.6.0",
     "jest-cli": "29.6.0",
-    "jest-environment-jsdom": "29.5.0",
+    "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
     "lerna": "6.6.2",
     "lint-staged": "13.2.2",
