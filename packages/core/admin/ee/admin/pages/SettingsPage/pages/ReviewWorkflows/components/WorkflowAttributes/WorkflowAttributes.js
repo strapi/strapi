@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Grid, GridItem, MultiSelectNested, TextInput } from '@strapi/design-system';
+import { useCollator } from '@strapi/helper-plugin';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -9,10 +10,13 @@ import { useDispatch } from 'react-redux';
 import { updateWorkflow } from '../../actions';
 
 export function WorkflowAttributes({ contentTypes: { collectionTypes, singleTypes } }) {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const dispatch = useDispatch();
   const [nameField, nameMeta, nameHelper] = useField('name');
   const [contentTypesField, contentTypesMeta, contentTypesHelper] = useField('contentTypes');
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   return (
     <Grid background="neutral0" hasRadius gap={4} padding={6} shadow="tableShadow">
@@ -62,10 +66,12 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
                 id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
                 defaultMessage: 'Collection Types',
               }),
-              children: collectionTypes.map((contentType) => ({
-                label: contentType.info.displayName,
-                value: contentType.uid,
-              })),
+              children: collectionTypes
+                .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
+                .map((contentType) => ({
+                  label: contentType.info.displayName,
+                  value: contentType.uid,
+                })),
             },
 
             {
