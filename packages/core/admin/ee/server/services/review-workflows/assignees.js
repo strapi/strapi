@@ -9,6 +9,15 @@ module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
 
   return {
+    async findEntityAssigneeId(id, model) {
+      const entity = await strapi.entityService.findOne(model, id, {
+        populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
+        fields: [],
+      });
+
+      return entity?.[ENTITY_ASSIGNEE_ATTRIBUTE]?.id ?? null;
+    },
+
     /**
      * Update the assignee of an entity
      */
@@ -23,8 +32,7 @@ module.exports = ({ strapi }) => {
         throw new ApplicationError(`Selected user does not exist`);
       }
 
-      // TODO get the fromId
-      metrics.sendDidEditAssignee(null, assigneeId);
+      metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), assigneeId);
 
       return strapi.entityService.update(model, id, {
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
@@ -34,7 +42,7 @@ module.exports = ({ strapi }) => {
     },
 
     async deleteEntityAssignee(id, model) {
-      metrics.sendDidEditAssignee(null, null);
+      metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), null);
 
       return strapi.entityService.update(model, id, {
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
