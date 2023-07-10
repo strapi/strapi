@@ -1,9 +1,9 @@
 import { join } from 'path';
 import https from 'https';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
-import { Duplex, PassThrough } from 'stream';
+import { Duplex, PassThrough, Readable } from 'stream';
 
-import type { IAsset, IFile } from '../../../../types';
+import type { IAsset } from '../../../../types';
 
 function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
   if (isLocal) {
@@ -60,9 +60,15 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
  */
 export const createAssetsStream = (strapi: Strapi.Strapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
-    const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
+    const stream: Readable = strapi.db
+      // Create a query builder instance (default type is 'select')
+      .queryBuilder('plugin::upload.file')
+      // Fetch all columns
+      .select('*')
+      // Get a readable stream
+      .stream();
 
-    for (const file of files) {
+    for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
       const stats = await getFileStats(filepath, isLocalProvider);

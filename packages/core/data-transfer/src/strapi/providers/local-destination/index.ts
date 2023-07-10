@@ -85,9 +85,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async #deleteAllAssets() {
     assertValidStrapi(this.strapi);
 
+    const stream: Readable = strapi.db
+      // Create a query builder instance (default type is 'select')
+      .queryBuilder('plugin::upload.file')
+      // Fetch all columns
+      .select('*')
+      // Get a readable stream
+      .stream();
+
     // TODO use bulk delete when exists in providers
-    const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
-    for (const file of files) {
+    for await (const file of stream) {
       await strapi.plugin('upload').provider.delete(file);
       if (file.formats) {
         for (const fileFormat of Object.values(file.formats)) {
