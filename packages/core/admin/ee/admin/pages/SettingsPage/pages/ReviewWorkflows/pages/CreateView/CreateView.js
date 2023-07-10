@@ -132,9 +132,12 @@ export function ReviewWorkflowsCreateView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (meta?.workflowsTotal >= limits?.workflows) {
+      if (limits.workflows && meta?.workflowsTotal >= limits.workflows) {
         setShowLimitModal('workflow');
-      } else if (currentWorkflow.stages.length >= limits.stagesPerWorkflow) {
+      } else if (
+        limits.stagesPerWorkflow &&
+        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+      ) {
         setShowLimitModal('stage');
       }
     }
