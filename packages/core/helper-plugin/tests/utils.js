@@ -2,16 +2,18 @@ import * as React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { renderHook as renderHookRTL, render as renderRTL } from '@testing-library/react';
+import { renderHook as renderHookRTL, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PropTypes from 'prop-types';
+import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import { RBACContext } from '../src/index';
 
 import { server } from './server';
 
-const Providers = ({ children }) => {
+const Providers = ({ children, initialEntries }) => {
   const rbacContextValue = React.useMemo(
     () => ({
       allPermissions: fixtures.permissions.allPermissions,
@@ -31,31 +33,47 @@ const Providers = ({ children }) => {
 
   return (
     // en is the default locale of the admin app.
-    <DesignSystemProvider locale="en">
-      <QueryClientProvider client={queryClient}>
-        <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
-      </QueryClientProvider>
-    </DesignSystemProvider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <IntlProvider locale="en" textComponent="span">
+        <DesignSystemProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
+          </QueryClientProvider>
+        </DesignSystemProvider>
+      </IntlProvider>
+    </MemoryRouter>
   );
+};
+
+Providers.defaultProps = {
+  initialEntries: undefined,
 };
 
 Providers.propTypes = {
   children: PropTypes.node.isRequired,
+  initialEntries: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.object])),
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
 const fallbackWrapper = ({ children }) => <>{children}</>;
 
 /**
- * @type {(ui: React.ReactElement, options?: { renderOptions?: import('@testing-library/react').RenderOptions, userEventOptions?: Parameters<typeof userEvent.setup>[0] }) => import('@testing-library/react').RenderResult & { user: typeof userEvent }}
+ * @typedef {object} RenderOptions
+ * @property {import('@testing-library/react').RenderOptions | undefined} renderOptions
+ * @property {Parameters<typeof userEvent.setup>[0] | undefined} userEventOptions
+ * @property {Array<string | { pathname?: string; search?: string; hash?: string; }>} initialEntries
  */
-const render = (ui, { renderOptions, userEventOptions } = {}) => {
+
+/**
+ * @type {(ui: React.ReactElement, options?: RenderOptions) => import('@testing-library/react').RenderResult & { user: typeof userEvent }}
+ */
+const render = (ui, { renderOptions, userEventOptions, initialEntries } = {}) => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
 
   return {
     ...renderRTL(ui, {
       wrapper: ({ children }) => (
-        <Providers>
+        <Providers initialEntries={initialEntries}>
           <Wrapper>{children}</Wrapper>
         </Providers>
       ),
@@ -78,4 +96,4 @@ const renderHook = (hook, options) => {
   });
 };
 
-export { render, renderHook, server };
+export { render, renderHook, waitFor, server };

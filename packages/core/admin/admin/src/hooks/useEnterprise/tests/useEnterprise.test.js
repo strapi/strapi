@@ -54,6 +54,14 @@ describe('useEnterprise (EE)', () => {
     await waitFor(() => expect(result.current).toStrictEqual(EE_DATA_FIXTURE));
   });
 
+  test('Returns CE data, when enabled is set to false', async () => {
+    const { result } = setup(CE_DATA_FIXTURE, async () => EE_DATA_FIXTURE, {
+      enabled: false,
+    });
+
+    await waitFor(() => expect(result.current).toStrictEqual(CE_DATA_FIXTURE));
+  });
+
   test('Returns a custom defaultValue on first render followed by the EE data', async () => {
     const { result } = setup(CE_DATA_FIXTURE, async () => EE_DATA_FIXTURE, {
       defaultValue: false,

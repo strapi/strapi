@@ -14,7 +14,7 @@ import * as utils from '../../../utils';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { assertValidStrapi } from '../../../utils/providers';
 
-export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
+export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {

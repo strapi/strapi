@@ -19,17 +19,17 @@ const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
 const useLicenseLimitNotification = () => {
   const { formatMessage } = useIntl();
-  let { license } = useLicenseLimits();
+  let { license, isError, isLoading } = useLicenseLimits();
   const toggleNotification = useNotification();
   const { pathname } = useLocation();
 
+  const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
+    license;
+
   useEffect(() => {
-    if (!license?.data) {
+    if (isError || isLoading) {
       return;
     }
-
-    const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
-      license?.data ?? {};
 
     const shouldDisplayNotification =
       !isNil(permittedSeats) &&
@@ -84,7 +84,18 @@ const useLicenseLimitNotification = () => {
         },
       });
     }
-  }, [toggleNotification, license.data, pathname, formatMessage]);
+  }, [
+    toggleNotification,
+    license,
+    pathname,
+    formatMessage,
+    isLoading,
+    permittedSeats,
+    licenseLimitStatus,
+    enforcementUserCount,
+    isHostedOnStrapiCloud,
+    isError,
+  ]);
 };
 
 export default useLicenseLimitNotification;
