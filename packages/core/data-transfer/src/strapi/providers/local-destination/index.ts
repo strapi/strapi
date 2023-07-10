@@ -85,23 +85,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async #deleteAllAssets() {
     assertValidStrapi(this.strapi);
 
-    if (strapi.config.get('plugin.upload').provider === 'local') {
-      const uploadsDirectory = path.join(
-        this.strapi.dirs.static.public,
-        this.uploadsBackupDirectoryName
-      );
-      await fse.rm(uploadsDirectory, { recursive: true, force: true });
-    } else {
-      // external providers
-
-      // TODO use bulk delete when exists in providers
-      const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
-      for (const file of files) {
-        await strapi.plugin('upload').provider.delete(file);
-        if (file.formats) {
-          for (const fileFormat of Object.values(file.formats)) {
-            await strapi.plugin('upload').provider.delete(fileFormat);
-          }
+    // TODO use bulk delete when exists in providers
+    const files: IFile[] = await strapi.query('plugin::upload.file').findMany();
+    for (const file of files) {
+      await strapi.plugin('upload').provider.delete(file);
+      if (file.formats) {
+        for (const fileFormat of Object.values(file.formats)) {
+          await strapi.plugin('upload').provider.delete(fileFormat);
         }
       }
     }
