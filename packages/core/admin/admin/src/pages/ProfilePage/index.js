@@ -77,19 +77,14 @@ const ProfilePage = () => {
   const { isLoading: isLoadingSSO, data: dataSSO } = useQuery(
     ['providers', 'isSSOLocked'],
     async () => {
-      if (window.strapi.isEE) {
-        const {
-          data: { data },
-        } = await get('/admin/providers/isSSOLocked');
+      const {
+        data: { data },
+      } = await get('/admin/providers/isSSOLocked');
 
-        return data;
-      }
-
-      return {
-        isSSOLocked: false,
-      };
+      return data;
     },
     {
+      enabled: window.strapi.isEE && window.strapi.features.isEnabled('sso'),
       onError() {
         toggleNotification({
           type: 'warning',
@@ -178,7 +173,7 @@ const ProfilePage = () => {
     );
   }
 
-  const hasLockedRole = dataSSO?.isSSOLocked;
+  const hasLockedRole = dataSSO?.isSSOLocked ?? false;
   const { email, firstname, lastname, username, preferedLanguage } = data;
   const initialData = { email, firstname, lastname, username, preferedLanguage, currentTheme };
 

@@ -46,7 +46,7 @@
     "purest": "4.0.2",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
-    "react-redux": "8.0.5",
+    "react-redux": "8.1.1",
     "url-join": "4.0.1",
     "yup": "^0.32.9"
   },
