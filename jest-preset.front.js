@@ -6,6 +6,10 @@ const moduleNameMapper = {
   '.*\\.(css|less|styl|scss|sass)$': '@strapi/admin-test-utils/file-mock',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '@strapi/admin-test-utils/file-mock',
+  '^react$': path.join(__dirname, 'node_modules/react'),
+  '^react-dom$': path.join(__dirname, 'node_modules/react-dom'),
+  '^react-router-dom$': path.join(__dirname, 'node_modules/react-router-dom'),
+  '^styled-components$': path.join(__dirname, 'node_modules/styled-components'),
 };
 
 module.exports = {
