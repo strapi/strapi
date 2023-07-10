@@ -24,7 +24,7 @@ const validateUpdateStageOnEntity = yup
 const validateUpdateAssigneeOnEntity = yup
   .object()
   .shape({
-    id: yup.number().integer().min(1),
+    id: yup.number().integer().min(1).nullable(),
   })
   .required();
 
