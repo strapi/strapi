@@ -91,7 +91,7 @@ export function ReviewWorkflowsCreateView() {
        * update, because it would throw an API error.
        */
 
-      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+      if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
         setShowLimitModal('workflow');
 
         /**
@@ -101,7 +101,7 @@ export function ReviewWorkflowsCreateView() {
          */
       } else if (
         limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+        currentWorkflow.stages.length >= parseInt(limits.stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
       } else {
@@ -132,11 +132,11 @@ export function ReviewWorkflowsCreateView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (limits.workflows && meta?.workflowsTotal >= limits.workflows) {
+      if (limits.workflows && meta?.workflowsTotal >= parseInt(limits.workflows, 10)) {
         setShowLimitModal('workflow');
       } else if (
         limits.stagesPerWorkflow &&
-        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+        currentWorkflow.stages.length >= parseInt(limits.stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
       }

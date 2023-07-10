@@ -146,7 +146,7 @@ export function ReviewWorkflowsListView() {
 
   React.useEffect(() => {
     if (!isLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+      if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
         setShowLimitModal(true);
       }
     }
@@ -178,7 +178,7 @@ export function ReviewWorkflowsListView() {
                * current hard-limit of 200 they will see an error thrown by the API.
                */
 
-              if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+              if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
                 event.preventDefault();
                 setShowLimitModal(true);
               }
@@ -226,7 +226,7 @@ export function ReviewWorkflowsListView() {
                    * current hard-limit of 200 they will see an error thrown by the API.
                    */
 
-                  if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+                  if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
                     setShowLimitModal(true);
                   } else {
                     push('/settings/review-workflows/create');

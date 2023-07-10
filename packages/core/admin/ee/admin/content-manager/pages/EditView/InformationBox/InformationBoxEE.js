@@ -88,7 +88,7 @@ export function InformationBoxEE() {
        *
        */
 
-      if (limits?.workflows && limits.workflows > meta.workflowCount) {
+      if (limits?.workflows && parseInt(limits.workflows, 10) > meta.workflowCount) {
         setShowLimitModal('workflow');
 
         /**
@@ -100,7 +100,10 @@ export function InformationBoxEE() {
          * do nothing (for now).
          *
          */
-      } else if (limits?.stagesPerWorkflow && limits.stagesPerWorkflow > workflow.stages.length) {
+      } else if (
+        limits?.stagesPerWorkflow &&
+        parseInt(limits.stagesPerWorkflow, 10) > workflow.stages.length
+      ) {
         setShowLimitModal('stage');
       } else {
         await mutateAsync({
