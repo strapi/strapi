@@ -307,6 +307,7 @@ export const MediaLibrary = () => {
               currentFolder={currentFolder}
               selected={selected}
               onSuccess={handleBulkActionSuccess}
+              folderCount={folderCount}
             />
           )}
 

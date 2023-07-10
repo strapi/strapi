@@ -10,8 +10,23 @@ import getTrad from '../../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
 
-export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
+export const BulkActions = ({ selected, onSuccess, currentFolder, folderCount }) => {
   const { formatMessage } = useIntl();
+  const numberFolders = selected.filter(({ type }) => type === 'folder').length;
+  const numberAssets = selected.filter(({ type }) => type === 'asset').length;
+
+  let showMoveButton = false;
+  if (currentFolder) {
+    showMoveButton = true;
+  } else if (numberAssets && numberFolders) {
+    if (numberFolders < folderCount) {
+      showMoveButton = true;
+    }
+  } else if (numberAssets) {
+    showMoveButton = folderCount > 0;
+  } else if (numberFolders) {
+    showMoveButton = numberFolders < folderCount;
+  }
 
   return (
     <Flex gap={2} paddingBottom={5}>
@@ -30,7 +45,9 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
       </Typography>
 
       <BulkDeleteButton selected={selected} onSuccess={onSuccess} />
-      <BulkMoveButton currentFolder={currentFolder} selected={selected} onSuccess={onSuccess} />
+      {showMoveButton ?
+        (<BulkMoveButton currentFolder={currentFolder} selected={selected} onSuccess={onSuccess} />) : null
+      }
     </Flex>
   );
 };
@@ -43,4 +60,5 @@ BulkActions.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   currentFolder: FolderDefinition,
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
+  folderCount: PropTypes.number.isRequired,
 };

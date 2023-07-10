@@ -19,6 +19,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const setup = (
   props = {
     selected: [],
+    folderCount: 0,
     onSuccess: jest.fn(),
   }
 ) => {
@@ -65,6 +66,7 @@ describe('BulkActions', () => {
         ...[...Array(ASSET_COUNT).keys()].map((index) => ({ id: index, type: 'asset' })),
         ...[...Array(FOLDER_COUNT).keys()].map((index) => ({ id: index, type: 'folder' })),
       ],
+      folderCount: 0,
     });
 
     expect(
