@@ -307,7 +307,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             callback();
           } catch (error) {
             console.log('Error uploading: ', error);
-            callback(new Error(`Error while uploading asset ${chunk.filename}`));
+            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
           }
         });
       },
