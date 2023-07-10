@@ -253,12 +253,13 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
         const entryMetadataPath = path.posix.join('assets', 'metadata', `${data.filename}.json`);
+        const stringifiedMetadata = JSON.stringify(data.metadata);
         archiveStream.entry(
           {
             name: entryMetadataPath,
-            size: JSON.stringify(data.metadata).length,
+            size: stringifiedMetadata.length,
           },
-          JSON.stringify(data.metadata)
+          stringifiedMetadata
         );
 
         const entry = archiveStream.entry({
