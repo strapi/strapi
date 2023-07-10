@@ -73,7 +73,7 @@ export function ReviewWorkflowsListView() {
   const { del } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { getFeature } = useLicenseLimits();
+  const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
 
   const limits = getFeature('review-workflows');
 
@@ -130,6 +130,34 @@ export function ReviewWorkflowsListView() {
       return null;
     }
   };
+
+  /**
+   * If the current license has a limit:
+   * check if the total count of workflows or stages exceeds that limit and display
+   * the limits modal on page load. It can be closed by the user, but the
+   * API will throw an error in case they try to create a new workflow or update the
+   * stages.
+   *
+   * If the current license does not have a limit (e.g. offline license):
+   * do nothing (for now). In case they are trying to create the 201st workflow/ stage
+   * the API will throw an error.
+   *
+   */
+
+  React.useEffect(() => {
+    if (!isLoading && !isLicenseLoading) {
+      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+        setShowLimitModal(true);
+      }
+    }
+  }, [
+    isLicenseLoading,
+    isLoading,
+    limits.stagesPerWorkflow,
+    limits.workflows,
+    meta?.workflowCount,
+    meta.workflowsTotal,
+  ]);
 
   return (
     <>
