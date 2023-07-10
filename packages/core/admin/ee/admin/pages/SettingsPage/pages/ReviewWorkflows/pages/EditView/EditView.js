@@ -114,6 +114,24 @@ export function ReviewWorkflowsEditView() {
     async onSubmit() {
       if (currentWorkflowHasDeletedServerStages) {
         setIsConfirmDeleteDialogOpen(true);
+      } else if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
+      /**
+       * If the current license has a limit, check if the total count of workflows
+       * exceeds that limit and display the limits modal instead of sending the
+       * update, because it would throw an API error.
+       */
+        setShowLimitModal('workflow');
+
+        /**
+         * If the current license has a limit, check if the total count of stages
+         * exceeds that limit and display the limits modal instead of sending the
+         * update, because it would throw an API error.
+         */
+      } else if (
+        limits?.stagesPerWorkflow &&
+        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
+      ) {
+        setShowLimitModal('stage');
       } else {
         submitForm();
       }
@@ -149,11 +167,11 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount >= limits.workflows) {
+      if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
         setShowLimitModal('workflow');
       } else if (
         limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length >= limits.stagesPerWorkflow
+        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
       ) {
         setShowLimitModal('stage');
       }
