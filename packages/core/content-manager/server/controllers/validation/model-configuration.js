@@ -71,15 +71,6 @@ const createMetadasSchema = (schema) => {
 
                 return yup.string().oneOf(validAttributes.concat('id')).default('id');
               }),
-              step: yup
-                .number()
-                .integer()
-                .positive()
-                .test(
-                  'isDivisibleBy60',
-                  'Step must be either 1 or divisible by 60',
-                  (value) => !value || value === 1 || (value * 24) % 60 === 0
-                ),
             })
             .noUnknown()
             .required(),
