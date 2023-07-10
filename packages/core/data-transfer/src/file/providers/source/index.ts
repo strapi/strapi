@@ -149,7 +149,6 @@ class LocalFileSourceProvider implements ISourceProvider {
               return false;
             }
             return isFilePathInDirname('assets/uploads', filePath);
-            // isFilePathInDirname('assets/metadata', filePath)
           },
           async onentry(entry) {
             const { path: filePath, size = 0 } = entry;
@@ -159,7 +158,9 @@ class LocalFileSourceProvider implements ISourceProvider {
             try {
               metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
             } catch (error) {
-              // do nothing
+              console.warn(
+                ` Failed to read metadata for ${file}, Strapi will try to fix this issue automatically`
+              );
             }
             const asset: IAsset = {
               metadata,
