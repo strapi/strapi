@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { act, render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormikProvider, useFormik } from 'formik';
 import { DndProvider } from 'react-dnd';
@@ -66,10 +66,6 @@ const setup = (props) => ({
 });
 
 describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should render values', async () => {
     const { getByRole, getByText, user } = setup();
 
@@ -78,11 +74,11 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     expect(getByRole('textbox')).toHaveValue('workflow name');
     expect(getByText(/2 content types selected/i)).toBeInTheDocument();
 
-    await act(async () => {
-      await user.click(contentTypesSelect);
-    });
+    await user.click(contentTypesSelect);
 
-    expect(getByRole('option', { name: /content type 1/i })).toBeInTheDocument();
-    expect(getByRole('option', { name: /content type 2/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByRole('option', { name: /content type 1/i })).toBeInTheDocument();
+      expect(getByRole('option', { name: /content type 2/i })).toBeInTheDocument();
+    });
   });
 });
