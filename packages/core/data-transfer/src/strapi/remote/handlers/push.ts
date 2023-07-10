@@ -382,6 +382,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     }
 
     for (const item of payload) {
+      /**
+       * This queues the given callback function to be executed in the next iteration
+       * of the event loop, immediately after the current operation completes.
+       */
       process.nextTick(async () => {
         const { action, assetID } = item;
 

@@ -155,8 +155,12 @@ class LocalFileSourceProvider implements ISourceProvider {
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
-            const metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
-
+            let metadata;
+            try {
+              metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
+            } catch (error) {
+              // do nothing
+            }
             const asset: IAsset = {
               metadata,
               filename: file,
