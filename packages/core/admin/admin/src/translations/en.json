@@ -845,6 +845,7 @@
   "content-manager.select.currently.selected": "{count} currently selected",
   "content-manager.success.record.delete": "Deleted",
   "content-manager.success.record.publish": "Published",
+  "content-manager.success.record.publishing": "Publishing...",
   "content-manager.success.record.save": "Saved",
   "content-manager.success.record.unpublish": "Unpublished",
   "content-manager.utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",

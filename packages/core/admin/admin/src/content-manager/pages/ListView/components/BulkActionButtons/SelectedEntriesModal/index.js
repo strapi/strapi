@@ -14,6 +14,7 @@ import {
   Flex,
   Icon,
   Tooltip,
+  Loader,
 } from '@strapi/design-system';
 import {
   useTableContext,
@@ -22,22 +23,64 @@ import {
   useFetchClient,
   useQueryParams,
 } from '@strapi/helper-plugin';
-import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
+import { Pencil, CrossCircle, CheckCircle, Check } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import InjectionZoneList from '../../../../../components/InjectionZoneList';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
+import ConfirmBulkActionDialog, { confirmDialogsPropTypes } from '../ConfirmBulkActionDialog';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogPublishAll
+ * -----------------------------------------------------------------------------------------------*/
+
+const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <ConfirmBulkActionDialog
+      isOpen={isOpen}
+      onToggleDialog={onToggleDialog}
+      dialogBody={
+        <>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
+              defaultMessage: 'Are you sure you want to publish these entries?',
+            })}
+          </Typography>
+          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
+        </>
+      }
+      endAction={
+        <Button
+          onClick={onConfirm}
+          variant="secondary"
+          startIcon={<Check />}
+          loading={isConfirmButtonLoading}
+        >
+          {formatMessage({
+            id: 'app.utils.publish',
+            defaultMessage: 'Publish',
+          })}
+        </Button>
+      }
+    />
+  );
+};
+
+ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
@@ -114,8 +157,7 @@ EntryValidationText.propTypes = {
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = () => {
-  const { rows } = useTableContext();
+const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPublish }) => {
   const {
     location: { pathname },
   } = useHistory();
@@ -143,10 +185,11 @@ const SelectedEntriesTableContent = () => {
         {shouldDisplayMainField && (
           <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
+        <Table.HeaderCell fieldSchemaType="string" label="status" name="status" />
       </Table.Head>
       <Table.LoadingBody />
       <Table.Body>
-        {rows.map(({ entity, errors }, index) => (
+        {rowsToDisplay.map(({ entity, errors }, index) => (
           <Tr key={entity.id}>
             <Body.CheckboxDataCell rowId={entity.id} index={index} />
             <Td>
@@ -158,7 +201,19 @@ const SelectedEntriesTableContent = () => {
               </Td>
             )}
             <Td>
-              <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+              {isPublishing && entriesToPublish.includes(entity.id) ? (
+                <Flex gap={2}>
+                  <Typography>
+                    {formatMessage({
+                      id: 'content-manager.success.record.publishing',
+                      defaultMessage: 'Publishing...',
+                    })}
+                  </Typography>
+                  <Loader small />
+                </Flex>
+              ) : (
+                <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+              )}
             </Td>
             <Td>
               <IconButton
@@ -184,6 +239,18 @@ const SelectedEntriesTableContent = () => {
   );
 };
 
+SelectedEntriesTableContent.defaultProps = {
+  isPublishing: false,
+  rowsToDisplay: [],
+  entriesToPublish: [],
+};
+
+SelectedEntriesTableContent.propTypes = {
+  isPublishing: PropTypes.bool,
+  rowsToDisplay: PropTypes.arrayOf(PropTypes.object),
+  entriesToPublish: PropTypes.arrayOf(PropTypes.number),
+};
+
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
  * -----------------------------------------------------------------------------------------------*/
@@ -196,12 +263,53 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
 
 const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
+  const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext();
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
+  const [rowsToDisplay, setRowsToDisplay] = React.useState([]);
 
-  const selectedEntriesWithErrorsCount = rows.filter(
+  const entriesToPublish = rows
+    .filter(({ entity, errors }) => selectedEntries.includes(entity.id) && !errors)
+    .map(({ entity }) => entity.id);
+
+  const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ entity, errors }) => selectedEntries.includes(entity.id) && errors
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
+
+  const toggleDialog = () => setIsDialogOpen((prev) => !prev);
+
+  const handleConfirmBulkPublish = async () => {
+    try {
+      toggleDialog();
+      setIsConfirmButtonLoading(true);
+      await onConfirm(entriesToPublish);
+      setIsConfirmButtonLoading(false);
+
+      const update = rowsToDisplay.filter((row) => {
+        if (entriesToPublish.includes(row.entity.id)) {
+          // Deselect the entries that have been published
+          onSelectRow({ name: row.entity.id, value: false });
+        }
+
+        // Remove the entries that have been published from the table
+        return !entriesToPublish.includes(row.entity.id);
+      });
+
+      setRowsToDisplay(update);
+    } catch (error) {
+      setIsConfirmButtonLoading(false);
+      toggleDialog();
+    }
+  };
+
+  React.useEffect(() => {
+    // When the api responds with data
+    if (rows.length > 0) {
+      // Update the rows to display
+      setRowsToDisplay(rows);
+    }
+  }, [rows]);
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -229,7 +337,11 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
           )}
         </Typography>
         <Box marginTop={5}>
-          <SelectedEntriesTableContent />
+          <SelectedEntriesTableContent
+            isPublishing={isConfirmButtonLoading}
+            rowsToDisplay={rowsToDisplay}
+            entriesToPublish={entriesToPublish}
+          />
         </Box>
       </ModalBody>
       <ModalFooter
@@ -247,17 +359,24 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
-              onClick={() => onConfirm(selectedEntries)}
+              onClick={() => toggleDialog()}
               disabled={
                 selectedEntries.length === 0 ||
                 selectedEntries.length === selectedEntriesWithErrorsCount ||
                 isLoading
               }
+              loading={isConfirmButtonLoading}
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
             </Button>
           </Flex>
         }
+      />
+      <ConfirmDialogPublishAll
+        isOpen={isDialogOpen}
+        onToggleDialog={toggleDialog}
+        isConfirmButtonLoading={isConfirmButtonLoading}
+        onConfirm={handleConfirmBulkPublish}
       />
     </ModalLayout>
   );
@@ -293,14 +412,13 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
   };
 
   const { get } = useFetchClient();
-  const queryString = stringify(queryParams);
 
   const { data, isLoading, isFetching, refetch } = useQuery(
     ['entries', contentType.uid, queryParams],
     async () => {
-      const { data } = await get(
-        `content-manager/collection-types/${contentType.uid}?${queryString}`
-      );
+      const { data } = await get(`content-manager/collection-types/${contentType.uid}`, {
+        params: queryParams,
+      });
 
       if (data.results) {
         const schema = createYupSchema(contentType, { components }, { isDraft: false });

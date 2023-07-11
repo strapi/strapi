@@ -149,8 +149,6 @@ function ListView({
           type: 'success',
           message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
         });
-
-        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({

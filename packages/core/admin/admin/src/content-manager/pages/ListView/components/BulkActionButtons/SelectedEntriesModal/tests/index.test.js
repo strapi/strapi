@@ -7,6 +7,7 @@ import {
   screen,
   waitForElementToBeRemoved,
   fireEvent,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
@@ -22,6 +23,9 @@ import reducers from '../../../../../../../reducers';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
+  })),
   useQueryParams: jest.fn(() => [
     {
       query: {
@@ -29,6 +33,11 @@ jest.mock('@strapi/helper-plugin', () => ({
       },
     },
   ]),
+}));
+
+jest.mock('../../../../../../../shared/hooks', () => ({
+  ...jest.requireActual('../../../../../../../shared/hooks'),
+  useInjectionZone: () => [],
 }));
 
 const handlers = [
@@ -56,8 +65,6 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-const user = userEvent.setup();
-
 const rootReducer = combineReducers(reducers);
 const store = createStore(rootReducer, {
   'content-manager_listView': {
@@ -74,6 +81,8 @@ const store = createStore(rootReducer, {
     components: [],
   },
 });
+
+const user = userEvent.setup();
 
 const render = (ui) => ({
   ...renderRTL(ui, {
@@ -128,7 +137,7 @@ describe('Bulk publish selected entries modal', () => {
     expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
 
     // Nested table should render the selected items from the parent table
-    expect(screen.getByText('Entry 1')).toBeInTheDocument();
+    expect(screen.queryByText('Entry 1')).toBeInTheDocument();
     expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
   });
 
@@ -171,7 +180,7 @@ describe('Bulk publish selected entries modal', () => {
     expect(publishButton).not.toBeDisabled();
   });
 
-  it('triggers validation dialog for selected items', async () => {
+  it('should publish entries after confirming', async () => {
     const onConfirm = jest.fn();
 
     const { queryByText } = render(
@@ -184,7 +193,19 @@ describe('Bulk publish selected entries modal', () => {
 
     const publishButton = screen.getByRole('button', { name: /publish/i });
     await user.click(publishButton);
+    const publishDialog = screen.getByRole('dialog', { name: /confirmation?/i });
+    const publishDialogButton = within(publishDialog).getByRole('button', { name: /publish/i });
+
+    expect(publishDialog).toBeInTheDocument();
+    expect(publishDialogButton).toBeInTheDocument();
+
+    await user.click(publishDialogButton);
+
     expect(onConfirm).toHaveBeenCalledWith([1, 2, 3]);
+    expect(publishDialog).not.toBeInTheDocument();
+    expect(screen.queryByText('Entry 1')).not.toBeInTheDocument();
+    expect(screen.queryByText('Entry 2')).not.toBeInTheDocument();
+    expect(screen.queryByText('Entry 3')).not.toBeInTheDocument();
   });
 
   it('should show validation errors if there is an error', async () => {
