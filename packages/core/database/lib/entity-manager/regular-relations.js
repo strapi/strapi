@@ -206,29 +206,40 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
 
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
+
+  // Build the update query based on the relation type
+  // See query below for more details
   const update = [];
   const updateBinding = [];
-  const select = ['??'];
-  const selectBinding = ['id'];
-  const where = [];
-  const whereBinding = [];
+  const selectEntityRelations = db.connection(joinTable.name).select('id');
+  const selectInverseEntityRelations = db.connection(joinTable.name).select('id');
 
   if (hasOrderColumn(attribute) && id) {
+    // Update order column of join table
     update.push('?? = b.src_order');
     updateBinding.push(orderColumnName);
-    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
-    selectBinding.push(joinColumn.name, orderColumnName);
-    where.push('?? = ?');
-    whereBinding.push(joinColumn.name, id);
+
+    // Calculate order column of entity relations
+    selectEntityRelations
+      .rowNumber('src_order', joinColumn.name, orderColumnName)
+      .where(joinColumn.name, id);
+
+    // Do not update the order column of entities that were also using the same relations
+    selectInverseEntityRelations.select({ src_order: orderColumnName });
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    // Update inverse order column of join table
     update.push('?? = b.inv_order');
     updateBinding.push(inverseOrderColumnName);
-    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
-    selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
-    where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
-    whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
+
+    // Calculate inv order column of inverse side for the entity relations
+    selectEntityRelations.rowNumber('inv_order', inverseJoinColumn.name, inverseOrderColumnName);
+
+    // Calculate inv order column of entities that were also using the same relations
+    selectInverseEntityRelations
+      .rowNumber('inv_order', inverseJoinColumn.name, inverseOrderColumnName)
+      .where(inverseJoinColumn.name, 'in', inverseRelIds);
   }
 
   switch (strapi.db.dialect.client) {
@@ -237,16 +248,20 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
       await db
         .getConnection()
         .raw(
-          `UPDATE
-            ?? as a,
+          `UPDATE ?? as a,
             (
-              SELECT ${select.join(', ')}
-              FROM ??
-              WHERE ${where.join(' OR ')}
+              ${selectEntityRelations.toSQL().sql}
+              UNION
+              ${selectInverseEntityRelations.toSQL().sql}
             ) AS b
           SET ${update.join(', ')}
           WHERE b.id = a.id`,
-          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+          [
+            joinTable.name,
+            ...selectEntityRelations.toSQL().bindings,
+            ...selectInverseEntityRelations.toSQL().bindings,
+            ...updateBinding,
+          ]
         )
         .transacting(trx);
       break;
@@ -254,12 +269,21 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
       UPDATE
         :joinTable: as a,
         (
+          -- Update the updated entity order columns
           SELECT
             id,
             ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
             ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
           FROM :joinTable:
-          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+          WHERE :joinColumn: = :id 
+          UNION
+          -- Update the inverse side order columns of entities that relate to the same inverse side
+          SELECT
+            id,
+            :orderColumn: AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :inverseJoinColumn: IN (:inverseRelIds)
         ) AS b
       SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
       WHERE b.id = a.id;
@@ -274,12 +298,17 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
           `UPDATE ?? as a
               SET ${update.join(', ')}
               FROM (
-                SELECT ${select.join(', ')}
-                FROM ??
-                WHERE ${where.join(' OR ')}
+                ${selectEntityRelations.toSQL().sql}
+                UNION
+                ${selectInverseEntityRelations.toSQL().sql}
               ) AS b
               WHERE b.id = a.id`,
-          [joinTableName, ...updateBinding, ...selectBinding, joinTableName, ...whereBinding]
+          [
+            joinTableName,
+            ...updateBinding,
+            ...selectEntityRelations.toSQL().bindings,
+            ...selectInverseEntityRelations.toSQL().bindings,
+          ]
         )
         .transacting(trx);
 
