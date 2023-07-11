@@ -8248,7 +8248,7 @@ __metadata:
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
     "@types/jest": 29.5.2
-    aws-sdk: 2.1409.0
+    aws-sdk: 2.1413.0
     eslint-config-custom: 4.11.4
     lodash: 4.17.21
     tsconfig: 4.11.4
@@ -11749,9 +11749,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:2.1409.0":
-  version: 2.1409.0
-  resolution: "aws-sdk@npm:2.1409.0"
+"aws-sdk@npm:2.1413.0":
+  version: 2.1413.0
+  resolution: "aws-sdk@npm:2.1413.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -11763,7 +11763,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: f0046c83916e12b07b28699fd20aea11d78a3f41b1aa6add2ed645f92dec8b424640ef9439596545eba5f3d3a4254c08ce12b7d48504656dd37d2cc9b5ba9994
+  checksum: 3ab880fa917ec4dd1ff475d3ba9040b41bb473ab13758d97e99fc5bb55e3e5b19ff0dfb7fc5aec61fcf238c5cfcc51f934b840013bde33452840ef8489e070f1
   languageName: node
   linkType: hard
 
@@ -18310,7 +18310,7 @@ __metadata:
     mysql: 2.18.1
     mysql2: 3.3.0
     passport-google-oauth2: 0.2.0
-    pg: 8.8.0
+    pg: 8.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
     react-intl: 6.4.1
@@ -22235,7 +22235,7 @@ __metadata:
     lodash: 4.17.21
     mysql: 2.18.1
     passport-google-oauth2: 0.2.0
-    pg: 8.8.0
+    pg: 8.11.1
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
@@ -26554,17 +26554,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:2.6.1":
-  version: 2.6.1
-  resolution: "pg-connection-string@npm:2.6.1"
-  checksum: 882344a47e1ecf3a91383e0809bf2ac48facea97fcec0358d6e060e1cbcb8737acde419b4c86f05da4ce4a16634ee50fff1d2bb787d73b52ccbfde697243ad8a
+"pg-cloudflare@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "pg-cloudflare@npm:1.1.1"
+  checksum: 32aac06b5dc4588bbf78801b6267781bc7e13be672009df949d08e9627ba9fdc26924916665d4de99d47f9b0495301930547488dad889d826856976c7b3f3731
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "pg-connection-string@npm:2.5.0"
-  checksum: a6f3a068f7c9416a5b33a326811caf0dfaaee045c225b7c628b4c9b4e9a2b25bdd12a21e4c48940e1000ea223a4e608ca122d2ff3dd08c8b1db0fc9f5705133a
+"pg-connection-string@npm:2.6.1, pg-connection-string@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "pg-connection-string@npm:2.6.1"
+  checksum: 882344a47e1ecf3a91383e0809bf2ac48facea97fcec0358d6e060e1cbcb8737acde419b4c86f05da4ce4a16634ee50fff1d2bb787d73b52ccbfde697243ad8a
   languageName: node
   linkType: hard
 
@@ -26575,19 +26575,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-pool@npm:^3.5.2":
-  version: 3.5.2
-  resolution: "pg-pool@npm:3.5.2"
+"pg-pool@npm:^3.6.1":
+  version: 3.6.1
+  resolution: "pg-pool@npm:3.6.1"
   peerDependencies:
     pg: ">=8.0"
-  checksum: a5d029200257671f0c17ca54b9ab6213e2060e64e5cc792b78edd50ab471a26cd364890d05d546d9296949e079e943821cf2ceb4d488f4e6a6789fb781a628bf
+  checksum: 8a6513e6f74a794708c9dd16d2ccda0debadc56435ec2582de2b2e35b01315550c5dab8a0a9a2a16f4adce45523228f5739940fb7687ec7e9c300f284eb08fd1
   languageName: node
   linkType: hard
 
-"pg-protocol@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "pg-protocol@npm:1.5.0"
-  checksum: b839d12cafe942ef9cbc5b13c174eb2356804fb4fe8ead8279f46a36be90722d19a91409955beb8a3d5301639c44854e49749de4aef02dc361fee3e2a61fb1e4
+"pg-protocol@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "pg-protocol@npm:1.6.0"
+  checksum: e12662d2de2011e0c3a03f6a09f435beb1025acdc860f181f18a600a5495dc38a69d753bbde1ace279c8c442536af9c1a7c11e1d0fe3fad3aa1348b28d9d2683
   languageName: node
   linkType: hard
 
@@ -26604,23 +26604,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:8.8.0":
-  version: 8.8.0
-  resolution: "pg@npm:8.8.0"
+"pg@npm:8.11.1":
+  version: 8.11.1
+  resolution: "pg@npm:8.11.1"
   dependencies:
     buffer-writer: 2.0.0
     packet-reader: 1.0.0
-    pg-connection-string: ^2.5.0
-    pg-pool: ^3.5.2
-    pg-protocol: ^1.5.0
+    pg-cloudflare: ^1.1.1
+    pg-connection-string: ^2.6.1
+    pg-pool: ^3.6.1
+    pg-protocol: ^1.6.0
     pg-types: ^2.1.0
     pgpass: 1.x
   peerDependencies:
     pg-native: ">=3.0.1"
+  dependenciesMeta:
+    pg-cloudflare:
+      optional: true
   peerDependenciesMeta:
     pg-native:
       optional: true
-  checksum: fa30a85814dd7238b582c3bc6c0b9e2b0ae38dd0a6bb485ef480e64bb5ce589de6cb873ce4d3cd10c37a3e0a1e1281ba75dc7d80b1a68bae91999cd5b70d398b
+  checksum: e608fe1c52725e1c0c4cbdf97e29df8f41b9fd21aed821866e3488b3a0622be1c19801d8d8eb31f0de35f040c4f69163c211358e7df8c48d15ee8f660d2bd4cc
   languageName: node
   linkType: hard
 
