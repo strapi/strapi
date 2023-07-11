@@ -6,7 +6,6 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -29,7 +28,6 @@ import { reducer, initialState } from '../../reducer';
 import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
 
 export function ReviewWorkflowsEditView() {
-  const { trackUsage } = useTracking();
   const { workflowId } = useParams();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
@@ -142,11 +140,6 @@ export function ReviewWorkflowsEditView() {
   useInjectReducer(REDUX_NAMESPACE, reducer);
 
   const limits = getFeature('review-workflows');
-
-  React.useEffect(() => {
-    trackUsage('didViewWorkflow');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   React.useEffect(() => {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));

@@ -23,6 +23,7 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -74,6 +75,7 @@ export function ReviewWorkflowsListView() {
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
+  const { trackUsage } = useTracking();
 
   const limits = getFeature('review-workflows');
 
@@ -181,6 +183,8 @@ export function ReviewWorkflowsListView() {
               if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
                 event.preventDefault();
                 setShowLimitModal(true);
+              } else {
+                trackUsage('willCreateWorkflow');
               }
             }}
           >
@@ -230,6 +234,7 @@ export function ReviewWorkflowsListView() {
                     setShowLimitModal(true);
                   } else {
                     push('/settings/review-workflows/create');
+                    trackUsage('willCreateWorkflow');
                   }
                 }}
               >
