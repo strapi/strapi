@@ -97,9 +97,11 @@ export const BrowseStep = ({
 
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
   const areAllAssetSelected =
+    allAllowedAsset.length > 0 &&
+    selectedAssets.length > 0 &&
     allAllowedAsset.every(
       (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
-    ) && selectedAssets.length > 0;
+    );
   const hasSomeAssetSelected = allAllowedAsset.some(
     (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
@@ -142,7 +144,7 @@ export const BrowseStep = ({
                     />
                   </Flex>
                 )}
-                {isGridView && <SortPicker onChangeSort={onChangeSort} />}
+                {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
                 <Filters
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}
@@ -271,7 +273,7 @@ export const BrowseStep = ({
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
-                      onClick={() => handleClickFolderCard(folder.id)}
+                      onClick={() => handleClickFolderCard(folder.id, folder.path)}
                       cardActions={
                         onEditFolder && (
                           <IconButton
@@ -286,11 +288,13 @@ export const BrowseStep = ({
                       }
                     >
                       <FolderCardBody>
-                        <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
+                        <FolderCardBodyAction
+                          onClick={() => handleClickFolderCard(folder.id, folder.path)}
+                        >
                           <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
-                              {/* VisuallyHidden dash here allows to separate folder title and count informations 
+                              {/* VisuallyHidden dash here allows to separate folder title and count informations
                               for voice reading structure purpose */}
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>

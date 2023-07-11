@@ -145,6 +145,7 @@
   "modalForm.editCategory.base.name.description": "Leerzeichen sind im Name einer Kategorie nicht erlaubt",
   "modalForm.header-edit": "Bearbeite {name}",
   "modalForm.header.categories": "Kategorien",
+  "modalForm.header.back": "Zurück",
   "modalForm.singleType.header-create": "Erstelle einen Einzel-Eintrag",
   "modalForm.sub-header.addComponentToDynamicZone": "Komponente zur dynamischen Zone hinzufügen",
   "modalForm.sub-header.attribute.create": "Erstelle neues {type}-Feld",

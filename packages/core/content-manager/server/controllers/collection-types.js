@@ -1,9 +1,11 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
-const { getService, pickWritableAttributes } = require('../utils');
+const { getService } = require('../utils');
 const { validateBulkActionInput } = require('./validation');
+const { hasProhibitedCloningFields, excludeNotCreatableFields } = require('./utils/clone');
 
 module.exports = {
   async find(ctx) {
@@ -88,11 +90,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeCreateInput;
     const setCreator = setCreatorFields({ user });
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
 
     const sanitizedBody = await sanitizeFn(body);
 
@@ -139,15 +140,64 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pickWritables = pickWritableAttributes({ model });
     const pickPermittedFields = permissionChecker.sanitizeUpdateInput(entity);
     const setCreator = setCreatorFields({ user, isEdition: true });
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
     const sanitizedBody = await sanitizeFn(body);
 
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
 
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
+  },
+
+  async clone(ctx) {
+    const { userAbility, user } = ctx.state;
+    const { model, sourceId: id } = ctx.params;
+    const { body } = ctx.request;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.create()) {
+      return ctx.forbidden();
+    }
+
+    const permissionQuery = await permissionChecker.sanitizedQuery.create(ctx.query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
+
+    const entity = await entityManager.findOne(id, model, { populate });
+
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    const pickPermittedFields = permissionChecker.sanitizeCreateInput;
+    const setCreator = setCreatorFields({ user });
+    const excludeNotCreatable = excludeNotCreatableFields(model, permissionChecker);
+
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator, excludeNotCreatable);
+
+    const sanitizedBody = await sanitizeFn(body);
+
+    const clonedEntity = await entityManager.clone(entity, sanitizedBody, model);
+
+    ctx.body = await permissionChecker.sanitizeOutput(clonedEntity);
+  },
+
+  async autoClone(ctx) {
+    const { model } = ctx.params;
+
+    // Trying to automatically clone the entity and model has unique or relational fields
+    if (hasProhibitedCloningFields(model)) {
+      throw new ApplicationError(
+        'Entity could not be cloned as it has unique and/or relational fields. ' +
+          'Please edit those fields manually and save to complete the cloning.'
+      );
+    }
+
+    await this.clone(ctx);
   },
 
   async delete(ctx) {
@@ -195,6 +245,8 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
       .build();
 
     const entity = await entityManager.findOne(id, model, { populate });
@@ -234,6 +286,8 @@ module.exports = {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
+      .populateDeep(Infinity)
+      .countRelations()
       .build();
 
     const entityPromises = ids.map((id) => entityManager.findOne(id, model, { populate }));

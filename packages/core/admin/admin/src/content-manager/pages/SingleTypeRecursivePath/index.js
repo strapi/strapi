@@ -2,16 +2,15 @@ import React, { memo, useMemo } from 'react';
 
 import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
-import permissions from '../../../permissions';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditSettingsView from '../EditSettingsView';
 import EditViewLayoutManager from '../EditViewLayoutManager';
-
-const cmPermissions = permissions.contentManager;
 
 const SingleTypeRecursivePath = ({
   match: {
@@ -19,6 +18,7 @@ const SingleTypeRecursivePath = ({
     url,
   },
 }) => {
+  const permissions = useSelector(selectAdminPermissions);
   const { isLoading, layout, updateLayout } = useFetchContentTypeLayout(slug);
 
   const { rawContentTypeLayout, rawComponentsLayouts } = useMemo(() => {
@@ -48,7 +48,7 @@ const SingleTypeRecursivePath = ({
     <ContentTypeLayoutContext.Provider value={layout}>
       <Switch>
         <Route path={`${url}/configurations/edit`}>
-          <CheckPagePermissions permissions={cmPermissions.singleTypesConfigurations}>
+          <CheckPagePermissions permissions={permissions.contentManager.singleTypesConfigurations}>
             <EditSettingsView
               components={rawComponentsLayouts}
               isContentTypeView

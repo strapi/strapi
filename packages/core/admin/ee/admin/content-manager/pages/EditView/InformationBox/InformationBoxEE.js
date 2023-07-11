@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
-import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { Information } from '../../../../../../admin/src/content-manager/pages/EditView/Information';
 
 import { AssigneeSelect } from './components/AssigneeSelect';
 import { StageSelect } from './components/StageSelect';

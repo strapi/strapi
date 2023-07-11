@@ -79,7 +79,17 @@ describe('useFolder', () => {
     await waitFor(() => result.current.isSuccess);
 
     await waitFor(() =>
-      expect(get).toBeCalledWith('/upload/folders/1?populate[parent][populate][parent]=*')
+      expect(get).toBeCalledWith('/upload/folders/1', {
+        params: {
+          populate: {
+            parent: {
+              populate: {
+                parent: '*',
+              },
+            },
+          },
+        },
+      })
     );
   });
 

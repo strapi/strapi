@@ -14,7 +14,13 @@ import WebhookForm from '../index';
 jest.mock('../../../../../../../../hooks/useContentTypes');
 
 const makeApp = (component) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };

@@ -3,7 +3,6 @@ import React from 'react';
 import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
 import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { stringify } from 'qs';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
@@ -97,7 +96,9 @@ describe('useFolders', () => {
     };
 
     await waitFor(() =>
-      expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`)
+      expect(get).toBeCalledWith(`/upload/folders`, {
+        params: expected,
+      })
     );
   });
 
@@ -122,7 +123,9 @@ describe('useFolders', () => {
       _q: 'something',
     };
 
-    expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`);
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
@@ -146,7 +149,9 @@ describe('useFolders', () => {
       },
     };
 
-    expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`);
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
@@ -159,7 +164,7 @@ describe('useFolders', () => {
       filters: {
         $and: [
           {
-            something: true,
+            something: 'true',
           },
           {
             parent: {
@@ -173,7 +178,9 @@ describe('useFolders', () => {
       },
     };
 
-    expect(get).toBeCalledWith(`/upload/folders?${stringify(expected, { encode: false })}`);
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('it does not fetch, if enabled is set to false', async () => {

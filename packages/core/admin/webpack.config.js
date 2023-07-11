@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const fse = require('fs-extra');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
@@ -16,8 +15,6 @@ const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
 
-const EE_REGEX = /from.* ['"]ee_else_ce\//;
-
 module.exports = ({
   cacheDir,
   dest,
@@ -29,10 +26,6 @@ module.exports = ({
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
     features: [],
-  },
-  roots = {
-    eeRoot: './ee/admin',
-    ceRoot: './admin/src',
   },
   tsConfigFilePath,
 }) => {
@@ -99,74 +92,7 @@ module.exports = ({
         },
         {
           test: /\.m?jsx?$/,
-          include: cacheDir,
-          oneOf: [
-            // Use babel-loader for files that distinct the ee and ce code
-            // These files have an import Something from 'ee_else_ce/
-            {
-              test(filePath) {
-                if (!filePath) {
-                  return false;
-                }
-
-                try {
-                  const fileContent = fse.readFileSync(filePath).toString();
-
-                  if (fileContent.match(/from.* ['"]ee_else_ce\//)) {
-                    return true;
-                  }
-
-                  return EE_REGEX.test(fileContent);
-                } catch (e) {
-                  return false;
-                }
-              },
-              use: {
-                loader: require.resolve('babel-loader'),
-                options: {
-                  cacheDirectory: true,
-                  cacheCompression: isProduction,
-                  compact: isProduction,
-                  presets: [
-                    require.resolve('@babel/preset-env'),
-                    require.resolve('@babel/preset-react'),
-                  ],
-                  plugins: [
-                    [
-                      require.resolve('@strapi/babel-plugin-switch-ee-ce'),
-                      {
-                        // Imported this tells the custom plugin where to look for the ee folder
-                        roots,
-                      },
-                    ],
-
-                    [
-                      require.resolve('@babel/plugin-transform-runtime'),
-                      {
-                        helpers: true,
-                        regenerator: true,
-                      },
-                    ],
-                    [require.resolve('babel-plugin-styled-components'), { pure: true }],
-                  ],
-                },
-              },
-            },
-            // Use esbuild-loader for the other files
-            {
-              use: {
-                loader: require.resolve('esbuild-loader'),
-                options: {
-                  loader: 'jsx',
-                  target: buildTarget,
-                },
-              },
-            },
-          ],
-        },
-        {
-          test: /\.m?jsx?$/,
-          include: pluginsPath,
+          include: [cacheDir, ...pluginsPath],
           use: {
             loader: require.resolve('esbuild-loader'),
             options: {

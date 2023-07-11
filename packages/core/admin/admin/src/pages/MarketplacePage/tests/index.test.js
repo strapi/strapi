@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { TrackingProvider, useAppInfo, useTracking } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -7,7 +8,9 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import { createStore } from 'redux';
 
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
@@ -36,31 +39,40 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const user = userEvent.setup();
+const setup = (props) => ({
+  ...render(<MarketPlacePage {...props} />, {
+    wrapper({ children }) {
+      const history = createMemoryHistory();
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+      return (
+        <Provider
+          store={createStore((state) => state, {
+            admin_app: { permissions: fixtures.permissions.app },
+          })}
+        >
+          <QueryClientProvider client={client}>
+            <TrackingProvider>
+              <IntlProvider locale="en" messages={{}} textComponent="span">
+                <ThemeProvider theme={lightTheme}>
+                  <Router history={history}>{children}</Router>
+                </ThemeProvider>
+              </IntlProvider>
+            </TrackingProvider>
+          </QueryClientProvider>
+        </Provider>
+      );
     },
-  },
+  }),
+
+  user: userEvent.setup(),
 });
-
-const history = createMemoryHistory();
-
-const App = (
-  <QueryClientProvider client={client}>
-    <TrackingProvider>
-      <IntlProvider locale="en" messages={{}} textComponent="span">
-        <ThemeProvider theme={lightTheme}>
-          <Router history={history}>
-            <MarketPlacePage />
-          </Router>
-        </ThemeProvider>
-      </IntlProvider>
-    </TrackingProvider>
-  </QueryClientProvider>
-);
 
 const waitForReload = async () => {
   await screen.findByTestId('marketplace-results');
@@ -71,8 +83,6 @@ describe('Marketplace page - layout', () => {
 
   afterEach(() => {
     server.resetHandlers();
-    // Clear the cache to isolate each test
-    client.clear();
   });
 
   afterAll(() => server.close());
@@ -81,7 +91,7 @@ describe('Marketplace page - layout', () => {
     const trackUsage = jest.fn();
     useTracking.mockImplementationOnce(() => ({ trackUsage }));
 
-    const { container } = render(App);
+    const { container } = setup();
     await waitForReload();
     // Check snapshot
     expect(container.firstChild).toMatchSnapshot();
@@ -100,17 +110,17 @@ describe('Marketplace page - layout', () => {
 
   it('renders the offline layout', async () => {
     useNavigatorOnLine.mockReturnValueOnce(false);
-    render(App);
+    const { getByText } = setup();
 
-    const offlineText = screen.getByText('You are offline');
+    const offlineText = getByText('You are offline');
 
     expect(offlineText).toBeVisible();
   });
 
   it('disables the button and shows compatibility tooltip message when version provided', async () => {
-    const { findByTestId } = render(App);
+    const { findByTestId, findAllByTestId } = setup();
 
-    const alreadyInstalledCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+    const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
     );
 
@@ -127,9 +137,9 @@ describe('Marketplace page - layout', () => {
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {
-    const { findByTestId } = render(App);
+    const { findByTestId, findAllByTestId, user } = setup();
 
-    const alreadyInstalledCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+    const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Config Sync')
     );
 
@@ -155,7 +165,7 @@ describe('Marketplace page - layout', () => {
       useYarn: true,
     }));
 
-    render(App);
+    const { queryByText } = setup();
     await waitForReload();
 
     // Should display notification
@@ -169,16 +179,16 @@ describe('Marketplace page - layout', () => {
     });
     expect(toggleNotification).toHaveBeenCalledTimes(1);
     // Should not show install buttons
-    expect(screen.queryByText(/copy install command/i)).toEqual(null);
+    expect(queryByText(/copy install command/i)).toEqual(null);
   });
 
   it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
-    render(App);
+    const { findByText, findAllByTestId, user } = setup();
 
-    const providersTab = (await screen.findByText(/providers/i)).closest('button');
+    const providersTab = (await findByText(/providers/i)).closest('button');
     await user.click(providersTab);
 
-    const nodeMailerCard = (await screen.findAllByTestId('npm-package-card')).find((div) =>
+    const nodeMailerCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Nodemailer')
     );
 

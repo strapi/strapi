@@ -136,6 +136,7 @@
   "modalForm.editCategory.base.name.description": "Mellemrum er ikke tilladt i kategori navnet",
   "modalForm.header-edit": "Redigér {name}",
   "modalForm.header.categories": "Kategorier",
+  "modalForm.header.back": "Tilbage",
   "modalForm.singleType.header-create": "Opret en enkelt type",
   "modalForm.sub-header.addComponentToDynamicZone": "Tilføj komponent til den dymaiske zone",
   "modalForm.sub-header.attribute.create": "Tilføj {type} felt",
