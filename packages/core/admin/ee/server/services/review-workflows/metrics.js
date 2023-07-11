@@ -1,7 +1,7 @@
 'use strict';
 
-const sendDidCreateStage = async () => {
-  strapi.telemetry.send('didCreateStage', {});
+const sendDidCreateStage = async (stagesCount) => {
+  strapi.telemetry.send('didCreateStage', { stagesCount });
 };
 
 const sendDidEditStage = async () => {
@@ -16,9 +16,19 @@ const sendDidChangeEntryStage = async () => {
   strapi.telemetry.send('didChangeEntryStage', {});
 };
 
+const sendDidCreateWorkflow = async () => {
+  strapi.telemetry.send('didCreateWorkflow', {});
+};
+
+const sendDidEditWorkflow = async () => {
+  strapi.telemetry.send('didEditWorkflow', {});
+};
+
 module.exports = {
   sendDidCreateStage,
   sendDidEditStage,
   sendDidDeleteStage,
   sendDidChangeEntryStage,
+  sendDidCreateWorkflow,
+  sendDidEditWorkflow,
 };
