@@ -174,7 +174,7 @@ export function Stage({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  const { themeColorName } = colorField.value ? getStageColorByHex(colorField.value) : {};
+  const { themeColorName } = getStageColorByHex(colorField.value) ?? {};
 
   return (
     <Box ref={composedRef}>
