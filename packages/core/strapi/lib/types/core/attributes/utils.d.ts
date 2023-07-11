@@ -56,7 +56,7 @@ export type GetKeysWithTarget<TSchemaUID extends Common.UID.Schema> = keyof {
   ? TKey
   : never;
 
-export type GetValue<TAttribute extends Attribute.Attribute> =
+export type GetValue<TAttribute extends Attribute.Attribute, TGuard = unknown> = Utils.Guard.Never<
   | Attribute.GetBigIntegerValue<TAttribute>
   | Attribute.GetBooleanValue<TAttribute>
   | Attribute.GetComponentValue<TAttribute>
@@ -77,7 +77,9 @@ export type GetValue<TAttribute extends Attribute.Attribute> =
   | Attribute.GetDateValue<TAttribute>
   | Attribute.GetDateTimeValue<TAttribute>
   | Attribute.GetTimeValue<TAttribute>
-  | Attribute.GetTimestampValue<TAttribute>;
+  | Attribute.GetTimestampValue<TAttribute>,
+  TGuard
+>;
 
 export type GetValueByKey<
   TSchemaUID extends Common.UID.Schema,
