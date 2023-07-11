@@ -64,7 +64,6 @@ describe('Local Strapi Source Destination', () => {
   });
 
   describe('Strategy', () => {
-    // TODO checkk this
     test('requires strategy to be restore', async () => {
       const restoreProvider = createLocalStrapiDestinationProvider({
         getStrapi: getStrapiFactory({
@@ -144,7 +143,15 @@ describe('Local Strapi Source Destination', () => {
         contentTypes: getContentTypes(),
         query,
         getModel,
-        db: { query, transaction },
+        db: {
+          query,
+          transaction,
+          queryBuilder: jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+              stream: jest.fn().mockReturnValue([]),
+            }),
+          }),
+        },
         ...strapiCommonProperties,
       })();
 
