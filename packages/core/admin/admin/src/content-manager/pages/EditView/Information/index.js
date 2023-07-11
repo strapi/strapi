@@ -124,7 +124,7 @@ Root.propTypes = {
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]).isRequired,
 };
 
-export default {
+export const Information = {
   Root,
   Title,
   Body,
