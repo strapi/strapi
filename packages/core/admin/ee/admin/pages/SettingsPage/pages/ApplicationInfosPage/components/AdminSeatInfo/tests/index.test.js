@@ -4,17 +4,17 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import AdminSeatInfo from '..';
+import { AdminSeatInfoEE } from '..';
 import { useLicenseLimits } from '../../../../../../../hooks';
 
 const LICENSE_MOCK = {
+  isLoading: false,
+  isError: false,
   license: {
-    data: {
-      enforcementUserCount: 10,
-      licenseLimitStatus: '',
-      permittedSeats: 100,
-      isHostedOnStrapiCloud: false,
-    },
+    enforcementUserCount: 10,
+    licenseLimitStatus: '',
+    permittedSeats: 100,
+    isHostedOnStrapiCloud: false,
   },
 };
 
@@ -28,37 +28,33 @@ const withMarkup = (query) => (text) =>
 
 jest.mock('../../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../../hooks'),
-  useLicenseLimits: jest.fn(),
+  useLicenseLimits: jest.fn(() => LICENSE_MOCK),
 }));
 
-const ComponentFixture = (props) => (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}}>
-      <AdminSeatInfo {...props} />
-    </IntlProvider>
-  </ThemeProvider>
-);
-
-function setup(props) {
-  return render(<ComponentFixture {...props} />);
-}
+const setup = (props) =>
+  render(<AdminSeatInfoEE {...props} />, {
+    wrapper({ children }) {
+      return (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}}>
+            {children}
+          </IntlProvider>
+        </ThemeProvider>
+      );
+    },
+  });
 
 describe('<AdminSeatInfo />', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-
-    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
   });
 
   test('Do not render anything, when permittedSeats is falsy', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          permittedSeats: null,
-        },
+        permittedSeats: null,
       },
     });
 
@@ -69,6 +65,7 @@ describe('<AdminSeatInfo />', () => {
 
   test('Render seat info', () => {
     const { getByText } = setup();
+
     const getByTextWithMarkup = withMarkup(getByText);
 
     expect(getByText('Admin seats')).toBeInTheDocument();
@@ -86,14 +83,11 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render billing link (on strapi cloud)', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          isHostedOnStrapiCloud: true,
-        },
+        isHostedOnStrapiCloud: true,
       },
     });
 
@@ -107,14 +101,11 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render OVER_LIMIT icon', () => {
-    useLicenseLimits.mockReturnValue({
+    useLicenseLimits.mockReturnValueOnce({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        data: {
-          ...LICENSE_MOCK.license.data,
-          licenseLimitStatus: 'OVER_LIMIT',
-        },
+        licenseLimitStatus: 'OVER_LIMIT',
       },
     });
 

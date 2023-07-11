@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import {
   Box,
@@ -51,11 +51,10 @@ const AdvancedSettingsPage = () => {
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
 
-  const updatePermissions = useMemo(() => ({ update: PERMISSIONS.updateAdvancedSettings }), []);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC(updatePermissions);
+  } = useRBAC({ update: PERMISSIONS.updateAdvancedSettings });
 
   const { status: isLoadingData, data } = useQuery('advanced', () => fetchData(), {
     onSuccess() {

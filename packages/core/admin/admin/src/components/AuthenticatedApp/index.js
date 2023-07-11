@@ -38,7 +38,7 @@ const AuthenticatedApp = () => {
   const [
     { data: appInfos, status },
     { data: tagName, isLoading },
-    { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
+    { data: permissions, status: fetchPermissionsStatus, refetch, isFetching },
     { data: userRoles },
   ] = useQueries([
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
@@ -86,7 +86,7 @@ const AuthenticatedApp = () => {
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   const shouldShowNotDependentQueriesLoader =
-    (isFetching && isFetched) || status === 'loading' || fetchPermissionsStatus === 'loading';
+    isFetching || status === 'loading' || fetchPermissionsStatus === 'loading';
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 

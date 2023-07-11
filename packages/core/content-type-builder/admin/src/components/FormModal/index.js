@@ -95,6 +95,7 @@ const FormModal = () => {
     forTarget,
     modalType,
     isOpen,
+    showBackLink,
     kind,
     step,
     targetUid,
@@ -1006,6 +1007,7 @@ const FormModal = () => {
         targetUid={targetUid}
         attributeType={attributeType}
         customFieldUid={customFieldUid}
+        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions

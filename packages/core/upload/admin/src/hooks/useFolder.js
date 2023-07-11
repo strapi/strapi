@@ -11,7 +11,16 @@ export const useFolder = (id, { enabled = true }) => {
 
   const fetchFolder = async () => {
     try {
-      const { data } = await get(`${dataRequestURL}/${id}?populate[parent][populate][parent]=*`);
+      const params = {
+        populate: {
+          parent: {
+            populate: {
+              parent: '*',
+            },
+          },
+        },
+      };
+      const { data } = await get(`${dataRequestURL}/${id}`, { params });
 
       return data.data;
     } catch (err) {

@@ -216,9 +216,9 @@ export const AssetDialog = ({
     setSelections(nextAssets);
   };
 
-  const handleFolderChange = (folder) => {
-    onChangeFolder(folder);
-    onChangeFolderParam(folder);
+  const handleFolderChange = (folderId, folderPath) => {
+    onChangeFolder(folderId);
+    onChangeFolderParam(folderId, folderPath);
   };
 
   return (
