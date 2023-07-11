@@ -1,5 +1,4 @@
 import { useRBACProvider, findMatchingPermissions, useCollator } from '@strapi/helper-plugin';
-import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
@@ -29,13 +28,10 @@ const useAllowedAttributes = (contentType, slug) => {
       },
     ]).length > 0;
 
-  const attributesWithReadPermissions = get(
-    readPermissionsForSlug,
-    ['0', 'properties', 'fields'],
-    []
-  );
+  const attributesWithReadPermissions = readPermissionsForSlug?.[0]?.properties?.fields ?? [];
+
   const allowedAttributes = attributesWithReadPermissions.filter((attr) => {
-    const current = get(contentType, ['attributes', attr], {});
+    const current = contentType?.attributes?.[attr] ?? {};
 
     if (!current.type) {
       return false;
