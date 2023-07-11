@@ -125,6 +125,7 @@
   "modalForm.editCategory.base.name.description": "Spazi non ammessi per il nome della categoria",
   "modalForm.header-edit": "Modifica {name}",
   "modalForm.header.categories": "Categorie",
+  "modalForm.header.back": "Indietro",
   "modalForm.singleType.header-create": "Crea una Entità singola",
   "modalForm.sub-header.addComponentToDynamicZone": "Aggiungi nuovo componente alla zona dinamica",
   "modalForm.sub-header.attribute.create": "Aggiungi nuovo campo {type}",

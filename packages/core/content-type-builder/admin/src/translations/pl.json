@@ -145,6 +145,7 @@
   "modalForm.editCategory.base.name.description": "Spacja nie jest dozwolona dla nazwy kategorii",
   "modalForm.header-edit": "Edytuj {name}",
   "modalForm.header.categories": "Kategorie",
+  "modalForm.header.back": "Z powrotem",
   "modalForm.singleType.header-create": "Nowy pojedynczy typ",
   "modalForm.sub-header.addComponentToDynamicZone": "Dodaj nowy komponent do strefy dynamicznej",
   "modalForm.sub-header.attribute.create": "Dodaj nowe pole {type}",
