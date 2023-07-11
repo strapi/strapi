@@ -105,12 +105,6 @@ async function syncMetadatas(configuration, schema) {
       _.set(acc, [key], updatedMeta);
     }
 
-    // update visible attr
-    if (edit.visible && !isVisible(schema, key)) {
-      _.set(updatedMeta, ['edit', 'visible'], false);
-      _.set(acc, [key], updatedMeta);
-    }
-
     if (!_.has(edit, 'mainField')) return acc;
 
     // remove mainField if the attribute is not a relation anymore
