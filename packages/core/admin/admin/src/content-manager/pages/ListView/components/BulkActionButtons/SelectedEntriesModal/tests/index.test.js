@@ -7,6 +7,7 @@ import {
   screen,
   waitForElementToBeRemoved,
   fireEvent,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
@@ -22,6 +23,9 @@ import reducers from '../../../../../../../reducers';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(() => {
+    return jest.fn();
+  }),
   useQueryParams: jest.fn(() => [
     {
       query: {
@@ -29,6 +33,11 @@ jest.mock('@strapi/helper-plugin', () => ({
       },
     },
   ]),
+}));
+
+jest.mock('../../../../../../../shared/hooks', () => ({
+  ...jest.requireActual('../../../../../../../shared/hooks'),
+  useInjectionZone: () => [],
 }));
 
 const handlers = [
@@ -39,24 +48,42 @@ const handlers = [
           {
             id: 1,
             name: 'Entry 1',
+            publishAt: null,
           },
           {
             id: 2,
             name: 'Entry 2',
+            publishAt: null,
           },
           {
             id: 3,
             name: 'Entry 3',
+            publishAt: null,
           },
         ],
+      })
+    );
+  }),
+  rest.post('*/content-manager/collection-types/:apiId/actions/bulkPublish', (req, res, ctx) => {
+    return res(
+      ctx.json({
+        data: {
+          count: 3,
+        },
+      })
+    );
+  }),
+  rest.get('*/content-manager/collection-types/:apiId/actions/countManyEntriesDraftRelations', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        data: 0,
       })
     );
   }),
 ];
 
 const server = setupServer(...handlers);
-
-const user = userEvent.setup();
 
 const rootReducer = combineReducers(reducers);
 const store = createStore(rootReducer, {
@@ -74,6 +101,8 @@ const store = createStore(rootReducer, {
     components: [],
   },
 });
+
+const user = userEvent.setup();
 
 const render = (ui) => ({
   ...renderRTL(ui, {
@@ -115,11 +144,9 @@ describe('Bulk publish selected entries modal', () => {
   });
 
   it('renders the selected items in the modal', async () => {
-    const onConfirm = jest.fn();
-
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+        <SelectedEntriesModal onToggle={jest.fn()} />
       </Table.Root>
     );
 
@@ -128,14 +155,14 @@ describe('Bulk publish selected entries modal', () => {
     expect(screen.getByText(/publish entries/i)).toBeInTheDocument();
 
     // Nested table should render the selected items from the parent table
-    expect(screen.getByText('Entry 1')).toBeInTheDocument();
+    expect(screen.queryByText('Entry 1')).toBeInTheDocument();
     expect(screen.queryByText('Entry 4')).not.toBeInTheDocument();
   });
 
   it('reacts to selection updates', async () => {
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onConfirm={jest.fn()} onToggle={jest.fn()} />
+        <SelectedEntriesModal onToggle={jest.fn()} />
       </Table.Root>
     );
 
@@ -171,12 +198,10 @@ describe('Bulk publish selected entries modal', () => {
     expect(publishButton).not.toBeDisabled();
   });
 
-  it('triggers validation dialog for selected items', async () => {
-    const onConfirm = jest.fn();
-
+  it('should publish valid entries after confirming and close the modal', async () => {
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onConfirm={onConfirm} onToggle={jest.fn()} />
+        <SelectedEntriesModal onToggle={jest.fn()} />
       </Table.Root>
     );
 
@@ -184,7 +209,69 @@ describe('Bulk publish selected entries modal', () => {
 
     const publishButton = screen.getByRole('button', { name: /publish/i });
     await user.click(publishButton);
-    expect(onConfirm).toHaveBeenCalledWith([1, 2, 3]);
+    const publishDialog = screen.getByRole('dialog', { name: /confirmation?/i });
+    const publishDialogButton = within(publishDialog).getByRole('button', { name: /publish/i });
+
+    expect(publishDialog).toBeInTheDocument();
+    expect(publishDialogButton).toBeInTheDocument();
+
+    await user.click(publishDialogButton);
+
+    expect(publishDialog).not.toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: 'Entry 3' })).not.toBeInTheDocument();
+  });
+
+  it('should only keep entries with validation errors in the modal after publish', async () => {
+    server.use(
+      rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            results: [
+              {
+                id: 1,
+                name: 'Entry 1',
+              },
+              {
+                id: 2,
+                name: 'Entry 2',
+              },
+              {
+                id: 3,
+                name: '',
+              },
+            ],
+          })
+        );
+      })
+    );
+
+    const { queryByText } = render(
+      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+        <SelectedEntriesModal onToggle={jest.fn()} />
+      </Table.Root>
+    );
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+
+    const publishButton = screen.getByRole('button', { name: /publish/i });
+    await user.click(publishButton);
+    const publishDialog = screen.getByRole('dialog', { name: /confirmation?/i });
+    const publishDialogButton = within(publishDialog).getByRole('button', { name: /publish/i });
+
+    expect(publishDialog).toBeInTheDocument();
+    expect(publishDialogButton).toBeInTheDocument();
+
+    await user.click(publishDialogButton);
+
+    expect(publishDialog).not.toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
+    expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
+    ).toBeInTheDocument();
   });
 
   it('should show validation errors if there is an error', async () => {
@@ -213,7 +300,7 @@ describe('Bulk publish selected entries modal', () => {
 
     const { queryByText } = render(
       <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
-        <SelectedEntriesModal onConfirm={jest.fn()} onToggle={jest.fn()} />
+        <SelectedEntriesModal onToggle={jest.fn()} />
       </Table.Root>
     );
 
@@ -221,7 +308,7 @@ describe('Bulk publish selected entries modal', () => {
 
     // Is showing the error message
     expect(
-      screen.getAllByText('components.Input.error.validation.required')[0]
+      screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
     ).toBeInTheDocument();
 
     // Publish button is enabled if at least one selected entry is valid

@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { combineReducers, createStore } from 'redux';
 
 import reducers from '../../../../../../reducers';
-import BulkActionButtons, { ConfirmDialogPublishAll } from '../index';
+import BulkActionButtons, { ConfirmDialogPublishAll } from '../SelectedEntriesModal';
 
 const handlers = [
   rest.get('*/countManyEntriesDraftRelations', (req, res, ctx) => {
