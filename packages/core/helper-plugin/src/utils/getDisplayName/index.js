@@ -1,5 +1,5 @@
 /**
- * Retrivies display name based on user data and with the formatMessage function to show the name if required
+ * Retrieves the display name of an admin panel user
  * @typedef AdminUserNamesAttributes
  * @property {string} firstname
  * @property {string} lastname
