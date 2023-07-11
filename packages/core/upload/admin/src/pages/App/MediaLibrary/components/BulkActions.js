@@ -14,8 +14,8 @@ export const BulkActions = ({ selected, onSuccess, currentFolder, folderCount })
   const { formatMessage } = useIntl();
   const numberFolders = selected.filter(({ type }) => type === 'folder').length;
   const numberAssets = selected.filter(({ type }) => type === 'asset').length;
-
   let showMoveButton = false;
+
   if (currentFolder) {
     showMoveButton = true;
   } else if (numberAssets && numberFolders) {
