@@ -665,7 +665,7 @@
   "content-manager.components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
   "content-manager.components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
   "content-manager.components.FiltersPickWrapper.hide": "Hide",
-  "content-manager.components.Filters.usersSelect.label": "Search and select an user to filter by",
+  "content-manager.components.Filters.usersSelect.label": "Search and select a user to filter by",
   "content-manager.components.LeftMenu.Search.label": "Search for a content type",
   "content-manager.components.LeftMenu.collection-types": "Collection Types",
   "content-manager.components.LeftMenu.single-types": "Single Types",
