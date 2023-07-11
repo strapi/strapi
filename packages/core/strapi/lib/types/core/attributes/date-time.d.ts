@@ -8,7 +8,7 @@ export type DateTime = Attribute.OfType<'datetime'> &
   Attribute.RequiredOption &
   Attribute.UniqueOption;
 
-export type DateTimeValue = string;
+export type DateTimeValue = globalThis.Date | string;
 
 export type GetDateTimeValue<T extends Attribute.Attribute> = T extends DateTime
   ? DateTimeValue
