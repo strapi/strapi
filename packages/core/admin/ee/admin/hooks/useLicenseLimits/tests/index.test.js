@@ -69,7 +69,9 @@ const setup = (...args) =>
 describe('useLicenseLimits', () => {
   beforeAll(() => server.listen());
 
-  afterAll(() => server.resetHandlers());
+  afterAll(() => {
+    server.close();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

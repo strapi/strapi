@@ -46,7 +46,7 @@
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
-    "react-redux": "8.0.5",
+    "react-redux": "8.1.1",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
     "swagger-ui-dist": "4.19.0",
