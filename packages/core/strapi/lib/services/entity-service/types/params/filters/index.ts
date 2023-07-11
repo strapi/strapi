@@ -10,9 +10,9 @@ export { Operator, AttributeUtils as Attribute };
  */
 type NestedAttributeCondition<
   TSchemaUID extends Common.UID.Schema,
-  TAttribute extends Attribute.GetKeys<TSchemaUID>
+  TAttributeName extends Attribute.GetKeys<TSchemaUID>
 > = ObjectNotation<
-  Utils.Guard.Never<Attribute.GetTarget<TSchemaUID, TAttribute>, Common.UID.Schema>
+  Utils.Guard.Never<Attribute.GetTarget<TSchemaUID, TAttributeName>, Common.UID.Schema>
 >;
 
 /**
@@ -20,11 +20,11 @@ type NestedAttributeCondition<
  */
 type AttributeCondition<
   TSchemaUID extends Common.UID.Schema,
-  TAttribute extends Attribute.GetKeys<TSchemaUID>
+  TAttributeName extends Attribute.GetKeys<TSchemaUID>
 > = Utils.Expression.If<
-  Utils.Expression.IsNotNever<TAttribute>,
+  Utils.Expression.IsNotNever<TAttributeName>,
   // Get the filter attribute value for the given attribute
-  AttributeUtils.GetValue<Attribute.Get<TSchemaUID, TAttribute>>,
+  AttributeUtils.GetValue<Attribute.Get<TSchemaUID, TAttributeName>>,
   // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
   AttributeUtils.ScalarValues
 > extends infer TAttributeValue
@@ -39,9 +39,9 @@ type AttributeCondition<
         } & {
           [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
         } & {
-          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttribute>;
+          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
         } & {
-          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttribute>[];
+          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
         })
   : never;
 

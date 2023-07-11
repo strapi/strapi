@@ -22,13 +22,13 @@ export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 
 
 export type NumberValue = string | number;
 
-export type DateValue = globalThis.Date | string | number;
+export type DateValue = Attribute.DateValue | number;
 
-export type TimeValue = globalThis.Date | string | number;
+export type TimeValue = Attribute.TimeValue | number;
 
-export type DateTimeValue = globalThis.Date | string | number;
+export type DateTimeValue = Attribute.DateTimeValue | number;
 
-export type TimeStampValue = globalThis.Date | string | number;
+export type TimeStampValue = Attribute.TimestampValue;
 
 /**
  * List of possible values for the scalar attributes
