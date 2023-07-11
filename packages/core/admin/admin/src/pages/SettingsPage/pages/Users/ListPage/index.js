@@ -12,8 +12,6 @@ import {
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
-import useLicenseLimitNotification from 'ee_else_ce/hooks/useLicenseLimitNotification';
-import CreateAction from 'ee_else_ce/pages/SettingsPage/pages/Users/ListPage/CreateAction';
 import qs from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
@@ -21,9 +19,11 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../App/selectors';
 import Filters from '../../../components/Filters';
 
+import { CreateActionCE } from './CreateAction';
 import TableRows from './DynamicTable/TableRows';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
@@ -32,7 +32,7 @@ import tableHeaders from './utils/tableHeaders';
 
 const EE_LICENSE_LIMIT_QUERY_KEY = ['ee', 'license-limit-info'];
 
-const ListPage = () => {
+export const UserListPageCE = () => {
   const { post } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = useState(false);
@@ -45,7 +45,6 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
-  useLicenseLimitNotification();
   const {
     users,
     pagination,
@@ -55,6 +54,15 @@ const ListPage = () => {
   } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
     enabled: canRead,
   });
+  const CreateAction = useEnterprise(
+    CreateActionCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/CreateAction'
+        )
+      ).CreateActionEE
+  );
 
   const headers = tableHeaders.map((header) => ({
     ...header,
@@ -96,6 +104,11 @@ const ListPage = () => {
       },
     }
   );
+
+  // block rendering until the EE component is fully loaded
+  if (!CreateAction) {
+    return null;
+  }
 
   return (
     <Main aria-busy={isLoading}>
@@ -166,4 +179,22 @@ const ListPage = () => {
   );
 };
 
-export default ListPage;
+// component which determines whether this page should render the CE or EE page
+const UsersListPageSwitch = () => {
+  const UsersListPage = useEnterprise(
+    UserListPageCE,
+    async () =>
+      // eslint-disable-next-line import/no-cycle
+      (await import('../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage'))
+        .UserListPageEE
+  );
+
+  // block rendering until the EE component is fully loaded
+  if (!UsersListPage) {
+    return null;
+  }
+
+  return <UsersListPage />;
+};
+
+export default UsersListPageSwitch;
