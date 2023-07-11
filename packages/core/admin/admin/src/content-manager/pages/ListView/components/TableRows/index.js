@@ -55,11 +55,7 @@ export const TableRows = ({
   const ReviewWorkflowsStage = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CE,
     async () =>
-      (
-        await import(
-          '../../../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
-        )
-      ).ReviewWorkflowsStageEE,
+      import('../../../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'),
     {
       enabled: hasReviewWorkflows,
     }
@@ -178,19 +174,36 @@ export const TableRows = ({
                 );
               }
 
-              if (hasReviewWorkflows && name === 'strapi_reviewWorkflows_stage') {
-                return (
-                  <Td key={key}>
-                    {data.strapi_reviewWorkflows_stage ? (
-                      <ReviewWorkflowsStage
-                        color={data.strapi_reviewWorkflows_stage.color}
-                        name={data.strapi_reviewWorkflows_stage.name}
-                      />
-                    ) : (
-                      <Typography textColor="neutral800">-</Typography>
-                    )}
-                  </Td>
-                );
+              if (hasReviewWorkflows) {
+                switch (name) {
+                  case 'strapi_reviewWorkflows_stage':
+                    return (
+                      <Td key={key}>
+                        {data.strapi_reviewWorkflows_stage ? (
+                          <ReviewWorkflowsStage.ReviewWorkflowsStageEE
+                            color={data.strapi_reviewWorkflows_stage.color}
+                            name={data.strapi_reviewWorkflows_stage.name}
+                          />
+                        ) : (
+                          <Typography textColor="neutral800">-</Typography>
+                        )}
+                      </Td>
+                    );
+                  case 'strapi_assignee':
+                    return (
+                      <Td key={key}>
+                        {data.strapi_assignee ? (
+                          <ReviewWorkflowsStage.ReviewWorkflowsAssigneeEE
+                            firstname={data.strapi_assignee.firstname}
+                            lastname={data.strapi_assignee.lastname}
+                          />
+                        ) : (
+                          <Typography textColor="neutral800">-</Typography>
+                        )}
+                      </Td>
+                    );
+                  default:
+                }
               }
 
               return (

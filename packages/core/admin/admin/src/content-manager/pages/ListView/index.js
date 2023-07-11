@@ -422,13 +422,15 @@ function ListView({
 
     if (reviewWorkflowColumns) {
       // Make sure the column header label is translated
-      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
-        reviewWorkflowColumns.metadatas.label = formatMessage(
-          reviewWorkflowColumns.metadatas.label
-        );
-      }
+      reviewWorkflowColumns.map((column) => {
+        if (typeof column.metadatas.label !== 'string') {
+          column.metadatas.label = formatMessage(column.metadatas.label);
+        }
 
-      formattedHeaders.push(reviewWorkflowColumns);
+        return column;
+      });
+
+      formattedHeaders.push(...reviewWorkflowColumns);
     }
 
     return formattedHeaders;
