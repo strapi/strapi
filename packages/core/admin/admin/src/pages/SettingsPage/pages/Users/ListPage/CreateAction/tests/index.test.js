@@ -4,14 +4,14 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import CreateAction from '..';
+import { CreateActionCE } from '..';
 
 const onClickSpy = jest.fn();
 
 const ComponentFixture = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}}>
-      <CreateAction onClick={onClickSpy} {...props} />
+      <CreateActionCE onClick={onClickSpy} {...props} />
     </IntlProvider>
   </ThemeProvider>
 );

@@ -7,19 +7,32 @@ updates:
         patterns:
           - '@babel/*'
           - 'babel-*'
-        exclude-patterns:
-          - '@strapi/babel-plugin-switch-ee-ce'
+
+      eslint:
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@typescript-eslint/*'
 
       jest:
         patterns:
           - 'jest'
-          - 'jest-circus'
-          - 'jest-cli'
+          - 'jest-*'
 
       react:
         patterns:
           - 'react'
           - 'react-dom'
+
+      react-dnd:
+        patterns:
+          - 'react-dnd'
+          - 'react-dnd-*'
+
+      redux:
+        patterns:
+          - 'redux'
+          - 'react-redux'
 
       richtext-editor:
         patterns:
