@@ -192,6 +192,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
             try {
               await fse.emptyDir(assetsDirectory);
               await fse.copy(backupDirectory, assetsDirectory, { recursive: true });
+              await fse.remove(backupDirectory);
               this.destroy(
                 new ProviderTransferError(
                   `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
