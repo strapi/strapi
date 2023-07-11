@@ -116,7 +116,7 @@
     "react-intl": "6.4.1",
     "react-is": "^18.2.0",
     "react-query": "3.39.3",
-    "react-redux": "8.0.5",
+    "react-redux": "8.1.1",
     "react-refresh": "0.14.0",
     "react-router-dom": "5.3.4",
     "react-select": "5.7.0",
