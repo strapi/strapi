@@ -13,6 +13,7 @@ import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvi
 import { useEnterprise } from '../../hooks/useEnterprise';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 
+import { LoginCE } from './components/Login';
 import { FORMS } from './constants';
 import init from './init';
 import { initialState, reducer } from './reducer';
@@ -29,6 +30,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
+  const Login = useEnterprise(
+    LoginCE,
+    async () => (await import('../../../../ee/admin/pages/AuthPage/components/Login')).LoginEE
+  );
   const forms = useEnterprise(
     FORMS,
     async () => (await import('../../../../ee/admin/pages/AuthPage/constants')).FORMS,
@@ -50,7 +55,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   );
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } =
+  const { endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } =
     forms?.[authType] ?? {};
 
   useEffect(() => {
@@ -273,6 +278,18 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       />
     );
   }
+
+  if (Login) {
+    // Assign the component to render for the login form
+    forms.login.Component = Login;
+  }
+
+  // block rendering until the Login EE component is fully loaded
+  if (!Login) {
+    return null;
+  }
+
+  const { Component } = forms?.[authType] ?? {};
 
   return (
     <Component

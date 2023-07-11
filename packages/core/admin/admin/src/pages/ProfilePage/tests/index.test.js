@@ -26,6 +26,7 @@ const setup = (props) =>
   render(<ProfilePage {...props} />, {
     wrapper({ children }) {
       window.strapi.isEE = true;
+      window.strapi.features.isEnabled = () => true;
       const client = new QueryClient({
         defaultOptions: {
           queries: {

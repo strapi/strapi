@@ -10,7 +10,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
-import Information from '../../../../../../admin/src/content-manager/pages/EditView/Information';
+import { Information } from '../../../../../../admin/src/content-manager/pages/EditView/Information';
 import { useReviewWorkflows } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
