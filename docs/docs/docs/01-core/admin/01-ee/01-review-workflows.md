@@ -133,6 +133,10 @@ This service is used to manipulate the stages entities and to update stages on o
 
 This is the telemetry service used to gather information on the usage of this feature. It provides information on the number of workflows and stages created, as well as the frequency of stage updates on entities.
 
+#### validation
+
+This service is used to ensure the feature is working as expected and validate the data to be valid.
+
 ### Decorators
 
 #### Entity Service
