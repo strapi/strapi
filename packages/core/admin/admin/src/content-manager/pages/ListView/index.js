@@ -140,24 +140,6 @@ function ListView({
 
   const { post, del } = fetchClient;
 
-  const bulkPublishMutation = useMutation(
-    (data) =>
-      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
-        });
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
   const bulkUnpublishMutation = useMutation(
     (data) =>
       post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
@@ -281,10 +263,6 @@ function ListView({
     },
     [slug, toggleNotification, formatAPIError, del, fetchData, params]
   );
-
-  const handleConfirmPublishAllData = async (selectedEntries) => {
-    return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
-  };
 
   const handleConfirmUnpublishAllData = (selectedEntries) => {
     return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
@@ -556,7 +534,6 @@ function ListView({
                   showPublish={canPublish && hasDraftAndPublish}
                   showDelete={canDelete}
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
-                  onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
                   refetchData={refetchData}
                 />

@@ -110,7 +110,6 @@ const BulkActionButtons = ({
   showPublish,
   showDelete,
   onConfirmDeleteAll,
-  onConfirmPublishAll,
   onConfirmUnpublishAll,
   refetchData,
 }) => {
@@ -180,10 +179,7 @@ const BulkActionButtons = ({
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
           {isSelectedEntriesModalOpen && (
-            <SelectedEntriesModal
-              onToggle={handleToggleSelectedEntriesModal}
-              onConfirm={onConfirmPublishAll}
-            />
+            <SelectedEntriesModal onToggle={handleToggleSelectedEntriesModal} />
           )}
         </>
       )}
@@ -221,7 +217,6 @@ BulkActionButtons.defaultProps = {
   showPublish: false,
   showDelete: false,
   onConfirmDeleteAll() {},
-  onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
   refetchData() {},
 };
@@ -230,7 +225,6 @@ BulkActionButtons.propTypes = {
   showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
-  onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
   refetchData: PropTypes.func,
 };
