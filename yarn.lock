@@ -8020,7 +8020,7 @@ __metadata:
     "@types/ws": ^8.5.4
     chalk: 4.1.2
     fs-extra: 10.0.0
-    knex: 2.4.0
+    knex: 2.5.0
     koa: 2.13.4
     lodash: 4.17.21
     rimraf: 3.0.2
@@ -8042,7 +8042,7 @@ __metadata:
     date-fns: 2.30.0
     debug: 4.3.4
     fs-extra: 10.0.0
-    knex: 2.4.0
+    knex: 2.5.0
     lodash: 4.17.21
     semver: 7.5.1
     umzug: 3.2.1
@@ -14244,7 +14244,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^9.1.0, commander@npm:^9.4.1":
+"commander@npm:^9.4.1":
   version: 9.5.0
   resolution: "commander@npm:9.5.0"
   checksum: c7a3e27aa59e913b54a1bafd366b88650bc41d6651f0cbe258d4ff09d43d6a7394232a4dadd0bf518b3e696fdf595db1028a0d82c785b88bd61f8a440cecfade
@@ -22700,12 +22700,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:2.4.0":
-  version: 2.4.0
-  resolution: "knex@npm:2.4.0"
+"knex@npm:2.5.0":
+  version: 2.5.0
+  resolution: "knex@npm:2.5.0"
   dependencies:
     colorette: 2.0.19
-    commander: ^9.1.0
+    commander: ^10.0.0
     debug: 4.3.4
     escalade: ^3.1.1
     esm: ^3.2.25
@@ -22713,7 +22713,7 @@ __metadata:
     getopts: 2.3.0
     interpret: ^2.2.0
     lodash: ^4.17.21
-    pg-connection-string: 2.5.0
+    pg-connection-string: 2.6.1
     rechoir: ^0.8.0
     resolve-from: ^5.0.0
     tarn: ^3.0.2
@@ -22735,7 +22735,7 @@ __metadata:
       optional: true
   bin:
     knex: bin/cli.js
-  checksum: 66b4ae8412c61125b78512a66d924af95116628e16026efce4d03b80b2ced6b63208b37bb49fb52a499761da5e8981e136b48fcefcd48c3fe9fc72d9d17c5661
+  checksum: 83c9fa20423546cbfcfedd28095645ad22c4a3529c02a94cbfe970800c0542c0dde502245237666f52da7edfe4b404b4acd3d5179fc37008ddaa6025b1fcfb9d
   languageName: node
   linkType: hard
 
@@ -26996,7 +26996,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:2.5.0, pg-connection-string@npm:^2.5.0":
+"pg-connection-string@npm:2.6.1":
+  version: 2.6.1
+  resolution: "pg-connection-string@npm:2.6.1"
+  checksum: 882344a47e1ecf3a91383e0809bf2ac48facea97fcec0358d6e060e1cbcb8737acde419b4c86f05da4ce4a16634ee50fff1d2bb787d73b52ccbfde697243ad8a
+  languageName: node
+  linkType: hard
+
+"pg-connection-string@npm:^2.5.0":
   version: 2.5.0
   resolution: "pg-connection-string@npm:2.5.0"
   checksum: a6f3a068f7c9416a5b33a326811caf0dfaaee045c225b7c628b4c9b4e9a2b25bdd12a21e4c48940e1000ea223a4e608ca122d2ff3dd08c8b1db0fc9f5705133a
