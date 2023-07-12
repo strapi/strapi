@@ -422,7 +422,7 @@ function ListView({
 
     if (reviewWorkflowColumns) {
       // Make sure the column header label is translated
-      reviewWorkflowColumns.map((column) => {
+      (reviewWorkflowColumns ?? []).map((column) => {
         if (typeof column.metadatas.label !== 'string') {
           column.metadatas.label = formatMessage(column.metadatas.label);
         }
