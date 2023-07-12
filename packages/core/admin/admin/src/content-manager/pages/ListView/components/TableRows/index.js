@@ -15,6 +15,7 @@ import {
   useFetchClient,
   useAPIErrorHandler,
   useQueryParams,
+  getDisplayName,
 } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { AxiosError } from 'axios';
@@ -189,6 +190,17 @@ export const TableRows = ({
                     ) : (
                       <Typography textColor="neutral800">-</Typography>
                     )}
+                  </Td>
+                );
+              }
+
+              if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
+                // Display the users full name
+                return (
+                  <Td key={key}>
+                    <Typography textColor="neutral800">
+                      {getDisplayName(data[name.split('.')[0]], formatMessage)}
+                    </Typography>
                   </Td>
                 );
               }
