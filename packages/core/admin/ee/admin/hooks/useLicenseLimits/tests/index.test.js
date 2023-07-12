@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { fixtures } from '@strapi/admin-test-utils';
-import { useRBAC } from '@strapi/helper-plugin';
 import { renderHook, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -9,7 +8,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import useLicenseLimits from '..';
+import { useLicenseLimits } from '..';
 
 const server = setupServer(
   ...[
@@ -29,19 +28,6 @@ const server = setupServer(
     }),
   ]
 );
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(() => ({
-    isLoading: false,
-    allowedActions: {
-      canRead: true,
-      canCreate: true,
-      canUpdate: true,
-      canDelete: true,
-    },
-  })),
-}));
 
 const setup = (...args) =>
   renderHook(() => useLicenseLimits(...args), {
@@ -92,31 +78,6 @@ describe('useLicenseLimits', () => {
     );
   });
 
-  it.each(['canRead', 'canCreate', 'canUpdate', 'canDelete'])(
-    'should not fetch the license limit information, when the user does not have the %s permissions',
-    async (permission) => {
-      const allowedActions = {
-        canRead: true,
-        canCreate: true,
-        canUpdate: true,
-        canDelete: true,
-      };
-
-      allowedActions[permission] = false;
-
-      useRBAC.mockReturnValueOnce({
-        isLoading: false,
-        allowedActions,
-      });
-
-      const { result } = setup();
-
-      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
-
-      expect(result.current.license).toEqual({});
-    }
-  );
-
   it('exposes a getFeature() method as a shortcut to feature options', async () => {
     const { result } = setup();
 
@@ -128,4 +89,12 @@ describe('useLicenseLimits', () => {
     expect(result.current.getFeature('without-options')).toStrictEqual({});
     expect(result.current.getFeature('with-options')).toStrictEqual({ something: true });
   });
+
+  it('does return an empty object of enabled == false', async () => {
+    const { result } = setup({ enabled: false });
+
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+    expect(result.current.license).toStrictEqual({});
+  })
 });
