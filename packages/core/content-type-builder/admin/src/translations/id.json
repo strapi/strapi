@@ -124,6 +124,7 @@
   "modalForm.editCategory.base.name.description": "Tidak ada spasi yang diperbolehkan untuk nama kategori",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Kategori",
+  "modalForm.header.back": "Kembali",
   "modalForm.singleType.header-create": "Buat jenis tunggal",
   "modalForm.sub-header.addComponentToDynamicZone": "Tambahkan komponen baru ke zona dinamis",
   "modalForm.sub-header.attribute.create": "Tambah bidang {type}",

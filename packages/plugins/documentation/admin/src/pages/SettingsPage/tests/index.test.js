@@ -58,18 +58,6 @@ describe('Plugin | Documentation | SettingsPage', () => {
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c6 {
         font-weight: 600;
         font-size: 2rem;
@@ -104,7 +92,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
         color: #32324d;
       }
 
-      .c30 {
+      .c29 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -112,7 +100,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c32 {
+      .c31 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
@@ -120,7 +108,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
         text-transform: uppercase;
       }
 
-      .c34 {
+      .c33 {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
@@ -164,23 +152,45 @@ describe('Plugin | Documentation | SettingsPage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c25 {
+      .c19 {
+        max-width: 320px;
+      }
+
+      .c23 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
         border-style: solid;
         border-width: 1px;
         border-color: #dcdce4;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+        position: relative;
+        cursor: pointer;
       }
 
-      .c27 {
+      .c26 {
+        background: #ffffff;
+        padding-top: 8px;
+        padding-right: 12px;
+        padding-bottom: 8px;
+        padding-left: 12px;
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+      }
+
+      .c30 {
+        background: transparent;
         padding-right: 12px;
         padding-left: 12px;
         border-radius: 4px;
+        border-color: #f6f6f9;
+        border: 1px solid #f6f6f9;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
       }
 
       .c2 {
@@ -260,7 +270,24 @@ describe('Plugin | Documentation | SettingsPage', () => {
         gap: 4px;
       }
 
-      .c28 {
+      .c24 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+      }
+
+      .c27 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -403,18 +430,7 @@ describe('Plugin | Documentation | SettingsPage', () => {
         outline: none;
       }
 
-      .c23 {
-        position: relative;
-        display: inline-block;
-        z-index: 0;
-        width: 100%;
-      }
-
-      .c26 {
-        overflow: hidden;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
+      .c25 {
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -423,55 +439,24 @@ describe('Plugin | Documentation | SettingsPage', () => {
         transition-duration: 0.2s;
       }
 
-      .c26:focus-within {
+      .c25:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c29 {
-        background-color: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
+      .c28 {
         padding-top: 6px;
         padding-bottom: 6px;
       }
 
-      .c31 {
-        background-color: transparent;
-        border: 1px solid #f6f6f9;
-        position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        z-index: 2;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c33 {
+      .c32 {
         height: 100%;
         left: 0;
         opacity: 0;
         position: absolute;
         top: 0;
-        z-index: 1;
+        z-index: 0;
         width: 100%;
-      }
-
-      .c19 {
-        max-width: 320px;
       }
 
       @media (max-width:68.75rem) {
@@ -588,51 +573,40 @@ describe('Plugin | Documentation | SettingsPage', () => {
                             Restricted Access
                           </label>
                         </div>
-                        <label
-                          class="c23"
+                        <div
+                          class="c23 c24 c25"
+                          wrap="wrap"
                         >
                           <div
-                            class="c24"
+                            class="c26 c27 c28"
                           >
-                            Restricted Access
+                            <span
+                              class="c5 c29"
+                            >
+                              Off
+                            </span>
                           </div>
                           <div
-                            class="c25 c26"
-                            display="flex"
+                            class="c30 c27 c28"
                           >
-                            <div
-                              aria-hidden="true"
-                              class="c27 c28 c29"
+                            <span
+                              class="c5 c31"
                             >
-                              <span
-                                class="c5 c30"
-                              >
-                                Off
-                              </span>
-                            </div>
-                            <div
-                              aria-hidden="true"
-                              class="c27 c28 c31"
-                            >
-                              <span
-                                class="c5 c32"
-                              >
-                                On
-                              </span>
-                            </div>
-                            <input
-                              aria-describedby=":r0:-hint"
-                              aria-disabled="false"
-                              aria-required="false"
-                              class="c33"
-                              id=":r0:"
-                              name="restrictedAccess"
-                              type="checkbox"
-                            />
+                              On
+                            </span>
                           </div>
-                        </label>
+                          <input
+                            aria-describedby=":r0:-hint :r0:-error"
+                            aria-disabled="false"
+                            aria-required="false"
+                            class="c32"
+                            id=":r0:"
+                            name="restrictedAccess"
+                            type="checkbox"
+                          />
+                        </div>
                         <p
-                          class="c5 c34"
+                          class="c5 c33"
                           id=":r0:-hint"
                         >
                           Make the documentation endpoint private

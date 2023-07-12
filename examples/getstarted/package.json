@@ -12,7 +12,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "1.8.1",
+    "@strapi/icons": "1.8.2",
     "@strapi/plugin-color-picker": "4.11.4",
     "@strapi/plugin-documentation": "4.11.4",
     "@strapi/plugin-graphql": "4.11.4",
@@ -28,7 +28,7 @@
     "mysql": "2.18.1",
     "mysql2": "3.3.0",
     "passport-google-oauth2": "0.2.0",
-    "pg": "8.8.0",
+    "pg": "8.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intl": "6.4.1",
