@@ -29,7 +29,7 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    async createMany(stagesList, { fields } = {}) {
+    async createMany(stagesList, totalNumberOfStages, { fields } = {}) {
       const params = { select: fields ?? '*' };
 
       const stages = await Promise.all(
@@ -38,7 +38,7 @@ module.exports = ({ strapi }) => {
         )
       );
 
-      metrics.sendDidCreateStage();
+      metrics.sendDidCreateStage(totalNumberOfStages);
 
       return stages;
     },
@@ -81,12 +81,17 @@ module.exports = ({ strapi }) => {
     async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
       const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
-      assertAtLeastOneStageRemain(srcStages || [], { created, deleted });
+      const totalNumberOfStages = assertAtLeastOneStageRemain(srcStages || [], {
+        created,
+        deleted,
+      });
 
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
         // Create the new stages
-        const createdStages = await this.createMany(created, { fields: ['id'] });
+        const createdStages = await this.createMany(created, totalNumberOfStages, {
+          fields: ['id'],
+        });
         // Put all the newly created stages ids
         const createdStagesIds = map('id', createdStages);
 
@@ -270,6 +275,7 @@ function getDiffBetweenStages(sourceStages, comparisonStages) {
  * @param {Array} diffStages.created - An array of stages that are planned to be created in the workflow.
  *
  * @throws {ValidationError} If the number of remaining stages in the workflow after applying deletions and additions is less than 1.
+ * @returns {Number} The total number of stages remaining in the workflow after applying deletions and additions.
  */
 function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   const remainingStagesCount =
@@ -277,6 +283,8 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   if (remainingStagesCount < 1) {
     throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
   }
+
+  return remainingStagesCount;
 }
 
 /**
