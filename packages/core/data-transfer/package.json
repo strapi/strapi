@@ -64,7 +64,7 @@
     "@types/tar": "6.1.4",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
-    "knex": "2.4.0",
+    "knex": "2.5.0",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
     "typescript": "5.1.3"

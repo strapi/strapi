@@ -122,6 +122,7 @@
   "modalForm.editCategory.base.name.description": "Tidak boleh ada jarak dalam nama kategori",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Kategori",
+  "modalForm.header.back": "belakang",
   "modalForm.singleType.header-create": "Cipta jenis tunggal",
   "modalForm.sub-header.addComponentToDynamicZone": "Tambah komponen baru ke zon dinamik",
   "modalForm.sub-header.attribute.create": "Tambah {type} baru",
