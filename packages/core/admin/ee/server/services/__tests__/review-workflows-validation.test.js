@@ -35,7 +35,7 @@ const servicesMock = {
 };
 
 const strapiMock = {
-  service: jest.fn((serviceName) => console.log(serviceName) || servicesMock[serviceName]),
+  service: jest.fn((serviceName) => servicesMock[serviceName]),
 };
 let validationService;
 
