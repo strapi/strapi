@@ -1,6 +1,7 @@
 import { Writable, Readable } from 'stream';
 import * as fse from 'fs-extra';
 import path from 'path';
+import type { Knex } from 'knex';
 import type {
   IAsset,
   IDestinationProvider,
@@ -82,7 +83,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
-  async #deleteAllAssets() {
+  async #deleteAllAssets(trx: Knex.Transaction) {
     assertValidStrapi(this.strapi);
 
     const stream: Readable = strapi.db
@@ -90,6 +91,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       .queryBuilder('plugin::upload.file')
       // Fetch all columns
       .select('*')
+      // Attach the transaction
+      .transacting(trx)
       // Get a readable stream
       .stream();
 
@@ -113,11 +116,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
-    await this.transaction?.attach(async () => {
+    await this.transaction?.attach(async (trx) => {
       await this.#handleAssetsBackup();
       try {
         if (this.options.strategy === 'restore') {
-          await this.#deleteAllAssets();
+          await this.#deleteAllAssets(trx);
           await this.#deleteAll();
         }
       } catch (error) {
