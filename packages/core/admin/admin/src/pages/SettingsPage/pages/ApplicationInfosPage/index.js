@@ -22,17 +22,19 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
-import AdminSeatInfo from 'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useSelector } from 'react-redux';
 
 import { useConfigurations } from '../../../../hooks';
+import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../App/selectors';
 
 import CustomizationInfos from './components/CustomizationInfos';
 import { fetchProjectSettings, postProjectSettings } from './utils/api';
 import getFormData from './utils/getFormData';
+
+const AdminSeatInfoCE = () => null;
 
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
@@ -50,6 +52,15 @@ const ApplicationInfosPage = () => {
   } = useAppInfo();
   const { updateProjectSettings } = useConfigurations();
   const permissions = useSelector(selectAdminPermissions);
+  const AdminSeatInfo = useEnterprise(
+    AdminSeatInfoCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../ee/admin/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo'
+        )
+      ).AdminSeatInfoEE
+  );
 
   const {
     allowedActions: { canRead, canUpdate },
@@ -104,6 +115,11 @@ const ApplicationInfosPage = () => {
       },
     });
   };
+
+  // block rendering until the EE component is fully loaded
+  if (!AdminSeatInfo) {
+    return null;
+  }
 
   return (
     <Layout>
