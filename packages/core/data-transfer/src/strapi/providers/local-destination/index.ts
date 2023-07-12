@@ -83,7 +83,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
-  async #deleteAllAssets(trx: Knex.Transaction) {
+  async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
 
     const stream: Readable = strapi.db
