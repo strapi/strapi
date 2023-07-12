@@ -6,11 +6,23 @@ import { useIntl } from 'react-intl';
 
 import getTrad from '../../../../../../admin/src/content-manager/utils/getTrad';
 
-export function ReviewWorkflowsAssigneeEE({ firstname, lastname }) {
+export function ReviewWorkflowsAssigneeEE({ firstname, lastname, displayname }) {
   const { formatMessage } = useIntl();
 
-  if (!firstname && !lastname) {
-    return <Typography textColor="neutral800">-</Typography>;
+  // TODO align with changes from this PR, using the getDisplayName util
+  // https://github.com/strapi/strapi/pull/17043/
+  if (displayname.length > 0) {
+    return (
+      <Typography textColor="neutral800">
+        {formatMessage(
+          {
+            id: getTrad(`containers.ListPage.reviewWorkflows.assignee`),
+            defaultMessage: '{displayname}',
+          },
+          { displayname }
+        )}
+      </Typography>
+    );
   }
 
   return (
@@ -26,8 +38,14 @@ export function ReviewWorkflowsAssigneeEE({ firstname, lastname }) {
   );
 }
 
-// TODO are both required?
+ReviewWorkflowsAssigneeEE.defaultProps = {
+  firstname: '',
+  lastname: '',
+  displayname: '',
+};
+
 ReviewWorkflowsAssigneeEE.propTypes = {
-  firstname: PropTypes.string.isRequired,
-  lastname: PropTypes.string.isRequired,
+  firstname: PropTypes.string,
+  lastname: PropTypes.string,
+  displayname: PropTypes.string,
 };

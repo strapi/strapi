@@ -17,6 +17,12 @@ const ComponentFixture = (props) => (
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('DynamicTable | ReviewWorkflowsAssignee', () => {
+  test('will use displayName over first and last name', () => {
+    const displayname = 'Display Name';
+    const { getByText } = setup({ displayname });
+
+    expect(getByText(displayname)).toBeInTheDocument();
+  });
   test('render assignee name', () => {
     const { getByText } = setup({ firstname: 'Kai', lastname: 'Doe' });
 
