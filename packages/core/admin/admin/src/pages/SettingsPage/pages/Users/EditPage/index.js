@@ -24,7 +24,6 @@ import {
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import MagicLink from 'ee_else_ce/pages/SettingsPage/pages/Users/components/MagicLink';
 import { Formik } from 'formik';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
@@ -34,7 +33,9 @@ import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { formatAPIErrors, getFullName } from '../../../../../utils';
+import { MagicLinkCE } from '../components/MagicLink';
 import SelectRoles from '../components/SelectRoles';
 import { editValidation } from '../utils/validations/users';
 
@@ -52,11 +53,21 @@ const EditPage = ({ canUpdate }) => {
   const { setUserDisplayName } = useAppInfo();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const MagicLink = useEnterprise(
+    MagicLinkCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/components/MagicLink'
+        )
+      ).MagicLinkEE
+  );
+
   useFocusWhenNavigate();
 
   const {
     users: [user],
-    isLoading,
+    isLoading: isLoadingAdminUsers,
   } = useAdminUsers(
     { id },
     {
@@ -125,6 +136,8 @@ const EditPage = ({ canUpdate }) => {
     unlockApp();
   };
 
+  const isLoading = isLoadingAdminUsers || !MagicLink;
+
   const headerLabel = isLoading
     ? { id: 'app.containers.Users.EditPage.header.label-loading', defaultMessage: 'Edit user' }
     : { id: 'app.containers.Users.EditPage.header.label', defaultMessage: 'Edit {name}' };
@@ -189,7 +202,7 @@ const EditPage = ({ canUpdate }) => {
               <HeaderLayout
                 primaryAction={
                   <Button
-                    disabled={(isSubmitting || !canUpdate) ? true : !dirty}
+                    disabled={isSubmitting || !canUpdate ? true : !dirty}
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"

@@ -102,6 +102,7 @@
   "modalForm.editCategory.base.name.description": "Mezery v názvu kategorie nejsou povoleny",
   "modalForm.header-edit": "Upravit {name}",
   "modalForm.header.categories": "Kategorie",
+  "modalForm.header.back": "Zadní",
   "modalForm.sub-header.addComponentToDynamicZone": "Přidat nový komponent do dynamické zóny",
   "modalForm.sub-header.attribute.create": "Přidat nové pole {type}",
   "modalForm.sub-header.attribute.create.step": "Přidat nový komponent ({step}/2)",

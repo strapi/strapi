@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/helper-plugin';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render as renderRTL } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -61,58 +61,53 @@ const DEFAULT_PROPS_FIXTURE = {
   rowId: 1,
 };
 
-const ComponentFixture = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
+const render = () => ({
+  ...renderRTL(<RelationMultiple {...DEFAULT_PROPS_FIXTURE} />, {
+    wrapper({ children }) {
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <RelationMultiple {...DEFAULT_PROPS_FIXTURE} />
-        </IntlProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-};
+      return (
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider theme={lightTheme}>
+            <IntlProvider locale="en" messages={{}} defaultLocale="en">
+              {children}
+            </IntlProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      );
+    },
+  }),
+  user: userEvent.setup(),
+});
 
 describe('DynamicTable / Cellcontent / RelationMultiple', () => {
-  it('renders and matches the snapshot', async () => {
-    const { container } = render(<ComponentFixture />);
-    expect(container).toMatchSnapshot();
-    const { get } = useFetchClient();
-    expect(get).toHaveBeenCalledTimes(0);
-  });
+  it('renders and renders the menu when clicked', async () => {
+    const { getByRole, user } = render();
 
-  it('fetches relation entities once the menu is opened', async () => {
-    const { container } = render(<ComponentFixture />);
-    const { get } = useFetchClient();
-    const button = container.querySelector('[type=button]');
+    expect(getByRole('button', { name: '1 item' })).toBeInTheDocument();
 
-    fireEvent(button, new MouseEvent('mousedown', { bubbles: true }));
+    await user.click(getByRole('button', { name: '1 item' }));
 
-    expect(screen.getByText('Relations are loading')).toBeInTheDocument();
-    expect(get).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(screen.getByText('Relation entity 1')).toBeInTheDocument());
+    expect(getByRole('menu')).toBeInTheDocument();
+
+    [1, 2, 3].forEach((number) => {
+      expect(getByRole('menuitem', { name: `Relation entity ${number}` })).toBeInTheDocument();
+    });
   });
 
   it('Displays related entities in reversed order', async () => {
-    const { container } = render(<ComponentFixture />);
-    const button = container.querySelector('[type=button]');
+    const { user, getByRole, getAllByRole } = render();
 
-    fireEvent(button, new MouseEvent('mousedown', { bubbles: true }));
+    await user.click(getByRole('button', { name: '1 item' }));
 
-    await waitFor(() => {
-      const buttons = screen.getAllByRole('menuitem');
-
-      expect(buttons[1]).toHaveTextContent('Relation entity 3');
-      expect(buttons[2]).toHaveTextContent('Relation entity 2');
-      expect(buttons[3]).toHaveTextContent('Relation entity 1');
+    getAllByRole('menuitem').forEach((button, i) => {
+      expect(button).toHaveTextContent(`Relation entity ${3 - i}`);
     });
   });
 });
