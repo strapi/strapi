@@ -144,7 +144,7 @@ export const BrowseStep = ({
                     />
                   </Flex>
                 )}
-                {isGridView && <SortPicker onChangeSort={onChangeSort} />}
+                {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
                 <Filters
                   appliedFilters={queryObject?.filters?.$and}
                   onChangeFilters={onChangeFilters}

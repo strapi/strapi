@@ -128,6 +128,7 @@
   "modalForm.empty.sub-heading": "Geniş yelpazedeki uzantılar ile aradığını bul.",
   "modalForm.header-edit": "Düzenle: {name}",
   "modalForm.header.categories": "Kategoriler",
+  "modalForm.header.back": "Geri",
   "modalForm.singleType.header-create": "Bir tekil tip oluştur",
   "modalForm.sub-header.addComponentToDynamicZone": "Dinamik bölgeye yeni bileşen ekle",
   "modalForm.sub-header.attribute.create": "Yeni {type} alanı ekle",

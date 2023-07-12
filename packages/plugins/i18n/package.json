@@ -30,9 +30,9 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.8.1",
+    "@strapi/design-system": "1.8.2",
     "@strapi/helper-plugin": "4.11.5",
-    "@strapi/icons": "1.8.1",
+    "@strapi/icons": "1.8.2",
     "@strapi/utils": "4.11.5",
     "formik": "2.4.0",
     "immer": "9.0.19",

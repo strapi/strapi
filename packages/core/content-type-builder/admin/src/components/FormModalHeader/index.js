@@ -30,7 +30,7 @@ const FormModalHeader = ({
   modalType,
   targetUid,
   customFieldUid,
-  showBackLink
+  showBackLink,
 }) => {
   const { formatMessage } = useIntl();
   const { modifiedData } = useDataManager();
@@ -112,7 +112,17 @@ const FormModalHeader = ({
   return (
     <ModalHeader>
       <Flex gap={3}>
-        {showBackLink && (<Link aria-label="Back" startIcon={<ArrowLeft />} onClick={() => onOpenModalAddField({ forTarget, targetUid })} to="#back" />)}
+        {showBackLink && (
+          <Link
+            aria-label={formatMessage({
+              id: getTrad('modalForm.header.back'),
+              defaultMessage: 'Back',
+            })}
+            startIcon={<ArrowLeft />}
+            onClick={() => onOpenModalAddField({ forTarget, targetUid })}
+            to="#back"
+          />
+        )}
         <AttributeIcon type={icon} customField={customFieldUid} />
 
         <Breadcrumbs label={headers.map(({ label }) => label).join(',')}>
