@@ -5,7 +5,7 @@ type WithStrapiCallback<T> = <S extends { strapi: Strapi }>(params: S) => T;
 export declare function createCoreRouter<T extends Common.UID.ContentType>(
   uid: T,
   cfg?: CoreApi.Router.RouterConfig<T>
-): () => CoreApi.Router.Router;
+): CoreApi.Router.Router;
 
 export declare function createCoreController<
   T extends Common.UID.ContentType,
