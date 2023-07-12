@@ -2,10 +2,15 @@ import type { Common, Utils } from '@strapi/strapi';
 
 export type Kind = 'preview' | 'live';
 
-export type IsEnabled<TSchemaUID extends Common.UID.Schema> = Utils.Expression.If<
-  Common.UID.IsContentType<TSchemaUID>,
-  Utils.Expression.IsTrue<Common.Schemas[TSchemaUID]['options']['draftAndPublish']>,
-  unknown
+export type IsEnabled<TSchemaUID extends Common.UID.Schema> = Utils.Expression.MatchFirst<
+  [
+    [
+      Common.UID.IsContentType<TSchemaUID>,
+      Utils.Expression.IsTrue<Common.Schemas[TSchemaUID]['options']['draftAndPublish']>
+    ],
+    [Common.UID.IsComponent<TSchemaUID>, Utils.Expression.False]
+  ],
+  Utils.Expression.BooleanValue
 >;
 
 export type For<TSchemaUID extends Common.UID.Schema> = IsEnabled<TSchemaUID> extends infer TEnabled
