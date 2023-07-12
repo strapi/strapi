@@ -686,11 +686,11 @@ describe('Relations', () => {
         populate: populateShop,
       });
 
-      // shop2 relations should be unchanged (content-manager relations are shown in reverse order)
-      expect(updatedShop2.products_om).toMatchObject([{ id: id2 }, { id: id1 }]);
-      expect(updatedShop2.products_mm).toMatchObject([{ id: id2 }, { id: id1 }]);
-      expect(updatedShop2.products_mw).toMatchObject([{ id: id2 }, { id: id1 }]);
-      expect(updatedShop2.myCompo.compo_products_mw).toMatchObject([{ id: id2 }, { id: id1 }]);
+      // shop2 relations should be unchanged
+      expect(updatedShop2.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(updatedShop2.products_mm).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(updatedShop2.products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(updatedShop2.myCompo.compo_products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
     });
   });
 
