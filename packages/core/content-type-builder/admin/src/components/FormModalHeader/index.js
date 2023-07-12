@@ -30,7 +30,7 @@ const FormModalHeader = ({
   modalType,
   targetUid,
   customFieldUid,
-  showBackLink
+  showBackLink,
 }) => {
   const { formatMessage } = useIntl();
   const { modifiedData } = useDataManager();
@@ -120,7 +120,8 @@ const FormModalHeader = ({
             })}
             startIcon={<ArrowLeft />}
             onClick={() => onOpenModalAddField({ forTarget, targetUid })}
-            to="#back" />
+            to="#back"
+          />
         )}
         <AttributeIcon type={icon} customField={customFieldUid} />
 
