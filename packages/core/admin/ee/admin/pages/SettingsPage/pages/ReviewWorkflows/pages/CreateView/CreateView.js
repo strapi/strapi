@@ -20,7 +20,7 @@ import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
-import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
+import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsCreateView() {
   const { formatMessage } = useIntl();
@@ -108,7 +108,9 @@ export function ReviewWorkflowsCreateView() {
         submitForm();
       }
     },
-    validationSchema: getWorkflowValidationSchema({ formatMessage }),
+    validate(values) {
+      return validateWorkflow({ values, formatMessage });
+    },
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);

@@ -25,7 +25,7 @@ import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import { REDUX_NAMESPACE } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
-import { getWorkflowValidationSchema } from '../../utils/getWorkflowValidationSchema';
+import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsEditView() {
   const { workflowId } = useParams();
@@ -113,11 +113,11 @@ export function ReviewWorkflowsEditView() {
       if (currentWorkflowHasDeletedServerStages) {
         setIsConfirmDeleteDialogOpen(true);
       } else if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
-      /**
-       * If the current license has a limit, check if the total count of workflows
-       * exceeds that limit and display the limits modal instead of sending the
-       * update, because it would throw an API error.
-       */
+        /**
+         * If the current license has a limit, check if the total count of workflows
+         * exceeds that limit and display the limits modal instead of sending the
+         * update, because it would throw an API error.
+         */
         setShowLimitModal('workflow');
 
         /**
@@ -134,7 +134,9 @@ export function ReviewWorkflowsEditView() {
         submitForm();
       }
     },
-    validationSchema: getWorkflowValidationSchema({ formatMessage }),
+    validate(values) {
+      return validateWorkflow({ values, formatMessage });
+    },
   });
 
   useInjectReducer(REDUX_NAMESPACE, reducer);
