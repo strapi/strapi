@@ -76,7 +76,7 @@
   "Roles.ListPage.notification.delete-all-not-allowed": "由于某些角色与用户关联,因此无法删除它们",
   "Roles.ListPage.notification.delete-not-allowed": "如果与用户关联则角色不能被删除",
   "Roles.RoleRow.select-all": "选择{name} 进行批量操作",
-  "Roles.RoleRow.user-count": "{number, plural, =0 {无用户} one {1个用户} other {#个用户}}",
+  "Roles.RoleRow.user-count": "{number, plural, =0 {无用户} one {1 个用户} other {# 个用户}}",
   "Roles.components.List.empty.withSearch": "没有与搜索({search})对应的角色...",
   "Settings.PageTitle": "设置 —— {name}",
   "Settings.apiTokens.ListView.headers.createdAt": "创建时间",
