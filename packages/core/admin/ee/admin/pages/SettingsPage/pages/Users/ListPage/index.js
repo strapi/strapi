@@ -10,4 +10,4 @@ function UserListPageEE() {
   return <UserListPageCE />;
 }
 
-export default UserListPageEE;
+export { UserListPageEE };
