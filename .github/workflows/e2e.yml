@@ -21,12 +21,12 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - uses: actions/cache@v3
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - uses: nrwl/nx-set-shas@v3
       - run: yarn install --immutable
@@ -37,14 +37,11 @@ jobs:
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
 
-      - name: Setup test app
-        run: yarn test:e2e:setup
-
-      - name: Install new package
-        run: yarn install --no-immutable
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
 
       - name: Run E2E tests
-        run: yarn test:e2e --project=${{ matrix.project }}
+        run: yarn test:e2e --concurrency=1 --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v3
         if: always()

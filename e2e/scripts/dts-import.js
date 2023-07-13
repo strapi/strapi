@@ -63,9 +63,9 @@ const createSourceProvider = (filePath) =>
     compression: { enabled: false },
   });
 
-const createDestinationProvider = () =>
-  createRemoteStrapiDestinationProvider({
-    url: new URL('http://127.0.0.1:1337/admin'),
+const createDestinationProvider = () => {
+  return createRemoteStrapiDestinationProvider({
+    url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
     strategy: 'restore',
     restore: {
@@ -78,3 +78,4 @@ const createDestinationProvider = () =>
       },
     },
   });
+};
