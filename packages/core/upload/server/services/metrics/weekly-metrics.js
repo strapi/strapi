@@ -2,10 +2,8 @@
 
 const { defaultTo } = require('lodash/fp');
 const { add } = require('date-fns');
+const { ONE_WEEK, getWeeklyCronScheduleAt } = require('@strapi/utils').cron;
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../../constants');
-const { getWeeklyCronScheduleAt } = require('../../utils/cron');
-
-const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 const getMetricsStoreValue = async () => {
   const value = await strapi.store.get({ type: 'plugin', name: 'upload', key: 'metrics' });

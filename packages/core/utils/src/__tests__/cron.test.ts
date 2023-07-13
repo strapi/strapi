@@ -1,6 +1,4 @@
-'use strict';
-
-const { getWeeklyCronScheduleAt } = require('../cron');
+import { getWeeklyCronScheduleAt } from '../cron';
 
 describe('cron', () => {
   describe('getWeeklyCronScheduleAt', () => {

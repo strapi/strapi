@@ -24,6 +24,16 @@ const sendDidEditWorkflow = async () => {
   strapi.telemetry.send('didEditWorkflow', {});
 };
 
+const sendDidSendReviewWorkflowPropertiesOnceAWeek = async (
+  numberOfActiveWorkflows,
+  activatedContentTypes
+) => {
+  strapi.telemetry.send('didSendReviewWorkflowPropertiesOnceAWeek', {
+    numberOfActiveWorkflows,
+    activatedContentTypes,
+  });
+};
+
 module.exports = {
   sendDidCreateStage,
   sendDidEditStage,
@@ -31,4 +41,5 @@ module.exports = {
   sendDidChangeEntryStage,
   sendDidCreateWorkflow,
   sendDidEditWorkflow,
+  sendDidSendReviewWorkflowPropertiesOnceAWeek,
 };
