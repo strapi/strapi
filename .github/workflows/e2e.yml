@@ -37,11 +37,8 @@ jobs:
       - name: Run build:ts
         run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
 
-      - name: Setup test app
-        run: yarn test:e2e:setup
-
-      - name: Install new package
-        run: yarn install --no-immutable
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
 
       - name: Run E2E tests
         run: yarn test:e2e --project=${{ matrix.project }}
