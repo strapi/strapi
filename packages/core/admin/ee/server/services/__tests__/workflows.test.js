@@ -34,6 +34,7 @@ const entityServiceMock = {
   findOne: jest.fn(() => workflowMock),
   findMany: jest.fn(() => [workflowMock]),
   update: jest.fn(() => [workflowMock]),
+  create: jest.fn(() => [workflowMock]),
 };
 
 const contentManagerServicesMock = {
@@ -53,6 +54,13 @@ const reviewWorkflowsValidationMock = {
   validateWorkflowStages: jest.fn(),
 };
 
+const stagesMock = [
+  {
+    id: 1,
+  },
+  { id: 2 },
+];
+
 const servicesMock = {
   'admin::review-workflows-validation': reviewWorkflowsValidationMock,
   'admin::review-workflows-metrics': {
@@ -60,10 +68,8 @@ const servicesMock = {
     sendDidEditWorkflow: jest.fn(),
   },
   'admin::stages': {
-    replaceStages: jest.fn(async () => [
-      { id: 1, name: 'Update' },
-      { id: 2, name: 'Ready to Review' },
-    ]),
+    replaceStages: jest.fn(async () => stagesMock),
+    createMany: jest.fn(async () => stagesMock),
   },
 };
 
@@ -155,6 +161,37 @@ describe('Review workflows - Workflows service', () => {
         populate: undefined,
       });
       expect(servicesMock['admin::review-workflows-metrics'].sendDidEditWorkflow).toBeCalled();
+    });
+  });
+
+  describe('create', () => {
+    const uid = 'uid';
+    const opts = {
+      data: {
+        name: 'Workflow',
+        contentTypes: [uid],
+        stages: [
+          {
+            color: '#4945ff',
+            name: 'Stage 1',
+          },
+        ],
+      },
+      populate: undefined,
+    };
+
+    test('Should call entityService with the right model UID', async () => {
+      await workflowsService.create(opts);
+
+      expect(entityServiceMock.create).toBeCalledWith(WORKFLOW_MODEL_UID, {
+        data: {
+          contentTypes: [uid],
+          name: 'Workflow',
+          stages: stagesMock.map((stage) => stage.id),
+        },
+        populate: { stages: true },
+      });
+      expect(servicesMock['admin::review-workflows-metrics'].sendDidCreateWorkflow).toBeCalled();
     });
   });
 });
