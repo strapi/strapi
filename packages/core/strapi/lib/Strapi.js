@@ -8,7 +8,8 @@ const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
 
 const loadConfiguration = require('./core/app-configuration');
-
+const factories = require('./factories');
+const compile = require('./compile');
 const { createContainer } = require('./container');
 const utils = require('./utils');
 const createStrapiFs = require('./services/fs');
@@ -571,10 +572,37 @@ class Strapi {
   }
 }
 
-module.exports = (options) => {
-  const strapi = new Strapi(options);
-  global.strapi = strapi;
-  return strapi;
+let singleton;
+
+const initializer = (options) => {
+  if (!singleton) {
+    singleton = new Strapi(options);
+    global.strapi = singleton;
+  }
+  return singleton;
 };
 
-module.exports.Strapi = Strapi;
+module.exports = new Proxy(initializer, {
+  get(_, prop) {
+    if (!singleton) {
+      throw new Error('Strapi is not initialized');
+    }
+
+    if (prop === 'Strapi') {
+      return Strapi;
+    }
+
+    if (prop === 'factories') {
+      return factories;
+    }
+
+    if (prop === 'compile') {
+      return compile;
+    }
+
+    return Reflect.get(singleton, prop, singleton);
+  },
+  set() {
+    throw new Error('Strapi is a readonly object');
+  },
+});
