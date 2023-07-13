@@ -67,7 +67,7 @@ describe('Review workflows - Stages service', () => {
         toId
       );
       expect(entityServiceMock.update).toBeCalledWith(uid, id, {
-        data: { strapi_assignee: toId },
+        data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: toId },
         fields: [],
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
       });

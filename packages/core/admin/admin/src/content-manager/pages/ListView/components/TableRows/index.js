@@ -200,8 +200,8 @@ export const TableRows = ({
                       {data.strapi_assignee ? (
                         <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
                           firstname={data.strapi_assignee.firstname}
-                          lastname={data?.strapi_assignee?.lastname ?? ''}
-                          displayname={data?.strapi_assignee?.displayname ?? ''}
+                          lastname={data?.strapi_assignee?.lastname}
+                          displayname={data?.strapi_assignee?.username}
                         />
                       ) : (
                         <Typography textColor="neutral800">-</Typography>

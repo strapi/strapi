@@ -11,7 +11,7 @@ export function ReviewWorkflowsAssigneeEE({ firstname, lastname, displayname }) 
 
   // TODO align with changes from this PR, using the getDisplayName util
   // https://github.com/strapi/strapi/pull/17043/
-  if (displayname.length > 0) {
+  if (displayname) {
     return (
       <Typography textColor="neutral800">
         {formatMessage(
