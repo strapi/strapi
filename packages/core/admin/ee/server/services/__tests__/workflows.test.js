@@ -33,6 +33,7 @@ const workflowMock = {
 const entityServiceMock = {
   findOne: jest.fn(() => workflowMock),
   findMany: jest.fn(() => [workflowMock]),
+  update: jest.fn(() => [workflowMock]),
 };
 
 const contentManagerServicesMock = {
@@ -54,12 +55,25 @@ const reviewWorkflowsValidationMock = {
 
 const servicesMock = {
   'admin::review-workflows-validation': reviewWorkflowsValidationMock,
+  'admin::review-workflows-metrics': {
+    sendDidCreateWorkflow: jest.fn(),
+    sendDidEditWorkflow: jest.fn(),
+  },
+  'admin::stages': {
+    replaceStages: jest.fn(async () => [
+      { id: 1, name: 'Update' },
+      { id: 2, name: 'Ready to Review' },
+    ]),
+  },
 };
 
 const strapiMock = {
   entityService: entityServiceMock,
   plugin: jest.fn((name) => pluginsMock[name]),
   service: jest.fn((serviceName) => servicesMock[serviceName]),
+  db: {
+    transaction: jest.fn((func) => func()),
+  },
 };
 
 const workflowsService = workflowsServiceFactory({ strapi: strapiMock });
@@ -81,6 +95,7 @@ describe('Review workflows - Workflows service', () => {
       });
     });
   });
+
   describe('findById', () => {
     test('Should call entityService with the right model UID', async () => {
       workflowsService.findById(1, {});
@@ -88,6 +103,58 @@ describe('Review workflows - Workflows service', () => {
       expect(entityServiceMock.findMany).not.toBeCalled();
       expect(entityServiceMock.findOne).toBeCalled();
       expect(entityServiceMock.findOne).toBeCalledWith(WORKFLOW_MODEL_UID, 1, {});
+    });
+  });
+
+  describe('update', () => {
+    const uid = 'uid';
+    const workflow = {
+      id: 1,
+      name: 'Default',
+      contentTypes: [uid],
+      stages: [
+        {
+          id: 1,
+          name: 'To do',
+          color: '#4945FF',
+        },
+        {
+          id: 2,
+          name: 'Ready to review',
+          color: '#4945FF',
+        },
+      ],
+    };
+
+    const opts = {
+      data: {
+        ...workflow,
+        stages: workflow.stages.map((stage) => {
+          if (stage.id === 1) {
+            return {
+              ...stage,
+              name: 'Update',
+            };
+          }
+          return stage;
+        }),
+      },
+      populate: undefined,
+    };
+
+    test('Should call entityService with the right model UID', async () => {
+      await workflowsService.update(workflow, opts);
+
+      expect(entityServiceMock.update).toBeCalledWith(WORKFLOW_MODEL_UID, workflow.id, {
+        data: {
+          contentTypes: [uid],
+          id: workflow.id,
+          name: 'Default',
+          stages: workflow.stages.map((stage) => stage.id),
+        },
+        populate: undefined,
+      });
+      expect(servicesMock['admin::review-workflows-metrics'].sendDidEditWorkflow).toBeCalled();
     });
   });
 });
