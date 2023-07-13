@@ -263,7 +263,7 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
     },
 
     mustUseAlias() {
-      return ['select', 'count'].includes(state.type);
+      return ['select', 'count', 'delete'].includes(state.type);
     },
 
     aliasColumn(key, alias) {
