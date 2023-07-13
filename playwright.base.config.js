@@ -2,12 +2,16 @@
 const { devices } = require('@playwright/test');
 
 /**
- * @see https://playwright.dev/docs/test-configuration
- * @type {import('@playwright/test').PlaywrightTestConfig}
+ * @typedef ConfigOptions
+ * @type {{ port: number; testDir: string; appDir: string }}
  */
-const config = {
-  // globalSetup: require.resolve('./e2e/global-setup'),
-  testDir: './e2e/tests',
+
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ * @type {(options: ConfigOptions) => import('@playwright/test').PlaywrightTestConfig}
+ */
+const createConfig = ({ port, testDir, appDir }) => ({
+  testDir,
   /* Maximum time one test can run for. */
   timeout: 3000,
   expect: {
@@ -30,7 +34,7 @@ const config = {
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://127.0.0.1:1337',
+    baseURL: `http://127.0.0.1:${port}`,
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
 
@@ -60,34 +64,6 @@ const config = {
         ...devices['Desktop Safari'],
       },
     },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: {
-    //     ...devices['Pixel 5'],
-    //   },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: {
-    //     ...devices['iPhone 12'],
-    //   },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: {
-    //     channel: 'msedge',
-    //   },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: {
-    //     channel: 'chrome',
-    //   },
-    // },
   ],
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
@@ -95,11 +71,11 @@ const config = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd test-apps/playwright && yarn develop',
-    url: 'http://127.0.0.1:1337',
+    command: `cd ${appDir} && yarn develop`,
+    url: `http://127.0.0.1:${port}`,
     timeout: 30 * 1000,
     reuseExistingServer: !process.env.CI,
   },
-};
+});
 
-module.exports = config;
+module.exports = { createConfig };
