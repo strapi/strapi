@@ -7,8 +7,6 @@ updates:
         patterns:
           - '@babel/*'
           - 'babel-*'
-        exclude-patterns:
-          - '@strapi/babel-plugin-switch-ee-ce'
 
       eslint:
         patterns:

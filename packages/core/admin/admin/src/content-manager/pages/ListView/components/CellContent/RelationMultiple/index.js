@@ -1,16 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import {
-  Badge,
-  Box,
-  Flex,
-  Loader,
-  MenuItem,
-  SimpleMenu,
-  Typography,
-  useNotifyAT,
-} from '@strapi/design-system';
-import { stopPropagation, useFetchClient } from '@strapi/helper-plugin';
+import { Badge, Flex, Loader, Typography, useNotifyAT } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system/v2';
+import { useFetchClient } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
@@ -19,54 +11,24 @@ import styled from 'styled-components';
 import { getRequestUrl, getTrad } from '../../../../../utils';
 import CellValue from '../CellValue';
 
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 500px;
-`;
-
-const fetchRelation = async (endPoint, notifyStatus, get) => {
-  const {
-    data: { results, pagination },
-  } = await get(endPoint);
-
-  notifyStatus();
-
-  return { results, pagination };
-};
-
 const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const relationFetchEndpoint = useMemo(
-    () => getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`),
-    [entityId, name, contentType]
-  );
   const [isOpen, setIsOpen] = useState(false);
+
   const { get } = useFetchClient();
-
-  const Label = (
-    <Flex gap={1} wrap="nowrap">
-      <Badge>{value.count}</Badge>
-      {formatMessage(
-        {
-          id: 'content-manager.containers.ListPage.items',
-          defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
-        },
-        { number: value.count }
-      )}
-    </Flex>
-  );
-
-  const notify = () => {
-    const message = formatMessage({
-      id: getTrad('DynamicTable.relation-loaded'),
-      defaultMessage: 'Relations have been loaded',
-    });
-    notifyStatus(message);
-  };
 
   const { data, status } = useQuery(
     [fieldSchema.targetModel, entityId],
-    () => fetchRelation(relationFetchEndpoint, notify, get),
+    async () => {
+      const {
+        data: { results, pagination },
+      } = await get(
+        getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`)
+      );
+
+      return { results, pagination };
+    },
     {
       enabled: isOpen,
       staleTime: 0,
@@ -77,40 +39,58 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
     }
   );
 
+  useEffect(() => {
+    if (data) {
+      notifyStatus(
+        formatMessage({
+          id: getTrad('DynamicTable.relation-loaded'),
+          defaultMessage: 'Relations have been loaded',
+        })
+      );
+    }
+  }, [data, formatMessage, notifyStatus]);
+
   return (
-    <Box {...stopPropagation}>
-      <SimpleMenu
-        label={Label}
-        size="S"
-        onOpen={() => setIsOpen(true)}
-        onClose={() => setIsOpen(false)}
-      >
+    <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
+      <MenuTrigger onClick={(e) => e.stopPropagation()}>
+        <Flex gap={1} wrap="nowrap">
+          <Badge>{value.count}</Badge>
+          {formatMessage(
+            {
+              id: 'content-manager.containers.ListPage.items',
+              defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
+            },
+            { number: value.count }
+          )}
+        </Flex>
+      </MenuTrigger>
+      <Menu.Content>
         {status !== 'success' && (
-          <MenuItem aria-disabled>
+          <Menu.Item disabled>
             <Loader small>
               {formatMessage({
                 id: getTrad('DynamicTable.relation-loading'),
                 defaultMessage: 'Relations are loading',
               })}
             </Loader>
-          </MenuItem>
+          </Menu.Item>
         )}
 
         {status === 'success' && (
           <>
             {data?.results.map((entry) => (
-              <MenuItem key={entry.id} aria-disabled>
+              <Menu.Item key={entry.id} disabled>
                 <TypographyMaxWidth ellipsis>
                   <CellValue
                     type={metadatas.mainField.schema.type}
                     value={entry[metadatas.mainField.name] || entry.id}
                   />
                 </TypographyMaxWidth>
-              </MenuItem>
+              </Menu.Item>
             ))}
 
             {data?.pagination.total > 10 && (
-              <MenuItem
+              <Menu.Item
                 aria-disabled
                 aria-label={formatMessage({
                   id: getTrad('DynamicTable.relation-more'),
@@ -118,12 +98,12 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
                 })}
               >
                 <Typography>…</Typography>
-              </MenuItem>
+              </Menu.Item>
             )}
           </>
         )}
-      </SimpleMenu>
-    </Box>
+      </Menu.Content>
+    </Menu.Root>
   );
 };
 
@@ -146,5 +126,19 @@ RelationMultiple.propTypes = {
   entityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   value: PropTypes.object.isRequired,
 };
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 500px;
+`;
+
+/**
+ * TODO: this needs to be solved in the Design-System
+ */
+const MenuTrigger = styled(Menu.Trigger)`
+  svg {
+    width: ${6 / 16}rem;
+    height: ${4 / 16}rem;
+  }
+`;
 
 export default RelationMultiple;

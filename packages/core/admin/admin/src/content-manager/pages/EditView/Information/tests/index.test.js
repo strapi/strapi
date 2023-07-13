@@ -11,7 +11,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Information from '..';
+import { Information } from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
