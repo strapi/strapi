@@ -82,6 +82,13 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
         Utils.Expression.Extends<TAttribute, Attribute.Timestamp | Attribute.DateTime>,
         DateTimeValue
       ],
+      // [
+      //   Utils.Expression.Extends<
+      //     TAttribute,
+      //     Attribute.Relation<infer TOrigin, infer TRelationKind, infer TTarget>
+      //   >,
+      //   Attribute.RelationValue<TRelationKind, TTarget>
+      // ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
       [Utils.Expression.True, Attribute.GetValue<TAttribute, unknown>]

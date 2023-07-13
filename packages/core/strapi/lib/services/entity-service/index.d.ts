@@ -1,5 +1,7 @@
 import type { Database, ID } from '@strapi/database';
-import { Strapi } from '../../';
+import { Attribute, Common, Strapi } from '../../';
+import { AttributeUtils, Fields } from './types/params';
+import { GetValue, GetValueByKey } from '../../types/core/attributes/utils';
 
 type EntityServiceAction =
   | 'findMany'
@@ -19,8 +21,12 @@ type PaginationInfo = {
   total: number;
 };
 
-type Params<T> = {
-  fields?: (keyof T)[];
+type DataParam<TSchemaUID extends Common.UID.Schema> = {
+  [Key in Attribute.GetKeys<TSchemaUID>]?: AttributeUtils.GetValue<Attribute.Get<TSchemaUID, Key>>;
+};
+
+type Params<TSchemaUID extends Common.UID.Schema> = {
+  fields?: Fields.Any<TSchemaUID>;
   filters?: any;
   _q?: string;
   populate?: any;
@@ -30,7 +36,7 @@ type Params<T> = {
   page?: number;
   pageSize?: number;
   publicationState?: string;
-  data?: any;
+  data?: DataParam<TSchemaUID>;
   files?: any;
 };
 
@@ -73,11 +79,14 @@ export interface EntityService {
   ): Promise<T>;
 
   count<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
-  create<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
-  update<K extends keyof AllTypes, T extends AllTypes[K]>(
-    uid: K,
+  create<TSchemaUID extends Common.UID.ContentType>(
+    uid: TSchemaUID,
+    params: Params<TSchemaUID>
+  ): Promise<any>;
+  update<TSchemaUID extends Common.UID.ContentType>(
+    uid: TSchemaUID,
     entityId: ID,
-    params: Params<T>
+    params: Params<TSchemaUID>
   ): Promise<any>;
   delete<K extends keyof AllTypes, T extends AllTypes[K]>(
     uid: K,

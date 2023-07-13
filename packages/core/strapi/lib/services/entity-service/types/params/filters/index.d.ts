@@ -1,9 +1,9 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 import type * as Operator from './operators';
-import type * as AttributeUtils from './attributes';
+import { AttributeUtils } from '..';
 
-export { Operator, AttributeUtils as Attribute };
+export { Operator };
 
 /**
  * Filter representation for nested attributes
