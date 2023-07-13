@@ -1213,7 +1213,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
             </div>
             <a
               aria-disabled="false"
-              class="c10 sc-bGaVxB c11 c12 c13 c14"
+              class="c10 sc-gnnDb c11 c12 c13 c14"
               href="https://market.strapi.io/submit-plugin"
               target="_self"
             >
@@ -1600,7 +1600,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Comments"
-                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        class="c10 sc-gnnDb c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-comments"
                         target="_self"
                       >
@@ -1764,7 +1764,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Config Sync"
-                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        class="c10 sc-gnnDb c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
                         target="_self"
                       >
@@ -1913,7 +1913,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Content Versioning"
-                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        class="c10 sc-gnnDb c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
                         target="_self"
                       >
@@ -2116,7 +2116,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Documentation"
-                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        class="c10 sc-gnnDb c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
                         target="_self"
                       >
@@ -2247,7 +2247,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                       <a
                         aria-disabled="false"
                         aria-label="Learn more about Transformer"
-                        class="c10 sc-bGaVxB c11 c12 c13 c14"
+                        class="c10 sc-gnnDb c11 c12 c13 c14"
                         href="https://market.strapi.io/plugins/strapi-plugin-transformer"
                         target="_self"
                       >
@@ -2337,15 +2337,12 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                 <div
                   class="c40"
                 >
-                  <label
-                    class="c8 c30 c31"
-                    for=":rk:"
-                  />
                   <div
                     aria-autocomplete="none"
                     aria-controls="radix-:rn:"
                     aria-describedby=":rk:-hint :rk:-error"
                     aria-expanded="false"
+                    aria-label="Entries per page"
                     class="c41 c42 c43"
                     data-state="closed"
                     dir="ltr"
