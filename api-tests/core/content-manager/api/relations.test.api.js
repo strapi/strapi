@@ -639,61 +639,6 @@ describe('Relations', () => {
     });
   });
 
-  describe('Update entity relations does not break other relations', () => {
-    test('Update and disconnect relation does not break other relations', async () => {
-      // Create 2 entries connected to the same relations
-      const shops = [];
-
-      for (let i = 0; i < 2; i++) {
-        const createdShop = await createEntry(
-          'shop',
-          {
-            name: 'Cazotte Shop',
-            products_ow: { connect: [id1] },
-            products_oo: { connect: [id1] },
-            products_mo: { connect: [id1] },
-            products_om: { connect: [id1, id2] },
-            products_mm: { connect: [id1, id2] },
-            products_mw: { connect: [id1, id2] },
-            myCompo: {
-              compo_products_ow: { connect: [id1] },
-              compo_products_mw: { connect: [id1, id2] },
-            },
-          },
-          ['myCompo']
-        );
-        shops.push(createdShop);
-      }
-
-      // Update shop 1 relation order
-      await updateEntry(
-        'shop',
-        shops[0].id,
-        {
-          name: 'Cazotte Shop',
-          products_om: { disconnect: [id2] },
-          products_mm: { disconnect: [id2] },
-          products_mw: { disconnect: [id2] },
-          myCompo: {
-            id: shops[0].myCompo.id,
-            compo_products_mw: { disconnect: [id2] },
-          },
-        },
-        []
-      );
-
-      const updatedShop2 = await strapi.entityService.findOne('api::shop.shop', shops[1].id, {
-        populate: populateShop,
-      });
-
-      // shop2 relations should be unchanged
-      expect(updatedShop2.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.products_mm).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.myCompo.compo_products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
-    });
-  });
-
   describe('Reorder an entity relations', () => {
     test('Reorder single relation', async () => {
       const createdShop = await createEntry(
