@@ -1,7 +1,8 @@
+import set from 'lodash/set';
 import * as yup from 'yup';
 
-export function getWorkflowValidationSchema({ formatMessage }) {
-  return yup.object({
+export async function validateWorkflow({ values, formatMessage }) {
+  const schema = yup.object({
     contentTypes: yup.array().of(yup.string()),
     name: yup
       .string()
@@ -32,6 +33,20 @@ export function getWorkflowValidationSchema({ formatMessage }) {
                 id: 'Settings.review-workflows.validation.stage.max-length',
                 defaultMessage: 'Name can not be longer than 255 characters',
               })
+            )
+            .test(
+              'unique-name',
+              formatMessage({
+                id: 'Settings.review-workflows.validation.stage.duplicate',
+                defaultMessage: 'Stage name must be unique',
+              }),
+              function (stageName) {
+                const {
+                  options: { context },
+                } = this;
+
+                return context.stages.filter((stage) => stage.name === stageName).length === 1;
+              }
             ),
           color: yup
             .string()
@@ -46,4 +61,20 @@ export function getWorkflowValidationSchema({ formatMessage }) {
       )
       .min(1),
   });
+
+  try {
+    await schema.validate(values, { abortEarly: false, context: values });
+
+    return true;
+  } catch (error) {
+    let errors = {};
+
+    if (error instanceof yup.ValidationError) {
+      error.inner.forEach((error) => {
+        set(errors, error.path, error.message);
+      });
+    }
+
+    return errors;
+  }
 }
