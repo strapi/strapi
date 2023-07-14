@@ -12,7 +12,7 @@ import useQueryParams from '../../hooks/useQueryParams';
 
 import AttributeTag from './AttributeTag';
 
-const FilterListURLQuery = ({ filtersSchema }) => {
+export const FilterListURLQuery = ({ filtersSchema }) => {
   const [{ query }, setQuery] = useQueryParams();
 
   const handleClick = (filter) => {
@@ -93,5 +93,3 @@ FilterListURLQuery.propTypes = {
     })
   ),
 };
-
-export default FilterListURLQuery;

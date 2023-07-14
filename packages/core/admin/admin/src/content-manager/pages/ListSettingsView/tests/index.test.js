@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Router } from 'react-router-dom';
+import { MemoryRouter, Route } from 'react-router-dom';
 
 import ModelsContext from '../../../contexts/ModelsContext';
 import ListSettingsView from '../index';
@@ -16,14 +16,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
 }));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
 
 const layout = {
   attributes: {
@@ -93,153 +85,189 @@ const layout = {
   uid: 'api::restaurant.restaurant',
 };
 
-const makeApp = (history) => (
-  <Router history={history}>
-    <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
-      <QueryClientProvider client={client}>
-        <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
-          <ThemeProvider theme={lightTheme}>
-            <DndProvider backend={HTML5Backend}>
-              <ListSettingsView
-                layout={layout}
-                slug="api::restaurant.restaurant"
-                updateLayout={jest.fn()}
-              />
-            </DndProvider>
-          </ThemeProvider>
-        </IntlProvider>
-      </QueryClientProvider>
-    </ModelsContext.Provider>
-  </Router>
-);
+let testLocation;
 
+const render = ({ initialEntries } = {}) => ({
+  ...renderRTL(
+    <ListSettingsView layout={layout} slug="api::restaurant.restaurant" updateLayout={jest.fn()} />,
+    {
+      wrapper({ children }) {
+        const client = new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: false,
+            },
+          },
+        });
+
+        return (
+          <MemoryRouter initialEntries={initialEntries}>
+            <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
+              <QueryClientProvider client={client}>
+                <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+                  <ThemeProvider theme={lightTheme}>
+                    <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+                  </ThemeProvider>
+                </IntlProvider>
+              </QueryClientProvider>
+            </ModelsContext.Provider>
+            <Route
+              path="*"
+              render={({ location }) => {
+                testLocation = location;
+
+                return null;
+              }}
+            />
+          </MemoryRouter>
+        );
+      },
+    }
+  ),
+  user: userEvent.setup(),
+});
+
+/**
+ * TODO: we should be using MSW for the network events
+ */
 describe('ADMIN | CM | LV | Configure the view', () => {
   it('renders and matches the snapshot', async () => {
-    const history = createMemoryHistory();
+    const { getByRole } = render();
 
-    const { container } = render(makeApp(history));
     await waitFor(() =>
-      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
     );
 
-    expect(container).toMatchSnapshot();
+    expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
+
+    expect(getByRole('heading', { name: 'Settings' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Enable search' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Enable filters' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Enable bulk actions' })).toBeInTheDocument();
+    expect(getByRole('combobox', { name: 'Entries per page' })).toBeInTheDocument();
+    expect(getByRole('combobox', { name: 'Default sort attribute' })).toBeInTheDocument();
+    expect(getByRole('combobox', { name: 'Default sort order' })).toBeInTheDocument();
+
+    expect(getByRole('heading', { name: 'View' })).toBeInTheDocument();
+
+    /**
+     * For each attribute it should have the following
+     */
+    layout.layouts.list.forEach((attribute) => {
+      expect(getByRole('button', { name: `Edit ${attribute}` })).toBeInTheDocument();
+      expect(getByRole('button', { name: `Delete ${attribute}` })).toBeInTheDocument();
+    });
+
+    expect(getByRole('button', { name: 'Add a field' })).toBeInTheDocument();
   });
 
   it('should keep plugins query params when arriving on the page and going back', async () => {
-    const history = createMemoryHistory();
-    act(() => {
-      history.push(
-        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr'
-      );
+    const { getByRole, user } = render({
+      initialEntries: [
+        '/content-manager/collectionType/api::category.category/configurations/list?plugins[i18n][locale]=fr',
+      ],
     });
 
-    const { container } = render(makeApp(history));
     await waitFor(() =>
-      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
     );
 
-    expect(history.location.search).toEqual('?plugins[i18n][locale]=fr');
-    fireEvent.click(container.querySelector('#go-back'));
-    expect(history.location.search).toEqual(
-      '?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr'
-    );
+    expect(testLocation.search).toEqual('?plugins[i18n][locale]=fr');
+
+    await user.click(getByRole('link', { name: 'Back' }));
+
+    expect(testLocation.search).toEqual('?page=1&pageSize=10&sort=id:ASC&plugins[i18n][locale]=fr');
   });
 
-  it('should add field', async () => {
-    const history = createMemoryHistory();
-
-    const { container } = render(makeApp(history));
+  it('should add field and let the user save', async () => {
+    const { getByRole, user } = render();
 
     await waitFor(() =>
-      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
     );
 
-    fireEvent.mouseDown(screen.getByTestId('add-field'));
+    await user.click(getByRole('button', { name: 'Add a field' }));
+    await user.click(getByRole('menuitem', { name: 'Cover' }));
 
-    await waitFor(() => expect(screen.getByText('Cover')).toBeInTheDocument());
+    expect(getByRole('button', { name: `Edit Cover` })).toBeInTheDocument();
+    expect(getByRole('button', { name: `Delete Cover` })).toBeInTheDocument();
 
-    fireEvent.mouseDown(screen.getByText('Cover'));
-    fireEvent.mouseDown(screen.getByTestId('add-field'));
+    fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(container).toMatchSnapshot();
+    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
+
+    await user.click(getByRole('button', { name: 'Confirm' }));
   });
 
   it('should delete field', async () => {
-    const history = createMemoryHistory();
+    const { getByRole, user } = render();
 
-    const { queryByTestId } = render(makeApp(history));
     await waitFor(() =>
-      expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+      expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
     );
 
-    expect(queryByTestId('delete-id')).toBeInTheDocument();
+    await user.click(getByRole('button', { name: 'Delete id' }));
 
-    fireEvent.click(screen.getByTestId('delete-id'));
+    fireEvent.click(getByRole('button', { name: 'Save' }));
 
-    expect(queryByTestId('delete-id')).not.toBeInTheDocument();
+    expect(getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
+
+    await user.click(getByRole('button', { name: 'Confirm' }));
   });
 
   describe('Edit modal', () => {
-    it('should open edit modal', async () => {
-      const history = createMemoryHistory();
+    it('should open edit modal & close upon editing and pressing finish', async () => {
+      const { getByRole, queryByRole, user } = render();
 
-      render(makeApp(history));
       await waitFor(() =>
-        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
       );
 
-      fireEvent.click(screen.getByLabelText('Edit address'));
+      await user.click(getByRole('button', { name: 'Edit id' }));
 
-      expect(
-        screen.getByText("This value overrides the label displayed in the table's head")
-      ).toBeInTheDocument();
+      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(getByRole('heading', { name: 'Edit Id' })).toBeInTheDocument();
+      expect(getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(getByRole('checkbox', { name: 'Enable sort on this field' })).toBeInTheDocument();
+
+      await user.type(getByRole('textbox', { name: 'Label' }), 'testname');
+
+      expect(getByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+
+      fireEvent.click(getByRole('button', { name: 'Finish' }));
+
+      expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument();
     });
 
-    it('should close edit modal onSubmit', async () => {
-      const history = createMemoryHistory();
+    it('should close edit modal when pressing cancel', async () => {
+      const { getByRole, queryByRole, user } = render();
 
-      const { queryByText } = render(makeApp(history));
       await waitFor(() =>
-        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
       );
 
-      fireEvent.click(screen.getByLabelText('Edit address'));
+      await user.click(getByRole('button', { name: 'Edit id' }));
 
-      expect(
-        screen.getByText("This value overrides the label displayed in the table's head")
-      ).toBeInTheDocument();
+      expect(getByRole('dialog', { name: 'Edit Id' })).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Finish'));
+      await user.click(getByRole('button', { name: 'Cancel' }));
 
-      expect(
-        queryByText("This value overrides the label displayed in the table's head")
-      ).not.toBeInTheDocument();
+      expect(queryByRole('dialog', { name: 'Edit Id' })).not.toBeInTheDocument();
     });
 
     it('should not show sortable toggle input if field not sortable', async () => {
-      const history = createMemoryHistory();
+      const { getByRole, queryByRole, user } = render();
 
-      const { queryByText } = render(makeApp(history));
       await waitFor(() =>
-        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
+        expect(getByRole('heading', { name: 'Configure the view - Michka' })).toBeInTheDocument()
       );
 
-      fireEvent.click(screen.getByLabelText('Edit address'));
+      await user.click(getByRole('button', { name: 'Edit address' }));
 
-      expect(queryByText('Enable sort on this field')).not.toBeInTheDocument();
-    });
-
-    it('should show sortable toggle input if field sortable', async () => {
-      const history = createMemoryHistory();
-
-      const { queryByTestId } = render(makeApp(history));
-      await waitFor(() =>
-        expect(screen.getByText('Configure the view - Michka')).toBeInTheDocument()
-      );
-
-      fireEvent.click(screen.getByLabelText('Edit id'));
-
-      expect(queryByTestId('Enable sort on this field')).toBeInTheDocument();
+      expect(
+        queryByRole('checkbox', { name: 'Enable sort on this field' })
+      ).not.toBeInTheDocument();
     });
   });
 });

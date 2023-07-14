@@ -125,6 +125,7 @@
   "modalForm.editCategory.base.name.description": "Medzery nie sú povolené v názve kategórie",
   "modalForm.header-edit": "Upraviť {name}",
   "modalForm.header.categories": "Kategórie",
+  "modalForm.header.back": "späť",
   "modalForm.singleType.header-create": "Vytvoriť jednorazový typ",
   "modalForm.sub-header.addComponentToDynamicZone": "Pridať nový komponent do dynamickej zóny",
   "modalForm.sub-header.attribute.create": "Pridať nové políčko {type}",

@@ -12,6 +12,9 @@ import {
   Flex,
   Td,
   Tr,
+  Typography,
+  Status,
+  lightTheme,
 } from '@strapi/design-system';
 import {
   NoPermissions,
@@ -25,7 +28,6 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
-  getYupInnerErrors,
   useStrapiApp,
   Table,
   PaginationURLQuery,
@@ -33,7 +35,6 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Cog, Plus } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
-import getReviewWorkflowsColumn from 'ee_else_ce/content-manager/components/ListViewTable/CellContent/ReviewWorkflowsStage/getTableColumn';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -45,11 +46,11 @@ import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
-import { PublicationState } from '../../components/ListViewTable/CellContent/PublicationState';
-import { createYupSchema, getRequestUrl, getTrad } from '../../utils';
+import { getRequestUrl, getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { Body } from './components/Body';
@@ -57,7 +58,7 @@ import BulkActionButtons from './components/BulkActionButtons';
 import CellContent from './components/CellContent';
 import { FieldPicker } from './components/FieldPicker';
 import makeSelectListView, { selectDisplayedHeaders } from './selectors';
-import { buildQueryString } from './utils';
+import { buildValidGetParams } from './utils';
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -66,6 +67,9 @@ const ConfigureLayoutBox = styled(Box)`
     }
   }
 `;
+
+const REVIEW_WORKFLOW_COLUMNS_CE = null;
+const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
 
 function ListView({
   canCreate,
@@ -101,14 +105,39 @@ function ListView({
   useFocusWhenNavigate();
 
   const [{ query }] = useQueryParams();
-  const params = buildQueryString(query);
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const hasDraftAndPublish = options?.draftAndPublish || false;
   const fetchClient = useFetchClient();
+
+  const hasDraftAndPublish = options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
+
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+        )
+      ).REVIEW_WORKFLOW_COLUMNS_EE,
+    {
+      enabled: !!options?.reviewWorkflows,
+    }
+  );
+  const ReviewWorkflowsStage = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CELL_CE,
+    async () =>
+      (await import('../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'))
+        .ReviewWorkflowsStageEE,
+    {
+      enabled: hasReviewWorkflows,
+    }
+  );
+
   const { post, del } = fetchClient;
 
   const bulkPublishMutation = useMutation(
@@ -121,7 +150,7 @@ function ListView({
           message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
         });
 
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({
@@ -144,7 +173,7 @@ function ListView({
           },
         });
 
-        fetchData(`/content-manager/collection-types/${slug}${params}`);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
       },
       onError(error) {
         toggleNotification({
@@ -159,19 +188,17 @@ function ListView({
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
   const requestUrlRef = React.useRef('');
-
   /**
    * TODO: re-write all of this, it's a mess.
    */
   const fetchData = React.useCallback(
-    async (endPoint, source) => {
+    async (endPoint, options) => {
       getData();
 
       try {
-        const opts = source ? { cancelToken: source.token } : null;
         const {
           data: { results, pagination: paginationResult },
-        } = await fetchClient.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, options);
 
         notifyStatus(
           formatMessage(
@@ -218,12 +245,12 @@ function ListView({
   const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
-        await post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
           ids,
         });
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
+
         trackUsageRef.current('didBulkDeleteEntries');
       } catch (err) {
         toggleNotification({
@@ -232,16 +259,16 @@ function ListView({
         });
       }
     },
-    [fetchData, params, slug, toggleNotification, formatAPIError, post]
+    [slug, toggleNotification, formatAPIError, post, fetchData, params]
   );
 
   const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
-        await del(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        const requestUrl = getRequestUrl(`collection-types/${slug}`);
+        fetchData(requestUrl, { params });
 
         toggleNotification({
           type: 'success',
@@ -254,66 +281,10 @@ function ListView({
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatAPIError, del]
+    [slug, toggleNotification, formatAPIError, del, fetchData, params]
   );
 
-  /**
-   * @param {number[]} selectedEntries - Array of ids to publish
-   * @returns {{validIds: number[], errors: Object.<number, string>}} - Returns an object with the valid ids and the errors
-   */
-  const validateEntriesToPublish = async (selectedEntries) => {
-    const validations = { validIds: [], errors: {} };
-    // Create the validation schema based on the contentType
-    const schema = createYupSchema(
-      contentType,
-      { components: layout.components },
-      { isDraft: false }
-    );
-    // Get the selected entries
-    const entries = data.filter((entry) => {
-      return selectedEntries.includes(entry.id);
-    });
-    // Validate each entry and map the unresolved promises
-    const validationPromises = entries.map((entry) =>
-      schema.validate(entry, { abortEarly: false })
-    );
-    // Resolve all the promises in one go
-    const resolvedPromises = await Promise.allSettled(validationPromises);
-    // Set the validations
-    resolvedPromises.forEach((promise) => {
-      if (promise.status === 'rejected') {
-        const entityId = promise.reason.value.id;
-        validations.errors[entityId] = getYupInnerErrors(promise.reason);
-      }
-
-      if (promise.status === 'fulfilled') {
-        validations.validIds.push(promise.value.id);
-      }
-    });
-
-    return validations;
-  };
-
   const handleConfirmPublishAllData = async (selectedEntries) => {
-    const validations = await validateEntriesToPublish(selectedEntries);
-
-    if (Object.values(validations.errors).length) {
-      toggleNotification({
-        type: 'warning',
-        title: {
-          id: 'content-manager.listView.validation.errors.title',
-          defaultMessage: 'Action required',
-        },
-        message: {
-          id: 'content-manager.listView.validation.errors.message',
-          defaultMessage:
-            'Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)',
-        },
-      });
-
-      throw new Error('Validation error');
-    }
-
     return bulkPublishMutation.mutateAsync({ ids: selectedEntries });
   };
 
@@ -326,10 +297,10 @@ function ListView({
     const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+    const requestUrl = getRequestUrl(`collection-types/${slug}`);
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
+      fetchData(requestUrl, { cancelToken: source.token, params });
     }
 
     return () => {
@@ -388,24 +359,8 @@ function ListView({
       };
     });
 
-    if (!hasDraftAndPublish) {
-      return formattedHeaders;
-    }
-
-    // this should not exist. Ideally we would use registerHook() similar to what has been done
-    // in the i18n plugin. In order to do that review-workflows should have been a plugin. In
-    // a future iteration we need to find a better pattern.
-
-    // In CE this will return null - in EE a column definition including the custom formatting component.
-    const reviewWorkflowColumn = getReviewWorkflowsColumn(layout);
-
-    if (reviewWorkflowColumn) {
-      formattedHeaders.push(reviewWorkflowColumn);
-    }
-
-    return [
-      ...formattedHeaders,
-      {
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
         key: '__published_at_temp_key__',
         name: 'publishedAt',
         fieldSchema: {
@@ -419,9 +374,29 @@ function ListView({
           searchable: false,
           sortable: true,
         },
-      },
-    ];
-  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
+      });
+    }
+
+    if (reviewWorkflowColumns) {
+      // Make sure the column header label is translated
+      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
+        reviewWorkflowColumns.metadatas.label = formatMessage(
+          reviewWorkflowColumns.metadatas.label
+        );
+      }
+
+      formattedHeaders.push(reviewWorkflowColumns);
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    reviewWorkflowColumns,
+    hasDraftAndPublish,
+    formatMessage,
+  ]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -497,6 +472,16 @@ function ListView({
 
   // Add 1 column for the checkbox and 1 for the actions
   const colCount = tableHeaders.length + 2;
+
+  // We have this function to refetch data when selected entries modal is closed
+  const refetchData = () => {
+    fetchData(`/content-manager/collection-types/${slug}`, { params });
+  };
+
+  // Block rendering until the review stage component is fully loaded in EE
+  if (!ReviewWorkflowsStage) {
+    return null;
+  }
 
   return (
     <Main aria-busy={isLoading}>
@@ -575,6 +560,7 @@ function ListView({
                   onConfirmDeleteAll={handleConfirmDeleteAllData}
                   onConfirmPublishAll={handleConfirmPublishAllData}
                   onConfirmUnpublishAll={handleConfirmUnpublishAllData}
+                  refetchData={refetchData}
                 />
               </Table.ActionBar>
               <Table.Content>
@@ -615,10 +601,49 @@ function ListView({
                         <Body.CheckboxDataCell rowId={rowData.id} index={index} />
                         {/* Field data */}
                         {tableHeaders.map(({ key, name, ...rest }) => {
-                          if (name === 'publishedAt') {
+                          if (hasDraftAndPublish && name === 'publishedAt') {
                             return (
                               <Td key={key}>
-                                <PublicationState isPublished={Boolean(rowData.publishedAt)} />
+                                <Status
+                                  width="min-content"
+                                  showBullet={false}
+                                  variant={rowData.publishedAt ? 'success' : 'secondary'}
+                                  size="S"
+                                >
+                                  <Typography
+                                    fontWeight="bold"
+                                    textColor={`${
+                                      rowData.publishedAt ? 'success' : 'secondary'
+                                    }700`}
+                                  >
+                                    {formatMessage({
+                                      id: getTrad(
+                                        `containers.List.${
+                                          rowData.publishedAt ? 'published' : 'draft'
+                                        }`
+                                      ),
+                                      defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
+                                    })}
+                                  </Typography>
+                                </Status>
+                              </Td>
+                            );
+                          }
+
+                          if (hasReviewWorkflows && name === 'strapi_reviewWorkflows_stage') {
+                            return (
+                              <Td key={key}>
+                                {rowData.strapi_reviewWorkflows_stage ? (
+                                  <ReviewWorkflowsStage
+                                    color={
+                                      rowData.strapi_reviewWorkflows_stage.color ??
+                                      lightTheme.colors.primary600
+                                    }
+                                    name={rowData.strapi_reviewWorkflows_stage.name}
+                                  />
+                                ) : (
+                                  <Typography textColor="neutral800">-</Typography>
+                                )}
                               </Td>
                             );
                           }

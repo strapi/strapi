@@ -48,7 +48,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
 
   const fetchFolders = async () => {
     try {
-      const { data } = await get(`${dataRequestURL}?${stringify(params, { encode: false })}`);
+      const { data } = await get(dataRequestURL, { params });
 
       notifyStatus(
         formatMessage({

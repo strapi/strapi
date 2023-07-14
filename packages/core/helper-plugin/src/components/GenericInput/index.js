@@ -231,7 +231,6 @@ const GenericInput = ({
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
-          step={step}
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
@@ -434,7 +433,6 @@ const GenericInput = ({
           }}
           placeholder={formattedPlaceholder}
           required={required}
-          step={step}
           value={time}
         />
       );

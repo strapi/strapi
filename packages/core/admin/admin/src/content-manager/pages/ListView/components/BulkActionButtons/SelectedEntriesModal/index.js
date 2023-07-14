@@ -8,18 +8,107 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Tbody,
   Tr,
   Td,
+  IconButton,
+  Flex,
+  Icon,
+  Tooltip,
 } from '@strapi/design-system';
-import { useTableContext, Table } from '@strapi/helper-plugin';
+import {
+  useTableContext,
+  Table,
+  getYupInnerErrors,
+  useFetchClient,
+  useQueryParams,
+} from '@strapi/helper-plugin';
+import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
+import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { getTrad } from '../../../../../utils';
+import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 300px;
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * EntryValidationText
+ * -----------------------------------------------------------------------------------------------*/
+
+const EntryValidationText = ({ errors, isPublished }) => {
+  const { formatMessage } = useIntl();
+
+  if (errors) {
+    const errorMessages = Object.entries(errors)
+      .map(([key, value]) =>
+        formatMessage(
+          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+          { field: key }
+        )
+      )
+      .join(' ');
+
+    return (
+      <Flex gap={2}>
+        <Icon color="danger600" as={CrossCircle} />
+        <Tooltip description={errorMessages}>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+            {errorMessages}
+          </TypographyMaxWidth>
+        </Tooltip>
+      </Flex>
+    );
+  }
+
+  if (isPublished) {
+    return (
+      <Flex gap={2}>
+        <Icon color="success600" as={CheckCircle} />
+        <Typography textColor="success600" fontWeight="bold">
+          {formatMessage({
+            id: 'app.utils.published',
+            defaultMessage: 'Published',
+          })}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex gap={2}>
+      <Icon color="success600" as={CheckCircle} />
+      <Typography>
+        {formatMessage({
+          id: 'app.utils.ready-to-publish',
+          defaultMessage: 'Ready to publish',
+        })}
+      </Typography>
+    </Flex>
+  );
+};
+
+EntryValidationText.defaultProps = {
+  errors: null,
+  isPublished: false,
+};
+
+EntryValidationText.propTypes = {
+  errors: PropTypes.shape({
+    [PropTypes.string]: PropTypes.shape({
+      id: PropTypes.string,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
+  isPublished: PropTypes.bool,
+};
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesTableContent
@@ -27,11 +116,24 @@ import { Body } from '../../Body';
 
 const SelectedEntriesTableContent = () => {
   const { rows } = useTableContext();
+  const {
+    location: { pathname },
+  } = useHistory();
+  const { formatMessage } = useIntl();
 
   // Get main field from list view layout
   const listViewStore = useSelector(listViewDomain());
   const { mainField } = listViewStore.contentType.settings;
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
+
+  const getItemLineText = (count) =>
+    formatMessage(
+      {
+        id: 'content-manager.components.ListViewTable.row-line',
+        defaultMessage: 'item line {number}',
+      },
+      { number: count + 1 }
+    );
 
   return (
     <Table.Content>
@@ -42,21 +144,42 @@ const SelectedEntriesTableContent = () => {
           <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
       </Table.Head>
-      <Tbody>
-        {rows.map((entry, index) => (
-          <Tr key={entry.id}>
-            <Body.CheckboxDataCell rowId={entry.id} index={index} />
+      <Table.LoadingBody />
+      <Table.Body>
+        {rows.map(({ entity, errors }, index) => (
+          <Tr key={entity.id}>
+            <Body.CheckboxDataCell rowId={entity.id} index={index} />
             <Td>
-              <Typography>{entry.id}</Typography>
+              <Typography>{entity.id}</Typography>
             </Td>
             {shouldDisplayMainField && (
               <Td>
-                <Typography>{entry[mainField]}</Typography>
+                <Typography>{entity[mainField]}</Typography>
               </Td>
             )}
+            <Td>
+              <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+            </Td>
+            <Td>
+              <IconButton
+                forwardedAs={Link}
+                to={{
+                  pathname: `${pathname}/${entity.id}`,
+                  state: { from: pathname },
+                }}
+                label={formatMessage(
+                  { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                  { target: getItemLineText(index) }
+                )}
+                noBorder
+                target="_blank"
+              >
+                <Pencil />
+              </IconButton>
+            </Td>
           </Tr>
         ))}
-      </Tbody>
+      </Table.Body>
     </Table.Content>
   );
 };
@@ -71,9 +194,14 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
+const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries } = useTableContext();
+  const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
+
+  const selectedEntriesWithErrorsCount = rows.filter(
+    ({ entity, errors }) => selectedEntries.includes(entity.id) && errors
+  ).length;
+  const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -91,10 +219,11 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
             {
               id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
               defaultMessage:
-                '<b>{count}</b> {count, plural, =0 {entries} one {entry} other {entries}} selected',
+                '<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} awaiting for action.',
             },
             {
-              count: selectedEntries.length,
+              readyToPublishCount: selectedEntriesWithNoErrorsCount,
+              withErrorsCount: selectedEntriesWithErrorsCount,
               b: BoldChunk,
             }
           )}
@@ -113,12 +242,21 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
           </Button>
         }
         endActions={
-          <Button
-            onClick={() => onConfirm(selectedEntries)}
-            disabled={selectedEntries.length === 0}
-          >
-            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-          </Button>
+          <Flex gap={2}>
+            <Button onClick={onRefresh} variant="tertiary" loading={isFetching}>
+              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
+            </Button>
+            <Button
+              onClick={() => onConfirm(selectedEntries)}
+              disabled={
+                selectedEntries.length === 0 ||
+                selectedEntries.length === selectedEntriesWithErrorsCount ||
+                isLoading
+              }
+            >
+              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+            </Button>
+          </Flex>
         }
       />
     </ModalLayout>
@@ -128,6 +266,7 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm }) => {
 SelectedEntriesModalContent.propTypes = {
   onToggle: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -135,19 +274,65 @@ SelectedEntriesModalContent.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
-  const { rows, selectedEntries } = useTableContext();
+  const { selectedEntries } = useTableContext();
+  const { contentType, components } = useSelector(listViewDomain());
 
-  // Get the selected entries full data, and keep the list view order
-  // Memoize to prevent infinite useEffect runs in SelectedEntriesTableContent
-  const entries = React.useMemo(() => {
-    return rows.filter((row) => {
-      return selectedEntries.includes(row.id);
-    });
-  }, [rows, selectedEntries]);
+  // We want to keep the selected entries order same as the list view
+  const [
+    {
+      query: { sort },
+    },
+  ] = useQueryParams();
+  const queryParams = {
+    sort,
+    filters: {
+      id: {
+        $in: selectedEntries,
+      },
+    },
+  };
+
+  const { get } = useFetchClient();
+  const queryString = stringify(queryParams);
+
+  const { data, isLoading, isFetching, refetch } = useQuery(
+    ['entries', contentType.uid, queryParams],
+    async () => {
+      const { data } = await get(
+        `content-manager/collection-types/${contentType.uid}?${queryString}`
+      );
+
+      if (data.results) {
+        const schema = createYupSchema(contentType, { components }, { isDraft: false });
+        const rows = data.results.map((entry) => {
+          try {
+            schema.validateSync(entry, { abortEarly: false });
+
+            return { entity: entry };
+          } catch (e) {
+            return {
+              entity: entry,
+              errors: getYupInnerErrors(e),
+            };
+          }
+        });
+
+        return rows;
+      }
+
+      return [];
+    }
+  );
 
   return (
-    <Table.Root rows={entries} defaultSelectedEntries={selectedEntries} colCount={4}>
-      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} />
+    <Table.Root
+      rows={data}
+      defaultSelectedEntries={selectedEntries}
+      colCount={4}
+      isLoading={isLoading}
+      isFetching={isFetching}
+    >
+      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} onRefresh={refetch} />
     </Table.Root>
   );
 };

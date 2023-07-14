@@ -4,12 +4,12 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import ReviewWorkflowsStage from '..';
+import { ReviewWorkflowsStageEE } from '..';
 
 const ComponentFixture = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}}>
-      <ReviewWorkflowsStage {...props} />
+      <ReviewWorkflowsStageEE {...props} />
     </IntlProvider>
   </ThemeProvider>
 );

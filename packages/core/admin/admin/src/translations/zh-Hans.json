@@ -799,7 +799,7 @@
     "content-manager.popUpWarning.warning.unpublish-question": "您确定不要发布它吗？",
     "content-manager.popUpWarning.warning.updateAllSettings": "这将修改所有设置",
     "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "是, 发布",
-    "content-manager.popUpwarning.warning.has-draft-relations.message": "<b>{count, plural, =0 { 个关联的内容} one { 个关联的内容} other { 个关联的内容}}</b> 尚未发布。<br></br>它可能会在你的项目上产生关联失效和错误。",
+    "content-manager.popUpwarning.warning.has-draft-relations.message": "<b>{count, plural, one { 个关联的内容} other { 个关联的内容}}</b> 尚未发布，这可能会导致不可预期的行为。",
     "content-manager.popover.display-relations.label": "显示关联",
     "content-manager.relation.add": "添加关联",
     "content-manager.relation.disconnect": "删除",

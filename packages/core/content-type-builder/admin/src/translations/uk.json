@@ -123,6 +123,7 @@
   "modalForm.editCategory.base.name.description": "Для назви категорії не допускається пробілів",
   "modalForm.header-edit": "Редагувати {name}",
   "modalForm.header.categories": "Категорії",
+  "modalForm.header.back": "Назад",
   "modalForm.singleType.header-create": "Створити Single Type",
   "modalForm.sub-header.addComponentToDynamicZone": "Додати новий компонент до динамічної зони",
   "modalForm.sub-header.attribute.create": "Додати нове поле {type}",

@@ -283,7 +283,7 @@ HeaderCell.propTypes = {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({ children, defaultSelectedEntries, rows, isLoading, colCount }) => {
+const Root = ({ children, defaultSelectedEntries, rows, colCount, isLoading, isFetching }) => {
   const [selectedEntries, setSelectedEntries] = React.useState(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
@@ -304,10 +304,20 @@ const Root = ({ children, defaultSelectedEntries, rows, isLoading, colCount }) =
       onSelectRow,
       rows,
       isLoading,
+      isFetching,
       colCount,
       rowCount,
     };
-  }, [onSelectRow, selectedEntries, setSelectedEntries, rows, isLoading, colCount, rowCount]);
+  }, [
+    onSelectRow,
+    selectedEntries,
+    setSelectedEntries,
+    rows,
+    isLoading,
+    isFetching,
+    colCount,
+    rowCount,
+  ]);
 
   return <TableContext.Provider value={context}>{children}</TableContext.Provider>;
 };
@@ -316,6 +326,7 @@ Root.defaultProps = {
   rows: [],
   defaultSelectedEntries: [],
   isLoading: false,
+  isFetching: false,
   colCount: 0,
 };
 
@@ -325,6 +336,7 @@ Root.propTypes = {
   defaultSelectedEntries: PropTypes.arrayOf(PropTypes.number),
   colCount: PropTypes.number,
   isLoading: PropTypes.bool,
+  isFetching: PropTypes.bool,
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -332,7 +344,7 @@ Root.propTypes = {
  * -----------------------------------------------------------------------------------------------*/
 
 const EmptyBody = ({ contentType, ...rest }) => {
-  const { rows, colCount } = useTableContext();
+  const { rows, colCount, isLoading } = useTableContext();
   const [{ query }] = useQueryParams();
   const hasFilters = query?.filters !== undefined;
   const content = hasFilters
@@ -343,7 +355,7 @@ const EmptyBody = ({ contentType, ...rest }) => {
       }
     : undefined;
 
-  if (rows?.length > 0) {
+  if (rows?.length > 0 || isLoading) {
     return null;
   }
 
@@ -396,6 +408,23 @@ const LoadingBody = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * Body
+ * -----------------------------------------------------------------------------------------------*/
+const Body = ({ children }) => {
+  const { rows, isLoading } = useTableContext();
+
+  if (isLoading || rows.length === 0) {
+    return null;
+  }
+
+  return <Tbody>{children}</Tbody>;
+};
+
+Body.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+/* -------------------------------------------------------------------------------------------------
  * Content
  * -----------------------------------------------------------------------------------------------*/
 
@@ -421,6 +450,7 @@ Content.propTypes = {
 const Table = {
   Content,
   Root,
+  Body,
   ActionBar,
   Head,
   HeaderCell,
