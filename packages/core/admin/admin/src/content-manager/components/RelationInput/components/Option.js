@@ -20,6 +20,7 @@ const StyledBullet = styled.div`
 
 export const Option = ({ publicationState, mainField, id }) => {
   const { formatMessage } = useIntl();
+  const textValue = (mainField ?? id).toString();
 
   if (publicationState) {
     const isDraft = publicationState === 'draft';
@@ -34,18 +35,18 @@ export const Option = ({ publicationState, mainField, id }) => {
     const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
 
     return (
-      <ComboboxOption value={id} textValue={mainField ?? id}>
+      <ComboboxOption value={id} textValue={textValue}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{mainField ?? id}</Typography>
+          <Typography ellipsis>{textValue}</Typography>
         </Flex>
       </ComboboxOption>
     );
   }
 
   return (
-    <ComboboxOption value={id} textValue={mainField ?? id}>
-      {mainField ?? id}
+    <ComboboxOption value={id} textValue={textValue}>
+      {textValue}
     </ComboboxOption>
   );
 };
