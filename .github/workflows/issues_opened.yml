@@ -12,7 +12,7 @@ jobs:
     name: Add issue to Support Team project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@main
+      - uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/strapi/projects/15
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
