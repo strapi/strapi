@@ -105,32 +105,30 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { type, customField } = attributes[selectedField];
   const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
 
-  const sizeField = (
-    <GridItem col={6} key="size">
-      <Select
-        value={fieldForm?.size}
-        name="size"
-        onChange={(value) => {
-          onSizeChange({ name: selectedField, value });
-        }}
-        label={formatMessage({
-          id: getTrad('containers.SettingPage.editSettings.size.label'),
-          defaultMessage: 'Size',
-        })}
-      >
-        {FIELD_SIZES.map(([value, label]) => (
-          <Option key={value} value={value}>
-            {label}
-          </Option>
-        ))}
-      </Select>
-    </GridItem>
-  );
-
   return (
     <>
       {metaFields}
-      {isResizable && sizeField}
+      {isResizable && (
+        <GridItem col={6} key="size">
+          <Select
+            value={fieldForm?.size}
+            name="size"
+            onChange={(value) => {
+              onSizeChange({ name: selectedField, value });
+            }}
+            label={formatMessage({
+              id: getTrad('containers.SettingPage.editSettings.size.label'),
+              defaultMessage: 'Size',
+            })}
+          >
+            {FIELD_SIZES.map(([value, label]) => (
+              <Option key={value} value={value}>
+                {label}
+              </Option>
+            ))}
+          </Select>
+        </GridItem>
+      )}
     </>
   );
 };

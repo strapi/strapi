@@ -1,1 +1,1 @@
-export { default as buildQueryString } from './buildQueryString';
+export { default as buildValidGetParams } from './buildValidGetParams';

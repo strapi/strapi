@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Box, Flex, IconButton, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Box, Flex, VisuallyHidden, Typography } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -10,17 +11,10 @@ import { getTrad } from '../../../utils';
 
 import DraggableCard from './DraggableCard';
 
-const FlexWrapper = styled(Box)`
+const ScrollableContainer = styled(Box)`
   flex: ${({ size }) => size};
-`;
-
-const ScrollableContainer = styled(FlexWrapper)`
   overflow-x: scroll;
   overflow-y: hidden;
-`;
-
-const SelectContainer = styled(FlexWrapper)`
-  max-width: ${32 / 16}rem;
 `;
 
 const SortDisplayedFields = ({
@@ -89,24 +83,32 @@ const SortDisplayedFields = ({
             ))}
           </Flex>
         </ScrollableContainer>
-        <SelectContainer size="auto" paddingBottom={4}>
-          <SimpleMenu
-            label={formatMessage({
-              id: getTrad('components.FieldSelect.label'),
-              defaultMessage: 'Add a field',
-            })}
-            as={IconButton}
-            icon={<Plus />}
+        <Menu.Root>
+          <Menu.Trigger
+            paddingLeft={2}
+            paddingRight={2}
+            justifyContent="center"
+            endIcon={null}
             disabled={listRemainingFields.length <= 0}
-            data-testid="add-field"
+            marginBottom={4}
+            variant="tertiary"
           >
+            <VisuallyHidden as="span">
+              {formatMessage({
+                id: getTrad('components.FieldSelect.label'),
+                defaultMessage: 'Add a field',
+              })}
+            </VisuallyHidden>
+            <Plus aria-hidden focusable={false} style={{ position: 'relative', top: 2 }} />
+          </Menu.Trigger>
+          <Menu.Content>
             {listRemainingFields.map((field) => (
-              <MenuItem key={field} onClick={() => handleAddField(field)}>
+              <Menu.Item key={field} onSelect={() => handleAddField(field)}>
                 {metadatas[field].list.label || field}
-              </MenuItem>
+              </Menu.Item>
             ))}
-          </SimpleMenu>
-        </SelectContainer>
+          </Menu.Content>
+        </Menu.Root>
       </Flex>
     </>
   );
