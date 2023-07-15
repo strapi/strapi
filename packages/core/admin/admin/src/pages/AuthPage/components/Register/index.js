@@ -113,7 +113,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
           enableReinitialize
           initialValues={{
             firstname: userInfo.firstname || '',
-            lastname: userInfo.lastname || '',
+            lastname: userInfo.lastname || undefined,
             email: userInfo.email || '',
             password: '',
             confirmPassword: '',
