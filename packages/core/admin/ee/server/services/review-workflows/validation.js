@@ -1,5 +1,6 @@
 'use strict';
 
+const { uniq } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../../utils');
 const { ERRORS, MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } = require('../../constants/workflows');
@@ -31,6 +32,11 @@ module.exports = ({ strapi }) => {
       }
       if (stages.length > this.limits.stagesPerWorkflow) {
         throw new ValidationError(ERRORS.STAGES_LIMIT);
+      }
+      // Validate stage names are not duplicated
+      const stageNames = stages.map((stage) => stage.name);
+      if (uniq(stageNames).length !== stageNames.length) {
+        throw new ValidationError(ERRORS.DUPLICATED_STAGE_NAME);
       }
     },
 
