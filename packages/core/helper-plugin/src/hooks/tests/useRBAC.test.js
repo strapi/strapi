@@ -137,6 +137,95 @@ describe('useRBAC', () => {
         }
       `);
     });
+
+    /**
+     * There may be cases where permissionsToCheck and the passed Permissions update at different times
+     * so therefore we can't just depend on permissionsToCheck to recalculate the permissions but we also
+     * need to recalculate the permissions when the permissions argument changes.
+     */
+    it('should recalculate the permissions the permissions argument changes', async () => {
+      const { result, rerender } = renderHook(
+        ({ permissions, permissionsToCheck }) => {
+          return useRBAC(permissionsToCheck, permissions);
+        },
+        {
+          initialProps: {
+            permissionsToCheck: {
+              create: [
+                {
+                  action: 'plugin::content-manager.explorer.update',
+                  subject: 'api::about.about',
+                },
+              ],
+            },
+            permissions: [
+              {
+                action: 'plugin::content-manager.explorer.update',
+                subject: 'api::about.about',
+              },
+            ],
+          },
+        }
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.allowedActions).toMatchInlineSnapshot(`
+        {
+          "canCreate": true,
+        }
+      `);
+
+      rerender({
+        permissionsToCheck: {
+          create: [
+            {
+              action: 'plugin::content-manager.explorer.update',
+              subject: 'api::term.term',
+            },
+          ],
+        },
+        permissions: [
+          {
+            action: 'plugin::content-manager.explorer.update',
+            subject: 'api::about.about',
+          },
+        ],
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.allowedActions).toMatchInlineSnapshot(`
+        {
+          "canCreate": false,
+        }
+      `);
+
+      rerender({
+        permissionsToCheck: {
+          create: [
+            {
+              action: 'plugin::content-manager.explorer.update',
+              subject: 'api::term.term',
+            },
+          ],
+        },
+        permissions: [
+          {
+            action: 'plugin::content-manager.explorer.update',
+            subject: 'api::term.term',
+          },
+        ],
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.allowedActions).toMatchInlineSnapshot(`
+        {
+          "canCreate": true,
+        }
+      `);
+    });
   });
 
   describe('checking against the server if there are conditions in the permissions', () => {
