@@ -63,9 +63,10 @@ const validateWorkflowUpdateSchema = yup.object().shape({
     // Check that the stages name are unique
     .test('unique', function (stages) {
       const errors = [];
+
       stages.forEach((stage, index) => {
-        const duplicatedStageNames = stages.filter((s) => s.name === stage.name);
-        if (duplicatedStageNames.length > 1) {
+        const sameNameStages = stages.filter((s) => s.name === stage.name);
+        if (sameNameStages.length > 1) {
           errors.push(
             this.createError({
               path: `${this.path}[${index}].name`,
@@ -74,6 +75,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
           );
         }
       });
+
       if (!isEmpty(errors)) {
         throw new yup.ValidationError(errors);
       }
