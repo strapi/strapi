@@ -50,7 +50,7 @@ const createEntry = async (data) => {
  * 3.  Filters by updated_by (successfully)
  */
 
-describe('Test type decimal', () => {
+describe('Test non visible fields', () => {
   beforeAll(async () => {
     await builder.addContentType(ct).build();
 
