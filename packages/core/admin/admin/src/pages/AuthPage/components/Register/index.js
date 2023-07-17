@@ -98,6 +98,10 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
       if (!['password', 'confirmPassword'].includes(key) && typeof value === 'string') {
         normalizedvalue = normalizedvalue.trim();
+
+        if (key === 'lastname') {
+          normalizedvalue = normalizedvalue || null;
+        }
       }
 
       acc[key] = normalizedvalue;
@@ -113,7 +117,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
           enableReinitialize
           initialValues={{
             firstname: userInfo.firstname || '',
-            lastname: userInfo.lastname || undefined,
+            lastname: userInfo.lastname || '',
             email: userInfo.email || '',
             password: '',
             confirmPassword: '',
