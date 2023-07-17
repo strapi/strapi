@@ -22,7 +22,6 @@ import {
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
-import parseISO from 'date-fns/parseISO';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -232,7 +231,6 @@ const GenericInput = ({
 
             onChange({ target: { name, value: formattedDate, type } });
           }}
-          step={step}
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
@@ -241,12 +239,6 @@ const GenericInput = ({
       );
     }
     case 'date': {
-      let selectedDate = null;
-
-      if (value) {
-        selectedDate = parseISO(value);
-      }
-
       return (
         <DatePicker
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -265,7 +257,7 @@ const GenericInput = ({
           onClear={() => onChange({ target: { name, value: null, type } })}
           placeholder={formattedPlaceholder}
           required={required}
-          selectedDate={selectedDate}
+          selectedDate={value ? new Date(value) : undefined}
           selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         />
       );
@@ -441,7 +433,6 @@ const GenericInput = ({
           }}
           placeholder={formattedPlaceholder}
           required={required}
-          step={step}
           value={time}
         />
       );

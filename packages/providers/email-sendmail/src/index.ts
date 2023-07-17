@@ -1,5 +1,4 @@
 import sendmailFactory, { Options, MailInput } from 'sendmail';
-import utils from '@strapi/utils';
 
 interface Settings {
   defaultFrom: string;
@@ -44,7 +43,7 @@ export = {
             ...rest,
           };
 
-          sendmail(utils.removeUndefined(msg), (err) => {
+          sendmail(msg, (err) => {
             if (err) {
               reject(err);
             } else {

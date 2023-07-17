@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Box, Button, Flex, MenuItem, SimpleMenu, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -41,26 +42,27 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
           {editLayout.map((row, index) => (
             <RowsLayout key={row.rowId} row={row} rowIndex={index} onRemoveField={onRemoveField} />
           ))}
-          <SimpleMenu
-            id="label"
-            label={formatMessage({
-              id: getTrad('containers.SettingPage.add.field'),
-              defaultMessage: 'Insert another field',
-            })}
-            as={Button}
-            data-testid="add-field"
-            fullWidth
-            startIcon={<Plus />}
-            endIcon={null}
-            variant="secondary"
-            disabled={fields.length === 0}
-          >
-            {fields.map((field) => (
-              <MenuItem key={field} onClick={() => onAddField(field)}>
-                {field}
-              </MenuItem>
-            ))}
-          </SimpleMenu>
+          <Menu.Root>
+            <Menu.Trigger
+              startIcon={<Plus />}
+              endIcon={null}
+              disabled={fields.length === 0}
+              fullWidth
+              variant="secondary"
+            >
+              {formatMessage({
+                id: getTrad('containers.SettingPage.add.field'),
+                defaultMessage: 'Insert another field',
+              })}
+            </Menu.Trigger>
+            <Menu.Content>
+              {fields.map((field) => (
+                <Menu.Item key={field} onSelect={() => onAddField(field)}>
+                  {field}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Root>
         </Flex>
       </Box>
     </Flex>

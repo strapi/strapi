@@ -7,21 +7,19 @@ import type { Schema, Utils } from '@strapi/strapi';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
-import type { Client, Server } from '../../../../types/remote/protocol';
+import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 
-interface ITransferTokenAuth {
-  type: 'token';
-  token: string;
-}
-
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
-  url: URL;
-  auth?: ITransferTokenAuth;
-  retryMessageOptions?: { retryMessageTimeout: number; retryMessageMaxRetries: number };
+  url: URL; // the url of the remote Strapi admin
+  auth?: Auth.ITransferTokenAuth;
+  retryMessageOptions?: {
+    retryMessageTimeout: number; // milliseconds to wait for a response from a message
+    retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
+  };
 }
 
 const jsonLength = (obj: object) => Buffer.byteLength(JSON.stringify(obj));
@@ -330,7 +328,6 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
       async write(asset: IAsset, _encoding, callback) {
         const startError = await startAssetsTransferOnce();
-
         if (startError) {
           return callback(startError);
         }
@@ -338,13 +335,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         hasStarted = true;
 
         const assetID = randomUUID();
-        const { filename, filepath, stats, stream } = asset;
+        const { filename, filepath, stats, stream, metadata } = asset;
 
         try {
           await safePush({
             action: 'start',
             assetID,
-            data: { filename, filepath, stats },
+            data: { filename, filepath, stats, metadata },
           });
 
           for await (const chunk of stream) {

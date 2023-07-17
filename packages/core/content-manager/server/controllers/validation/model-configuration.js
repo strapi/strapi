@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { getService } = require('../../utils');
 const {
   isListable,
   hasEditableAttribute,
@@ -51,16 +52,25 @@ const createMetadasSchema = (schema) => {
               placeholder: yup.string(),
               editable: yup.boolean(),
               visible: yup.boolean(),
-              mainField: yup.string(),
-              step: yup
-                .number()
-                .integer()
-                .positive()
-                .test(
-                  'isDivisibleBy60',
-                  'Step must be either 1 or divisible by 60',
-                  (value) => !value || value === 1 || (value * 24) % 60 === 0
-                ),
+              mainField: yup.lazy((value) => {
+                if (!value) {
+                  return yup.string();
+                }
+
+                const targetSchema = getService('content-types').findContentType(
+                  schema.attributes[key].targetModel
+                );
+
+                if (!targetSchema) {
+                  return yup.string();
+                }
+
+                const validAttributes = Object.keys(targetSchema.attributes).filter((key) =>
+                  isListable(targetSchema, key)
+                );
+
+                return yup.string().oneOf(validAttributes.concat('id')).default('id');
+              }),
             })
             .noUnknown()
             .required(),

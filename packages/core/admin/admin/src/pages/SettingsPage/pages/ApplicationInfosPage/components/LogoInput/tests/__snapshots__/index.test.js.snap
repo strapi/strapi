@@ -67,15 +67,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   color: #32324d;
 }
 
-.c52 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
-}
-
-.c54 {
+.c53 {
   font-size: 0.75rem;
   line-height: 1.33;
   color: #666687;
@@ -220,7 +212,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   cursor: pointer;
 }
 
-.c53 {
+.c52 {
   padding-top: 24px;
 }
 
@@ -459,57 +451,57 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   fill: #ffffff;
 }
 
-.c56 {
+.c55 {
   height: 2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
-.c56 svg {
+.c55 svg {
   height: 0.75rem;
   width: auto;
 }
 
-.c56[aria-disabled='true'] {
+.c55[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c56[aria-disabled='true'] .c1 {
+.c55[aria-disabled='true'] .c1 {
   color: #666687;
 }
 
-.c56[aria-disabled='true'] svg > g,.c56[aria-disabled='true'] svg path {
+.c55[aria-disabled='true'] svg > g,.c55[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c56[aria-disabled='true']:active {
+.c55[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c56[aria-disabled='true']:active .c1 {
+.c55[aria-disabled='true']:active .c1 {
   color: #666687;
 }
 
-.c56[aria-disabled='true']:active svg > g,.c56[aria-disabled='true']:active svg path {
+.c55[aria-disabled='true']:active svg > g,.c55[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c56:hover {
+.c55:hover {
   background-color: #f6f6f9;
 }
 
-.c56:active {
+.c55:active {
   background-color: #eaeaef;
 }
 
-.c56 .c1 {
+.c55 .c1 {
   color: #32324d;
 }
 
-.c56 svg > g,
-.c56 svg path {
+.c55 svg > g,
+.c55 svg path {
   fill: #32324d;
 }
 
@@ -576,7 +568,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border-bottom: 1px solid #eaeaef;
 }
 
-.c55 {
+.c54 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
@@ -929,16 +921,16 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                                 type="button"
                               >
                                 <span
-                                  class="c1 c52"
+                                  class="c1 c23"
                                 >
                                   Browse files
                                 </span>
                               </button>
                               <div
-                                class="c53"
+                                class="c52"
                               >
                                 <span
-                                  class="c1 c54"
+                                  class="c1 c53"
                                 >
                                   Max dimension: 750x750, Max size: 100KB
                                 </span>
@@ -950,7 +942,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                     </div>
                   </form>
                   <div
-                    class="c27 c55"
+                    class="c27 c54"
                   >
                     <div
                       class="c29"
@@ -960,11 +952,11 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                       >
                         <button
                           aria-disabled="false"
-                          class="c49 c50 c16 c56"
+                          class="c49 c50 c16 c55"
                           type="button"
                         >
                           <span
-                            class="c1 c52"
+                            class="c1 c23"
                           >
                             Cancel
                           </span>
@@ -1044,14 +1036,6 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   line-height: 1.45;
   text-transform: uppercase;
   color: #666687;
-}
-
-.c47 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  line-height: 0;
-  color: #ffffff;
 }
 
 .c4 {
@@ -1319,53 +1303,53 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 2px solid #4945ff;
 }
 
-.c48 {
+.c47 {
   height: 2rem;
 }
 
-.c48 svg {
+.c47 svg {
   height: 0.75rem;
   width: auto;
 }
 
-.c48[aria-disabled='true'] {
+.c47[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c48[aria-disabled='true'] .c1 {
+.c47[aria-disabled='true'] .c1 {
   color: #666687;
 }
 
-.c48[aria-disabled='true'] svg > g,.c48[aria-disabled='true'] svg path {
+.c47[aria-disabled='true'] svg > g,.c47[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c48[aria-disabled='true']:active {
+.c47[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c48[aria-disabled='true']:active .c1 {
+.c47[aria-disabled='true']:active .c1 {
   color: #666687;
 }
 
-.c48[aria-disabled='true']:active svg > g,.c48[aria-disabled='true']:active svg path {
+.c47[aria-disabled='true']:active svg > g,.c47[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c48:hover {
+.c47:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c48:active {
+.c47:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c48 svg > g,
-.c48 svg path {
+.c47 svg > g,
+.c47 svg path {
   fill: #ffffff;
 }
 
@@ -1881,7 +1865,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                             type="button"
                           >
                             <span
-                              class="c1 c47"
+                              class="c1 c23"
                             >
                               Cancel
                             </span>
@@ -1892,11 +1876,11 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
                         >
                           <button
                             aria-disabled="false"
-                            class="c45 c44 c16 c48"
+                            class="c45 c44 c16 c47"
                             type="submit"
                           >
                             <span
-                              class="c1 c47"
+                              class="c1 c23"
                             >
                               Next
                             </span>

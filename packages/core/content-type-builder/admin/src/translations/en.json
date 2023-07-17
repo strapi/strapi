@@ -154,6 +154,7 @@
   "modalForm.editCategory.base.name.description": "No space is allowed for the name of the category",
   "modalForm.header-edit": "Edit {name}",
   "modalForm.header.categories": "Categories",
+  "modalForm.header.back": "Back",
   "modalForm.singleType.header-create": "Create a single type",
   "modalForm.sub-header.addComponentToDynamicZone": "Add new component to the dynamic zone",
   "modalForm.sub-header.attribute.create": "Add new {type} field",
@@ -204,5 +205,5 @@
   "IconPicker.remove.tooltip": "Remove the selected icon",
   "IconPicker.remove.button": "Remove the selected icon button",
   "IconPicker.emptyState.label": "No icon found",
-  "IconPicker.icon.label": "Select {icon} icon" 
+  "IconPicker.icon.label": "Select {icon} icon"
 }

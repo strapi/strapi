@@ -25,7 +25,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 describe('RepeatableComponent | Component', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   const defaultProps = {

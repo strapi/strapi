@@ -20,18 +20,18 @@ import { ProviderTransferError } from '../../../errors/providers';
 
 export interface ILocalFileDestinationProviderOptions {
   encryption: {
-    enabled: boolean;
-    key?: string;
+    enabled: boolean; // if the file should be encrypted
+    key?: string; // the key to use when encryption.enabled is true
   };
 
   compression: {
-    enabled: boolean;
+    enabled: boolean; // if the file should be compressed with gzip
   };
 
   file: {
-    path: string;
-    maxSize?: number;
-    maxSizeJsonl?: number;
+    path: string; // the filename to create
+    maxSize?: number; // the max size of a single backup file
+    maxSizeJsonl?: number; // the max lines of each jsonl file before creating the next file
   };
 }
 
@@ -252,13 +252,23 @@ class LocalFileDestinationProvider implements IDestinationProvider {
         // always write tar files with posix paths so we have a standard format for paths regardless of system
         const entryPath = path.posix.join('assets', 'uploads', data.filename);
 
+        const entryMetadataPath = path.posix.join('assets', 'metadata', `${data.filename}.json`);
+        const stringifiedMetadata = JSON.stringify(data.metadata);
+        archiveStream.entry(
+          {
+            name: entryMetadataPath,
+            size: stringifiedMetadata.length,
+          },
+          stringifiedMetadata
+        );
+
         const entry = archiveStream.entry({
           name: entryPath,
           size: data.stats.size,
         });
 
         if (!entry) {
-          callback(new Error(`Failed to created a tar entry for ${entryPath}`));
+          callback(new Error(`Failed to created an asset tar entry for ${entryPath}`));
           return;
         }
 
