@@ -82,11 +82,19 @@ describe('Review workflows - Validation service', () => {
   describe('validateWorkflowStages', () => {
     test('Should not throw because limit is not reached and at least 1 stage', async () => {
       validationService.register({ stagesPerWorkflow: 2 });
-      expect(() => validationService.validateWorkflowStages([{}, {}])).not.toThrowError();
+      expect(() =>
+        validationService.validateWorkflowStages([{ name: 'a' }, { name: 'b' }])
+      ).not.toThrowError();
     });
     test('Should throw because limit is reached', async () => {
       validationService.register({ stagesPerWorkflow: 2 });
       expect(() => validationService.validateWorkflowStages([{}, {}, {}])).toThrowError();
+    });
+    test('Should throw because stage name is duplicated', async () => {
+      validationService.register({ stagesPerWorkflow: 200 });
+      expect(() =>
+        validationService.validateWorkflowStages([{ name: 'a' }, { name: 'a' }])
+      ).toThrowError();
     });
   });
 });
