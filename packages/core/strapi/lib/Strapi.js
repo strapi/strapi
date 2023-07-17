@@ -575,10 +575,9 @@ class Strapi {
 let singleton;
 
 const initializer = (options) => {
-  if (!singleton) {
-    singleton = new Strapi(options);
-    global.strapi = singleton;
-  }
+  singleton = new Strapi(options);
+  global.strapi = singleton;
+
   return singleton;
 };
 
