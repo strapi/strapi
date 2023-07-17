@@ -73,14 +73,17 @@ const handlers = [
       })
     );
   }),
-  rest.get('*/content-manager/collection-types/:apiId/actions/countManyEntriesDraftRelations', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        data: 0,
-      })
-    );
-  }),
+  rest.get(
+    '*/content-manager/collection-types/:apiId/actions/countManyEntriesDraftRelations',
+    (req, res, ctx) => {
+      return res(
+        ctx.status(200),
+        ctx.json({
+          data: 0,
+        })
+      );
+    }
+  ),
 ];
 
 const server = setupServer(...handlers);

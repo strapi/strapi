@@ -23,9 +23,8 @@ import {
   useFetchClient,
   useQueryParams,
   useNotification,
-  useAPIErrorHandler,
 } from '@strapi/helper-plugin';
-import { Pencil, CrossCircle, CheckCircle, Check } from '@strapi/icons';
+import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -34,112 +33,14 @@ import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import formatAPIError from '../../../../../../utils/formatAPIErrors';
-import InjectionZoneList from '../../../../../components/InjectionZoneList';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
-import ConfirmBulkActionDialog, { confirmDialogsPropTypes } from '../ConfirmBulkActionDialog';
+import { ConfirmDialogPublishAll } from '../ConfirmBulkActionDialog';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
-
-/* -------------------------------------------------------------------------------------------------
- * ConfirmDialogPublishAll
- * -----------------------------------------------------------------------------------------------*/
-
-export const ConfirmDialogPublishAll = ({
-  isOpen,
-  onToggleDialog,
-  isConfirmButtonLoading,
-  onConfirm,
-}) => {
-  const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
-  const { selectedEntries } = useTableContext();
-  const toggleNotification = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTrad);
-  const {
-    contentType: { uid: slug },
-  } = useSelector(listViewDomain());
-
-  const {
-    data: countDraftRelations,
-    isLoading,
-    isError,
-  } = useQuery(
-    ['content-manager', 'draft-relations', slug, selectedEntries],
-    async () => {
-      const {
-        data: { data },
-      } = await get(
-        `/content-manager/collection-types/${slug}/actions/countManyEntriesDraftRelations`,
-        {
-          params: {
-            ids: selectedEntries,
-          },
-        }
-      );
-
-      return data;
-    },
-    {
-      onError(error) {
-        toggleNotification({ type: 'warning', message: formatAPIError(error) });
-      },
-    }
-  );
-
-  if (isError) {
-    return null;
-  }
-
-  return (
-    <ConfirmBulkActionDialog
-      isOpen={isOpen && !isLoading}
-      onToggleDialog={onToggleDialog}
-      dialogBody={
-        <>
-          <Typography id="confirm-description" textAlign="center">
-            {countDraftRelations > 0 &&
-              formatMessage(
-                {
-                  id: getTrad(`popUpwarning.warning.bulk-has-draft-relations.message`),
-                  defaultMessage:
-                    '<b>{count} {count, plural, one { relation } other { relations } } out of {entities} { entities, plural, one { entry } other { entries } } {count, plural, one { is } other { are } }</b> not published yet and might lead to unexpected behavior. ',
-                },
-                {
-                  b: BoldChunk,
-                  count: countDraftRelations,
-                  entities: selectedEntries.length,
-                }
-              )}
-            {formatMessage({
-              id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
-              defaultMessage: 'Are you sure you want to publish these entries?',
-            })}
-          </Typography>
-          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
-        </>
-      }
-      endAction={
-        <Button
-          onClick={onConfirm}
-          variant="secondary"
-          startIcon={<Check />}
-          loading={isConfirmButtonLoading}
-        >
-          {formatMessage({
-            id: 'app.utils.publish',
-            defaultMessage: 'Publish',
-          })}
-        </Button>
-      }
-    />
-  );
-};
-
-ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText

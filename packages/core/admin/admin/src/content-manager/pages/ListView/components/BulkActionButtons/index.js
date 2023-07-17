@@ -11,7 +11,7 @@ import InjectionZoneList from '../../../../components/InjectionZoneList';
 import { getTrad } from '../../../../utils';
 import { listViewDomain } from '../../selectors';
 
-import ConfirmBulkActionDialog, { confirmDialogsPropTypes } from './ConfirmBulkActionDialog';
+import { ConfirmBulkActionDialog, confirmDialogsPropTypes } from './ConfirmBulkActionDialog';
 import SelectedEntriesModal from './SelectedEntriesModal';
 
 /* -------------------------------------------------------------------------------------------------
