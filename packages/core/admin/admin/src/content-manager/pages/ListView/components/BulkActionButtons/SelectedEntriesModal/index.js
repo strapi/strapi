@@ -14,6 +14,7 @@ import {
   Flex,
   Icon,
   Tooltip,
+  Loader,
 } from '@strapi/design-system';
 import {
   useTableContext,
@@ -21,19 +22,21 @@ import {
   getYupInnerErrors,
   useFetchClient,
   useQueryParams,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import formatAPIError from '../../../../../../utils/formatAPIErrors';
 import { getTrad, createYupSchema } from '../../../../../utils';
 import { listViewDomain } from '../../../selectors';
 import { Body } from '../../Body';
+import { ConfirmDialogPublishAll } from '../ConfirmBulkActionDialog';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
@@ -114,8 +117,7 @@ EntryValidationText.propTypes = {
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = () => {
-  const { rows } = useTableContext();
+const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPublish }) => {
   const {
     location: { pathname },
   } = useHistory();
@@ -143,10 +145,11 @@ const SelectedEntriesTableContent = () => {
         {shouldDisplayMainField && (
           <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
         )}
+        <Table.HeaderCell fieldSchemaType="string" label="status" name="status" />
       </Table.Head>
       <Table.LoadingBody />
       <Table.Body>
-        {rows.map(({ entity, errors }, index) => (
+        {rowsToDisplay.map(({ entity, errors }, index) => (
           <Tr key={entity.id}>
             <Body.CheckboxDataCell rowId={entity.id} index={index} />
             <Td>
@@ -158,7 +161,19 @@ const SelectedEntriesTableContent = () => {
               </Td>
             )}
             <Td>
-              <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+              {isPublishing && entriesToPublish.includes(entity.id) ? (
+                <Flex gap={2}>
+                  <Typography>
+                    {formatMessage({
+                      id: 'content-manager.success.record.publishing',
+                      defaultMessage: 'Publishing...',
+                    })}
+                  </Typography>
+                  <Loader small />
+                </Flex>
+              ) : (
+                <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+              )}
             </Td>
             <Td>
               <IconButton
@@ -184,6 +199,18 @@ const SelectedEntriesTableContent = () => {
   );
 };
 
+SelectedEntriesTableContent.defaultProps = {
+  isPublishing: false,
+  rowsToDisplay: [],
+  entriesToPublish: [],
+};
+
+SelectedEntriesTableContent.propTypes = {
+  isPublishing: PropTypes.bool,
+  rowsToDisplay: PropTypes.arrayOf(PropTypes.object),
+  entriesToPublish: PropTypes.arrayOf(PropTypes.number),
+};
+
 /* -------------------------------------------------------------------------------------------------
  * BoldChunk
  * -----------------------------------------------------------------------------------------------*/
@@ -194,17 +221,111 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
+const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntriesToFetch }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, isLoading, isFetching } = useTableContext();
+  const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext();
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [rowsToDisplay, setRowsToDisplay] = React.useState([]);
+  const [publishedCount, setPublishedCount] = React.useState(0);
 
-  const selectedEntriesWithErrorsCount = rows.filter(
+  const entriesToPublish = rows
+    .filter(({ entity, errors }) => selectedEntries.includes(entity.id) && !errors)
+    .map(({ entity }) => entity.id);
+
+  const { post } = useFetchClient();
+  const toggleNotification = useNotification();
+  const { contentType } = useSelector(listViewDomain());
+
+  const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ entity, errors }) => selectedEntries.includes(entity.id) && errors
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
+  const bulkPublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkPublish`, data),
+    {
+      onSuccess() {
+        const update = rowsToDisplay.filter((row) => {
+          if (entriesToPublish.includes(row.entity.id)) {
+            // Deselect the entries that have been published from the modal table
+            onSelectRow({ name: row.entity.id, value: false });
+          }
+
+          // Remove the entries that have been published from the table
+          return !entriesToPublish.includes(row.entity.id);
+        });
+
+        setRowsToDisplay(update);
+        // Set the parent's entries to fetch when clicking refresh
+        setEntriesToFetch(update.map(({ entity }) => entity.id));
+
+        if (update.length === 0) {
+          toggleModal();
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+        });
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
+
+  const toggleDialog = () => setIsDialogOpen((prev) => !prev);
+
+  const handleConfirmBulkPublish = async () => {
+    toggleDialog();
+    const { data } = await bulkPublishMutation.mutateAsync({ ids: entriesToPublish });
+    setPublishedCount(data.count);
+  };
+
+  const getFormattedCountMessage = () => {
+    if (publishedCount) {
+      return formatMessage(
+        {
+          id: getTrad('containers.ListPage.selectedEntriesModal.publishedCount'),
+          defaultMessage:
+            '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
+        },
+        {
+          publishedCount,
+          withErrorsCount: selectedEntriesWithErrorsCount,
+          b: BoldChunk,
+        }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
+        defaultMessage:
+          '<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
+      },
+      {
+        readyToPublishCount: selectedEntriesWithNoErrorsCount,
+        withErrorsCount: selectedEntriesWithErrorsCount,
+        b: BoldChunk,
+      }
+    );
+  };
+
+  React.useEffect(() => {
+    // When the api responds with data
+    if (rows.length > 0) {
+      // Update the rows to display
+      setRowsToDisplay(rows);
+    }
+  }, [rows]);
+
   return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
+    <ModalLayout onClose={toggleModal} labelledBy="title">
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
@@ -214,27 +335,18 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
         </Typography>
       </ModalHeader>
       <ModalBody>
-        <Typography>
-          {formatMessage(
-            {
-              id: getTrad('containers.ListPage.selectedEntriesModal.selectedCount'),
-              defaultMessage:
-                '<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} awaiting for action.',
-            },
-            {
-              readyToPublishCount: selectedEntriesWithNoErrorsCount,
-              withErrorsCount: selectedEntriesWithErrorsCount,
-              b: BoldChunk,
-            }
-          )}
-        </Typography>
+        <Typography>{getFormattedCountMessage()}</Typography>
         <Box marginTop={5}>
-          <SelectedEntriesTableContent />
+          <SelectedEntriesTableContent
+            isPublishing={bulkPublishMutation.isLoading}
+            rowsToDisplay={rowsToDisplay}
+            entriesToPublish={entriesToPublish}
+          />
         </Box>
       </ModalBody>
       <ModalFooter
         startActions={
-          <Button onClick={onToggle} variant="tertiary">
+          <Button onClick={toggleModal} variant="tertiary">
             {formatMessage({
               id: 'app.components.Button.cancel',
               defaultMessage: 'Cancel',
@@ -243,39 +355,48 @@ const SelectedEntriesModalContent = ({ onToggle, onConfirm, onRefresh }) => {
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={onRefresh} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetchModalData} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
-              onClick={() => onConfirm(selectedEntries)}
+              onClick={toggleDialog}
               disabled={
                 selectedEntries.length === 0 ||
                 selectedEntries.length === selectedEntriesWithErrorsCount ||
                 isLoading
               }
+              loading={bulkPublishMutation.isLoading}
             >
               {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
             </Button>
           </Flex>
         }
       />
+      <ConfirmDialogPublishAll
+        isOpen={isDialogOpen}
+        onToggleDialog={toggleDialog}
+        isConfirmButtonLoading={bulkPublishMutation.isLoading}
+        onConfirm={handleConfirmBulkPublish}
+      />
     </ModalLayout>
   );
 };
 
 SelectedEntriesModalContent.propTypes = {
-  onToggle: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onRefresh: PropTypes.func.isRequired,
+  toggleModal: PropTypes.func.isRequired,
+  refetchModalData: PropTypes.func.isRequired,
+  setEntriesToFetch: PropTypes.func.isRequired,
 };
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModal
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
-  const { selectedEntries } = useTableContext();
+const SelectedEntriesModal = ({ onToggle }) => {
+  const { selectedEntries: selectedListViewEntries } = useTableContext();
   const { contentType, components } = useSelector(listViewDomain());
+  // The child table will update this value based on the entries that were published
+  const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
 
   // We want to keep the selected entries order same as the list view
   const [
@@ -287,20 +408,19 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
     sort,
     filters: {
       id: {
-        $in: selectedEntries,
+        $in: entriesToFetch,
       },
     },
   };
 
   const { get } = useFetchClient();
-  const queryString = stringify(queryParams);
 
   const { data, isLoading, isFetching, refetch } = useQuery(
     ['entries', contentType.uid, queryParams],
     async () => {
-      const { data } = await get(
-        `content-manager/collection-types/${contentType.uid}?${queryString}`
-      );
+      const { data } = await get(`content-manager/collection-types/${contentType.uid}`, {
+        params: queryParams,
+      });
 
       if (data.results) {
         const schema = createYupSchema(contentType, { components }, { isDraft: false });
@@ -327,19 +447,22 @@ const SelectedEntriesModal = ({ onToggle, onConfirm }) => {
   return (
     <Table.Root
       rows={data}
-      defaultSelectedEntries={selectedEntries}
+      defaultSelectedEntries={selectedListViewEntries}
       colCount={4}
       isLoading={isLoading}
       isFetching={isFetching}
     >
-      <SelectedEntriesModalContent onToggle={onToggle} onConfirm={onConfirm} onRefresh={refetch} />
+      <SelectedEntriesModalContent
+        setEntriesToFetch={setEntriesToFetch}
+        toggleModal={onToggle}
+        refetchModalData={refetch}
+      />
     </Table.Root>
   );
 };
 
 SelectedEntriesModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
 };
 
 export default SelectedEntriesModal;
