@@ -2,7 +2,7 @@
 
 const path = require('path');
 const execa = require('execa');
-const fs = require('fs-extra');
+const fs = require('node:fs/promises');
 const yargs = require('yargs');
 
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
