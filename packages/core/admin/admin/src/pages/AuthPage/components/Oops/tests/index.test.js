@@ -33,21 +33,24 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c7 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
+      .c9 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
       }
 
-      .c17 {
+      .c21 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c18 {
+      .c22 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
@@ -58,23 +61,29 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-right: 40px;
       }
 
-      .c2 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
+      .c3 {
+        background: #ffffff;
+        padding-right: 12px;
+        padding-left: 12px;
         border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        cursor: default;
       }
 
-      .c10 {
+      .c6 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c13 {
         padding-top: 8px;
         padding-bottom: 64px;
       }
 
-      .c12 {
+      .c15 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -84,12 +93,12 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c16 {
+      .c20 {
         padding-top: 24px;
         padding-bottom: 32px;
       }
 
-      .c19 {
+      .c23 {
         padding-top: 16px;
       }
 
@@ -111,7 +120,22 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: flex-end;
       }
 
-      .c3 {
+      .c2 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -123,10 +147,29 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        gap: 8px;
+        gap: 16px;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
       }
 
-      .c8 {
+      .c7 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 12px;
+      }
+
+      .c17 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -140,7 +183,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         flex-direction: row;
       }
 
-      .c20 {
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -158,137 +201,71 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         justify-content: center;
       }
 
-      .c4 {
-        position: relative;
+      .c5 {
+        border: 1px solid #dcdce4;
+        min-height: 2.5rem;
         outline: none;
-      }
-
-      .c4 > svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c4 > svg > g,
-      .c4 > svg path {
-        fill: #ffffff;
-      }
-
-      .c4[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c4:after {
-        -webkit-transition-property: all;
-        transition-property: all;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
         -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c4:focus-visible {
-        outline: none;
-      }
-
-      .c4:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c5 {
-        height: 2rem;
-        border: 1px solid transparent;
-        background: transparent;
-      }
-
-      .c5 svg {
-        height: 0.75rem;
-        width: auto;
       }
 
       .c5[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c5[aria-disabled='true'] .c6 {
         color: #666687;
       }
 
-      .c5[aria-disabled='true'] svg > g,.c5[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c5[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c5[aria-disabled='true']:active .c6 {
-        color: #666687;
-      }
-
-      .c5[aria-disabled='true']:active svg > g,.c5[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c5:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c5:active {
-        border: 1px solid undefined;
-        background: undefined;
-      }
-
-      .c5 .c6 {
-        color: #32324d;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c11:focus-visible {
+      .c5:focus-visible {
         outline: none;
       }
 
-      .c9 {
+      .c5:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c12 > svg {
+        width: 0.375rem;
+      }
+
+      .c12 > svg > path {
+        fill: #666687;
+      }
+
+      .c10 {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        gap: 4px;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
       }
 
-      .c9 svg {
-        height: 4px;
-        width: 6px;
+      .c27[data-state='checked'] .c8 {
+        font-weight: bold;
+        color: #4945ff;
       }
 
-      .c22 {
+      .c14:focus-visible {
+        outline: none;
+      }
+
+      .c26 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
       }
 
-      .c21 {
+      .c25 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -304,23 +281,23 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         outline: none;
       }
 
-      .c21 svg {
+      .c25 svg {
         font-size: 0.625rem;
       }
 
-      .c21 svg path {
+      .c25 svg path {
         fill: #4945ff;
       }
 
-      .c21:hover {
+      .c25:hover {
         color: #7b79ff;
       }
 
-      .c21:active {
+      .c25:active {
         color: #271fe0;
       }
 
-      .c21:after {
+      .c25:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -335,11 +312,11 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid transparent;
       }
 
-      .c21:focus-visible {
+      .c25:focus-visible {
         outline: none;
       }
 
-      .c21:focus-visible:after {
+      .c25:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -350,16 +327,16 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         border: 2px solid #4945ff;
       }
 
-      .c15 {
+      .c19 {
         height: 4.5rem;
       }
 
-      .c13 {
+      .c16 {
         margin: 0 auto;
         width: 552px;
       }
 
-      .c14 {
+      .c18 {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
@@ -372,89 +349,106 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           <div
             class="c1"
           >
-            <div>
-              <button
-                aria-controls=":r0:"
-                aria-disabled="false"
-                aria-expanded="false"
-                aria-haspopup="true"
-                class="c2 c3 c4 c5"
-                label="English"
-                type="button"
+            <div
+              class=""
+            >
+              <div
+                class="c2"
               >
-                <span
-                  class="c6 c7"
-                >
-                  English
-                </span>
                 <div
-                  aria-hidden="true"
-                  class="c8"
+                  aria-autocomplete="none"
+                  aria-controls="radix-:r3:"
+                  aria-describedby=":r0:-hint :r0:-error"
+                  aria-expanded="false"
+                  class="c3 c4 c5"
+                  data-state="closed"
+                  dir="ltr"
+                  id=":r0:"
+                  overflow="hidden"
+                  role="combobox"
+                  tabindex="0"
                 >
                   <span
-                    class="c9"
+                    class="c6 c7"
                   >
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 14 8"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="c8 c9 c10"
                     >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
+                      <span
+                        class="c11"
+                      >
+                        English
+                      </span>
+                    </span>
+                  </span>
+                  <span
+                    class="c7"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="c12"
+                    >
+                      <svg
+                        fill="none"
+                        height="1rem"
+                        viewBox="0 0 14 8"
+                        width="1rem"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
                   </span>
                 </div>
-              </button>
+              </div>
             </div>
           </div>
         </header>
         <div
-          class="c10"
+          class="c13"
         >
           <main
             aria-labelledby="main-content-title"
-            class="c11"
+            class="c14"
             id="main-content"
             tabindex="-1"
           >
             <div
-              class="c12 c13"
+              class="c15 c16"
             >
               <div
-                class="c8 c14"
+                class="c17 c18"
               >
                 <img
                   alt=""
                   aria-hidden="true"
-                  class="c15"
+                  class="c19"
                   src="customAuthLogo.png"
                 />
                 <div
-                  class="c16"
+                  class="c20"
                 >
                   <h1
-                    class="c6 c17"
+                    class="c8 c21"
                   >
                     Oops...
                   </h1>
                 </div>
                 <span
-                  class="c6 c18"
+                  class="c8 c22"
                 >
                   Your account has been suspended.
                 </span>
                 <div
-                  class="c19"
+                  class="c23"
                 >
                   <span
-                    class="c6 c18"
+                    class="c8 c22"
                   >
                     If this is a mistake, please contact your administrator.
                   </span>
@@ -462,17 +456,17 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
               </div>
             </div>
             <div
-              class="c20"
+              class="c24"
             >
               <div
-                class="c19"
+                class="c23"
               >
                 <a
-                  class="c21"
+                  class="c25"
                   href="/auth/login"
                 >
                   <span
-                    class="c22"
+                    class="c26"
                   >
                     Sign in
                   </span>

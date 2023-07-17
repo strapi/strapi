@@ -327,7 +327,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     let entitiesToDelete = await db.query(uid).findMany(query);
 
     if (!entitiesToDelete.length) {
-      return null;
+      return { count: 0 };
     }
 
     const componentsToDelete = await Promise.all(
