@@ -100,6 +100,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
     testWorkflow = await strapi.query(WORKFLOW_MODEL_UID).create({
       data: {
+        contentTypes: [],
         name: 'workflow',
         stages: [defaultStage.id, secondStage.id],
       },
