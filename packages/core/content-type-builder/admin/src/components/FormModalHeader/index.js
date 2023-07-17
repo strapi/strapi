@@ -114,7 +114,10 @@ const FormModalHeader = ({
       <Flex gap={3}>
         {showBackLink && (
           <Link
-            aria-label="Back"
+            aria-label={formatMessage({
+              id: getTrad('modalForm.header.back'),
+              defaultMessage: 'Back',
+            })}
             startIcon={<ArrowLeft />}
             onClick={() => onOpenModalAddField({ forTarget, targetUid })}
             to="#back"
