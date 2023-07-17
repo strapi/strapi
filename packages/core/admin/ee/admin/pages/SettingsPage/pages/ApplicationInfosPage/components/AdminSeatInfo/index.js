@@ -11,13 +11,15 @@ import { useLicenseLimits } from '../../../../../../hooks';
 const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 
-const AdminSeatInfo = () => {
+export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
-  const { license } = useLicenseLimits();
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud } =
-    license?.data ?? {};
+  const {
+    license: { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud },
+    isError,
+    isLoading,
+  } = useLicenseLimits();
 
-  if (!permittedSeats) {
+  if (isError || isLoading || !permittedSeats) {
     return null;
   }
 
@@ -86,5 +88,3 @@ const AdminSeatInfo = () => {
     </GridItem>
   );
 };
-
-export default AdminSeatInfo;

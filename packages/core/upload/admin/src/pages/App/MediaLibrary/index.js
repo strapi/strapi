@@ -250,7 +250,9 @@ export const MediaLibrary = () => {
                   />
                 </BoxWithHeight>
               )}
-              {canRead && isGridView && <SortPicker onChangeSort={handleChangeSort} />}
+              {canRead && isGridView && (
+                <SortPicker value={query?.sort} onChangeSort={handleChangeSort} />
+              )}
               {canRead && <Filters />}
             </>
           }
