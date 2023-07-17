@@ -110,7 +110,7 @@ export type GetRequiredKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object
   { required: true }
 >;
 
-export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = keyof Omit<
+export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysNotBy<
   GetAll<TSchemaUID>,
-  GetRequiredKeys<TSchemaUID>
+  { required: true }
 >;

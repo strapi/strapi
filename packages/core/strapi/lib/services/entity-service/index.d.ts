@@ -1,7 +1,7 @@
 import type { Database, ID } from '@strapi/database';
-import { Attribute, Common, Strapi } from '../../';
-import { AttributeUtils, Fields } from './types/params';
-import { GetValue, GetValueByKey } from '../../types/core/attributes/utils';
+import { Attribute, Common, Strapi } from '@strapi/strapi';
+import type * as AttributeUtils from './types/params/attributes';
+import { Fields } from './types/params';
 
 type EntityServiceAction =
   | 'findMany'
@@ -21,10 +21,6 @@ type PaginationInfo = {
   total: number;
 };
 
-type DataParam<TSchemaUID extends Common.UID.Schema> = {
-  [Key in Attribute.GetKeys<TSchemaUID>]?: AttributeUtils.GetValue<Attribute.Get<TSchemaUID, Key>>;
-};
-
 type Params<TSchemaUID extends Common.UID.Schema> = {
   fields?: Fields.Any<TSchemaUID>;
   filters?: any;
@@ -36,7 +32,7 @@ type Params<TSchemaUID extends Common.UID.Schema> = {
   page?: number;
   pageSize?: number;
   publicationState?: string;
-  data?: DataParam<TSchemaUID>;
+  data?: any;
   files?: any;
 };
 

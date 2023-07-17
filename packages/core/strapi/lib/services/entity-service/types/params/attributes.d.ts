@@ -56,6 +56,49 @@ export type ScalarValues = GetValue<
   | Attribute.UID<Common.UID.Schema | undefined>
 >;
 
+// TODO Add doc
+export type GetValues<TSchemaUID extends Common.UID.Schema> = OmitRelationWithoutTarget<
+  TSchemaUID,
+  {
+    [TKey in Attribute.GetOptionalKeys<TSchemaUID>]?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+  } & {
+    [TKey in Attribute.GetRequiredKeys<TSchemaUID>]-?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+  }
+>;
+
+export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TValue> = Omit<
+  TValue,
+  Exclude<Attribute.GetKeysByType<TSchemaUID, 'relation'>, Attribute.GetKeysWithTarget<TSchemaUID>>
+>;
+
+export type ComponentValue<
+  TComponentUID extends Common.UID.Component,
+  TRepeatable extends Utils.Expression.BooleanValue
+> = GetValues<TComponentUID> extends infer TValues
+  ? Utils.Expression.If<TRepeatable, TValues[], TValues>
+  : never;
+
+export type GetComponentValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Attribute.Component<infer TComponentUID, infer TRepeatable>
+    ? TComponentUID extends Common.UID.Component
+      ? ComponentValue<TComponentUID, TRepeatable>
+      : never
+    : never;
+
+type DynamicZoneValue<TComponentsUIDs extends Common.UID.Component[]> = Array<
+  // Extract tuple values to a component uid union type
+  Utils.Array.Values<TComponentsUIDs> extends infer TComponentUID
+    ? TComponentUID extends Common.UID.Component
+      ? GetValues<TComponentUID> & { __component: TComponentUID }
+      : never
+    : never
+>;
+
+export type GetDynamicZoneValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Attribute.DynamicZone<infer TComponentsUIDs>
+    ? DynamicZoneValue<TComponentsUIDs>
+    : never;
+
 /**
  * Attribute.GetValue override with filter values
  *
@@ -65,6 +108,26 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
   Utils.Expression.IsNotNever<TAttribute>,
   Utils.Expression.MatchFirst<
     [
+      // Relation
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
+        TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
+          ? Utils.Expression.If<
+              Utils.Expression.IsNotNever<TTarget>,
+              Attribute.RelationPluralityModifier<TRelationKind, `${number}` | number>
+            >
+          : never
+      ],
+      // DynamicZone
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'dynamiczone'>>,
+        GetDynamicZoneValue<TAttribute>
+      ],
+      // Component
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'component'>>,
+        GetComponentValue<TAttribute>
+      ],
       // Boolean
       [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, BooleanValue],
       // Number
@@ -81,13 +144,6 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
       [
         Utils.Expression.Extends<TAttribute, Attribute.Timestamp | Attribute.DateTime>,
         DateTimeValue
-      ],
-      [
-        Utils.Expression.Extends<
-          TAttribute,
-          Attribute.Relation<infer TOrigin, infer TRelationKind, infer TTarget>
-        >,
-        Attribute.RelationValue<TRelationKind, TTarget>
       ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)

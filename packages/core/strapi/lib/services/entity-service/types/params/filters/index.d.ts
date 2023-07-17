@@ -1,7 +1,7 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
 
 import type * as Operator from './operators';
-import { AttributeUtils } from '..';
+import type * as AttributeUtils from '../attributes';
 
 export { Operator };
 
