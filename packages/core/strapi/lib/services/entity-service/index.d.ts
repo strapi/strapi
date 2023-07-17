@@ -21,8 +21,8 @@ type PaginationInfo = {
   total: number;
 };
 
-type Params<TSchemaUID extends Common.UID.Schema> = {
-  fields?: Fields.Any<TSchemaUID>;
+type Params<T> = {
+  fields?: (keyof T)[];
   filters?: any;
   _q?: string;
   populate?: any;
