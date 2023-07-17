@@ -1,7 +1,5 @@
 import type { Database, ID } from '@strapi/database';
-import { Attribute, Common, Strapi } from '@strapi/strapi';
-import type * as AttributeUtils from './types/params/attributes';
-import { Fields } from './types/params';
+import { Strapi } from '../../';
 
 type EntityServiceAction =
   | 'findMany'
@@ -75,14 +73,11 @@ export interface EntityService {
   ): Promise<T>;
 
   count<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
-  create<TSchemaUID extends Common.UID.ContentType>(
-    uid: TSchemaUID,
-    params: Params<TSchemaUID>
-  ): Promise<any>;
-  update<TSchemaUID extends Common.UID.ContentType>(
-    uid: TSchemaUID,
+  create<K extends keyof AllTypes, T extends AllTypes[K]>(uid: K, params: Params<T>): Promise<any>;
+  update<K extends keyof AllTypes, T extends AllTypes[K]>(
+    uid: K,
     entityId: ID,
-    params: Params<TSchemaUID>
+    params: Params<T>
   ): Promise<any>;
   delete<K extends keyof AllTypes, T extends AllTypes[K]>(
     uid: K,
