@@ -70,7 +70,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
           errors.push(
             this.createError({
               path: `${this.path}[${index}].name`,
-              message: 'Stage must be unique',
+              message: 'Stage name must be unique',
             })
           );
         }
