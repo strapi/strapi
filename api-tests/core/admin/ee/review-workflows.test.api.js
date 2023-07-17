@@ -464,6 +464,25 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(workflowRes.body.data).toBeUndefined();
       }
     });
+    test('It should throw an error if trying to create stages with duplicated names', async () => {
+      const stagesRes = await requests.admin.put(
+        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        {
+          body: {
+            data: {
+              stages: [{ name: 'To Do' }, { name: 'To Do' }],
+            },
+          },
+        }
+      );
+
+      if (hasRW) {
+        expect(stagesRes.status).toBe(400);
+        expect(stagesRes.body.error).toBeDefined();
+        expect(stagesRes.body.error.name).toEqual('ValidationError');
+        expect(stagesRes.body.error.message).toBeDefined();
+      }
+    });
     test('It should throw an error if trying to create more than 200 stages', async () => {
       const stagesRes = await requests.admin.put(
         `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
