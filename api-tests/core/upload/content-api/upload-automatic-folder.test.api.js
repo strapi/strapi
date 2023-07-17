@@ -495,7 +495,7 @@ describe('Uploads folder', () => {
           },
           populate: '*',
           // sort the same as fileInfo so that the loop below matches regardless of order
-          sort: ['name:desc'],
+          sort: ['name:asc'],
         },
       });
 
