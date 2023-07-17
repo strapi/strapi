@@ -8,7 +8,8 @@ const {
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
 
-const { getNonVisibleAttributes, getWritableAttributes } = contentTypes;
+const { getNonVisibleAttributes, getWritableAttributes, constants } = contentTypes;
+const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = constants;
 
 /**
  * Creates the validation schema for content-type configurations
@@ -46,7 +47,14 @@ const createSettingsSchema = (schema) => {
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
-        .oneOf(validAttributes.concat(['id', ...nonVisibleWritableAttributes]))
+        .oneOf(
+          validAttributes.concat([
+            'id',
+            ...nonVisibleWritableAttributes,
+            CREATED_BY_ATTRIBUTE,
+            UPDATED_BY_ATTRIBUTE,
+          ])
+        )
         .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })
