@@ -494,13 +494,12 @@ describe('Uploads folder', () => {
             },
           },
           populate: '*',
+          // sort the same as fileInfo so that the loop below matches regardless of order
+          sort: ['name:desc'],
         },
       });
 
-      // sort the same as fileInfo so that the loop below matches regardless of order
-      const sortedResults = orderBy('name', 'asc')(files);
-
-      sortedResults.forEach((file, index) =>
+      files.forEach((file, index) =>
         expect(file).toMatchObject({
           ...fileInfo[index],
           folder: {
