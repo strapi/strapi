@@ -1,10 +1,17 @@
 import * as React from 'react';
 
 import { Button, Flex, Dialog, DialogBody, DialogFooter, Typography } from '@strapi/design-system';
-import { useTracking, useTableContext } from '@strapi/helper-plugin';
+import {
+  useAPIErrorHandler,
+  useTracking,
+  useTableContext,
+  useFetchClient,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
 import InjectionZoneList from '../../../../components/InjectionZoneList';
@@ -66,19 +73,81 @@ const confirmDialogsPropTypes = {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * BoldChunk
+ * -----------------------------------------------------------------------------------------------*/
+
+const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography>;
+
+/* -------------------------------------------------------------------------------------------------
  * ConfirmDialogPublishAll
  * -----------------------------------------------------------------------------------------------*/
 
-const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
+export const ConfirmDialogPublishAll = ({
+  isOpen,
+  onToggleDialog,
+  isConfirmButtonLoading,
+  onConfirm,
+}) => {
   const { formatMessage } = useIntl();
+  const { get } = useFetchClient();
+  const { selectedEntries } = useTableContext();
+  const toggleNotification = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const {
+    contentType: { uid: slug },
+  } = useSelector(listViewDomain());
+
+  const {
+    data: countDraftRelations,
+    isLoading,
+    isError,
+  } = useQuery(
+    ['content-manager', 'draft-relations', slug, selectedEntries],
+    async () => {
+      const {
+        data: { data },
+      } = await get(
+        `/content-manager/collection-types/${slug}/actions/countManyEntriesDraftRelations`,
+        {
+          params: {
+            ids: selectedEntries,
+          },
+        }
+      );
+
+      return data;
+    },
+    {
+      onError(error) {
+        toggleNotification({ type: 'warning', message: formatAPIError(error) });
+      },
+    }
+  );
+
+  if (isError) {
+    return null;
+  }
 
   return (
     <ConfirmBulkActionDialog
-      isOpen={isOpen}
+      isOpen={isOpen && !isLoading}
       onToggleDialog={onToggleDialog}
       dialogBody={
         <>
           <Typography id="confirm-description" textAlign="center">
+            {countDraftRelations > 0 &&
+              formatMessage(
+                {
+                  id: getTrad(`popUpwarning.warning.bulk-has-draft-relations.message`),
+                  defaultMessage:
+                    '<b>{count} {count, plural, one { relation } other { relations } } out of {entities} { entities, plural, one { entry } other { entries } } {count, plural, one { is } other { are } }</b> not published yet and might lead to unexpected behavior. ',
+                },
+                {
+                  b: BoldChunk,
+                  count: countDraftRelations,
+                  entities: selectedEntries.length,
+                }
+              )}
             {formatMessage({
               id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
               defaultMessage: 'Are you sure you want to publish these entries?',
