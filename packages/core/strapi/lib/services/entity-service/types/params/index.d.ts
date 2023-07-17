@@ -15,4 +15,4 @@ export type For<TSchemaUID extends Common.UID.Schema> = {
 } & Pagination.Any &
   PublicationState.For<TSchemaUID>;
 
-export type { Sort, Pagination, Fields, Filters, PublicationState };
+export type { Sort, Pagination, Fields, Filters, Populate, PublicationState };
