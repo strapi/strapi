@@ -149,6 +149,7 @@ describe('Local Strapi Source Destination', () => {
           queryBuilder: jest.fn().mockReturnValue({
             select: jest.fn().mockReturnValue({
               stream: jest.fn().mockReturnValue([]),
+              transacting: jest.fn().mockReturnThis(),
             }),
           }),
         },
