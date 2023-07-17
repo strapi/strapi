@@ -24,11 +24,12 @@ module.exports =
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
       const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
+      const requestPath = toLower(ctx.request.path) || 'unknownPath';
 
       const loadConfig = {
         interval: { min: 5 },
         max: 5,
-        prefixKey: `${userEmail}:${ctx.request.path}:${ctx.request.ip}`,
+        prefixKey: `${userEmail}:${requestPath}:${ctx.request.ip}`,
         handler() {
           throw new RateLimitError();
         },
