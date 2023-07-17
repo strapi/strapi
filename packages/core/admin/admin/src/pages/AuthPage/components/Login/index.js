@@ -6,7 +6,7 @@ import UnauthenticatedLayout from '../../../../layouts/UnauthenticatedLayout';
 
 import BaseLogin from './BaseLogin';
 
-const Login = (loginProps) => {
+export const LoginCE = (loginProps) => {
   return (
     <UnauthenticatedLayout>
       <BaseLogin {...loginProps} />
@@ -14,12 +14,10 @@ const Login = (loginProps) => {
   );
 };
 
-Login.defaultProps = {
+LoginCE.defaultProps = {
   onSubmit: (e) => e.preventDefault(),
 };
 
-Login.propTypes = {
+LoginCE.propTypes = {
   onSubmit: PropTypes.func,
 };
-
-export default Login;

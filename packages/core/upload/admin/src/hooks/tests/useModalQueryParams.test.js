@@ -5,48 +5,39 @@ import { NotificationsProvider } from '@strapi/helper-plugin';
 import { act, renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import useModalQueryParams from '../useModalQueryParams';
 
-const refetchQueriesMock = jest.fn();
-
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
-  useQueryClient: () => ({
-    refetchQueries: refetchQueriesMock,
-  }),
-}));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
-  return (
-    <Router>
-      <Route>
-        <QueryClientProvider client={client}>
-          <ThemeProvider theme={lightTheme}>
-            <NotificationsProvider>
-              <IntlProvider locale="en" messages={{}}>
-                {children}
-              </IntlProvider>
-            </NotificationsProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Route>
-    </Router>
-  );
-}
-
+/**
+ * TODO: we should set up MSW for these tests
+ */
 function setup(...args) {
-  return renderHook(() => useModalQueryParams(...args), { wrapper: ComponentFixture });
+  return renderHook(() => useModalQueryParams(...args), {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <MemoryRouter>
+          <QueryClientProvider client={client}>
+            <ThemeProvider theme={lightTheme}>
+              <NotificationsProvider>
+                <IntlProvider locale="en" messages={{}}>
+                  {children}
+                </IntlProvider>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </MemoryRouter>
+      );
+    },
+  });
 }
 
 const FIXTURE_QUERY = {
@@ -63,12 +54,12 @@ describe('useModalQueryParams', () => {
     jest.clearAllMocks();
   });
 
-  test('setup proper defaults', async () => {
+  test('setup proper defaults', () => {
     const {
       result: {
         current: [{ queryObject, rawQuery }, callbacks],
       },
-    } = await setup();
+    } = setup();
 
     expect(queryObject).toStrictEqual(FIXTURE_QUERY);
     expect(rawQuery).toBe('page=1&sort=updatedAt:DESC&pageSize=10');
@@ -83,18 +74,18 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('set initial state', async () => {
+  test('set initial state', () => {
     const {
       result: { current },
-    } = await setup();
+    } = setup();
 
     expect(current[0].queryObject).toStrictEqual(FIXTURE_QUERY);
   });
 
-  test('handles initial state', async () => {
+  test('handles initial state', () => {
     const {
       result: { current },
-    } = await setup({ state: true });
+    } = setup({ state: true });
 
     expect(current[0].queryObject).toStrictEqual({
       ...FIXTURE_QUERY,
@@ -102,8 +93,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeFilters', async () => {
-    const { result } = await setup();
+  test('onChangeFilters', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangeFilters([{ some: 'thing' }]);
@@ -122,11 +113,11 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeFolder', async () => {
-    const { result } = await setup();
+  test('onChangeFolder', () => {
+    const { result } = setup();
 
     act(() => {
-      result.current[1].onChangeFolder({ id: 1 });
+      result.current[1].onChangeFolder({ id: 1 }, '/1');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -134,11 +125,12 @@ describe('useModalQueryParams', () => {
       folder: {
         id: 1,
       },
+      folderPath: '/1',
     });
   });
 
-  test('onChangePage', async () => {
-    const { result } = await setup();
+  test('onChangePage', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangePage({ id: 1 });
@@ -152,8 +144,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangePageSize', async () => {
-    const { result } = await setup();
+  test('onChangePageSize', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangePageSize(5);
@@ -165,8 +157,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangePageSize - converts string to numbers', async () => {
-    const { result } = await setup();
+  test('onChangePageSize - converts string to numbers', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangePageSize('5');
@@ -178,8 +170,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSort', async () => {
-    const { result } = await setup();
+  test('onChangeSort', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangeSort('something:else');
@@ -191,8 +183,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSearch', async () => {
-    const { result } = await setup();
+  test('onChangeSearch', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangeSearch('something');
@@ -204,8 +196,8 @@ describe('useModalQueryParams', () => {
     });
   });
 
-  test('onChangeSearch - empty string resets all values and removes _q and page', async () => {
-    const { result } = await setup();
+  test('onChangeSearch - empty string resets all values and removes _q and page', () => {
+    const { result } = setup();
 
     act(() => {
       result.current[1].onChangePage({ id: 1 });

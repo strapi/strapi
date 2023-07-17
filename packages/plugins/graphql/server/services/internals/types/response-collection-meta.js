@@ -25,8 +25,9 @@ module.exports = ({ strapi }) => {
             const { args, resourceUID } = parent;
             const { start, limit } = args;
             const safeLimit = Math.max(limit, 1);
+            const contentType = strapi.getModel(resourceUID);
 
-            const sanitizedQuery = await sanitize.contentAPI.query(args, parent.contentType, {
+            const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
               auth: ctx?.state?.auth,
             });
             const total = await strapi.entityService.count(resourceUID, sanitizedQuery);

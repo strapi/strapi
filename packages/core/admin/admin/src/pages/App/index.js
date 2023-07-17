@@ -31,7 +31,6 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 
 import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
-import { getUID } from './utils';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -112,8 +111,6 @@ function App() {
           menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
           authLogo: prefixFileUrlWithBackendUrl(authLogo),
         });
-
-        const deviceId = await getUID();
 
         if (uuid) {
           const {
