@@ -605,16 +605,15 @@ function ListView({
                             );
                           }
 
-                          if (hasReviewWorkflows && name === 'strapi_reviewWorkflows_stage') {
+                          if (hasReviewWorkflows && name === 'strapi_stage') {
                             return (
                               <Td key={key}>
-                                {rowData.strapi_reviewWorkflows_stage ? (
+                                {rowData.strapi_stage ? (
                                   <ReviewWorkflowsStage
                                     color={
-                                      rowData.strapi_reviewWorkflows_stage.color ??
-                                      lightTheme.colors.primary600
+                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
                                     }
-                                    name={rowData.strapi_reviewWorkflows_stage.name}
+                                    name={rowData.strapi_stage.name}
                                   />
                                 ) : (
                                   <Typography textColor="neutral800">-</Typography>
