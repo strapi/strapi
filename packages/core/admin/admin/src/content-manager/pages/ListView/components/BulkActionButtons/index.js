@@ -1,100 +1,22 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
-import { Button, Dialog, DialogBody, DialogFooter, Flex, Typography } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
-import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { Button, Typography } from '@strapi/design-system';
+import { useTracking, useTableContext } from '@strapi/helper-plugin';
+import { Check, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { listViewDomain } from '../../../pages/ListView/selectors';
-import { getTrad } from '../../../utils';
-import InjectionZoneList from '../../InjectionZoneList';
+import InjectionZoneList from '../../../../components/InjectionZoneList';
+import { getTrad } from '../../../../utils';
+import { listViewDomain } from '../../selectors';
 
-const ConfirmBulkActionDialog = ({ onToggleDialog, isOpen, dialogBody, endAction }) => {
-  const { formatMessage } = useIntl();
+import { ConfirmBulkActionDialog, confirmDialogsPropTypes } from './ConfirmBulkActionDialog';
+import SelectedEntriesModal from './SelectedEntriesModal';
 
-  return (
-    <Dialog
-      onClose={onToggleDialog}
-      title={formatMessage({
-        id: 'app.components.ConfirmDialog.title',
-        defaultMessage: 'Confirmation',
-      })}
-      labelledBy="confirmation"
-      describedBy="confirm-description"
-      isOpen={isOpen}
-    >
-      <DialogBody icon={<ExclamationMarkCircle />}>
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          {dialogBody}
-        </Flex>
-      </DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={onToggleDialog} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={endAction}
-      />
-    </Dialog>
-  );
-};
-
-ConfirmBulkActionDialog.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onToggleDialog: PropTypes.func.isRequired,
-  dialogBody: PropTypes.node.isRequired,
-  endAction: PropTypes.node.isRequired,
-};
-
-const confirmDialogsPropTypes = {
-  isConfirmButtonLoading: PropTypes.bool.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onToggleDialog: PropTypes.func.isRequired,
-};
-
-const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
-  const { formatMessage } = useIntl();
-
-  return (
-    <ConfirmBulkActionDialog
-      isOpen={isOpen}
-      onToggleDialog={onToggleDialog}
-      dialogBody={
-        <>
-          <Typography id="confirm-description" textAlign="center">
-            {formatMessage({
-              id: getTrad('popUpWarning.bodyMessage.contentType.publish.all'),
-              defaultMessage: 'Are you sure you want to publish these entries?',
-            })}
-          </Typography>
-          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
-        </>
-      }
-      endAction={
-        <Button
-          onClick={onConfirm}
-          variant="secondary"
-          startIcon={<Check />}
-          loading={isConfirmButtonLoading}
-        >
-          {formatMessage({
-            id: 'app.utils.publish',
-            defaultMessage: 'Publish',
-          })}
-        </Button>
-      }
-    />
-  );
-};
-
-ConfirmDialogPublishAll.propTypes = confirmDialogsPropTypes;
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogUnpublishAll
+ * -----------------------------------------------------------------------------------------------*/
 
 const ConfirmDialogUnpublishAll = ({
   isOpen,
@@ -138,6 +60,10 @@ const ConfirmDialogUnpublishAll = ({
 
 ConfirmDialogUnpublishAll.propTypes = confirmDialogsPropTypes;
 
+/* -------------------------------------------------------------------------------------------------
+ * ConfirmDialogDeleteAll
+ * -----------------------------------------------------------------------------------------------*/
+
 const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading, onConfirm }) => {
   const { formatMessage } = useIntl();
 
@@ -176,21 +102,25 @@ const ConfirmDialogDeleteAll = ({ isOpen, onToggleDialog, isConfirmButtonLoading
 
 ConfirmDialogDeleteAll.propTypes = confirmDialogsPropTypes;
 
-const BulkActionsBar = ({
+/* -------------------------------------------------------------------------------------------------
+ * BulkActionButtons
+ * -----------------------------------------------------------------------------------------------*/
+
+const BulkActionButtons = ({
   showPublish,
   showDelete,
   onConfirmDeleteAll,
-  onConfirmPublishAll,
   onConfirmUnpublishAll,
-  selectedEntries,
-  clearSelectedEntries,
+  refetchData,
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { data } = useSelector(listViewDomain());
+  const { selectedEntries, setSelectedEntries } = useTableContext();
 
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
-  const [dialogToOpen, setDialogToOpen] = useState(null);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = React.useState(false);
+  const [isSelectedEntriesModalOpen, setIsSelectedEntriesModalOpen] = React.useState(false);
+  const [dialogToOpen, setDialogToOpen] = React.useState(null);
 
   // Filters for Bulk actions
   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
@@ -199,7 +129,7 @@ const BulkActionsBar = ({
   const unpublishButtonIsShown =
     showPublish && selectedEntriesObjects.some((entry) => entry.publishedAt);
 
-  const toggleDeleteModal = () => {
+  const toggleDeleteDialog = () => {
     if (dialogToOpen === 'delete') {
       setDialogToOpen(null);
     } else {
@@ -208,16 +138,7 @@ const BulkActionsBar = ({
     }
   };
 
-  const togglePublishModal = () => {
-    if (dialogToOpen === 'publish') {
-      setDialogToOpen(null);
-    } else {
-      setDialogToOpen('publish');
-      trackUsage('willBulkPublishEntries');
-    }
-  };
-
-  const toggleUnpublishModal = () => {
+  const toggleUnpublishDialog = () => {
     if (dialogToOpen === 'unpublish') {
       setDialogToOpen(null);
     } else {
@@ -226,46 +147,51 @@ const BulkActionsBar = ({
     }
   };
 
-  const handleBulkAction = async (confirmAction, toggleModal) => {
+  const handleBulkAction = async (confirmAction, toggleDialog) => {
     try {
       setIsConfirmButtonLoading(true);
       await confirmAction(selectedEntries);
       setIsConfirmButtonLoading(false);
-      toggleModal();
-      clearSelectedEntries();
+      toggleDialog();
+      setSelectedEntries([]);
     } catch (error) {
       setIsConfirmButtonLoading(false);
-      toggleModal();
+      toggleDialog();
     }
   };
 
-  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteModal);
-  const handleBulkPublish = () => handleBulkAction(onConfirmPublishAll, togglePublishModal);
-  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishModal);
+  const handleBulkDelete = () => handleBulkAction(onConfirmDeleteAll, toggleDeleteDialog);
+  const handleBulkUnpublish = () => handleBulkAction(onConfirmUnpublishAll, toggleUnpublishDialog);
+  const handleToggleSelectedEntriesModal = () => {
+    setIsSelectedEntriesModalOpen((prev) => {
+      if (prev) {
+        refetchData();
+      }
+
+      return !prev;
+    });
+  };
 
   return (
     <>
       {publishButtonIsShown && (
         <>
-          <Button variant="tertiary" onClick={togglePublishModal}>
+          <Button variant="tertiary" onClick={handleToggleSelectedEntriesModal}>
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
-          <ConfirmDialogPublishAll
-            isOpen={dialogToOpen === 'publish'}
-            onToggleDialog={togglePublishModal}
-            isConfirmButtonLoading={isConfirmButtonLoading}
-            onConfirm={handleBulkPublish}
-          />
+          {isSelectedEntriesModalOpen && (
+            <SelectedEntriesModal onToggle={handleToggleSelectedEntriesModal} />
+          )}
         </>
       )}
       {unpublishButtonIsShown && (
         <>
-          <Button variant="tertiary" onClick={toggleUnpublishModal}>
+          <Button variant="tertiary" onClick={toggleUnpublishDialog}>
             {formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' })}
           </Button>
           <ConfirmDialogUnpublishAll
             isOpen={dialogToOpen === 'unpublish'}
-            onToggleDialog={toggleUnpublishModal}
+            onToggleDialog={toggleUnpublishDialog}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkUnpublish}
           />
@@ -273,12 +199,12 @@ const BulkActionsBar = ({
       )}
       {showDelete && (
         <>
-          <Button variant="danger-light" onClick={toggleDeleteModal}>
+          <Button variant="danger-light" onClick={toggleDeleteDialog}>
             {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
           </Button>
           <ConfirmDialogDeleteAll
             isOpen={dialogToOpen === 'delete'}
-            onToggleDialog={toggleDeleteModal}
+            onToggleDialog={toggleDeleteDialog}
             isConfirmButtonLoading={isConfirmButtonLoading}
             onConfirm={handleBulkDelete}
           />
@@ -288,22 +214,20 @@ const BulkActionsBar = ({
   );
 };
 
-BulkActionsBar.defaultProps = {
+BulkActionButtons.defaultProps = {
   showPublish: false,
   showDelete: false,
   onConfirmDeleteAll() {},
-  onConfirmPublishAll() {},
   onConfirmUnpublishAll() {},
+  refetchData() {},
 };
 
-BulkActionsBar.propTypes = {
+BulkActionButtons.propTypes = {
   showPublish: PropTypes.bool,
   showDelete: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
-  onConfirmPublishAll: PropTypes.func,
   onConfirmUnpublishAll: PropTypes.func,
-  selectedEntries: PropTypes.array.isRequired,
-  clearSelectedEntries: PropTypes.func.isRequired,
+  refetchData: PropTypes.func,
 };
 
-export default BulkActionsBar;
+export default BulkActionButtons;
