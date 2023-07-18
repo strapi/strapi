@@ -193,6 +193,10 @@ export const TableRows = ({
                 );
               }
 
+              if (typeof cellFormatter === 'function') {
+                cellFormatter(data, { key, name, ...rest });
+              }
+
               return (
                 <Td key={key}>
                   <CellContent
