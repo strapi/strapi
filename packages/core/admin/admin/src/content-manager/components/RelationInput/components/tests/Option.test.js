@@ -44,4 +44,14 @@ describe('Content-Manager || RelationInput || Option', () => {
     expect(getByText('relation 1')).toBeInTheDocument();
     expect(getByTitle('State: Draft')).toBeInTheDocument();
   });
+
+  it('should render custom Option with mainField prop as number type', async () => {
+    const { user, getByRole } = setup({
+      options: [{ id: 1, mainField: 1, publicationState: 'published' }],
+    });
+
+    await user.click(getByRole('combobox'));
+
+    expect(getByRole('option', { publicationState: 'State: Published' })).toBeInTheDocument();
+  });
 });

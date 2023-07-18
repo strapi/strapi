@@ -16,7 +16,7 @@ const ComponentFixture = (props) => (
 
 const setup = (props) => render(<ComponentFixture {...props} />);
 
-describe('DynamicTable | PublicationState', () => {
+describe('ListViewTable | PublicationState', () => {
   test('render draft state', () => {
     const { container, getByText } = setup({ isPublished: false });
 
