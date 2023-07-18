@@ -6,6 +6,7 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -17,6 +18,7 @@ import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
 import { setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
@@ -30,6 +32,7 @@ import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsEditView() {
   const { workflowId } = useParams();
+  const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { put } = useFetchClient();
@@ -53,6 +56,9 @@ export function ReviewWorkflowsEditView() {
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const {
+    allowedActions: { canDelete, canUpdate },
+  } = useRBAC(permissions.settings['review-workflows']);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
@@ -225,7 +231,7 @@ export function ReviewWorkflowsEditView() {
                 startIcon={<Check />}
                 type="submit"
                 size="M"
-                disabled={!currentWorkflowIsDirty}
+                disabled={!currentWorkflowIsDirty || !canUpdate}
                 // if the confirm dialog is open the loading state is on
                 // the confirm button already
                 loading={!isConfirmDeleteDialogOpen && isLoading}
@@ -256,8 +262,15 @@ export function ReviewWorkflowsEditView() {
               </Loader>
             ) : (
               <Flex alignItems="stretch" direction="column" gap={7}>
-                <WorkflowAttributes contentTypes={{ collectionTypes, singleTypes }} />
-                <Stages stages={formik.values?.stages} />
+                <WorkflowAttributes
+                  canUpdate={canUpdate}
+                  contentTypes={{ collectionTypes, singleTypes }}
+                />
+                <Stages
+                  canDelete={canDelete}
+                  canUpdate={canUpdate}
+                  stages={formik.values?.stages}
+                />
               </Flex>
             )}
           </Layout.Root>

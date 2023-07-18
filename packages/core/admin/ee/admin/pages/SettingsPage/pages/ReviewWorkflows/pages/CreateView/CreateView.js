@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader } from '@strapi/design-system';
-import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import {
+  useAPIErrorHandler,
+  useFetchClient,
+  useNotification,
+  useRBAC,
+} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
 import set from 'lodash/set';
@@ -12,6 +17,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
 import { resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
@@ -29,6 +35,7 @@ export function ReviewWorkflowsCreateView() {
   const { push } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
+  const permissions = useSelector(selectAdminPermissions);
   const toggleNotification = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
@@ -36,6 +43,9 @@ export function ReviewWorkflowsCreateView() {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const {
+    allowedActions: { canCreate },
+  } = useRBAC(permissions.settings['review-workflows']);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const { meta, isLoading: isWorkflowLoading } = useReviewWorkflows();
@@ -191,7 +201,7 @@ export function ReviewWorkflowsCreateView() {
                 startIcon={<Check />}
                 type="submit"
                 size="M"
-                disabled={!currentWorkflowIsDirty}
+                disabled={!currentWorkflowIsDirty || !canCreate}
                 isLoading={isLoading}
               >
                 {formatMessage({

@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 
 import { updateWorkflow } from '../../actions';
 
-export function WorkflowAttributes({ contentTypes: { collectionTypes, singleTypes } }) {
+export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes, singleTypes } }) {
   const { formatMessage, locale } = useIntl();
   const dispatch = useDispatch();
   const [nameField, nameMeta, nameHelper] = useField('name');
@@ -24,6 +24,7 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
         <TextInput
           {...nameField}
           id={nameField.name}
+          disabled={!canUpdate}
           label={formatMessage({
             id: 'Settings.review-workflows.workflow.name.label',
             defaultMessage: 'Workflow Name',
@@ -50,6 +51,7 @@ export function WorkflowAttributes({ contentTypes: { collectionTypes, singleType
               { count: value.length }
             )
           }
+          disabled={!canUpdate}
           error={contentTypesMeta.error ?? false}
           id={contentTypesField.name}
           label={formatMessage({
@@ -102,7 +104,12 @@ const ContentTypeType = PropTypes.shape({
   }).isRequired,
 });
 
+WorkflowAttributes.defaultProps = {
+  canUpdate: true,
+};
+
 WorkflowAttributes.propTypes = {
+  canUpdate: PropTypes.bool,
   contentTypes: PropTypes.shape({
     collectionTypes: PropTypes.arrayOf(ContentTypeType).isRequired,
     singleTypes: PropTypes.arrayOf(ContentTypeType).isRequired,

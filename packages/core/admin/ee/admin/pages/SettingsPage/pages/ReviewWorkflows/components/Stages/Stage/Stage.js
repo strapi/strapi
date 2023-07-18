@@ -50,6 +50,7 @@ export function Stage({
   index,
   canDelete,
   canReorder,
+  canUpdate,
   isOpen: isOpenDefault = false,
   stagesCount,
 }) {
@@ -216,6 +217,7 @@ export function Stage({
 
                 <IconButton
                   background="transparent"
+                  disabled={!canUpdate}
                   forwardedAs="div"
                   role="button"
                   noBorder
@@ -240,6 +242,7 @@ export function Stage({
                 <TextInput
                   {...nameField}
                   id={nameField.name}
+                  disabled={!canUpdate}
                   label={formatMessage({
                     id: 'Settings.review-workflows.stage.name.label',
                     defaultMessage: 'Stage name',
@@ -255,6 +258,7 @@ export function Stage({
 
               <GridItem col={6}>
                 <SingleSelect
+                  disabled={!canUpdate}
                   error={colorMeta?.error ?? false}
                   id={colorField.name}
                   required
@@ -319,5 +323,6 @@ Stage.propTypes = PropTypes.shape({
   color: PropTypes.string.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canReorder: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   stagesCount: PropTypes.number.isRequired,
 }).isRequired;
