@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaultTo } = require('lodash/fp');
+const { flow, map, sum, size, mean, max, defaultTo } = require('lodash/fp');
 const { add } = require('date-fns');
 
 const { ONE_WEEK, getWeeklyCronScheduleAt } = require('@strapi/utils').cron;
@@ -15,18 +15,34 @@ const setMetricsStoreValue = (value) =>
 
 module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
+  const workflowsService = getService('workflows', { strapi });
 
   return {
     async computeMetrics() {
-      /*
-        TODO: compute metrics
-        numberOfActiveWorkflows,
-        activatedContentTypes
-      */
+      // There will never be more than 200 workflow, so we can safely fetch them all
+      const workflows = await workflowsService.findMany({ populate: 'stages' });
+
+      const stagesCount = flow(
+        map('stages'), // Number of stages per workflow
+        map(size)
+      )(workflows);
+
+      const contentTypesCount = flow(
+        map('contentTypes'), // Number of content types per workflow
+        map(size)
+      )(workflows);
+
+      return {
+        numberOfActiveWorkflows: size(workflows),
+        avgStagesCount: mean(stagesCount),
+        maxStagesCount: max(stagesCount),
+        activatedContentTypes: sum(contentTypesCount),
+      };
     },
 
     async sendMetrics() {
-      metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek();
+      const computedMetrics = this.computeMetrics();
+      metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();
       await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
