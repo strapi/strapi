@@ -29,7 +29,7 @@ module.exports = ({ strapi }) => {
       return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
     },
 
-    async createMany(stagesList, totalNumberOfStages, { fields } = {}) {
+    async createMany(stagesList, { fields } = {}) {
       const params = { select: fields ?? '*' };
 
       const stages = await Promise.all(
@@ -38,7 +38,7 @@ module.exports = ({ strapi }) => {
         )
       );
 
-      metrics.sendDidCreateStage(totalNumberOfStages);
+      metrics.sendDidCreateStage();
 
       return stages;
     },
@@ -81,7 +81,7 @@ module.exports = ({ strapi }) => {
     async replaceStages(srcStages, destStages, contentTypesToMigrate = []) {
       const { created, updated, deleted } = getDiffBetweenStages(srcStages, destStages);
 
-      const totalNumberOfStages = assertAtLeastOneStageRemain(srcStages || [], {
+      assertAtLeastOneStageRemain(srcStages || [], {
         created,
         deleted,
       });
@@ -89,7 +89,7 @@ module.exports = ({ strapi }) => {
       // Update stages and assign entity stages
       return strapi.db.transaction(async ({ trx }) => {
         // Create the new stages
-        const createdStages = await this.createMany(created, totalNumberOfStages, {
+        const createdStages = await this.createMany(created, {
           fields: ['id'],
         });
         // Put all the newly created stages ids
@@ -283,8 +283,6 @@ function assertAtLeastOneStageRemain(workflowStages, diffStages) {
   if (remainingStagesCount < 1) {
     throw new ValidationError(ERRORS.WORKFLOW_WITHOUT_STAGES);
   }
-
-  return remainingStagesCount;
 }
 
 /**
