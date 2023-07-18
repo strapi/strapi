@@ -10,7 +10,7 @@ export function ProtectedPage({ children }) {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings.users.main}>
+    <CheckPagePermissions permissions={permissions.settings['review-workflows'].main}>
       {children}
     </CheckPagePermissions>
   );
