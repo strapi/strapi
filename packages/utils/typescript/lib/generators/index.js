@@ -3,6 +3,7 @@
 const path = require('path');
 const chalk = require('chalk');
 
+const { cleanupGeneratedTypes } = require('../utils');
 const { TYPES_ROOT_DIR, GENERATED_OUT_DIR } = require('./constants');
 const { saveDefinitionToFileSystem, createLogger, timer } = require('./utils');
 const generateContentTypesDefinitions = require('./content-types');
@@ -63,6 +64,9 @@ const generate = async (config = {}) => {
   logger.info('Starting the type generation process');
   logger.debug(`Enabled artifacts: ${enabledArtifacts.join(', ')}`);
 
+  logger.info(`Cleaning up old types at ${chalk.bold(path.relative(process.cwd(), registryPwd))}`);
+  cleanupGeneratedTypes({ pwd, rootDir });
+
   for (const artifact of enabledArtifacts) {
     const boldArtifact = chalk.bold(artifact); // used for log messages
 
@@ -100,7 +104,7 @@ const generate = async (config = {}) => {
 
     try {
       const outPath = await saveDefinitionToFileSystem(registryPwd, filename, report.output);
-      const relativeOutPath = path.relative(__dirname, outPath);
+      const relativeOutPath = path.relative(process.cwd(), outPath);
 
       artifactFsTimer.end();
 
