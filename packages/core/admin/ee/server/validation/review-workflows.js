@@ -64,7 +64,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
     .test('unique', function (stages) {
       const errors = [];
 
-      stages.forEach((stage, index) => {
+      stages?.forEach((stage, index) => {
         const sameNameStages = stages.filter((s) => s.name === stage.name);
         if (sameNameStages.length > 1) {
           errors.push(
