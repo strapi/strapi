@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl';
 
 import { formatAPIError } from './utils/formatAPIError';
 import { formatAxiosError } from './utils/formatAxiosError';
+import { formatFormikError } from './utils/formatFormikError';
 
 /**
  * Hook that exports an error message formatting function.
@@ -28,6 +29,10 @@ export function useAPIErrorHandler(intlMessagePrefixCallback) {
 
         throw new Error('formatAPIError: Unknown error:', error);
       }
+    },
+
+    formatFormikError(error) {
+      return formatFormikError(error, { intlMessagePrefixCallback, formatMessage });
     },
   };
 }
