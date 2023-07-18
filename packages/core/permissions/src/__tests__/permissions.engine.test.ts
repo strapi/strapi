@@ -1,8 +1,14 @@
-'use strict';
+import _ from 'lodash';
+import { subject } from '@casl/ability';
+import { providerFactory } from '@strapi/utils';
+import permissions from '..';
+import type { HookName } from '../engine/hooks';
+import type { Permission } from '../domain/permission';
 
-const _ = require('lodash');
-const { subject } = require('@casl/ability');
-const permissions = require('..');
+interface EnginHook {
+  name: HookName;
+  fn: (permission: Permission) => unknown;
+}
 
 describe('Permissions Engine', () => {
   const allowedCondition = 'plugin::test.isAuthor';
@@ -35,27 +41,27 @@ describe('Permissions Engine', () => {
   ];
 
   const providers = {
-    condition: {
-      get(condition) {
-        const c = conditions.find((c) => c.name === condition);
-        if (c) return c;
-        return {
-          async handler() {
-            return true;
-          },
-        };
-      },
-    },
+    action: providerFactory(),
+    condition: providerFactory(),
   };
+
+  Object.assign(providers.condition, {
+    get(condition) {
+      const c = conditions.find((c) => c.name === condition);
+      if (c) return c;
+      return {
+        async handler() {
+          return true;
+        },
+      };
+    },
+  });
 
   /**
    * Create an engine hook function that rejects a specific action
    *
-   * @param {string} action
-   *
-   * @return {(params) => boolean | undefined)}
    */
-  const generateInvalidateActionHook = (action) => {
+  const generateInvalidateActionHook = (action: string) => {
     return (params) => {
       if (params.permission.action === action) {
         return false;
@@ -65,13 +71,8 @@ describe('Permissions Engine', () => {
 
   /**
    * build an engine and add all given hooks
-   *
-   * @param {PermissionEngineParams} params
-   * @param {string} action
-   *
-   * @return {PermissionEngine}
    */
-  const buildEngineWithHooks = (params = { providers }, engineHooks = []) => {
+  const buildEngineWithHooks = (params = { providers }, engineHooks: EnginHook[] = []) => {
     const engine = permissions.engine.new(params);
     engineHooks.forEach(({ name, fn }) => {
       engine.on(name, fn);
@@ -81,24 +82,19 @@ describe('Permissions Engine', () => {
 
   /**
    * build an engine, add all given hooks, and generate an ability
-   *
-   * @param {PermissionEngineParams} params
-   * @param {string} action
-   *
-   * @return {{
-   *   engine: PermissionEngine,
-   *   ability: Ability,
-   *   createRegisterFunction: jest.Mock<jest.Mock<any, any[]>, [can?: any, options?: any]>,
-   *   registerFunction: [jest.Mock<Function, [import('../../').Permission]>]
-   * }}
    */
   const buildEngineWithAbility = async ({
     permissions,
     engineProviders = providers,
-    engineHooks,
-    abilityOptions,
+    engineHooks = [],
+    abilityOptions = {},
+  }: {
+    permissions: Permission[];
+    engineHooks?: EnginHook[];
+    engineProviders?: { action: any; condition: any };
+    abilityOptions?: Record<string, unknown>;
   }) => {
-    const registerFunctions = [];
+    const registerFunctions: jest.Mock[] = [];
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
     const engineCrf = engine.createRegisterFunction;
     const createRegisterFunction = jest
@@ -156,8 +152,8 @@ describe('Permissions Engine', () => {
       permissions,
     });
 
-    expect(ability.can('read')).toBeTruthy();
-    expect(ability.can('i_dont_exist')).toBeFalsy();
+    expect(ability.can('read', 'all')).toBeTruthy();
+    expect(ability.can('i_dont_exist', 'all')).toBeFalsy();
 
     expect(createRegisterFunction).toBeCalledTimes(2);
     expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
@@ -173,7 +169,7 @@ describe('Permissions Engine', () => {
       permissions,
     });
 
-    expect(ability.can('read')).toBeTruthy();
+    expect(ability.can('read', 'all')).toBeTruthy();
 
     expect(createRegisterFunction).toBeCalledTimes(2);
     expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
@@ -229,7 +225,7 @@ describe('Permissions Engine', () => {
   it('registers action with subject and properties', async () => {
     const permissions = [{ action: 'read', subject: 'article', properties: { fields: ['title'] } }];
     const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
-    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'all')).toBeFalsy();
     expect(ability.can('read', 'user')).toBeFalsy();
     expect(ability.can('read', 'article')).toBeTruthy();
     expect(ability.can('read', 'article', 'title')).toBeTruthy();
@@ -256,7 +252,7 @@ describe('Permissions Engine', () => {
 
     expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
 
-    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'all')).toBeFalsy();
     expect(ability.can('read', 'user')).toBeFalsy();
     expect(ability.can('read', 'article')).toBeTruthy();
     expect(ability.can('read', 'article', 'title')).toBeTruthy();
@@ -290,7 +286,7 @@ describe('Permissions Engine', () => {
 
     expect(ability.rules).toMatchObject(expectedAbilityRules(expectedPermissions));
 
-    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'all')).toBeFalsy();
     expect(ability.can('read', 'user')).toBeFalsy();
     expect(ability.can('read', 'article', 'name')).toBeFalsy();
 
@@ -316,7 +312,7 @@ describe('Permissions Engine', () => {
 
     expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
 
-    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'all')).toBeFalsy();
     expect(ability.can('read', 'user')).toBeFalsy();
     expect(ability.can('read', 'article', 'name')).toBeFalsy();
 
@@ -347,8 +343,8 @@ describe('Permissions Engine', () => {
 
         expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
 
-        expect(ability.can('read')).toBeFalsy();
-        expect(ability.can('read')).toBeFalsy();
+        expect(ability.can('read', 'all')).toBeFalsy();
+        expect(ability.can('read', 'all')).toBeFalsy();
         expect(ability.can('view', 'article')).toBeTruthy();
         expect(registerFunctions[0]).toBeCalledWith(newPermissions[0]);
       });
@@ -460,11 +456,11 @@ describe('Permissions Engine', () => {
 
         expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
 
-        expect(ability.can('update')).toBeFalsy();
-        expect(ability.can('modify')).toBeTruthy();
-        expect(ability.can('delete')).toBeFalsy();
-        expect(ability.can('remove')).toBeTruthy();
-        expect(ability.can('view')).toBeFalsy();
+        expect(ability.can('update', 'all')).toBeFalsy();
+        expect(ability.can('modify', 'all')).toBeTruthy();
+        expect(ability.can('delete', 'all')).toBeFalsy();
+        expect(ability.can('remove', 'all')).toBeTruthy();
+        expect(ability.can('view', 'all')).toBeFalsy();
       });
     });
   });

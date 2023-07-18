@@ -7851,8 +7851,10 @@ __metadata:
   dependencies:
     "@casl/ability": 5.4.4
     "@strapi/utils": 4.11.7
+    eslint-config-custom: 4.11.7
     lodash: 4.17.21
     sift: 16.0.1
+    tsconfig: 4.11.7
   languageName: unknown
   linkType: soft
 
