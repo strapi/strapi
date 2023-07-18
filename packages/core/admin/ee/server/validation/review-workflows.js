@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable func-names */
+
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { hasStageAttribute } = require('../utils/review-workflows');
 
@@ -42,10 +44,11 @@ const validateContentTypes = yup.array().of(
 );
 
 const validateWorkflowCreateSchema = yup.object().shape({
-  name: yup.string().max(255).required(),
+  name: yup.string().max(255).min(1, 'Workflow name can not be empty').required(),
   stages: yup
     .array()
     .of(stageObject)
+    .uniqueProperty('name', 'Stage name must be unique')
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
@@ -53,10 +56,11 @@ const validateWorkflowCreateSchema = yup.object().shape({
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
-  name: yup.string().max(255),
+  name: yup.string().max(255).min(1, 'Workflow name can not be empty'),
   stages: yup
     .array()
     .of(stageObject)
+    .uniqueProperty('name', 'Stage name must be unique')
     .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
   contentTypes: validateContentTypes,

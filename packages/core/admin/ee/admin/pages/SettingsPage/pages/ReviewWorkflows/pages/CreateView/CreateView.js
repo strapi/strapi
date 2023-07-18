@@ -4,6 +4,7 @@ import { Button, Flex, Loader } from '@strapi/design-system';
 import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
+import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
@@ -38,6 +39,7 @@ export function ReviewWorkflowsCreateView() {
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const { meta, isLoading: isWorkflowLoading } = useReviewWorkflows();
+  const [initialErrors, setInitialErrors] = React.useState(null);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -70,10 +72,33 @@ export function ReviewWorkflowsCreateView() {
 
       return workflow;
     } catch (error) {
-      toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
-      });
+      // TODO: the current implementation of `formatAPIError` prints all error messages of all details,
+      // which get's hairy when we have duplicated-name errors, because the same error message is printed
+      // several times. What we want instead in these scenarios is to print only the error summary and
+      // display the individual error messages for each field. This is a workaround, until we change the
+      // implementation of `formatAPIError`.
+      if (
+        error.response.data?.error?.name === 'ValidationError' &&
+        error.response.data?.error?.details?.errors?.length > 0
+      ) {
+        toggleNotification({
+          type: 'warning',
+          message: error.response.data.error.message,
+        });
+
+        setInitialErrors(
+          error.response.data?.error?.details?.errors.reduce((acc, error) => {
+            set(acc, error.path, error.message);
+
+            return acc;
+          }, {})
+        );
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      }
 
       return null;
     }
@@ -83,6 +108,7 @@ export function ReviewWorkflowsCreateView() {
 
   const formik = useFormik({
     enableReinitialize: true,
+    initialErrors,
     initialValues: currentWorkflow,
     async onSubmit() {
       /**
