@@ -1,52 +1,74 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { Table, useTableContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { combineReducers, createStore } from 'redux';
 
-import BulkActionsBar from '../index';
+import BulkActionButtons from '..';
+import reducers from '../../../../../../reducers';
+
+const toggleNotification = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: () => ({
-    trackUsage: jest.fn(),
+  useTableContext: jest.fn(() => ({
+    selectedEntries: [1, 2],
+    setSelectedEntries: jest.fn(),
+  })),
+  useNotification: jest.fn(() => {
+    return toggleNotification;
   }),
 }));
 
-jest.mock('react-redux', () => ({
-  useSelector: () => ({
+jest.mock('../../../../../../shared/hooks', () => ({
+  ...jest.requireActual('../../../../../../shared/hooks'),
+  useInjectionZone: () => [],
+}));
+
+jest.mock('../SelectedEntriesModal', () => () => <div>SelectedEntriesModal</div>);
+
+const user = userEvent.setup();
+
+const rootReducer = combineReducers(reducers);
+const store = createStore(rootReducer, {
+  'content-manager_listView': {
     data: [
       { id: 1, publishedAt: null },
       { id: 2, publishedAt: '2023-01-01T10:10:10.408Z' },
     ],
+    contentType: {
+      settings: {
+        mainField: 'name',
+      },
+    },
+  },
+});
+
+const setup = (props) => ({
+  ...render(<BulkActionButtons {...props} />, {
+    wrapper({ children }) {
+      return (
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={{}} defaultLocale="en">
+            <Provider store={store}>
+              <MemoryRouter>
+                <Table.Root>{children}</Table.Root>
+              </MemoryRouter>
+            </Provider>
+          </IntlProvider>
+        </ThemeProvider>
+      );
+    },
   }),
-}));
-
-jest.mock('../../../../../shared/hooks', () => ({
-  ...jest.requireActual('../../../../../shared/hooks'),
-  useInjectionZone: () => [],
-}));
-
-const user = userEvent.setup();
+});
 
 describe('BulkActionsBar', () => {
-  const requiredProps = {
-    selectedEntries: [1, 2],
-    clearSelectedEntries: jest.fn(),
-  };
-
-  const TestComponent = (props) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <BulkActionsBar {...requiredProps} {...props} />
-      </IntlProvider>
-    </ThemeProvider>
-  );
-
-  const setup = (props) => render(<TestComponent {...props} />);
-
-  it('should render publish buttons if showPublish is true', () => {
+  it('should render publish buttons if showPublish is true', async () => {
     setup({ showPublish: true });
 
     expect(screen.getByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
@@ -75,7 +97,7 @@ describe('BulkActionsBar', () => {
   it('should show delete modal if delete button is clicked', async () => {
     setup({ showDelete: true });
 
-    await userEvent.click(screen.getByRole('button', { name: /\bDelete\b/ }));
+    await user.click(screen.getByRole('button', { name: /\bDelete\b/ }));
 
     expect(screen.getByText('Confirmation')).toBeInTheDocument();
   });
@@ -98,14 +120,18 @@ describe('BulkActionsBar', () => {
   });
 
   it('should not show publish button if selected entries are all published', () => {
-    setup({ showPublish: true, selectedEntries: [2] });
+    useTableContext.mockReturnValueOnce({ selectedEntries: [2] });
+    setup({ showPublish: true });
 
     expect(screen.queryByRole('button', { name: /\bPublish\b/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).toBeInTheDocument();
   });
 
   it('should not show unpublish button if selected entries are all unpublished', () => {
-    setup({ showPublish: true, selectedEntries: [1] });
+    useTableContext.mockReturnValueOnce({ selectedEntries: [1] });
+    setup({ showPublish: true });
 
+    expect(screen.queryByRole('button', { name: /\bPublish\b/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /\bUnpublish\b/ })).not.toBeInTheDocument();
   });
 
@@ -115,13 +141,8 @@ describe('BulkActionsBar', () => {
 
     await user.click(screen.getByRole('button', { name: /\bpublish\b/i }));
 
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
-
-    await user.click(
-      within(screen.getByRole('dialog')).getByRole('button', { name: /\bpublish\b/i })
-    );
-
-    expect(onConfirmPublishAll).toHaveBeenCalledWith([1, 2]);
+    // Only test that a mock component is rendered. The modal is tested in its own file.
+    expect(screen.getByText('SelectedEntriesModal')).toBeInTheDocument();
   });
 
   it('should show unpublish modal if unpublish button is clicked', async () => {

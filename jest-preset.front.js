@@ -6,6 +6,15 @@ const moduleNameMapper = {
   '.*\\.(css|less|styl|scss|sass)$': '@strapi/admin-test-utils/file-mock',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '@strapi/admin-test-utils/file-mock',
+  /**
+   * we're mapping the following packages to the monorepos node_modules
+   * so if you link a package e.g. `design-system` the correct dependencies
+   * are used and the tests run correctly.
+   **/
+  '^react$': path.join(__dirname, 'node_modules/react'),
+  '^react-dom$': path.join(__dirname, 'node_modules/react-dom'),
+  '^react-router-dom$': path.join(__dirname, 'node_modules/react-router-dom'),
+  '^styled-components$': path.join(__dirname, 'node_modules/styled-components'),
 };
 
 module.exports = {
