@@ -163,6 +163,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       // Create a .gitkeep file to ensure the directory is not empty
       await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
     } catch (err) {
+      console.log('THE ERROR', err);
       throw new ProviderTransferError(
         'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
       );
