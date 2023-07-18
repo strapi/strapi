@@ -7,7 +7,7 @@ import basename from '../../../../../../core/utils/basename';
 
 import MagicLinkWrapper from './MagicLinkWrapper';
 
-const MagicLink = ({ registrationToken }) => {
+export const MagicLinkCE = ({ registrationToken }) => {
   const { formatMessage } = useIntl();
   const target = `${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`;
 
@@ -21,12 +21,10 @@ const MagicLink = ({ registrationToken }) => {
   );
 };
 
-MagicLink.defaultProps = {
+MagicLinkCE.defaultProps = {
   registrationToken: '',
 };
 
-MagicLink.propTypes = {
+MagicLinkCE.propTypes = {
   registrationToken: PropTypes.string,
 };
-
-export default MagicLink;

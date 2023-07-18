@@ -1,5 +1,4 @@
 import { translatedErrors } from '@strapi/helper-plugin';
-import Login from 'ee_else_ce/pages/AuthPage/components/Login';
 import * as yup from 'yup';
 
 import ForgotPassword from './components/ForgotPassword';
@@ -27,8 +26,10 @@ export const FORMS = {
     schema: null,
     inputsPrefix: '',
   },
+
+  // the `Component` attribute is set after all forms and CE/EE components are loaded, but since we
+  // are here outside of a React component we can not use the hook directly
   login: {
-    Component: Login,
     endPoint: 'login',
     fieldsToDisable: [],
     fieldsToOmit: ['rememberMe'],

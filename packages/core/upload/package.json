@@ -25,9 +25,9 @@
     "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/design-system": "1.8.1",
+    "@strapi/design-system": "1.8.2",
     "@strapi/helper-plugin": "4.11.4",
-    "@strapi/icons": "1.8.1",
+    "@strapi/icons": "1.8.2",
     "@strapi/provider-upload-local": "4.11.4",
     "@strapi/utils": "4.11.4",
     "axios": "1.4.0",
@@ -47,7 +47,7 @@
     "react-helmet": "^6.1.0",
     "react-intl": "6.4.1",
     "react-query": "3.39.3",
-    "react-redux": "8.0.5",
+    "react-redux": "8.1.1",
     "react-select": "5.7.0",
     "sharp": "0.32.0",
     "yup": "^0.32.9"
