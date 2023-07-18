@@ -18,6 +18,8 @@ export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
   GetNonFilterableKeys<TSchemaUID>
 >;
 
+export type ID = `${number}` | number;
+
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 
 export type NumberValue = string | number;
@@ -56,7 +58,9 @@ export type ScalarValues = GetValue<
   | Attribute.UID<Common.UID.Schema | undefined>
 >;
 
-// TODO Add doc
+/**
+ * Attribute.GetValues override with extended values
+ */
 export type GetValues<TSchemaUID extends Common.UID.Schema> = OmitRelationWithoutTarget<
   TSchemaUID,
   {
@@ -71,36 +75,8 @@ export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TVal
   Exclude<Attribute.GetKeysByType<TSchemaUID, 'relation'>, Attribute.GetKeysWithTarget<TSchemaUID>>
 >;
 
-export type ComponentValue<
-  TComponentUID extends Common.UID.Component,
-  TRepeatable extends Utils.Expression.BooleanValue
-> = GetValues<TComponentUID> extends infer TValues
-  ? Utils.Expression.If<TRepeatable, TValues[], TValues>
-  : never;
-
-export type GetComponentValue<TAttribute extends Attribute.Attribute> =
-  TAttribute extends Attribute.Component<infer TComponentUID, infer TRepeatable>
-    ? TComponentUID extends Common.UID.Component
-      ? ComponentValue<TComponentUID, TRepeatable>
-      : never
-    : never;
-
-type DynamicZoneValue<TComponentsUIDs extends Common.UID.Component[]> = Array<
-  // Extract tuple values to a component uid union type
-  Utils.Array.Values<TComponentsUIDs> extends infer TComponentUID
-    ? TComponentUID extends Common.UID.Component
-      ? GetValues<TComponentUID> & { __component: TComponentUID }
-      : never
-    : never
->;
-
-export type GetDynamicZoneValue<TAttribute extends Attribute.Attribute> =
-  TAttribute extends Attribute.DynamicZone<infer TComponentsUIDs>
-    ? DynamicZoneValue<TComponentsUIDs>
-    : never;
-
 /**
- * Attribute.GetValue override with filter values
+ * Attribute.GetValue override with extended values
  *
  * Fallback to unknown if never is found
  */
@@ -114,19 +90,34 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
         TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
           ? Utils.Expression.If<
               Utils.Expression.IsNotNever<TTarget>,
-              Attribute.RelationPluralityModifier<TRelationKind, `${number}` | number>
+              Attribute.RelationPluralityModifier<TRelationKind, ID>
             >
           : never
       ],
       // DynamicZone
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'dynamiczone'>>,
-        GetDynamicZoneValue<TAttribute>
+        TAttribute extends Attribute.DynamicZone<infer TComponentsUIDs>
+          ? Array<
+              // Extract tuple values to a component uid union type
+              Utils.Array.Values<TComponentsUIDs> extends infer TComponentUID
+                ? TComponentUID extends Common.UID.Component
+                  ? GetValues<TComponentUID> & { __component: TComponentUID }
+                  : never
+                : never
+            >
+          : never
       ],
       // Component
       [
         Utils.Expression.Extends<TAttribute, Attribute.OfType<'component'>>,
-        GetComponentValue<TAttribute>
+        TAttribute extends Attribute.Component<infer TComponentUID, infer TRepeatable>
+          ? TComponentUID extends Common.UID.Component
+            ? GetValues<TComponentUID> extends infer TValues
+              ? Utils.Expression.If<TRepeatable, TValues[], TValues>
+              : never
+            : never
+          : never
       ],
       // Boolean
       [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, BooleanValue],
