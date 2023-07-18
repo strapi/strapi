@@ -103,7 +103,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
     ])('can be %s', async (name, value) => {
       const newData = {
         ssoLockedRoles: value,
-        defaultRole: 1, // TODO: there seems to be a bug with not setting a default role
+        defaultRole: localData.restrictedRole.id, // TODO: there seems to be a bug with not setting a default role
         autoRegister: false,
       };
       const res = await requests.admin.put('/admin/providers/options', {
@@ -127,7 +127,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
       const res = await requests.admin.put('/admin/providers/options', {
         body: {
           ssoLockedRoles: value,
-          defaultRole: localData.restrictedRole.id,
+          defaultRole: localData.restrictedRole.id, // TODO: there seems to be a bug with not setting a default role
           autoRegister: false,
         },
       });
