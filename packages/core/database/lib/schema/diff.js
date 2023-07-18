@@ -370,7 +370,9 @@ module.exports = (db) => {
           })
           .map((dependsOnTable) => {
             return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
-          });
+          })
+          // In case the table is not found, filter undefined values
+          .filter((table) => !_.isNil(table));
 
         removedTables.push(srcTable, ...dependencies);
       }
