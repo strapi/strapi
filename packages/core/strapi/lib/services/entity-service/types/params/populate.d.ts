@@ -1,4 +1,5 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
+import type Params from './index';
 
 /**
  * Wildcard notation for populate
@@ -39,7 +40,11 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
  */
 type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
 
+type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
+  [key in PopulatableKeys<TSchemaUID>]?: Boolean | Params.For<Attribute.GetTarget<TSchemaUID, key>>;
+};
+
 export type Any<TSchemaUID extends Common.UID.Schema> =
   | StringNotation<TSchemaUID>
   | ArrayNotation<TSchemaUID>
-  | Object;
+  | ObjectNotation<TSchemaUID>;
