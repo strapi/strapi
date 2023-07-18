@@ -45,7 +45,7 @@ const validateContentTypes = yup.array().of(
 );
 
 const validateWorkflowCreateSchema = yup.object().shape({
-  name: yup.string().max(255).required(),
+  name: yup.string().max(255).min(1, 'Workflow name can not be empty').required(),
   stages: yup
     .array()
     .of(stageObject)
@@ -56,7 +56,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
-  name: yup.string().max(255),
+  name: yup.string().max(255).min(1, 'Workflow name can not be empty'),
   stages: yup
     .array()
     .of(stageObject)
