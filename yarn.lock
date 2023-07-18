@@ -7622,7 +7622,7 @@ __metadata:
     reselect: ^4.1.7
     rimraf: 3.0.2
     sanitize-html: 2.10.0
-    semver: 7.5.1
+    semver: 7.5.2
     sift: 16.0.1
     speed-measure-webpack-plugin: 1.5.0
     style-loader: 3.3.1
@@ -7662,7 +7662,7 @@ __metadata:
     koa: 2.13.4
     lodash: 4.17.21
     rimraf: 3.0.2
-    semver: 7.5.1
+    semver: 7.5.2
     stream-chain: 2.2.5
     stream-json: 1.8.0
     tar: 6.1.13
@@ -7682,7 +7682,7 @@ __metadata:
     fs-extra: 10.0.0
     knex: 2.5.0
     lodash: 4.17.21
-    semver: 7.5.1
+    semver: 7.5.2
     umzug: 3.2.1
   languageName: unknown
   linkType: soft
@@ -7754,7 +7754,7 @@ __metadata:
     node-fetch: ^2.6.9
     node-machine-id: ^1.1.10
     ora: ^5.4.1
-    semver: 7.5.1
+    semver: 7.5.2
     tar: 6.1.13
   languageName: unknown
   linkType: soft
@@ -8335,7 +8335,7 @@ __metadata:
     package-json: 7.0.0
     qs: 6.11.1
     resolve-cwd: 3.0.0
-    semver: 7.5.1
+    semver: 7.5.2
     statuses: 2.0.1
     supertest: 6.3.3
     typescript: 5.1.3
@@ -29308,14 +29308,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.5.1":
-  version: 7.5.1
-  resolution: "semver@npm:7.5.1"
+"semver@npm:7.5.2":
+  version: 7.5.2
+  resolution: "semver@npm:7.5.2"
   dependencies:
     lru-cache: ^6.0.0
   bin:
     semver: bin/semver.js
-  checksum: d16dbedad53c65b086f79524b9ef766bf38670b2395bdad5c957f824dcc566b624988013564f4812bcace3f9d405355c3635e2007396a39d1bffc71cfec4a2fc
+  checksum: 3fdf5d1e6f170fe8bcc41669e31787649af91af7f54f05c71d0865bb7aa27e8b92f68b3e6b582483e2c1c648008bc84249d2cd86301771fe5cbf7621d1fe5375
   languageName: node
   linkType: hard
 
