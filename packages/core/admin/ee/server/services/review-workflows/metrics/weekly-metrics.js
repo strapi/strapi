@@ -2,14 +2,18 @@
 
 const { flow, map, sum, size, mean, max, defaultTo } = require('lodash/fp');
 const { add } = require('date-fns');
-
-const { ONE_WEEK, getWeeklyCronScheduleAt } = require('@strapi/utils').cron;
 const { getService } = require('../../../../../server/utils');
+
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+const getWeeklyCronScheduleAt = (date) =>
+  `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
 const getMetricsStoreValue = async () => {
   const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
   return defaultTo({}, value);
 };
+
 const setMetricsStoreValue = (value) =>
   strapi.store.set({ type: 'plugin', name: 'ee', key: 'metrics', value });
 
@@ -20,7 +24,7 @@ module.exports = ({ strapi }) => {
   return {
     async computeMetrics() {
       // There will never be more than 200 workflow, so we can safely fetch them all
-      const workflows = await workflowsService.findMany({ populate: 'stages' });
+      const workflows = await workflowsService.find({ populate: 'stages' });
 
       const stagesCount = flow(
         map('stages'), // Number of stages per workflow
@@ -41,7 +45,7 @@ module.exports = ({ strapi }) => {
     },
 
     async sendMetrics() {
-      const computedMetrics = this.computeMetrics();
+      const computedMetrics = await this.computeMetrics();
       metrics.sendDidSendReviewWorkflowPropertiesOnceAWeek(computedMetrics);
 
       const metricsInfoStored = await getMetricsStoreValue();
@@ -56,7 +60,7 @@ module.exports = ({ strapi }) => {
       let weeklySchedule = currentSchedule;
 
       if (!currentSchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
-        weeklySchedule = getWeeklyCronScheduleAt(add(now, { minutes: 5 }));
+        weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 10 }));
         await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
       }
 
