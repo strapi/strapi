@@ -2,7 +2,6 @@
 
 /* eslint-disable func-names */
 
-const { isEmpty } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { hasStageAttribute } = require('../utils/review-workflows');
 
@@ -49,6 +48,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
   stages: yup
     .array()
     .of(stageObject)
+    .uniqueProperty('name', 'Stage name must be unique')
     .min(1, 'Can not create a workflow without stages')
     .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
@@ -60,27 +60,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
   stages: yup
     .array()
     .of(stageObject)
-    // Check that the stages name are unique
-    .test('unique', function (stages) {
-      const errors = [];
-
-      stages?.forEach((stage, index) => {
-        const sameNameStages = stages.filter((s) => s.name === stage.name);
-        if (sameNameStages.length > 1) {
-          errors.push(
-            this.createError({
-              path: `${this.path}[${index}].name`,
-              message: 'Stage name must be unique',
-            })
-          );
-        }
-      });
-
-      if (!isEmpty(errors)) {
-        throw new yup.ValidationError(errors);
-      }
-      return true;
-    })
+    .uniqueProperty('name', 'Stage name must be unique')
     .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
   contentTypes: validateContentTypes,
