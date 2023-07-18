@@ -1,7 +1,7 @@
 'use strict';
 
-const sendDidCreateStage = async (stagesCount) => {
-  strapi.telemetry.send('didCreateStage', { stagesCount });
+const sendDidCreateStage = async () => {
+  strapi.telemetry.send('didCreateStage', {});
 };
 
 const sendDidEditStage = async () => {
