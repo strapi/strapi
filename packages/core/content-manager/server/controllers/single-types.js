@@ -190,7 +190,7 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
   },
 
-  async getNumberOfDraftRelations(ctx) {
+  async countDraftRelations(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
@@ -210,7 +210,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const number = await entityManager.getNumberOfDraftRelations(entity.id, model);
+    const number = await entityManager.countDraftRelations(entity.id, model);
 
     return {
       data: number,

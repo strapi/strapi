@@ -141,8 +141,8 @@ export function Stage({
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
-  const [nameField, nameMeta] = useField(`stages.${index}.name`);
-  const [colorField, colorMeta] = useField(`stages.${index}.color`);
+  const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);
+  const [colorField, colorMeta, colorHelper] = useField(`stages.${index}.color`);
   const [{ handlerId, isDragging, handleKeyDown }, stageRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(canReorder, {
       index,
@@ -174,7 +174,7 @@ export function Stage({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
-  const { themeColorName } = colorField.value ? getStageColorByHex(colorField.value) : {};
+  const { themeColorName } = getStageColorByHex(colorField.value) ?? {};
 
   return (
     <Box ref={composedRef}>
@@ -246,7 +246,7 @@ export function Stage({
                   })}
                   error={nameMeta.error ?? false}
                   onChange={(event) => {
-                    nameField.onChange(event);
+                    nameHelper.setValue(event.target.value);
                     dispatch(updateStage(id, { name: event.target.value }));
                   }}
                   required
@@ -263,7 +263,7 @@ export function Stage({
                     defaultMessage: 'Color',
                   })}
                   onChange={(value) => {
-                    colorField.onChange({ target: { value } });
+                    colorHelper.setValue(value);
                     dispatch(updateStage(id, { color: value }));
                   }}
                   value={colorField.value.toUpperCase()}

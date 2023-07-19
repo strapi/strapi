@@ -50,7 +50,6 @@ import FormModalSubHeader from '../FormModalSubHeader';
 import IconPicker from '../IconPicker';
 import PluralName from '../PluralName';
 import Relation from '../Relation';
-import ReviewWorkflowsToggle from '../ReviewWorkflowsToggle';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
@@ -194,7 +193,6 @@ const FormModal = () => {
           actionType,
           data: {
             draftAndPublish: true,
-            reviewWorkflows: false,
           },
           pluginOptions: {},
         });
@@ -930,7 +928,6 @@ const FormModal = () => {
       'select-number': SelectNumber,
       'select-date': SelectDateType,
       'toggle-draft-publish': DraftAndPublishToggle,
-      'toggle-review-workflows': ReviewWorkflowsToggle,
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
