@@ -760,7 +760,6 @@ class TransferEngine<
           this.#handlers.assetsBackupError
         );
         if (context.ignore) {
-          console.log('Entering here');
           return;
         }
         // Error happening during the before transfer step should be considered fatal errors
