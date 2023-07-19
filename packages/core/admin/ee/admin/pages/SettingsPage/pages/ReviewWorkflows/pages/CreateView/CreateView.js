@@ -82,20 +82,12 @@ export function ReviewWorkflowsCreateView() {
 
       return workflow;
     } catch (error) {
-      // TODO: the current implementation of `formatAPIError` prints all error messages of all details,
-      // which get's hairy when we have duplicated-name errors, because the same error message is printed
-      // several times. What we want instead in these scenarios is to print only the error summary and
-      // display the individual error messages for each field. This is a workaround, until we change the
-      // implementation of `formatAPIError`.
+      // TODO: this would benefit from a utility to get a formik error
+      // representation from an API error
       if (
         error.response.data?.error?.name === 'ValidationError' &&
         error.response.data?.error?.details?.errors?.length > 0
       ) {
-        toggleNotification({
-          type: 'warning',
-          message: error.response.data.error.message,
-        });
-
         setInitialErrors(
           error.response.data?.error?.details?.errors.reduce((acc, error) => {
             set(acc, error.path, error.message);
@@ -103,12 +95,12 @@ export function ReviewWorkflowsCreateView() {
             return acc;
           }, {})
         );
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
       }
+
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
 
       return null;
     }
