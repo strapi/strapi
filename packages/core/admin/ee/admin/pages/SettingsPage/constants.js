@@ -20,12 +20,36 @@ export const ROUTES_EE = [
         {
           async Component() {
             const component = await import(
-              /* webpackChunkName: "review-workflows-settings" */ './pages/ReviewWorkflows'
+              /* webpackChunkName: "review-workflows-settings-list-view" */ './pages/ReviewWorkflows/pages/ListView'
             );
 
             return component;
           },
           to: '/settings/review-workflows',
+          exact: true,
+        },
+
+        {
+          async Component() {
+            const component = await import(
+              /* webpackChunkName: "review-workflows-settings-create-view" */ './pages/ReviewWorkflows/pages/CreateView'
+            );
+
+            return component;
+          },
+          to: '/settings/review-workflows/create',
+          exact: true,
+        },
+
+        {
+          async Component() {
+            const component = await import(
+              /* webpackChunkName: "review-workflows-settings-edit-view" */ './pages/ReviewWorkflows/pages/EditView'
+            );
+
+            return component;
+          },
+          to: '/settings/review-workflows/:workflowId',
           exact: true,
         },
       ]

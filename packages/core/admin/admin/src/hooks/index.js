@@ -3,7 +3,6 @@ export { useContentTypes } from './useContentTypes';
 export { default as useFetchPermissionsLayout } from './useFetchPermissionsLayout';
 export { default as useFetchRole } from './useFetchRole';
 export { default as useLicenseLimitNotification } from './useLicenseLimitNotification';
-export { default as useLicenseLimit } from './useLicenseLimits';
 export { default as useMenu } from './useMenu';
 export { default as usePermissionsDataManager } from './usePermissionsDataManager';
 export { default as useRegenerate } from './useRegenerate';
