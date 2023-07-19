@@ -1,9 +1,11 @@
-import { Writable } from 'stream';
-import path from 'path';
+import { Writable, Readable } from 'stream';
 import * as fse from 'fs-extra';
+import path from 'path';
+import type { Knex } from 'knex';
 import type {
   IAsset,
   IDestinationProvider,
+  IFile,
   IMetadata,
   ProviderType,
   Transaction,
@@ -14,7 +16,7 @@ import * as utils from '../../../utils';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { assertValidStrapi } from '../../../utils/providers';
 
-export const VALID_CONFLICT_STRATEGIES = ['restore', 'merge'];
+export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
@@ -36,6 +38,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   transaction?: Transaction;
 
+  uploadsBackupDirectoryName: string;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -44,6 +48,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   constructor(options: ILocalStrapiDestinationProviderOptions) {
     this.options = options;
     this.#entitiesMapper = {};
+    this.uploadsBackupDirectoryName = `uploads_backup_${Date.now()}`;
   }
 
   async bootstrap(): Promise<void> {
@@ -78,6 +83,30 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
+  async #deleteAllAssets(trx?: Knex.Transaction) {
+    assertValidStrapi(this.strapi);
+
+    const stream: Readable = strapi.db
+      // Create a query builder instance (default type is 'select')
+      .queryBuilder('plugin::upload.file')
+      // Fetch all columns
+      .select('*')
+      // Attach the transaction
+      .transacting(trx)
+      // Get a readable stream
+      .stream();
+
+    // TODO use bulk delete when exists in providers
+    for await (const file of stream) {
+      await strapi.plugin('upload').provider.delete(file);
+      if (file.formats) {
+        for (const fileFormat of Object.values(file.formats)) {
+          await strapi.plugin('upload').provider.delete(fileFormat);
+        }
+      }
+    }
+  }
+
   async rollback() {
     await this.transaction?.rollback();
   }
@@ -87,9 +116,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       throw new Error('Strapi instance not found');
     }
 
-    await this.transaction?.attach(async () => {
+    await this.transaction?.attach(async (trx) => {
+      await this.#handleAssetsBackup();
       try {
         if (this.options.strategy === 'restore') {
+          await this.#deleteAllAssets(trx);
           await this.#deleteAll();
         }
       } catch (error) {
@@ -147,64 +178,138 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
+  async #handleAssetsBackup() {
+    assertValidStrapi(this.strapi, 'Not able to create the assets backup');
+
+    if (strapi.config.get('plugin.upload').provider === 'local') {
+      const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+
+      try {
+        await fse.move(assetsDirectory, backupDirectory);
+        await fse.mkdir(assetsDirectory);
+        // Create a .gitkeep file to ensure the directory is not empty
+        await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+      } catch (err) {
+        throw new ProviderTransferError(
+          'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
+        );
+      }
+      return backupDirectory;
+    }
+  }
+
+  async #removeAssetsBackup() {
+    if (strapi.config.get('plugin.upload').provider === 'local') {
+      assertValidStrapi(this.strapi);
+      const backupDirectory = path.join(
+        this.strapi.dirs.static.public,
+        this.uploadsBackupDirectoryName
+      );
+      await fse.rm(backupDirectory, { recursive: true, force: true });
+    }
+  }
+
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
-    const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
-    const backupDirectory = path.join(
-      this.strapi.dirs.static.public,
-      `uploads_backup_${Date.now()}`
-    );
-
-    try {
-      await fse.move(assetsDirectory, backupDirectory);
-      await fse.mkdir(assetsDirectory);
-      // Create a .gitkeep file to ensure the directory is not empty
-      await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
-    } catch (err) {
-      throw new ProviderTransferError(
-        'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
-      );
-    }
-
+    const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
+    const strapi = this.strapi;
+    const transaction = this.transaction;
+    const backupDirectory = this.uploadsBackupDirectoryName;
     return new Writable({
       objectMode: true,
       async final(next) {
-        await fse.rm(backupDirectory, { recursive: true, force: true });
+        // Deletes the backup folder
+        removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
-        const entryPath = path.join(assetsDirectory, chunk.filename);
-        const writableStream = fse.createWriteStream(entryPath);
+        await transaction?.attach(async () => {
+          // TODO: Remove this logic in V5
+          if (!chunk.metadata) {
+            // If metadata does not exist is because it is an old backup file
+            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
+            const entryPath = path.join(assetsDirectory, chunk.filename);
+            const writableStream = fse.createWriteStream(entryPath);
+            chunk.stream
+              .pipe(writableStream)
+              .on('close', () => {
+                callback(null);
+              })
+              .on('error', async (error: NodeJS.ErrnoException) => {
+                const errorMessage =
+                  error.code === 'ENOSPC'
+                    ? " Your server doesn't have space to proceed with the import. "
+                    : ' ';
 
-        chunk.stream
-          .pipe(writableStream)
-          .on('close', () => {
-            callback(null);
-          })
-          .on('error', async (error: NodeJS.ErrnoException) => {
-            const errorMessage =
-              error.code === 'ENOSPC'
-                ? " Your server doesn't have space to proceed with the import. "
-                : ' ';
+                try {
+                  await fse.rm(assetsDirectory, { recursive: true, force: true });
+                  this.destroy(
+                    new ProviderTransferError(
+                      `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
+                    )
+                  );
+                } catch (err) {
+                  throw new ProviderTransferError(
+                    `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
+                  );
+                } finally {
+                  callback(error);
+                }
+              });
+            return;
+          }
+          const uploadData = {
+            ...chunk.metadata,
+            stream: Readable.from(chunk.stream),
+            buffer: chunk?.buffer,
+          };
 
-            try {
-              await fse.rm(assetsDirectory, { recursive: true, force: true });
-              await fse.move(backupDirectory, assetsDirectory);
-              this.destroy(
-                new ProviderTransferError(
-                  `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
-                )
-              );
-            } catch (err) {
-              throw new ProviderTransferError(
-                `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
-              );
-            } finally {
-              callback(error);
+          const provider = strapi.config.get('plugin.upload').provider;
+
+          try {
+            await strapi.plugin('upload').provider.uploadStream(uploadData);
+
+            // Files formats are stored within the parent file entity
+            if (uploadData?.type) {
+              const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+                where: { hash: uploadData.mainHash },
+              });
+              const specificFormat = entry?.formats?.[uploadData.type];
+              if (specificFormat) {
+                specificFormat.url = uploadData.url;
+              }
+              await strapi.db.query('plugin::upload.file').update({
+                where: { hash: uploadData.mainHash },
+                data: {
+                  formats: entry.formats,
+                  provider,
+                },
+              });
+              return callback();
             }
-          });
+            const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
+              where: { hash: uploadData.hash },
+            });
+            entry.url = uploadData.url;
+            await strapi.db.query('plugin::upload.file').update({
+              where: { hash: uploadData.hash },
+              data: {
+                url: entry.url,
+                provider,
+              },
+            });
+            callback();
+          } catch (error) {
+            console.log('Error uploading: ', error);
+            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
+          }
+        });
       },
     });
   }

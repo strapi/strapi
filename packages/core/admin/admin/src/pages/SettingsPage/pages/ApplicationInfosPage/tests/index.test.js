@@ -82,13 +82,6 @@ jest.mock('../../../../../hooks', () => ({
   })),
 }));
 
-jest.mock(
-  'ee_else_ce/pages/SettingsPage/pages/ApplicationInfosPage/components/AdminSeatInfo',
-  () => () => {
-    return <></>;
-  }
-);
-
 const setup = (props) => ({
   ...render(<ApplicationInfosPage {...props} />, {
     wrapper({ children }) {

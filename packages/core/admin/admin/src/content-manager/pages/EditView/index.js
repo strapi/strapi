@@ -9,12 +9,12 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Layer, Pencil } from '@strapi/icons';
-import InformationBox from 'ee_else_ce/content-manager/pages/EditView/InformationBox';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
@@ -29,6 +29,7 @@ import DraftAndPublishBadge from './DraftAndPublishBadge';
 import GridRow from './GridRow';
 import Header from './Header';
 import { useOnce } from './hooks/useOnce';
+import { InformationBoxCE } from './InformationBox';
 import { selectCurrentLayout, selectAttributesLayout, selectCustomFieldUids } from './selectors';
 import { getFieldsActionMatchingPermissions } from './utils';
 
@@ -42,6 +43,12 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
   const permissions = useSelector(selectAdminPermissions);
   const location = useLocation();
   const toggleNotification = useNotification();
+  const Information = useEnterprise(
+    InformationBoxCE,
+    async () =>
+      (await import('../../../../../ee/admin/content-manager/pages/EditView/InformationBox'))
+        .InformationBoxEE
+  );
 
   useOnce(() => {
     /**
@@ -89,6 +96,11 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
 
   if (isLazyLoading) {
     return <LoadingIndicatorPage />;
+  }
+
+  // wait until the EE component is fully loaded before rendering, to prevent flickering
+  if (!Information) {
+    return null;
   }
 
   return (
@@ -202,7 +214,7 @@ const EditView = ({ allowedActions, isSingleType, goBack, slug, id, origin, user
                         paddingTop={6}
                         shadow="tableShadow"
                       >
-                        <InformationBox />
+                        <Information />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
                       <Box as="aside" aria-labelledby="links">

@@ -8,11 +8,14 @@ import React from 'react';
 
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import { Link } from '@strapi/helper-plugin';
+import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import useDataManager from '../../hooks/useDataManager';
+import useFormModalNavigation from '../../hooks/useFormModalNavigation';
 import getTrad from '../../utils/getTrad';
 import AttributeIcon from '../AttributeIcon';
 
@@ -27,9 +30,11 @@ const FormModalHeader = ({
   modalType,
   targetUid,
   customFieldUid,
+  showBackLink,
 }) => {
   const { formatMessage } = useIntl();
   const { modifiedData } = useDataManager();
+  const { onOpenModalAddField } = useFormModalNavigation();
 
   let icon;
   let headers = [];
@@ -107,6 +112,17 @@ const FormModalHeader = ({
   return (
     <ModalHeader>
       <Flex gap={3}>
+        {showBackLink && (
+          <Link
+            aria-label={formatMessage({
+              id: getTrad('modalForm.header.back'),
+              defaultMessage: 'Back',
+            })}
+            startIcon={<ArrowLeft />}
+            onClick={() => onOpenModalAddField({ forTarget, targetUid })}
+            to="#back"
+          />
+        )}
         <AttributeIcon type={icon} customField={customFieldUid} />
 
         <Breadcrumbs label={headers.map(({ label }) => label).join(',')}>
@@ -145,6 +161,7 @@ FormModalHeader.defaultProps = {
   contentTypeKind: null,
   targetUid: null,
   customFieldUid: null,
+  showBackLink: false,
 };
 
 FormModalHeader.propTypes = {
@@ -158,6 +175,7 @@ FormModalHeader.propTypes = {
   modalType: PropTypes.string.isRequired,
   targetUid: PropTypes.string,
   customFieldUid: PropTypes.string,
+  showBackLink: PropTypes.bool,
 };
 
 export default FormModalHeader;
