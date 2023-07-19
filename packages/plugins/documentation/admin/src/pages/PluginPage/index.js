@@ -1,15 +1,8 @@
-/**
- *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
- *
- */
-
 import React, { useState } from 'react';
 
 import {
   Box,
-  Button,
+  LinkButton,
   ContentLayout,
   Flex,
   HeaderLayout,
@@ -26,40 +19,35 @@ import {
 } from '@strapi/design-system';
 import {
   AnErrorOccurred,
-  CheckPermissions,
   ConfirmDialog,
   EmptyStateLayout,
   LoadingIndicatorPage,
-  stopPropagation,
   useFocusWhenNavigate,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { PERMISSIONS } from '../../constants';
+import { useDocumentation } from '../../hooks/useDocumentation';
 import { getTrad } from '../../utils';
-import openWithNewTab from '../../utils/openWithNewTab';
-import useReactQuery from '../utils/useReactQuery';
 
 const PluginPage = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { data, isLoading, isError, deleteMutation, regenerateDocMutation } = useReactQuery();
+  const { data, isLoading, isError, remove, regenerate } = useDocumentation();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState();
+  const { allowedActions } = useRBAC(PERMISSIONS);
 
   const colCount = 4;
   const rowCount = (data?.docVersions?.length || 0) + 1;
 
-  const openDocVersion = (version) => {
-    const slash = data?.prefix.startsWith('/') ? '' : '/';
-    openWithNewTab(`${slash}${data?.prefix}/v${version}`);
-  };
-
   const handleRegenerateDoc = (version) => {
-    regenerateDocMutation.mutate({ version, prefix: data?.prefix });
+    regenerate.mutate({ version, prefix: data?.prefix });
   };
 
   const handleShowConfirmDelete = () => {
@@ -68,7 +56,7 @@ const PluginPage = () => {
 
   const handleConfirmDelete = async () => {
     setIsConfirmButtonLoading(true);
-    await deleteMutation.mutateAsync({ prefix: data?.prefix, version: versionToDelete });
+    await remove.mutateAsync({ prefix: data?.prefix, version: versionToDelete });
     setShowConfirmDelete(!showConfirmDelete);
     setIsConfirmButtonLoading(false);
   };
@@ -106,15 +94,16 @@ const PluginPage = () => {
             defaultMessage: 'Configure the documentation plugin',
           })}
           primaryAction={
-            //  eslint-disable-next-line
-            <CheckPermissions permissions={PERMISSIONS.open}>
-              <Button onClick={() => openDocVersion(data?.currentVersion)} startIcon={<Show />}>
-                {formatMessage({
-                  id: getTrad('pages.PluginPage.Button.open'),
-                  defaultMessage: 'Open Documentation',
-                })}
-              </Button>
-            </CheckPermissions>
+            <OpenDocLink
+              disabled={!allowedActions.canOpen || !data?.currentVersion || !data?.prefix}
+              href={createDocumentationHref(`${data?.prefix}/v${data?.currentVersion}`)}
+              startIcon={<Show />}
+            >
+              {formatMessage({
+                id: getTrad('pages.PluginPage.Button.open'),
+                defaultMessage: 'Open Documentation',
+              })}
+            </OpenDocLink>
           }
         />
         <ContentLayout>
@@ -153,11 +142,15 @@ const PluginPage = () => {
                         <Typography>{doc.generatedDate}</Typography>
                       </Td>
                       <Td>
-                        <Flex justifyContent="end" {...stopPropagation}>
+                        <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
-                            onClick={() => openDocVersion(doc.version)}
+                            forwardedAs="a"
+                            disabled={!allowedActions.canOpen}
+                            href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder
                             icon={<Show />}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             label={formatMessage(
                               {
                                 id: getTrad('pages.PluginPage.table.icon.show'),
@@ -166,7 +159,7 @@ const PluginPage = () => {
                               { target: `${doc.version}` }
                             )}
                           />
-                          <CheckPermissions permissions={PERMISSIONS.regenerate}>
+                          {allowedActions.canRegenerate ? (
                             <IconButton
                               onClick={() => handleRegenerateDoc(doc.version)}
                               noBorder
@@ -179,23 +172,21 @@ const PluginPage = () => {
                                 { target: `${doc.version}` }
                               )}
                             />
-                          </CheckPermissions>
-                          <CheckPermissions permissions={PERMISSIONS.update}>
-                            {doc.version !== data.currentVersion && (
-                              <IconButton
-                                onClick={() => handleClickDelete(doc.version)}
-                                noBorder
-                                icon={<Trash />}
-                                label={formatMessage(
-                                  {
-                                    id: 'global.delete-target',
-                                    defaultMessage: 'Delete {target}',
-                                  },
-                                  { target: `${doc.version}` }
-                                )}
-                              />
-                            )}
-                          </CheckPermissions>
+                          ) : null}
+                          {allowedActions.canUpdate && doc.version !== data.currentVersion ? (
+                            <IconButton
+                              onClick={() => handleClickDelete(doc.version)}
+                              noBorder
+                              icon={<Trash />}
+                              label={formatMessage(
+                                {
+                                  id: 'global.delete-target',
+                                  defaultMessage: 'Delete {target}',
+                                },
+                                { target: `${doc.version}` }
+                              )}
+                            />
+                          ) : null}
                         </Flex>
                       </Td>
                     </Tr>
@@ -215,6 +206,25 @@ const PluginPage = () => {
       </Main>
     </Layout>
   );
+};
+
+/**
+ * TODO: should this be fixed in the DS?
+ */
+const OpenDocLink = styled(LinkButton)`
+  text-decoration: none;
+`;
+
+const createDocumentationHref = (path) => {
+  if (path.startsWith('http')) {
+    return path;
+  }
+
+  if (path.startsWith('/')) {
+    return `${window.strapi.backendURL}${path}`;
+  }
+
+  return `${window.strapi.backendURL}/${path}`;
 };
 
 export default PluginPage;
