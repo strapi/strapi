@@ -20,7 +20,7 @@ import { useContentTypes } from '../../../../../../../../admin/src/hooks/useCont
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { setWorkflow } from '../../actions';
+import { resetWorkflow, setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
@@ -180,6 +180,12 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
+
+    // reset the state to the initial state to avoid flashes if a user
+    // navigates from an edit-view to a create-view
+    return () => {
+      dispatch(resetWorkflow());
+    };
   }, [workflowStatus, workflow, dispatch]);
 
   /**
