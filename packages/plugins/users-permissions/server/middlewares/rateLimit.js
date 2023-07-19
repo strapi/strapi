@@ -24,7 +24,13 @@ module.exports =
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
       const userIdentifier = toLower(ctx.request.body.email) || 'unknownIdentifier';
-      const requestPath = toLower(ctx.request.path) || 'unknownPath';
+      let requestPath = toLower(ctx.request.path) || 'unknownPath';
+
+      if (requestPath.endsWith('/')) {
+        if (requestPath !== '/') {
+          requestPath = requestPath.slice(0, -1);
+        }
+      }
 
       const loadConfig = {
         interval: { min: 5 },
