@@ -7938,26 +7938,22 @@ __metadata:
     "@strapi/icons": 1.8.2
     "@strapi/utils": 4.11.5
     "@testing-library/react": 14.0.0
+    "@testing-library/user-event": 14.4.3
     bcryptjs: 2.4.3
     cheerio: ^1.0.0-rc.12
     formik: 2.4.0
     fs-extra: 10.0.0
-    history: ^4.9.0
     immer: 9.0.19
     koa-static: ^5.0.0
     lodash: 4.17.21
     msw: 1.2.1
     path-to-regexp: 6.2.1
-    pluralize: 8.0.0
     react: ^18.2.0
     react-dom: ^18.2.0
     react-helmet: ^6.1.0
     react-intl: 6.4.1
     react-query: 3.39.3
-    react-redux: 8.1.1
     react-router-dom: 5.3.4
-    redux: ^4.2.1
-    reselect: ^4.1.7
     styled-components: 5.3.3
     swagger-ui-dist: 4.19.0
     yaml: 1.10.2
