@@ -7519,7 +7519,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/admin-test-utils@workspace:*, @strapi/admin-test-utils@workspace:packages/admin-test-utils":
+"@strapi/admin-test-utils@workspace:packages/admin-test-utils":
   version: 0.0.0-use.local
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
@@ -18317,6 +18317,36 @@ __metadata:
     lodash: 4.17.21
     mysql: 2.18.1
     mysql2: 3.5.1
+    passport-google-oauth2: 0.2.0
+    pg: 8.11.1
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    react-intl: 6.4.1
+    react-router-dom: 5.3.4
+    sqlite3: 5.1.2
+    styled-components: 5.3.3
+  languageName: unknown
+  linkType: soft
+
+"getstarted_remote@workspace:examples/getstarted_remote":
+  version: 0.0.0-use.local
+  resolution: "getstarted_remote@workspace:examples/getstarted_remote"
+  dependencies:
+    "@strapi/icons": 1.8.2
+    "@strapi/plugin-color-picker": 4.11.5
+    "@strapi/plugin-documentation": 4.11.5
+    "@strapi/plugin-graphql": 4.11.5
+    "@strapi/plugin-i18n": 4.11.5
+    "@strapi/plugin-sentry": 4.11.5
+    "@strapi/plugin-users-permissions": 4.11.5
+    "@strapi/provider-email-mailgun": 4.11.5
+    "@strapi/provider-upload-aws-s3": 4.11.5
+    "@strapi/provider-upload-cloudinary": 4.11.5
+    "@strapi/strapi": 4.11.5
+    better-sqlite3: 8.3.0
+    lodash: 4.17.21
+    mysql: 2.18.1
+    mysql2: 3.3.0
     passport-google-oauth2: 0.2.0
     pg: 8.11.1
     react: ^18.2.0
@@ -30254,7 +30284,6 @@ __metadata:
     "@babel/core": ^7.20.12
     "@babel/eslint-parser": ^7.19.1
     "@babel/preset-react": 7.18.6
-    "@strapi/admin-test-utils": "workspace:*"
     "@strapi/eslint-config": 0.1.2
     "@swc/cli": 0.1.62
     "@swc/core": 1.3.58

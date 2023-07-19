@@ -341,6 +341,28 @@ const getDiffHandler = (engine, { force, action }) => {
   };
 };
 
+const getAssetsBackupHandler = (engine, { force, action }) => {
+  return async (context, next) => {
+    // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
+    setSignalHandler(async () => {
+      await abortTransfer({ engine, strapi });
+      exitWith(1, exitMessageText(action, true));
+    });
+
+    await confirmMessage(
+      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
+      {
+        force,
+      }
+    );
+
+    // reset handler back to normal
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
+
+    return next(context);
+  };
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
@@ -357,4 +379,5 @@ module.exports = {
   abortTransfer,
   setSignalHandler,
   getDiffHandler,
+  getAssetsBackupHandler,
 };

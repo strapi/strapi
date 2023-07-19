@@ -18,6 +18,8 @@ export type SchemaDiffHandlerContext = {
 };
 export type SchemaDiffHandler = Middleware<SchemaDiffHandlerContext>;
 
+export type AssetsBackupErrorHandler = Middleware;
+
 /**
  * Defines the capabilities and properties of the transfer engine
  */

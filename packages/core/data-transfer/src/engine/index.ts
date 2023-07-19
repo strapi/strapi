@@ -26,6 +26,7 @@ import type {
   StreamItem,
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
+  AssetsBackupErrorHandler,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -108,12 +109,18 @@ class TransferEngine<
 
   #handlers: {
     schemaDiff: SchemaDiffHandler[];
+    assetsBackupError: AssetsBackupErrorHandler[];
   } = {
     schemaDiff: [],
+    assetsBackupError: [],
   };
 
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
+  }
+
+  onAssetsBackupError(handler: AssetsBackupErrorHandler) {
+    this.#handlers?.assetsBackupError?.push(handler);
   }
 
   // Save the currently open stream so that we can access it at any time
