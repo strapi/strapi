@@ -759,7 +759,6 @@ class TransferEngine<
           context,
           this.#handlers.assetsBackupError
         );
-        console.log('context', context);
         if (context.ignore) {
           console.log('Entering here');
           return;
