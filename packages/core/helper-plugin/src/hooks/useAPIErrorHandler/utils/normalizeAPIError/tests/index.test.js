@@ -38,6 +38,7 @@ describe('normalizeAPIError', () => {
   test('Handle ValidationError', () => {
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE)).toStrictEqual({
       name: 'ValidationError',
+      message: null,
       errors: [
         {
           defaultMessage: 'Field contains errors',
@@ -65,6 +66,7 @@ describe('normalizeAPIError', () => {
 
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ValidationError',
+      message: null,
       errors: [
         {
           name: 'ValidationError',
