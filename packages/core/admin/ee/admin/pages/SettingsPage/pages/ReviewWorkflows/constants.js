@@ -2,11 +2,13 @@ import { lightTheme } from '@strapi/design-system';
 
 export const REDUX_NAMESPACE = 'settings_review-workflows';
 
-export const ACTION_SET_WORKFLOWS = `Settings/Review_Workflows/SET_WORKFLOWS`;
+export const ACTION_RESET_WORKFLOW = `Settings/Review_Workflows/RESET_WORKFLOW`;
+export const ACTION_SET_WORKFLOW = `Settings/Review_Workflows/SET_WORKFLOW`;
 export const ACTION_DELETE_STAGE = `Settings/Review_Workflows/WORKFLOW_DELETE_STAGE`;
 export const ACTION_ADD_STAGE = `Settings/Review_Workflows/WORKFLOW_ADD_STAGE`;
 export const ACTION_UPDATE_STAGE = `Settings/Review_Workflows/WORKFLOW_UPDATE_STAGE`;
 export const ACTION_UPDATE_STAGE_POSITION = `Settings/Review_Workflows/WORKFLOW_UPDATE_STAGE_POSITION`;
+export const ACTION_UPDATE_WORKFLOW = `Settings/Review_Workflows/WORKFLOW_UPDATE`;
 
 export const STAGE_COLORS = {
   primary600: 'Blue',

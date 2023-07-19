@@ -16,6 +16,10 @@ export function formatAPIError(error, { formatMessage, intlMessagePrefixCallback
 
   const normalizedError = normalizeAPIError(error, intlMessagePrefixCallback);
 
+  if (normalizedError.message) {
+    return normalizedError.message;
+  }
+
   // stringify multiple errors
   if (normalizedError?.errors) {
     return normalizedError.errors

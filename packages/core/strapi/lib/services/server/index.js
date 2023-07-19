@@ -107,10 +107,6 @@ const createServer = (strapi) => {
     listRoutes() {
       const allRoutes = [...router.stack];
 
-      Object.values(apis).forEach((api) => {
-        allRoutes.push(...api.listRoutes());
-      });
-
       return allRoutes;
     },
 

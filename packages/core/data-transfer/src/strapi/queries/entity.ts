@@ -20,7 +20,7 @@ const sanitizeComponentLikeAttributes = <T extends Schema.ContentType>(
 
 const omitInvalidCreationAttributes = omit(['id']);
 
-const createEntityQuery = (strapi: Strapi.Strapi) => {
+const createEntityQuery = (strapi: Strapi.Strapi): any => {
   const components = {
     async assignToEntity<T extends object>(uid: string, data: T) {
       const model = strapi.getModel(uid);
