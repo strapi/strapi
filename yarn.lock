@@ -8348,7 +8348,7 @@ __metadata:
     cli-table3: 0.6.2
     fs-extra: 10.0.1
     lodash: 4.17.21
-    prettier: 2.8.4
+    prettier: 3.0.0
     typescript: 5.1.3
   languageName: unknown
   linkType: soft
@@ -27090,12 +27090,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.4":
-  version: 2.8.4
-  resolution: "prettier@npm:2.8.4"
+"prettier@npm:3.0.0":
+  version: 3.0.0
+  resolution: "prettier@npm:3.0.0"
   bin:
-    prettier: bin-prettier.js
-  checksum: c173064bf3df57b6d93d19aa98753b9b9dd7657212e33b41ada8e2e9f9884066bb9ca0b4005b89b3ab137efffdf8fbe0b462785aba20364798ff4303aadda57e
+    prettier: bin/prettier.cjs
+  checksum: 6a832876a1552dc58330d2467874e5a0b46b9ccbfc5d3531eb69d15684743e7f83dc9fbd202db6270446deba9c82b79d24383d09924c462b457136a759425e33
   languageName: node
   linkType: hard
 
@@ -30292,7 +30292,7 @@ __metadata:
     lodash: 4.17.21
     nx: 16.5.2
     plop: 2.7.6
-    prettier: 2.8.4
+    prettier: 3.0.0
     qs: 6.11.1
     rimraf: 3.0.2
     stylelint: 15.10.1
