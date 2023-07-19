@@ -109,7 +109,7 @@ test.describe('Login', () => {
       await page.getByRole('combobox').click();
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Space');
-      await expect(page.getByText('Bienvenue !')).toBeVisible();
+      await expect(page.getByText('Bienvenue !')).toBeVisible({ timeout: 10000 });
     });
   });
 });

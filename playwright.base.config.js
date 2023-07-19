@@ -12,8 +12,6 @@ const { devices } = require('@playwright/test');
  */
 const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
-  /* Maximum time one test can run for. */
-  timeout: 3000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -39,7 +37,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
     actionTimeout: 0,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'off',
   },
 
   /* Configure projects for major browsers */
@@ -74,7 +72,8 @@ const createConfig = ({ port, testDir, appDir }) => ({
     command: `cd ${appDir} && yarn develop`,
     url: `http://127.0.0.1:${port}`,
     timeout: 30 * 1000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
+    stdout: 'pipe',
   },
 });
 

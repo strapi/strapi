@@ -117,6 +117,7 @@ yargs
               const pathToEnv = path.join(appPath, '.env');
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
+              const envWitoutHost = envWithoutPort.replace('HOST=0.0.0.0', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
               /**
                * Always build! Just incase.
@@ -136,7 +137,7 @@ yargs
           );
         } else {
           console.log(
-            `Skipping setting up test apps, use ${chalk.bold('--force')} to force the setup process`
+            `Skipping setting up test apps, use ${chalk.bold('--setup')} to force the setup process`
           );
         }
 
@@ -190,6 +191,7 @@ module.exports = config
                   cwd,
                   env: {
                     PORT: port,
+                    HOST: '127.0.0.1',
                   },
                 }
               );
