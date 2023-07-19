@@ -128,11 +128,15 @@ function ListView({
       enabled: !!options?.reviewWorkflows,
     }
   );
-  const ReviewWorkflowsStage = useEnterprise(
+  const ReviewWorkflowsColumns = useEnterprise(
     REVIEW_WORKFLOW_COLUMNS_CELL_CE,
-    async () =>
-      (await import('../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'))
-        .ReviewWorkflowsStageEE,
+    async () => {
+      const { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE } = await import(
+        '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'
+      );
+
+      return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
+    },
     {
       enabled: hasReviewWorkflows,
     }
@@ -457,7 +461,7 @@ function ListView({
   };
 
   // Block rendering until the review stage component is fully loaded in EE
-  if (!ReviewWorkflowsStage) {
+  if (!ReviewWorkflowsColumns) {
     return null;
   }
 
@@ -607,21 +611,38 @@ function ListView({
                             );
                           }
 
-                          if (hasReviewWorkflows && name === 'strapi_stage') {
-                            return (
-                              <Td key={key}>
-                                {rowData.strapi_stage ? (
-                                  <ReviewWorkflowsStage
-                                    color={
-                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
-                                    }
-                                    name={rowData.strapi_stage.name}
-                                  />
-                                ) : (
-                                  <Typography textColor="neutral800">-</Typography>
-                                )}
-                              </Td>
-                            );
+                          if (hasReviewWorkflows) {
+                            if (name === 'strapi_stage') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_stage ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsStageEE
+                                      color={
+                                        rowData.strapi_stage.color ?? lightTheme.colors.primary600
+                                      }
+                                      name={rowData.strapi_stage.name}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
+                            if (name === 'strapi_assignee') {
+                              return (
+                                <Td key={key}>
+                                  {rowData.strapi_assignee ? (
+                                    <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
+                                      firstname={rowData.strapi_assignee.firstname}
+                                      lastname={rowData?.strapi_assignee?.lastname}
+                                      displayname={rowData?.strapi_assignee?.username}
+                                    />
+                                  ) : (
+                                    <Typography textColor="neutral800">-</Typography>
+                                  )}
+                                </Td>
+                              );
+                            }
                           }
 
                           return (
