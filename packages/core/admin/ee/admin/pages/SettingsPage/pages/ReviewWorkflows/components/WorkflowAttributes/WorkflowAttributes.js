@@ -63,29 +63,37 @@ export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes,
             contentTypesHelper.setValue(values);
           }}
           options={[
-            {
-              label: formatMessage({
-                id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
-                defaultMessage: 'Collection Types',
-              }),
-              children: collectionTypes
-                .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
-                .map((contentType) => ({
-                  label: contentType.info.displayName,
-                  value: contentType.uid,
-                })),
-            },
+            ...(collectionTypes.length > 0
+              ? [
+                  {
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.workflow.contentTypes.collectionTypes.label',
+                      defaultMessage: 'Collection Types',
+                    }),
+                    children: collectionTypes
+                      .sort((a, b) => formatter.compare(a.info.displayName, b.info.displayName))
+                      .map((contentType) => ({
+                        label: contentType.info.displayName,
+                        value: contentType.uid,
+                      })),
+                  },
+                ]
+              : []),
 
-            {
-              label: formatMessage({
-                id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
-                defaultMessage: 'Single Types',
-              }),
-              children: singleTypes.map((contentType) => ({
-                label: contentType.info.displayName,
-                value: contentType.uid,
-              })),
-            },
+            ...(singleTypes.length > 0
+              ? [
+                  {
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.workflow.contentTypes.singleTypes.label',
+                      defaultMessage: 'Single Types',
+                    }),
+                    children: singleTypes.map((contentType) => ({
+                      label: contentType.info.displayName,
+                      value: contentType.uid,
+                    })),
+                  },
+                ]
+              : []),
           ]}
           placeholder={formatMessage({
             id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
