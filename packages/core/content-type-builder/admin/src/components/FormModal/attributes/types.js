@@ -99,8 +99,8 @@ const types = {
       type: validators.type(),
       default: yup.number(),
       required: validators.required(),
-      max: yup.number(),
-      min: yup.number().test(isMinSuperiorThanMax),
+      max: yup.number().nullable(),
+      min: yup.number().test(isMinSuperiorThanMax).nullable(),
     };
 
     return yup.object(shape);
@@ -194,8 +194,8 @@ const types = {
       type: validators.type(),
       required: validators.required(),
       default: yup.number(),
-      max: yup.number(),
-      min: yup.number().test(isMinSuperiorThanMax),
+      max: yup.number().nullable(),
+      min: yup.number().test(isMinSuperiorThanMax).nullable(),
     };
 
     return yup.object(shape);
