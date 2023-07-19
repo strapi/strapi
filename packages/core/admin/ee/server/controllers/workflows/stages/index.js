@@ -77,7 +77,7 @@ module.exports = {
     const stagesService = getService('stages');
     const workflowService = getService('workflows');
 
-    const { model_uid: model, id: entityIdString } = ctx.params;
+    const { model_uid: modelUID, id: entityIdString } = ctx.params;
     const { body } = ctx.request;
 
     const entityId = Number(entityIdString);
@@ -85,17 +85,17 @@ module.exports = {
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
       .service('permission-checker')
-      .create({ userAbility: ctx.state.userAbility, model });
+      .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     const { id: stageId } = await validateUpdateStageOnEntity(
       { id: Number(body?.data?.id) },
       'You should pass an id to the body of the put request.'
     );
 
-    const workflow = await workflowService.assertContentTypeBelongsToWorkflow(model);
+    const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    const entity = await stagesService.updateEntity({ id: entityId, model }, stageId);
+    const entity = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
 
     ctx.body = { data: await sanitizeOutput(entity) };
   },
