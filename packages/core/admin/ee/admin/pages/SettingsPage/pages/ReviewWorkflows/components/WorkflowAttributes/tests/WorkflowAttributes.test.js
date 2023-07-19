@@ -74,11 +74,23 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     expect(getByRole('textbox')).toHaveValue('workflow name');
     expect(getByText(/2 content types selected/i)).toBeInTheDocument();
 
+    expect(getByRole('textbox')).not.toHaveAttribute('disabled');
+    expect(getByRole('combobox', { name: /associated to/i })).not.toHaveAttribute('data-disabled');
+
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
       expect(getByRole('option', { name: /content type 1/i })).toBeInTheDocument();
       expect(getByRole('option', { name: /content type 2/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should disabled fields if canUpdate = false', async () => {
+    const { getByRole } = setup({ canUpdate: false });
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveAttribute('disabled');
+      expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
     });
   });
 });
