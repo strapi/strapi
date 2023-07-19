@@ -152,7 +152,7 @@ module.exports = async (opts) => {
   engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
 
   engine.onAssetsBackupError(
-    getAssetsBackupHandler(engine, { force: opts.foce, action: 'transfer' })
+    getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
   );
 
   progress.on(`stage::start`, ({ stage, data }) => {
