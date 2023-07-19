@@ -115,4 +115,13 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
 
     expect(getByRole('textbox').value).toBe('something');
   });
+
+  it('disables all input fields, if canUpdate = false', async () => {
+    const { container, getByRole } = setup({ canUpdate: false });
+
+    await user.click(container.querySelector('button[aria-expanded]'));
+
+    expect(getByRole('textbox')).toHaveAttribute('disabled');
+    expect(getByRole('combobox')).toHaveAttribute('data-disabled');
+  });
 });
