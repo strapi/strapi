@@ -131,7 +131,7 @@
     "package-json": "7.0.0",
     "qs": "6.11.1",
     "resolve-cwd": "3.0.0",
-    "semver": "7.5.1",
+    "semver": "7.5.2",
     "statuses": "2.0.1"
   },
   "devDependencies": {

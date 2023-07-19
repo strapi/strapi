@@ -23,24 +23,25 @@ The Review Workflow feature have been built with one main consideration, to be d
 All the backend code related to Review Workflow can be found in `packages/core/admin/ee`.
 This code is separated into several elements:
 
-- Two content-types
+- Content-types
   - _strapi_workflows_: `packages/core/admin/ee/server/content-types/workflow/index.js`
   - _strapi_workflows_stages_: `packages/core/admin/ee/server/content-types/workflow-stage/index.js`
-- Two controllers
+- Controllers
   - _workflows_: `packages/core/admin/ee/server/controllers/workflows/index.js`
   - _stages_: `packages/core/admin/ee/server/controllers/workflows/stages/index.js`
-- One middleware
-  - _contentTypeMiddleware_: `packages/core/admin/ee/server/middlewares/review-workflows.js`
+- Middlewares
+  - [_DEPRECATED_] _contentTypeMiddleware_: `packages/core/admin/ee/server/middlewares/review-workflows.js`
 - Routes
   - `packages/core/admin/ee/server/routes/index.js`
-- Four services
+- Services
   - _review-workflows_: `packages/core/admin/ee/server/services/review-workflows/review-workflows.js`
   - _workflows_: `packages/core/admin/ee/server/services/review-workflows/workflows.js`
   - _stages_: `packages/core/admin/ee/server/services/review-workflows/stages.js`
   - _metrics_: `packages/core/admin/ee/server/services/review-workflows/metrics.js`
-- One decorator
+  - _validation_: `packages/core/admin/ee/server/services/review-workflows/validation.js`
+- Decorators
   - _EntityService_ decorator: `packages/core/admin/ee/server/services/review-workflows/entity-service-decorator.js`
-- One utils file
+- Utils file
   - _Review workflows utils_: `packages/core/admin/ee/server/utils/review-workflows.js`
 - A bootstrap and a register part
   - `packages/core/admin/ee/server/bootstrap.js`
@@ -68,7 +69,7 @@ Used to interact with the `strapi_workflows_stages` content-type.
 
 ### Middlewares
 
-#### contentTypeMiddleware
+#### contentTypeMiddleware - _DEPRECATED_
 
 In order to properly manage the options for content-type in the root level of the object, it is necessary to relocate the `reviewWorkflows` option within the `options` object located inside the content-type data. By doing so, we can ensure that all options are consistently organized and easily accessible within their respective data structures. This will also make it simpler to maintain and update the options as needed, providing a more streamlined and efficient workflow for developers working with the system. Therefore, it is recommended to move the reviewWorkflows option to its appropriate location within the options object inside the content-type data before sending it to the admin API.
 
@@ -80,9 +81,21 @@ The Admin API of the Enterprise Edition includes several routes related to the R
 
 This route returns a list of all workflows.
 
+#### POST `/review-workflows/workflows`
+
+This route creates a new workflow.
+
 #### GET `/review-workflows/workflows/:id`
 
 This route returns the details of a specific workflow identified by the id parameter.
+
+#### PUT `/review-workflows/workflows/:id`
+
+This route updates a specific workflow identified by the id parameter.
+
+#### DELETE `/review-workflows/workflows/:id`
+
+This route deletes a specific workflow identified by the id parameter.
 
 #### GET `/review-workflows/workflows/:workflow_id/stages`
 
@@ -119,6 +132,10 @@ This service is used to manipulate the stages entities and to update stages on o
 #### metrics
 
 This is the telemetry service used to gather information on the usage of this feature. It provides information on the number of workflows and stages created, as well as the frequency of stage updates on entities.
+
+#### validation
+
+This service is used to ensure the feature is working as expected and validate the data to be valid.
 
 ### Decorators
 

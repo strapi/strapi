@@ -86,7 +86,7 @@ const render = () => ({
   user: userEvent.setup(),
 });
 
-describe('DynamicTable / Cellcontent / RelationMultiple', () => {
+describe('ListViewTable / Cellcontent / RelationMultiple', () => {
   it('renders and renders the menu when clicked', async () => {
     const { getByRole, user } = render();
 
