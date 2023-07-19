@@ -213,20 +213,22 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
+      const isCloning = typeof origin === 'string';
       /**
        * If we're cloning we want to post directly to this endpoint
        * so that the relations even if they're not listed in the EditView
        * are correctly attached to the entry.
        */
-      const endPoint =
-        typeof origin === 'string'
-          ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
-          : getRequestUrl(`collection-types/${slug}`);
+      const endPoint = isCloning
+        ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
+        : getRequestUrl(`collection-types/${slug}`);
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await post(endPoint, body, {
+        const { id, ...restBody } = body;
+
+        const { data } = await post(endPoint, isCloning ? restBody : body, {
           params: query,
         });
 
