@@ -26,7 +26,7 @@ module.exports =
 
       const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
       const requestPath = isString(ctx.request.path)
-        ? toLower(path.normalize(ctx.request.path))
+        ? toLower(path.normalize(ctx.request.path)).replace(/\/$/, '')
         : 'invalidPath';
 
       const loadConfig = {
