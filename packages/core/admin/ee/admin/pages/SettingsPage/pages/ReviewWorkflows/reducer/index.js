@@ -22,13 +22,7 @@ export const initialState = {
       data: {
         name: '',
         contentTypes: [],
-        stages: [
-          {
-            color: STAGE_COLOR_DEFAULT,
-            name: '',
-            __temp_key__: 1,
-          },
-        ],
+        stages: [],
       },
       isDirty: false,
       hasDeletedServerStages: false,

@@ -245,24 +245,29 @@ export function ReviewWorkflowsEditView() {
                 })}
               </Button>
             }
-            subtitle={formatMessage(
-              {
-                id: 'Settings.review-workflows.page.subtitle',
-                defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-              },
-              { count: currentWorkflow?.stages?.length ?? 0 }
-            )}
+            subtitle={
+              currentWorkflow.stages.length > 0 &&
+              formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow.stages.length }
+              )
+            }
             title={currentWorkflow.name}
           />
 
           <Layout.Root>
             {isLoadingModels || status === 'loading' ? (
-              <Loader>
-                {formatMessage({
-                  id: 'Settings.review-workflows.page.isLoading',
-                  defaultMessage: 'Workflow is loading',
-                })}
-              </Loader>
+              <Flex justifyContent="center">
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              </Flex>
             ) : (
               <Flex alignItems="stretch" direction="column" gap={7}>
                 <WorkflowAttributes
