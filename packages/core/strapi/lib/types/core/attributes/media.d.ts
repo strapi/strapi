@@ -4,7 +4,7 @@ export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
 
 export interface MediaProperties<
   TKind extends MediaKind | undefined = undefined,
-  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False
+  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False,
 > {
   allowedTypes?: TKind;
   multiple?: TMultiple;
@@ -12,7 +12,7 @@ export interface MediaProperties<
 
 export type Media<
   TKind extends MediaKind | undefined = undefined,
-  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False
+  TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False,
 > = Attribute.OfType<'media'> &
   // Properties
   MediaProperties<TKind, TMultiple> &

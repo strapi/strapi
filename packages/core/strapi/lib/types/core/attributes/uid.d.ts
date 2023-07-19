@@ -11,7 +11,7 @@ export interface UIDOptions {
 export interface UIDProperties<
   TOrigin extends Common.UID.Schema,
   TTargetAttribute extends AllowedTargetAttributes<TOrigin>,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > {
   targetField: TTargetAttribute;
   options: UIDOptions & TOptions;
@@ -25,7 +25,7 @@ export interface GenericUIDProperties<TOptions extends UIDOptions = UIDOptions> 
 export type UID<
   TOrigin extends Common.UID.Schema | undefined = undefined,
   TTargetAttribute extends AllowedTargetAttributes<TOrigin> = AllowedTargetAttributes<TOrigin>,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > = Attribute.OfType<'uid'> &
   // Properties
   (TOrigin extends Common.UID.Schema

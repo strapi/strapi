@@ -60,7 +60,7 @@ export type Keys<TRegistry, TUidFormat extends UID.Any = UID.Any> = Extract<
 export type WhereKeys<
   TRegistry,
   TQuery extends Partial<UID.Parsed>,
-  TUidFormat extends UID.Any = UID.Any
+  TUidFormat extends UID.Any = UID.Any,
 > = {
   [uid in Keys<TRegistry, TUidFormat> as UID.Parse<uid> extends TQuery
     ? uid

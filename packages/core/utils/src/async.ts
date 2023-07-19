@@ -8,7 +8,7 @@ type AnyFunc = (...args: any) => any;
  For a list of functions it will return a new list of function but will answer the return type of the previous is the arg type of the next function
 */
 type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends [
-  (arg: any) => infer B
+  (arg: any) => infer B,
 ]
   ? [(arg: PrevReturn) => B]
   : F extends [(arg: any) => infer B, ...infer Tail]

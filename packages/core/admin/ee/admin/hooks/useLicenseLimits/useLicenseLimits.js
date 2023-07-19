@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
-export function useLicenseLimits({ enabled } = { enabled: true}) {
+export function useLicenseLimits({ enabled } = { enabled: true }) {
   const { get } = useFetchClient();
   const { data, isError, isLoading } = useQuery(
     ['ee', 'license-limit-info'],

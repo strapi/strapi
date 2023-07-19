@@ -21,20 +21,23 @@ export = (ctx: Context) => {
     return ctx.badRequest(`Invalid 'data' field. 'data' should be a valid JSON.`);
   }
 
-  const filesToUpload = Object.keys(files).reduce((acc, key) => {
-    const fullPath = _.toPath(key);
+  const filesToUpload = Object.keys(files).reduce(
+    (acc, key) => {
+      const fullPath = _.toPath(key);
 
-    if (fullPath.length <= 1 || fullPath[0] !== 'files') {
-      return ctx.badRequest(
-        `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.
+      if (fullPath.length <= 1 || fullPath[0] !== 'files') {
+        return ctx.badRequest(
+          `When using multipart/form-data you need to provide your files by prefixing them with the 'files'.
 For example, when a media file is named "avatar", make sure the form key name is "files.avatar"`
-      );
-    }
+        );
+      }
 
-    const path = _.tail(fullPath);
-    acc[path.join('.')] = files[key];
-    return acc;
-  }, {} as NonNullable<Request['files']>);
+      const path = _.tail(fullPath);
+      acc[path.join('.')] = files[key];
+      return acc;
+    },
+    {} as NonNullable<Request['files']>
+  );
 
   return {
     data,

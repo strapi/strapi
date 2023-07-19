@@ -44,7 +44,7 @@ export interface SingleType extends Base {
 export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
   [
     Utils.Expression.Test<Common.UID.IsCollectionType<T>, CollectionType>,
-    Utils.Expression.Test<Common.UID.IsSingleType<T>, SingleType>
+    Utils.Expression.Test<Common.UID.IsSingleType<T>, SingleType>,
   ],
   Base
 >;

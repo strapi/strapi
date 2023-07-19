@@ -52,7 +52,7 @@ export type RouterConfig<TContentTypeUID extends Common.UID.ContentType> = {
         Common.UID.IsCollectionType<TContentTypeUID>,
         CollectionTypeRouterConfig
       >,
-      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>
+      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>,
     ],
     Generic
   >;

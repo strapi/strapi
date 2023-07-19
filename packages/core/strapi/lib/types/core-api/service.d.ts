@@ -41,7 +41,7 @@ export type ContentType<TContentTypeUID extends Common.UID.ContentType> =
   Utils.Expression.MatchFirst<
     [
       Utils.Expression.Test<Common.UID.IsCollectionType<TContentTypeUID>, CollectionType>,
-      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleType>
+      Utils.Expression.Test<Common.UID.IsSingleType<TContentTypeUID>, SingleType>,
     ],
     Base
   >;

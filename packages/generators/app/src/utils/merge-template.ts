@@ -34,8 +34,8 @@ export default async function mergeTemplate(scope: Scope, rootPath: string) {
   let templatePath;
   let templateParentPath;
   let templatePackageInfo: PackageInfo | undefined;
-  const isLocalTemplate = ['./', '../', '/'].some((filePrefix) =>
-    scope.template?.startsWith(filePrefix)
+  const isLocalTemplate = ['./', '../', '/'].some(
+    (filePrefix) => scope.template?.startsWith(filePrefix)
   );
 
   if (isLocalTemplate) {

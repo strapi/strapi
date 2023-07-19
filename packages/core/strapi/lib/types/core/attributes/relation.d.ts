@@ -7,7 +7,7 @@ export type Relation<
   // It is kept to allow for future iterations without breaking the current type API
   TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
-  TTarget extends Common.UID.Schema = never
+  TTarget extends Common.UID.Schema = never,
 > = Attribute.OfType<'relation'> &
   // Properties
   RelationProperties<TOrigin, TRelationKind, TTarget> &
@@ -18,7 +18,7 @@ export type Relation<
 export type RelationProperties<
   _TOrigin extends Common.UID.Schema,
   TRelationKind extends RelationKind.Any,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.Schema,
 > = Utils.Expression.MatchFirst<
   [
     Utils.Expression.Test<
@@ -44,28 +44,28 @@ export type RelationProperties<
           string
         >;
       }
-    >
+    >,
   ]
 >;
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,
-  TOrigin extends Common.UID.Schema
+  TOrigin extends Common.UID.Schema,
 > = keyof PickRelationsFromTo<TTarget, TOrigin>;
 
 export type PickRelationsFromTo<
   TTarget extends Common.UID.Schema,
-  TOrigin extends Common.UID.Schema
+  TOrigin extends Common.UID.Schema,
 > = Attribute.GetByType<TTarget, 'relation', { target: TOrigin }>;
 
 export type RelationPluralityModifier<
   TRelationKind extends RelationKind.Any,
-  TValue
+  TValue,
 > = TRelationKind extends Utils.String.Suffix<string, 'Many'> ? TValue[] : TValue;
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.Schema,
 > = RelationPluralityModifier<TRelationKind, Attribute.GetValues<TTarget>>;
 
 export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
@@ -101,7 +101,8 @@ export module RelationKind {
   export type Any = RelationKind.BiDirectional | RelationKind.UniDirectional;
 
   export type Reverse<TRelationKind extends RelationKind.Any> =
-    TRelationKind extends `${infer TLeft extends RelationKind.Left}To${infer TRight extends RelationKind.Right}`
+    TRelationKind extends `${infer TLeft extends RelationKind.Left}To${infer TRight extends
+      RelationKind.Right}`
       ? Utils.Expression.If<
           Utils.Expression.Extends<Uppercase<TLeft>, Uppercase<TRight>>,
           TRelationKind,

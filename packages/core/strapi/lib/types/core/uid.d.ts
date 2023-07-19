@@ -67,7 +67,7 @@ export type ContentType = StringSuffix<
  */
 export type Component<
   TCategory extends string = string,
-  TName extends string = string
+  TName extends string = string,
 > = `${TCategory}.${TName}`;
 
 /**
@@ -82,7 +82,7 @@ export type Any = Service | Controller | Policy | Middleware | ContentType | Com
  */
 export interface Parsed<
   TNamespace extends Namespace.Any = Namespace.Any,
-  TName extends string = string
+  TName extends string = string,
 > {
   raw: `${TNamespace}${Namespace.GetSeparator<TNamespace>}${TName}`;
   namespace: TNamespace;
@@ -109,8 +109,10 @@ export interface Parsed<
  */
 export type Parse<TUid extends Any> =
   ExtractNamespace<TUid> extends infer TExtractedNamespace extends Namespace.Any
-    ? Namespace.GetSeparator<TExtractedNamespace> extends infer TSeparator extends Namespace.Separator
-      ? TUid extends `${infer TInferredNamespace extends TExtractedNamespace}${TSeparator}${infer TName extends string}`
+    ? Namespace.GetSeparator<TExtractedNamespace> extends infer TSeparator extends
+        Namespace.Separator
+      ? TUid extends `${infer TInferredNamespace extends
+          TExtractedNamespace}${TSeparator}${infer TName extends string}`
         ? Parsed<TInferredNamespace, TName>
         : never
       : never
@@ -133,7 +135,7 @@ export type Parse<TUid extends Any> =
  */
 export type EnsureNamespaceMatches<
   TUid extends Any,
-  TNamespace extends Namespace.Any
+  TNamespace extends Namespace.Any,
 > = TUid extends StringSuffix<Namespace.WithSeparator<TNamespace>> ? TNamespace : never;
 
 /**

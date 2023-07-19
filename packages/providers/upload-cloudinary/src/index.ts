@@ -52,41 +52,38 @@ export = {
             ? cloudinary.uploader.upload_stream
             : cloudinary.uploader.upload_chunked_stream;
 
-        const uploadStream = uploadMethod(
-          { ...config, ...customConfig },
-          (err, image) => {
-            if (err) {
-              if (err.message.includes('File size too large')) {
-                reject(new utils.errors.PayloadTooLargeError());
-              } else {
-                reject(new Error(`Error uploading to cloudinary: ${err.message}`));
-              }
-              return;
+        const uploadStream = uploadMethod({ ...config, ...customConfig }, (err, image) => {
+          if (err) {
+            if (err.message.includes('File size too large')) {
+              reject(new utils.errors.PayloadTooLargeError());
+            } else {
+              reject(new Error(`Error uploading to cloudinary: ${err.message}`));
             }
-
-            if (!image) {
-              return;
-            }
-
-            if (image.resource_type === 'video') {
-              file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
-                video_sampling: 6,
-                delay: 200,
-                width: 250,
-                crop: 'scale',
-                resource_type: 'video',
-              });
-            }
-
-            file.url = image.secure_url;
-            file.provider_metadata = {
-              public_id: image.public_id,
-              resource_type: image.resource_type,
-            };
-
-            resolve();
+            return;
           }
-        );
+
+          if (!image) {
+            return;
+          }
+
+          if (image.resource_type === 'video') {
+            file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
+              video_sampling: 6,
+              delay: 200,
+              width: 250,
+              crop: 'scale',
+              resource_type: 'video',
+            });
+          }
+
+          file.url = image.secure_url;
+          file.provider_metadata = {
+            public_id: image.public_id,
+            resource_type: image.resource_type,
+          };
+
+          resolve();
+        });
 
         if (file.stream) {
           file.stream.pipe(uploadStream);

@@ -23,7 +23,7 @@ export type SchemaDiffHandler = Middleware<SchemaDiffHandlerContext>;
  */
 export interface ITransferEngine<
   S extends ISourceProvider = ISourceProvider,
-  D extends IDestinationProvider = IDestinationProvider
+  D extends IDestinationProvider = IDestinationProvider,
 > {
   /**
    * Provider used as a source which that will stream its data to the transfer engine

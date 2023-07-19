@@ -96,5 +96,5 @@ describe('useLicenseLimits', () => {
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
     expect(result.current.license).toStrictEqual({});
-  })
+  });
 });

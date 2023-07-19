@@ -3,7 +3,7 @@ import type { Attribute, Common, Utils } from '@strapi/strapi';
 export type GetKeysByType<
   TSchemaUID extends Common.UID.Schema,
   TKind extends Attribute.Kind,
-  TCondition = never
+  TCondition = never,
 > = Utils.Object.KeysBy<
   GetAll<TSchemaUID>,
   Attribute.OfType<TKind> & Utils.Guard.Never<TCondition, unknown>
@@ -12,7 +12,7 @@ export type GetKeysByType<
 export type GetByType<
   TSchemaUID extends Common.UID.Schema,
   TKind extends Attribute.Kind,
-  TCondition = never
+  TCondition = never,
 > = Utils.Object.PickBy<
   GetAll<TSchemaUID>,
   Attribute.OfType<TKind> & Utils.Guard.Never<TCondition, unknown>
@@ -55,14 +55,14 @@ export type GetValue<TAttribute extends Attribute.Attribute> =
 
 export type GetValueByKey<
   TSchemaUID extends Common.UID.Schema,
-  TKey extends GetKeys<TSchemaUID>
+  TKey extends GetKeys<TSchemaUID>,
 > = Get<TSchemaUID, TKey> extends infer TAttribute extends Attribute.Attribute
   ? GetValue<TAttribute>
   : never;
 
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
-  TKey extends GetKeys<TSchemaUID> = GetKeys<TSchemaUID>
+  TKey extends GetKeys<TSchemaUID> = GetKeys<TSchemaUID>,
 > = {
   // Handle required attributes
   [key in GetRequiredKeys<TSchemaUID> as key extends TKey ? key : never]-?: GetValueByKey<

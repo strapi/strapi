@@ -9,7 +9,7 @@ export declare function createCoreRouter<T extends Common.UID.ContentType>(
 
 export declare function createCoreController<
   T extends Common.UID.ContentType,
-  S extends Partial<CoreApi.Controller.Extendable<T>>
+  S extends Partial<CoreApi.Controller.Extendable<T>>,
 >(
   uid: T,
   config?: WithStrapiCallback<S> | S
@@ -17,5 +17,5 @@ export declare function createCoreController<
 
 export declare function createCoreService<
   T extends Common.UID.ContentType,
-  S extends Partial<CoreApi.Service.Extendable<T>>
+  S extends Partial<CoreApi.Service.Extendable<T>>,
 >(uid: T, config?: WithStrapiCallback<S> | S): () => Required<S & CoreApi.Service.ContentType<T>>;
