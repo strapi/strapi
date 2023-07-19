@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.11.5",
+  "version": "4.11.7",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -40,8 +40,8 @@
     "./dist"
   ],
   "dependencies": {
-    "@strapi/logger": "4.11.5",
-    "@strapi/strapi": "4.11.5",
+    "@strapi/logger": "4.11.7",
+    "@strapi/strapi": "4.11.7",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "lodash": "4.17.21",

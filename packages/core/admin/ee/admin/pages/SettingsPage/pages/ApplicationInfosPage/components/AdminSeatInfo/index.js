@@ -29,7 +29,7 @@ export const AdminSeatInfoEE = () => {
     // we will have to move away from data-fetching hooks to query functions.
     // Short-term we could at least implement a loader, for the user to have visual feedback
     // in case the requests take a while
-    enabled: !isRBACLoading && canRead && canCreate && canUpdate && canDelete
+    enabled: !isRBACLoading && canRead && canCreate && canUpdate && canDelete,
   });
 
   const isLoading = isRBACLoading || isLicenseLoading;
