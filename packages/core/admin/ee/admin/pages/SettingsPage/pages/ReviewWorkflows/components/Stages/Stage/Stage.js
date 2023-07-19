@@ -196,6 +196,8 @@ export function Stage({
           }}
           expanded={isOpen}
           shadow="tableShadow"
+          error={nameMeta.error ?? colorMeta?.error ?? false}
+          hasErrorMessage={false}
         >
           <AccordionToggle
             title={nameField.value}
