@@ -165,7 +165,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     } catch (err) {
       console.log('THE ERROR', err);
       throw new ProviderTransferError(
-        'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory'
+        `The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory ${err}`
       );
     }
 
