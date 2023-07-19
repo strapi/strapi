@@ -38,6 +38,7 @@ import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/
 import { useLicenseLimits } from '../../../../../../hooks';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
+import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
@@ -155,18 +156,14 @@ export function ReviewWorkflowsListView() {
 
   React.useEffect(() => {
     if (!isLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal(true);
       }
     }
-  }, [
-    isLicenseLoading,
-    isLoading,
-    limits.stagesPerWorkflow,
-    limits.workflows,
-    meta?.workflowCount,
-    meta.workflowsTotal,
-  ]);
+  }, [isLicenseLoading, isLoading, limits, meta?.workflowCount, meta.workflowsTotal]);
 
   return (
     <>
@@ -188,7 +185,10 @@ export function ReviewWorkflowsListView() {
                * current hard-limit of 200 they will see an error thrown by the API.
                */
 
-              if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
+              if (
+                limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+                meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+              ) {
                 event.preventDefault();
                 setShowLimitModal(true);
               } else {
@@ -240,8 +240,9 @@ export function ReviewWorkflowsListView() {
                      */
 
                     if (
-                      limits?.workflows &&
-                      meta?.workflowCount >= parseInt(limits.workflows, 10)
+                      limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+                      meta?.workflowCount >=
+                        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
                     ) {
                       setShowLimitModal(true);
                     } else {

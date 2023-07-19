@@ -24,7 +24,11 @@ import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { REDUX_NAMESPACE } from '../../constants';
+import {
+  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
+  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
+  REDUX_NAMESPACE,
+} from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { validateWorkflow } from '../../utils/validateWorkflow';
@@ -127,7 +131,10 @@ export function ReviewWorkflowsCreateView() {
        * update, because it would throw an API error.
        */
 
-      if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal('workflow');
 
         /**
@@ -136,8 +143,9 @@ export function ReviewWorkflowsCreateView() {
          * update, because it would throw an API error.
          */
       } else if (
-        limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length >= parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >=
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
       } else {
@@ -170,11 +178,15 @@ export function ReviewWorkflowsCreateView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (limits.workflows && meta?.workflowsTotal >= parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowsTotal >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal('workflow');
       } else if (
-        limits.stagesPerWorkflow &&
-        currentWorkflow.stages.length >= parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >=
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
       }
@@ -182,8 +194,7 @@ export function ReviewWorkflowsCreateView() {
   }, [
     isLicenseLoading,
     isWorkflowLoading,
-    limits.stagesPerWorkflow,
-    limits?.workflows,
+    limits,
     meta?.workflowsTotal,
     currentWorkflow.stages.length,
   ]);
