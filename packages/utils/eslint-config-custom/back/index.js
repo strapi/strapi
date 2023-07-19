@@ -38,5 +38,6 @@ module.exports = {
         props: false,
       },
     ],
+    'curly': ['error', 'all'],
   },
 };
