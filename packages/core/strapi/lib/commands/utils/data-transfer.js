@@ -349,16 +349,19 @@ const getAssetsBackupHandler = (engine, { force, action }) => {
       exitWith(1, exitMessageText(action, true));
     });
 
-    await confirmMessage(
-      'There are differences in schema between the source and destination, and the data listed above will be lost. Are you sure you want to continue?',
+    const confirmed = await confirmMessage(
+      'The backup folder for the assets could not be created inside the public folder. Maybe Strapi does not have write permissions on the public directory. Do you want to continue without the backup?',
       {
         force,
       }
     );
 
+    if (confirmed) {
+      context.ignore = true;
+    }
+
     // reset handler back to normal
     setSignalHandler(() => abortTransfer({ engine, strapi }));
-
     return next(context);
   };
 };

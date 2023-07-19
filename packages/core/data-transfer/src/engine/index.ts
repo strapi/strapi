@@ -27,6 +27,7 @@ import type {
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
   AssetsBackupErrorHandler,
+  AssetsBackupErrorHandlerContext,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -749,9 +750,20 @@ class TransferEngine<
 
   async beforeTransfer(): Promise<void> {
     const runWithDiagnostic = async (provider: IProvider) => {
+      const context: AssetsBackupErrorHandlerContext = {};
+
       try {
         await provider.beforeTransfer?.();
       } catch (error) {
+        await utils.middleware.runMiddleware<AssetsBackupErrorHandlerContext>(
+          context,
+          this.#handlers.assetsBackupError
+        );
+        console.log('context', context);
+        if (context.ignore) {
+          console.log('Entering here');
+          return;
+        }
         // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
           this.panic(error);
