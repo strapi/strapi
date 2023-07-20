@@ -1,5 +1,5 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
-import type Params from './index';
+import type * as Params from './index';
 
 /**
  * Wildcard notation for populate
@@ -27,7 +27,7 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
   | WildcardNotation
   | PopulatableKeys<TSchemaUID>
   | `${string},${string}`
-  | `${PopulatableKeys<TSchemaUID>}.${string}`;
+  | `${string}.${string}`;
 
 /**
  * Array notation for populate
@@ -40,21 +40,35 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
  */
 type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
 
-type PopulateFragments<TSchemaUID extends Common.UID.Schema> = {
-  [key in Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>]?: {
-    on?: {
-      [key1 in Attribute.GetValueByKey<TSchemaUID, key>]?: Boolean;
+type PopulateDynamicZoneFragments<TSchemaUID extends Common.UID.Schema> = {
+  [TKey in Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>]: {
+    on: {
+      [TComponentUID in GetComponentsFromDynamicZone<TSchemaUID, TKey>[number]]?:
+        | Boolean
+        | Params.For<TComponentUID>;
     };
   };
 };
+
+type GetComponentsFromDynamicZone<
+  TSchemaUID extends Common.UID.Schema,
+  TKey extends Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>
+> = Attribute.Get<TSchemaUID, TKey> extends Attribute.DynamicZone<infer TComponentsUIDs>
+  ? TComponentsUIDs
+  : never;
 
 type ObjectNotation<TSchemaUID extends Common.UID.Schema> =
   | {
       [key in PopulatableKeys<TSchemaUID>]?:
         | Boolean
-        | Params.For<Attribute.GetTarget<TSchemaUID, key>>;
+        | Params.For<
+            Attribute.GetTarget<
+              TSchemaUID,
+              key extends keyof Attribute.GetAll<TSchemaUID> ? key : never
+            >
+          >;
     }
-  | PopulateFragments<TSchemaUID>;
+  | PopulateDynamicZoneFragments<TSchemaUID>;
 
 export type Any<TSchemaUID extends Common.UID.Schema> =
   | StringNotation<TSchemaUID>
