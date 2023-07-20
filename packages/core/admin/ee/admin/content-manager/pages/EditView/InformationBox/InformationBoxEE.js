@@ -94,7 +94,7 @@ export function InformationBoxEE() {
 
       if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) > meta.workflowCount
+        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < meta.workflowCount
       ) {
         setShowLimitModal('workflow');
 
@@ -109,7 +109,7 @@ export function InformationBoxEE() {
          */
       } else if (
         limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
-        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) >
+        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) <
           workflow.stages.length
       ) {
         setShowLimitModal('stage');
