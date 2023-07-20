@@ -342,21 +342,22 @@ export function ReviewWorkflowsListView() {
                         <Pencil />
                       </ActionLink>
 
-                      <IconButton
-                        aria-label={formatMessage(
-                          {
-                            id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
-                            defaultMessage: 'Delete {name}',
-                          },
-                          { name: 'Default workflow' }
-                        )}
-                        disabled={workflows.length === 1 || !canDelete}
-                        icon={<Trash />}
-                        noBorder
-                        onClick={() => {
-                          handleDeleteWorkflow(workflow.id);
-                        }}
-                      />
+                      {workflows.length > 1 && canDelete && (
+                        <IconButton
+                          aria-label={formatMessage(
+                            {
+                              id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
+                              defaultMessage: 'Delete {name}',
+                            },
+                            { name: 'Default workflow' }
+                          )}
+                          icon={<Trash />}
+                          noBorder
+                          onClick={() => {
+                            handleDeleteWorkflow(workflow.id);
+                          }}
+                        />
+                      )}
                     </Flex>
                   </Td>
                 </Tr>
