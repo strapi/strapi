@@ -158,7 +158,7 @@ export function ReviewWorkflowsListView() {
     if (!isLoading && !isLicenseLoading) {
       if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-        meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal(true);
       }
