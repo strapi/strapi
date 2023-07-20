@@ -1,8 +1,6 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../../../utils');
-const { hasReviewWorkflow } = require('../../../utils/review-workflows');
 const { validateUpdateAssigneeOnEntity } = require('../../../validation/review-workflows');
 
 module.exports = {
@@ -21,9 +19,11 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const assigneeService = getService('assignees');
+    const workflowService = getService('workflows');
+
     const { model_uid: model, id } = ctx.params;
 
-    const permissionChecker = strapi
+    const { sanitizeOutput } = strapi
       .plugin('content-manager')
       .service('permission-checker')
       .create({ userAbility: ctx.state.userAbility, model });
@@ -35,13 +35,10 @@ module.exports = {
       'You should pass a valid id to the body of the put request.'
     );
 
-    if (!hasReviewWorkflow({ strapi }, model)) {
-      throw new ApplicationError(`Review workflows is not activated on ${model}.`);
-    }
+    await workflowService.assertContentTypeBelongsToWorkflow(model);
 
     const entity = await assigneeService.updateEntityAssignee(id, model, assigneeId);
-    const sanitizedEntity = await permissionChecker.sanitizeOutput(entity);
 
-    ctx.body = { data: sanitizedEntity };
+    ctx.body = { data: await sanitizeOutput(entity) };
   },
 };

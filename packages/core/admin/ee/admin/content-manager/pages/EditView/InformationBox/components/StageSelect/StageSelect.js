@@ -18,6 +18,8 @@ import {
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 
+import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
+import * as LimitsModal from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
 import { useReviewWorkflows } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 import { STAGE_ATTRIBUTE_NAME } from '../../constants';
@@ -25,7 +27,6 @@ import { STAGE_ATTRIBUTE_NAME } from '../../constants';
 export function StageSelect() {
   const {
     initialData,
-    isCreatingEntry,
     layout: { uid },
     isSingleType,
     onChange,
@@ -34,17 +35,19 @@ export function StageSelect() {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
-  const { workflows, isLoading } = useReviewWorkflows();
+  const {
+    meta,
+    workflows: [workflow],
+    isLoading,
+  } = useReviewWorkflows({ filters: { contentTypes: uid } });
+  const { getFeature } = useLicenseLimits();
+  const [showLimitModal, setShowLimitModal] = React.useState(false);
 
-  const activeWorkflowStage = initialData?.[STAGE_ATTRIBUTE_NAME] ?? null;
-
-  // TODO: this works only as long as we support one workflow
-  const workflow = workflows?.[0] ?? null;
-
+  const limits = getFeature('review-workflows');
   // it is possible to rely on initialData here, because it always will
   // be updated at the same time when modifiedData is updated, otherwise
   // the entity is flagged as modified
-  const currentWorkflowStage = initialData?.[STAGE_ATTRIBUTE_NAME] ?? null;
+  const activeWorkflowStage = initialData?.[STAGE_ATTRIBUTE_NAME] ?? null;
 
   const mutation = useMutation(
     async ({ entityId, stageId, uid }) => {
@@ -71,36 +74,53 @@ export function StageSelect() {
           type: 'success',
           message: {
             id: 'content-manager.reviewWorkflows.stage.notification.saved',
-            defaultMessage: 'Success: Review stage updated',
+            defaultMessage: 'Review stage updated',
           },
         });
       },
     }
   );
 
-  // if entities are created e.g. through lifecycle methods
-  // they may not have a stage assigned. Updating the entity won't
-  // set the default stage either which may lead to entities that
-  // do not have a stage assigned for a while. By displaying an
-  // error by default we are trying to nudge users into assigning a stage.
-  const initialStageNullError =
-    currentWorkflowStage === null &&
-    !isLoading &&
-    !isCreatingEntry &&
-    formatMessage({
-      id: 'content-manager.reviewWorkflows.stage.select.placeholder',
-      defaultMessage: 'Select a stage',
-    });
-
-  const formattedError =
-    (mutation.error && formatAPIError(mutation.error)) || initialStageNullError || null;
-
   const handleChange = async ({ value: stageId }) => {
-    mutation.mutate({
-      entityId: initialData.id,
-      stageId,
-      uid,
-    });
+    try {
+      /**
+       * If the current license has a limit:
+       * check if the total count of workflows exceeds that limit and display
+       * the limits modal.
+       *
+       * If the current license does not have a limit (e.g. offline license):
+       * do nothing (for now).
+       *
+       */
+
+      if (limits?.workflows && parseInt(limits.workflows, 10) > meta.workflowCount) {
+        setShowLimitModal('workflow');
+
+        /**
+         * If the current license has a limit:
+         * check if the total count of stages exceeds that limit and display
+         * the limits modal.
+         *
+         * If the current license does not have a limit (e.g. offline license):
+         * do nothing (for now).
+         *
+         */
+      } else if (
+        limits?.stagesPerWorkflow &&
+        parseInt(limits.stagesPerWorkflow, 10) > workflow.stages.length
+      ) {
+        setShowLimitModal('stage');
+      } else {
+        mutation.mutateAsync({
+          entityId: initialData.id,
+          stageId,
+          uid,
+        });
+      }
+    } catch (error) {
+      // react-query@v3: the error doesn't have to be handled here
+      // see: https://github.com/TanStack/query/issues/121
+    }
   };
 
   const { themeColorName } = activeWorkflowStage?.color
@@ -108,67 +128,107 @@ export function StageSelect() {
     : {};
 
   return (
-    <Field name={STAGE_ATTRIBUTE_NAME} id={STAGE_ATTRIBUTE_NAME}>
-      <Flex direction="column" gap={2} alignItems="stretch">
-        <SingleSelect
-          error={formattedError}
-          name={STAGE_ATTRIBUTE_NAME}
-          id={STAGE_ATTRIBUTE_NAME}
-          value={activeWorkflowStage?.id}
-          onChange={(value) => handleChange({ value })}
-          label={formatMessage({
-            id: 'content-manager.reviewWorkflows.stage.label',
-            defaultMessage: 'Review stage',
-          })}
-          startIcon={
-            <Flex
-              as="span"
-              height={2}
-              background={activeWorkflowStage?.color}
-              borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-              hasRadius
-              shrink={0}
-              width={2}
-              marginRight="-3px"
-            />
-          }
-          // eslint-disable-next-line react/no-unstable-nested-components
-          customizeContent={() => (
-            <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
-              <Typography textColor="neutral800" ellipsis>
-                {activeWorkflowStage?.name}
-              </Typography>
-              {isLoading ? <Loader small style={{ display: 'flex' }} /> : null}
-            </Flex>
-          )}
-        >
-          {workflow
-            ? workflow.stages.map(({ id, color, name }) => {
-                const { themeColorName } = getStageColorByHex(color);
+    <>
+      <Field name={STAGE_ATTRIBUTE_NAME} id={STAGE_ATTRIBUTE_NAME}>
+        <Flex direction="column" gap={2} alignItems="stretch">
+          <SingleSelect
+            error={(mutation.error && formatAPIError(mutation.error)) || null}
+            name={STAGE_ATTRIBUTE_NAME}
+            id={STAGE_ATTRIBUTE_NAME}
+            value={activeWorkflowStage?.id}
+            onChange={(value) => handleChange({ value })}
+            label={formatMessage({
+              id: 'content-manager.reviewWorkflows.stage.label',
+              defaultMessage: 'Review stage',
+            })}
+            startIcon={
+              <Flex
+                as="span"
+                height={2}
+                background={activeWorkflowStage?.color}
+                borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                hasRadius
+                shrink={0}
+                width={2}
+                marginRight="-3px"
+              />
+            }
+            // eslint-disable-next-line react/no-unstable-nested-components
+            customizeContent={() => (
+              <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+                <Typography textColor="neutral800" ellipsis>
+                  {activeWorkflowStage?.name}
+                </Typography>
+                {isLoading ? <Loader small style={{ display: 'flex' }} /> : null}
+              </Flex>
+            )}
+          >
+            {workflow
+              ? workflow.stages.map(({ id, color, name }) => {
+                  const { themeColorName } = getStageColorByHex(color);
 
-                return (
-                  <SingleSelectOption
-                    startIcon={
-                      <Flex
-                        height={2}
-                        background={color}
-                        borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                        hasRadius
-                        shrink={0}
-                        width={2}
-                      />
-                    }
-                    value={id}
-                    textValue={name}
-                  >
-                    {name}
-                  </SingleSelectOption>
-                );
-              })
-            : []}
-        </SingleSelect>
-        <FieldError />
-      </Flex>
-    </Field>
+                  return (
+                    <SingleSelectOption
+                      startIcon={
+                        <Flex
+                          height={2}
+                          background={color}
+                          borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                          hasRadius
+                          shrink={0}
+                          width={2}
+                        />
+                      }
+                      value={id}
+                      textValue={name}
+                    >
+                      {name}
+                    </SingleSelectOption>
+                  );
+                })
+              : []}
+          </SingleSelect>
+          <FieldError />
+        </Flex>
+      </Field>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'workflow'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.workflows.limit.title',
+            defaultMessage: 'You’ve reached the limit of workflows in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.workflows.limit.body',
+            defaultMessage: 'Delete a workflow or contact Sales to enable more workflows.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+
+      <LimitsModal.Root
+        isOpen={showLimitModal === 'stage'}
+        onClose={() => setShowLimitModal(false)}
+      >
+        <LimitsModal.Title>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.limit.title',
+            defaultMessage: 'You have reached the limit of stages for this workflow in your plan',
+          })}
+        </LimitsModal.Title>
+
+        <LimitsModal.Body>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.stages.limit.body',
+            defaultMessage: 'Try deleting some stages or contact Sales to enable more stages.',
+          })}
+        </LimitsModal.Body>
+      </LimitsModal.Root>
+    </>
   );
 }

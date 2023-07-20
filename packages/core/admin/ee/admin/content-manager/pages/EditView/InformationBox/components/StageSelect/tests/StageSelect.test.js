@@ -92,21 +92,6 @@ describe('EE | Content Manager | EditView | InformationBox | StageSelect', () =>
     server.close();
   });
 
-  it('renders an error, if no workflow stage is assigned to the entity', async () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
-      },
-      layout: { uid: 'api::articles:articles' },
-    });
-
-    const { getByText, queryByRole } = setup();
-
-    expect(queryByRole('combobox')).toBeInTheDocument();
-
-    await waitFor(() => expect(getByText(/select a stage/i)).toBeInTheDocument());
-  });
-
   it('renders an enabled select input, if the entity is edited', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
