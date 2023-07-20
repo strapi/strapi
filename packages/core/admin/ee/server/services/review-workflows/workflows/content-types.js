@@ -34,13 +34,25 @@ module.exports = ({ strapi }) => {
       const workflowsService = getService('workflows', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
+      const contentTypesToTransfer = {};
+
       await mapAsync(created, async (uid) => {
         // If it was assigned to another workflow, transfer it from the previous workflow
         const srcWorkflow = await workflowsService.getAssignedWorkflow(uid);
         if (srcWorkflow) {
           // Updates all existing entities stages links to the new stage
           await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
-          return this.transferContentType(srcWorkflow, uid);
+
+          // Workflows will be updated afterwards, to avoid race conditions
+          if (contentTypesToTransfer[srcWorkflow.id]) {
+            const workflow = contentTypesToTransfer[srcWorkflow.id];
+            contentTypesToTransfer[srcWorkflow.id] = workflow.filter((ct) => ct.uid !== uid);
+          } else {
+            contentTypesToTransfer[srcWorkflow.id] = srcWorkflow.contentTypes.filter(
+              (ct) => ct.uid !== uid
+            );
+          }
+          return;
         }
         await updateContentTypeConfig(uid, true);
 
@@ -51,6 +63,11 @@ module.exports = ({ strapi }) => {
         });
       });
 
+      await mapAsync(Object.entries(contentTypesToTransfer), async ([workflowId, contentTypes]) =>
+        this.transferContentTypes(workflowId, contentTypes)
+      );
+
+      // TODO: Manage edge cases where content type is assigned twice to other workflows
       await mapAsync(deleted, async (uid) => {
         await updateContentTypeConfig(uid, false);
         await stagesService.deleteAllEntitiesStage(uid, {});
@@ -58,15 +75,15 @@ module.exports = ({ strapi }) => {
     },
 
     /**
-     * Filters the content types assigned to the previous workflow.
+     * Using the workflow content types, transfer the content types to the new workflow
      * @param {Workflow} srcWorkflow - The workflow to transfer from
      * @param {string} uid - The content type uid
      */
-    async transferContentType(srcWorkflow, uid) {
+    async transferContentTypes(workflowId, contentTypes) {
       // Update assignedContentTypes of the previous workflow
-      await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
+      await strapi.entityService.update(WORKFLOW_MODEL_UID, workflowId, {
         data: {
-          contentTypes: srcWorkflow.contentTypes.filter((ct) => ct !== uid),
+          contentTypes,
         },
       });
     },
