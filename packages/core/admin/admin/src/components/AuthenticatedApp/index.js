@@ -110,8 +110,10 @@ const AuthenticatedApp = () => {
       userDisplayName={userDisplayName}
     >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
-        <NpsSurvey />
-        <PluginsInitializer />
+        <>
+          <NpsSurvey />
+          <PluginsInitializer />
+        </>
       </RBACProvider>
     </AppInfoProvider>
   );
