@@ -20,7 +20,7 @@ import { useContentTypes } from '../../../../../../../../admin/src/hooks/useCont
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { setWorkflow } from '../../actions';
+import { resetWorkflow, setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
@@ -180,6 +180,12 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
+
+    // reset the state to the initial state to avoid flashes if a user
+    // navigates from an edit-view to a create-view
+    return () => {
+      dispatch(resetWorkflow());
+    };
   }, [workflowStatus, workflow, dispatch]);
 
   /**
@@ -245,24 +251,29 @@ export function ReviewWorkflowsEditView() {
                 })}
               </Button>
             }
-            subtitle={formatMessage(
-              {
-                id: 'Settings.review-workflows.page.subtitle',
-                defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-              },
-              { count: currentWorkflow?.stages?.length ?? 0 }
-            )}
+            subtitle={
+              currentWorkflow.stages.length > 0 &&
+              formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow.stages.length }
+              )
+            }
             title={currentWorkflow.name}
           />
 
           <Layout.Root>
             {isLoadingModels || status === 'loading' ? (
-              <Loader>
-                {formatMessage({
-                  id: 'Settings.review-workflows.page.isLoading',
-                  defaultMessage: 'Workflow is loading',
-                })}
-              </Loader>
+              <Flex justifyContent="center">
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              </Flex>
             ) : (
               <Flex alignItems="stretch" direction="column" gap={7}>
                 <WorkflowAttributes

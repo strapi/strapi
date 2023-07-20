@@ -19,7 +19,7 @@ import { useContentTypes } from '../../../../../../../../admin/src/hooks/useCont
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { resetWorkflow } from '../../actions';
+import { addStage, resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
@@ -153,6 +153,13 @@ export function ReviewWorkflowsCreateView() {
 
   React.useEffect(() => {
     dispatch(resetWorkflow());
+
+    // Create an empty default stage
+    dispatch(
+      addStage({
+        name: '',
+      })
+    );
   }, [dispatch]);
 
   /**

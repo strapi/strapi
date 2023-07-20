@@ -187,7 +187,7 @@ export function ReviewWorkflowsListView() {
 
               if (
                 limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-                meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+                meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
               ) {
                 event.preventDefault();
                 setShowLimitModal(true);
@@ -215,12 +215,14 @@ export function ReviewWorkflowsListView() {
 
       <Layout.Root>
         {isLoading || isLoadingModels ? (
-          <Loader>
-            {formatMessage({
-              id: 'Settings.review-workflows.page.list.isLoading',
-              defaultMessage: 'Workflows are loading',
-            })}
-          </Loader>
+          <Flex justifyContent="center">
+            <Loader>
+              {formatMessage({
+                id: 'Settings.review-workflows.page.list.isLoading',
+                defaultMessage: 'Workflows are loading',
+              })}
+            </Loader>
+          </Flex>
         ) : (
           <Table
             colCount={3}
