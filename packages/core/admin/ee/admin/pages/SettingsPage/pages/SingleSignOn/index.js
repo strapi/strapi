@@ -62,7 +62,7 @@ export const SingleSignOn = () => {
 
   const showLoader = isLoadingForPermissions || isLoading;
 
-  // TODO: select first error field, but it looks like that requires refactoring from useSettingsForm to Formik
+  // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
 
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
