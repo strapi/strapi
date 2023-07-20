@@ -18,7 +18,7 @@ export module OrderKind {
  */
 type SingleAttribute<TSchemaUID extends Common.UID.Schema> =
   | 'id'
-  | Utils.Guard.Never<Attribute.GetNonPopulatableKeys<TSchemaUID>, string>;
+  | Utils.Guard.Never<string & Attribute.GetNonPopulatableKeys<TSchemaUID>, string>;
 
 /**
  * Ordered single non-populatable attribute representation

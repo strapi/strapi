@@ -18,6 +18,8 @@ export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
   GetNonFilterableKeys<TSchemaUID>
 >;
 
+export type ID = `${number}` | number;
+
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 
 export type NumberValue = string | number;
@@ -57,7 +59,24 @@ export type ScalarValues = GetValue<
 >;
 
 /**
- * Attribute.GetValue override with filter values
+ * Attribute.GetValues override with extended values
+ */
+export type GetValues<TSchemaUID extends Common.UID.Schema> = OmitRelationWithoutTarget<
+  TSchemaUID,
+  {
+    [TKey in Attribute.GetOptionalKeys<TSchemaUID>]?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+  } & {
+    [TKey in Attribute.GetRequiredKeys<TSchemaUID>]-?: GetValue<Attribute.Get<TSchemaUID, TKey>>;
+  }
+>;
+
+export type OmitRelationWithoutTarget<TSchemaUID extends Common.UID.Schema, TValue> = Omit<
+  TValue,
+  Exclude<Attribute.GetKeysByType<TSchemaUID, 'relation'>, Attribute.GetKeysWithTarget<TSchemaUID>>
+>;
+
+/**
+ * Attribute.GetValue override with extended values
  *
  * Fallback to unknown if never is found
  */
@@ -65,6 +84,41 @@ export type GetValue<TAttribute extends Attribute.Attribute> = Utils.Expression.
   Utils.Expression.IsNotNever<TAttribute>,
   Utils.Expression.MatchFirst<
     [
+      // Relation
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'relation'>>,
+        TAttribute extends Attribute.Relation<infer _TOrigin, infer TRelationKind, infer TTarget>
+          ? Utils.Expression.If<
+              Utils.Expression.IsNotNever<TTarget>,
+              Attribute.RelationPluralityModifier<TRelationKind, ID>
+            >
+          : never
+      ],
+      // DynamicZone
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'dynamiczone'>>,
+        TAttribute extends Attribute.DynamicZone<infer TComponentsUIDs>
+          ? Array<
+              // Extract tuple values to a component uid union type
+              Utils.Array.Values<TComponentsUIDs> extends infer TComponentUID
+                ? TComponentUID extends Common.UID.Component
+                  ? GetValues<TComponentUID> & { __component: TComponentUID }
+                  : never
+                : never
+            >
+          : never
+      ],
+      // Component
+      [
+        Utils.Expression.Extends<TAttribute, Attribute.OfType<'component'>>,
+        TAttribute extends Attribute.Component<infer TComponentUID, infer TRepeatable>
+          ? TComponentUID extends Common.UID.Component
+            ? GetValues<TComponentUID> extends infer TValues
+              ? Utils.Expression.If<TRepeatable, TValues[], TValues>
+              : never
+            : never
+          : never
+      ],
       // Boolean
       [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, BooleanValue],
       // Number
