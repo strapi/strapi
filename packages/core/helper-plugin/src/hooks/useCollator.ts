@@ -4,17 +4,14 @@
 
 /**
  * A cache of collators for the current locale.
- * @type {Map<string, Intl.Collator>}
  */
-let cache = new Map();
+let cache = new Map<string, Intl.Collator>();
 
 /**
  * Provides localized string collation for the current locale. Automatically updates when the locale changes,
  * and handles caching of the collator for performance.
- *
- * @type {(locale: string, options?: Intl.CollatorOptions) => Intl.Collator}
  */
-export function useCollator(locale, options) {
+export function useCollator(locale: string, options?: Intl.CollatorOptions): Intl.Collator {
   let cacheKey =
     locale +
     (options
@@ -24,7 +21,7 @@ export function useCollator(locale, options) {
       : '');
 
   if (cache.has(cacheKey)) {
-    return cache.get(cacheKey);
+    return cache.get(cacheKey)!;
   }
 
   let formatter = new Intl.Collator(locale, options);
