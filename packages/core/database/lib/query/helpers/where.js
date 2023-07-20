@@ -276,6 +276,7 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
 
+    // Experimental, only for internal use
     // Only on MySQL, PostgreSQL and CockroachDB.
     // https://knexjs.org/guide/query-builder.html#wherejsonsupersetof
     case '$jsonSupersetOf': {
