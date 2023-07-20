@@ -20,6 +20,7 @@ export function normalizeAPIError(apiError, intlMessagePrefixCallback) {
   if (error?.details?.errors) {
     return {
       name: error.name,
+      message: error?.message || null,
       errors: error.details.errors.map((err) =>
         normalizeError(err, { name: error.name, intlMessagePrefixCallback })
       ),

@@ -39,7 +39,7 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-interface SortParamsObject {
+export interface SortParamsObject {
   [key: string]: SortOrder | SortParamsObject;
 }
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];

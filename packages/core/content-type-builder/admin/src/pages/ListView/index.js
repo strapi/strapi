@@ -109,7 +109,9 @@ const ListView = () => {
   return (
     <>
       <Prompt
-        message={(location) => location.hash === '#back' ? false : formatMessage({ id: getTrad('prompt.unsaved') })}
+        message={(location) =>
+          location.hash === '#back' ? false : formatMessage({ id: getTrad('prompt.unsaved') })
+        }
         when={hasModelBeenModified}
       />
       <HeaderLayout
