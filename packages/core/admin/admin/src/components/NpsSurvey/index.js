@@ -1,13 +1,7 @@
 import * as React from 'react';
 
 import { Flex, Button, Typography } from '@strapi/design-system';
-
-export const npsStorageKeys = {
-  enabled: 'NPS_SURVEY_ENABLED',
-  lastResponseDate: 'NPS_SURVEY_LAST_RESPONSE_DATE',
-  firstDismissalDate: 'NPS_SURVEY_FIRST_DISMISSAL_DATE',
-  lastDismissalDate: 'NPS_SURVEY_LAST_DISMISSAL_DATE',
-};
+import { usePersistentState } from '@strapi/helper-plugin';
 
 const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
@@ -15,34 +9,16 @@ const delays = {
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
 };
 
-const getLocalStorageDate = (key) => {
-  const value = window.localStorage.getItem(key);
+const checkIfShouldShowSurvey = (settings) => {
+  const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
 
-  if (!value) {
-    return null;
-  }
-
-  return new Date(parseInt(value, 10));
-};
-
-const setLocalStorageDate = (key, date) => {
-  if (date == null) {
-    window.localStorage.removeItem(key);
-
-    return;
-  }
-
-  window.localStorage.setItem(key, date.getTime().toString());
-};
-
-const checkIfShouldShowSurvey = ({ lastResponseDate, firstDismissalDate, lastDismissalDate }) => {
-  if (window.localStorage.getItem(npsStorageKeys.enabled) !== 'true') {
+  if (!enabled) {
     return false;
   }
 
   if (lastResponseDate) {
     // If the user has already responded to the survey
-    const timeSinceLastResponse = Date.now() - lastResponseDate.getTime();
+    const timeSinceLastResponse = Date.now() - new Date(lastResponseDate).getTime();
 
     if (timeSinceLastResponse >= delays.postResponse) {
       return true;
@@ -53,7 +29,7 @@ const checkIfShouldShowSurvey = ({ lastResponseDate, firstDismissalDate, lastDis
 
   if (lastDismissalDate) {
     // If the user has dismissed the survey twice or more before
-    const timeSinceLastDismissal = Date.now() - lastDismissalDate.getTime();
+    const timeSinceLastDismissal = Date.now() - new Date(lastDismissalDate).getTime();
 
     if (timeSinceLastDismissal >= delays.postSubsequentDismissal) {
       return true;
@@ -64,7 +40,7 @@ const checkIfShouldShowSurvey = ({ lastResponseDate, firstDismissalDate, lastDis
 
   if (firstDismissalDate) {
     // If the user has dismissed the survey before
-    const timeSinceFirstDismissal = Date.now() - firstDismissalDate.getTime();
+    const timeSinceFirstDismissal = Date.now() - new Date(firstDismissalDate).getTime();
 
     if (timeSinceFirstDismissal >= delays.postFirstDismissal) {
       return true;
@@ -77,19 +53,23 @@ const checkIfShouldShowSurvey = ({ lastResponseDate, firstDismissalDate, lastDis
   return true;
 };
 
+export function useNpsSurveySettings() {
+  const [npsSurveySettings, setNpsSurveySettings] = usePersistentState('NPS_SURVEY_SETTINGS', {
+    enabled: true,
+    lastResponseDate: null,
+    firstDismissalDate: null,
+    lastDismissalDate: null,
+  });
+
+  return { npsSurveySettings, setNpsSurveySettings };
+}
+
 const NpsSurvey = () => {
-  // Get timestamps from local storage
-  const lastResponseDate = getLocalStorageDate(npsStorageKeys.lastResponseDate);
-  const firstDismissalDate = getLocalStorageDate(npsStorageKeys.firstDismissalDate);
-  const lastDismissalDate = getLocalStorageDate(npsStorageKeys.lastDismissalDate);
+  const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
 
   // Only check on first render if the survey should be shown
   const [surveyIsShown, setSurveyIsShown] = React.useState(
-    checkIfShouldShowSurvey({
-      lastResponseDate,
-      firstDismissalDate,
-      lastDismissalDate,
-    })
+    checkIfShouldShowSurvey(npsSurveySettings)
   );
 
   if (!surveyIsShown) {
@@ -97,23 +77,34 @@ const NpsSurvey = () => {
   }
 
   const handleSubmitResponse = () => {
-    setLocalStorageDate(npsStorageKeys.lastResponseDate, new Date());
-    setLocalStorageDate(npsStorageKeys.firstDismissalDate, null);
-    setLocalStorageDate(npsStorageKeys.lastDismissalDate, null);
+    setNpsSurveySettings((settings) => ({
+      ...settings,
+      lastResponseDate: new Date(),
+      firstDismissalDate: null,
+      lastDismissalDate: null,
+    }));
     // TODO: send response to the backend
     setSurveyIsShown(false);
   };
 
   const handleDismiss = () => {
-    if (firstDismissalDate) {
-      // If the user dismisses the survey for the second time
-      setLocalStorageDate(npsStorageKeys.lastDismissalDate, new Date());
-    } else {
-      // If the user dismisses the survey for the first time
-      setLocalStorageDate(npsStorageKeys.firstDismissalDate, new Date());
-    }
+    setNpsSurveySettings((settings) => {
+      const nextSettings = {
+        ...settings,
+        lastResponseDate: null,
+      };
 
-    setLocalStorageDate(npsStorageKeys.lastResponseDate, null);
+      if (settings.firstDismissalDate) {
+        // If the user dismisses the survey for the second time
+        nextSettings.lastDismissalDate = new Date();
+      } else {
+        // If the user dismisses the survey for the first time
+        nextSettings.firstDismissalDate = new Date();
+      }
+
+      return nextSettings;
+    });
+
     setSurveyIsShown(false);
   };
 
