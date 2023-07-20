@@ -36,3 +36,6 @@ export const DRAG_DROP_TYPES = {
 export const CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME = 'review-workflows-number-of-workflows';
 export const CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME =
   'review-workflows--stages-per-workflow';
+
+export const PROMPT_CONTENT_TYPE_REASSIGNMENT = 'reassign-content-type';
+export const PROMPT_HAS_DELETED_SERVER_STAGE = 'has-deleted-server-stage';

@@ -28,6 +28,8 @@ import { WorkflowAttributes } from '../../components/WorkflowAttributes';
 import {
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
   CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
+  PROMPT_CONTENT_TYPE_REASSIGNMENT,
+  PROMPT_HAS_DELETED_SERVER_STAGE,
   REDUX_NAMESPACE,
 } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
@@ -45,10 +47,10 @@ export function ReviewWorkflowsEditView() {
   const {
     isLoading: isWorkflowLoading,
     meta,
-    workflows: [workflow],
+    workflows,
     status: workflowStatus,
     refetch,
-  } = useReviewWorkflows({ id: workflowId });
+  } = useReviewWorkflows();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
     status,
@@ -56,17 +58,22 @@ export function ReviewWorkflowsEditView() {
       currentWorkflow: {
         data: currentWorkflow,
         isDirty: currentWorkflowIsDirty,
-        hasDeletedServerStages: currentWorkflowHasDeletedServerStages,
+        hasDeletedServerStages,
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const {
     allowedActions: { canDelete, canUpdate },
   } = useRBAC(permissions.settings['review-workflows']);
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
+  const [confirmationPrompts, setConfirmationPrompts] = React.useState([]);
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const [initialErrors, setInitialErrors] = React.useState(null);
+
+  const workflow = workflows.find((workflow) => workflow.id === parseInt(workflowId, 10));
+  const contentTypesFromOtherWorkflows = workflows
+    .filter((workflow) => workflow.id !== parseInt(workflowId, 10))
+    .flatMap((workflow) => workflow.contentTypes);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -125,15 +132,19 @@ export function ReviewWorkflowsEditView() {
     await updateWorkflow(currentWorkflow);
     await refetch();
 
-    setIsConfirmDeleteDialogOpen(false);
+    setConfirmationPrompts([]);
   };
 
   const handleConfirmDeleteDialog = async () => {
-    await submitForm();
+    setConfirmationPrompts((prev) => [...prev.slice(0, -1)]);
+
+    if (confirmationPrompts.length === 1) {
+      await submitForm();
+    }
   };
 
-  const toggleConfirmDeleteDialog = () => {
-    setIsConfirmDeleteDialogOpen((prev) => !prev);
+  const onCloseConfirmation = () => {
+    setConfirmationPrompts((prev) => [...prev.slice(0, -1)]);
   };
 
   const formik = useFormik({
@@ -141,8 +152,21 @@ export function ReviewWorkflowsEditView() {
     initialErrors,
     initialValues: currentWorkflow,
     async onSubmit() {
-      if (currentWorkflowHasDeletedServerStages) {
-        setIsConfirmDeleteDialogOpen(true);
+      const isContentTypeReassignment = currentWorkflow.contentTypes.some((contentType) =>
+        contentTypesFromOtherWorkflows.includes(contentType)
+      );
+
+      // Display a confirmation prompt before saving in case the user:
+      // 1. attempts to delete a stage that existed before on the server
+      // 2. attempts to assign a content-type that is already assigned to another workflow
+      if (hasDeletedServerStages || isContentTypeReassignment) {
+        if (hasDeletedServerStages) {
+          setConfirmationPrompts((prev) => [...prev, PROMPT_HAS_DELETED_SERVER_STAGE]);
+        }
+
+        if (isContentTypeReassignment) {
+          setConfirmationPrompts((prev) => [...prev, PROMPT_CONTENT_TYPE_REASSIGNMENT]);
+        }
       } else if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
         meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
@@ -243,7 +267,7 @@ export function ReviewWorkflowsEditView() {
                 disabled={!currentWorkflowIsDirty || !canUpdate}
                 // if the confirm dialog is open the loading state is on
                 // the confirm button already
-                loading={!isConfirmDeleteDialogOpen && isLoading}
+                loading={!confirmationPrompts && isLoading}
               >
                 {formatMessage({
                   id: 'global.save',
@@ -298,8 +322,23 @@ export function ReviewWorkflowsEditView() {
             'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
         }}
         isConfirmButtonLoading={isLoading}
-        isOpen={isConfirmDeleteDialogOpen}
-        onToggleDialog={toggleConfirmDeleteDialog}
+        isOpen={confirmationPrompts.at(-1) === PROMPT_HAS_DELETED_SERVER_STAGE}
+        onToggleDialog={onCloseConfirmation}
+        onConfirm={handleConfirmDeleteDialog}
+      />
+
+      <ConfirmDialog
+        bodyText={formatMessage(
+          {
+            id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
+            defaultMessage:
+              '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to other workflow(s). If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the other workflow(s) and all corresponding information will be removed. Are you sure you want to save?',
+          },
+          { count: contentTypesFromOtherWorkflows.length }
+        )}
+        isConfirmButtonLoading={isLoading}
+        isOpen={confirmationPrompts.at(-1) === PROMPT_CONTENT_TYPE_REASSIGNMENT}
+        onToggleDialog={onCloseConfirmation}
         onConfirm={handleConfirmDeleteDialog}
       />
 

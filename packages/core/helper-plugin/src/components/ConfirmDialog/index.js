@@ -35,10 +35,12 @@ const ConfirmDialog = ({
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Flex justifyContent="center">
             <Typography variant="omega" id="confirm-description">
-              {formatMessage({
-                id: bodyText.id,
-                defaultMessage: bodyText.defaultMessage,
-              })}
+              {typeof bodyText === 'string'
+                ? bodyText
+                : formatMessage({
+                    id: bodyText.id,
+                    defaultMessage: bodyText.defaultMessage,
+                  })}
             </Typography>
           </Flex>
         </Flex>
