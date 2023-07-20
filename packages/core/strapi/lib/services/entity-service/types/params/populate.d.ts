@@ -40,9 +40,21 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
  */
 type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
 
-type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
-  [key in PopulatableKeys<TSchemaUID>]?: Boolean | Params.For<Attribute.GetTarget<TSchemaUID, key>>;
+type PopulateFragments<TSchemaUID extends Common.UID.Schema> = {
+  [key in Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>]?: {
+    on?: {
+      [key1 in Attribute.GetValueByKey<TSchemaUID, key>]?: Boolean;
+    };
+  };
 };
+
+type ObjectNotation<TSchemaUID extends Common.UID.Schema> =
+  | {
+      [key in PopulatableKeys<TSchemaUID>]?:
+        | Boolean
+        | Params.For<Attribute.GetTarget<TSchemaUID, key>>;
+    }
+  | PopulateFragments<TSchemaUID>;
 
 export type Any<TSchemaUID extends Common.UID.Schema> =
   | StringNotation<TSchemaUID>
