@@ -107,10 +107,10 @@ export type GetValues<
 
 export type GetRequiredKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
   GetAll<TSchemaUID>,
-  { required: true }
+  Attribute.Required
 >;
 
-export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = keyof Omit<
+export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysExcept<
   GetAll<TSchemaUID>,
-  GetRequiredKeys<TSchemaUID>
+  Attribute.Required
 >;

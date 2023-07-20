@@ -27,7 +27,7 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
   | WildcardNotation
   | PopulatableKeys<TSchemaUID>
   | `${string},${string}`
-  | `${PopulatableKeys}.${string}`;
+  | `${PopulatableKeys<TSchemaUID>}.${string}`;
 
 /**
  * Array notation for populate
