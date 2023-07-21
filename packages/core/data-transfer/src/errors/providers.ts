@@ -4,7 +4,7 @@ import { Severity, SeverityKind } from './constants';
 
 type ProviderStep = 'initialization' | 'validation' | 'transfer';
 
-type ProviderErrorDetails<P extends ProviderStep = ProviderStep, U = never> = {
+export type ProviderErrorDetails<P extends ProviderStep = ProviderStep, U = never> = {
   step: P;
   code?: ErrorCode;
 } & ([U] extends [never] ? unknown : { details?: U });

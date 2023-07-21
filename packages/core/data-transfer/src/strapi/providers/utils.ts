@@ -2,12 +2,13 @@ import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
 import type { Client, Server } from '../../../types/remote/protocol';
-import { ProviderErrorDetails } from '../../../dist/errors/providers';
+
 import {
   ProviderError,
   ProviderTransferError,
   ProviderInitializationError,
   ProviderValidationError,
+  ProviderErrorDetails,
 } from '../../errors/providers';
 
 interface IDispatcherState {
