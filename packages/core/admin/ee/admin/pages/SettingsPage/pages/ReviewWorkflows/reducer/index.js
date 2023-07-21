@@ -73,7 +73,7 @@ export function reducer(state = initialState, action) {
 
         if (!currentWorkflow.hasDeletedServerStages) {
           draft.clientState.currentWorkflow.hasDeletedServerStages = !!(
-            state.serverState.currentWorkflow?.stages ?? []
+            state.serverState.workflow?.stages ?? []
           ).find((stage) => stage.id === stageId);
         }
 

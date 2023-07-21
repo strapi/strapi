@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Button, Flex, Loader } from '@strapi/design-system';
+import { Button, Flex, Loader, Typography } from '@strapi/design-system';
 import {
+  ConfirmDialog,
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
@@ -42,6 +43,7 @@ export function ReviewWorkflowsCreateView() {
   const permissions = useSelector(selectAdminPermissions);
   const toggleNotification = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
+  const { isLoading: isWorkflowLoading, meta, workflows } = useReviewWorkflows();
   const {
     clientState: {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
@@ -52,8 +54,11 @@ export function ReviewWorkflowsCreateView() {
   } = useRBAC(permissions.settings['review-workflows']);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
-  const { meta, isLoading: isWorkflowLoading } = useReviewWorkflows();
   const [initialErrors, setInitialErrors] = React.useState(null);
+  const [savePrompts, setSavePrompts] = React.useState({});
+
+  const limits = getFeature('review-workflows');
+  const contentTypesFromOtherWorkflows = workflows.flatMap((workflow) => workflow.contentTypes);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -79,6 +84,8 @@ export function ReviewWorkflowsCreateView() {
   );
 
   const submitForm = async () => {
+    setSavePrompts({});
+
     try {
       const workflow = await mutateAsync({ workflow: currentWorkflow });
 
@@ -110,13 +117,23 @@ export function ReviewWorkflowsCreateView() {
     }
   };
 
-  const limits = getFeature('review-workflows');
+  const handleConfirmDeleteDialog = async () => {
+    await submitForm();
+  };
+
+  const handleConfirmClose = () => {
+    setSavePrompts({});
+  };
 
   const formik = useFormik({
     enableReinitialize: true,
     initialErrors,
     initialValues: currentWorkflow,
     async onSubmit() {
+      const isContentTypeReassignment = currentWorkflow.contentTypes.some((contentType) =>
+        contentTypesFromOtherWorkflows.includes(contentType)
+      );
+
       /**
        * If the current license has a limit, check if the total count of workflows
        * exceeds that limit and display the limits modal instead of sending the
@@ -140,6 +157,8 @@ export function ReviewWorkflowsCreateView() {
           parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
+      } else if (isContentTypeReassignment) {
+        setSavePrompts((prev) => ({ ...prev, hasReassignedContentTypes: true }));
       } else {
         submitForm();
       }
@@ -243,7 +262,10 @@ export function ReviewWorkflowsCreateView() {
                 </Loader>
               ) : (
                 <Flex alignItems="stretch" direction="column" gap={7}>
-                  <WorkflowAttributes contentTypes={{ collectionTypes, singleTypes }} />
+                  <WorkflowAttributes
+                    contentTypes={{ collectionTypes, singleTypes }}
+                    workflows={workflows}
+                  />
                   <Stages stages={formik.values?.stages} />
                 </Flex>
               )}
@@ -251,6 +273,41 @@ export function ReviewWorkflowsCreateView() {
           </Layout.Root>
         </Form>
       </FormikProvider>
+
+      <ConfirmDialog.Root
+        isConfirmButtonLoading={isLoading}
+        isOpen={Object.keys(savePrompts).length > 0}
+        onToggleDialog={handleConfirmClose}
+        onConfirm={handleConfirmDeleteDialog}
+      >
+        <ConfirmDialog.Body>
+          <Flex direction="column" gap={5}>
+            {savePrompts.hasReassignedContentTypes && (
+              <Typography textAlign="center" variant="omega">
+                {formatMessage(
+                  {
+                    id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
+                    defaultMessage:
+                      '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                  },
+                  {
+                    count: contentTypesFromOtherWorkflows.filter((contentType) =>
+                      currentWorkflow.contentTypes.includes(contentType)
+                    ).length,
+                  }
+                )}
+              </Typography>
+            )}
+
+            <Typography textAlign="center" variant="omega">
+              {formatMessage({
+                id: 'Settings.review-workflows.page.delete.confirm.confirm',
+                defaultMessage: 'Are you sure you want to save?',
+              })}
+            </Typography>
+          </Flex>
+        </ConfirmDialog.Body>
+      </ConfirmDialog.Root>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}
