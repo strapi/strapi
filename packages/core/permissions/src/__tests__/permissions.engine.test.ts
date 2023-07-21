@@ -5,7 +5,7 @@ import permissions from '..';
 import type { HookName } from '../engine/hooks';
 import type { Permission } from '../domain/permission';
 
-interface EnginHook {
+interface EngineHook {
   name: HookName;
   fn: (permission: Permission) => unknown;
 }
@@ -72,7 +72,7 @@ describe('Permissions Engine', () => {
   /**
    * build an engine and add all given hooks
    */
-  const buildEngineWithHooks = (params = { providers }, engineHooks: EnginHook[] = []) => {
+  const buildEngineWithHooks = (params = { providers }, engineHooks: EngineHook[] = []) => {
     const engine = permissions.engine.new(params);
     engineHooks.forEach(({ name, fn }) => {
       engine.on(name, fn);
@@ -90,7 +90,7 @@ describe('Permissions Engine', () => {
     abilityOptions = {},
   }: {
     permissions: Permission[];
-    engineHooks?: EnginHook[];
+    engineHooks?: EngineHook[];
     engineProviders?: { action: any; condition: any };
     abilityOptions?: Record<string, unknown>;
   }) => {

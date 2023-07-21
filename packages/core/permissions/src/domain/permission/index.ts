@@ -1,6 +1,6 @@
 import _ from 'lodash/fp';
 
-const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'];
+const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'] as const;
 
 const sanitizePermissionFields = _.pick(PERMISSION_FIELDS);
 

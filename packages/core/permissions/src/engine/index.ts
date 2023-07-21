@@ -172,8 +172,6 @@ const newEngine = (params: EngineParams): Engine => {
 
     /**
      * Register a new handler for a given hook
-     *
-     * @return {this}
      */
     on(hook, handler) {
       const validHooks = Object.keys(state.hooks);
