@@ -13,13 +13,20 @@ This document explains at a high level how we create our app instance, run the e
 
 ## Get Started
 
+To run the e2e tests, you must first install the playwright browsers.
+
+```shell
+npx playwright install
+```
 Because we require a "fresh" instance to assert our e2e tests against this is included in the testing script so all you need to run is:
 
 ```shell
 yarn test:e2e
 ```
 
-This will spawn a Strapi instance in `test-apps/playwright` where the `playwright.config` will start the instance and run tests against. It will not install the dependencies because `test-apps` are considered part of the monorepo therefore using the most recent version of strapi (published or development) meaning our most recent code changes can be tested against.
+This will spawn by default a Strapi instance per testing domain (e.g. content-manager) in `test-apps` where the an individual `playwright.config` will start the instance and run tests against. It will automatically link the dependencies from the instance to the monorepo because `test-apps` are not considered part of the monorepo but we want to be using the most recent version of strapi (published or development) therefore meaning our most recent code changes can be tested against.
+
+If you need to clean the test-apps folder because they are not working as expected, you can run `yarn test:e2e clean` which will clean said directory.
 
 ## Strapi Templates
 
@@ -35,6 +42,6 @@ For more information check out their [docs](https://playwright.dev/docs/intro). 
 
 ## What makes a good end to end test?
 
-This is the million dollar question. E2E tests typically test complete user flows that touch numerous points of the application it's testing, we're not interested in asserting API responses, we're writing from the perspective of the user so consider writing them with your story hat on. E.g. "As a user I want to create a new entity and publish that entity".
+This is the million dollar question. E2E tests typically test complete user flows that touch numerous points of the application it's testing, we're not interested in what happens during a process, only the user perspective and end results. Consider writing them with your story hat on. E.g. "As a user I want to create a new entity,  publish that entity, and then be able to retrieve its data from the content API".
 
 Our E2E test suite should _at minimum_ cover the core business flows of the product and this is lead by the QA defined set for this. Consult with your QA if you're not sure.

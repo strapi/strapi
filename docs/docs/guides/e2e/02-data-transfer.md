@@ -26,13 +26,13 @@ The full documentation of the feature can be seen [here](https://docs.strapi.io/
 Because we're using an Strapi template for the test instance, it makes the most sense to add/edit the dataset in said templated instance. Begin by creating the instance:
 
 ```shell
-yarn test:e2e:setup
+yarn test:e2e
 ```
 
-Then, you should be able to navigate to the app – `cd ./test-apps/playwright`, the current content schemas should already be defined in there so you will be able to instantly import the current data packet to bring to life the test instance (instead of it being fresh):
+Then, you should be able to navigate to the app – `cd ./test-apps/test-app-XX`, the current content schemas should already be defined in there so you will be able to instantly import the current data packet to bring to life the test instance (instead of it being fresh):
 
 ```shell
-yarn strapi import --file ../../e2e/data/backup.tar
+yarn strapi import --file ../../../e2e/data/backup.tar
 ```
 
 Once that's completed, you should be able to run your Strapi instance as usual:

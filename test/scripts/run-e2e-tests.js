@@ -102,7 +102,7 @@ yargs
                 database: {
                   client: 'sqlite',
                   connection: {
-                    filename: './tmp/data.db',
+                    filename: './.tmp/data.db',
                   },
                   useNullAsDefault: true,
                 },
@@ -117,7 +117,6 @@ yargs
               const pathToEnv = path.join(appPath, '.env');
               const envFile = (await fs.readFile(pathToEnv)).toString();
               const envWithoutPort = envFile.replace('PORT=1337', '');
-              const envWitoutHost = envWithoutPort.replace('HOST=0.0.0.0', '');
               await fs.writeFile(pathToEnv, envWithoutPort);
               /**
                * Always build! Just incase.
@@ -131,7 +130,7 @@ yargs
           );
 
           console.log(
-            `${chalk.green('Successfully')} setup test apps for the follwing domains: ${chalk.bold(
+            `${chalk.green('Successfully')} setup test apps for the following domains: ${chalk.bold(
               domains.join(', ')
             )}`
           );
