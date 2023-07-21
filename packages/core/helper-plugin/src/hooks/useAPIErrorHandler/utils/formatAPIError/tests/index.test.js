@@ -62,4 +62,25 @@ describe('formatAPIError', () => {
   test('error if formatMessage was not passed', () => {
     expect(() => formatAPIError(API_VALIDATION_ERROR_FIXTURE)).toThrow();
   });
+
+  test('give precedence to error.message over error.details', () => {
+    expect(
+      formatAPIError(
+        {
+          ...API_VALIDATION_ERROR_FIXTURE,
+          response: {
+            ...API_VALIDATION_ERROR_FIXTURE.response,
+            data: {
+              ...API_VALIDATION_ERROR_FIXTURE.response.data,
+              error: {
+                ...API_VALIDATION_ERROR_FIXTURE.response.data.error,
+                message: 'Main error message',
+              },
+            },
+          },
+        },
+        { formatMessage, getTrad: (translation) => translation }
+      )
+    ).toBe('Main error message');
+  });
 });

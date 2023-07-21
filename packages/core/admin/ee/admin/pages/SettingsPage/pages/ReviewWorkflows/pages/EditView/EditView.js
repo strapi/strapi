@@ -6,6 +6,7 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -17,19 +18,25 @@ import { useParams } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { setWorkflow } from '../../actions';
+import { resetWorkflow, setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { REDUX_NAMESPACE } from '../../constants';
+import {
+  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
+  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
+  REDUX_NAMESPACE,
+} from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsEditView() {
   const { workflowId } = useParams();
+  const permissions = useSelector(selectAdminPermissions);
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { put } = useFetchClient();
@@ -53,6 +60,9 @@ export function ReviewWorkflowsEditView() {
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const {
+    allowedActions: { canDelete, canUpdate },
+  } = useRBAC(permissions.settings['review-workflows']);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
@@ -87,20 +97,12 @@ export function ReviewWorkflowsEditView() {
 
       return res;
     } catch (error) {
-      // TODO: the current implementation of `formatAPIError` prints all error messages of all details,
-      // which get's hairy when we have duplicated-name errors, because the same error message is printed
-      // several times. What we want instead in these scenarios is to print only the error summary and
-      // display the individual error messages for each field. This is a workaround, until we change the
-      // implementation of `formatAPIError`.
+      // TODO: this would benefit from a utility to get a formik error
+      // representation from an API error
       if (
         error.response.data?.error?.name === 'ValidationError' &&
         error.response.data?.error?.details?.errors?.length > 0
       ) {
-        toggleNotification({
-          type: 'warning',
-          message: error.response.data.error.message,
-        });
-
         setInitialErrors(
           error.response.data?.error?.details?.errors.reduce((acc, error) => {
             set(acc, error.path, error.message);
@@ -108,12 +110,12 @@ export function ReviewWorkflowsEditView() {
             return acc;
           }, {})
         );
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
       }
+
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
 
       return null;
     }
@@ -141,7 +143,10 @@ export function ReviewWorkflowsEditView() {
     async onSubmit() {
       if (currentWorkflowHasDeletedServerStages) {
         setIsConfirmDeleteDialogOpen(true);
-      } else if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
+      } else if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         /**
          * If the current license has a limit, check if the total count of workflows
          * exceeds that limit and display the limits modal instead of sending the
@@ -155,8 +160,9 @@ export function ReviewWorkflowsEditView() {
          * update, because it would throw an API error.
          */
       } else if (
-        limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
       } else {
@@ -174,6 +180,12 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
+
+    // reset the state to the initial state to avoid flashes if a user
+    // navigates from an edit-view to a create-view
+    return () => {
+      dispatch(resetWorkflow());
+    };
   }, [workflowStatus, workflow, dispatch]);
 
   /**
@@ -191,11 +203,15 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal('workflow');
       } else if (
-        limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
       }
@@ -204,8 +220,7 @@ export function ReviewWorkflowsEditView() {
     currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
-    limits.stagesPerWorkflow,
-    limits.workflows,
+    limits,
     meta?.workflowCount,
     meta.workflowsTotal,
   ]);
@@ -225,7 +240,7 @@ export function ReviewWorkflowsEditView() {
                 startIcon={<Check />}
                 type="submit"
                 size="M"
-                disabled={!currentWorkflowIsDirty}
+                disabled={!currentWorkflowIsDirty || !canUpdate}
                 // if the confirm dialog is open the loading state is on
                 // the confirm button already
                 loading={!isConfirmDeleteDialogOpen && isLoading}
@@ -236,28 +251,40 @@ export function ReviewWorkflowsEditView() {
                 })}
               </Button>
             }
-            subtitle={formatMessage(
-              {
-                id: 'Settings.review-workflows.page.subtitle',
-                defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-              },
-              { count: currentWorkflow?.stages?.length ?? 0 }
-            )}
+            subtitle={
+              currentWorkflow.stages.length > 0 &&
+              formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow.stages.length }
+              )
+            }
             title={currentWorkflow.name}
           />
 
           <Layout.Root>
             {isLoadingModels || status === 'loading' ? (
-              <Loader>
-                {formatMessage({
-                  id: 'Settings.review-workflows.page.isLoading',
-                  defaultMessage: 'Workflow is loading',
-                })}
-              </Loader>
+              <Flex justifyContent="center">
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              </Flex>
             ) : (
               <Flex alignItems="stretch" direction="column" gap={7}>
-                <WorkflowAttributes contentTypes={{ collectionTypes, singleTypes }} />
-                <Stages stages={formik.values?.stages} />
+                <WorkflowAttributes
+                  canUpdate={canUpdate}
+                  contentTypes={{ collectionTypes, singleTypes }}
+                />
+                <Stages
+                  canDelete={canDelete}
+                  canUpdate={canUpdate}
+                  stages={formik.values?.stages}
+                />
               </Flex>
             )}
           </Layout.Root>

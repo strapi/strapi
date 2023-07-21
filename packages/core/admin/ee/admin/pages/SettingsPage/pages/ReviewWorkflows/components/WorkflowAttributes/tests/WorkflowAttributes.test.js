@@ -74,11 +74,84 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     expect(getByRole('textbox')).toHaveValue('workflow name');
     expect(getByText(/2 content types selected/i)).toBeInTheDocument();
 
+    expect(getByRole('textbox')).not.toHaveAttribute('disabled');
+    expect(getByRole('combobox', { name: /associated to/i })).not.toHaveAttribute('data-disabled');
+
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
       expect(getByRole('option', { name: /content type 1/i })).toBeInTheDocument();
       expect(getByRole('option', { name: /content type 2/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should disabled fields if canUpdate = false', async () => {
+    const { getByRole } = setup({ canUpdate: false });
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveAttribute('disabled');
+      expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
+    });
+  });
+
+  it('should not render a collection-type group if there are not collection-types', async () => {
+    const { getByRole, queryByRole, user } = setup({
+      contentTypes: {
+        collectionTypes: [],
+
+        singleTypes: [
+          {
+            uid: 'uid2',
+            info: {
+              displayName: 'Content Type 2',
+            },
+          },
+        ],
+      },
+    });
+
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+
+    await user.click(contentTypesSelect);
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument();
+      expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it('should not render a collection-type group if there are not single-types', async () => {
+    const { getByRole, queryByRole, user } = setup({
+      contentTypes: {
+        collectionTypes: [
+          {
+            uid: 'uid2',
+            info: {
+              displayName: 'Content Type 2',
+            },
+          },
+        ],
+
+        singleTypes: [],
+      },
+    });
+
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+
+    await user.click(contentTypesSelect);
+
+    await waitFor(() => {
+      expect(queryByRole('option', { name: /Single Types/i })).not.toBeInTheDocument();
+      expect(getByRole('option', { name: /Collection Types/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should disabled fields if canUpdate = false', async () => {
+    const { getByRole } = setup({ canUpdate: false });
+
+    await waitFor(() => {
+      expect(getByRole('textbox')).toHaveAttribute('disabled');
+      expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
     });
   });
 });
