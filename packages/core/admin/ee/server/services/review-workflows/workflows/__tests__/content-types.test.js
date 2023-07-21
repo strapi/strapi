@@ -9,6 +9,7 @@ const stagesServiceMock = {
 
 const workflowsServiceMock = {
   getAssignedWorkflow: jest.fn(),
+  _getAssignedWorkflows: jest.fn(),
 };
 
 const reviewWorkflowsValidationMock = {
@@ -67,7 +68,7 @@ describe('Review Workflows', () => {
       test('should update the configuration of newly added content types', async () => {
         const prevOptions = { testOptions: true };
 
-        workflowsServiceMock.getAssignedWorkflow.mockResolvedValueOnce(null);
+        workflowsServiceMock._getAssignedWorkflows.mockResolvedValueOnce([]);
         CTMPContentTypesServiceMock.findConfiguration.mockResolvedValueOnce({
           options: prevOptions,
         });

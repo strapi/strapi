@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import useLicenseLimitNotification from '..';
-import useLicenseLimits from '../../useLicenseLimits';
+import { useLicenseLimits } from '../../useLicenseLimits';
 
 const baseLicenseInfo = {
   enforcementUserCount: 5,
@@ -34,11 +34,11 @@ jest.mock('@strapi/helper-plugin', () => {
   };
 });
 
-jest.mock('../../useLicenseLimits', () => {
-  return jest.fn(() => ({
+jest.mock('../../useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
     license: baseLicenseInfo,
-  }));
-});
+  })),
+}));
 
 const setup = (...args) =>
   renderHook(() => useLicenseLimitNotification(...args), {

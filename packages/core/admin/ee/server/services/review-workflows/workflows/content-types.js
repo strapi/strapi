@@ -30,26 +30,35 @@ module.exports = ({ strapi }) => {
      * @param {Workflow.Stage} options.stageId - The new stage to assign the entities to
      */
     async migrate({ srcContentTypes = [], destContentTypes, stageId }) {
-      // Workflows service is using this content-types service, to avoid an infinite loop, we need to get the service in the method
       const workflowsService = getService('workflows', { strapi });
       const { created, deleted } = diffContentTypes(srcContentTypes, destContentTypes);
 
-      await mapAsync(created, async (uid) => {
-        // If it was assigned to another workflow, transfer it from the previous workflow
-        const srcWorkflow = await workflowsService.getAssignedWorkflow(uid);
-        if (srcWorkflow) {
-          // Updates all existing entities stages links to the new stage
-          await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
-          return this.transferContentType(srcWorkflow, uid);
-        }
-        await updateContentTypeConfig(uid, true);
+      await mapAsync(
+        created,
+        async (uid) => {
+          // Content Types should only be assigned to one workflow
+          // However, edge cases can happen, and this handles them
+          const srcWorkflows = await workflowsService._getAssignedWorkflows(uid, {});
 
-        // Create new stages links to the new stage
-        return stagesService.updateEntitiesStage(uid, {
-          fromStageId: null,
-          toStageId: stageId,
-        });
-      });
+          if (srcWorkflows.length) {
+            // Updates all existing entities stages links to the new stage
+            await stagesService.updateEntitiesStage(uid, { toStageId: stageId });
+            // Transfer content types from the previous workflow(s)
+            await mapAsync(srcWorkflows, (srcWorkflow) =>
+              this.transferContentTypes(srcWorkflow, uid)
+            );
+          }
+          await updateContentTypeConfig(uid, true);
+
+          // Create new stages links to the new stage
+          return stagesService.updateEntitiesStage(uid, {
+            fromStageId: null,
+            toStageId: stageId,
+          });
+        },
+        // transferContentTypes can cause race conditions if called in parallel when updating the same workflow
+        { concurrency: 1 }
+      );
 
       await mapAsync(deleted, async (uid) => {
         await updateContentTypeConfig(uid, false);
@@ -58,15 +67,15 @@ module.exports = ({ strapi }) => {
     },
 
     /**
-     * Filters the content types assigned to the previous workflow.
+     * Filters the content types assigned to a workflow
      * @param {Workflow} srcWorkflow - The workflow to transfer from
      * @param {string} uid - The content type uid
      */
-    async transferContentType(srcWorkflow, uid) {
+    async transferContentTypes(srcWorkflow, uid) {
       // Update assignedContentTypes of the previous workflow
       await strapi.entityService.update(WORKFLOW_MODEL_UID, srcWorkflow.id, {
         data: {
-          contentTypes: srcWorkflow.contentTypes.filter((ct) => ct !== uid),
+          contentTypes: srcWorkflow.contentTypes.filter((contentType) => contentType !== uid),
         },
       });
     },

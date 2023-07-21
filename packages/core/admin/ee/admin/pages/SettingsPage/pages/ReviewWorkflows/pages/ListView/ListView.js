@@ -23,18 +23,22 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
+  useRBAC,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
+import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
+import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 
 const ActionLink = styled(Link)`
@@ -76,6 +80,10 @@ export function ReviewWorkflowsListView() {
   const toggleNotification = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const { trackUsage } = useTracking();
+  const permissions = useSelector(selectAdminPermissions);
+  const {
+    allowedActions: { canCreate, canDelete },
+  } = useRBAC(permissions.settings['review-workflows']);
 
   const limits = getFeature('review-workflows');
 
@@ -148,24 +156,21 @@ export function ReviewWorkflowsListView() {
 
   React.useEffect(() => {
     if (!isLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal(true);
       }
     }
-  }, [
-    isLicenseLoading,
-    isLoading,
-    limits.stagesPerWorkflow,
-    limits.workflows,
-    meta?.workflowCount,
-    meta.workflowsTotal,
-  ]);
+  }, [isLicenseLoading, isLoading, limits, meta?.workflowCount, meta.workflowsTotal]);
 
   return (
     <>
       <Layout.Header
         primaryAction={
           <LinkButton
+            disabled={!canCreate}
             startIcon={<Plus />}
             size="S"
             to="/settings/review-workflows/create"
@@ -180,7 +185,10 @@ export function ReviewWorkflowsListView() {
                * current hard-limit of 200 they will see an error thrown by the API.
                */
 
-              if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
+              if (
+                limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+                meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+              ) {
                 event.preventDefault();
                 setShowLimitModal(true);
               } else {
@@ -207,42 +215,50 @@ export function ReviewWorkflowsListView() {
 
       <Layout.Root>
         {isLoading || isLoadingModels ? (
-          <Loader>
-            {formatMessage({
-              id: 'Settings.review-workflows.page.list.isLoading',
-              defaultMessage: 'Workflows are loading',
-            })}
-          </Loader>
+          <Flex justifyContent="center">
+            <Loader>
+              {formatMessage({
+                id: 'Settings.review-workflows.page.list.isLoading',
+                defaultMessage: 'Workflows are loading',
+              })}
+            </Loader>
+          </Flex>
         ) : (
           <Table
             colCount={3}
             footer={
               // TODO: we should be able to use a link here instead of an (inaccessible onClick) handler
-              <TFooter
-                icon={<Plus />}
-                onClick={() => {
-                  /**
-                   * If the current license has a workflow limit:
-                   * check if the total count of workflows exceeds that limit
-                   *
-                   * If the current license does not have a limit (e.g. offline license):
-                   * allow the user to navigate to the create-view. In case they exceed the
-                   * current hard-limit of 200 they will see an error thrown by the API.
-                   */
+              canCreate && (
+                <TFooter
+                  icon={<Plus />}
+                  onClick={() => {
+                    /**
+                     * If the current license has a workflow limit:
+                     * check if the total count of workflows exceeds that limit
+                     *
+                     * If the current license does not have a limit (e.g. offline license):
+                     * allow the user to navigate to the create-view. In case they exceed the
+                     * current hard-limit of 200 they will see an error thrown by the API.
+                     */
 
-                  if (limits?.workflows && meta?.workflowCount >= parseInt(limits.workflows, 10)) {
-                    setShowLimitModal(true);
-                  } else {
-                    push('/settings/review-workflows/create');
-                    trackUsage('willCreateWorkflow');
-                  }
-                }}
-              >
-                {formatMessage({
-                  id: 'Settings.review-workflows.list.page.create',
-                  defaultMessage: 'Create new workflow',
-                })}
-              </TFooter>
+                    if (
+                      limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+                      meta?.workflowCount >=
+                        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+                    ) {
+                      setShowLimitModal(true);
+                    } else {
+                      push('/settings/review-workflows/create');
+                      trackUsage('willCreateWorkflow');
+                    }
+                  }}
+                >
+                  {formatMessage({
+                    id: 'Settings.review-workflows.list.page.create',
+                    defaultMessage: 'Create new workflow',
+                  })}
+                </TFooter>
+              )
             }
             rowCount={1}
           >
@@ -326,21 +342,22 @@ export function ReviewWorkflowsListView() {
                         <Pencil />
                       </ActionLink>
 
-                      <IconButton
-                        aria-label={formatMessage(
-                          {
-                            id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
-                            defaultMessage: 'Delete {name}',
-                          },
-                          { name: 'Default workflow' }
-                        )}
-                        disabled={workflows.length === 1}
-                        icon={<Trash />}
-                        noBorder
-                        onClick={() => {
-                          handleDeleteWorkflow(workflow.id);
-                        }}
-                      />
+                      {workflows.length > 1 && canDelete && (
+                        <IconButton
+                          aria-label={formatMessage(
+                            {
+                              id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
+                              defaultMessage: 'Delete {name}',
+                            },
+                            { name: 'Default workflow' }
+                          )}
+                          icon={<Trash />}
+                          noBorder
+                          onClick={() => {
+                            handleDeleteWorkflow(workflow.id);
+                          }}
+                        />
+                      )}
                     </Flex>
                   </Td>
                 </Tr>

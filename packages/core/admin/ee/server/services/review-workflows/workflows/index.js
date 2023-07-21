@@ -163,11 +163,23 @@ module.exports = ({ strapi }) => {
      * @returns {Promise<object|null>} - Assigned workflow object if found, or null.
      */
     async getAssignedWorkflow(uid, opts = {}) {
-      const workflows = await this.find({
+      const workflows = await this._getAssignedWorkflows(uid, opts);
+      return workflows.length > 0 ? workflows[0] : null;
+    },
+
+    /**
+     * Finds all the assigned workflows for a given content type ID.
+     * Normally, there should only be one workflow assigned to a content type.
+     * However, edge cases can occur where a content type is assigned to multiple workflows.
+     * @param {string} uid - Content type ID to find the assigned workflows for.
+     * @param {object} opts - Options for the query.
+     * @returns {Promise<object[]>} - List of assigned workflow objects.
+     */
+    async _getAssignedWorkflows(uid, opts = {}) {
+      return this.find({
         ...opts,
         filters: { contentTypes: getWorkflowContentTypeFilter({ strapi }, uid) },
       });
-      return workflows.length > 0 ? workflows[0] : null;
     },
 
     /**

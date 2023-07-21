@@ -122,4 +122,10 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
       name: 'New name',
     });
   });
+
+  it('should not render the "add stage" button if canUpdate = false', () => {
+    const { queryByText } = setup({ canUpdate: false });
+
+    expect(queryByText('Add new stage')).not.toBeInTheDocument();
+  });
 });
