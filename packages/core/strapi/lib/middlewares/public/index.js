@@ -25,7 +25,7 @@ module.exports = (config, { strapi }) => {
     filePath = `./public/${index}`;
   }
 
-  if (!defaultIndex && fs.existsSync('./public/index.html')) {
+  if (filePath === 'index.html' && fs.existsSync('./public/index.html')) {
     filePath = './public/index.html';
   }
   filePath = filePath === 'index.html' ? path.join(__dirname, filePath) : filePath;
