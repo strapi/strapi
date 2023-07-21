@@ -103,7 +103,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
     ])('can be %s', async (name, value) => {
       const newData = {
         ssoLockedRoles: value,
-        defaultRole: localData.restrictedRole.id, // TODO: there seems to be a bug with not setting a default role
+        defaultRole: null,
         autoRegister: false,
       };
       const res = await requests.admin.put('/admin/providers/options', {
@@ -127,7 +127,7 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
       const res = await requests.admin.put('/admin/providers/options', {
         body: {
           ssoLockedRoles: value,
-          defaultRole: localData.restrictedRole.id, // TODO: there seems to be a bug with not setting a default role
+          defaultRole: null,
           autoRegister: false,
         },
       });
@@ -137,6 +137,50 @@ describeOnCondition(edition === 'EE')('SSO Provider Options', () => {
         expect(res.status).toBe(404);
         expect(Array.isArray(res.body)).toBeFalsy();
       }
+    });
+
+    describe('autoRegister and defaultRole', () => {
+      test.each([
+        [null, false],
+        [1, false],
+        [1, true],
+      ])('defaultRole can be %s when autoRegister is %s', async (defaultRole, autoRegister) => {
+        const newData = {
+          defaultRole,
+          autoRegister,
+        };
+        const res = await requests.admin.put('/admin/providers/options', {
+          body: newData,
+        });
+        if (hasSSO) {
+          expect(res.status).toEqual(200);
+          const parsed = JSON.parse(res.text);
+          expect(parsed.data).toMatchObject(newData);
+        } else {
+          expect(res.status).toBe(404);
+          expect(Array.isArray(res.body)).toBeFalsy();
+        }
+      });
+
+      test.each([
+        [null, true],
+        [{}, true],
+        [9999, true],
+      ])('defaultRole cannot be %s when autoRegister is %s', async (defaultRole, autoRegister) => {
+        const newData = {
+          defaultRole,
+          autoRegister,
+        };
+        const res = await requests.admin.put('/admin/providers/options', {
+          body: newData,
+        });
+        if (hasSSO) {
+          expect(res.status).toEqual(400);
+        } else {
+          expect(res.status).toBe(404);
+          expect(Array.isArray(res.body)).toBeFalsy();
+        }
+      });
     });
   });
 });
