@@ -70,7 +70,7 @@ describe('Transfer', () => {
             onDiagnostic: jest.fn().mockReturnThis(),
           },
           onSchemaDiff: jest.fn(),
-          onAssetsBackupError: jest.fn(),
+          addErrorHandler: jest.fn(),
         };
       },
     },
