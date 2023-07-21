@@ -18,11 +18,15 @@ export type SchemaDiffHandlerContext = {
 };
 export type SchemaDiffHandler = Middleware<SchemaDiffHandlerContext>;
 
-export type AssetsBackupErrorHandlerContext = {
+export type ErrorHandlerContext = {
   ignore?: boolean;
 };
 
-export type AssetsBackupErrorHandler = Middleware<AssetsBackupErrorHandlerContext>;
+export type ErrorHandler<T extends ErrorHandlerContext = ErrorHandlerContext> = Middleware<T>;
+
+export type ErrorCode = 'ASSETS_DIRECTORY_ERR';
+
+export type ErrorHandlers = { [k in ErrorCode]: ErrorHandler[] };
 
 /**
  * Defines the capabilities and properties of the transfer engine

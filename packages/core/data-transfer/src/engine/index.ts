@@ -26,8 +26,10 @@ import type {
   StreamItem,
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
-  AssetsBackupErrorHandler,
-  AssetsBackupErrorHandlerContext,
+  ErrorHandler,
+  ErrorHandlerContext,
+  ErrorHandlers,
+  ErrorCode,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -41,6 +43,7 @@ import {
 } from './diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
+import { ProviderTransferError } from '../errors/providers';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -110,18 +113,31 @@ class TransferEngine<
 
   #handlers: {
     schemaDiff: SchemaDiffHandler[];
-    assetsBackupError: AssetsBackupErrorHandler[];
+    errors: Partial<ErrorHandlers>;
   } = {
     schemaDiff: [],
-    assetsBackupError: [],
+    errors: {},
   };
 
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
   }
 
-  onAssetsBackupError(handler: AssetsBackupErrorHandler) {
-    this.#handlers?.assetsBackupError?.push(handler);
+  addErrorHandler(handlerName: ErrorCode, handler: ErrorHandler) {
+    if (!this.#handlers.errors[handlerName]) {
+      this.#handlers.errors[handlerName] = [];
+    }
+    this.#handlers.errors[handlerName]?.push(handler);
+  }
+
+  async emitResolvableError(error: Error, context?: ErrorHandlerContext) {
+    if (error instanceof ProviderTransferError && error.details?.details.code) {
+      const errorCode = error.details?.details.code as ErrorCode;
+      if (!this.#handlers.errors[errorCode]) {
+        this.#handlers.errors[errorCode] = [];
+      }
+      await utils.middleware.runMiddleware(context ?? {}, this.#handlers.errors[errorCode] ?? []);
+    }
   }
 
   // Save the currently open stream so that we can access it at any time
@@ -750,20 +766,17 @@ class TransferEngine<
 
   async beforeTransfer(): Promise<void> {
     const runWithDiagnostic = async (provider: IProvider) => {
-      const context: AssetsBackupErrorHandlerContext = {};
+      const context: ErrorHandlerContext = {};
 
       try {
         await provider.beforeTransfer?.();
       } catch (error) {
-        await utils.middleware.runMiddleware<AssetsBackupErrorHandlerContext>(
-          context,
-          this.#handlers.assetsBackupError
-        );
-        if (context.ignore) {
-          return;
-        }
-        // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
+          await this.emitResolvableError(error, context);
+
+          if (context.ignore) {
+            return;
+          }
           this.panic(error);
         } else {
           this.panic(

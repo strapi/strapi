@@ -151,7 +151,8 @@ module.exports = async (opts) => {
 
   engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
 
-  engine.onAssetsBackupError(
+  engine.addErrorHandler(
+    'ASSETS_DIRECTORY_ERR',
     getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
   );
 
