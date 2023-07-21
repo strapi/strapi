@@ -46,11 +46,11 @@ const TypographyMaxWidth = styled(Typography)`
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
 
-const EntryValidationText = ({ errors, isPublished }) => {
+const EntryValidationText = ({ validationErrors, isPublished }) => {
   const { formatMessage } = useIntl();
 
-  if (errors) {
-    const errorMessages = Object.entries(errors)
+  if (validationErrors) {
+    const validationErrorsMessages = Object.entries(validationErrors)
       .map(([key, value]) =>
         formatMessage(
           { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
@@ -62,9 +62,9 @@ const EntryValidationText = ({ errors, isPublished }) => {
     return (
       <Flex gap={2}>
         <Icon color="danger600" as={CrossCircle} />
-        <Tooltip description={errorMessages}>
+        <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
-            {errorMessages}
+            {validationErrorsMessages}
           </TypographyMaxWidth>
         </Tooltip>
       </Flex>
@@ -99,12 +99,12 @@ const EntryValidationText = ({ errors, isPublished }) => {
 };
 
 EntryValidationText.defaultProps = {
-  errors: null,
+  validationErrors: null,
   isPublished: false,
 };
 
 EntryValidationText.propTypes = {
-  errors: PropTypes.shape({
+  validationErrors: PropTypes.shape({
     [PropTypes.string]: PropTypes.shape({
       id: PropTypes.string,
       defaultMessage: PropTypes.string,
@@ -149,19 +149,19 @@ const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPub
       </Table.Head>
       <Table.LoadingBody />
       <Table.Body>
-        {rowsToDisplay.map(({ entity, errors }, index) => (
-          <Tr key={entity.id}>
-            <Body.CheckboxDataCell rowId={entity.id} index={index} />
+        {rowsToDisplay.map((row, index) => (
+          <Tr key={row.id}>
+            <Body.CheckboxDataCell rowId={row.id} index={index} />
             <Td>
-              <Typography>{entity.id}</Typography>
+              <Typography>{row.id}</Typography>
             </Td>
             {shouldDisplayMainField && (
               <Td>
-                <Typography>{entity[mainField]}</Typography>
+                <Typography>{row[mainField]}</Typography>
               </Td>
             )}
             <Td>
-              {isPublishing && entriesToPublish.includes(entity.id) ? (
+              {isPublishing && entriesToPublish.includes(row.id) ? (
                 <Flex gap={2}>
                   <Typography>
                     {formatMessage({
@@ -172,14 +172,17 @@ const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPub
                   <Loader small />
                 </Flex>
               ) : (
-                <EntryValidationText errors={errors} isPublished={entity.publishedAt !== null} />
+                <EntryValidationText
+                  validationErrors={row.validationErrors}
+                  isPublished={row.publishedAt !== null}
+                />
               )}
             </Td>
             <Td>
               <IconButton
                 forwardedAs={Link}
                 to={{
-                  pathname: `${pathname}/${entity.id}`,
+                  pathname: `${pathname}/${row.id}`,
                   state: { from: pathname },
                 }}
                 label={formatMessage(
@@ -229,15 +232,15 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
   const [publishedCount, setPublishedCount] = React.useState(0);
 
   const entriesToPublish = rows
-    .filter(({ entity, errors }) => selectedEntries.includes(entity.id) && !errors)
-    .map(({ entity }) => entity.id);
+    .filter(({ id, validationErrors }) => selectedEntries.includes(id) && !validationErrors)
+    .map(({ id }) => id);
 
   const { post } = useFetchClient();
   const toggleNotification = useNotification();
   const { contentType } = useSelector(listViewDomain());
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
-    ({ entity, errors }) => selectedEntries.includes(entity.id) && errors
+    ({ id, validationErrors }) => selectedEntries.includes(id) && validationErrors
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
@@ -247,18 +250,18 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
     {
       onSuccess() {
         const update = rowsToDisplay.filter((row) => {
-          if (entriesToPublish.includes(row.entity.id)) {
+          if (entriesToPublish.includes(row.id)) {
             // Deselect the entries that have been published from the modal table
-            onSelectRow({ name: row.entity.id, value: false });
+            onSelectRow({ name: row.id, value: false });
           }
 
           // Remove the entries that have been published from the table
-          return !entriesToPublish.includes(row.entity.id);
+          return !entriesToPublish.includes(row.id);
         });
 
         setRowsToDisplay(update);
         // Set the parent's entries to fetch when clicking refresh
-        setEntriesToFetch(update.map(({ entity }) => entity.id));
+        setEntriesToFetch(update.map(({ id }) => id));
 
         if (update.length === 0) {
           toggleModal();
@@ -428,11 +431,11 @@ const SelectedEntriesModal = ({ onToggle }) => {
           try {
             schema.validateSync(entry, { abortEarly: false });
 
-            return { entity: entry };
+            return entry;
           } catch (e) {
             return {
-              entity: entry,
-              errors: getYupInnerErrors(e),
+              ...entry,
+              validationErrors: getYupInnerErrors(e),
             };
           }
         });
