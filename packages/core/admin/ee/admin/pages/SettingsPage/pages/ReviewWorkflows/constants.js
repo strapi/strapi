@@ -33,6 +33,5 @@ export const DRAG_DROP_TYPES = {
   STAGE: 'stage',
 };
 
-export const CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME = 'review-workflows-number-of-workflows';
-export const CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME =
-  'review-workflows--stages-per-workflow';
+export const CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME = 'numberOfWorkflows';
+export const CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME = 'stagesPerWorkflow';

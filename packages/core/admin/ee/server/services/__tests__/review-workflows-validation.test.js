@@ -48,33 +48,33 @@ describe('Review workflows - Validation service', () => {
   });
   describe('register', () => {
     test('Limits object should be frozen after register', () => {
-      validationService.register({ workflows: 2, stagesPerWorkflow: 10 });
-      expect(validationService.limits.workflows).toEqual(2);
+      validationService.register({ numberOfWorkflows: 2, stagesPerWorkflow: 10 });
+      expect(validationService.limits.numberOfWorkflows).toEqual(2);
       expect(validationService.limits.stagesPerWorkflow).toEqual(10);
       expect(Object.isFrozen(validationService.limits)).toBe(true);
     });
     test(`Limits object shouldn't be frozen before register`, () => {
-      expect(validationService.limits.workflows).toEqual(MAX_WORKFLOWS);
+      expect(validationService.limits.numberOfWorkflows).toEqual(MAX_WORKFLOWS);
       expect(validationService.limits.stagesPerWorkflow).toEqual(MAX_STAGES_PER_WORKFLOW);
       expect(Object.isFrozen(validationService.limits)).toBe(false);
     });
     test('Limits object should not be modified after first register', () => {
-      validationService.register({ workflows: 2, stagesPerWorkflow: 10 });
-      expect(validationService.limits.workflows).toEqual(2);
+      validationService.register({ numberOfWorkflows: 2, stagesPerWorkflow: 10 });
+      expect(validationService.limits.numberOfWorkflows).toEqual(2);
       expect(validationService.limits.stagesPerWorkflow).toEqual(10);
       validationService.register({ workflows: 99, stagesPerWorkflow: 99 });
-      expect(validationService.limits.workflows).toEqual(2);
+      expect(validationService.limits.numberOfWorkflows).toEqual(2);
       expect(validationService.limits.stagesPerWorkflow).toEqual(10);
     });
   });
   describe('validateWorkflowCount', () => {
     test('Should not throw because limit is not reached', async () => {
-      validationService.register({ workflows: 2 });
+      validationService.register({ numberOfWorkflows: 2 });
       workflowsServiceMock.count.mockReturnValue(1);
       await expect(validationService.validateWorkflowCount()).resolves.not.toThrowError();
     });
     test('Should throw because limit is reached', async () => {
-      validationService.register({ workflows: 2 });
+      validationService.register({ numberOfWorkflows: 2 });
       workflowsServiceMock.count.mockReturnValue(2);
       await expect(validationService.validateWorkflowCount(1)).rejects.toThrowError();
     });
