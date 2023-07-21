@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 
 import useQueryParams from '../../hooks/useQueryParams';
 import SortIcon from '../../icons/SortIcon';
-import ConfirmDialog from '../ConfirmDialog';
+import { ConfirmDialog } from '../ConfirmDialog';
 import EmptyStateLayout from '../EmptyStateLayout';
 
 /* -------------------------------------------------------------------------------------------------

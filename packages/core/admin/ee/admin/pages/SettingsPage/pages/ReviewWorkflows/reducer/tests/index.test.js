@@ -104,7 +104,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     state = {
       status: expect.any(String),
       serverState: {
-        currentWorkflow: WORKFLOW_FIXTURE,
+        workflow: WORKFLOW_FIXTURE,
       },
       clientState: {
         currentWorkflow: {
@@ -172,7 +172,7 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
     state = {
       status: expect.any(String),
       serverState: {
-        currentWorkflow: WORKFLOW_FIXTURE,
+        workflow: WORKFLOW_FIXTURE,
       },
       clientState: {
         currentWorkflow: {
