@@ -23,7 +23,7 @@
     "@strapi/provider-upload-aws-s3": "4.11.7",
     "@strapi/provider-upload-cloudinary": "4.11.7",
     "@strapi/strapi": "4.11.7",
-    "better-sqlite3": "8.3.0",
+    "better-sqlite3": "8.5.0",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "mysql2": "3.5.1",
