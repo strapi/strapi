@@ -144,11 +144,16 @@ export function WorkflowAttributes({
                           {
                             id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
                             defaultMessage:
-                              '{label} {name, select, undefined {} other {<i>(assigned to {name} workflow)</i>}}',
+                              '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
                           },
                           {
                             label: child.label,
                             name: assignedWorkflowName,
+                            em: (...children) => (
+                              <Typography as="em" fontWeight="bold">
+                                {children}
+                              </Typography>
+                            ),
                             i: (...children) => (
                               <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
                             ),
