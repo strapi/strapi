@@ -188,7 +188,7 @@ const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPub
                 )}
                 noBorder
                 target="_blank"
-                style={{ marginLeft: 'auto' }}
+                marginLeft="auto"
               >
                 <Pencil />
               </IconButton>
