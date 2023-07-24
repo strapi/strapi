@@ -189,6 +189,15 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       );
 
       try {
+        // Check access before attempting to do anything
+        await fse.access(
+          assetsDirectory,
+          // eslint-disable-next-line no-bitwise
+          fse.constants.W_OK | fse.constants.R_OK | fse.constants.F_OK
+        );
+        // eslint-disable-next-line no-bitwise
+        await fse.access(path.join(assetsDirectory, '..'), fse.constants.W_OK | fse.constants.R_OK);
+
         await fse.move(assetsDirectory, backupDirectory);
         await fse.mkdir(assetsDirectory);
         // Create a .gitkeep file to ensure the directory is not empty
