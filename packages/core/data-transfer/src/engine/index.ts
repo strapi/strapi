@@ -130,7 +130,8 @@ class TransferEngine<
     this.#handlers.errors[handlerName]?.push(handler);
   }
 
-  async attemptResolveError(error: Error, context?: ErrorHandlerContext) {
+  async attemptResolveError(error: Error) {
+    const context: ErrorHandlerContext = {};
     if (error instanceof ProviderTransferError && error.details?.details.code) {
       const errorCode = error.details?.details.code as ErrorCode;
       if (!this.#handlers.errors[errorCode]) {
@@ -138,6 +139,8 @@ class TransferEngine<
       }
       await utils.middleware.runMiddleware(context ?? {}, this.#handlers.errors[errorCode] ?? []);
     }
+
+    return !!context.ignore;
   }
 
   // Save the currently open stream so that we can access it at any time
@@ -766,15 +769,13 @@ class TransferEngine<
 
   async beforeTransfer(): Promise<void> {
     const runWithDiagnostic = async (provider: IProvider) => {
-      const context: ErrorHandlerContext = {};
-
       try {
         await provider.beforeTransfer?.();
       } catch (error) {
         if (error instanceof Error) {
-          await this.attemptResolveError(error, context);
+          const resolved = await this.attemptResolveError(error);
 
-          if (context.ignore) {
+          if (resolved) {
             return;
           }
           this.panic(error);
