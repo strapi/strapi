@@ -117,7 +117,12 @@ EntryValidationText.propTypes = {
  * SelectedEntriesTableContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPublish }) => {
+const SelectedEntriesTableContent = ({
+  isPublishing,
+  rowsToDisplay,
+  entriesToPublish,
+  validationErrors,
+}) => {
   const {
     location: { pathname },
   } = useHistory();
@@ -173,7 +178,7 @@ const SelectedEntriesTableContent = ({ isPublishing, rowsToDisplay, entriesToPub
                 </Flex>
               ) : (
                 <EntryValidationText
-                  validationErrors={row.validationErrors}
+                  validationErrors={validationErrors && validationErrors[row.id]}
                   isPublished={row.publishedAt !== null}
                 />
               )}
@@ -206,12 +211,19 @@ SelectedEntriesTableContent.defaultProps = {
   isPublishing: false,
   rowsToDisplay: [],
   entriesToPublish: [],
+  validationErrors: null,
 };
 
 SelectedEntriesTableContent.propTypes = {
   isPublishing: PropTypes.bool,
   rowsToDisplay: PropTypes.arrayOf(PropTypes.object),
   entriesToPublish: PropTypes.arrayOf(PropTypes.number),
+  validationErrors: PropTypes.shape({
+    [PropTypes.string]: PropTypes.shape({
+      id: PropTypes.string,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -224,7 +236,12 @@ const BoldChunk = (chunks) => <Typography fontWeight="bold">{chunks}</Typography
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntriesToFetch }) => {
+const SelectedEntriesModalContent = ({
+  toggleModal,
+  refetchModalData,
+  setEntriesToFetch,
+  validationErrors,
+}) => {
   const { formatMessage } = useIntl();
   const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -232,7 +249,7 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
   const [publishedCount, setPublishedCount] = React.useState(0);
 
   const entriesToPublish = rows
-    .filter(({ id, validationErrors }) => selectedEntries.includes(id) && !validationErrors)
+    .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
     .map(({ id }) => id);
 
   const { post } = useFetchClient();
@@ -240,7 +257,7 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
   const { contentType } = useSelector(listViewDomain());
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
-    ({ id, validationErrors }) => selectedEntries.includes(id) && validationErrors
+    ({ id }) => selectedEntries.includes(id) && validationErrors && validationErrors[id]
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
@@ -344,6 +361,7 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
             isPublishing={bulkPublishMutation.isLoading}
             rowsToDisplay={rowsToDisplay}
             entriesToPublish={entriesToPublish}
+            validationErrors={validationErrors}
           />
         </Box>
       </ModalBody>
@@ -385,10 +403,20 @@ const SelectedEntriesModalContent = ({ toggleModal, refetchModalData, setEntries
   );
 };
 
+SelectedEntriesModalContent.defaultProps = {
+  validationErrors: null,
+};
+
 SelectedEntriesModalContent.propTypes = {
   toggleModal: PropTypes.func.isRequired,
   refetchModalData: PropTypes.func.isRequired,
   setEntriesToFetch: PropTypes.func.isRequired,
+  validationErrors: PropTypes.shape({
+    [PropTypes.string]: PropTypes.shape({
+      id: PropTypes.string,
+      defaultMessage: PropTypes.string,
+    }),
+  }),
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -427,29 +455,32 @@ const SelectedEntriesModal = ({ onToggle }) => {
 
       if (data.results) {
         const schema = createYupSchema(contentType, { components }, { isDraft: false });
+        const validationErrors = {};
         const rows = data.results.map((entry) => {
           try {
             schema.validateSync(entry, { abortEarly: false });
 
             return entry;
           } catch (e) {
-            return {
-              ...entry,
-              validationErrors: getYupInnerErrors(e),
-            };
+            validationErrors[entry.id] = getYupInnerErrors(e);
+
+            return entry;
           }
         });
 
-        return rows;
+        return { rows, validationErrors };
       }
 
-      return [];
+      return {
+        rows: [],
+        validationErrors: {},
+      };
     }
   );
 
   return (
     <Table.Root
-      rows={data}
+      rows={data?.rows}
       defaultSelectedEntries={selectedListViewEntries}
       colCount={4}
       isLoading={isLoading}
@@ -459,6 +490,7 @@ const SelectedEntriesModal = ({ onToggle }) => {
         setEntriesToFetch={setEntriesToFetch}
         toggleModal={onToggle}
         refetchModalData={refetch}
+        validationErrors={data?.validationErrors}
       />
     </Table.Root>
   );
