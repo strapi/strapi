@@ -349,8 +349,11 @@ const getAssetsBackupHandler = (engine, { force, action }) => {
       exitWith(1, exitMessageText(action, true));
     });
 
+    console.warn(
+      'The backup for the assets could not be created inside the public directory. Ensure Strapi has write permissions on the public directory.'
+    );
     const confirmed = await confirmMessage(
-      'The backup folder for the assets could not be created inside the public folder. Maybe Strapi does not have write permissions on the public directory. Do you want to continue without the backup?',
+      'Do you want to continue without backing up your public/uploads files?',
       {
         force,
       }
