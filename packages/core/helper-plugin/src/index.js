@@ -7,7 +7,7 @@ import { getOtherInfos, getType } from './content-manager/utils/getAttributeInfo
 export { default as AnErrorOccurred } from './components/AnErrorOccurred';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
-export { default as ConfirmDialog } from './components/ConfirmDialog';
+export * from './components/ConfirmDialog';
 export { default as ContentBox } from './components/ContentBox';
 export { default as DateTimePicker } from './components/DateTimePicker';
 export { default as DynamicTable } from './components/DynamicTable';

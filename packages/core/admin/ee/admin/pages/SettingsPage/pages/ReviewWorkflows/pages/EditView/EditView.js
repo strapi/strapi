@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Flex, Loader } from '@strapi/design-system';
+import { Button, Flex, Loader, Typography } from '@strapi/design-system';
 import {
   ConfirmDialog,
   useAPIErrorHandler,
@@ -45,10 +45,10 @@ export function ReviewWorkflowsEditView() {
   const {
     isLoading: isWorkflowLoading,
     meta,
-    workflows: [workflow],
+    workflows,
     status: workflowStatus,
     refetch,
-  } = useReviewWorkflows({ id: workflowId });
+  } = useReviewWorkflows();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
     status,
@@ -56,17 +56,22 @@ export function ReviewWorkflowsEditView() {
       currentWorkflow: {
         data: currentWorkflow,
         isDirty: currentWorkflowIsDirty,
-        hasDeletedServerStages: currentWorkflowHasDeletedServerStages,
+        hasDeletedServerStages,
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const {
     allowedActions: { canDelete, canUpdate },
   } = useRBAC(permissions.settings['review-workflows']);
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
+  const [savePrompts, setSavePrompts] = React.useState({});
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const [initialErrors, setInitialErrors] = React.useState(null);
+
+  const workflow = workflows.find((workflow) => workflow.id === parseInt(workflowId, 10));
+  const contentTypesFromOtherWorkflows = workflows
+    .filter((workflow) => workflow.id !== parseInt(workflowId, 10))
+    .flatMap((workflow) => workflow.contentTypes);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -125,15 +130,15 @@ export function ReviewWorkflowsEditView() {
     await updateWorkflow(currentWorkflow);
     await refetch();
 
-    setIsConfirmDeleteDialogOpen(false);
+    setSavePrompts({});
   };
 
   const handleConfirmDeleteDialog = async () => {
     await submitForm();
   };
 
-  const toggleConfirmDeleteDialog = () => {
-    setIsConfirmDeleteDialogOpen((prev) => !prev);
+  const handleConfirmClose = () => {
+    setSavePrompts({});
   };
 
   const formik = useFormik({
@@ -141,9 +146,11 @@ export function ReviewWorkflowsEditView() {
     initialErrors,
     initialValues: currentWorkflow,
     async onSubmit() {
-      if (currentWorkflowHasDeletedServerStages) {
-        setIsConfirmDeleteDialogOpen(true);
-      } else if (
+      const isContentTypeReassignment = currentWorkflow.contentTypes.some((contentType) =>
+        contentTypesFromOtherWorkflows.includes(contentType)
+      );
+
+      if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
         meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
@@ -165,6 +172,14 @@ export function ReviewWorkflowsEditView() {
           parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
+      } else if (hasDeletedServerStages || isContentTypeReassignment) {
+        if (hasDeletedServerStages) {
+          setSavePrompts((prev) => ({ ...prev, hasDeletedServerStages: true }));
+        }
+
+        if (isContentTypeReassignment) {
+          setSavePrompts((prev) => ({ ...prev, hasReassignedContentTypes: true }));
+        }
       } else {
         submitForm();
       }
@@ -243,7 +258,7 @@ export function ReviewWorkflowsEditView() {
                 disabled={!currentWorkflowIsDirty || !canUpdate}
                 // if the confirm dialog is open the loading state is on
                 // the confirm button already
-                loading={!isConfirmDeleteDialogOpen && isLoading}
+                loading={!Object.keys(savePrompts).length > 0 && isLoading}
               >
                 {formatMessage({
                   id: 'global.save',
@@ -279,6 +294,8 @@ export function ReviewWorkflowsEditView() {
                 <WorkflowAttributes
                   canUpdate={canUpdate}
                   contentTypes={{ collectionTypes, singleTypes }}
+                  currentWorkflow={currentWorkflow}
+                  workflows={workflows}
                 />
                 <Stages
                   canDelete={canDelete}
@@ -291,17 +308,50 @@ export function ReviewWorkflowsEditView() {
         </Form>
       </FormikProvider>
 
-      <ConfirmDialog
-        bodyText={{
-          id: 'Settings.review-workflows.page.delete.confirm.body',
-          defaultMessage:
-            'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
-        }}
+      <ConfirmDialog.Root
         isConfirmButtonLoading={isLoading}
-        isOpen={isConfirmDeleteDialogOpen}
-        onToggleDialog={toggleConfirmDeleteDialog}
+        isOpen={Object.keys(savePrompts).length > 0}
+        onToggleDialog={handleConfirmClose}
         onConfirm={handleConfirmDeleteDialog}
-      />
+      >
+        <ConfirmDialog.Body>
+          <Flex direction="column" gap={5}>
+            {savePrompts.hasDeletedServerStages && (
+              <Typography textAlign="center" variant="omega">
+                {formatMessage({
+                  id: 'Settings.review-workflows.page.delete.confirm.stages.body',
+                  defaultMessage:
+                    'All entries assigned to deleted stages will be moved to the previous stage.',
+                })}
+              </Typography>
+            )}
+
+            {savePrompts.hasReassignedContentTypes && (
+              <Typography textAlign="center" variant="omega">
+                {formatMessage(
+                  {
+                    id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
+                    defaultMessage:
+                      '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                  },
+                  {
+                    count: contentTypesFromOtherWorkflows.filter((contentType) =>
+                      currentWorkflow.contentTypes.includes(contentType)
+                    ).length,
+                  }
+                )}
+              </Typography>
+            )}
+
+            <Typography textAlign="center" variant="omega">
+              {formatMessage({
+                id: 'Settings.review-workflows.page.delete.confirm.confirm',
+                defaultMessage: 'Are you sure you want to save?',
+              })}
+            </Typography>
+          </Flex>
+        </ConfirmDialog.Body>
+      </ConfirmDialog.Root>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}

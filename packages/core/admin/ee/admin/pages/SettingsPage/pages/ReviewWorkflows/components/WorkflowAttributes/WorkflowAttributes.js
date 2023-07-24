@@ -1,15 +1,37 @@
 import * as React from 'react';
 
-import { Grid, GridItem, MultiSelectNested, TextInput } from '@strapi/design-system';
+import {
+  Grid,
+  GridItem,
+  MultiSelect,
+  MultiSelectGroup,
+  MultiSelectOption,
+  TextInput,
+  Typography,
+} from '@strapi/design-system';
 import { useCollator } from '@strapi/helper-plugin';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import { updateWorkflow } from '../../actions';
 
-export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes, singleTypes } }) {
+const NestedOption = styled(MultiSelectOption)`
+  padding-left: ${({ theme }) => theme.spaces[7]};
+`;
+
+const ContentTypeTakeNotice = styled(Typography)`
+  font-style: italic;
+`;
+
+export function WorkflowAttributes({
+  canUpdate,
+  contentTypes: { collectionTypes, singleTypes },
+  currentWorkflow,
+  workflows,
+}) {
   const { formatMessage, locale } = useIntl();
   const dispatch = useDispatch();
   const [nameField, nameMeta, nameHelper] = useField('name');
@@ -39,7 +61,7 @@ export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes,
       </GridItem>
 
       <GridItem col={6}>
-        <MultiSelectNested
+        <MultiSelect
           {...contentTypesField}
           customizeContent={(value) =>
             formatMessage(
@@ -62,7 +84,12 @@ export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes,
             dispatch(updateWorkflow({ contentTypes: values }));
             contentTypesHelper.setValue(values);
           }}
-          options={[
+          placeholder={formatMessage({
+            id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
+            defaultMessage: 'Select',
+          })}
+        >
+          {[
             ...(collectionTypes.length > 0
               ? [
                   {
@@ -94,12 +121,58 @@ export function WorkflowAttributes({ canUpdate, contentTypes: { collectionTypes,
                   },
                 ]
               : []),
-          ]}
-          placeholder={formatMessage({
-            id: 'Settings.review-workflows.workflow.contentTypes.placeholder',
-            defaultMessage: 'Select',
+          ].map((opt) => {
+            if ('children' in opt) {
+              return (
+                <MultiSelectGroup
+                  key={opt.label}
+                  label={opt.label}
+                  values={opt.children.map((child) => child.value.toString())}
+                >
+                  {opt.children.map((child) => {
+                    const { name: assignedWorkflowName } =
+                      workflows.find(
+                        (workflow) =>
+                          ((currentWorkflow && workflow.id !== currentWorkflow.id) ||
+                            !currentWorkflow) &&
+                          workflow.contentTypes.includes(child.value)
+                      ) ?? {};
+
+                    return (
+                      <NestedOption key={child.value} value={child.value}>
+                        {formatMessage(
+                          {
+                            id: 'Settings.review-workflows.workflow.contentTypes.assigned.notice',
+                            defaultMessage:
+                              '{label} {name, select, undefined {} other {<i>(assigned to <em>{name}</em> workflow)</i>}}',
+                          },
+                          {
+                            label: child.label,
+                            name: assignedWorkflowName,
+                            em: (...children) => (
+                              <Typography as="em" fontWeight="bold">
+                                {children}
+                              </Typography>
+                            ),
+                            i: (...children) => (
+                              <ContentTypeTakeNotice>{children}</ContentTypeTakeNotice>
+                            ),
+                          }
+                        )}
+                      </NestedOption>
+                    );
+                  })}
+                </MultiSelectGroup>
+              );
+            }
+
+            return (
+              <MultiSelectOption key={opt.value} value={opt.value}>
+                {opt.label}
+              </MultiSelectOption>
+            );
           })}
-        />
+        </MultiSelect>
       </GridItem>
     </Grid>
   );
@@ -114,6 +187,7 @@ const ContentTypeType = PropTypes.shape({
 
 WorkflowAttributes.defaultProps = {
   canUpdate: true,
+  currentWorkflow: undefined,
 };
 
 WorkflowAttributes.propTypes = {
@@ -122,4 +196,6 @@ WorkflowAttributes.propTypes = {
     collectionTypes: PropTypes.arrayOf(ContentTypeType).isRequired,
     singleTypes: PropTypes.arrayOf(ContentTypeType).isRequired,
   }).isRequired,
+  currentWorkflow: PropTypes.object,
+  workflows: PropTypes.array.isRequired,
 };

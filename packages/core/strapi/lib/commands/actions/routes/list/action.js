@@ -10,7 +10,7 @@ module.exports = async () => {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).load();
 
-  const list = app.server.listRoutes();
+  const list = app.server.mount().listRoutes();
 
   const infoTable = new CLITable({
     head: [chalk.blue('Method'), chalk.blue('Path')],
