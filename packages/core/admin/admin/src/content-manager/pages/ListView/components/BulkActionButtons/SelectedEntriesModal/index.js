@@ -196,6 +196,7 @@ const SelectedEntriesTableContent = ({
                 )}
                 noBorder
                 target="_blank"
+                marginLeft="auto"
               >
                 <Pencil />
               </IconButton>
