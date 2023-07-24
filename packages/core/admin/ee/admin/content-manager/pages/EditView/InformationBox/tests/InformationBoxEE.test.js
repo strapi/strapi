@@ -103,7 +103,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       initialData: {},
       isCreatingEntry: true,
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-      readActionAllowedFields: [],
     });
 
     const { getByText } = setup();
@@ -128,27 +127,11 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {},
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: false } },
-      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
 
     expect(queryByRole('combobox')).not.toBeInTheDocument();
-  });
-
-  it('renders an error, if no workflow stage is assigned to the entity', () => {
-    useCMEditViewDataManager.mockReturnValue({
-      initialData: {
-        [STAGE_ATTRIBUTE_NAME]: null,
-      },
-      layout: { uid: 'api::articles:articles' },
-      readActionAllowedFields: [],
-    });
-
-    const { getByText, queryByRole } = setup();
-
-    expect(getByText(/select a stage/i)).toBeInTheDocument();
-    expect(queryByRole('combobox')).toBeInTheDocument();
   });
 
   it('does not render the select input, if the entity is created', () => {
@@ -158,7 +141,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: true,
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
@@ -174,7 +156,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: false,
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-      readActionAllowedFields: [],
     });
 
     const { queryByRole } = setup();
@@ -190,7 +171,6 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
       },
       isCreatingEntry: false,
       layout: { uid: 'api::articles:articles', options: { reviewWorkflows: true } },
-      readActionAllowedFields: [],
     });
 
     const { getByRole, getByText, user } = setup();
