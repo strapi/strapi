@@ -397,14 +397,16 @@ const SelectedEntriesModal = ({ onToggle }) => {
   const { contentType, components } = useSelector(listViewDomain());
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
-
   // We want to keep the selected entries order same as the list view
   const [
     {
       query: { sort },
     },
   ] = useQueryParams();
+
   const queryParams = {
+    page: 1,
+    pageSize: entriesToFetch.length,
     sort,
     filters: {
       id: {
