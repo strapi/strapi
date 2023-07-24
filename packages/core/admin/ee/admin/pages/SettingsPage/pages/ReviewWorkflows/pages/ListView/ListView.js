@@ -204,8 +204,7 @@ export function ReviewWorkflowsListView() {
         }
         subtitle={formatMessage({
           id: 'Settings.review-workflows.list.page.subtitle',
-          defaultMessage:
-            'Manage content review stages and collaborate during content creation from draft to publication',
+          defaultMessage: 'Manage your content review process',
         })}
         title={formatMessage({
           id: 'Settings.review-workflows.list.page.title',
