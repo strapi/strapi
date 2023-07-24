@@ -78,7 +78,7 @@ const EntryValidationText = ({ errors, isPublished }) => {
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'app.utils.published',
-            defaultMessage: 'Published',
+            defaultMessage: 'Already Published',
           })}
         </Typography>
       </Flex>
