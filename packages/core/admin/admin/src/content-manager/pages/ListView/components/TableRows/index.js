@@ -15,7 +15,6 @@ import {
   useFetchClient,
   useAPIErrorHandler,
   useQueryParams,
-  getDisplayName,
 } from '@strapi/helper-plugin';
 import { Trash, Duplicate, Pencil } from '@strapi/icons';
 import { AxiosError } from 'axios';
@@ -27,6 +26,7 @@ import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { getFullName } from '../../../../../utils';
 import { usePluginsQueryParams } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
+import { getDisplayName } from '../../../../utils';
 import CellContent from '../CellContent';
 
 const REVIEW_WORKFLOW_COLUMNS_CE = () => null;

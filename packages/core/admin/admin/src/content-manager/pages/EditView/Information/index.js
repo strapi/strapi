@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
 
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
-import { useCMEditViewDataManager, getDisplayName } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTrad, getDisplayName } from '../../../utils';
 
 import getUnits from './utils/getUnits';
 
