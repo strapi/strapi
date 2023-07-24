@@ -38,6 +38,13 @@ export type GetTarget<TSchemaUID extends Common.UID.Schema, TKey extends GetKeys
       | Attribute.GetMediaTarget<TAttribute>
   : never;
 
+export type GetMorphTargets<
+  TSchemaUID extends Common.UID.Schema,
+  TKey extends GetKeys<TSchemaUID>
+> = Get<TSchemaUID, TKey> extends infer TAttribute extends Attribute.Attribute
+  ? Attribute.GetDynamicZoneTargets<TAttribute>
+  : never;
+
 export type GetKeys<TSchemaUID extends Common.UID.Schema> = keyof GetAll<TSchemaUID>;
 
 export type GetNonPopulatableKeys<TSchemaUID extends Common.UID.Schema> = GetKeysByType<
