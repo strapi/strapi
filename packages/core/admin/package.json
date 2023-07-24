@@ -116,7 +116,7 @@
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
     "rimraf": "3.0.2",
-    "sanitize-html": "2.10.0",
+    "sanitize-html": "2.11.0",
     "semver": "7.5.2",
     "sift": "16.0.1",
     "style-loader": "3.3.1",

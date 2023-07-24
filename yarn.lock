@@ -7621,7 +7621,7 @@ __metadata:
     redux: ^4.2.1
     reselect: ^4.1.7
     rimraf: 3.0.2
-    sanitize-html: 2.10.0
+    sanitize-html: 2.11.0
     semver: 7.5.2
     sift: 16.0.1
     speed-measure-webpack-plugin: 1.5.0
@@ -28938,9 +28938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.10.0":
-  version: 2.10.0
-  resolution: "sanitize-html@npm:2.10.0"
+"sanitize-html@npm:2.11.0":
+  version: 2.11.0
+  resolution: "sanitize-html@npm:2.11.0"
   dependencies:
     deepmerge: ^4.2.2
     escape-string-regexp: ^4.0.0
@@ -28948,7 +28948,7 @@ __metadata:
     is-plain-object: ^5.0.0
     parse-srcset: ^1.0.2
     postcss: ^8.3.11
-  checksum: 0cb2bb330ed966a4d667b1890322dd868a67f527f87c04d7e3be1688fcfda20f7452a9a7744870751f51e255742e7264a287d9bcfcd64d4cd74a3c99f99c73d2
+  checksum: 44807f22b0feb5a6a883b4bc04bcd8690ec3bbd6dacb24d6e52226ffe0c0e4fad43d6a882ce60e3884a327fae2de01e67e566e3a211491add50ff0160be2e98a
   languageName: node
   linkType: hard
 
