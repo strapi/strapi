@@ -138,7 +138,7 @@ This command runs tests using jest behind the scenes. Options for jest can be pa
 
 ### Changing the database
 
-By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
+By default the script run by `test:api` generates an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
 $ yarn test:api --db=sqlite

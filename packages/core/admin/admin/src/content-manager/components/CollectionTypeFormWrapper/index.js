@@ -1,7 +1,6 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 
 import {
-  contentManagementUtilRemoveFieldsFromData,
   formatContentTypeData,
   useAPIErrorHandler,
   useFetchClient,
@@ -60,30 +59,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const isCreatingEntry = id === null;
 
-  const requestURL = useMemo(() => {
-    if (isCreatingEntry && !origin) {
-      return null;
-    }
-
-    return getRequestUrl(`collection-types/${slug}/${origin || id}`);
-  }, [slug, id, isCreatingEntry, origin]);
-
-  const cleanClonedData = useCallback(
-    (data) => {
-      if (!origin) {
-        return data;
-      }
-
-      const cleaned = contentManagementUtilRemoveFieldsFromData(
-        data,
-        allLayoutDataRef.current.contentType,
-        allLayoutDataRef.current.components
-      );
-
-      return cleaned;
-    },
-    [origin]
-  );
+  const requestURL =
+    isCreatingEntry && !origin ? null : getRequestUrl(`collection-types/${slug}/${origin || id}`);
 
   const cleanReceivedData = useCallback((data) => {
     const cleaned = removePasswordFieldsFromData(
@@ -146,7 +123,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       try {
         const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
 
-        dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
+        dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
         if (axios.isCancel(err)) {
           return;
@@ -173,8 +150,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
     // This is needed in order to reset the form when the query changes
     const init = async () => {
-      await dispatch(getData());
-      await dispatch(initForm(rawQuery));
+      dispatch(getData());
+      dispatch(initForm(rawQuery));
     };
 
     if (!isMounted.current) {
@@ -192,7 +169,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     };
   }, [
     fetchClient,
-    cleanClonedData,
     cleanReceivedData,
     push,
     requestURL,
@@ -237,20 +213,22 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
+      const isCloning = typeof origin === 'string';
       /**
        * If we're cloning we want to post directly to this endpoint
        * so that the relations even if they're not listed in the EditView
        * are correctly attached to the entry.
        */
-      const endPoint =
-        typeof origin === 'string'
-          ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
-          : getRequestUrl(`collection-types/${slug}`);
+      const endPoint = isCloning
+        ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
+        : getRequestUrl(`collection-types/${slug}`);
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await post(endPoint, body, {
+        const { id, ...restBody } = body;
+
+        const { data } = await post(endPoint, isCloning ? restBody : body, {
           params: query,
         });
 
@@ -301,9 +279,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(
-        `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
-      );
+      const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/countDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);

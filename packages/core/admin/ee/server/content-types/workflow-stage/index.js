@@ -12,7 +12,9 @@ module.exports = {
       pluralName: 'workflow-stages',
       displayName: 'Stages',
     },
-    options: {},
+    options: {
+      version: '1.1.0',
+    },
     pluginOptions: {
       'content-manager': {
         visible: false,

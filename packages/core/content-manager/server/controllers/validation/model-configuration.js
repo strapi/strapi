@@ -16,6 +16,7 @@ module.exports = (schema, opts = {}) =>
       settings: createSettingsSchema(schema).default(null).nullable(),
       metadatas: createMetadasSchema(schema).default(null).nullable(),
       layouts: createLayoutsSchema(schema, opts).default(null).nullable(),
+      options: yup.object().optional(),
     })
     .noUnknown();
 

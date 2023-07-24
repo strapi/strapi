@@ -98,6 +98,10 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
 
       if (!['password', 'confirmPassword'].includes(key) && typeof value === 'string') {
         normalizedvalue = normalizedvalue.trim();
+
+        if (key === 'lastname') {
+          normalizedvalue = normalizedvalue || null;
+        }
       }
 
       acc[key] = normalizedvalue;
