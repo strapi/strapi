@@ -77,7 +77,7 @@ const EntryValidationText = ({ errors, isPublished }) => {
         <Icon color="success600" as={CheckCircle} />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
-            id: 'content-manager.components.SelectedEntriesModal.published',
+            id: 'content-manager.bulk-publish.already-published',
             defaultMessage: 'Already Published',
           })}
         </Typography>
