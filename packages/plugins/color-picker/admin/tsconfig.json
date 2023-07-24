@@ -1,9 +1,5 @@
 {
-  "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "noEmit": true
-  },
+  "extends": "tsconfig/front.json",
   "include": ["src"],
   "exclude": ["node_modules"]
 }
