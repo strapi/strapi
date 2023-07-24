@@ -6,7 +6,6 @@ import {
   useAPIErrorHandler,
   useFetchClient,
   useNotification,
-  useRBAC,
 } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -18,7 +17,6 @@ import { useHistory } from 'react-router-dom';
 
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
-import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
 import { addStage, resetWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
@@ -40,7 +38,6 @@ export function ReviewWorkflowsCreateView() {
   const { push } = useHistory();
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
-  const permissions = useSelector(selectAdminPermissions);
   const toggleNotification = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { isLoading: isWorkflowLoading, meta, workflows } = useReviewWorkflows();
@@ -49,9 +46,6 @@ export function ReviewWorkflowsCreateView() {
       currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
-  const {
-    allowedActions: { canCreate },
-  } = useRBAC(permissions.settings['review-workflows']);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const [initialErrors, setInitialErrors] = React.useState(null);
@@ -230,7 +224,7 @@ export function ReviewWorkflowsCreateView() {
                 startIcon={<Check />}
                 type="submit"
                 size="M"
-                disabled={!currentWorkflowIsDirty || !canCreate}
+                disabled={!currentWorkflowIsDirty}
                 isLoading={isLoading}
               >
                 {formatMessage({

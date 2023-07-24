@@ -251,20 +251,22 @@ export function ReviewWorkflowsEditView() {
           <Layout.Header
             navigationAction={<Layout.Back href="/settings/review-workflows" />}
             primaryAction={
-              <Button
-                startIcon={<Check />}
-                type="submit"
-                size="M"
-                disabled={!currentWorkflowIsDirty || !canUpdate}
-                // if the confirm dialog is open the loading state is on
-                // the confirm button already
-                loading={!Object.keys(savePrompts).length > 0 && isLoading}
-              >
-                {formatMessage({
-                  id: 'global.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
+              canUpdate && (
+                <Button
+                  startIcon={<Check />}
+                  type="submit"
+                  size="M"
+                  disabled={!currentWorkflowIsDirty}
+                  // if the confirm dialog is open the loading state is on
+                  // the confirm button already
+                  loading={!Object.keys(savePrompts).length > 0 && isLoading}
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              )
             }
             subtitle={
               currentWorkflow.stages.length > 0 &&

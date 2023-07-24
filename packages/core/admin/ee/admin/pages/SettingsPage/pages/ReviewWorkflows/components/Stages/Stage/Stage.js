@@ -203,39 +203,42 @@ export function Stage({
             title={nameField.value}
             togglePosition="left"
             action={
-              <Flex>
-                {canDelete && (
-                  <IconButton
-                    background="transparent"
-                    icon={<Trash />}
-                    label={formatMessage({
-                      id: 'Settings.review-workflows.stage.delete',
-                      defaultMessage: 'Delete stage',
-                    })}
-                    noBorder
-                    onClick={() => dispatch(deleteStage(id))}
-                  />
-                )}
+              (canDelete || canUpdate) && (
+                <Flex>
+                  {canDelete && (
+                    <IconButton
+                      background="transparent"
+                      icon={<Trash />}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.delete',
+                        defaultMessage: 'Delete stage',
+                      })}
+                      noBorder
+                      onClick={() => dispatch(deleteStage(id))}
+                    />
+                  )}
 
-                <IconButton
-                  background="transparent"
-                  disabled={!canUpdate}
-                  forwardedAs="div"
-                  role="button"
-                  noBorder
-                  tabIndex={0}
-                  data-handler-id={handlerId}
-                  ref={dragRef}
-                  label={formatMessage({
-                    id: 'Settings.review-workflows.stage.drag',
-                    defaultMessage: 'Drag',
-                  })}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={handleKeyDown}
-                >
-                  <Drag />
-                </IconButton>
-              </Flex>
+                  {canUpdate && (
+                    <IconButton
+                      background="transparent"
+                      forwardedAs="div"
+                      role="button"
+                      noBorder
+                      tabIndex={0}
+                      data-handler-id={handlerId}
+                      ref={dragRef}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.drag',
+                        defaultMessage: 'Drag',
+                      })}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={handleKeyDown}
+                    >
+                      <Drag />
+                    </IconButton>
+                  )}
+                </Flex>
+              )
             }
           />
           <AccordionContent padding={6} background="neutral0" hasRadius>
