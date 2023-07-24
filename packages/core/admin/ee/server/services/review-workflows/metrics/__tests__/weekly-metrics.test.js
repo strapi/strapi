@@ -7,13 +7,18 @@ jest.mock('../../../../../../server/utils', () => {
     getService: jest.fn(() => {
       const workflowsMock = {
         find: jest.fn(() => [
-          { id: 1, stages: [{ id: 1, name: 'To Do' }] },
+          {
+            id: 1,
+            stages: [{ id: 1, name: 'To Do' }],
+            contentTypes: [{ uid: 'test-model' }],
+          },
           {
             id: 2,
             stages: [
               { id: 2, name: 'To Do' },
               { id: 3, name: 'In Progress' },
             ],
+            contentTypes: [{ uid: 'test-model-1' }],
           },
           {
             id: 3,
@@ -31,6 +36,7 @@ jest.mock('../../../../../../server/utils', () => {
               { id: 9, name: 'Ready to Review' },
               { id: 10, name: 'Reviewed' },
             ],
+            contentTypes: [{ uid: 'test-model-2' }],
           },
         ]),
       };
@@ -52,7 +58,7 @@ describe('Review workflows - Weekly Metrics', () => {
         numberOfActiveWorkflows: 4,
         avgStagesCount: 2.5,
         maxStagesCount: 4,
-        activatedContentTypes: 0,
+        activatedContentTypes: 3,
       });
     });
   });
