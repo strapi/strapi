@@ -99,7 +99,7 @@ const EntryValidationText = ({ validationErrors, isPublished }) => {
 };
 
 EntryValidationText.defaultProps = {
-  validationErrors: null,
+  validationErrors: undefined,
   isPublished: false,
 };
 
@@ -178,7 +178,7 @@ const SelectedEntriesTableContent = ({
                 </Flex>
               ) : (
                 <EntryValidationText
-                  validationErrors={validationErrors && validationErrors[row.id]}
+                  validationErrors={validationErrors[row.id]}
                   isPublished={row.publishedAt !== null}
                 />
               )}
@@ -211,7 +211,7 @@ SelectedEntriesTableContent.defaultProps = {
   isPublishing: false,
   rowsToDisplay: [],
   entriesToPublish: [],
-  validationErrors: null,
+  validationErrors: {},
 };
 
 SelectedEntriesTableContent.propTypes = {
@@ -258,7 +258,7 @@ const SelectedEntriesModalContent = ({
   const { contentType } = useSelector(listViewDomain());
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
-    ({ id }) => selectedEntries.includes(id) && validationErrors && validationErrors[id]
+    ({ id }) => selectedEntries.includes(id) && validationErrors[id]
   ).length;
   const selectedEntriesWithNoErrorsCount = selectedEntries.length - selectedEntriesWithErrorsCount;
 
@@ -408,7 +408,7 @@ const SelectedEntriesModalContent = ({
 };
 
 SelectedEntriesModalContent.defaultProps = {
-  validationErrors: null,
+  validationErrors: {},
 };
 
 SelectedEntriesModalContent.propTypes = {
