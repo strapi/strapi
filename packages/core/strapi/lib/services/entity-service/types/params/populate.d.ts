@@ -6,12 +6,7 @@ import type * as Params from './index';
  *
  * To populate all the root level relations
  */
-type WildcardNotation = '*';
-
-type PopulatableKeys<TSchemaUID extends Common.UID.Schema> = Utils.Guard.Never<
-  Attribute.GetPopulatableKeys<TSchemaUID>,
-  string
->;
+export type WildcardNotation = '*';
 
 /**
  * Union of all possible string representation for populate
@@ -23,9 +18,12 @@ type PopulatableKeys<TSchemaUID extends Common.UID.Schema> = Utils.Guard.Never<
  * type D = 'populatableField'; // ✅
  * type E = '<random_string>'; // ❌
  */
-type StringNotation<TSchemaUID extends Common.UID.Schema> =
+export type StringNotation<TSchemaUID extends Common.UID.Schema> =
   | WildcardNotation
-  | PopulatableKeys<TSchemaUID>
+  // Populatable keys
+  | Utils.Guard.Never<Attribute.GetPopulatableKeys<TSchemaUID>, string>
+  // Other string notations
+  // Those are not computed as it would break the TS parser for schemas with lots of populatable attributes
   | `${string},${string}`
   | `${string}.${string}`;
 
@@ -38,37 +36,66 @@ type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type C = ['populatableField']; // ✅
  * type D = ['<random_string>']; // ❌
  */
-type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = StringNotation<TSchemaUID>[];
 
-type PopulateDynamicZoneFragments<TSchemaUID extends Common.UID.Schema> = {
-  [TKey in Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>]: {
-    on: {
-      [TComponentUID in GetComponentsFromDynamicZone<TSchemaUID, TKey>[number]]?:
-        | Boolean
-        | Params.For<TComponentUID>;
-    };
-  };
+type GetPopulatableKeysWithTarget<TSchemaUID extends Common.UID.Schema> = Extract<
+  Attribute.GetPopulatableKeys<TSchemaUID>,
+  Attribute.GetKeysWithTarget<TSchemaUID>
+>;
+
+type GetPopulatableKeysWithoutTarget<TSchemaUID extends Common.UID.Schema> = Exclude<
+  Attribute.GetPopulatableKeys<TSchemaUID>,
+  GetPopulatableKeysWithTarget<TSchemaUID>
+>;
+
+/**
+ * Fragment populate notation for polymorphic attributes
+ */
+type PopulateFragment<TMaybeTargets extends Common.UID.Schema> = {
+  on: { [TSchemaUID in TMaybeTargets]?: boolean | Params.For<TSchemaUID> };
 };
 
-type GetComponentsFromDynamicZone<
-  TSchemaUID extends Common.UID.Schema,
-  TKey extends Attribute.GetKeysByType<TSchemaUID, 'dynamiczone'>
-> = Attribute.Get<TSchemaUID, TKey> extends Attribute.DynamicZone<infer TComponentsUIDs>
-  ? TComponentsUIDs
+/**
+ * Object notation for populate
+ *
+ * @example
+ * type A = { image: true }; // ✅
+ * type B = { image: { fields: ['url', 'provider'] } }; // ✅
+ * type C = { populatableField: { populate: { nestedPopulatableField: true } } }; // ✅
+ * type D = { dynamic_zone: { on: { comp_A: { fields: ['name', 'price_a'] }, comp_B: { fields: ['name', 'price_b'] } } } }; // ✅
+ */
+export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
+  GetPopulatableKeysWithTarget<TSchemaUID>,
+  GetPopulatableKeysWithoutTarget<TSchemaUID>
+] extends [
+  infer TKeysWithTarget extends Attribute.GetPopulatableKeys<TSchemaUID>,
+  infer TKeysWithoutTarget extends Attribute.GetPopulatableKeys<TSchemaUID>
+]
+  ? Utils.Expression.If<
+      Common.AreSchemasRegistriesExtended,
+      // Populatable keys with a target
+      | Utils.Expression.If<
+          Utils.Expression.IsNotNever<TKeysWithTarget>,
+          {
+            [TKey in TKeysWithTarget]?: boolean | Params.For<Attribute.GetTarget<TSchemaUID, TKey>>;
+          }
+        >
+      // Populatable keys with either zero or multiple target(s)
+      | Utils.Expression.If<
+          Utils.Expression.IsNotNever<TKeysWithoutTarget>,
+          {
+            [TKey in TKeysWithoutTarget]?:
+              | boolean
+              | PopulateFragment<
+                  Utils.Guard.Never<Attribute.GetMorphTargets<TSchemaUID, TKey>, Common.UID.Schema>
+                >;
+          }
+        >,
+      // Loose fallback when registries are not extended
+      | { [TKey in string]?: boolean | Params.For<Common.UID.Schema> }
+      | { [TKey in string]?: boolean | PopulateFragment<Common.UID.Schema> }
+    >
   : never;
-
-type ObjectNotation<TSchemaUID extends Common.UID.Schema> =
-  | {
-      [key in PopulatableKeys<TSchemaUID>]?:
-        | Boolean
-        | Params.For<
-            Attribute.GetTarget<
-              TSchemaUID,
-              key extends keyof Attribute.GetAll<TSchemaUID> ? key : never
-            >
-          >;
-    }
-  | PopulateDynamicZoneFragments<TSchemaUID>;
 
 export type Any<TSchemaUID extends Common.UID.Schema> =
   | StringNotation<TSchemaUID>
