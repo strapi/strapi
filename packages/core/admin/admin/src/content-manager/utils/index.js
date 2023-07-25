@@ -13,3 +13,4 @@ export { default as mergeMetasWithSchema } from './mergeMetasWithSchema';
 export { default as removeKeyInObject } from './removeKeyInObject';
 export { default as removePasswordFieldsFromData } from './removePasswordFieldsFromData';
 export { default as createYupSchema } from './schema';
+export { getDisplayName } from './getDisplayName';

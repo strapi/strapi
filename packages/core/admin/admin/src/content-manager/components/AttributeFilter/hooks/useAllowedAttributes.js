@@ -1,11 +1,17 @@
-import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
-import get from 'lodash/get';
+import { useRBACProvider, findMatchingPermissions, useCollator } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 
 const useAllowedAttributes = (contentType, slug) => {
   const { allPermissions } = useRBACProvider();
+  const { locale } = useIntl();
+
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
     {
@@ -14,29 +20,37 @@ const useAllowedAttributes = (contentType, slug) => {
     },
   ]);
 
-  const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
-  const attributesArray = Object.keys(get(contentType, ['attributes']), {});
-  const allowedAttributes = attributesArray
-    .filter((attr) => {
-      const current = get(contentType, ['attributes', attr], {});
+  const canReadAdminUsers =
+    findMatchingPermissions(allPermissions, [
+      {
+        action: 'admin::users.read',
+        subject: null,
+      },
+    ]).length > 0;
 
-      if (!current.type) {
-        return false;
-      }
+  const attributesWithReadPermissions = readPermissionsForSlug?.[0]?.properties?.fields ?? [];
 
-      if (NOT_ALLOWED_FILTERS.includes(current.type)) {
-        return false;
-      }
+  const allowedAttributes = attributesWithReadPermissions.filter((attr) => {
+    const current = contentType?.attributes?.[attr] ?? {};
 
-      if (!readPermissionForAttr.includes(attr) && attr !== 'id' && !TIMESTAMPS.includes(attr)) {
-        return false;
-      }
+    if (!current.type) {
+      return false;
+    }
 
-      return true;
-    })
-    .sort();
+    if (NOT_ALLOWED_FILTERS.includes(current.type)) {
+      return false;
+    }
 
-  return allowedAttributes;
+    return true;
+  });
+  const allowedAndDefaultAttributes = [
+    'id',
+    ...allowedAttributes,
+    ...TIMESTAMPS,
+    ...(canReadAdminUsers ? CREATOR_ATTRIBUTES : []),
+  ];
+
+  return allowedAndDefaultAttributes.sort((a, b) => formatter.compare(a, b));
 };
 
 export default useAllowedAttributes;

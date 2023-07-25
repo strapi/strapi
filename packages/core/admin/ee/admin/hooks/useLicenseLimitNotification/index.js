@@ -10,7 +10,7 @@ import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import useLicenseLimits from '../useLicenseLimits';
+import { useLicenseLimits } from '../useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
