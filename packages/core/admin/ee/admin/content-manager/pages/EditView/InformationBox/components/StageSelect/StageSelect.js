@@ -20,6 +20,10 @@ import { useMutation } from 'react-query';
 
 import { useLicenseLimits } from '../../../../../../hooks/useLicenseLimits';
 import * as LimitsModal from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
+import {
+  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
+  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
+} from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/constants';
 import { useReviewWorkflows } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 import { STAGE_ATTRIBUTE_NAME } from '../../constants';
@@ -93,7 +97,10 @@ export function StageSelect() {
        *
        */
 
-      if (limits?.workflows && parseInt(limits.workflows, 10) > meta.workflowCount) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10) < meta.workflowCount
+      ) {
         setShowLimitModal('workflow');
 
         /**
@@ -106,8 +113,8 @@ export function StageSelect() {
          *
          */
       } else if (
-        limits?.stagesPerWorkflow &&
-        parseInt(limits.stagesPerWorkflow, 10) > workflow.stages.length
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10) < workflow.stages.length
       ) {
         setShowLimitModal('stage');
       } else {

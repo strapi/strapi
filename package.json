@@ -87,7 +87,7 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "execa": "1.0.0",
     "find-up": "5.0.0",
@@ -119,7 +119,7 @@
     "yargs": "17.7.2"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "packageManager": "yarn@3.6.1"

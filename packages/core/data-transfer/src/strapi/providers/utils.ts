@@ -2,10 +2,13 @@ import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
 
 import type { Client, Server } from '../../../types/remote/protocol';
+
 import {
   ProviderError,
   ProviderTransferError,
   ProviderInitializationError,
+  ProviderValidationError,
+  ProviderErrorDetails,
 } from '../../errors/providers';
 
 interface IDispatcherState {
@@ -72,7 +75,18 @@ export const createDispatcher = (
         if (response.uuid === uuid) {
           clearInterval(interval);
           if (response.error) {
-            return reject(new ProviderError('error', response.error.message));
+            const message = response.error.message;
+            const details = response.error.details?.details as ProviderErrorDetails;
+            const step = response.error.details?.step;
+            let error = new ProviderError('error', message, details);
+            if (step === 'transfer') {
+              error = new ProviderTransferError(message, details);
+            } else if (step === 'validation') {
+              error = new ProviderValidationError(message, details);
+            } else if (step === 'initialization') {
+              error = new ProviderInitializationError(message);
+            }
+            return reject(error);
           }
           resolve(response.data ?? null);
         } else {

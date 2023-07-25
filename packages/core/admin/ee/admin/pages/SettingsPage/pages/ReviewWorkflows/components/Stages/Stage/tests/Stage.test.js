@@ -91,12 +91,22 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(queryByRole('textbox')).toBeInTheDocument();
   });
 
-  it('should not render delete button if canDelete=false', async () => {
+  it('should not render the delete button if canDelete=false', async () => {
     const { queryByRole } = setup({ isOpen: true, canDelete: false });
 
     expect(
       queryByRole('button', {
         name: /delete stage/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not render delete drag button if canUpdate=false', async () => {
+    const { queryByRole } = setup({ isOpen: true, canUpdate: false });
+
+    expect(
+      queryByRole('button', {
+        name: /drag/i,
       })
     ).not.toBeInTheDocument();
   });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Flex, Loader } from '@strapi/design-system';
+import { Button, Flex, Loader, Typography } from '@strapi/design-system';
 import {
   ConfirmDialog,
   useAPIErrorHandler,
@@ -20,12 +20,16 @@ import { useContentTypes } from '../../../../../../../../admin/src/hooks/useCont
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/pages/App/selectors';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { setWorkflow } from '../../actions';
+import { resetWorkflow, setWorkflow } from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
 import { WorkflowAttributes } from '../../components/WorkflowAttributes';
-import { REDUX_NAMESPACE } from '../../constants';
+import {
+  CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
+  CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME,
+  REDUX_NAMESPACE,
+} from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer, initialState } from '../../reducer';
 import { validateWorkflow } from '../../utils/validateWorkflow';
@@ -41,10 +45,10 @@ export function ReviewWorkflowsEditView() {
   const {
     isLoading: isWorkflowLoading,
     meta,
-    workflows: [workflow],
+    workflows,
     status: workflowStatus,
     refetch,
-  } = useReviewWorkflows({ id: workflowId });
+  } = useReviewWorkflows();
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const {
     status,
@@ -52,17 +56,22 @@ export function ReviewWorkflowsEditView() {
       currentWorkflow: {
         data: currentWorkflow,
         isDirty: currentWorkflowIsDirty,
-        hasDeletedServerStages: currentWorkflowHasDeletedServerStages,
+        hasDeletedServerStages,
       },
     },
   } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
   const {
     allowedActions: { canDelete, canUpdate },
   } = useRBAC(permissions.settings['review-workflows']);
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false);
+  const [savePrompts, setSavePrompts] = React.useState({});
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const [initialErrors, setInitialErrors] = React.useState(null);
+
+  const workflow = workflows.find((workflow) => workflow.id === parseInt(workflowId, 10));
+  const contentTypesFromOtherWorkflows = workflows
+    .filter((workflow) => workflow.id !== parseInt(workflowId, 10))
+    .flatMap((workflow) => workflow.contentTypes);
 
   const { mutateAsync, isLoading } = useMutation(
     async ({ workflow }) => {
@@ -93,20 +102,12 @@ export function ReviewWorkflowsEditView() {
 
       return res;
     } catch (error) {
-      // TODO: the current implementation of `formatAPIError` prints all error messages of all details,
-      // which get's hairy when we have duplicated-name errors, because the same error message is printed
-      // several times. What we want instead in these scenarios is to print only the error summary and
-      // display the individual error messages for each field. This is a workaround, until we change the
-      // implementation of `formatAPIError`.
+      // TODO: this would benefit from a utility to get a formik error
+      // representation from an API error
       if (
         error.response.data?.error?.name === 'ValidationError' &&
         error.response.data?.error?.details?.errors?.length > 0
       ) {
-        toggleNotification({
-          type: 'warning',
-          message: error.response.data.error.message,
-        });
-
         setInitialErrors(
           error.response.data?.error?.details?.errors.reduce((acc, error) => {
             set(acc, error.path, error.message);
@@ -114,12 +115,12 @@ export function ReviewWorkflowsEditView() {
             return acc;
           }, {})
         );
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
       }
+
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
 
       return null;
     }
@@ -129,15 +130,15 @@ export function ReviewWorkflowsEditView() {
     await updateWorkflow(currentWorkflow);
     await refetch();
 
-    setIsConfirmDeleteDialogOpen(false);
+    setSavePrompts({});
   };
 
   const handleConfirmDeleteDialog = async () => {
     await submitForm();
   };
 
-  const toggleConfirmDeleteDialog = () => {
-    setIsConfirmDeleteDialogOpen((prev) => !prev);
+  const handleConfirmClose = () => {
+    setSavePrompts({});
   };
 
   const formik = useFormik({
@@ -145,9 +146,14 @@ export function ReviewWorkflowsEditView() {
     initialErrors,
     initialValues: currentWorkflow,
     async onSubmit() {
-      if (currentWorkflowHasDeletedServerStages) {
-        setIsConfirmDeleteDialogOpen(true);
-      } else if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
+      const isContentTypeReassignment = currentWorkflow.contentTypes.some((contentType) =>
+        contentTypesFromOtherWorkflows.includes(contentType)
+      );
+
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         /**
          * If the current license has a limit, check if the total count of workflows
          * exceeds that limit and display the limits modal instead of sending the
@@ -161,10 +167,19 @@ export function ReviewWorkflowsEditView() {
          * update, because it would throw an API error.
          */
       } else if (
-        limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
+      } else if (hasDeletedServerStages || isContentTypeReassignment) {
+        if (hasDeletedServerStages) {
+          setSavePrompts((prev) => ({ ...prev, hasDeletedServerStages: true }));
+        }
+
+        if (isContentTypeReassignment) {
+          setSavePrompts((prev) => ({ ...prev, hasReassignedContentTypes: true }));
+        }
       } else {
         submitForm();
       }
@@ -180,6 +195,12 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     dispatch(setWorkflow({ status: workflowStatus, data: workflow }));
+
+    // reset the state to the initial state to avoid flashes if a user
+    // navigates from an edit-view to a create-view
+    return () => {
+      dispatch(resetWorkflow());
+    };
   }, [workflowStatus, workflow, dispatch]);
 
   /**
@@ -197,11 +218,15 @@ export function ReviewWorkflowsEditView() {
 
   React.useEffect(() => {
     if (!isWorkflowLoading && !isLicenseLoading) {
-      if (limits?.workflows && meta?.workflowCount > parseInt(limits.workflows, 10)) {
+      if (
+        limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+        meta?.workflowCount > parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+      ) {
         setShowLimitModal('workflow');
       } else if (
-        limits?.stagesPerWorkflow &&
-        currentWorkflow.stages.length > parseInt(limits.stagesPerWorkflow, 10)
+        limits?.[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME] &&
+        currentWorkflow.stages.length >
+          parseInt(limits[CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME], 10)
       ) {
         setShowLimitModal('stage');
       }
@@ -210,8 +235,7 @@ export function ReviewWorkflowsEditView() {
     currentWorkflow.stages.length,
     isLicenseLoading,
     isWorkflowLoading,
-    limits.stagesPerWorkflow,
-    limits.workflows,
+    limits,
     meta?.workflowCount,
     meta.workflowsTotal,
   ]);
@@ -227,44 +251,53 @@ export function ReviewWorkflowsEditView() {
           <Layout.Header
             navigationAction={<Layout.Back href="/settings/review-workflows" />}
             primaryAction={
-              <Button
-                startIcon={<Check />}
-                type="submit"
-                size="M"
-                disabled={!currentWorkflowIsDirty || !canUpdate}
-                // if the confirm dialog is open the loading state is on
-                // the confirm button already
-                loading={!isConfirmDeleteDialogOpen && isLoading}
-              >
-                {formatMessage({
-                  id: 'global.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
+              canUpdate && (
+                <Button
+                  startIcon={<Check />}
+                  type="submit"
+                  size="M"
+                  disabled={!currentWorkflowIsDirty}
+                  // if the confirm dialog is open the loading state is on
+                  // the confirm button already
+                  loading={!Object.keys(savePrompts).length > 0 && isLoading}
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
+              )
             }
-            subtitle={formatMessage(
-              {
-                id: 'Settings.review-workflows.page.subtitle',
-                defaultMessage: '{count, plural, one {# stage} other {# stages}}',
-              },
-              { count: currentWorkflow?.stages?.length ?? 0 }
-            )}
+            subtitle={
+              currentWorkflow.stages.length > 0 &&
+              formatMessage(
+                {
+                  id: 'Settings.review-workflows.page.subtitle',
+                  defaultMessage: '{count, plural, one {# stage} other {# stages}}',
+                },
+                { count: currentWorkflow.stages.length }
+              )
+            }
             title={currentWorkflow.name}
           />
 
           <Layout.Root>
             {isLoadingModels || status === 'loading' ? (
-              <Loader>
-                {formatMessage({
-                  id: 'Settings.review-workflows.page.isLoading',
-                  defaultMessage: 'Workflow is loading',
-                })}
-              </Loader>
+              <Flex justifyContent="center">
+                <Loader>
+                  {formatMessage({
+                    id: 'Settings.review-workflows.page.isLoading',
+                    defaultMessage: 'Workflow is loading',
+                  })}
+                </Loader>
+              </Flex>
             ) : (
               <Flex alignItems="stretch" direction="column" gap={7}>
                 <WorkflowAttributes
                   canUpdate={canUpdate}
                   contentTypes={{ collectionTypes, singleTypes }}
+                  currentWorkflow={currentWorkflow}
+                  workflows={workflows}
                 />
                 <Stages
                   canDelete={canDelete}
@@ -277,17 +310,50 @@ export function ReviewWorkflowsEditView() {
         </Form>
       </FormikProvider>
 
-      <ConfirmDialog
-        bodyText={{
-          id: 'Settings.review-workflows.page.delete.confirm.body',
-          defaultMessage:
-            'All entries assigned to deleted stages will be moved to the previous stage. Are you sure you want to save?',
-        }}
+      <ConfirmDialog.Root
         isConfirmButtonLoading={isLoading}
-        isOpen={isConfirmDeleteDialogOpen}
-        onToggleDialog={toggleConfirmDeleteDialog}
+        isOpen={Object.keys(savePrompts).length > 0}
+        onToggleDialog={handleConfirmClose}
         onConfirm={handleConfirmDeleteDialog}
-      />
+      >
+        <ConfirmDialog.Body>
+          <Flex direction="column" gap={5}>
+            {savePrompts.hasDeletedServerStages && (
+              <Typography textAlign="center" variant="omega">
+                {formatMessage({
+                  id: 'Settings.review-workflows.page.delete.confirm.stages.body',
+                  defaultMessage:
+                    'All entries assigned to deleted stages will be moved to the previous stage.',
+                })}
+              </Typography>
+            )}
+
+            {savePrompts.hasReassignedContentTypes && (
+              <Typography textAlign="center" variant="omega">
+                {formatMessage(
+                  {
+                    id: 'Settings.review-workflows.page.delete.confirm.contentType.body',
+                    defaultMessage:
+                      '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                  },
+                  {
+                    count: contentTypesFromOtherWorkflows.filter((contentType) =>
+                      currentWorkflow.contentTypes.includes(contentType)
+                    ).length,
+                  }
+                )}
+              </Typography>
+            )}
+
+            <Typography textAlign="center" variant="omega">
+              {formatMessage({
+                id: 'Settings.review-workflows.page.delete.confirm.confirm',
+                defaultMessage: 'Are you sure you want to save?',
+              })}
+            </Typography>
+          </Flex>
+        </ConfirmDialog.Body>
+      </ConfirmDialog.Root>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}

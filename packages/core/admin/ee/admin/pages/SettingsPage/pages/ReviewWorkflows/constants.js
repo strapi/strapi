@@ -32,3 +32,6 @@ export const STAGE_COLOR_DEFAULT = lightTheme.colors.primary600;
 export const DRAG_DROP_TYPES = {
   STAGE: 'stage',
 };
+
+export const CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME = 'numberOfWorkflows';
+export const CHARGEBEE_STAGES_PER_WORKFLOW_ENTITLEMENT_NAME = 'stagesPerWorkflow';
