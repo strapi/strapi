@@ -61,6 +61,9 @@ const createSettingsSchema = (schema) => {
       defaultSortBy: yup
         .string()
         .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) => {
+          // Does nested validation for relational attributes (e.g author[username])
+          const parsedValue = qs.parse(value);
+
           const omitNonSortableAttributes = ({ schema, key }, { remove }) => {
             const sortableAttributes = getSortableAttributes(schema);
             if (!sortableAttributes.includes(key)) {
@@ -68,7 +71,6 @@ const createSettingsSchema = (schema) => {
             }
           };
 
-          const parsedValue = qs.parse(value);
           const sanitizedValue = await traverse.traverseQuerySort(
             omitNonSortableAttributes,
             { schema },
