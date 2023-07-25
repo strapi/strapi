@@ -24,7 +24,7 @@ const ACTIONS = {
 
 const sanitizeRole = omit(['users', 'permissions']);
 
-const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
+const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action', 'actionProperties'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
 
 const jsonClean = (data) => JSON.parse(JSON.stringify(data));

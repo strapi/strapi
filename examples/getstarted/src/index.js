@@ -16,7 +16,23 @@ module.exports = {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap({ strapi }) {},
+  async bootstrap({ strapi }) {
+    const roleService = strapi.service(`admin::role`);
+    const permissionService = strapi.service(`admin::permission`);
+
+    // roleService.assignPermissions('1', [
+    //   {
+    //     uid: 'review-workflows.change-stage',
+    //     displayName: 'Change stage',
+    //     pluginName: 'admin',
+    //     section: 'internal',
+    //     actionParameters: {
+    //       from: 1,
+    //       to: 2,
+    //     },
+    //   },
+    // ]);
+  },
 
   /**
    * An asynchronous destroy function that runs before
