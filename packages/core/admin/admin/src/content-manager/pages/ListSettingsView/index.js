@@ -1,10 +1,10 @@
-import React, { memo, useContext, useReducer, useState } from 'react';
+import React, { useContext, useReducer, useState } from 'react';
 
 import {
-  Box,
   Button,
   ContentLayout,
   Divider,
+  Flex,
   HeaderLayout,
   Layout,
   Main,
@@ -31,9 +31,9 @@ import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
 import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
 
-import EditFieldForm from './components/EditFieldForm';
-import Settings from './components/Settings';
-import SortDisplayedFields from './components/SortDisplayedFields';
+import { EditFieldForm } from './components/EditFieldForm';
+import { Settings } from './components/Settings';
+import { SortDisplayedFields } from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -217,8 +217,11 @@ const ListSettingsView = ({ layout, slug }) => {
             )}
           />
           <ContentLayout>
-            <Box
+            <Flex
+              alignItems="stretch"
               background="neutral0"
+              direction="column"
+              gap={6}
               hasRadius
               shadow="tableShadow"
               paddingTop={6}
@@ -231,9 +234,9 @@ const ListSettingsView = ({ layout, slug }) => {
                 onChange={handleChange}
                 sortOptions={sortOptions}
               />
-              <Box paddingTop={6} paddingBottom={6}>
-                <Divider />
-              </Box>
+
+              <Divider />
+
               <SortDisplayedFields
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
@@ -243,8 +246,9 @@ const ListSettingsView = ({ layout, slug }) => {
                 onRemoveField={handleRemoveField}
                 metadatas={modifiedData.metadatas}
               />
-            </Box>
+            </Flex>
           </ContentLayout>
+
           <ConfirmDialog
             bodyText={{
               id: getTrad('popUpWarning.warning.updateAllSettings'),
@@ -258,6 +262,7 @@ const ListSettingsView = ({ layout, slug }) => {
             variantRightButton="success-light"
           />
         </form>
+
         {isModalFormOpen && (
           <EditFieldForm
             attributes={attributes}
@@ -296,4 +301,4 @@ ListSettingsView.propTypes = {
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(ListSettingsView);
+export default ListSettingsView;

@@ -5,19 +5,12 @@ import { Menu } from '@strapi/design-system/v2';
 import { Plus } from '@strapi/icons';
 import { PropTypes } from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import { getTrad } from '../../../utils';
 
 import DraggableCard from './DraggableCard';
 
-const ScrollableContainer = styled(Box)`
-  flex: ${({ size }) => size};
-  overflow-x: scroll;
-  overflow-y: hidden;
-`;
-
-const SortDisplayedFields = ({
+export const SortDisplayedFields = ({
   displayedFields,
   listRemainingFields,
   metadatas,
@@ -48,25 +41,16 @@ const SortDisplayedFields = ({
   }, [displayedFields, lastAction]);
 
   return (
-    <>
-      <Box paddingBottom={4}>
-        <Typography variant="delta" as="h2">
-          {formatMessage({
-            id: getTrad('containers.SettingPage.view'),
-            defaultMessage: 'View',
-          })}
-        </Typography>
-      </Box>
-      <Flex
-        paddingTop={4}
-        paddingLeft={4}
-        paddingRight={4}
-        borderColor="neutral300"
-        borderStyle="dashed"
-        borderWidth="1px"
-        hasRadius
-      >
-        <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
+    <Flex alignItems="stretch" direction="column" gap={4}>
+      <Typography variant="delta" as="h2">
+        {formatMessage({
+          id: getTrad('containers.SettingPage.view'),
+          defaultMessage: 'View',
+        })}
+      </Typography>
+
+      <Flex padding={4} borderColor="neutral300" borderStyle="dashed" borderWidth="1px" hasRadius>
+        <Box flex="1" overflow="scroll hidden" ref={scrollableContainerRef}>
           <Flex gap={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
@@ -82,7 +66,8 @@ const SortDisplayedFields = ({
               />
             ))}
           </Flex>
-        </ScrollableContainer>
+        </Box>
+
         <Menu.Root>
           <Menu.Trigger
             paddingLeft={2}
@@ -90,7 +75,6 @@ const SortDisplayedFields = ({
             justifyContent="center"
             endIcon={null}
             disabled={listRemainingFields.length <= 0}
-            marginBottom={4}
             variant="tertiary"
           >
             <VisuallyHidden as="span">
@@ -110,7 +94,7 @@ const SortDisplayedFields = ({
           </Menu.Content>
         </Menu.Root>
       </Flex>
-    </>
+    </Flex>
   );
 };
 
@@ -129,5 +113,3 @@ SortDisplayedFields.propTypes = {
   onMoveField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };
-
-export default SortDisplayedFields;
