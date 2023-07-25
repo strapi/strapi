@@ -23,11 +23,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
-import flatMap from 'lodash/flatMap';
-import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
-import set from 'lodash/set';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -57,13 +53,13 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { componentLayouts, initialData, modifiedData, metaToEdit, metaForm } = reducerState;
   const { formatMessage } = useIntl();
-  const modelName = get(mainLayout, ['info', 'displayName'], '');
-  const attributes = get(modifiedData, ['attributes'], {});
+  const modelName = mainLayout.info.displayName;
+  const attributes = modifiedData?.attributes ?? {};
   const fieldSizes = useSelector(selectFieldSizes);
   const { put } = useFetchClient();
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
-    const type = get(attributes, [attr, 'type'], '');
+    const type = attributes?.[attr]?.type ?? '';
 
     return (
       ![
@@ -80,10 +76,10 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       ].includes(type) && !!type
     );
   });
-  const editLayout = get(modifiedData, ['layouts', 'edit'], []);
-  const displayedFields = flatMap(editLayout, 'rowContent');
+  const editLayout = modifiedData.layouts.edit;
+  const displayedFields = editLayout.flatMap((layout) => layout.rowContent);
   const editLayoutFields = Object.keys(modifiedData.attributes)
-    .filter((attr) => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
+    .filter((attr) => (modifiedData?.metadatas?.[attr]?.edit?.visible ?? false) === true)
     .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
 
@@ -160,9 +156,15 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleConfirm = () => {
-    const body = pick(cloneDeep(modifiedData), ['layouts', 'metadatas', 'settings']);
-    set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
-    submitMutation.mutate(body);
+    const { layouts, metadatas, settings } = cloneDeep(modifiedData);
+    submitMutation.mutate({
+      layouts: {
+        ...layouts,
+        edit: unformatLayout(layouts.edit),
+      },
+      metadatas,
+      settings,
+    });
   };
 
   const handleMoveRelation = (fromIndex, toIndex) => {
@@ -368,8 +370,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             onToggle={handleToggleModal}
             onMetaChange={handleMetaChange}
             onSizeChange={handleSizeChange}
-            type={get(attributes, [metaToEdit, 'type'], '')}
-            customFieldUid={get(attributes, [metaToEdit, 'customField'], '')}
+            type={attributes?.[metaToEdit]?.type ?? ''}
+            customFieldUid={attributes?.[metaToEdit]?.customField ?? ''}
           />
         )}
       </Main>
