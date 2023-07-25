@@ -5,8 +5,6 @@ import Cookies from 'js-cookie';
 import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
-import { getRequestUrl } from '../../../../admin/src/utils';
-
 export const AuthResponse = () => {
   const {
     params: { authResponse },
@@ -36,7 +34,7 @@ export const AuthResponse = () => {
 
       if (jwtToken) {
         auth.setToken(jwtToken, true);
-        const requestUrl = getRequestUrl('users/me');
+        const requestUrl = '/admin/users/me';
         const {
           data: { data },
         } = await get(requestUrl);

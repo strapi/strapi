@@ -4,7 +4,7 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import ConfirmDialog from '../index';
+import { ConfirmDialog } from '../index';
 
 const App = (
   <ThemeProvider theme={lightTheme}>

@@ -33,6 +33,26 @@ const CONTENT_TYPES_FIXTURE = {
   ],
 };
 
+const WORKFLOWS_FIXTURE = [
+  {
+    id: 1,
+    name: 'Default',
+    contentTypes: ['uid1'],
+    stages: [],
+  },
+
+  {
+    id: 2,
+    name: 'Workflow 1',
+    contentTypes: [],
+    stages: [],
+  },
+];
+
+const CURRENT_WORKFLOW_FIXTURE = {
+  ...WORKFLOWS_FIXTURE[0],
+};
+
 const ComponentFixture = (props) => {
   const store = configureStore([], [reducer]);
 
@@ -51,7 +71,12 @@ const ComponentFixture = (props) => {
         <FormikProvider value={formik}>
           <IntlProvider locale="en" messages={{}}>
             <ThemeProvider theme={lightTheme}>
-              <WorkflowAttributes contentTypes={CONTENT_TYPES_FIXTURE} {...props} />
+              <WorkflowAttributes
+                contentTypes={CONTENT_TYPES_FIXTURE}
+                currentWorkflow={CURRENT_WORKFLOW_FIXTURE}
+                workflows={WORKFLOWS_FIXTURE}
+                {...props}
+              />
             </ThemeProvider>
           </IntlProvider>
         </FormikProvider>
@@ -59,6 +84,14 @@ const ComponentFixture = (props) => {
     </DndProvider>
   );
 };
+
+const withMarkup = (query) => (text) =>
+  query((content, node) => {
+    const hasText = (node) => node.textContent === text;
+    const childrenDontHaveText = Array.from(node.children).every((child) => !hasText(child));
+
+    return hasText(node) && childrenDontHaveText;
+  });
 
 const setup = (props) => ({
   ...render(<ComponentFixture {...props} />),
@@ -152,6 +185,49 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     await waitFor(() => {
       expect(getByRole('textbox')).toHaveAttribute('disabled');
       expect(getByRole('combobox', { name: /associated to/i })).toHaveAttribute('data-disabled');
+    });
+  });
+
+  it('should not render assigned content-types to the current workflow', async () => {
+    const { getByRole, queryByText, user } = setup();
+
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const queryByTextWithMarkup = withMarkup(queryByText);
+
+    await user.click(contentTypesSelect);
+
+    await waitFor(() => {
+      expect(queryByTextWithMarkup('(assigned to Default workflow)')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render assigned content-types to the other workflows', async () => {
+    const { getByRole, getByText, user } = setup({
+      currentWorkflow: { ...WORKFLOWS_FIXTURE[1] },
+    });
+
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const getByTextWithMarkup = withMarkup(getByText);
+
+    await user.click(contentTypesSelect);
+
+    await waitFor(() => {
+      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
+    });
+  });
+
+  it('should render assigned content-types to the other workflows, when currentWorkflow is not passed', async () => {
+    const { getByRole, getByText, user } = setup({
+      currentWorkflow: undefined,
+    });
+
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const getByTextWithMarkup = withMarkup(getByText);
+
+    await user.click(contentTypesSelect);
+
+    await waitFor(() => {
+      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
     });
   });
 });

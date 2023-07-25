@@ -6,7 +6,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 
 import type { Handler, TransferState } from './abstract';
 import type { Protocol } from '../../../../types';
-import { ProviderTransferError } from '../../../errors/providers';
+import { ProviderError, ProviderTransferError } from '../../../errors/providers';
 import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
 import { TransferMethod } from '../constants';
 
@@ -138,16 +138,23 @@ export const handlerControllerFactory =
           },
 
           respond(uuid, e, data) {
+            let details = {};
             return new Promise<void>((resolve, reject) => {
               if (!uuid && !e) {
                 reject(new Error('Missing uuid for this message'));
                 return;
               }
+
               this.response = {
                 uuid,
                 data,
                 e,
               };
+
+              if (e instanceof ProviderError) {
+                details = e.details;
+              }
+
               const payload = JSON.stringify({
                 uuid,
                 data: data ?? null,
@@ -155,6 +162,7 @@ export const handlerControllerFactory =
                   ? {
                       code: e?.name ?? 'ERR',
                       message: e?.message,
+                      details,
                     }
                   : null,
               });
@@ -183,10 +191,6 @@ export const handlerControllerFactory =
                 const response = JSON.parse(raw.toString());
 
                 if (response.uuid === uuid) {
-                  if (response.error) {
-                    return reject(new Error(response.error.message));
-                  }
-
                   resolve(response.data ?? null);
                 } else {
                   ws.once('message', onResponse);

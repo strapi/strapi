@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 
 import { useTracking } from '../../features/Tracking';
 import useQueryParams from '../../hooks/useQueryParams';
-import ConfirmDialog from '../ConfirmDialog';
+import { ConfirmDialog } from '../ConfirmDialog';
 import EmptyBodyTable from '../EmptyBodyTable';
 
 import TableHead from './TableHead';

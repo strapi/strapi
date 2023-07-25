@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v18 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v16 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -138,7 +138,7 @@ This command runs tests using jest behind the scenes. Options for jest can be pa
 
 ### Changing the database
 
-By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
+By default the script run by `test:api` generates an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
 $ yarn test:api --db=sqlite
