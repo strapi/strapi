@@ -11,6 +11,6 @@ export * as UID from './uid';
  * Here we use the fact that once the registries are extended, Attribute.GetKeys<Common.UID.Schema> will resolve to either never or a more
  * deterministic value rather than string | number which represent the keys of the initial mapped type (Component & ContentType's registries)
  */
-export type AreSchemasRegistriesExtended = Utils.Expression.Not<
+export type AreSchemaRegistriesExtended = Utils.Expression.Not<
   Utils.Expression.Extends<string | number, Attribute.GetKeys<Common.UID.Schema>>
 >;
