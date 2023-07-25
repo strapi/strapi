@@ -4,8 +4,8 @@ import { Combobox, ComboboxOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useAdminUsers } from '../../../hooks/useAdminUsers';
-import { getDisplayName } from '../../utils';
+import { useAdminUsers } from '../../../../hooks/useAdminUsers';
+import { getDisplayName } from '../../../utils';
 
 const AdminUsersFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();
