@@ -17,10 +17,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -35,7 +32,6 @@ import EditFieldForm from './components/EditFieldForm';
 import Settings from './components/Settings';
 import SortDisplayedFields from './components/SortDisplayedFields';
 import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
-import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ListSettingsView = ({ layout, slug }) => {
@@ -45,14 +41,19 @@ const ListSettingsView = ({ layout, slug }) => {
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
-
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, layout)
+  const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    () => ({
+      ...initialState,
+      initialData: layout,
+      modifiedData: layout,
+    })
   );
-  const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
-  const isModalFormOpen = !isEmpty(fieldForm);
+
+  const isModalFormOpen = Object.keys(fieldForm).length !== 0;
 
   const { attributes } = layout;
   const displayedFields = modifiedData.layouts.list;
@@ -84,9 +85,30 @@ const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
+  const { isLoading: isSubmittingForm, mutate } = useMutation(
+    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
+    {
+      onSuccess() {
+        trackUsage('didEditListSettings');
+        refetchData();
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
+
   const handleConfirm = async () => {
-    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutate(body);
+    const { layouts, settings, metadatas } = modifiedData;
+
+    mutate({
+      layouts,
+      settings,
+      metadatas,
+    });
   };
 
   const handleAddField = (item) => {
@@ -138,23 +160,6 @@ const ListSettingsView = ({ layout, slug }) => {
     });
     handleCloseModal();
   };
-
-  const submitMutation = useMutation(
-    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
-    {
-      onSuccess() {
-        trackUsage('didEditListSettings');
-        refetchData();
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      },
-    }
-  );
-  const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleChangeEditLabel = ({ target: { name, value } }) => {
     dispatch({
@@ -266,7 +271,7 @@ const ListSettingsView = ({ layout, slug }) => {
             onChangeEditLabel={handleChangeEditLabel}
             onCloseModal={handleCloseModal}
             onSubmit={handleSubmitFieldEdit}
-            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+            type={attributes?.[fieldToEdit]?.type ?? 'text'}
           />
         )}
       </Main>
