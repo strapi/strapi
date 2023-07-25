@@ -23,7 +23,7 @@ import { useIntl } from 'react-intl';
 
 import useQueryParams from '../../hooks/useQueryParams';
 import SortIcon from '../../icons/SortIcon';
-import ConfirmDialog from '../ConfirmDialog';
+import { ConfirmDialog } from '../ConfirmDialog';
 import EmptyStateLayout from '../EmptyStateLayout';
 
 /* -------------------------------------------------------------------------------------------------
@@ -241,7 +241,8 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
     <Th
       key={name}
       action={
-        isSorted && (
+        isSorted &&
+        isSortable && (
           <IconButton
             label={sortLabel}
             onClick={handleClickSort}

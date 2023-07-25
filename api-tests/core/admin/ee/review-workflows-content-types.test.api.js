@@ -32,6 +32,21 @@ const productModel = {
   },
 };
 
+const articleUID = 'api::article.article';
+const articleModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'article',
+  pluralName: 'articles',
+  displayName: 'Article',
+  kind: 'collectionType',
+  attributes: {
+    title: {
+      type: 'string',
+    },
+  },
+};
+
 describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => {
   const builder = createTestBuilder();
 
@@ -87,14 +102,21 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([productModel]).build();
+    await builder.addContentTypes([productModel, articleModel]).build();
 
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
 
+    // Create products
     await Promise.all([
       createEntry(productUID, { name: 'Product 1' }),
       createEntry(productUID, { name: 'Product 2' }),
+    ]);
+
+    // Create articles
+    await Promise.all([
+      createEntry(articleUID, { title: 'Article 1' }),
+      createEntry(articleUID, { title: 'Article 2' }),
     ]);
   });
 
@@ -228,6 +250,32 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       });
     });
 
+    // Depends on the previous test
+    describe('Assign multiple content types', () => {
+      test('It should assign multiple content types', async () => {
+        const res = await updateWorkflow(workflow1.id, {
+          contentTypes: [productUID, articleUID],
+        });
+
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({ contentTypes: [productUID, articleUID] });
+      });
+
+      test('It should steal content types from other workflows', async () => {
+        // There could be concurrency issues, so assert all workflows are transfered
+        const res = await updateWorkflow(workflow2.id, {
+          contentTypes: [productUID, articleUID],
+        });
+
+        const updatedWorkflow1 = await getWorkflow(workflow1.id);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data).toMatchObject({ contentTypes: [productUID, articleUID] });
+
+        expect(updatedWorkflow1).toMatchObject({ contentTypes: [] });
+      });
+    });
+
     describe('Assign and update stages', () => {
       test('It should assign and update stages', async () => {
         workflow1 = await createWorkflow({ contentTypes: [] }).then((res) => res.body.data);
@@ -276,6 +324,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       }
     });
   });
+
   describe('Creating entity assigned to a workflow', () => {
     let workflow;
     test('When content type is assigned to workflow, new entries should be added to the first stage of the default workflow', async () => {

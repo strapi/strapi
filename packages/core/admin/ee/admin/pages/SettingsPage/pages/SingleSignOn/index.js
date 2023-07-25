@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import {
   Button,
@@ -62,13 +62,7 @@ export const SingleSignOn = () => {
 
   const showLoader = isLoadingForPermissions || isLoading;
 
-  useEffect(() => {
-    if (formErrors.defaultRole) {
-      const selector = `[name="defaultRole"]`;
-
-      document.querySelector(selector).focus();
-    }
-  }, [formErrors]);
+  // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
 
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 

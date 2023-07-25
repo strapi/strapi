@@ -22,13 +22,7 @@ export const initialState = {
       data: {
         name: '',
         contentTypes: [],
-        stages: [
-          {
-            color: STAGE_COLOR_DEFAULT,
-            name: '',
-            __temp_key__: 1,
-          },
-        ],
+        stages: [],
       },
       isDirty: false,
       hasDeletedServerStages: false,
@@ -79,7 +73,7 @@ export function reducer(state = initialState, action) {
 
         if (!currentWorkflow.hasDeletedServerStages) {
           draft.clientState.currentWorkflow.hasDeletedServerStages = !!(
-            state.serverState.currentWorkflow?.stages ?? []
+            state.serverState.workflow?.stages ?? []
           ).find((stage) => stage.id === stageId);
         }
 

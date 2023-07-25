@@ -9,12 +9,14 @@ const { clampMaxWorkflows, clampMaxStagesPerWorkflow } = require('../../utils/re
 module.exports = ({ strapi }) => {
   return {
     limits: {
-      workflows: MAX_WORKFLOWS,
+      numberOfWorkflows: MAX_WORKFLOWS,
       stagesPerWorkflow: MAX_STAGES_PER_WORKFLOW,
     },
-    register({ workflows, stagesPerWorkflow }) {
+    register({ numberOfWorkflows, stagesPerWorkflow }) {
       if (!Object.isFrozen(this.limits)) {
-        this.limits.workflows = clampMaxWorkflows(workflows || this.limits.workflows);
+        this.limits.numberOfWorkflows = clampMaxWorkflows(
+          numberOfWorkflows || this.limits.numberOfWorkflows
+        );
         this.limits.stagesPerWorkflow = clampMaxStagesPerWorkflow(
           stagesPerWorkflow || this.limits.stagesPerWorkflow
         );
@@ -58,7 +60,7 @@ module.exports = ({ strapi }) => {
     async validateWorkflowCount(countAddedWorkflows = 0) {
       const workflowsService = getService('workflows', { strapi });
       const countWorkflows = await workflowsService.count();
-      if (countWorkflows + countAddedWorkflows > this.limits.workflows) {
+      if (countWorkflows + countAddedWorkflows > this.limits.numberOfWorkflows) {
         throw new ValidationError(ERRORS.WORKFLOWS_LIMIT);
       }
     },
