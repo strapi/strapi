@@ -1,6 +1,11 @@
 'use strict';
 
-const { stripUrlQueryAndFragment } = require('@sentry/utils');
+const {
+  tracingContextFromHeaders,
+  isString,
+  extractPathForTransaction,
+  extractRequestData,
+} = require('@sentry/utils');
 
 /**
  * Programmatic sentry-performance middleware. We do not want to expose it in the plugin
@@ -11,8 +16,8 @@ module.exports = ({ strapi }) => {
   sentryService.init();
   const Sentry = sentryService.getInstance();
 
-  if (!Sentry || !sentryService.hasTracingEnabled()) {
-    // initialization failed or tracing is not enabled
+  if (!Sentry) {
+    // initialization failed
     return;
   }
 
@@ -35,27 +40,57 @@ module.exports = ({ strapi }) => {
 
   // this tracing middleware creates a transaction per request
   strapi.server.use((ctx, next) => {
-    const reqMethod = (ctx.method || '').toUpperCase();
-    const reqUrl = ctx.url && stripUrlQueryAndFragment(ctx.url);
+    const req = ctx.request;
 
-    // connect to trace of upstream app
-    let traceparentData;
-    if (ctx.request.get('sentry-trace')) {
-      traceparentData = Sentry.extractTraceparentData(ctx.request.get('sentry-trace'));
+    const hub = Sentry.getCurrentHub();
+    const reqMethod = (ctx.method || '').toUpperCase();
+
+    if (reqMethod === 'OPTIONS' || reqMethod === 'HEAD') {
+      return next();
     }
 
-    const transaction = Sentry.startTransaction({
-      name: `${reqMethod} ${reqUrl}`,
-      op: 'http.server',
-      ...traceparentData,
-    });
+    const sentryTrace =
+      req.headers && isString(req.headers['sentry-trace'])
+        ? req.headers['sentry-trace']
+        : undefined;
+    const baggage = req.headers?.baggage;
+    const { traceparentData, dynamicSamplingContext, propagationContext } =
+      tracingContextFromHeaders(sentryTrace, baggage);
+    hub.getScope().setPropagationContext(propagationContext);
 
-    ctx.__sentry_transaction = transaction;
+    if (!sentryService.hasTracingEnabled()) {
+      return next();
+    }
+
+    const [name, source] = extractPathForTransaction(req, { path: true, method: true });
+    const transaction = Sentry.startTransaction(
+      {
+        name,
+        op: 'http.server',
+        ...traceparentData,
+        metadata: {
+          dynamicSamplingContext:
+            traceparentData && !dynamicSamplingContext ? {} : dynamicSamplingContext,
+          // The request should already have been stored in `scope.sdkProcessingMetadata` (which will become
+          // `event.sdkProcessingMetadata` the same way the metadata here will) by `sentryRequestMiddleware`, but on the
+          // off chance someone is using `sentryTracingMiddleware` without `sentryRequestMiddleware`, it doesn't hurt to
+          // be sure
+          request: req,
+          source,
+        },
+      },
+      // extra context passed to the tracesSampler
+      { request: extractRequestData(req) }
+    );
 
     // We put the transaction on the scope so users can attach children to it
-    Sentry.getCurrentHub().configureScope((scope) => {
+    hub.configureScope((scope) => {
       scope.setSpan(transaction);
     });
+
+    // We also set __sentry_transaction on the response so people can grab the transaction there to add
+    // spans to it later.
+    ctx.res.__sentry_transaction = transaction;
 
     ctx.res.on('finish', () => {
       // Push `transaction.finish` to the next event loop so open spans have a chance to finish before the transaction closes
