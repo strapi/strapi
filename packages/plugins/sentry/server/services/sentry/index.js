@@ -1,7 +1,5 @@
 'use strict';
 
-// FIXME
-/* eslint-disable import/extensions */
 const Sentry = require('@sentry/node');
 
 const createSentryService = (strapi) => {
@@ -27,7 +25,12 @@ const createSentryService = (strapi) => {
         if (settings.dsn) {
           Sentry.init({
             dsn: settings.dsn,
+            tracesSampleRate: settings.tracesSampleRate,
             environment: strapi.config.get('environment'),
+            integrations: settings.tracesSampleRate ? [
+              new Sentry.Integrations.Http({ tracing: true }),
+              new Sentry.Integrations.GraphQL(),
+            ] : undefined,
             ...settings.init,
           });
           // Store the successfully initialized Sentry instance
@@ -49,6 +52,11 @@ const createSentryService = (strapi) => {
      */
     getInstance() {
       return instance;
+    },
+
+    /** If tracing (performance monitoring) is enabled. */
+    hasTracingEnabled() {
+      return !!settings.tracesSampleRate; 
     },
 
     /**

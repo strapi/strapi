@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import readline from 'node:readline';
 import crypto from 'crypto';
-import * as sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import hasYarn from './utils/has-yarn';
 import checkRequirements from './utils/check-requirements';
 import { trackError, captureException } from './utils/usage';
@@ -17,7 +17,7 @@ export { default as checkInstallPath } from './utils/check-install-path';
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {
-  sentry.init({
+  Sentry.init({
     dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
   });
 
@@ -59,7 +59,7 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
     useTypescript: Boolean(options.typescript),
   };
 
-  sentry.configureScope(function configureScope(sentryScope) {
+  Sentry.configureScope(function configureScope(sentryScope) {
     const tags = {
       os: os.type(),
       osPlatform: os.platform(),

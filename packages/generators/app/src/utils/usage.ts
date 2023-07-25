@@ -1,7 +1,7 @@
 import os from 'os';
 import _ from 'lodash';
 import fetch from 'node-fetch';
-import sentry, { Severity } from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import { Scope, StderrError, isStderrError } from '../types';
 
 type TrackError = Error | string | StderrError;
@@ -15,8 +15,8 @@ function addPackageJsonStrapiMetadata(metadata: Record<string, unknown>, scope: 
 
 export async function captureException(error: Error) {
   try {
-    sentry.captureException(error);
-    await sentry.flush();
+    Sentry.captureException(error);
+    await Sentry.flush();
   } catch (err) {
     /** ignore errors */
     return Promise.resolve();
@@ -25,8 +25,8 @@ export async function captureException(error: Error) {
 
 async function captureError(message: string) {
   try {
-    sentry.captureMessage(message, Severity.Error);
-    await sentry.flush();
+    Sentry.captureMessage(message, Sentry.Severity.Error);
+    await Sentry.flush();
   } catch (err) {
     /** ignore errors */
     return Promise.resolve();
@@ -39,10 +39,10 @@ export function captureStderr(name: string, error: unknown) {
       .trim()
       .split('\n')
       .forEach((line) => {
-        sentry.addBreadcrumb({
+        Sentry.addBreadcrumb({
           category: 'stderr',
           message: line,
-          level: Severity.Error,
+          level: Sentry.Severity.Error,
         });
       });
   }

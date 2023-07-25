@@ -7,9 +7,9 @@
 module.exports = ({ strapi }) => {
   const sentryService = strapi.plugin('sentry').service('sentry');
   sentryService.init();
-  const sentry = sentryService.getInstance();
+  const Sentry = sentryService.getInstance();
 
-  if (!sentry) {
+  if (!Sentry) {
     // initialization failed
     return;
   }
@@ -18,19 +18,15 @@ module.exports = ({ strapi }) => {
     try {
       await next();
     } catch (error) {
-      sentryService.sendError(error, (scope, sentryInstance) => {
-        scope.addEventProcessor((event) => {
-          // Parse Koa context to add error metadata
-          return sentryInstance.Handlers.parseRequest(event, ctx.request, {
-            // Don't parse the transaction name, we'll do it manually
-            transaction: false,
-          });
-        });
-
-        // Manually add transaction name
-        scope.setTag('transaction', `${ctx.method} ${ctx._matchedRoute}`);
+      sentryService.sendError(error, (scope, Sentry) => {
+        scope.setSDKProcessingMetadata({ request: ctx.request });
+        Sentry.captureException(error);
+   
         // Manually add Strapi version
         scope.setTag('strapi_version', strapi.config.info.strapi);
+
+        // TODO Remove these, let this be handled by Sentry
+        scope.setTag('transaction', `${ctx.method} ${ctx._matchedRoute}`);
         scope.setTag('method', ctx.method);
       });
 
