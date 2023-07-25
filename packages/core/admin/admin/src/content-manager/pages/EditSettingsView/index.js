@@ -14,7 +14,13 @@ import {
   Select,
   Typography,
 } from '@strapi/design-system';
-import { ConfirmDialog, Link, useNotification, useTracking } from '@strapi/helper-plugin';
+import {
+  ConfirmDialog,
+  Link,
+  useFetchClient,
+  useNotification,
+  useTracking,
+} from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import flatMap from 'lodash/flatMap';
@@ -37,7 +43,6 @@ import ModalForm from './components/FormModal';
 import { LayoutDndProvider } from './components/LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';
-import putCMSettingsEV from './utils/api';
 import { unformatLayout } from './utils/layout';
 
 const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, updateLayout }) => {
@@ -55,6 +60,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
   const fieldSizes = useSelector(selectFieldSizes);
+  const { put } = useFetchClient();
 
   const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
@@ -128,7 +134,12 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
 
   const submitMutation = useMutation(
     (body) => {
-      return putCMSettingsEV(body, slug, isContentTypeView);
+      return put(
+        isContentTypeView
+          ? `/content-manager/content-types/${slug}/configuration`
+          : `components/${slug}/configuration`,
+        body
+      );
     },
     {
       onSuccess({ data }) {
