@@ -53,7 +53,7 @@ const populate = traverseFactory()
       // Get the list of all attributes that can be populated
       .filter(([, value]) => ['relation', 'component', 'dynamiczone', 'media'].includes(value.type))
       // Only keep the attributes key
-      .map(([key]) => key);
+      .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
 
     return recurse(visitor, options, parsedPopulate);
   })

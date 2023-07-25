@@ -411,10 +411,6 @@ const convertPopulateObject = (populate: PopulateAttributesParams, schema: Model
 };
 
 const convertNestedPopulate = (subPopulate: PopulateObjectParams, schema: Model) => {
-  if (Array.isArray(subPopulate) && _.every(subPopulate, _.isString)) {
-    return subPopulate.reduce((acc, key) => ({ ...acc, [key]: true }), {});
-  }
-
   if (_.isString(subPopulate)) {
     return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
