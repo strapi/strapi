@@ -21,7 +21,7 @@ module.exports = ({ strapi }) => {
       sentryService.sendError(error, (scope, Sentry) => {
         scope.setSDKProcessingMetadata({ request: ctx.request });
         Sentry.captureException(error);
-   
+
         // Manually add Strapi version
         scope.setTag('strapi_version', strapi.config.info.strapi);
 

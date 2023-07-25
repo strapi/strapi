@@ -27,10 +27,9 @@ const createSentryService = (strapi) => {
             dsn: settings.dsn,
             tracesSampleRate: settings.tracesSampleRate,
             environment: strapi.config.get('environment'),
-            integrations: settings.tracesSampleRate ? [
-              new Sentry.Integrations.Http({ tracing: true }),
-              new Sentry.Integrations.GraphQL(),
-            ] : undefined,
+            integrations: settings.tracesSampleRate
+              ? [new Sentry.Integrations.Http({ tracing: true }), new Sentry.Integrations.GraphQL()]
+              : undefined,
             ...settings.init,
           });
           // Store the successfully initialized Sentry instance
@@ -56,7 +55,7 @@ const createSentryService = (strapi) => {
 
     /** If tracing (performance monitoring) is enabled. */
     hasTracingEnabled() {
-      return !!settings.tracesSampleRate; 
+      return !!settings.tracesSampleRate;
     },
 
     /**

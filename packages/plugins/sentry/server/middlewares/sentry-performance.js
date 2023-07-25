@@ -1,6 +1,6 @@
 'use strict';
 
-const { stripUrlQueryAndFragment } = require("@sentry/utils");
+const { stripUrlQueryAndFragment } = require('@sentry/utils');
 
 /**
  * Programmatic sentry-performance middleware. We do not want to expose it in the plugin
@@ -16,46 +16,37 @@ module.exports = ({ strapi }) => {
     return;
   }
 
-  strapi.server.use(async (ctx, next) => {
-    return new Promise((resolve, reject) => {
-      Sentry.runWithAsyncContext(async () => {
-        const hub = Sentry.getCurrentHub();
-        hub.configureScope((scope) =>
-          scope.addEventProcessor((event) =>
-            Sentry.addRequestDataToEvent(event, ctx.request, {
-              include: {
-                user: false,
-              },
-            })
-          )
-        );
+  strapi.server.use((ctx, next) => {
+    Sentry.runWithAsyncContext(async () => {
+      const hub = Sentry.getCurrentHub();
+      hub.configureScope((scope) =>
+        scope.addEventProcessor((event) =>
+          Sentry.addRequestDataToEvent(event, ctx.request, {
+            include: {
+              user: false,
+            },
+          })
+        )
+      );
 
-        try {
-          await next();
-        } catch (err) {
-          reject(err);
-        }
-        resolve();
-      });
+      next();
     });
   });
 
   // this tracing middleware creates a transaction per request
-  strapi.server.use(async (ctx, next) => {
-    const reqMethod = (ctx.method || "").toUpperCase();
+  strapi.server.use((ctx, next) => {
+    const reqMethod = (ctx.method || '').toUpperCase();
     const reqUrl = ctx.url && stripUrlQueryAndFragment(ctx.url);
 
     // connect to trace of upstream app
     let traceparentData;
-    if (ctx.request.get("sentry-trace")) {
-      traceparentData = Sentry.extractTraceparentData(
-        ctx.request.get("sentry-trace")
-      );
+    if (ctx.request.get('sentry-trace')) {
+      traceparentData = Sentry.extractTraceparentData(ctx.request.get('sentry-trace'));
     }
 
     const transaction = Sentry.startTransaction({
       name: `${reqMethod} ${reqUrl}`,
-      op: "http.server",
+      op: 'http.server',
       ...traceparentData,
     });
 
@@ -66,12 +57,12 @@ module.exports = ({ strapi }) => {
       scope.setSpan(transaction);
     });
 
-    ctx.res.on("finish", () => {
+    ctx.res.on('finish', () => {
       // Push `transaction.finish` to the next event loop so open spans have a chance to finish before the transaction closes
       setImmediate(() => {
         // if using koa router, a nicer way to capture transaction using the matched route
         if (ctx._matchedRoute) {
-          const mountPath = ctx.mountPath || "";
+          const mountPath = ctx.mountPath || '';
           transaction.setName(`${reqMethod} ${mountPath}${ctx._matchedRoute}`);
         }
         transaction.setHttpStatus(ctx.status);
@@ -79,6 +70,6 @@ module.exports = ({ strapi }) => {
       });
     });
 
-    await next();
+    next();
   });
 };
