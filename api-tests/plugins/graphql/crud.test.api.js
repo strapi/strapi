@@ -243,6 +243,58 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
+    test('Pagination counts are correct', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            posts(filters: { name: { eq: "post 2" } }) {
+              data {
+                id
+                attributes {
+                  name
+                  bigint
+                  nullable
+                  category
+                }
+              }
+              meta {
+                pagination {
+                  total
+                  pageSize
+                  page
+                  pageCount
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const expectedPost = data.posts[1];
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        data: {
+          posts: {
+            data: [
+              {
+                id: expectedPost.id,
+                attributes: omit('id', expectedPost),
+              },
+            ],
+            meta: {
+              pagination: {
+                total: 1,
+                pageSize: 10,
+                page: 1,
+                pageCount: 1,
+              },
+            },
+          },
+        },
+      });
+    });
+
     test.skip('List posts with `createdBy` and `updatedBy`', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

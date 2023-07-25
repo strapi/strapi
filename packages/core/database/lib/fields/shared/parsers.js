@@ -25,6 +25,8 @@ const parseDateTimeOrTimestamp = (value) => {
 };
 
 const parseDate = (value) => {
+  if (dateFns.isDate(value)) return dateFns.format(value, 'yyyy-MM-dd');
+
   const found = isString(value) ? value.match(PARTIAL_DATE_REGEX) || [] : [];
   const extractedValue = found[0];
 

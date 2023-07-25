@@ -11,7 +11,7 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import Information from '..';
+import { Information } from '..';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -50,6 +50,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
+      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { getByText, getAllByText } = setup();
@@ -77,6 +78,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
         },
       },
       isCreatingEntry: false,
+      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { getAllByText } = setup();
@@ -103,6 +105,7 @@ describe('CONTENT MANAGER | EditView | Information', () => {
         },
       },
       isCreatingEntry: false,
+      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { queryByText, getAllByText } = setup();

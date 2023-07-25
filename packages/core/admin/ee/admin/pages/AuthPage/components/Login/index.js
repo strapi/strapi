@@ -14,7 +14,7 @@ const DividerFull = styled(Divider)`
   flex: 1;
 `;
 
-const Login = (loginProps) => {
+export const LoginEE = (loginProps) => {
   const ssoEnabled = window.strapi.features.isEnabled(window.strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
@@ -49,17 +49,15 @@ const Login = (loginProps) => {
   );
 };
 
-Login.defaultProps = {
+LoginEE.defaultProps = {
   onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 
-Login.propTypes = {
+LoginEE.propTypes = {
   formErrors: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   requestError: PropTypes.object,
 };
-
-export default Login;

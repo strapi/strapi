@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import {
   Button,
@@ -30,7 +30,6 @@ import { useSelector } from 'react-redux';
 
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
 import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
@@ -38,25 +37,20 @@ export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
-  // TODO: this is necessary because otherwise we run into an
-  // infinite rendering loop
-  const permissionsMemoized = React.useMemo(() => {
-    return {
-      ...permissions.settings.sso,
-      readRoles: permissions.settings.roles.read,
-    };
-  }, [permissions.settings.roles.read, permissions.settings.sso]);
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useRBAC(permissionsMemoized);
+  } = useRBAC({
+    ...permissions.settings.sso,
+    readRoles: permissions.settings.roles.read,
+  });
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleChange, handleSubmit },
-  ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
+  ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
     'autoRegister',
     'defaultRole',
     'ssoLockedRoles',
@@ -67,13 +61,7 @@ export const SingleSignOn = () => {
 
   const showLoader = isLoadingForPermissions || isLoading;
 
-  useEffect(() => {
-    if (formErrors.defaultRole) {
-      const selector = `[name="defaultRole"]`;
-
-      document.querySelector(selector).focus();
-    }
-  }, [formErrors]);
+  // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
 
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 

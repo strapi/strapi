@@ -34,11 +34,6 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.mock('../../../hooks/useContentTypes');
 
-jest.mock('ee_else_ce/hooks/useLicenseLimitNotification', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 const history = createMemoryHistory();
 
 const App = (

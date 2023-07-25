@@ -9,7 +9,7 @@ function isEnterprise() {
 export function useEnterprise(
   ceData,
   eeCallback,
-  { defaultValue = null, combine = (ceData, eeData) => eeData } = {}
+  { defaultValue = null, combine = (ceData, eeData) => eeData, enabled = true } = {}
 ) {
   const eeCallbackRef = useCallbackRef(eeCallback);
   const combineCallbackRef = useCallbackRef(combine);
@@ -17,7 +17,7 @@ export function useEnterprise(
   // We have to use a nested object here, because functions (e.g. Components)
   // can not be stored as value directly
   const [{ data }, setData] = React.useState({
-    data: isEnterprise() ? defaultValue : ceData,
+    data: isEnterprise() && enabled ? defaultValue : ceData,
   });
 
   React.useEffect(() => {
@@ -27,10 +27,10 @@ export function useEnterprise(
       setData({ data: combineCallbackRef(ceData, eeData) });
     }
 
-    if (isEnterprise()) {
+    if (isEnterprise() && enabled) {
       importEE();
     }
-  }, [ceData, eeCallbackRef, combineCallbackRef]);
+  }, [ceData, eeCallbackRef, combineCallbackRef, enabled]);
 
   return data;
 }

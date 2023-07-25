@@ -250,7 +250,9 @@ export const MediaLibrary = () => {
                   />
                 </BoxWithHeight>
               )}
-              {canRead && isGridView && <SortPicker onChangeSort={handleChangeSort} />}
+              {canRead && isGridView && (
+                <SortPicker value={query?.sort} onChangeSort={handleChangeSort} />
+              )}
               {canRead && <Filters />}
             </>
           }
@@ -367,7 +369,10 @@ export const MediaLibrary = () => {
                       (currentFolder) => currentFolder.id === folder.id
                     );
 
-                    const url = getFolderURL(pathname, query, folder?.id);
+                    const url = getFolderURL(pathname, query, {
+                      folder: folder?.id,
+                      folderPath: folder?.path,
+                    });
 
                     return (
                       <GridItem col={3} key={`folder-${folder.id}`}>

@@ -39,7 +39,7 @@ export interface SortMap {
   [key: string]: SortOrder | SortMap;
 }
 
-interface SortParamsObject {
+export interface SortParamsObject {
   [key: string]: SortOrder | SortParamsObject;
 }
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
@@ -530,7 +530,7 @@ const convertAndSanitizeFilters = (filters: FiltersParams, schema: Model): Where
         // Sanitize each filter
         .map((filter) => convertAndSanitizeFilters(filter, schema))
         // Filter out empty filters
-        .filter((filter) => !isObject(filter) || !isEmpty(filter))
+        .filter((filter) => !isPlainObject(filter) || !isEmpty(filter))
     );
   }
 
