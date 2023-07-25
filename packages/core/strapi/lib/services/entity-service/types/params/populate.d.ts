@@ -80,7 +80,7 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
 ]
   ? Utils.Expression.If<
       Utils.Expression.And<
-        Common.AreSchemasRegistriesExtended,
+        Common.AreSchemaRegistriesExtended,
         // If TSchemaUID === Common.UID.Schema, then ignore it and move to loose types
         // Note: Currently, this only ignores TSchemaUID when it is equal to Common.UID.Schema, it won't work if Common.UID.(ContentType|Component) is passed as parameter
         Utils.Expression.DoesNotExtends<Common.UID.Schema, TSchemaUID>
