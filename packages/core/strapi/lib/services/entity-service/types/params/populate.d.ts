@@ -52,7 +52,14 @@ type GetPopulatableKeysWithoutTarget<TSchemaUID extends Common.UID.Schema> = Exc
  * Fragment populate notation for polymorphic attributes
  */
 type PopulateFragment<TMaybeTargets extends Common.UID.Schema> = {
-  on: { [TSchemaUID in TMaybeTargets]?: boolean | Params.For<TSchemaUID> };
+  on?: { [TSchemaUID in TMaybeTargets]?: boolean | Params.For<TSchemaUID> };
+};
+
+type PopulateClause<
+  TSchemaUID extends Common.UID.Schema,
+  TKeys extends Attribute.GetPopulatableKeys<TSchemaUID>
+> = {
+  [TKey in TKeys]?: boolean | Params.For<Attribute.GetTarget<TSchemaUID, TKey>>;
 };
 
 /**
@@ -72,13 +79,16 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
   infer TKeysWithoutTarget extends Attribute.GetPopulatableKeys<TSchemaUID>
 ]
   ? Utils.Expression.If<
-      Common.AreSchemasRegistriesExtended,
+      Utils.Expression.And<
+        Common.AreSchemasRegistriesExtended,
+        // If TSchemaUID === Common.UID.Schema, then ignore it and move to loose types
+        // Note: Currently, this only ignores TSchemaUID when it is equal to Common.UID.Schema, it won't work if Common.UID.(ContentType|Component) is passed as parameter
+        Utils.Expression.NotExtends<Common.UID.Schema, TSchemaUID>
+      >,
       // Populatable keys with a target
       | Utils.Expression.If<
           Utils.Expression.IsNotNever<TKeysWithTarget>,
-          {
-            [TKey in TKeysWithTarget]?: boolean | Params.For<Attribute.GetTarget<TSchemaUID, TKey>>;
-          }
+          PopulateClause<TSchemaUID, TKeysWithTarget>
         >
       // Populatable keys with either zero or multiple target(s)
       | Utils.Expression.If<
@@ -88,12 +98,20 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
               | boolean
               | PopulateFragment<
                   Utils.Guard.Never<Attribute.GetMorphTargets<TSchemaUID, TKey>, Common.UID.Schema>
-                >;
+                >
+              // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
+              | Params.For<Common.UID.Schema>;
           }
         >,
       // Loose fallback when registries are not extended
       | { [TKey in string]?: boolean | Params.For<Common.UID.Schema> }
-      | { [TKey in string]?: boolean | PopulateFragment<Common.UID.Schema> }
+      | {
+          [TKey in string]?:
+            | boolean
+            | PopulateFragment<Common.UID.Schema>
+            // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
+            | Params.For<Common.UID.Schema>;
+        }
     >
   : never;
 
