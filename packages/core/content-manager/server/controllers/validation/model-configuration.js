@@ -1,7 +1,8 @@
 'use strict';
 
-const { yup, contentTypes } = require('@strapi/utils');
-const { intersection } = require('lodash/fp');
+const { yup, contentTypes, traverse } = require('@strapi/utils');
+const { intersection, isEqual } = require('lodash/fp');
+const qs = require('qs');
 const { getService } = require('../../utils');
 const {
   isListable,
@@ -25,7 +26,7 @@ module.exports = (schema, opts = {}) =>
     })
     .noUnknown();
 
-const createSettingsSchema = (schema) => {
+const getSortableAttributes = (schema) => {
   const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
 
   // TODO V5: Refactor non visible fields to be a part of content-manager schema
@@ -34,6 +35,18 @@ const createSettingsSchema = (schema) => {
     getNonVisibleAttributes(model),
     getWritableAttributes(model)
   );
+
+  return [
+    'id',
+    ...validAttributes,
+    ...nonVisibleWritableAttributes,
+    CREATED_BY_ATTRIBUTE,
+    UPDATED_BY_ATTRIBUTE,
+  ];
+};
+
+const createSettingsSchema = (schema) => {
+  const validAttributes = Object.keys(schema.attributes).filter((key) => isListable(schema, key));
 
   return yup
     .object()
@@ -47,14 +60,23 @@ const createSettingsSchema = (schema) => {
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
-        .oneOf(
-          validAttributes.concat([
-            'id',
-            ...nonVisibleWritableAttributes,
-            CREATED_BY_ATTRIBUTE,
-            UPDATED_BY_ATTRIBUTE,
-          ])
-        )
+        .test('is-valid-sort-attribute', '${path} is not a valid sort attribute', async (value) => {
+          const omitNonSortableAttributes = ({ schema, key }, { remove }) => {
+            const sortableAttributes = getSortableAttributes(schema);
+            if (!sortableAttributes.includes(key)) {
+              remove(key);
+            }
+          };
+
+          const parsedValue = qs.parse(value);
+          const sanitizedValue = await traverse.traverseQuerySort(
+            omitNonSortableAttributes,
+            { schema },
+            parsedValue
+          );
+          // If any of the keys has been removed, the sort attribute is not valid
+          return isEqual(parsedValue, sanitizedValue);
+        })
         .default('id'),
       defaultSortOrder: yup.string().oneOf(['ASC', 'DESC']).default('ASC'),
     })

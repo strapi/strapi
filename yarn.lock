@@ -7890,6 +7890,7 @@ __metadata:
     "@sindresorhus/slugify": 1.1.0
     "@strapi/utils": 4.11.7
     lodash: 4.17.21
+    qs: 6.11.1
   languageName: unknown
   linkType: soft
 
