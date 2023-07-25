@@ -159,7 +159,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
         const { data } = await del(getRequestUrl(slug), {
-          params: query,
+          params,
         });
 
         toggleNotification({
@@ -181,7 +181,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [del, slug, displayErrors, toggleNotification, query, dispatch, rawQuery]
+    [del, slug, params, toggleNotification, dispatch, rawQuery, displayErrors]
   );
 
   const onPost = useCallback(
@@ -237,7 +237,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
+      const endPoint = getRequestUrl(`${slug}/actions/countDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
@@ -265,7 +265,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         endPoint,
         {},
         {
-          params: query,
+          params,
         }
       );
 
@@ -287,7 +287,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       return Promise.reject(err);
     }
-  }, [post, cleanReceivedData, displayErrors, slug, query, dispatch, toggleNotification]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -341,7 +341,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         endPoint,
         {},
         {
-          params: query,
+          params,
         }
       );
 
@@ -358,7 +358,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [post, cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, query]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   return children({
     componentsDataStructure,

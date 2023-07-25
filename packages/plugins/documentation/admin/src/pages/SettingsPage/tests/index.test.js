@@ -1,625 +1,124 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { NotificationsProvider, RBACContext } from '@strapi/helper-plugin';
+import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Router } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
+import { server } from '../../../../../tests/server';
 import SettingsPage from '../index';
 
-import server from './server';
+const render = ({ permissions } = { permissions: fixtures.permissions.allPermissions }) => ({
+  ...renderRTL(<SettingsPage />, {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  CheckPermissions: jest.fn(({ children }) => children),
-}));
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const rbacContextValue = React.useMemo(
+        () => ({
+          allPermissions: permissions,
+        }),
+        []
+      );
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
+      return (
+        <MemoryRouter>
+          <ThemeProvider theme={lightTheme}>
+            <QueryClientProvider client={client}>
+              <IntlProvider locale="en" messages={{}} textComponent="span">
+                <NotificationsProvider>
+                  <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
+                </NotificationsProvider>
+              </IntlProvider>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </MemoryRouter>
+      );
     },
-  },
+  }),
+  user: userEvent.setup(),
 });
 
-const makeApp = (history) => (
-  <Router history={history}>
-    <ThemeProvider theme={lightTheme}>
-      <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <SettingsPage />
-        </IntlProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </Router>
-);
+describe('SettingsPage', () => {
+  it('renders the setting page correctly', async () => {
+    const { getByRole, queryByText, getByText } = render();
 
-describe('Plugin | Documentation | SettingsPage', () => {
-  beforeAll(() => server.listen());
+    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
 
-  beforeEach(() => jest.clearAllMocks());
+    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
 
-  afterEach(() => server.resetHandlers());
+    expect(getByRole('heading', { name: 'Documentation' })).toBeInTheDocument();
+    expect(getByText('Configure the documentation plugin')).toBeInTheDocument();
+    expect(getByRole('heading', { name: 'Settings' })).toBeInTheDocument();
 
-  afterAll(() => server.close());
+    expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Save' })).toHaveAttribute('aria-disabled', 'true');
 
-  it('renders and matches the snapshot', async () => {
-    const history = createMemoryHistory();
-    const App = makeApp(history);
-    const {
-      container: { firstChild },
-    } = render(App);
+    expect(getByRole('checkbox', { name: 'Restricted Access' })).toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(screen.getByText('Make the documentation endpoint private')).toBeInTheDocument();
-    });
+  it('should automatically render the password field if the server restricted access property is true', async () => {
+    server.use(
+      rest.get('*/getInfos', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            documentationAccess: { restrictedAccess: true },
+          })
+        );
+      })
+    );
 
-    expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
+    const { getByLabelText, queryByText } = render();
 
-      .c11 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #ffffff;
-      }
+    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
 
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #666687;
-      }
+    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
 
-      .c16 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
+    expect(getByLabelText('Password')).toBeInTheDocument();
 
-      .c21 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
+    server.restoreHandlers();
+  });
 
-      .c29 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #b72b1a;
-        text-transform: uppercase;
-      }
+  it('should render the password field when the Restricted Access checkbox is checked', async () => {
+    const { getByRole, getByLabelText, queryByText } = render();
 
-      .c31 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-        text-transform: uppercase;
-      }
+    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
 
-      .c33 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
+    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
 
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
+    fireEvent.click(getByRole('checkbox', { name: 'Restricted Access' }));
 
-      .c3 {
-        min-width: 0;
-      }
+    expect(getByRole('button', { name: 'Save' })).toHaveAttribute('aria-disabled', 'false');
 
-      .c7 {
-        background: #4945ff;
-        padding: 8px;
-        padding-right: 16px;
-        padding-left: 16px;
-        border-radius: 4px;
-        border-color: #4945ff;
-        border: 1px solid #4945ff;
-        cursor: pointer;
-      }
+    expect(getByLabelText('Password')).toBeInTheDocument();
+  });
 
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
+  it('should allow me to type a password and save that settings change successfully', async () => {
+    const { getByRole, getByLabelText, queryByText, user, getByText } = render();
 
-      .c14 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
+    expect(queryByText('Plugin settings are loading')).toBeInTheDocument();
 
-      .c19 {
-        max-width: 320px;
-      }
+    await waitFor(() => expect(queryByText('Plugin settings are loading')).not.toBeInTheDocument());
 
-      .c23 {
-        background: #f6f6f9;
-        padding: 4px;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dcdce4;
-        position: relative;
-        cursor: pointer;
-      }
+    fireEvent.click(getByRole('checkbox', { name: 'Restricted Access' }));
 
-      .c26 {
-        background: #ffffff;
-        padding-top: 8px;
-        padding-right: 12px;
-        padding-bottom: 8px;
-        padding-left: 12px;
-        border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-      }
+    expect(getByRole('button', { name: 'Save' })).toHaveAttribute('aria-disabled', 'false');
 
-      .c30 {
-        background: transparent;
-        padding-right: 12px;
-        padding-left: 12px;
-        border-radius: 4px;
-        border-color: #f6f6f9;
-        border: 1px solid #f6f6f9;
-        -webkit-flex: 1 1 50%;
-        -ms-flex: 1 1 50%;
-        flex: 1 1 50%;
-      }
+    await user.type(getByLabelText('Password'), 'password');
 
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
+    fireEvent.click(getByRole('button', { name: 'Save' }));
 
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        gap: 8px;
-      }
-
-      .c15 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .c20 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .c24 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
-      }
-
-      .c27 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c9 {
-        position: relative;
-        outline: none;
-      }
-
-      .c9 > svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c9 > svg > g,
-      .c9 > svg path {
-        fill: #ffffff;
-      }
-
-      .c9[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c9:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c9:focus-visible {
-        outline: none;
-      }
-
-      .c9:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c10 {
-        height: 2rem;
-      }
-
-      .c10 svg {
-        height: 0.75rem;
-        width: auto;
-      }
-
-      .c10[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c10[aria-disabled='true'] .c5 {
-        color: #666687;
-      }
-
-      .c10[aria-disabled='true'] svg > g,.c10[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c10[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c10[aria-disabled='true']:active .c5 {
-        color: #666687;
-      }
-
-      .c10[aria-disabled='true']:active svg > g,.c10[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c10:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c10:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c10 svg > g,
-      .c10 svg path {
-        fill: #ffffff;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c17 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
-      .c18 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c25 {
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c25:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c28 {
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .c32 {
-        height: 100%;
-        left: 0;
-        opacity: 0;
-        position: absolute;
-        top: 0;
-        z-index: 0;
-        width: 100%;
-      }
-
-      @media (max-width:68.75rem) {
-        .c18 {
-          grid-column: span 12;
-        }
-      }
-
-      @media (max-width:34.375rem) {
-        .c18 {
-          grid-column: span;
-        }
-      }
-
-      <main
-        aria-labelledby="main-content-title"
-        class="c0"
-        id="main-content"
-        tabindex="-1"
-      >
-        <form
-          action="#"
-          novalidate=""
-        >
-          <div
-            style="height: 0px;"
-          >
-            <div
-              class="c1"
-              data-strapi-header="true"
-            >
-              <div
-                class="c2"
-              >
-                <div
-                  class="c3 c4"
-                >
-                  <h1
-                    class="c5 c6"
-                  >
-                    Documentation
-                  </h1>
-                </div>
-                <button
-                  aria-disabled="true"
-                  class="c7 c8 c9 c10"
-                  disabled=""
-                  type="submit"
-                >
-                  <div
-                    aria-hidden="true"
-                    class=""
-                  >
-                    <svg
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
-                        fill="#212134"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    class="c5 c11"
-                  >
-                    Save
-                  </span>
-                </button>
-              </div>
-              <p
-                class="c5 c12"
-              >
-                Configure the documentation plugin
-              </p>
-            </div>
-          </div>
-          <div
-            class="c13"
-          >
-            <div
-              class="c14"
-            >
-              <div
-                class="c15"
-              >
-                <h2
-                  class="c5 c16"
-                >
-                  Settings
-                </h2>
-                <div
-                  class="c17"
-                >
-                  <div
-                    class="c18"
-                  >
-                    <div
-                      class="c19"
-                    >
-                      <div
-                        class="c20"
-                      >
-                        <div
-                          class="c4"
-                        >
-                          <label
-                            class="c5 c21 c22"
-                            for=":r0:"
-                          >
-                            Restricted Access
-                          </label>
-                        </div>
-                        <div
-                          class="c23 c24 c25"
-                          wrap="wrap"
-                        >
-                          <div
-                            class="c26 c27 c28"
-                          >
-                            <span
-                              class="c5 c29"
-                            >
-                              Off
-                            </span>
-                          </div>
-                          <div
-                            class="c30 c27 c28"
-                          >
-                            <span
-                              class="c5 c31"
-                            >
-                              On
-                            </span>
-                          </div>
-                          <input
-                            aria-describedby=":r0:-hint :r0:-error"
-                            aria-disabled="false"
-                            aria-required="false"
-                            class="c32"
-                            id=":r0:"
-                            name="restrictedAccess"
-                            type="checkbox"
-                          />
-                        </div>
-                        <p
-                          class="c5 c33"
-                          id=":r0:-hint"
-                        >
-                          Make the documentation endpoint private
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </main>
-    `);
+    await waitFor(() => expect(getByText('Successfully updated settings')).toBeInTheDocument());
   });
 });

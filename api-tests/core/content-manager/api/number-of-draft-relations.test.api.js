@@ -165,7 +165,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -196,7 +196,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -235,7 +235,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -272,7 +272,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -311,7 +311,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -351,7 +351,7 @@ describe('CM API - Basic', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/numberOfDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.id}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(12);

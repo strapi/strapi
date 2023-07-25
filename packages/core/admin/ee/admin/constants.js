@@ -6,6 +6,9 @@ export const ADMIN_PERMISSIONS_EE = {
     },
     'review-workflows': {
       main: [{ action: 'admin::review-workflows.read', subject: null }],
+      create: [{ action: 'admin::review-workflows.create', subject: null }],
+      delete: [{ action: 'admin::review-workflows.delete', subject: null }],
+      update: [{ action: 'admin::review-workflows.update', subject: null }],
     },
     sso: {
       main: [{ action: 'admin::provider-login.read', subject: null }],

@@ -22,6 +22,8 @@ const WHERE_OPERATORS = [
   '$notContains',
   '$containsi',
   '$notContainsi',
+  // Experimental, only for internal use
+  '$jsonSupersetOf',
 ];
 
 const CAST_OPERATORS = [

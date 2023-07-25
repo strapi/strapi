@@ -27,19 +27,22 @@ describe('Transfer Token', () => {
     hexedString: '7472616e736665722d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  const now = Date.now();
+  let now;
+  let nowSpy;
+
   beforeAll(() => {
     jest
       .spyOn(crypto, 'randomBytes')
       .mockImplementation(() => Buffer.from(mockedTransferToken.randomBytes));
 
-    jest.useFakeTimers('modern').setSystemTime(now);
+    // To eliminate latency in the request and predict the expiry timestamp, we freeze Date.now()
+    now = Date.now();
+    nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
   });
 
   afterAll(() => {
+    nowSpy.mockRestore();
     jest.clearAllMocks();
-
-    jest.useRealTimers();
   });
 
   describe('create', () => {
