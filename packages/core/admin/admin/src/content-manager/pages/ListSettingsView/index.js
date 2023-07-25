@@ -55,7 +55,7 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const isModalFormOpen = Object.keys(fieldForm).length !== 0;
 
-  const { attributes } = layout;
+  const { attributes, options } = layout;
   const displayedFields = modifiedData.layouts.list;
 
   const goBackUrl = () => {
@@ -179,7 +179,10 @@ const ListSettingsView = ({ layout, slug }) => {
 
   const sortOptions = Object.entries(attributes)
     .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
-    .map(([name]) => name);
+    .map(([name]) => ({
+      value: name,
+      label: layout.metadatas[name].list.label,
+    }));
 
   const move = (originalIndex, atIndex) => {
     dispatch({
@@ -235,6 +238,7 @@ const ListSettingsView = ({ layout, slug }) => {
               paddingRight={7}
             >
               <Settings
+                contentTypeOptions={options}
                 modifiedData={modifiedData}
                 onChange={handleChange}
                 sortOptions={sortOptions}
