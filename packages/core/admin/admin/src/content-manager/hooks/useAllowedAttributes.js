@@ -1,17 +1,11 @@
-import { findMatchingPermissions, useRBACProvider, useCollator } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
+import { useRBACProvider, findMatchingPermissions } from '@strapi/helper-plugin';
 
 const NOT_ALLOWED_FILTERS = ['json', 'component', 'media', 'richtext', 'dynamiczone', 'password'];
 const TIMESTAMPS = ['createdAt', 'updatedAt'];
 const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 
-const useAllowedAttributes = (contentType, slug) => {
+export const useAllowedAttributes = (contentType, slug) => {
   const { allPermissions } = useRBACProvider();
-  const { locale } = useIntl();
-
-  const formatter = useCollator(locale, {
-    sensitivity: 'base',
-  });
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
     {
@@ -43,14 +37,11 @@ const useAllowedAttributes = (contentType, slug) => {
 
     return true;
   });
-  const allowedAndDefaultAttributes = [
+
+  return [
     'id',
     ...allowedAttributes,
     ...TIMESTAMPS,
     ...(canReadAdminUsers ? CREATOR_ATTRIBUTES : []),
   ];
-
-  return allowedAndDefaultAttributes.sort((a, b) => formatter.compare(a, b));
 };
-
-export default useAllowedAttributes;

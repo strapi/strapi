@@ -28,6 +28,7 @@ import {
   useTracking,
   Link,
   useAPIErrorHandler,
+  useCollator,
   useStrapiApp,
   Table,
   PaginationURLQuery,
@@ -46,10 +47,13 @@ import { bindActionCreators, compose } from 'redux';
 import styled from 'styled-components';
 
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useAdminUsers } from '../../../hooks/useAdminUsers';
 import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
-import AttributeFilter from '../../components/AttributeFilter';
+import { Filter } from '../../components/Filter';
+import { AdminUsersFilter } from '../../components/Filter/CustomInputs/AdminUsersFilter';
+import { useAllowedAttributes } from '../../hooks/useAllowedAttributes';
 import { getTrad, getDisplayName } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
@@ -70,6 +74,8 @@ const ConfigureLayoutBox = styled(Box)`
 
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
+const REVIEW_WORKFLOW_FILTER_CE = [];
+const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
 
 function ListView({
   canCreate,
@@ -101,17 +107,90 @@ function ListView({
   const { notifyStatus } = useNotifyAT();
   const { formatAPIError } = useAPIErrorHandler(getTrad);
   const permissions = useSelector(selectAdminPermissions);
+  const allowedAttributes = useAllowedAttributes(contentType, slug);
+  const [{ query }] = useQueryParams();
+  const { pathname } = useLocation();
+  const { push } = useHistory();
+  const { formatMessage, locale } = useIntl();
+  const fetchClient = useFetchClient();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
+
+  const selectedUserIds =
+    query?.filters?.$and?.reduce((acc, filter) => {
+      const [key, value] = Object.entries(filter)[0];
+      const id = value.id?.$eq || value.id?.$ne;
+
+      if (CREATOR_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+        acc.push(id);
+      }
+
+      return acc;
+    }, []) ?? [];
+
+  const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
+    { filter: { id: { in: selectedUserIds } } },
+    {
+      enabled: selectedUserIds.length > 0,
+    }
+  );
 
   useFocusWhenNavigate();
 
-  const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-  const { pathname } = useLocation();
-  const { push } = useHistory();
-  const { formatMessage } = useIntl();
-  const fetchClient = useFetchClient();
+  const displayedAttributeFilters = allowedAttributes.map((name) => {
+    const attribute = contentType.attributes[name];
+    const { type, enum: options } = attribute;
+
+    const trackedEvent = {
+      name: 'didFilterEntries',
+      properties: { useRelation: type === 'relation' },
+    };
+
+    const { mainField, label } = metadatas[name].list;
+
+    const filter = {
+      name,
+      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
+      fieldSchema: { type, options, mainField },
+      trackedEvent,
+    };
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
+      filter.metadatas = {
+        ...filter.metadatas,
+        customOperators: [
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$eq',
+              defaultMessage: 'is',
+            },
+            value: '$eq',
+          },
+          {
+            intlLabel: {
+              id: 'components.FilterOptions.FILTER_TYPES.$ne',
+              defaultMessage: 'is not',
+            },
+            value: '$ne',
+          },
+        ],
+        customInput: AdminUsersFilter,
+        options: users.map((user) => ({
+          label: getDisplayName(user, formatMessage),
+          customValue: user.id.toString(),
+        })),
+      };
+      filter.fieldSchema.mainField = {
+        name: 'id',
+      };
+    }
+
+    return filter;
+  });
 
   const hasDraftAndPublish = options?.draftAndPublish ?? false;
   const hasReviewWorkflows = options?.reviewWorkflows ?? false;
@@ -138,6 +217,34 @@ function ListView({
       return { ReviewWorkflowsStageEE, ReviewWorkflowsAssigneeEE };
     },
     {
+      enabled: hasReviewWorkflows,
+    }
+  );
+
+  const reviewWorkflowFilter = useEnterprise(
+    REVIEW_WORKFLOW_FILTER_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
+        )
+      ).REVIEW_WORKFLOW_STAGE_FILTER,
+    {
+      combine(ceFilters, eeFilter) {
+        return [
+          ...ceFilters,
+          {
+            ...eeFilter,
+            metadatas: {
+              ...eeFilter.metadatas,
+              label: formatMessage(eeFilter.metadatas.label),
+              uid: contentType.uid,
+            },
+          },
+        ];
+      },
+
+      defaultValue: [],
       enabled: hasReviewWorkflows,
     }
   );
@@ -550,8 +657,12 @@ function ListView({
                   trackedEvent="didSearch"
                 />
               )}
-              {isFilterable && (
-                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
+              {isFilterable && !isLoadingAdminUsers && (
+                <Filter
+                  displayedFilters={[...displayedAttributeFilters, ...reviewWorkflowFilter].sort(
+                    (a, b) => formatter.compare(a.metadatas.label, b.metadatas.label)
+                  )}
+                />
               )}
             </>
           }
