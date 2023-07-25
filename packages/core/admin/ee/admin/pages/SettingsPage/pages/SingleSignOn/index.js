@@ -30,7 +30,6 @@ import { useSelector } from 'react-redux';
 
 import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
 import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
-import { getRequestUrl } from '../../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
@@ -51,7 +50,7 @@ export const SingleSignOn = () => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleChange, handleSubmit },
-  ] = useSettingsForm(getRequestUrl('providers/options'), schema, () => {}, [
+  ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
     'autoRegister',
     'defaultRole',
     'ssoLockedRoles',

@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl, getTrad } from '../utils';
+import { getTrad } from '../utils';
 
 import { recursiveRenameKeys } from './utils/rename-keys';
 
@@ -14,13 +14,12 @@ const FIELD_MAPPING = {
 
 export const useFolderStructure = ({ enabled = true } = {}) => {
   const { formatMessage } = useIntl();
-  const dataRequestURL = getRequestUrl('folder-structure');
   const { get } = useFetchClient();
 
   const fetchFolderStructure = async () => {
     const {
       data: { data },
-    } = await get(dataRequestURL);
+    } = await get('/upload/folder-structure');
 
     const children = data.map((f) => recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key));
 
