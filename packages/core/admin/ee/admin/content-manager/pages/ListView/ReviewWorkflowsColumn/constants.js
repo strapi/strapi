@@ -1,8 +1,8 @@
 import getTrad from '../../../../../../admin/src/content-manager/utils/getTrad';
 
 export const REVIEW_WORKFLOW_COLUMNS_EE = {
-  key: '__strapi_reviewWorkflows_stage_temp_key__',
-  name: 'strapi_reviewWorkflows_stage',
+  key: '__strapi_stage_temp_key__',
+  name: 'strapi_stage',
   fieldSchema: {
     type: 'relation',
   },

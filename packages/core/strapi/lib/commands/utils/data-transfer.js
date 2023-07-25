@@ -291,7 +291,7 @@ const getDiffHandler = (engine, { force, action }) => {
         if (
           uid === 'admin::workflow' ||
           uid === 'admin::workflow-stage' ||
-          endPath?.startsWith('strapi_reviewWorkflows_')
+          endPath?.startsWith('strapi_stage')
         ) {
           workflowsStatus = diff.kind;
         }
@@ -341,6 +341,34 @@ const getDiffHandler = (engine, { force, action }) => {
   };
 };
 
+const getAssetsBackupHandler = (engine, { force, action }) => {
+  return async (context, next) => {
+    // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
+    setSignalHandler(async () => {
+      await abortTransfer({ engine, strapi });
+      exitWith(1, exitMessageText(action, true));
+    });
+
+    console.warn(
+      'The backup for the assets could not be created inside the public directory. Ensure Strapi has write permissions on the public directory.'
+    );
+    const confirmed = await confirmMessage(
+      'Do you want to continue without backing up your public/uploads files?',
+      {
+        force,
+      }
+    );
+
+    if (confirmed) {
+      context.ignore = true;
+    }
+
+    // reset handler back to normal
+    setSignalHandler(() => abortTransfer({ engine, strapi }));
+    return next(context);
+  };
+};
+
 module.exports = {
   loadersFactory,
   buildTransferTable,
@@ -357,4 +385,5 @@ module.exports = {
   abortTransfer,
   setSignalHandler,
   getDiffHandler,
+  getAssetsBackupHandler,
 };

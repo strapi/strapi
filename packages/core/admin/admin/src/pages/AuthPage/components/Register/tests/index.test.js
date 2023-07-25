@@ -136,6 +136,61 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
     );
   });
 
+  it('Validates optional Lastname value to be null', async () => {
+    const spy = jest.fn();
+    const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
+
+    await user.type(getByLabelText(/Firstname/i), 'First name');
+    await user.type(getByLabelText(/Email/i), 'test@strapi.io');
+    await user.type(getByLabelText(/^Password/i), 'secret');
+    await user.type(getByLabelText(/Confirm Password/i), 'secret');
+
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
+
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        {
+          firstname: 'First name',
+          lastname: null,
+          email: 'test@strapi.io',
+          news: false,
+          registrationToken: undefined,
+          confirmPassword: 'secret',
+          password: 'secret',
+        },
+        expect.any(Object)
+      )
+    );
+  });
+
+  it('Validates optional Lastname value to be empty space', async () => {
+    const spy = jest.fn();
+    const { getByRole, getByLabelText, user } = setup({ onSubmit: spy });
+
+    await user.type(getByLabelText(/Firstname/i), 'First name');
+    await user.type(getByLabelText(/Lastname/i), ' ');
+    await user.type(getByLabelText(/Email/i), 'test@strapi.io');
+    await user.type(getByLabelText(/^Password/i), 'secret');
+    await user.type(getByLabelText(/Confirm Password/i), 'secret');
+
+    fireEvent.click(getByRole('button', { name: /let's start/i }));
+
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        {
+          firstname: 'First name',
+          lastname: null,
+          email: 'test@strapi.io',
+          news: false,
+          registrationToken: undefined,
+          confirmPassword: 'secret',
+          password: 'secret',
+        },
+        expect.any(Object)
+      )
+    );
+  });
+
   it('Disable fields', () => {
     const { getByLabelText } = setup({
       fieldsToDisable: ['email', 'firstname'],
