@@ -115,6 +115,7 @@ const createComponentValidator =
             },
             { isDraft }
           ).notNull();
+
           return schema;
         })
       );
@@ -125,6 +126,7 @@ const createComponentValidator =
         {
           model,
           data: updatedAttribute.value,
+          entity: entity?.[updatedAttribute.name] ?? null,
           validateUniqueFieldWithinEntity: (attribute) =>
             validateUniqueFieldWithinEntity(model.uid, uniqueFieldValues, attribute),
         },
@@ -140,7 +142,7 @@ const createComponentValidator =
 
 const createDzValidator =
   (createOrUpdate) =>
-  ({ attr, updatedAttribute, uniqueFieldValues }, { isDraft }) => {
+  ({ attr, updatedAttribute, uniqueFieldValues, entity }, { isDraft }) => {
     let validator;
 
     validator = yup.array().of(
@@ -159,6 +161,7 @@ const createDzValidator =
                 {
                   model,
                   data: item,
+                  entity: entity?.[updatedAttribute.name] ?? null,
                   validateUniqueFieldWithinEntity: (attribute) =>
                     validateUniqueFieldWithinEntity(model.uid, uniqueFieldValues, attribute),
                 },
@@ -289,24 +292,40 @@ const createValidateEntity =
           models.push(strapi.getModel(attribute.component));
         } else {
           // When it is a dynamic zone there can be multiple components
-          models.push(...components.map((component) => strapi.getModel(component.__component)));
+          const uniqueKeys = new Set();
+          components.forEach((component) => {
+            if (!uniqueKeys.has(component.__component)) {
+              uniqueKeys.add(component.__component);
+              models.push(strapi.getModel(component.__component));
+            }
+          });
         }
 
         models.forEach((componentModel) => {
           Object.entries(componentModel.attributes).forEach(([key, value]) => {
             if (!value.unique) {
+              // This attribute is not unique, skip it
               return;
             }
 
-            acc[componentModel.uid] = {
-              ...acc[componentModel.uid],
-              [key]: [...(acc?.[componentModel.uid]?.[key] ?? [])],
-            };
+            // Check if the uid is already present in the accumulator
+            if (!acc[componentModel.uid]) {
+              acc[componentModel.uid] = {};
+            }
 
+            // Iterate over each component item and add it to the array
             components.forEach((item) => {
-              acc[componentModel.uid][key].push(item[key]);
+              if (!item[key]) {
+                return;
+              }
+
+              if (acc[componentModel.uid][key]) {
+                acc[componentModel.uid][key].push(item[key]);
+              } else {
+                acc[componentModel.uid][key] = [item[key]];
+              }
             });
-          }, {});
+          });
         });
 
         return acc;
@@ -323,6 +342,7 @@ const createValidateEntity =
       },
       { isDraft }
     )
+      // eslint-disable-next-line func-names
       .test('relations-test', 'check that all relations exist', async function (data) {
         try {
           await checkRelationsExist(buildRelationsStore({ uid: model.uid, data }));
