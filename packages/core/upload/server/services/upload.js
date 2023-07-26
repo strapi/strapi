@@ -6,258 +6,153 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const os = require('os');
 const path = require('path');
-const crypto = require('crypto');
 const fs = require('fs');
-const fse = require('fs-extra');
 const _ = require('lodash');
+const { pipe, castArray, zip } = require('lodash/fp');
 const { extension } = require('mime-types');
 const {
   sanitize,
-  nameToSlug,
   contentTypes: contentTypesUtils,
-  errors: { ApplicationError, NotFoundError },
+  errors: { NotFoundError },
   file: { bytesToKbytes },
+  mapAsync,
 } = require('@strapi/utils');
-
-const {
-  FILE_MODEL_UID,
-  ALLOWED_WEBHOOK_EVENTS: { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE },
-} = require('../constants');
+const { getFileType, generateFileName, withTempDirectory } = require('../utils/file');
+const MediaBuilder = require('../utils/media-builder');
 const { getService } = require('../utils');
+const {
+  metadata,
+  optimize,
+  autoRotate,
+  breakpoints,
+  thumbnail,
+} = require('../utils/media-builder/transforms/sharp');
+const throttle = require('../utils/media-builder/transforms/throttle');
 
+const { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } = require('../constants');
+
+const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
-const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+const IMAGES_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'gif', 'svg', 'avif'];
+const IMAGES_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
+const IMAGES_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
-const generateFileName = (name) => {
-  const baseName = nameToSlug(name, { separator: '_', lowercase: false });
-
-  return `${baseName}_${randomSuffix()}`;
-};
-
-const sendMediaMetrics = (data) => {
-  if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-    strapi.telemetry.send('didSaveMediaWithCaption');
-  }
-
-  if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-    strapi.telemetry.send('didSaveMediaWithAlternativeText');
-  }
-};
-
-const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
-  const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-
-  if (Array.isArray(files)) {
-    files.forEach((file) => {
-      file.tmpWorkingDirectory = tmpWorkingDirectory;
-    });
-  } else {
-    files.tmpWorkingDirectory = tmpWorkingDirectory;
-  }
-
-  return tmpWorkingDirectory;
-};
+const mediaBuilder = MediaBuilder()
+  .transformOn('image.metadata', IMAGES_TO_PROCESS, [metadata])
+  .transformOn('image.throttle', IMAGES_TO_PROCESS, [throttle])
+  .transformOn('image.optimize', IMAGES_TO_OPTIMIZE, [optimize, autoRotate])
+  .transformOn('image.breakpoints', IMAGES_TO_RESIZE, [breakpoints])
+  .transformOn('image.thumbnail', IMAGES_TO_RESIZE, [thumbnail]);
+// .transformOn('image.size', IMAGES_TO_PROCESS, [size])
 
 module.exports = ({ strapi }) => ({
+  /**
+   * Builder to define transformations on files.
+   * @experimental Could be changed in the future.
+   */
+  mediaBuilder,
+
+  /**
+   * Emit event on file creation/update/deletion.
+   */
   async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
     const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
-
     strapi.eventHub.emit(event, { media: sanitizedData });
   },
 
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
-    const fileService = getService('file');
+    const ext = path.extname(filename) || `.${extension(type)}`;
+    const name = (fileInfo.name || filename).normalize();
+    const basename = path.basename(name, ext);
+    const folderPath = await getService('file').getFolderPath(fileInfo.folder);
 
-    let ext = path.extname(filename);
-    if (!ext) {
-      ext = `.${extension(type)}`;
-    }
-    const usedName = (fileInfo.name || filename).normalize();
-    const basename = path.basename(usedName, ext);
-
-    const entity = {
-      name: usedName,
+    const file = {
+      name,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
       folder: fileInfo.folder,
-      folderPath: await fileService.getFolderPath(fileInfo.folder),
+      folderPath,
       hash: generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
     };
 
+    // Add related entity information
     const { refId, ref, field } = metas;
-
     if (refId && ref && field) {
-      entity.related = [
-        {
-          id: refId,
-          __type: ref,
-          __pivot: { field },
-        },
-      ];
+      file.related = [{ id: refId, __type: ref, __pivot: { field } }];
     }
 
+    // Add file path information
     if (metas.path) {
-      entity.path = metas.path;
+      file.path = metas.path;
     }
 
     if (metas.tmpWorkingDirectory) {
-      entity.tmpWorkingDirectory = metas.tmpWorkingDirectory;
+      file.tmpWorkingDirectory = metas.tmpWorkingDirectory;
     }
 
-    return entity;
+    return file;
   },
 
-  async enhanceAndValidateFile(file, fileInfo = {}, metas = {}) {
-    const currentFile = await this.formatFileInfo(
-      {
-        filename: file.name,
-        type: file.type,
-        size: file.size,
-      },
-      fileInfo,
-      {
-        ...metas,
-        tmpWorkingDirectory: file.tmpWorkingDirectory,
-      }
-    );
-    currentFile.getStream = () => fs.createReadStream(file.path);
+  /**
+   * Adds properties needed to upload a file to a provider.
+   */
+  async formatUploadFile({ name: filename, type, size, path }, fileInfo = {}, metas = {}) {
+    const file = await this.formatFileInfo({ filename, type, size }, fileInfo, metas);
 
-    const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
-      .plugin('upload')
-      .service('image-manipulation');
+    file.getStream = () => {
+      const stream = fs.createReadStream(path, {
+        // Set the highWaterMark to 1MB instead of the default 64KB
+        highWaterMark: 1024 * 1024,
+      });
+      return stream;
+    };
+    file.type = await getFileType(file);
+    file.provider = strapi.config.get('plugin.upload').provider;
 
-    if (await isImage(currentFile)) {
-      if (await isFaultyImage(currentFile)) {
-        throw new ApplicationError('File is not a valid image');
-      }
-      if (await isOptimizableImage(currentFile)) {
-        return optimize(currentFile);
-      }
-    }
-    return currentFile;
+    return file;
   },
 
-  // TODO V5: remove enhanceFile
-  async enhanceFile(file, fileInfo = {}, metas = {}) {
-    process.emitWarning(
-      '[deprecated] In future versions, `enhanceFile` will be removed. Replace it with `enhanceAndValidateFile` instead.'
-    );
-    return this.enhanceAndValidateFile(file, fileInfo, metas);
-  },
-
+  /**
+   * Uploads a file and persists it in the database.
+   */
   async upload({ data, files }, { user } = {}) {
-    // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
+    const { fileInfo, ...metas } = data;
 
-    let uploadedFiles = [];
+    const filesAndInfo = zip(
+      castArray(files),
+      castArray(fileInfo).map((info) => info || {})
+    );
 
-    try {
-      const { fileInfo, ...metas } = data;
+    return withTempDirectory((tmpWorkingDirectory) => {
+      const fileMetadata = { ...metas, tmpWorkingDirectory };
 
-      const fileArray = Array.isArray(files) ? files : [files];
-      const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
-
-      const doUpload = async (file, fileInfo) => {
-        const fileData = await this.enhanceAndValidateFile(file, fileInfo, metas);
-        return this.uploadFileAndPersist(fileData, { user });
+      const doUpload = async ([fileData, fileInfo]) => {
+        const file = await this.formatUploadFile(fileData, fileInfo, fileMetadata);
+        return this.uploadFileAndPersist(file, { user });
       };
 
-      uploadedFiles = await Promise.all(
-        fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
-      );
-    } finally {
-      // delete temporary folder
-      await fse.remove(tmpWorkingDirectory);
-    }
-
-    return uploadedFiles;
-  },
-
-  /**
-   * When uploading an image, an additional thumbnail is generated.
-   * Also, if there are responsive formats defined, another set of images will be generated too.
-   *
-   * @param {*} fileData
-   */
-  async uploadImage(fileData) {
-    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
-      getService('image-manipulation');
-
-    // Store width and height of the original image
-    const { width, height } = await getDimensions(fileData);
-
-    // Make sure this is assigned before calling any upload
-    // That way it can mutate the width and height
-    _.assign(fileData, {
-      width,
-      height,
+      return mapAsync(filesAndInfo, doUpload);
     });
-
-    // For performance reasons, all uploads are wrapped in a single Promise.all
-    const uploadThumbnail = async (thumbnailFile) => {
-      await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
-    };
-
-    // Generate thumbnail and responsive formats
-    const uploadResponsiveFormat = async (format) => {
-      const { key, file } = format;
-      await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
-    };
-
-    const uploadPromises = [];
-
-    // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
-
-    // Generate & Upload thumbnail and responsive formats
-    if (await isResizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
-      }
-
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          // eslint-disable-next-line no-continue
-          if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
-        }
-      }
-    }
-    // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
   },
 
-  /**
-   * Upload a file. If it is an image it will generate a thumbnail
-   * and responsive formats (if enabled).
-   */
-  async uploadFileAndPersist(fileData, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
-    const { isImage } = getService('image-manipulation');
+  async uploadFileAndPersist(file, { user } = {}, fileId = null) {
+    const transformedFiles = await mediaBuilder.transform(file);
 
-    await getService('provider').checkFileSize(fileData);
+    // upload files to provider
+    await mapAsync(transformedFiles, getService('provider').upload);
 
-    if (await isImage(fileData)) {
-      await this.uploadImage(fileData);
-    } else {
-      await getService('provider').upload(fileData);
-    }
+    // persist file in database
+    const dbFile = mediaBuilder.groupByFormats(transformedFiles, file);
 
-    _.set(fileData, 'provider', config.provider);
-
-    // Persist file(s)
-    return this.add(fileData, { user });
+    return fileId // return persisted file
+      ? this.update(fileId, dbFile, { user })
+      : this.add(dbFile, { user });
   },
 
   async updateFileInfo(id, { name, alternativeText, caption, folder }, { user } = {}) {
@@ -281,29 +176,23 @@ module.exports = ({ strapi }) => ({
     return this.update(id, newInfos, { user });
   },
 
-  async replace(id, { data, file }, { user } = {}) {
+  async replace(id, { data, file: fileData }, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
-
-    const { isImage } = getService('image-manipulation');
 
     const dbFile = await this.findOne(id);
     if (!dbFile) {
-      throw new NotFoundError();
+      throw new NotFoundError("Can't find file to update");
     }
 
-    // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(file);
-
-    let fileData;
-
-    try {
+    return withTempDirectory(async (tmpWorkingDirectory) => {
       const { fileInfo } = data;
-      fileData = await this.enhanceAndValidateFile(file, fileInfo);
+      const file = await this.formatUploadFile(fileData, fileInfo, { tmpWorkingDirectory });
 
-      // keep a constant hash and extension so the file url doesn't change when the file is replaced
-      _.assign(fileData, {
+      // keep hash and extension so the file url doesn't change when the file is replaced
+      _.assign(file, {
         hash: dbFile.hash,
         ext: dbFile.ext,
+        formats: {},
       });
 
       // execute delete function of the provider
@@ -311,30 +200,13 @@ module.exports = ({ strapi }) => ({
         await strapi.plugin('upload').provider.delete(dbFile);
 
         if (dbFile.formats) {
-          await Promise.all(
-            Object.keys(dbFile.formats).map((key) => {
-              return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
-            })
-          );
+          const fileFormats = Object.values(dbFile.formats);
+          await mapAsync(fileFormats, strapi.plugin('upload').provider.delete);
         }
       }
 
-      // clear old formats
-      _.set(fileData, 'formats', {});
-
-      if (await isImage(fileData)) {
-        await this.uploadImage(fileData);
-      } else {
-        await getService('provider').upload(fileData);
-      }
-
-      _.set(fileData, 'provider', config.provider);
-    } finally {
-      // delete temporary folder
-      await fse.remove(tmpWorkingDirectory);
-    }
-
-    return this.update(id, fileData, { user });
+      return this.uploadFileAndPersist(file, { user }, dbFile.id);
+    });
   },
 
   async update(id, values, { user } = {}) {
@@ -343,7 +215,7 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues);
+    getService('metrics').sendMediaSaveMetrics(fileValues);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
@@ -359,7 +231,7 @@ module.exports = ({ strapi }) => ({
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues);
+    getService('metrics').sendMediaSaveMetrics(fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -388,55 +260,33 @@ module.exports = ({ strapi }) => ({
       await strapi.plugin('upload').provider.delete(file);
 
       if (file.formats) {
-        await Promise.all(
-          Object.keys(file.formats).map((key) => {
-            return strapi.plugin('upload').provider.delete(file.formats[key]);
-          })
-        );
+        const fileFormats = Object.values(file.formats);
+        await mapAsync(fileFormats, strapi.plugin('upload').provider.delete);
       }
     }
 
-    const media = await strapi.query(FILE_MODEL_UID).findOne({
-      where: { id: file.id },
-    });
-
+    const deleteQuery = { where: { id: file.id } };
+    const media = await strapi.query(FILE_MODEL_UID).findOne(deleteQuery);
     await this.emitEvent(MEDIA_DELETE, media);
-
-    return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
+    return strapi.query(FILE_MODEL_UID).delete(deleteQuery);
   },
 
   async uploadToEntity(params, files) {
     const { id, model, field } = params;
+    const apiUploadFolder = await getService('api-upload-folder').getAPIUploadFolder();
 
-    // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
+    await withTempDirectory(async (tmpWorkingDirectory) => {
+      const fileInfo = { folder: apiUploadFolder.id };
+      const fileMetadata = { refId: id, ref: model, field, tmpWorkingDirectory };
 
-    const arr = Array.isArray(files) ? files : [files];
-
-    const apiUploadFolderService = getService('api-upload-folder');
-
-    const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-
-    try {
-      const enhancedFiles = await Promise.all(
-        arr.map((file) => {
-          return this.enhanceAndValidateFile(
-            file,
-            { folder: apiUploadFolder.id },
-            {
-              refId: id,
-              ref: model,
-              field,
-            }
-          );
-        })
+      return mapAsync(
+        castArray(files),
+        pipe(
+          (file) => this.formatUploadFile(file, fileInfo, fileMetadata),
+          (file) => this.uploadFileAndPersist(file, fileMetadata)
+        )
       );
-
-      await Promise.all(enhancedFiles.map((file) => this.uploadFileAndPersist(file)));
-    } finally {
-      // delete temporary folder
-      await fse.remove(tmpWorkingDirectory);
-    }
+    });
   },
 
   getSettings() {
