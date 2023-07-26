@@ -56,7 +56,6 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeFilters = pipeAsync(
       traverse.traverseQueryFilters(allowedFields(permittedFields), { schema }),
       traverse.traverseQueryFilters(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQueryFilters(removePassword, { schema }),
       traverse.traverseQueryFilters(
         ({ key, value }, { remove }) => {
@@ -71,7 +70,6 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeSort = pipeAsync(
       traverse.traverseQuerySort(allowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQuerySort(removePassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
@@ -86,13 +84,11 @@ module.exports = ({ action, ability, model }) => {
     const sanitizePopulate = pipeAsync(
       traverse.traverseQueryPopulate(allowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQueryPopulate(removePassword, { schema })
     );
 
     const sanitizeFields = pipeAsync(
       traverse.traverseQueryFields(allowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
       traverse.traverseQueryFields(removePassword, { schema })
     );
 
@@ -260,21 +256,13 @@ module.exports = ({ action, ability, model }) => {
   };
 
   const getQueryFields = (fields = []) => {
-    const nonVisibleAttributes = getNonVisibleAttributes(schema);
-    const writableAttributes = getWritableAttributes(schema);
-
-    const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
-
     return uniq([
       ...fields,
       ...STATIC_FIELDS,
       ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
       CREATED_AT_ATTRIBUTE,
       UPDATED_AT_ATTRIBUTE,
       PUBLISHED_AT_ATTRIBUTE,
-      CREATED_BY_ATTRIBUTE,
-      UPDATED_BY_ATTRIBUTE,
     ]);
   };
 
