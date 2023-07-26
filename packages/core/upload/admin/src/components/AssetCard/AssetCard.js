@@ -27,6 +27,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
     onRemove: onRemove ? () => onRemove(asset) : undefined,
     selected: isSelected,
     size,
+    updatedAt: asset.updatedAt,
   };
 
   if (asset.mime.includes(AssetType.Video)) {
