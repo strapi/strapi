@@ -103,14 +103,14 @@ describe('Permissions Manager - Sanitize', () => {
       const data = {
         filters: { a: 'Foo', c: 'Bar' },
         sort: { a: 'asc', c: 'desc' },
-        populate: { a: 'Foo', c: 'Bar' },
+        populate: { a: true, c: true },
         fields: ['a', 'c'],
       };
       const result = await sanitizeHelpers.sanitizeQuery(data, { subject: fooModel.uid });
 
       expect(result.filters).toEqual({ c: 'Bar' });
       expect(result.sort).toEqual({ c: 'desc' });
-      expect(result.populate).toEqual({ c: 'Bar' });
+      expect(result.populate).toEqual({ c: true });
       expect(result.fields).toEqual([undefined, 'c']);
     });
   });
