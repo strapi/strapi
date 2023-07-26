@@ -28,7 +28,12 @@ export const assertValidHeader = (ctx: Context) => {
   const upgradeHeader = transformUpgradeHeader(ctx.headers.upgrade);
 
   if (!upgradeHeader.includes('websocket')) {
-    throw new Error('Invalid Header');
+    const logSafeUpgradeHeader = ctx.headers.upgrade
+      ?.replace(/[^a-z0-9\s.,|]/gi, '')
+      .substring(0, 50);
+    throw new Error(
+      `Transfer Upgrade header expected 'websocket', found '${logSafeUpgradeHeader}'. Please ensure that your server or proxy is not modifying the Upgrade header.`
+    );
   }
 };
 
