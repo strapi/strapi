@@ -241,7 +241,8 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
     <Th
       key={name}
       action={
-        isSorted && (
+        isSorted &&
+        isSortable && (
           <IconButton
             label={sortLabel}
             onClick={handleClickSort}

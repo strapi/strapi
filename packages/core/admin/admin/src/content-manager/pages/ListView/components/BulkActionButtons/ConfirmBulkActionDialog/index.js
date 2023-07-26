@@ -104,6 +104,8 @@ const ConfirmDialogPublishAll = ({ isOpen, onToggleDialog, isConfirmButtonLoadin
       return data;
     },
     {
+      // The API is called everytime you select/deselect an entry, this check avoids us sending a query with bad data
+      enabled: selectedEntries.length > 0,
       onError(error) {
         toggleNotification({ type: 'warning', message: formatAPIError(error) });
       },

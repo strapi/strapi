@@ -8,6 +8,5 @@ export { default as getBreadcrumbDataCM } from './getBreadcrumbDataCM';
 export { default as getBreadcrumbDataML } from './getBreadcrumbDataML';
 export { default as getFolderParents } from './getFolderParents';
 export { default as getFolderURL } from './getFolderURL';
-export { default as getRequestUrl } from './getRequestUrl';
 export { default as getTrad } from './getTrad';
 export { default as toSingularTypes } from './toSingularTypes';

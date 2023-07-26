@@ -85,6 +85,14 @@ const ComponentFixture = (props) => {
   );
 };
 
+const withMarkup = (query) => (text) =>
+  query((content, node) => {
+    const hasText = (node) => node.textContent === text;
+    const childrenDontHaveText = Array.from(node.children).every((child) => !hasText(child));
+
+    return hasText(node) && childrenDontHaveText;
+  });
+
 const setup = (props) => ({
   ...render(<ComponentFixture {...props} />),
   user: userEvent.setup(),
@@ -184,11 +192,12 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     const { getByRole, queryByText, user } = setup();
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const queryByTextWithMarkup = withMarkup(queryByText);
 
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
-      expect(queryByText(/\(assigned to default workflow\)/i)).not.toBeInTheDocument();
+      expect(queryByTextWithMarkup('(assigned to Default workflow)')).not.toBeInTheDocument();
     });
   });
 
@@ -198,11 +207,12 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     });
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const getByTextWithMarkup = withMarkup(getByText);
 
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
-      expect(getByText(/\(assigned to default workflow\)/i)).toBeInTheDocument();
+      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
     });
   });
 
@@ -212,11 +222,12 @@ describe('Admin | Settings | Review Workflow | WorkflowAttributes', () => {
     });
 
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    const getByTextWithMarkup = withMarkup(getByText);
 
     await user.click(contentTypesSelect);
 
     await waitFor(() => {
-      expect(getByText(/\(assigned to default workflow\)/i)).toBeInTheDocument();
+      expect(getByTextWithMarkup('(assigned to Default workflow)')).toBeInTheDocument();
     });
   });
 });

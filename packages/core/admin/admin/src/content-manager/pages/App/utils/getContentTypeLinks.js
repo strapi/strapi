@@ -1,7 +1,5 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-import { getRequestUrl } from '../../../utils';
-
 import checkPermissions from './checkPermissions';
 import generateModelsLinks from './generateModelsLinks';
 
@@ -10,7 +8,7 @@ const getContentTypeLinks = async ({ models, userPermissions, toggleNotification
   try {
     const {
       data: { data: contentTypeConfigurations },
-    } = await get(getRequestUrl('content-types-settings'));
+    } = await get('/content-manager/content-types-settings');
 
     const { collectionTypeSectionLinks, singleTypeSectionLinks } = generateModelsLinks(
       models,

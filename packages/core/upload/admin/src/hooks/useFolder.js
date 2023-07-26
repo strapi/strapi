@@ -2,11 +2,10 @@ import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl, getTrad } from '../utils';
+import { getTrad } from '../utils';
 
 export const useFolder = (id, { enabled = true }) => {
   const toggleNotification = useNotification();
-  const dataRequestURL = getRequestUrl('folders');
   const { get } = useFetchClient();
 
   const fetchFolder = async () => {
@@ -20,9 +19,11 @@ export const useFolder = (id, { enabled = true }) => {
           },
         },
       };
-      const { data } = await get(`${dataRequestURL}/${id}`, { params });
+      const {
+        data: { data },
+      } = await get(`/upload/folders/${id}`, { params });
 
-      return data.data;
+      return data;
     } catch (err) {
       toggleNotification({
         type: 'warning',
