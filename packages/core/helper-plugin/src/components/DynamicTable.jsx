@@ -392,4 +392,4 @@ TableHead.propTypes = {
   withMainAction: PropTypes.bool,
 };
 
-export { Table };
+export { Table as DynamicTable };

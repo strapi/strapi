@@ -7834,7 +7834,6 @@ __metadata:
     "@storybook/react": ^6.5.16
     "@strapi/design-system": 1.8.2
     "@strapi/icons": 1.8.2
-    "@strapi/typescript-utils": 4.11.7
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
     "@types/react": 18.2.16
@@ -8405,20 +8404,6 @@ __metadata:
     typescript: 5.1.3
   languageName: unknown
   linkType: soft
-
-"@strapi/typescript-utils@npm:4.11.7":
-  version: 4.11.7
-  resolution: "@strapi/typescript-utils@npm:4.11.7"
-  dependencies:
-    chalk: 4.1.2
-    cli-table3: 0.6.2
-    fs-extra: 10.0.1
-    lodash: 4.17.21
-    prettier: 2.8.4
-    typescript: 5.1.3
-  checksum: af00e76e864a934d36ba6a6efd8f4e4a409cee236c3cf9efeaa51f1aaf8be2890687848f0ef951bb8c89e10e551886cbc15a40b4ff667c5f016de0b072f9aa77
-  languageName: node
-  linkType: hard
 
 "@strapi/ui-primitives@npm:^1.8.2":
   version: 1.8.2
@@ -17895,17 +17880,6 @@ __metadata:
     jsonfile: ^6.0.1
     universalify: ^2.0.0
   checksum: 5285a3d8f34b917cf2b66af8c231a40c1623626e9d701a20051d3337be16c6d7cac94441c8b3732d47a92a2a027886ca93c69b6a4ae6aee3c89650d2a8880c0a
-  languageName: node
-  linkType: hard
-
-"fs-extra@npm:10.0.1":
-  version: 10.0.1
-  resolution: "fs-extra@npm:10.0.1"
-  dependencies:
-    graceful-fs: ^4.2.0
-    jsonfile: ^6.0.1
-    universalify: ^2.0.0
-  checksum: c1faaa5eb9e1c5c7c7ff09f966e93922ecb068ae1b04801cfc983ef05fcc1f66bfbb8d8d0b745c910014c7a2e7317fb6cf3bfe7390450c1157e3cc1a218f221d
   languageName: node
   linkType: hard
 

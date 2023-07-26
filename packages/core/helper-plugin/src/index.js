@@ -98,6 +98,7 @@ export { getFileExtension } from './utils/getFileExtension';
 export { getYupInnerErrors } from './utils/getYupInnerErrors';
 export { hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
+export { normalizeAPIError } from './utils/normalizeAPIError';
 export { prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
 export { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 export { pxToRem } from './utils/pxToRem';

@@ -12,4 +12,4 @@ const errorsTrads = {
   integer: 'component.Input.error.validation.integer',
 };
 
-export { errorsTrads };
+export { errorsTrads as translatedErrors };
