@@ -25,14 +25,27 @@ export const transformUpgradeHeader = (header = '') => {
  * Make sure that the upgrade header is a valid websocket one
  */
 export const assertValidHeader = (ctx: Context) => {
-  const upgradeHeader = transformUpgradeHeader(ctx.headers.upgrade);
+  if (ctx.headers.upgrade !== 'websocket') {
+    const upgradeHeader = transformUpgradeHeader(ctx.headers.upgrade);
 
-  if (!upgradeHeader.includes('websocket')) {
-    const logSafeUpgradeHeader = ctx.headers.upgrade
+    // Sanitize user input before writing it to our logs
+    const logSafeUpgradeHeader = JSON.stringify(ctx.headers.upgrade)
       ?.replace(/[^a-z0-9\s.,|]/gi, '')
       .substring(0, 50);
-    throw new Error(
-      `Transfer Upgrade header expected 'websocket', found '${logSafeUpgradeHeader}'. Please ensure that your server or proxy is not modifying the Upgrade header.`
+
+    if (!upgradeHeader.includes('websocket')) {
+      throw new Error(
+        `Transfer Upgrade header expected 'websocket', found '${logSafeUpgradeHeader}'. Please ensure that your server or proxy is not modifying the Upgrade header.`
+      );
+    }
+
+    /**
+     * If there's more than expected but it still includes websocket, in theory it could still work
+     * and could be necessary for their certain configurations, so we'll allow it to proceed but
+     * log the unexpected behaviour in case it helps debug an issue
+     * */
+    strapi.log.info(
+      `Transfer Upgrade header expected only 'websocket', found unexpected values: ${logSafeUpgradeHeader}`
     );
   }
 };
