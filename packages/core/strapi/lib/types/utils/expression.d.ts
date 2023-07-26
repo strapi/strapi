@@ -14,6 +14,8 @@ export type IsFalse<TValue> = [TValue] extends [False] ? True : False;
 
 export type Extends<TLeft, TRight> = [TLeft] extends [TRight] ? True : False;
 
+export type DoesNotExtends<TLeft, TRight> = Not<Extends<TLeft, TRight>>;
+
 export type Not<TExpression extends BooleanValue> = If<TExpression, False, True>;
 
 export type If<TExpression extends BooleanValue, TOnTrue, TOnFalse = never> = [
