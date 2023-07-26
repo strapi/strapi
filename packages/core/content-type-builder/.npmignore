@@ -94,5 +94,4 @@ node_modules
 tests
 __tests__
 jest.config.js
-testApp
 coverage

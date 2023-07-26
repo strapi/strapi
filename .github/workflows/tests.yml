@@ -117,6 +117,47 @@ jobs:
       - name: Build
         run: yarn build --projects=@strapi/admin,@strapi/helper-plugin
 
+  e2e:
+    timeout-minutes: 60
+    needs: [changes, lint, unit_front, build]
+    name: 'e2e (browser: ${{ matrix.project }})'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        # we need 1.37.0 to support Firefox install...
+        run: npx playwright@1.37.0-alpha-jul-20-2023 install --with-deps
+
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+
+      - name: Run build
+        run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+
+      - name: Run E2E tests
+        run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
