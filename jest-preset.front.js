@@ -28,7 +28,7 @@ module.exports = {
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.(j|t)s(x)?$': [
+    '^.+\\.js(x)?$': [
       '@swc/jest',
       {
         env: {
@@ -43,6 +43,32 @@ module.exports = {
           },
           // this should match the minimum supported node.js version
           target: 'es2020',
+        },
+      },
+    ],
+    '\\.ts$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+          },
+        },
+      },
+    ],
+    '\\.tsx$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic',
+            },
+          },
         },
       },
     ],
