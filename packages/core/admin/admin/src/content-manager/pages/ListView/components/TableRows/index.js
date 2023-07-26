@@ -26,7 +26,6 @@ import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { getFullName } from '../../../../../utils';
 import { usePluginsQueryParams } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
-import { getDisplayName } from '../../../../utils';
 import CellContent from '../CellContent';
 
 const REVIEW_WORKFLOW_COLUMNS_CE = () => null;
@@ -196,17 +195,6 @@ export const TableRows = ({
 
               if (typeof cellFormatter === 'function') {
                 return <Td key={key}>{cellFormatter(data, { key, name, ...rest })}</Td>;
-              }
-
-              if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
-                // Display the users full name
-                return (
-                  <Td key={key}>
-                    <Typography textColor="neutral800">
-                      {getDisplayName(data[name.split('.')[0]], formatMessage)}
-                    </Typography>
-                  </Td>
-                );
               }
 
               return (

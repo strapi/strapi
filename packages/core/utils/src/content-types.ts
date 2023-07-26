@@ -52,20 +52,6 @@ const getTimestamps = (model: Model) => {
   return attributes;
 };
 
-const getCreatorFields = (model: Model) => {
-  const attributes = [];
-
-  if (has(CREATED_BY_ATTRIBUTE, model.attributes)) {
-    attributes.push(CREATED_BY_ATTRIBUTE);
-  }
-
-  if (has(UPDATED_BY_ATTRIBUTE, model.attributes)) {
-    attributes.push(UPDATED_BY_ATTRIBUTE);
-  }
-
-  return attributes;
-};
-
 const getNonWritableAttributes = (model: Model) => {
   if (!model) return [];
 
@@ -216,7 +202,6 @@ export {
   getNonVisibleAttributes,
   getVisibleAttributes,
   getTimestamps,
-  getCreatorFields,
   isVisibleAttribute,
   hasDraftAndPublish,
   getOptions,

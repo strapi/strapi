@@ -50,7 +50,6 @@ describe('CONTENT MANAGER | EditView | Information', () => {
     useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
-      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { getByText, getAllByText } = setup();
@@ -78,7 +77,6 @@ describe('CONTENT MANAGER | EditView | Information', () => {
         },
       },
       isCreatingEntry: false,
-      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { getAllByText } = setup();
@@ -105,7 +103,6 @@ describe('CONTENT MANAGER | EditView | Information', () => {
         },
       },
       isCreatingEntry: false,
-      readActionAllowedFields: ['createdBy', 'updatedBy'],
     }));
 
     const { queryByText, getAllByText } = setup();
