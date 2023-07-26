@@ -71,7 +71,7 @@ module.exports = ({ action, ability, model }) => {
     const sanitizeSort = pipeAsync(
       traverse.traverseQuerySort(allowedFields(permittedFields), { schema }),
       traverse.traverseQuerySort(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
+      traverse.traverseQuerySort(omitHiddenFields, { schema }),
       traverse.traverseQuerySort(removePassword, { schema }),
       traverse.traverseQuerySort(
         ({ key, attribute, value }, { remove }) => {
@@ -86,13 +86,13 @@ module.exports = ({ action, ability, model }) => {
     const sanitizePopulate = pipeAsync(
       traverse.traverseQueryPopulate(allowedFields(permittedFields), { schema }),
       traverse.traverseQueryPopulate(omitDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
+      traverse.traverseQueryPopulate(omitHiddenFields, { schema }),
       traverse.traverseQueryPopulate(removePassword, { schema })
     );
 
     const sanitizeFields = pipeAsync(
       traverse.traverseQueryFields(allowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(omitHiddenFields, { schema }),
+      traverse.traverseQueryFields(omitHiddenFields, { schema }),
       traverse.traverseQueryFields(removePassword, { schema })
     );
 
