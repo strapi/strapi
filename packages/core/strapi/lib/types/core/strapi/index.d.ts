@@ -11,7 +11,7 @@ interface CustomFieldServerOptions {
   /**
    * The name of the plugin creating the custom field
    */
-  plugin?: string;
+  pluginId?: string;
 
   /**
    * The existing Strapi data type the custom field uses
@@ -25,6 +25,28 @@ interface CustomFieldServerOptions {
     default: 4 | 6 | 8 | 12;
     isResizable: boolean;
   };
+
+  icon?: React.ComponentType;
+
+  /**
+   * TODO: this should be MessageDescriptor from react-intl
+   */
+  intlLabel?: object;
+
+  /**
+   * TODO: this should be MessageDescriptor from react-intl
+   */
+  intlDescription?: object;
+
+  /**
+   * TODO: this needs typing better, the dynamic imports are tricky to type.
+   */
+  components?: object;
+
+  /**
+   * TODO: this needs typing better.
+   */
+  options?: object;
 }
 
 interface CustomFields {

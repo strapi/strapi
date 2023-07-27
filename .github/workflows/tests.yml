@@ -56,6 +56,25 @@ jobs:
       - name: Run lint
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
+  typescript_front:
+    name: 'typescript_front'
+    needs: [changes, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: nrwl/nx-set-shas@v3
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run build:ts for admin-test-utils
+        run: yarn build --projects=@strapi/admin-test-utils,@strapi/helper-plugin --skip-nx-cache
+      - name: Run test
+        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
+
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, lint]
@@ -80,7 +99,7 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint]
+    needs: [changes, lint, typescript_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -102,7 +121,7 @@ jobs:
 
   build:
     name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, unit_front]
+    needs: [changes, lint, typescript_front, unit_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -119,7 +138,7 @@ jobs:
 
   e2e:
     timeout-minutes: 60
-    needs: [changes, lint, unit_front, build]
+    needs: [changes, lint, typescript_front, unit_front, build]
     name: 'e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:

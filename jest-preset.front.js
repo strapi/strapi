@@ -22,13 +22,13 @@ module.exports = {
   moduleNameMapper,
   /* Tells jest to ignore duplicated manual mock files, such as index.js */
   modulePathIgnorePatterns: ['.*__mocks__.*'],
-  testPathIgnorePatterns: ['node_modules/', '__tests__'],
+  testPathIgnorePatterns: ['node_modules/', '__tests__', 'dist/'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/environment'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.js(x)?$': [
+    '^.+\\.(j|t)s(x)?$': [
       '@swc/jest',
       {
         env: {
