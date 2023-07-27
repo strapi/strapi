@@ -67,7 +67,7 @@ const checkIfShouldShowSurvey = (settings) => {
 // Because we only enable the NPS for users who subscribe to the newsletter when signing up
 export function useNpsSurveySettings() {
   const [npsSurveySettings, setNpsSurveySettings] = usePersistentState(
-    'strapi_NPS_SURVEY_SETTINGS',
+    'STRAPI_NPS_SURVEY_SETTINGS',
     {
       enabled: true,
       lastResponseDate: null,
