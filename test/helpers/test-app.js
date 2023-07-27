@@ -25,7 +25,7 @@ const cleanTestApp = (appPath) => {
  * @param {string} options.appPath - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = async ({ appPath, database, template }) => {
+const generateTestApp = async ({ appPath, database, template, link = false }) => {
   const scope = {
     database,
     rootPath: path.resolve(appPath),
@@ -54,7 +54,9 @@ const generateTestApp = async ({ appPath, database, template }) => {
   };
 
   await generateNew(scope);
-  await linkPackages(appPath);
+  if (link) {
+    await linkPackages(appPath);
+  }
 };
 
 const linkPackages = async (appPath) => {
