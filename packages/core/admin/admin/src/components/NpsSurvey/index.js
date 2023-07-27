@@ -215,7 +215,7 @@ const NpsSurvey = () => {
           >
             {feedback}
           </Textarea>
-          <Button onClick={handleSubmitResponse} disabled={!feedback}>
+          <Button onClick={handleSubmitResponse}>
             {formatMessage({
               id: 'app.components.NpsSurvey.submit-feedback',
               defaultMessage: 'Submit Feedback',
