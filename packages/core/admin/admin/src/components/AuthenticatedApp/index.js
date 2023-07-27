@@ -14,6 +14,7 @@ import { useQueries } from 'react-query';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import { getFullName, hashAdminUserEmail } from '../../utils';
+import NpsSurvey from '../NpsSurvey';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 
@@ -109,7 +110,10 @@ const AuthenticatedApp = () => {
       userDisplayName={userDisplayName}
     >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
-        <PluginsInitializer />
+        <>
+          <NpsSurvey />
+          <PluginsInitializer />
+        </>
       </RBACProvider>
     </AppInfoProvider>
   );

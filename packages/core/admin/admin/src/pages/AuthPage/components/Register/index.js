@@ -29,6 +29,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { useNpsSurveySettings } from '../../../../components/NpsSurvey';
 import Logo from '../../../../components/UnauthenticatedLogo';
 import UnauthenticatedLayout, { LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
@@ -55,6 +56,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
   const query = useQuery();
   const { formatAPIError } = useAPIErrorHandler();
   const { get } = useFetchClient();
+  const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
 
@@ -139,6 +141,9 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
               } else {
                 onSubmit(normalizedData, formik);
               }
+
+              // Only enable EE survey if user accepted the newsletter
+              setNpsSurveySettings({ enabled: data.news });
             } catch (err) {
               const errors = getYupInnerErrors(err);
               setSubmitCount(submitCount + 1);
