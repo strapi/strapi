@@ -50,7 +50,7 @@ import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
-import { getTrad, getDisplayName } from '../../utils';
+import { getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { Body } from './components/Body';
@@ -618,17 +618,6 @@ function ListView({
                                 ) : (
                                   <Typography textColor="neutral800">-</Typography>
                                 )}
-                              </Td>
-                            );
-                          }
-
-                          if (['createdBy', 'updatedBy'].includes(name.split('.')[0])) {
-                            // Display the users full name
-                            return (
-                              <Td key={key}>
-                                <Typography textColor="neutral800">
-                                  {getDisplayName(rowData[name.split('.')[0]], formatMessage)}
-                                </Typography>
                               </Td>
                             );
                           }
