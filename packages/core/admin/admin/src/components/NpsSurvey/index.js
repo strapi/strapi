@@ -7,6 +7,7 @@ const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
+  cooldown: 5 * 60 * 1000, // 5 minutes in ms
 };
 
 const checkIfShouldShowSurvey = (settings) => {
@@ -86,6 +87,23 @@ const NpsSurvey = () => {
   const [surveyIsShown, setSurveyIsShown] = React.useState(
     checkIfShouldShowSurvey(npsSurveySettings)
   );
+
+  // Set a cooldown to show the survey
+  const [showSurvey, setShowSurvey] = React.useState(false);
+
+  React.useEffect(() => {
+    const cooldown = setTimeout(() => {
+      setShowSurvey(true);
+    }, delays.cooldown);
+
+    return () => {
+      clearTimeout(cooldown);
+    };
+  }, []);
+
+  if (!showSurvey) {
+    return null;
+  }
 
   if (!surveyIsShown) {
     return null;
