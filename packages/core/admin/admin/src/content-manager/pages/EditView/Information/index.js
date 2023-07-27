@@ -5,8 +5,8 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { getFullName } from '../../../../utils/getFullName';
-import { getTrad } from '../../../utils';
+import getTrad from '../../../utils/getTrad';
+import getDisplayName from '../../../utils/getDisplayName';
 
 import getUnits from './utils/getUnits';
 
@@ -42,9 +42,13 @@ const KeyValuePair = ({ label, value }) => {
   );
 };
 
+KeyValuePair.defaultProps = {
+  value: '-',
+};
+
 KeyValuePair.propTypes = {
   label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
 };
 
 const Body = () => {
@@ -53,18 +57,16 @@ const Body = () => {
   const currentTime = useRef(Date.now());
 
   const getFieldInfo = (atField, byField) => {
-    const { firstname, lastname, username } = initialData[byField] ?? {};
+    const user = initialData[byField] ?? {};
 
-    const userFirstname = firstname ?? '';
-    const userLastname = lastname ?? '';
-    const user = username ?? getFullName(userFirstname, userLastname);
+    const displayName = getDisplayName(user, formatMessage);
     const timestamp = initialData[atField] ? new Date(initialData[atField]).getTime() : Date.now();
     const elapsed = timestamp - currentTime.current;
     const { unit, value } = getUnits(-elapsed);
 
     return {
       at: formatRelativeTime(value, unit, { numeric: 'auto' }),
-      by: isCreatingEntry ? '-' : user,
+      by: isCreatingEntry ? '-' : displayName,
     };
   };
 
