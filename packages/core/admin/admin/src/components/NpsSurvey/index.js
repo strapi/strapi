@@ -1,13 +1,52 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 
-import { Flex, Button, Typography } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
+import { Box, Flex, IconButton, Button, Typography, Textarea } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
+import { useNpsSurveySettings } from './hooks/useNpsSurveySettings';
+
+const BannerWrapper = styled(Flex)`
+  border: 1px solid ${({ theme }) => theme.colors.primary200};
+  background: ${({ theme }) => theme.colors.neutral0};
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  padding: ${({ theme }) => theme.spaces[5]};
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spaces[3]};
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  z-index: 999;
+`;
+
+const Header = styled(Box)`
+  margin: 0 auto;
+`;
+
+const RatingButtonWrapper = styled(Button)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: ${32 / 16}rem;
+  width: ${32 / 16}rem;
+  padding: ${({ theme }) => theme.spaces[2]};
+
+  &.selected {
+    background-color: ${({ theme }) => theme.colors.neutral0};
+    border-color: ${({ theme }) => theme.colors.primary700};
+  }
+`;
 
 const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
 };
+
+const ratingArray = Array.from(Array(11).keys());
 
 const checkIfShouldShowSurvey = (settings) => {
   const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
@@ -63,29 +102,15 @@ const checkIfShouldShowSurvey = (settings) => {
   return true;
 };
 
-// Exported to make it available during admin user registration.
-// Because we only enable the NPS for users who subscribe to the newsletter when signing up
-export function useNpsSurveySettings() {
-  const [npsSurveySettings, setNpsSurveySettings] = usePersistentState(
-    'STRAPI_NPS_SURVEY_SETTINGS',
-    {
-      enabled: true,
-      lastResponseDate: null,
-      firstDismissalDate: null,
-      lastDismissalDate: null,
-    }
-  );
-
-  return { npsSurveySettings, setNpsSurveySettings };
-}
-
 const NpsSurvey = () => {
+  const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
+  const [feedback, setFeedback] = useState('');
+  const [showFeedbackBox, setShowFeedbackBox] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(null);
 
   // Only check on first render if the survey should be shown
-  const [surveyIsShown, setSurveyIsShown] = React.useState(
-    checkIfShouldShowSurvey(npsSurveySettings)
-  );
+  const [surveyIsShown, setSurveyIsShown] = useState(checkIfShouldShowSurvey(npsSurveySettings));
 
   if (!surveyIsShown) {
     return null;
@@ -123,13 +148,82 @@ const NpsSurvey = () => {
     setSurveyIsShown(false);
   };
 
-  // TODO: replace with the proper UI
+  const onSelectRating = (number) => {
+    setShowFeedbackBox(true);
+    setSelectedRating(number);
+  };
+
   return (
-    <Flex gap={2} padding={2}>
-      <Typography>NPS SURVEY</Typography>
-      <Button onClick={handleDismiss}>Dismiss</Button>
-      <Button onClick={handleSubmitResponse}>Submit</Button>
-    </Flex>
+    <BannerWrapper hasRadius>
+      <Flex justifyContent="space-between" width="100%">
+        <Header>
+          <Typography>
+            {formatMessage({
+              id: 'app.components.NpsSurvey.banner-title',
+              defaultMessage: 'How likely are you to recommend Strapi to a friend or colleague?',
+            })}
+          </Typography>
+        </Header>
+        <IconButton
+          onClick={handleDismiss}
+          aria-label={formatMessage({
+            id: 'app.components.NpsSurvey.dismiss-survey-label',
+            defaultMessage: 'Dismiss survey',
+          })}
+          icon={<Cross />}
+        />
+      </Flex>
+      <Flex gap={2} paddingLeft={8} paddingRight={8}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: 'app.components.NpsSurvey.no-recommendation',
+            defaultMessage: 'Not at all likely',
+          })}
+        </Typography>
+        {ratingArray.map((number) => {
+          return (
+            <RatingButtonWrapper
+              key={number}
+              variant="secondary"
+              onClick={() => onSelectRating(number)}
+              className={selectedRating === number ? `selected` : null}
+            >
+              {number}
+            </RatingButtonWrapper>
+          );
+        })}
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: 'app.components.NpsSurvey.happy-to-recommend',
+            defaultMessage: 'Extremely likely',
+          })}
+        </Typography>
+      </Flex>
+      {showFeedbackBox && (
+        <Flex direction="column" gap={4} paddingTop={3}>
+          <Typography>
+            {formatMessage({
+              id: 'app.components.NpsSurvey.feedback-question',
+              defaultMessage: 'Do you have any suggestion for improvements?',
+            })}
+          </Typography>
+          <Textarea
+            id="feedback"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            width="432px"
+          >
+            {feedback}
+          </Textarea>
+          <Button onClick={handleSubmitResponse}>
+            {formatMessage({
+              id: 'app.components.NpsSurvey.submit-feedback',
+              defaultMessage: 'Submit Feedback',
+            })}
+          </Button>
+        </Flex>
+      )}
+    </BannerWrapper>
   );
 };
 
