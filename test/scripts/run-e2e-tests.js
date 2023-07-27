@@ -107,6 +107,7 @@ yargs
                   useNullAsDefault: true,
                 },
                 template: path.join(cwd, 'e2e', 'app-template'),
+                link: true,
               });
               /**
                * Because we're running multiple test apps at the same time

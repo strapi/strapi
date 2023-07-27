@@ -82,12 +82,18 @@ module.exports = {
 
     const targetedModel = strapi.getModel(attribute.target);
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: attribute.target,
+    });
+
     const modelConfig = isComponent
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
     let mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    if (!isListable(targetedModel, mainField)) {
+
+    if (!isListable(targetedModel, mainField) || permissionChecker.cannot.read(null, mainField)) {
       mainField = 'id';
     }
 
@@ -195,8 +201,13 @@ module.exports = {
       ? await getService('components').findConfiguration(modelSchema)
       : await getService('content-types').findConfiguration(modelSchema);
 
+    const permissionChecker = getService('permission-checker').create({
+      userAbility,
+      model: attribute.target,
+    });
+
     let mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    if (!isListable(targetedModel, mainField)) {
+    if (!isListable(targetedModel, mainField) || permissionChecker.cannot.read(null, mainField)) {
       mainField = 'id';
     }
 
