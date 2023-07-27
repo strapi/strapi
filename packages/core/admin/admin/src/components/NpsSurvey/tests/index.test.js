@@ -17,11 +17,11 @@ const originalLocalStorage = global.localStorage;
 const user = userEvent.setup();
 
 const setup = () =>
-  render(
-    <ThemeProvider theme={lightTheme}>
-      <NpsSurvey />
-    </ThemeProvider>
-  );
+  render(<NpsSurvey />, {
+    wrapper({ children }) {
+      return <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>;
+    },
+  });
 
 describe('NPS survey', () => {
   beforeAll(() => {
