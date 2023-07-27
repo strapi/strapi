@@ -1,11 +1,11 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import ColorPickerIcon from './components/ColorPicker/ColorPickerIcon';
-import pluginId from './pluginId';
+import { pluginId } from './pluginId';
 import getTrad from './utils/getTrad';
 
 export default {
-  register(app) {
+  register(app: any) {
     app.customFields.register({
       name: 'color',
       pluginId: 'color-picker',
@@ -64,7 +64,7 @@ export default {
       },
     });
   },
-  async registerTrads({ locales }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
         return import(`./translations/${locale}.json`)

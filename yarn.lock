@@ -7884,6 +7884,7 @@ __metadata:
     "@strapi/helper-plugin": 4.11.7
     "@strapi/icons": 1.8.2
     "@testing-library/react": 14.0.0
+    "@types/styled-components": 5.1.26
     prop-types: ^15.8.1
     react: ^18.2.0
     react-colorful: 5.6.1
@@ -8990,7 +8991,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hoist-non-react-statics@npm:^3.3.1":
+"@types/hoist-non-react-statics@npm:*, @types/hoist-non-react-statics@npm:^3.3.1":
   version: 3.3.1
   resolution: "@types/hoist-non-react-statics@npm:3.3.1"
   dependencies:
@@ -9548,6 +9549,17 @@ __metadata:
     "@types/node": "*"
     "@types/stream-chain": "*"
   checksum: cafa47c27bbd0cf446d1c90442cf53240a8a8a3828e73ba456720d6612b03d32d04067c9c0e54105b94584f37c7ed2f1a941b0600fbc6c095c25c1b401d184bb
+  languageName: node
+  linkType: hard
+
+"@types/styled-components@npm:5.1.26":
+  version: 5.1.26
+  resolution: "@types/styled-components@npm:5.1.26"
+  dependencies:
+    "@types/hoist-non-react-statics": "*"
+    "@types/react": "*"
+    csstype: ^3.0.2
+  checksum: 84f53b3101739b20d1731554fb7735bc2f3f5d050a8b392e9845403c8c8bbd729737d033978649f9195a97b557875b010d46e35a4538564a2d0dbcce661dbf76
   languageName: node
   linkType: hard
 
