@@ -55,4 +55,4 @@ ConditionsButton.propTypes = {
 // This is a styled component advanced usage :
 // Used to make a ref to a non styled component.
 // https://styled-components.com/docs/advanced#caveat
-export default styled(ConditionsButton)``;
+export default styled(ConditionsButton);

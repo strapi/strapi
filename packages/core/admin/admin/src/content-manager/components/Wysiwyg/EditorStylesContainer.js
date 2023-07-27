@@ -1,8 +1,9 @@
 import styled from 'styled-components';
 
 /* eslint-disable */
-/* stylelint-disable */
 export const EditorStylesContainer = styled.div`
+  /* stylelint-disable */
+
   cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
   height: 100%;
   /* BASICS */
