@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 
-import { getRequestUrl, getTrad } from '../../../../../utils';
+import { getTrad } from '../../../../../utils';
 import CellValue from '../CellValue';
 
 const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
@@ -24,7 +24,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
       const {
         data: { results, pagination },
       } = await get(
-        getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`)
+        `/content-manager/relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`
       );
 
       return { results, pagination };
@@ -69,7 +69,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
           <Menu.Item disabled>
             <Loader small>
               {formatMessage({
-                id: getTrad('DynamicTable.relation-loading'),
+                id: getTrad('ListViewTable.relation-loading'),
                 defaultMessage: 'Relations are loading',
               })}
             </Loader>
@@ -93,7 +93,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
               <Menu.Item
                 aria-disabled
                 aria-label={formatMessage({
-                  id: getTrad('DynamicTable.relation-more'),
+                  id: getTrad('ListViewTable.relation-more'),
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >

@@ -40,7 +40,7 @@ export const useRBAC = (permissionsToCheck, passedPermissions) => {
 
   const queryResults = useQueries(
     permissionsToCheckEntries.map(([name, permissions]) => ({
-      queryKey: ['useRBAC', name, permissions.map(({ action, subject }) => ({ action, subject }))],
+      queryKey: ['useRBAC', name, permissions, userPermissions],
       async queryFn() {
         if (!permissions || !permissions.length) {
           return { name, hasPermission: true };

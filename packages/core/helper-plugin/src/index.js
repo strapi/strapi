@@ -7,12 +7,13 @@ import { getOtherInfos, getType } from './content-manager/utils/getAttributeInfo
 export { default as AnErrorOccurred } from './components/AnErrorOccurred';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
-export { default as ConfirmDialog } from './components/ConfirmDialog';
+export * from './components/ConfirmDialog';
 export { default as ContentBox } from './components/ContentBox';
 export { default as DateTimePicker } from './components/DateTimePicker';
 export { default as DynamicTable } from './components/DynamicTable';
-export { default as EmptyBodyTable } from './components/EmptyBodyTable';
+export { Table, useTableContext } from './components/Table';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
+export { default as EmptyBodyTable } from './components/EmptyBodyTable';
 export { FilterListURLQuery } from './components/FilterListURLQuery';
 export { default as FilterPopoverURLQuery } from './components/FilterPopoverURLQuery';
 export { default as Form } from './components/Form';

@@ -29,8 +29,6 @@ import {
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 
-import { getRequestUrl } from './utils';
-
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const queryClient = useQueryClient();
@@ -110,7 +108,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       setIsCreatingEntry(true);
 
       try {
-        const { data } = await fetchClient.get(getRequestUrl(slug), {
+        const { data } = await fetchClient.get(`/content-manager/single-types/${slug}`, {
           cancelToken: source.token,
           params,
         });
@@ -158,8 +156,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await del(getRequestUrl(slug), {
-          params: query,
+        const { data } = await del(`/content-manager/single-types/${slug}`, {
+          params,
         });
 
         toggleNotification({
@@ -181,12 +179,12 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [del, slug, displayErrors, toggleNotification, query, dispatch, rawQuery]
+    [del, slug, params, toggleNotification, dispatch, rawQuery, displayErrors]
   );
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(slug);
+      const endPoint = `/content-manager/single-types/${slug}`;
 
       try {
         dispatch(setStatus('submit-pending'));
@@ -237,7 +235,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
+      const endPoint = `/content-manager/single-types/${slug}/actions/countDraftRelations`;
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
@@ -257,7 +255,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/actions/publish`);
+      const endPoint = `/content-manager/single-types/${slug}/actions/publish`;
 
       dispatch(setStatus('publish-pending'));
 
@@ -265,7 +263,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         endPoint,
         {},
         {
-          params: query,
+          params,
         }
       );
 
@@ -287,11 +285,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       return Promise.reject(err);
     }
-  }, [post, cleanReceivedData, displayErrors, slug, query, dispatch, toggleNotification]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(slug);
+      const endPoint = `/content-manager/single-types/${slug}`;
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
@@ -330,7 +328,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
+    const endPoint = `/content-manager/single-types/${slug}/actions/unpublish`;
 
     dispatch(setStatus('unpublish-pending'));
 
@@ -341,7 +339,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         endPoint,
         {},
         {
-          params: query,
+          params,
         }
       );
 
@@ -358,7 +356,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [post, cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, query]);
+  }, [slug, dispatch, post, params, toggleNotification, cleanReceivedData, displayErrors]);
 
   return children({
     componentsDataStructure,

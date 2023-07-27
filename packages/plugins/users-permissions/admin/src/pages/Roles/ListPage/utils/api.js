@@ -1,11 +1,9 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-import { getRequestURL } from '../../../../utils';
-
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
     const { get } = getFetchClient();
-    const { data } = await get(getRequestURL('roles'));
+    const { data } = await get('/users-permissions/roles');
     notifyStatus('The roles have loaded successfully');
 
     return data;
@@ -22,7 +20,7 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
 export const deleteData = async (id, toggleNotification) => {
   try {
     const { del } = getFetchClient();
-    await del(`${getRequestURL('roles')}/${id}`);
+    await del(`/users-permissions/roles/${id}`);
   } catch (error) {
     toggleNotification({
       type: 'warning',

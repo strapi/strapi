@@ -24,6 +24,7 @@ const {
   getTransferTelemetryPayload,
   setSignalHandler,
   getDiffHandler,
+  getAssetsBackupHandler,
 } = require('../../utils/data-transfer');
 const { exitWith } = require('../../utils/helpers');
 
@@ -149,6 +150,11 @@ module.exports = async (opts) => {
   const { updateLoader } = loadersFactory();
 
   engine.onSchemaDiff(getDiffHandler(engine, { force: opts.force, action: 'transfer' }));
+
+  engine.addErrorHandler(
+    'ASSETS_DIRECTORY_ERR',
+    getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
+  );
 
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
