@@ -50,7 +50,7 @@ import { useEnterprise } from '../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
 import AttributeFilter from '../../components/AttributeFilter';
-import { getRequestUrl, getTrad } from '../../utils';
+import { getTrad } from '../../utils';
 
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import { Body } from './components/Body';
@@ -251,7 +251,7 @@ function ListView({
       try {
         await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}`);
+        const requestUrl = `/content-manager/collection-types/${slug}`;
         fetchData(requestUrl, { params });
 
         toggleNotification({
@@ -277,7 +277,7 @@ function ListView({
     const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}`);
+    const requestUrl = `/content-manager/collection-types/${slug}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
       fetchData(requestUrl, { cancelToken: source.token, params });
