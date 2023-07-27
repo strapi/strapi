@@ -1,4 +1,4 @@
-import Chain from 'stream-chain';
+import type Chain from 'stream-chain';
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
