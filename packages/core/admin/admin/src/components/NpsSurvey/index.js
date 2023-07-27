@@ -105,7 +105,7 @@ const checkIfShouldShowSurvey = (settings) => {
 const NpsSurvey = () => {
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState(null);
   const [showFeedbackBox, setShowFeedbackBox] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
 
@@ -215,7 +215,7 @@ const NpsSurvey = () => {
           >
             {feedback}
           </Textarea>
-          <Button onClick={handleSubmitResponse}>
+          <Button onClick={handleSubmitResponse} disabled={!feedback}>
             {formatMessage({
               id: 'app.components.NpsSurvey.submit-feedback',
               defaultMessage: 'Submit Feedback',
