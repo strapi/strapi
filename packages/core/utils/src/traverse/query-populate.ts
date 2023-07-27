@@ -145,6 +145,10 @@ const populate = traverseFactory()
   })
   // Handle populate on relation
   .onRelation(async ({ key, value, attribute, visitor, path, schema }, { set, recurse }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     if (isMorphToRelationalAttribute(attribute)) {
       // Don't traverse values that cannot be parsed
       if (!isObject(value) || !('on' in value && isObject(value?.on))) {
@@ -166,6 +170,10 @@ const populate = traverseFactory()
   })
   // Handle populate on media
   .onMedia(async ({ key, path, visitor, value }, { recurse, set }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = strapi.getModel(targetSchemaUID);
 
@@ -175,6 +183,10 @@ const populate = traverseFactory()
   })
   // Handle populate on components
   .onComponent(async ({ key, value, visitor, path, attribute }, { recurse, set }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     const targetSchema = strapi.getModel(attribute.component);
 
     const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
@@ -183,6 +195,10 @@ const populate = traverseFactory()
   })
   // Handle populate on dynamic zones
   .onDynamicZone(async ({ key, value, attribute, schema, visitor, path }, { set, recurse }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     if (isObject(value)) {
       const { components } = attribute;
 

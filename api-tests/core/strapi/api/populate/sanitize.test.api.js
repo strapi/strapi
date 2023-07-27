@@ -23,15 +23,59 @@ const schemas = {
         cover: { type: 'media' },
       },
     },
+    b: {
+      kind: 'collectionType',
+      displayName: 'b',
+      singularName: 'b',
+      pluralName: 'bs',
+      attributes: {
+        name: { type: 'string' },
+        number: { type: 'integer' },
+        relA: { type: 'relation', relation: 'oneToOne', target: 'api::a.a' },
+        cp: { type: 'component', repeatable: false, component: 'default.cp-a' },
+        dz: { type: 'dynamiczone', components: ['default.cp-a', 'default.cp-b'] },
+        img: { type: 'media', multiple: false },
+      },
+    },
+  },
+  components: {
+    cpA: {
+      displayName: 'cp-a',
+      attributes: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+    cpB: {
+      displayName: 'cp-b',
+      attributes: {
+        title: {
+          type: 'string',
+        },
+      },
+    },
   },
 };
 
-const getFixtures = (file) => {
-  return [
-    {
-      cover: file.id,
-    },
-  ];
+const fixtures = {
+  a: (file) => [{ cover: file.id }],
+  b:
+    (file) =>
+    ({ a }) =>
+      [
+        {
+          name: 'one',
+          number: 1,
+          relA: a[0].id,
+          cp: { name: 'cp_one' },
+          dz: [
+            { __component: 'default.cp-a', name: 'cp_two' },
+            { __component: 'default.cp-b', title: 'cp_three' },
+          ],
+          img: file.id,
+        },
+      ],
 };
 
 const uploadFile = async () => {
@@ -56,8 +100,11 @@ describe('Sanitize populated entries', () => {
     const file = await uploadFile();
 
     await builder
+      .addComponent(schemas.components.cpA)
+      .addComponent(schemas.components.cpB)
       .addContentTypes(Object.values(schemas.contentTypes))
-      .addFixtures(schemas.contentTypes.a.singularName, getFixtures(file))
+      .addFixtures(schemas.contentTypes.a.singularName, fixtures.a(file))
+      .addFixtures(schemas.contentTypes.b.singularName, fixtures.b(file))
       .build();
 
     strapi = await createStrapiInstance();
@@ -85,6 +132,23 @@ describe('Sanitize populated entries', () => {
       expect(body.data[0].attributes.cover).toBeDefined();
       expect(body.data[0].attributes.cover.data.attributes.createdBy).toBeUndefined();
       expect(body.data[0].attributes.cover.data.attributes.updatedBy).toBeUndefined();
+    });
+  });
+
+  describe('Wildcard Populate', () => {
+    test('Wildcard populate is transformed to ane exhaustive list of populatable fields', async () => {
+      const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
+
+      const { status } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
+        qs: { fields: ['id'], populate: '*' },
+      });
+
+      expect(status).toBe(200);
+      // Make sure the wildcard populate is transformed to an exhaustive list
+      expect(findManyMock).toHaveBeenCalledWith(
+        'api::b.b',
+        expect.objectContaining({ populate: { relA: true, cp: true, dz: true, img: true } })
+      );
     });
   });
 });
