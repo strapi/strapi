@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import NpsSurvey from '..';
@@ -14,7 +14,7 @@ const localStorageMock = {
 };
 const originalLocalStorage = global.localStorage;
 
-const user = userEvent.setup();
+const user = userEvent.setup({ delay: null });
 
 const setup = () =>
   render(<NpsSurvey />, {
@@ -23,6 +23,8 @@ const setup = () =>
     },
   });
 
+const waitForTimers = () => act(() => jest.runAllTimers());
+
 describe('NPS survey', () => {
   beforeAll(() => {
     global.localStorage = localStorageMock;
@@ -30,23 +32,32 @@ describe('NPS survey', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
   });
 
   it('renders survey if enabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
+    waitForTimers();
+
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
   });
 
   it('does not render survey if disabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: false });
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
   });
 
   it('saves user response', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
+    waitForTimers();
 
     await user.click(screen.getByRole('button', { name: /submit/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -64,6 +75,7 @@ describe('NPS survey', () => {
   it('saves first user dismissal', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
+    waitForTimers();
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -84,6 +96,7 @@ describe('NPS survey', () => {
       firstDismissalDate,
     });
     setup();
+    waitForTimers();
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -105,24 +118,24 @@ describe('NPS survey', () => {
 
     localStorageMock.getItem.mockReturnValue({ enabled: true, lastResponseDate: initialDate });
 
-    jest.useFakeTimers();
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after submission
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
+    waitForTimers();
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
-
-    jest.useRealTimers();
   });
 
   it('respects the delay after first user dismissal', async () => {
@@ -137,21 +150,23 @@ describe('NPS survey', () => {
       lastResponseDate: null,
     });
 
-    jest.useFakeTimers();
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after dismissal
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
+    waitForTimers();
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
 
     jest.useRealTimers();
@@ -169,24 +184,24 @@ describe('NPS survey', () => {
       lastResponseDate: null,
     });
 
-    jest.useFakeTimers();
     jest.setSystemTime(initialDate);
 
     // Survey should not show up right after dismissal
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
+    waitForTimers();
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
+    waitForTimers();
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
-
-    jest.useRealTimers();
   });
 
   afterAll(() => {
