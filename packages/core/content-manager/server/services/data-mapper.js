@@ -35,12 +35,11 @@ module.exports = () => ({
 });
 
 const formatAttributes = (contentType) => {
-  const { getVisibleAttributes, getTimestamps, getCreatorFields } = contentTypesUtils;
+  const { getVisibleAttributes, getTimestamps } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
   return getVisibleAttributes(contentType)
     .concat(getTimestamps(contentType))
-    .concat(getCreatorFields(contentType))
     .reduce((acc, key) => {
       const attribute = contentType.attributes[key];
 
