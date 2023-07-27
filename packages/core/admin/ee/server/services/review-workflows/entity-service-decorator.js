@@ -66,7 +66,7 @@ const decorator = (service) => ({
     const updatedEntity = await service.update.call(this, uid, entityId, { ...opts, data });
     const updatedStage = updatedEntity[ENTITY_STAGE_ATTRIBUTE];
 
-    if (previousStage?.id && previousStage.id !== updatedStage.id) {
+    if (previousStage?.id && updatedStage?.id && previousStage.id !== updatedStage.id) {
       const model = strapi.getModel(uid);
 
       strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {

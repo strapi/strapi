@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "@testing-library/react": "14.0.0",
-    "@types/styled-components": "5.1.26",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
@@ -31,18 +30,7 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
-  "files": [
-    "./dist",
-    "./admin",
-    "strapi-admin.js",
-    "strapi-server.js"
-  ],
   "scripts": {
-    "build": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
-    "build:ts": "run build",
-    "watch": "run -T tsc -w --preserveWatchOutput",
-    "clean": "run -T rimraf ./dist",
-    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",

@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('./admin/src/index.ts');
+module.exports = require('./admin/src').default;
