@@ -23,8 +23,6 @@ const setup = () =>
     },
   });
 
-const waitForTimers = () => act(() => jest.runAllTimers());
-
 describe('NPS survey', () => {
   beforeAll(() => {
     global.localStorage = localStorageMock;
@@ -42,7 +40,7 @@ describe('NPS survey', () => {
   it('renders survey if enabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
 
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
   });
@@ -50,14 +48,14 @@ describe('NPS survey', () => {
   it('does not render survey if disabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: false });
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
   });
 
   it('saves user response', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
 
     await user.click(screen.getByRole('button', { name: /submit/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -75,7 +73,7 @@ describe('NPS survey', () => {
   it('saves first user dismissal', async () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -96,7 +94,7 @@ describe('NPS survey', () => {
       firstDismissalDate,
     });
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
 
     await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
@@ -122,19 +120,19 @@ describe('NPS survey', () => {
 
     // Survey should not show up right after submission
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
   });
 
@@ -154,19 +152,19 @@ describe('NPS survey', () => {
 
     // Survey should not show up right after dismissal
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
 
     jest.useRealTimers();
@@ -188,19 +186,19 @@ describe('NPS survey', () => {
 
     // Survey should not show up right after dismissal
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should not show up during delay
     jest.advanceTimersByTime(withinDelay - initialDate);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.queryByText(/nps survey/i)).not.toBeInTheDocument();
 
     // Survey should show up again after delay
     jest.advanceTimersByTime(beyondDelay - withinDelay);
     setup();
-    waitForTimers();
+    act(() => jest.runAllTimers());
     expect(screen.getByText(/nps survey/i)).toBeInTheDocument();
   });
 
