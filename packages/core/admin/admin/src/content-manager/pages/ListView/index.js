@@ -633,9 +633,7 @@ function ListView({
                                 <Td key={key}>
                                   {rowData.strapi_assignee ? (
                                     <ReviewWorkflowsColumns.ReviewWorkflowsAssigneeEE
-                                      firstname={rowData.strapi_assignee.firstname}
-                                      lastname={rowData?.strapi_assignee?.lastname}
-                                      displayname={rowData?.strapi_assignee?.username}
+                                      user={rowData.strapi_assignee}
                                     />
                                   ) : (
                                     <Typography textColor="neutral800">-</Typography>

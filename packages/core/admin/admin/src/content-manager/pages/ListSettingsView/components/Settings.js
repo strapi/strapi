@@ -17,7 +17,12 @@ import { useIntl } from 'react-intl';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { getTrad } from '../../../utils';
 
-export const Settings = ({ contentTypeOptions, modifiedData, onChange, sortOptions: sortOptionsCE }) => {
+export const Settings = ({
+  contentTypeOptions,
+  modifiedData,
+  onChange,
+  sortOptions: sortOptionsCE,
+}) => {
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
@@ -26,10 +31,13 @@ export const Settings = ({ contentTypeOptions, modifiedData, onChange, sortOptio
     sortOptionsCE,
     async () =>
       (await import('../../../../../../ee/admin/content-manager/pages/ListSettingsView/constants'))
-        .REVIEW_WORKFLOW_STAGE_SORT_OPTION_NAME,
+        .REVIEW_WORKFLOW_ASSIGNEE_SORT_OPTIONS,
     {
-      combine(ceOptions, eeOption) {
-        return [...ceOptions, { ...eeOption, label: formatMessage(eeOption.label) }];
+      combine(ceOptions, eeOptions) {
+        return [
+          ...ceOptions,
+          ...eeOptions.map((eeOption) => ({ ...eeOption, label: formatMessage(eeOption.label) })),
+        ];
       },
 
       defaultValue: sortOptionsCE,
