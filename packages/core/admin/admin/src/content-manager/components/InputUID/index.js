@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import useDebounce from '../../../hooks/useDebounce';
-import { getRequestUrl } from '../../utils';
 
 import { FieldActionWrapper, LoadingWrapper, TextValidation } from './endActionStyle';
 import UID_REGEX from './regex';
@@ -67,7 +66,7 @@ const InputUID = ({
     try {
       const {
         data: { data },
-      } = await post(getRequestUrl('uid/generate'), {
+      } = await post('/content-manager/uid/generate', {
         contentTypeUID,
         field: name,
         data: modifiedData,
@@ -92,7 +91,7 @@ const InputUID = ({
     setIsLoading(true);
 
     try {
-      const { data } = await post(getRequestUrl('uid/check-availability'), {
+      const { data } = await post('/content-manager/uid/check-availability', {
         contentTypeUID,
         field: name,
         value: value ? value.trim() : '',

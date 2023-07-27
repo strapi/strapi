@@ -134,7 +134,7 @@ describe('EE | Content Manager | EditView | InformationBox', () => {
     expect(queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('does not render the select input, if the entity is created', () => {
+  it('does not render the select input, if the entity is being created', () => {
     useCMEditViewDataManager.mockReturnValue({
       initialData: {
         [STAGE_ATTRIBUTE_NAME]: STAGE_FIXTURE,

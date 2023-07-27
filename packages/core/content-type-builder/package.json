@@ -45,8 +45,8 @@
     "react-intl": "6.4.1",
     "react-redux": "8.1.1",
     "redux": "^4.2.1",
-    "reselect": "^4.1.7",
-    "yup": "^0.32.9"
+    "reselect": "4.1.7",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/admin": "4.11.7",

@@ -1,10 +1,8 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-import { getRequestURL } from '../../../utils';
-
 const fetchData = async () => {
   const { get } = getFetchClient();
-  const { data } = await get(getRequestURL('advanced'));
+  const { data } = await get('/users-permissions/advanced');
 
   return data;
 };
@@ -12,7 +10,7 @@ const fetchData = async () => {
 const putAdvancedSettings = (body) => {
   const { put } = getFetchClient();
 
-  return put(getRequestURL('advanced'), body);
+  return put('/users-permissions/advanced', body);
 };
 
 export { fetchData, putAdvancedSettings };
