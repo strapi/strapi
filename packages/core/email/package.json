@@ -34,7 +34,7 @@
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
     "react-intl": "6.4.1",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/helper-plugin": "4.12.0",
@@ -52,7 +52,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

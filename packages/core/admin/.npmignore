@@ -95,6 +95,5 @@ test
 tests
 __tests__
 jest.config.js
-testApp
 coverage
 webpack.config.dev.js

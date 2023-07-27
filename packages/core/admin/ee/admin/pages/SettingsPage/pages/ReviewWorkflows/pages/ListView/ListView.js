@@ -169,38 +169,39 @@ export function ReviewWorkflowsListView() {
     <>
       <Layout.Header
         primaryAction={
-          <LinkButton
-            disabled={!canCreate}
-            startIcon={<Plus />}
-            size="S"
-            to="/settings/review-workflows/create"
-            onClick={(event) => {
-              /**
-               * If the current license has a workflow limit:
-               * check if the total count of workflows exceeds that limit. If so,
-               * prevent the navigation and show the limits overlay.
-               *
-               * If the current license does not have a limit (e.g. offline license):
-               * allow the user to navigate to the create-view. In case they exceed the
-               * current hard-limit of 200 they will see an error thrown by the API.
-               */
+          canCreate && (
+            <LinkButton
+              startIcon={<Plus />}
+              size="S"
+              to="/settings/review-workflows/create"
+              onClick={(event) => {
+                /**
+                 * If the current license has a workflow limit:
+                 * check if the total count of workflows exceeds that limit. If so,
+                 * prevent the navigation and show the limits overlay.
+                 *
+                 * If the current license does not have a limit (e.g. offline license):
+                 * allow the user to navigate to the create-view. In case they exceed the
+                 * current hard-limit of 200 they will see an error thrown by the API.
+                 */
 
-              if (
-                limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
-                meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
-              ) {
-                event.preventDefault();
-                setShowLimitModal(true);
-              } else {
-                trackUsage('willCreateWorkflow');
-              }
-            }}
-          >
-            {formatMessage({
-              id: 'Settings.review-workflows.list.page.create',
-              defaultMessage: 'Create new workflow',
-            })}
-          </LinkButton>
+                if (
+                  limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
+                  meta?.workflowCount >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
+                ) {
+                  event.preventDefault();
+                  setShowLimitModal(true);
+                } else {
+                  trackUsage('willCreateWorkflow');
+                }
+              }}
+            >
+              {formatMessage({
+                id: 'Settings.review-workflows.list.page.create',
+                defaultMessage: 'Create new workflow',
+              })}
+            </LinkButton>
+          )
         }
         subtitle={formatMessage({
           id: 'Settings.review-workflows.list.page.subtitle',

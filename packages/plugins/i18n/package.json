@@ -43,7 +43,7 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "redux": "^4.2.1",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
@@ -60,7 +60,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

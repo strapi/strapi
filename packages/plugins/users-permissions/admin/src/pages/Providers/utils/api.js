@@ -1,12 +1,10 @@
 import { getFetchClient } from '@strapi/helper-plugin';
 
-import { getRequestURL } from '../../../utils';
-
 // eslint-disable-next-line import/prefer-default-export
 export const fetchData = async (toggleNotification) => {
   try {
     const { get } = getFetchClient();
-    const { data } = await get(getRequestURL('providers'));
+    const { data } = await get('/users-permissions/providers');
 
     return data;
   } catch (err) {
@@ -22,5 +20,5 @@ export const fetchData = async (toggleNotification) => {
 export const putProvider = (body) => {
   const { put } = getFetchClient();
 
-  return put(getRequestURL('providers'), body);
+  return put('/users-permissions/providers', body);
 };

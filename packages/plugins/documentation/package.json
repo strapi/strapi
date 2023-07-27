@@ -45,7 +45,7 @@
     "react-query": "3.39.3",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",
@@ -65,7 +65,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
