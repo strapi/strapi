@@ -5,13 +5,11 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getRequestUrl } from '../utils';
 
 export const useFolders = ({ enabled = true, query = {} }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const dataRequestURL = getRequestUrl('folders');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
 
@@ -48,7 +46,9 @@ export const useFolders = ({ enabled = true, query = {} }) => {
 
   const fetchFolders = async () => {
     try {
-      const { data } = await get(dataRequestURL, { params });
+      const {
+        data: { data },
+      } = await get('/upload/folders', { params });
 
       notifyStatus(
         formatMessage({
@@ -57,7 +57,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
         })
       );
 
-      return data.data;
+      return data;
     } catch (err) {
       toggleNotification({
         type: 'warning',

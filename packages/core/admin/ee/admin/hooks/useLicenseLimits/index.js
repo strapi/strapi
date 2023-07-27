@@ -1,3 +1,1 @@
-import { useLicenseLimits } from './useLicenseLimits';
-
-export default useLicenseLimits;
+export { useLicenseLimits } from './useLicenseLimits';
