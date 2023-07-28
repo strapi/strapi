@@ -71,6 +71,10 @@ describe('Migration - draft and publish', () => {
       await builder.cleanup();
     });
 
+    afterEach(async () => {
+      await restart();
+    });
+
     describe('Enabling D&P on a content-type', () => {
       test('No publishedAt before enabling the feature', async () => {
         const { body } = await rq({
