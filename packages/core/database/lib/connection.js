@@ -4,8 +4,6 @@
 
 const knex = require('knex');
 
-const SqliteClient = require('knex/lib/dialects/sqlite3/index');
-
 const trySqlitePackage = (packageName) => {
   try {
     require.resolve(packageName);
@@ -17,11 +15,6 @@ const trySqlitePackage = (packageName) => {
     throw error;
   }
 };
-// class LegacySqliteClient extends SqliteClient {
-//   _driver() {
-//     return require('sqlite3');
-//   }
-// }
 
 const clientMap = {
   'better-sqlite3': 'better-sqlite3',
