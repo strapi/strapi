@@ -17,16 +17,16 @@ const trySqlitePackage = (packageName) => {
     throw error;
   }
 };
-class LegacySqliteClient extends SqliteClient {
-  _driver() {
-    return require('sqlite3');
-  }
-}
+// class LegacySqliteClient extends SqliteClient {
+//   _driver() {
+//     return require('sqlite3');
+//   }
+// }
 
 const clientMap = {
   'better-sqlite3': 'better-sqlite3',
-  '@vscode/sqlite3': 'sqlite',
-  sqlite3: LegacySqliteClient,
+  '@vscode/sqlite3': 'sqlite3',
+  sqlite3: 'sqlite3',
 };
 
 const getSqlitePackageName = () => {
@@ -38,8 +38,9 @@ const getSqlitePackageName = () => {
   // NOTE: this tries to find the best sqlite module possible to use
   // while keeping retro compatibility
   return (
-    trySqlitePackage('better-sqlite3') ||
-    trySqlitePackage('@vscode/sqlite3') ||
+    // NOTE: just commented out to enforce sqlite3 to make it easier to test
+    // trySqlitePackage('better-sqlite3') ||
+    // trySqlitePackage('@vscode/sqlite3') ||
     trySqlitePackage('sqlite3')
   );
 };

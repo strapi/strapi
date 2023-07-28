@@ -379,6 +379,17 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
           break;
         }
         case 'insert': {
+          // TODO: replace this with something like a db.dialect method
+          // With sqlite3 on node 20, Date is being inserted as null
+          if (db.connection.client.config.client === 'sqlite3') {
+            for (const [key, value] of Object.entries(state.data)) {
+              if (value instanceof Date) {
+                console.log('Converting date', key, value);
+                state.data[key] = value.toISOString();
+              }
+            }
+          }
+
           qb.insert(state.data);
 
           if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
