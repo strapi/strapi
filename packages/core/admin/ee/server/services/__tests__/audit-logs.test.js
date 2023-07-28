@@ -33,7 +33,6 @@ describe('Audit logs service', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
     jest.useRealTimers();
   });
 
@@ -202,6 +201,7 @@ describe('Audit logs service', () => {
       await auditLogsService.register();
 
       jest.useFakeTimers().setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+
       await strapi.eventHub.emit('entry.create', { meta: 'test' });
 
       // Sends the processed event to a provider

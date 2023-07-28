@@ -7,6 +7,8 @@ const errors = require('../../errors');
 const { Dialect } = require('../dialect');
 const SqliteSchemaInspector = require('./schema-inspector');
 
+const UNSUPPORTED_OPERATORS = ['$jsonSupersetOf'];
+
 class SqliteDialect extends Dialect {
   constructor(db) {
     super(db);
@@ -52,6 +54,10 @@ class SqliteDialect extends Dialect {
         return type;
       }
     }
+  }
+
+  supportsOperator(operator) {
+    return !UNSUPPORTED_OPERATORS.includes(operator);
   }
 
   async startSchemaUpdate() {

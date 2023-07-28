@@ -19,18 +19,22 @@ const STAGES_FIXTURE = {
   index: 0,
 };
 
-const ComponentFixture = (props) => {
+const ComponentFixture = ({
+  // eslint-disable-next-line react/prop-types
+  stages = [
+    {
+      color: STAGE_COLOR_DEFAULT,
+      name: 'something',
+    },
+  ],
+  ...props
+}) => {
   const store = configureStore([], [reducer]);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      stages: [
-        {
-          color: STAGE_COLOR_DEFAULT,
-          name: 'something',
-        },
-      ],
+      stages,
     },
     validateOnChange: false,
   });
@@ -87,7 +91,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(queryByRole('textbox')).toBeInTheDocument();
   });
 
-  it('should not render delete button if canDelete=false', async () => {
+  it('should not render the delete button if canDelete=false', async () => {
     const { queryByRole } = setup({ isOpen: true, canDelete: false });
 
     expect(
@@ -95,5 +99,39 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
         name: /delete stage/i,
       })
     ).not.toBeInTheDocument();
+  });
+
+  it('should not render delete drag button if canUpdate=false', async () => {
+    const { queryByRole } = setup({ isOpen: true, canUpdate: false });
+
+    expect(
+      queryByRole('button', {
+        name: /drag/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not crash on a custom color code', async () => {
+    const { getByRole } = setup({
+      isOpen: true,
+      canDelete: false,
+      stages: [
+        {
+          color: '#FF4945',
+          name: 'something',
+        },
+      ],
+    });
+
+    expect(getByRole('textbox').value).toBe('something');
+  });
+
+  it('disables all input fields, if canUpdate = false', async () => {
+    const { container, getByRole } = setup({ canUpdate: false });
+
+    await user.click(container.querySelector('button[aria-expanded]'));
+
+    expect(getByRole('textbox')).toHaveAttribute('disabled');
+    expect(getByRole('combobox')).toHaveAttribute('data-disabled');
   });
 });

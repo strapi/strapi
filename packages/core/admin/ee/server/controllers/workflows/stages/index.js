@@ -1,12 +1,24 @@
 'use strict';
 
-const { ApplicationError } = require('@strapi/utils').errors;
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../../../utils');
-const { hasReviewWorkflow } = require('../../../utils/review-workflows');
-const {
-  validateUpdateStages,
-  validateUpdateStageOnEntity,
-} = require('../../../validation/review-workflows');
+const { validateUpdateStageOnEntity } = require('../../../validation/review-workflows');
+const { STAGE_MODEL_UID } = require('../../../constants/workflows');
+
+/**
+ *
+ * @param { Strapi } strapi - Strapi instance
+ * @param userAbility
+ * @return { (Stage) => SanitizedStage }
+ */
+function sanitizeStage({ strapi }, userAbility) {
+  const permissionChecker = strapi
+    .plugin('content-manager')
+    .service('permission-checker')
+    .create({ userAbility, model: STAGE_MODEL_UID });
+
+  return (entity) => permissionChecker.sanitizeOutput(entity);
+}
 
 module.exports = {
   /**
@@ -17,14 +29,15 @@ module.exports = {
     const { workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
+    const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
-    const data = await stagesService.find({
+    const stages = await stagesService.find({
       workflowId,
       populate,
     });
 
     ctx.body = {
-      data,
+      data: await mapAsync(stages, sanitizer),
     };
   },
   /**
@@ -35,34 +48,16 @@ module.exports = {
     const { id, workflow_id: workflowId } = ctx.params;
     const { populate } = ctx.query;
     const stagesService = getService('stages');
+    const sanitizer = sanitizeStage({ strapi }, ctx.state.userAbility);
 
-    const data = await stagesService.findById(id, {
+    const stage = await stagesService.findById(id, {
       workflowId,
       populate,
     });
 
     ctx.body = {
-      data,
+      data: await sanitizer(stage),
     };
-  },
-
-  /**
-   * Replace all stages in a workflow
-   * @param {import('koa').BaseContext} ctx - koa context
-   *
-   */
-  async replace(ctx) {
-    const { workflow_id: workflowId } = ctx.params;
-    const stagesService = getService('stages');
-    const {
-      body: { data: stages },
-    } = ctx.request;
-
-    const stagesValidated = await validateUpdateStages(stages);
-
-    const data = await stagesService.replaceWorkflowStages(workflowId, stagesValidated);
-
-    ctx.body = { data };
   },
 
   /**
@@ -80,23 +75,28 @@ module.exports = {
    */
   async updateEntity(ctx) {
     const stagesService = getService('stages');
+    const workflowService = getService('workflows');
+
     const { model_uid: modelUID, id: entityIdString } = ctx.params;
+    const { body } = ctx.request;
+
     const entityId = Number(entityIdString);
 
+    const { sanitizeOutput } = strapi
+      .plugin('content-manager')
+      .service('permission-checker')
+      .create({ userAbility: ctx.state.userAbility, model: modelUID });
+
     const { id: stageId } = await validateUpdateStageOnEntity(
-      ctx.request?.body?.data,
+      { id: Number(body?.data?.id) },
       'You should pass an id to the body of the put request.'
     );
 
-    if (!hasReviewWorkflow({ strapi }, modelUID)) {
-      throw new ApplicationError(`Review workflows is not activated on ${modelUID}.`);
-    }
+    const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
+    workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    // TODO When multiple workflows are possible, check if the stage is part of the right one
-    // Didn't need this today as their can only be one workflow
+    const entity = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
 
-    const data = await stagesService.updateEntity({ id: entityId, modelUID }, stageId);
-
-    ctx.body = { data };
+    ctx.body = { data: await sanitizeOutput(entity) };
   },
 };

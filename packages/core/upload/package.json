@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.11.5",
+  "version": "4.12.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.5",
+    "@strapi/helper-plugin": "4.12.0",
     "@strapi/icons": "1.8.2",
-    "@strapi/provider-upload-local": "4.11.5",
-    "@strapi/utils": "4.11.5",
+    "@strapi/provider-upload-local": "4.12.0",
+    "@strapi/utils": "4.12.0",
     "axios": "1.4.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
@@ -50,7 +50,7 @@
     "react-redux": "8.1.1",
     "react-select": "5.7.0",
     "sharp": "0.32.0",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@testing-library/dom": "9.2.0",
@@ -69,7 +69,7 @@
     "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

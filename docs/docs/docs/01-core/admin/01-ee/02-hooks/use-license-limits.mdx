@@ -13,8 +13,17 @@ An abstraction around `react-query`'s `useQuery` hook to fetch license limits fo
 ## Usage
 
 ```js
-const { license, getFeature, isError, isLoading } = useLicenseLimits();
+const { license, getFeature, isError, isLoading } = useLicenseLimits(options);
 ```
+
+## Options
+
+### `enabled`
+
+Boolean flag which is passed onto react-query indicating whether the license check should be performed. This
+can be useful if e.g. other permissions need to be checked before.
+
+## Result
 
 ### `license`
 
@@ -56,5 +65,9 @@ interface LicenseFeature {
   options?: object;
 }
 
-type UseLicenseLimit = () => Pick<UseQueryResult, 'isError' | 'isLoading'> & { license: License }
+type Options {
+  enabled?: boolean;
+}
+
+type UseLicenseLimit = (options: Options) => Pick<UseQueryResult, 'isError' | 'isLoading'> & { license: License, getFeature: (name: string) => object }
 ```

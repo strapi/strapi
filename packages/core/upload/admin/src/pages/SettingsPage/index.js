@@ -28,7 +28,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { PERMISSIONS } from '../../constants';
-import { getRequestUrl, getTrad } from '../../utils';
+import { getTrad } from '../../utils';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -56,7 +56,7 @@ export const SettingsPage = () => {
       try {
         const {
           data: { data },
-        } = await get(getRequestUrl('settings'), {
+        } = await get('/upload/settings', {
           cancelToken: source.token,
         });
 
@@ -94,7 +94,7 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      await put(getRequestUrl('settings'), modifiedData);
+      await put('/upload/settings', modifiedData);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',

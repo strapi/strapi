@@ -33,6 +33,10 @@ class Dialect {
     return true;
   }
 
+  supportsOperator() {
+    return true;
+  }
+
   async startSchemaUpdate() {
     // noop
   }
