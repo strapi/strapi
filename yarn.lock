@@ -12216,14 +12216,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:8.3.0":
-  version: 8.3.0
-  resolution: "better-sqlite3@npm:8.3.0"
+"better-sqlite3@npm:8.5.0":
+  version: 8.5.0
+  resolution: "better-sqlite3@npm:8.5.0"
   dependencies:
     bindings: ^1.5.0
     node-gyp: latest
     prebuild-install: ^7.1.0
-  checksum: 00fc9f12058d2d157f56fe57b0f5c8ba705aee22a1dfe33ef8f60755531eda8f809cdb2377af314f6ed9396ad036094576e0596649bd6ca5bcaec172613e2dc9
+  checksum: 98243cb08a410fad0b5c443410428c8ea00376a4eb7d2c9a8a5a695970bc7a2a4007221930460939594d728e7d6bcb1889f46ec11a3bbb2257b996c80fbaacb1
   languageName: node
   linkType: hard
 
@@ -18199,7 +18199,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": 4.12.0
     "@strapi/provider-upload-cloudinary": 4.12.0
     "@strapi/strapi": 4.12.0
-    better-sqlite3: 8.3.0
+    better-sqlite3: 8.5.0
     lodash: 4.17.21
     mysql: 2.18.1
     mysql2: 3.5.1
@@ -18209,7 +18209,7 @@ __metadata:
     react-dom: ^18.2.0
     react-intl: 6.4.1
     react-router-dom: 5.3.4
-    sqlite3: 5.1.2
+    sqlite3: 5.1.6
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -22077,7 +22077,7 @@ __metadata:
     "@strapi/plugin-i18n": 4.12.0
     "@strapi/plugin-users-permissions": 4.12.0
     "@strapi/strapi": 4.12.0
-    better-sqlite3: 8.3.0
+    better-sqlite3: 8.5.0
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
@@ -22100,7 +22100,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     react-router-dom: 5.3.4
-    sqlite3: 5.1.2
+    sqlite3: 5.1.6
     styled-components: 5.3.3
   languageName: unknown
   linkType: soft
@@ -29869,9 +29869,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sqlite3@npm:5.1.2":
-  version: 5.1.2
-  resolution: "sqlite3@npm:5.1.2"
+"sqlite3@npm:5.1.6":
+  version: 5.1.6
+  resolution: "sqlite3@npm:5.1.6"
   dependencies:
     "@mapbox/node-pre-gyp": ^1.0.0
     node-addon-api: ^4.2.0
@@ -29885,7 +29885,7 @@ __metadata:
   peerDependenciesMeta:
     node-gyp:
       optional: true
-  checksum: 5ed90068f27853c4fef9d01c2e18706b7f51351220cbcd34488772a8ee5438097a16955e7a9d462da81c93fdf1ed3c8cdb085b23ddda02fc863b48e6acc0ee6e
+  checksum: ea640628843e37a63dfb4bd2c8429dbd7aab845c1a8204574dca3aac61486ab65bc0abfd99b48f1cead1f783171c6111c0cc4115335d5b95bb0b4eb44db162d5
   languageName: node
   linkType: hard
 
