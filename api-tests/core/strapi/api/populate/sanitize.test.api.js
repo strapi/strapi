@@ -11,6 +11,7 @@ const builder = createTestBuilder();
 
 let strapi;
 let file;
+let rq;
 
 const schemas = {
   contentTypes: {
