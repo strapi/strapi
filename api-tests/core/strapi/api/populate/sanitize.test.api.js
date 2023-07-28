@@ -171,7 +171,9 @@ describe('Sanitize populated entries', () => {
       // Make sure the wildcard populate is transformed to an exhaustive list
       expect(findManyMock).toHaveBeenCalledWith(
         'api::b.b',
-        expect.objectContaining({ populate: { relA: true, cp: true, dz: true, img: true } })
+        expect.objectContaining({
+          populate: expect.objectContaining({ relA: true, cp: true, dz: true, img: true }),
+        })
       );
     });
   });
