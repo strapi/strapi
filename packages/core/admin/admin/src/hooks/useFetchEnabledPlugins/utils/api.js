@@ -1,7 +1,8 @@
-import { axiosInstance } from '../../../core/utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const fetchEnabledPlugins = async () => {
-  const { data } = await axiosInstance.get('/admin/plugins');
+  const { get } = getFetchClient();
+  const { data } = await get('/admin/plugins');
 
   return data;
 };

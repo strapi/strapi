@@ -1,18 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { useIntl } from 'react-intl';
+
+import {
+  Button,
+  Grid,
+  GridItem,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  Textarea,
+} from '@strapi/design-system';
+import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { Form, GenericInput } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Button } from '@strapi/design-system/Button';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
-import { Textarea } from '@strapi/design-system/Textarea';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../../utils';
 import schema from '../utils/schema';
 
@@ -43,7 +46,7 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
               defaultMessage: 'Edit email template',
             })}
           </Crumb>
-          <Crumb>
+          <Crumb isCurrent>
             {formatMessage({ id: getTrad(template.display), defaultMessage: template.display })}
           </Crumb>
         </Breadcrumbs>
@@ -118,7 +121,7 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
                         id: getTrad('PopUpForm.Email.options.message.label'),
                         defaultMessage: 'Message',
                       })}
-                      name="options.message"
+                      id="options.message"
                       onChange={handleChange}
                       value={values.options.message}
                       error={

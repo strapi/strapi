@@ -29,6 +29,14 @@ class Dialect {
     return false;
   }
 
+  supportsWindowFunctions() {
+    return true;
+  }
+
+  supportsOperator() {
+    return true;
+  }
+
   async startSchemaUpdate() {
     // noop
   }

@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { pull } from 'lodash';
+import pull from 'lodash/pull';
+
 import { transformPermissionsData } from './utils';
 
 export const initialState = {

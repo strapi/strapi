@@ -1,17 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
+
+import {
+  BaseButton,
+  Box,
+  Field,
+  FieldError,
+  FieldHint,
+  FieldInput,
+  FieldLabel,
+  Flex,
+  FocusTrap,
+  Popover,
+  Typography,
+} from '@strapi/design-system';
+import { CarretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { BaseButton } from '@strapi/design-system/BaseButton';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Field, FieldHint, FieldError, FieldLabel, FieldInput } from '@strapi/design-system/Field';
-import { Popover } from '@strapi/design-system/Popover';
-import CarretDown from '@strapi/icons/CarretDown';
-import { useIntl } from 'react-intl';
 import { HexColorPicker } from 'react-colorful';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import getTrad from '../../../utils/getTrad';
 
@@ -101,11 +107,10 @@ const ColorPickerInput = ({
       // GenericInput calls formatMessage and returns a string for the error
       error={error}
       hint={description && formatMessage(description)}
+      required={required}
     >
-      <Stack spacing={1}>
-        <FieldLabel action={labelAction} required={required}>
-          {formatMessage(intlLabel)}
-        </FieldLabel>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <FieldLabel action={labelAction}>{formatMessage(intlLabel)}</FieldLabel>
         <ColorPickerToggle
           ref={colorPickerButtonRef}
           aria-label={formatMessage({
@@ -171,7 +176,7 @@ const ColorPickerInput = ({
         )}
         <FieldHint />
         <FieldError />
-      </Stack>
+      </Flex>
     </Field>
   );
 };

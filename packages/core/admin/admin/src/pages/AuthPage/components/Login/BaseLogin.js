@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
+
+import { Box, Button, Checkbox, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Form, Link } from '@strapi/helper-plugin';
-import EyeStriked from '@strapi/icons/EyeStriked';
-import Eye from '@strapi/icons/Eye';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Main } from '@strapi/design-system/Main';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Typography } from '@strapi/design-system/Typography';
+import { Eye, EyeStriked } from '@strapi/icons';
+import { Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Formik } from 'formik';
-import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
+
 import Logo from '../../../../components/UnauthenticatedLogo';
+import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const PasswordInput = styled(TextInput)`
@@ -74,7 +68,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 )}
               </Column>
 
-              <Stack spacing={6}>
+              <Flex direction="column" alignItems="stretch" gap={6}>
                 <TextInput
                   error={
                     errors.email
@@ -150,7 +144,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 <Button fullWidth type="submit">
                   {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
                 </Button>
-              </Stack>
+              </Flex>
             </Form>
           )}
         </Formik>

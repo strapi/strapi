@@ -1,8 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
+
 import {
+  Box,
   Card,
   CardAction,
   CardBadge,
@@ -10,13 +9,15 @@ import {
   CardCheckbox,
   CardContent,
   CardHeader,
-  CardTitle,
   CardSubtitle,
-} from '@strapi/design-system/Card';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
+  CardTitle,
+  Flex,
+  IconButton,
+} from '@strapi/design-system';
+import { Pencil, Trash } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -44,12 +45,13 @@ const CardContainer = styled(Card)`
 
 export const AssetCardBase = ({
   children,
-  name,
   extension,
-  selected,
+  isSelectable,
+  name,
   onSelect,
   onRemove,
   onEdit,
+  selected,
   subtitle,
   variant,
 }) => {
@@ -76,7 +78,7 @@ export const AssetCardBase = ({
   return (
     <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
       <CardHeader>
-        {onSelect && (
+        {isSelectable && (
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div onClick={handlePropagationClick}>
             <CardCheckbox value={selected} onValueChange={onSelect} />
@@ -116,12 +118,14 @@ export const AssetCardBase = ({
             {subtitle}
           </CardSubtitle>
         </CardContent>
-        <CardBadge>
-          {formatMessage({
-            id: getTrad(`settings.section.${variant.toLowerCase()}.label`),
-            defaultMessage: variant,
-          })}
-        </CardBadge>
+        <Flex paddingTop={1} grow={1}>
+          <CardBadge>
+            {formatMessage({
+              id: getTrad(`settings.section.${variant.toLowerCase()}.label`),
+              defaultMessage: variant,
+            })}
+          </CardBadge>
+        </Flex>
       </CardBody>
     </CardContainer>
   );
@@ -129,10 +133,11 @@ export const AssetCardBase = ({
 
 AssetCardBase.defaultProps = {
   children: undefined,
-  selected: false,
+  isSelectable: true,
   onEdit: undefined,
   onSelect: undefined,
   onRemove: undefined,
+  selected: false,
   subtitle: '',
   variant: 'Image',
 };
@@ -140,6 +145,7 @@ AssetCardBase.defaultProps = {
 AssetCardBase.propTypes = {
   children: PropTypes.node,
   extension: PropTypes.string.isRequired,
+  isSelectable: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,
   onSelect: PropTypes.func,

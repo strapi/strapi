@@ -1,60 +1,64 @@
 import React, { memo, useEffect, useMemo, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { get, groupBy, set, size } from 'lodash';
+
 import {
   LoadingIndicatorPage,
-  useTracking,
-  useNotification,
-  useStrapiApp,
+  useAppInfo,
   useAutoReloadOverlayBlocker,
-  useAppInfos,
-  useRBACProvider,
+  useFetchClient,
   useGuidedTour,
+  useNotification,
+  useRBACProvider,
+  useStrapiApp,
+  useTracking,
 } from '@strapi/helper-plugin';
+import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import set from 'lodash/set';
+import size from 'lodash/size';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import { compose } from 'redux';
+
 import DataManagerContext from '../../contexts/DataManagerContext';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
-import axiosInstance from '../../utils/axiosInstance';
+import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
-import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
-import createDataObject from './utils/createDataObject';
-import createModifiedDataSchema from './utils/createModifiedDataSchema';
-import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
-import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
-import retrieveNestedComponents from './utils/retrieveNestedComponents';
-import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
-import { getComponentsToPost, formatMainDataType, sortContentType } from './utils/cleanData';
-import serverRestartWatcher from './utils/serverRestartWatcher';
-import validateSchema from './utils/validateSchema';
 
 import {
   ADD_ATTRIBUTE,
-  ADD_CUSTOM_FIELD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
+  ADD_CUSTOM_FIELD_ATTRIBUTE,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
-  CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
+  CREATE_SCHEMA,
   DELETE_NOT_SAVED_TYPE,
   EDIT_ATTRIBUTE,
   EDIT_CUSTOM_FIELD_ATTRIBUTE,
   GET_DATA_SUCCEEDED,
   RELOAD_PLUGIN,
-  REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
   REMOVE_FIELD,
+  REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
 } from './constants';
 import makeSelectDataManagerProvider from './selectors';
+import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
+import createDataObject from './utils/createDataObject';
+import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import formatSchemas from './utils/formatSchemas';
+import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
+import retrieveNestedComponents from './utils/retrieveNestedComponents';
+import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
+import serverRestartWatcher from './utils/serverRestartWatcher';
+import validateSchema from './utils/validateSchema';
 
 const DataManagerProvider = ({
-  allIcons,
   children,
   components,
   contentTypes,
@@ -72,7 +76,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const { autoReload } = useAppInfos();
+  const { autoReload } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -82,6 +86,8 @@ const DataManagerProvider = ({
   const componentMatch = useRouteMatch(
     `/plugins/${pluginId}/component-categories/:categoryUid/:componentUid`
   );
+  const fetchClient = useFetchClient();
+  const { put, post, del } = fetchClient;
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
@@ -108,7 +114,7 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
-          return axiosInstance.get(endPoint);
+          return fetchClient.get(`/${pluginId}/${endPoint}`);
         })
       );
 
@@ -253,7 +259,7 @@ const DataManagerProvider = ({
 
   const deleteCategory = async (categoryUid) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
@@ -266,7 +272,7 @@ const DataManagerProvider = ({
       if (userConfirm) {
         lockAppWithAutoreload();
 
-        await axiosInstance.delete(requestURL);
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -289,7 +295,7 @@ const DataManagerProvider = ({
 
   const deleteData = async () => {
     try {
-      const requestURL = `/${endPoint}/${currentUid}`;
+      const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
@@ -316,7 +322,7 @@ const DataManagerProvider = ({
 
         lockAppWithAutoreload();
 
-        await axiosInstance.delete(requestURL);
+        await del(requestURL);
 
         // Make sure the server has restarted
         await serverRestartWatcher(true);
@@ -340,7 +346,7 @@ const DataManagerProvider = ({
 
   const editCategory = async (categoryUid, body) => {
     try {
-      const requestURL = `/component-categories/${categoryUid}`;
+      const requestURL = `/${pluginId}/component-categories/${categoryUid}`;
 
       // Close the modal
       onCloseModal();
@@ -349,7 +355,7 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
-      await axiosInstance({ url: requestURL, method: 'PUT', data: body });
+      await put(requestURL, body);
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -499,19 +505,17 @@ const DataManagerProvider = ({
         trackUsage('willSaveComponent');
       }
 
-      const method = isCreating ? 'POST' : 'PUT';
-
-      const baseURL = `/${endPoint}`;
-      const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
-
       // Lock the app
       lockAppWithAutoreload();
 
-      await axiosInstance({
-        url: requestURL,
-        method,
-        data: body,
-      });
+      const baseURL = `/${pluginId}/${endPoint}`;
+      const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
+
+      if (isCreating) {
+        await post(requestURL, body);
+      } else {
+        await put(requestURL, body);
+      }
 
       // Make sure the server has restarted
       await serverRestartWatcher(true);
@@ -578,7 +582,6 @@ const DataManagerProvider = ({
         addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allIcons,
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
@@ -621,7 +624,6 @@ DataManagerProvider.defaultProps = {
 };
 
 DataManagerProvider.propTypes = {
-  allIcons: PropTypes.array.isRequired,
   children: PropTypes.node.isRequired,
   components: PropTypes.object,
   contentTypes: PropTypes.object.isRequired,

@@ -5,33 +5,19 @@
  */
 
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { pxToRem } from '@strapi/helper-plugin';
-import Cross from '@strapi/icons/Cross';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styled from 'styled-components';
 
 import useDataManager from '../../hooks/useDataManager';
 
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
+import { ComponentIcon } from './ComponentIcon';
 
-const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
-  width: ${pxToRem(32)} !important;
-  height: ${pxToRem(32)} !important;
-  padding: ${pxToRem(9)};
-  border-radius: ${pxToRem(64)};
-  background: ${({ theme }) => theme.colors.neutral150};
-  path {
-    fill: ${({ theme }) => theme.colors.neutral500};
-  }
-`;
-
-const CloseButton = styled.div`
+const CloseButton = styled(Box)`
   position: absolute;
   display: none;
   top: 5px;
@@ -40,25 +26,24 @@ const CloseButton = styled.div`
   svg {
     width: ${pxToRem(10)};
     height: ${pxToRem(10)};
+
     path {
       fill: ${({ theme }) => theme.colors.primary600};
     }
   }
 `;
 
-const ComponentBox = styled(Box)`
-  flex-shrink: 0;
+const ComponentBox = styled(Flex)`
   width: ${pxToRem(140)};
   height: ${pxToRem(80)};
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};
   border-radius: ${({ theme }) => theme.borderRadius};
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  max-width: 100%;
 
   &.active,
+  &:focus,
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
@@ -67,30 +52,29 @@ const ComponentBox = styled(Box)`
       display: block;
     }
 
-    ${StyledFontAwesomeIcon} {
-      background: ${({ theme }) => theme.colors.primary200};
-      path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
-
     ${Typography} {
       color: ${({ theme }) => theme.colors.primary600};
     }
-  }
-`;
 
-const StackCentered = styled(Stack)`
-  align-items: center;
+    /* > ComponentIcon */
+    > div:first-child {
+      background: ${({ theme }) => theme.colors.primary200};
+      color: ${({ theme }) => theme.colors.primary600};
+
+      svg {
+        path {
+          fill: ${({ theme }) => theme.colors.primary600};
+        }
+      }
+    }
+  }
 `;
 
 function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode, onClick }) {
   const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
   const {
     schema: { icon, displayName },
-  } = get(modifiedData, ['components', component], {
-    schema: { icon: null },
-  });
+  } = get(modifiedData, ['components', component], { schema: {} });
 
   const onClose = (e) => {
     e.stopPropagation();
@@ -98,33 +82,37 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
   };
 
   return (
-    <button type="button" onClick={onClick}>
-      <ComponentBox
-        className={isActive ? 'active' : ''}
-        borderRadius="borderRadius"
-        paddingLeft={4}
-        paddingRight={4}
-      >
-        <StackCentered spacing={1}>
-          <StyledFontAwesomeIcon icon={icon || 'dice-d6'} />
-          <Box maxWidth={`calc(${pxToRem(140)} - 32px)`}>
-            <Typography variant="pi" fontWeight="bold" ellipsis>
-              {displayName}
-            </Typography>
-          </Box>
-        </StackCentered>
-        {isInDevelopmentMode && (
-          <CloseButton
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
-            onClick={onClose}
-          >
-            <Cross />
-          </CloseButton>
-        )}
-      </ComponentBox>
-    </button>
+    <ComponentBox
+      alignItems="center"
+      direction="column"
+      className={isActive ? 'active' : ''}
+      borderRadius="borderRadius"
+      justifyContent="center"
+      paddingLeft={4}
+      paddingRight={4}
+      shrink={0}
+      onClick={onClick}
+      role="tab"
+      tabIndex={isActive ? 0 : -1}
+      cursor="pointer"
+      aria-selected={isActive}
+      aria-controls={`dz-${dzName}-panel-${index}`}
+      id={`dz-${dzName}-tab-${index}`}
+    >
+      <ComponentIcon icon={icon} isActive={isActive} />
+
+      <Box marginTop={1} maxWidth="100%">
+        <Typography variant="pi" fontWeight="bold" ellipsis>
+          {displayName}
+        </Typography>
+      </Box>
+
+      {isInDevelopmentMode && (
+        <CloseButton as="button" onClick={onClose}>
+          <Cross />
+        </CloseButton>
+      )}
+    </ComponentBox>
   );
 }
 

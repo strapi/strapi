@@ -1,16 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
+
+import { Box, Button, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Portal } from '@strapi/design-system/Portal';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Button } from '@strapi/design-system/Button';
-import Cross from '@strapi/icons/Cross';
+import styled from 'styled-components';
 
 const ModalWrapper = styled(Flex)`
   position: fixed;
@@ -27,13 +22,15 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
     <Portal>
       <ModalWrapper onClick={onClose} padding={8} justifyContent="center">
         <FocusTrap onEscape={onClose}>
-          <Stack
+          <Flex
+            direction="column"
+            alignItems="stretch"
             background="neutral0"
             width={pxToRem(660)}
             shadow="popupShadow"
             hasRadius
             padding={4}
-            spacing={8}
+            gap={8}
             role="dialog"
             aria-modal
             onClick={(e) => e.stopPropagation()}
@@ -58,7 +55,7 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
                 </Button>
               </Flex>
             )}
-          </Stack>
+          </Flex>
         </FocusTrap>
       </ModalWrapper>
     </Portal>

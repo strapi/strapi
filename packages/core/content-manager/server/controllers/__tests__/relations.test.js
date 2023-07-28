@@ -3,236 +3,271 @@
 const createContext = require('../../../../../../test/helpers/create-context');
 const relations = require('../relations');
 
+const contentTypes = {
+  main: {
+    uid: 'main',
+    attributes: {
+      relation: { type: 'relation', target: 'target' },
+      relationWithHidden: { type: 'relation', target: 'targetWithHidden' },
+    },
+  },
+  targetWithHidden: {
+    uid: 'targetWithHidden',
+    attributes: { myField: { type: 'string' } },
+    config: {
+      attributes: {
+        myField: {
+          hidden: true,
+        },
+      },
+    },
+  },
+  target: {
+    uid: 'target',
+    attributes: { myField: { type: 'string' } },
+  },
+};
+
 describe('Relations', () => {
-  describe('find', () => {
-    test('Fails on model not found', async () => {
-      const notFound = jest.fn();
-      const ctx = createContext(
-        {
-          params: { model: 'test', targetField: 'field' },
-        },
-        {
-          notFound,
-        }
-      );
-
-      const getModel = jest.fn();
-      global.strapi = {
-        getModel,
-        plugins: {
-          'content-manager': {
-            services: {},
+  beforeAll(() => {
+    global.strapi = {
+      getModel: jest.fn((uid) => {
+        return contentTypes[uid];
+      }),
+      entityService: {
+        findPage: jest.fn(),
+        load: jest.fn(),
+      },
+      plugins: {
+        'content-manager': {
+          services: {
+            'permission-checker': {
+              create: jest.fn().mockReturnValue({
+                cannot: {
+                  read: jest.fn().mockReturnValue(false),
+                },
+                sanitizedQuery: {
+                  read: jest.fn().mockReturnValue({}),
+                },
+              }),
+            },
+            'populate-builder': () => ({
+              populateFromQuery: jest.fn().mockReturnThis(),
+              build: jest.fn().mockReturnValue({}),
+            }),
+            'content-types': {
+              findConfiguration: jest.fn().mockReturnValue({
+                metadatas: {
+                  relation: {
+                    edit: {
+                      mainField: 'myField',
+                    },
+                  },
+                },
+              }),
+            },
+            'entity-manager': {
+              findOne: jest.fn(() => ({})),
+            },
           },
         },
-      };
+      },
+    };
+  });
 
-      await relations.find(ctx);
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
 
-      expect(notFound).toHaveBeenCalledWith('model.notFound');
-    });
-
-    test('Fails on invalid target field', async () => {
-      const badRequest = jest.fn();
+  describe('findAvailable', () => {
+    test('Query mainField when mainField is listable', async () => {
       const ctx = createContext(
         {
-          params: { model: 'test', targetField: 'field' },
-        },
-        {
-          badRequest,
-        }
-      );
-
-      const getModel = jest.fn(() => ({
-        attributes: {},
-      }));
-
-      global.strapi = {
-        getModel,
-        plugins: {
-          'content-manager': {
-            services: {},
+          params: {
+            model: 'main',
+            targetField: 'relation',
+          },
+          query: {
+            _q: 'foobar',
           },
         },
-      };
-
-      await relations.find(ctx);
-
-      expect(badRequest).toHaveBeenCalledWith('targetField.invalid');
-    });
-
-    test('Fails on model not found', async () => {
-      const notFound = jest.fn();
-      const ctx = createContext(
         {
-          params: { model: 'test', targetField: 'target' },
-        },
-        {
-          notFound,
+          state: {
+            userAbility: {
+              can: jest.fn().mockReturnValue(false),
+            },
+          },
         }
       );
 
-      const getModel = jest
-        .fn()
-        .mockReturnValueOnce({
-          attributes: { target: { type: 'relation', target: 'test' } },
+      await relations.findAvailable(ctx);
+
+      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
+        'target',
+        expect.objectContaining({
+          sort: 'myField',
+          fields: ['id', 'myField'],
+          filters: {
+            $and: [
+              {
+                myField: {
+                  $containsi: 'foobar',
+                },
+              },
+            ],
+          },
         })
-        .mockReturnValueOnce(null);
-
-      global.strapi = {
-        getModel,
-        plugins: {
-          'content-manager': {
-            services: {},
-          },
-        },
-      };
-
-      await relations.find(ctx);
-
-      expect(notFound).toHaveBeenCalledWith('target.notFound');
+      );
     });
 
-    test('Picks the mainField and id only', async () => {
-      const notFound = jest.fn();
+    test('Replace mainField by id when mainField is not listable', async () => {
       const ctx = createContext(
         {
-          params: { model: 'test', targetField: 'target' },
+          params: {
+            model: 'main',
+            targetField: 'relationWithHidden',
+          },
+          query: {
+            _q: 'foobar',
+          },
         },
         {
-          notFound,
+          state: {
+            userAbility: {
+              can: jest.fn().mockReturnValue(false),
+            },
+          },
         }
       );
 
-      const getModel = jest.fn(() => ({
-        attributes: { target: { type: 'relation', target: 'test' } },
-      }));
+      await relations.findAvailable(ctx);
 
-      global.strapi = {
-        getModel,
-        plugins: {
-          'content-manager': {
-            services: {
-              'content-types': {
-                findConfiguration() {
-                  return {
-                    metadatas: {
-                      target: {
-                        edit: {
-                          mainField: 'title',
-                        },
-                      },
-                    },
-                  };
+      expect(strapi.entityService.findPage).toHaveBeenCalledWith(
+        'targetWithHidden',
+        expect.objectContaining({
+          sort: 'id',
+          fields: ['id'],
+          filters: {
+            $and: [
+              {
+                id: {
+                  $containsi: 'foobar',
                 },
               },
-              'entity-manager': {
-                find() {
-                  return [
-                    {
-                      id: 1,
-                      title: 'title1',
-                      secret: 'some secret',
-                    },
-                    {
-                      id: 2,
-                      title: 'title2',
-                      secret: 'some secret 2',
-                    },
-                  ];
-                },
-              },
-            },
+            ],
           },
-        },
-      };
-
-      await relations.find(ctx);
-
-      expect(ctx.body).toEqual([
-        {
-          id: 1,
-          title: 'title1',
-        },
-        {
-          id: 2,
-          title: 'title2',
-        },
-      ]);
+        })
+      );
     });
+  });
 
-    test('Omit somes ids', async () => {
-      const result = [
-        {
-          id: 1,
-          title: 'title1',
-          secret: 'some secret',
-        },
-        {
-          id: 2,
-          title: 'title2',
-          secret: 'some secret 2',
-        },
-      ];
-      const configuration = {
-        metadatas: {
-          target: {
-            edit: {
-              mainField: 'title',
-            },
-          },
-        },
-      };
-      const assocModel = { uid: 'api::test.test', attributes: {} };
-      const notFound = jest.fn();
-      const find = jest.fn(() => Promise.resolve(result));
-      const findConfiguration = jest.fn(() => Promise.resolve(configuration));
-
-      const getModel = jest
-        .fn()
-        .mockImplementationOnce(() => ({
-          attributes: { target: { type: 'relation', target: 'test' } },
-        }))
-        .mockImplementationOnce(() => assocModel);
-
-      global.strapi = {
-        getModel,
-        plugins: {
-          'content-manager': {
-            services: {
-              'content-types': { findConfiguration },
-              'entity-manager': { find },
-            },
-          },
-        },
-      };
-
+  describe('findExisting', () => {
+    test('Query mainField when mainField is listable', async () => {
       const ctx = createContext(
         {
-          params: { model: 'test', targetField: 'target' },
-          body: { idsToOmit: [3, 4] },
+          params: {
+            model: 'main',
+            targetField: 'relation',
+            id: 1,
+          },
+          query: {
+            _q: 'foobar',
+          },
         },
         {
-          notFound,
+          state: {
+            userAbility: {
+              can: jest.fn().mockReturnValue(false),
+            },
+          },
         }
       );
 
-      await relations.find(ctx);
+      await relations.findExisting(ctx);
 
-      expect(find).toHaveBeenCalledWith(
-        { filters: { $and: [{ id: { $notIn: [3, 4] } }] } },
-        assocModel.uid,
-        []
+      expect(strapi.entityService.load).toHaveBeenCalledWith(
+        'main',
+        { id: 1 },
+        'relation',
+        expect.objectContaining({
+          fields: ['id', 'myField'],
+        })
       );
-      expect(ctx.body).toEqual([
-        {
-          id: 1,
-          title: 'title1',
-        },
-        {
-          id: 2,
-          title: 'title2',
-        },
-      ]);
     });
+
+    test('Replace mainField by id when mainField is not listable', async () => {
+      const ctx = createContext(
+        {
+          params: {
+            model: 'main',
+            targetField: 'relationWithHidden',
+            id: 1,
+          },
+        },
+        {
+          state: {
+            userAbility: {
+              can: jest.fn().mockReturnValue(false),
+            },
+          },
+        }
+      );
+
+      await relations.findExisting(ctx);
+
+      expect(strapi.entityService.load).toHaveBeenCalledWith(
+        'main',
+        { id: 1 },
+        'relationWithHidden',
+        expect.objectContaining({
+          fields: ['id'],
+        })
+      );
+    });
+  });
+
+  test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
+    global.strapi.plugins['content-manager'].services['permission-checker'].create
+      .mockReturnValueOnce({
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn().mockReturnValue({}),
+        },
+      })
+      .mockReturnValueOnce({
+        cannot: {
+          read: jest.fn().mockReturnValue(true),
+        },
+      });
+
+    const ctx = createContext(
+      {
+        params: {
+          model: 'main',
+          targetField: 'relationWithHidden',
+          id: 1,
+        },
+      },
+      {
+        state: {
+          userAbility: {
+            can: jest.fn().mockReturnValue(true),
+          },
+        },
+      }
+    );
+
+    await relations.findExisting(ctx);
+
+    expect(strapi.entityService.load).toHaveBeenCalledWith(
+      'main',
+      { id: 1 },
+      'relationWithHidden',
+      expect.objectContaining({
+        fields: ['id'],
+      })
+    );
   });
 });

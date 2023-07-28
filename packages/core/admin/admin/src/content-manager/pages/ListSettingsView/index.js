@@ -1,46 +1,60 @@
-import React, { memo, useContext, useReducer, useState } from 'react';
-import PropTypes from 'prop-types';
-import { useMutation } from 'react-query';
+import React, { useContext, useReducer, useState } from 'react';
+
+import {
+  Button,
+  ContentLayout,
+  Divider,
+  Flex,
+  HeaderLayout,
+  Layout,
+  Main,
+} from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  Link,
+  useFetchClient,
+  useNotification,
+  useTracking,
+} from '@strapi/helper-plugin';
+import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import { stringify } from 'qs';
-import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Check from '@strapi/icons/Check';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
+import { useMutation } from 'react-query';
+
 import ModelsContext from '../../contexts/ModelsContext';
 import { usePluginsQueryParams } from '../../hooks';
-import putCMSettingsLV from './utils/api';
-import Settings from './components/Settings';
-import SortDisplayedFields from './components/SortDisplayedFields';
-import EditFieldForm from './components/EditFieldForm';
-import init from './init';
+import { checkIfAttributeIsDisplayable, getTrad } from '../../utils';
+
+import { EditFieldForm } from './components/EditFieldForm';
+import { Settings } from './components/Settings';
+import { SortDisplayedFields } from './components/SortDisplayedFields';
+import { EXCLUDED_SORT_ATTRIBUTE_TYPES } from './constants';
 import reducer, { initialState } from './reducer';
-import { EXCLUDED_SORT_OPTIONS } from './utils/excludedSortOptions';
 
 const ListSettingsView = ({ layout, slug }) => {
+  const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = useContext(ModelsContext);
-
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
-  const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, layout)
+  const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    () => ({
+      ...initialState,
+      initialData: layout,
+      modifiedData: layout,
+    })
   );
-  const { fieldToEdit, fieldForm, initialData, modifiedData } = reducerState;
+
+  const isModalFormOpen = Object.keys(fieldForm).length !== 0;
+
   const { attributes } = layout;
   const displayedFields = modifiedData.layouts.list;
 
@@ -71,9 +85,30 @@ const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
+  const { isLoading: isSubmittingForm, mutate } = useMutation(
+    (body) => put(`/content-manager/content-types/${slug}/configuration`, body),
+    {
+      onSuccess() {
+        trackUsage('didEditListSettings');
+        refetchData();
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
+
   const handleConfirm = async () => {
-    const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
-    submitMutation.mutate(body);
+    const { layouts, settings, metadatas } = modifiedData;
+
+    mutate({
+      layouts,
+      settings,
+      metadatas,
+    });
   };
 
   const handleAddField = (item) => {
@@ -110,37 +145,21 @@ const ListSettingsView = ({ layout, slug }) => {
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
     });
-    toggleModalForm();
   };
 
   const handleCloseModal = () => {
     dispatch({
       type: 'UNSET_FIELD_TO_EDIT',
     });
-    toggleModalForm();
   };
 
   const handleSubmitFieldEdit = (e) => {
     e.preventDefault();
-    toggleModalForm();
     dispatch({
       type: 'SUBMIT_FIELD_FORM',
     });
+    handleCloseModal();
   };
-
-  const submitMutation = useMutation((body) => putCMSettingsLV(body, slug), {
-    onSuccess() {
-      trackUsage('didEditListSettings');
-      refetchData();
-    },
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    },
-  });
-  const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleChangeEditLabel = ({ target: { name, value } }) => {
     dispatch({
@@ -151,29 +170,16 @@ const ListSettingsView = ({ layout, slug }) => {
   };
 
   const listRemainingFields = Object.entries(attributes)
-    .reduce((acc, cur) => {
-      const [attrName, fieldSchema] = cur;
-
-      const isDisplayable = checkIfAttributeIsDisplayable(fieldSchema);
-      const isAlreadyDisplayed = displayedFields.includes(attrName);
-
-      if (isDisplayable && !isAlreadyDisplayed) {
-        acc.push(attrName);
-      }
-
-      return acc;
-    }, [])
+    .filter(
+      ([name, attribute]) =>
+        checkIfAttributeIsDisplayable(attribute) && !displayedFields.includes(name)
+    )
+    .map(([name]) => name)
     .sort();
 
-  const sortOptions = Object.entries(attributes).reduce((acc, cur) => {
-    const [name, { type }] = cur;
-
-    if (!EXCLUDED_SORT_OPTIONS.includes(type)) {
-      acc.push(name);
-    }
-
-    return acc;
-  }, []);
+  const sortOptions = Object.entries(attributes)
+    .filter(([, attribute]) => !EXCLUDED_SORT_ATTRIBUTE_TYPES.includes(attribute.type))
+    .map(([name]) => name);
 
   const move = (originalIndex, atIndex) => {
     dispatch({
@@ -216,8 +222,11 @@ const ListSettingsView = ({ layout, slug }) => {
             )}
           />
           <ContentLayout>
-            <Box
+            <Flex
+              alignItems="stretch"
               background="neutral0"
+              direction="column"
+              gap={6}
               hasRadius
               shadow="tableShadow"
               paddingTop={6}
@@ -230,9 +239,9 @@ const ListSettingsView = ({ layout, slug }) => {
                 onChange={handleChange}
                 sortOptions={sortOptions}
               />
-              <Box paddingTop={6} paddingBottom={6}>
-                <Divider />
-              </Box>
+
+              <Divider />
+
               <SortDisplayedFields
                 listRemainingFields={listRemainingFields}
                 displayedFields={displayedFields}
@@ -242,8 +251,9 @@ const ListSettingsView = ({ layout, slug }) => {
                 onRemoveField={handleRemoveField}
                 metadatas={modifiedData.metadatas}
               />
-            </Box>
+            </Flex>
           </ContentLayout>
+
           <ConfirmDialog
             bodyText={{
               id: getTrad('popUpWarning.warning.updateAllSettings'),
@@ -257,6 +267,7 @@ const ListSettingsView = ({ layout, slug }) => {
             variantRightButton="success-light"
           />
         </form>
+
         {isModalFormOpen && (
           <EditFieldForm
             attributes={attributes}
@@ -265,7 +276,7 @@ const ListSettingsView = ({ layout, slug }) => {
             onChangeEditLabel={handleChangeEditLabel}
             onCloseModal={handleCloseModal}
             onSubmit={handleSubmitFieldEdit}
-            type={get(attributes, [fieldToEdit, 'type'], 'text')}
+            type={attributes?.[fieldToEdit]?.type ?? 'text'}
           />
         )}
       </Main>
@@ -295,4 +306,4 @@ ListSettingsView.propTypes = {
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(ListSettingsView);
+export default ListSettingsView;

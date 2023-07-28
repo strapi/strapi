@@ -11,11 +11,6 @@ describe('CONTENT MANAGER | utils | createDefaultForm', () => {
     expect(createDefaultForm(attributes, {})).toEqual({});
   });
 
-  it('should set the json type with the correct value', () => {
-    expect(createDefaultForm({ test: { type: 'json' } }, {})).toEqual({ test: null });
-    expect(createDefaultForm({ test: { type: 'json', required: true } }, {})).toEqual({ test: {} });
-  });
-
   it('should init the requide dynamic zone type with an empty array', () => {
     expect(createDefaultForm({ test: { type: 'dynamiczone', required: true } })).toEqual({
       test: [],

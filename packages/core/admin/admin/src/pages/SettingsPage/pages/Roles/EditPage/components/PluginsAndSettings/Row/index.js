@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { Accordion, AccordionContent, AccordionToggle } from '@strapi/design-system/Accordion';
-import { Box } from '@strapi/design-system/Box';
+
+import { Accordion, AccordionContent, AccordionToggle, Box } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import SubCategory from '../SubCategory';
 
 const PermissionRow = ({

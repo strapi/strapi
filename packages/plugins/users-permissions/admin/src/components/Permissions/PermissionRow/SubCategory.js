@@ -1,16 +1,23 @@
 import React, { useCallback, useMemo } from 'react';
-import { get } from 'lodash';
-import styled from 'styled-components';
+
+import {
+  Box,
+  Checkbox,
+  Flex,
+  Typography,
+  Grid,
+  GridItem,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Cog as CogIcon } from '@strapi/icons';
+import get from 'lodash/get';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
-import { Checkbox } from '@strapi/design-system/Checkbox';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
-import CheckboxWrapper from './CheckboxWrapper';
+import styled from 'styled-components';
+
 import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
+
+import CheckboxWrapper from './CheckboxWrapper';
 
 const Border = styled.div`
   flex: 1;
@@ -91,10 +98,20 @@ const SubCategory = ({ subCategory }) => {
                   </Checkbox>
                   <button
                     type="button"
-                    data-testid="action-cog"
                     onClick={() => onSelectedAction(action.name)}
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
+                    <VisuallyHidden as="span">
+                      {formatMessage(
+                        {
+                          id: 'app.utils.show-bound-route',
+                          defaultMessage: 'Show bound route for {route}',
+                        },
+                        {
+                          route: action.name,
+                        }
+                      )}
+                    </VisuallyHidden>
                     <CogIcon />
                   </button>
                 </CheckboxWrapper>

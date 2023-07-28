@@ -61,7 +61,7 @@ const createMigrationsProvider = (db) => {
     async shouldRun() {
       const pending = await migrations.pending();
 
-      return pending.length > 0;
+      return pending.length > 0 && db.config.settings.runMigrations;
     },
     async up() {
       await migrations.up();

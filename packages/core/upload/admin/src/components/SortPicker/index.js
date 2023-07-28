@@ -1,40 +1,45 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import { useIntl } from 'react-intl';
+
+import { sortOptions } from '../../constants';
 import { getTrad } from '../../utils';
 
-const SortPicker = ({ onChangeSort }) => {
+const SortPicker = ({ onChangeSort, value }) => {
   const { formatMessage } = useIntl();
 
-  const filters = [
-    { key: 'sort.created_at_desc', value: `createdAt:DESC` },
-    { key: 'sort.created_at_asc', value: `createdAt:ASC` },
-    { key: 'sort.name_asc', value: 'name:ASC' },
-    { key: 'sort.name_desc', value: 'name:DESC' },
-    { key: 'sort.updated_at_desc', value: `updatedAt:DESC` },
-    { key: 'sort.updated_at_asc', value: `updatedAt:ASC` },
-  ];
-
   return (
-    <SimpleMenu
-      variant="tertiary"
-      label={formatMessage({
+    <SingleSelect
+      size="S"
+      value={value}
+      onChange={(value) => onChangeSort(value)}
+      aria-label={formatMessage({
+        id: getTrad('sort.label'),
+        defaultMessage: 'Sort by',
+      })}
+      placeholder={formatMessage({
         id: getTrad('sort.label'),
         defaultMessage: 'Sort by',
       })}
     >
-      {filters.map((filter) => (
-        <MenuItem key={filter.key} onClick={() => onChangeSort(filter.value)}>
+      {sortOptions.map((filter) => (
+        <SingleSelectOption key={filter.key} value={filter.value}>
           {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
-        </MenuItem>
+        </SingleSelectOption>
       ))}
-    </SimpleMenu>
+    </SingleSelect>
   );
+};
+
+SortPicker.defaultProps = {
+  value: undefined,
 };
 
 SortPicker.propTypes = {
   onChangeSort: PropTypes.func.isRequired,
+  value: PropTypes.string,
 };
 
 export default SortPicker;

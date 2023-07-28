@@ -2,8 +2,58 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    groups:
+      babel:
+        patterns:
+          - '@babel/*'
+          - 'babel-*'
+
+      eslint:
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@typescript-eslint/*'
+
+      jest:
+        patterns:
+          - 'jest'
+          - 'jest-*'
+
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+
+      react-dnd:
+        patterns:
+          - 'react-dnd'
+          - 'react-dnd-*'
+
+      redux:
+        patterns:
+          - 'redux'
+          - 'react-redux'
+
+      richtext-editor:
+        patterns:
+          - 'markdown-it'
+          - 'markdown-it-*'
+
+      testing-library:
+        patterns:
+          - '@testing-library/*'
+
+      webpack:
+        patterns:
+          - 'webpack'
+          - 'webpack-cli'
+          - 'webpack-dev-server'
+
     schedule:
-      interval: daily
+      interval: weekly
+      day: sunday
+      time: '22:00'
+    open-pull-requests-limit: 10
     versioning-strategy: increase
     ignore:
       # Only allow patch as minor babel versions need to be upgraded all together
@@ -14,8 +64,19 @@ updates:
 
       - dependency-name: '*'
         update-types:
+          - 'version-update:semver-patch'
           - 'version-update:semver-major'
 
+    labels:
+      - 'source: dependencies'
+      - 'pr: chore'
+  - package-ecosystem: github-actions
+    open-pull-requests-limit: 10
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
     labels:
       - 'source: dependencies'
       - 'pr: chore'

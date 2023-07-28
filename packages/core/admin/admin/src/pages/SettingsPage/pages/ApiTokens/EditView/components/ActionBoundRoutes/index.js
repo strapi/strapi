@@ -1,10 +1,10 @@
 import React from 'react';
+
+import { Flex, GridItem, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { GridItem } from '@strapi/design-system/Grid';
-import BoundRoute from '../BoundRoute';
+
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import BoundRoute from '../BoundRoute';
 
 const ActionBoundRoutes = () => {
   const {
@@ -24,16 +24,16 @@ const ActionBoundRoutes = () => {
       style={{ minHeight: '100%' }}
     >
       {selectedAction ? (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           {routes[actionSection]?.map((route) => {
             return route.config.auth?.scope?.includes(selectedAction) ||
               route.handler === selectedAction ? (
               <BoundRoute key={route.handler} route={route} />
             ) : null;
           })}
-        </Stack>
+        </Flex>
       ) : (
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'Settings.apiTokens.createPage.permissions.header.title',
@@ -47,7 +47,7 @@ const ActionBoundRoutes = () => {
                 "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
             })}
           </Typography>
-        </Stack>
+        </Flex>
       )}
     </GridItem>
   );

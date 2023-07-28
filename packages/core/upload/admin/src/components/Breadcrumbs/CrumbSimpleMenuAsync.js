@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useIntl } from 'react-intl';
+
+import { Loader } from '@strapi/design-system';
+import { CrumbSimpleMenu, MenuItem } from '@strapi/design-system/v2';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { CrumbSimpleMenu } from '@strapi/design-system/v2/Breadcrumbs';
-import { MenuItem } from '@strapi/design-system/v2/SimpleMenu';
-import { Loader } from '@strapi/design-system/Loader';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
@@ -50,7 +51,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
               <MenuItem
                 as="button"
                 type="button"
-                onClick={() => onChangeFolder(ascendant.id)}
+                onClick={() => onChangeFolder(ascendant.id, ascendant.path)}
                 key={ascendant.id}
               >
                 {ascendant.label}
@@ -58,7 +59,10 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
             );
           }
 
-          const url = getFolderURL(pathname, query, ascendant);
+          const url = getFolderURL(pathname, query, {
+            folder: ascendant?.id,
+            folderPath: ascendant?.path,
+          });
 
           return (
             <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>

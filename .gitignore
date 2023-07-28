@@ -10,13 +10,11 @@ Icon
 .Trashes
 ._*
 
-
 ############################
 # Linux
 ############################
 
 *~
-
 
 ############################
 # Windows
@@ -30,7 +28,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-
 
 ############################
 # Packages
@@ -60,7 +57,6 @@ $RECYCLE.BIN/
 *.out
 *.pid
 
-
 ############################
 # Logs and databases
 ############################
@@ -68,8 +64,8 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
+!.github/workflows/db/**/*.sql
 *.sqlite
-
 
 ############################
 # Misc.
@@ -78,8 +74,7 @@ $RECYCLE.BIN/
 *#
 .idea
 nbproject
-.vscode/
-
+.eslintcache
 
 ############################
 # Node.js
@@ -98,16 +93,12 @@ package-lock.json
 !docs/package-lock.json
 *.heapsnapshot
 
-
 ############################
 # Tests
 ############################
 
-testApp
+test-apps
 coverage
-cypress/screenshots
-cypress/videos
-
 
 ############################
 # Documentation
@@ -133,6 +124,25 @@ schema.graphql
 # Visual Studio Code
 ############################
 
+.vscode/
+!.vscode/settings.json
 front-workspace.code-workspace
-.yarn
 .yarnrc
+
+############################
+# Yarn
+############################
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+############################
+# Playwright
+############################
+playwright-report
+test-results
+!e2e/data/*.tar

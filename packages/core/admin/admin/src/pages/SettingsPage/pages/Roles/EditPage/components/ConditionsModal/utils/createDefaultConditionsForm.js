@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const createConditionsForm = (conditions, valueObject) => {
   return conditions.reduce((acc, current) => {
@@ -44,4 +44,4 @@ const createDefaultConditionsForm = (
 };
 
 export default createDefaultConditionsForm;
-export { createConditionsForm, createCategoryForm };
+export { createCategoryForm, createConditionsForm };

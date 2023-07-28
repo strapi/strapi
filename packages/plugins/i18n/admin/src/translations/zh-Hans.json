@@ -46,10 +46,8 @@
   "plugin.description.short": "在管理面板或是API中创建，查询及更新不同语言的内容",
   "plugin.name": "国际化",
   "plugin.schema.i18n.ensure-unique-localization": "唯一字段必须本地化",
-  "plugin.schema.i18n.localized.description": "允许您为内容设置不同的语言",
   "plugin.schema.i18n.localized.description-content-type": "允许您为内容设置不同的语言",
   "plugin.schema.i18n.localized.description-field": "该字段在不同的语言环境中有不同的值",
-  "plugin.schema.i18n.localized.label": "为内容类型开启本地化",
   "plugin.schema.i18n.localized.label-content-type": "为该内容类型开启本地化",
   "plugin.schema.i18n.localized.label-field": "为该字段开启本地化"
 }

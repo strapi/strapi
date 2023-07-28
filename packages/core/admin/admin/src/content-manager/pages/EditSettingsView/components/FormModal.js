@@ -1,21 +1,24 @@
 import React from 'react';
+
+import {
+  Button,
+  Flex,
+  Grid,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  Typography,
+} from '@strapi/design-system';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import upperFirst from 'lodash/upperFirst';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-} from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
-import { Grid } from '@strapi/design-system/Grid';
 import styled from 'styled-components';
-import { getTrad } from '../../../utils';
-import { useLayoutDnd } from '../../../hooks';
+
 import FieldTypeIcon from '../../../components/FieldTypeIcon';
+import { getTrad } from '../../../utils';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
+
 import ModalForm from './ModalForm';
 
 const HeaderContainer = styled(Flex)`

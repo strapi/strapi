@@ -42,7 +42,14 @@ describe('Upload plugin bootstrap function', () => {
         upload: {
           services: {
             metrics: {
+              sendUploadPluginMetrics() {},
+            },
+            weeklyMetrics: {
               registerCron() {},
+            },
+            extensions: {
+              contentManager: { entityManager: { addSignedFileUrlsToAdmin: jest.fn() } },
+              core: { entityService: { addSignedFileUrlsToEntityService: jest.fn() } },
             },
           },
         },
@@ -60,6 +67,9 @@ describe('Upload plugin bootstrap function', () => {
           },
           set: setStore,
         };
+      },
+      webhookStore: {
+        addAllowedEvent: jest.fn(),
       },
     };
 

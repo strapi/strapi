@@ -1,11 +1,44 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { act, renderHook } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 import useModalQueryParams from '../useModalQueryParams';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
+/**
+ * TODO: we should set up MSW for these tests
+ */
+function setup(...args) {
+  return renderHook(() => useModalQueryParams(...args), {
+    wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
+      return (
+        <MemoryRouter>
+          <QueryClientProvider client={client}>
+            <ThemeProvider theme={lightTheme}>
+              <NotificationsProvider>
+                <IntlProvider locale="en" messages={{}}>
+                  {children}
+                </IntlProvider>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </MemoryRouter>
+      );
+    },
+  });
+}
 
 const FIXTURE_QUERY = {
   page: 1,
@@ -16,11 +49,11 @@ const FIXTURE_QUERY = {
   },
 };
 
-function setup(...args) {
-  return renderHook(() => useModalQueryParams(...args));
-}
-
 describe('useModalQueryParams', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('setup proper defaults', () => {
     const {
       result: {
@@ -84,7 +117,7 @@ describe('useModalQueryParams', () => {
     const { result } = setup();
 
     act(() => {
-      result.current[1].onChangeFolder({ id: 1 });
+      result.current[1].onChangeFolder({ id: 1 }, '/1');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -92,6 +125,7 @@ describe('useModalQueryParams', () => {
       folder: {
         id: 1,
       },
+      folderPath: '/1',
     });
   });
 

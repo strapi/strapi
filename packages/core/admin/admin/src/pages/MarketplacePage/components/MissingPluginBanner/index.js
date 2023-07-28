@@ -1,9 +1,9 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
+
+import { Icon } from '@strapi/design-system';
 import { ContentBox, useTracking } from '@strapi/helper-plugin';
-import GlassesSquare from '@strapi/icons/GlassesSquare';
-import ExternalLink from '@strapi/icons/ExternalLink';
-import { Icon } from '@strapi/design-system/Icon';
+import { ExternalLink, GlassesSquare } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 
 const MissingPluginBanner = () => {
   const { formatMessage } = useIntl();

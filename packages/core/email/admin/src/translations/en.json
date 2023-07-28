@@ -2,7 +2,7 @@
   "link": "Link",
   "Settings.email.plugin.button.test-email": "Send test email",
   "Settings.email.plugin.label.defaultFrom": "Default sender email",
-  "Settings.email.plugin.label.defaultReplyTo": "Default response  email",
+  "Settings.email.plugin.label.defaultReplyTo": "Default response email",
   "Settings.email.plugin.label.provider": "Email provider",
   "Settings.email.plugin.label.testAddress": "Recipient email",
   "Settings.email.plugin.notification.config.error": "Failed to retrieve the email config",

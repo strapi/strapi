@@ -1,5 +1,5 @@
+import { CarretDown } from '@strapi/icons';
 import styled from 'styled-components';
-import CarretDown from '@strapi/icons/CarretDown';
 
 const CarretIcon = styled(CarretDown)`
   display: none;

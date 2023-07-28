@@ -10,25 +10,34 @@ const ALLOWED_IMAGE_FILE_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml'];
 const updateProjectSettings = yup
   .object({
     menuLogo: yup.string(),
+    authLogo: yup.string(),
   })
   .noUnknown();
+
+const updateProjectSettingsLogo = yup.object({
+  name: yup.string(),
+  type: yup.string().oneOf(ALLOWED_IMAGE_FILE_TYPES),
+  size: yup.number().max(MAX_IMAGE_FILE_SIZE),
+});
 
 const updateProjectSettingsFiles = yup
   .object({
-    menuLogo: yup.object({
-      name: yup.string(),
-      type: yup.string().oneOf(ALLOWED_IMAGE_FILE_TYPES),
-      size: yup.number().max(MAX_IMAGE_FILE_SIZE),
-    }),
+    menuLogo: updateProjectSettingsLogo,
+    authLogo: updateProjectSettingsLogo,
   })
   .noUnknown();
 
-const updateProjectSettingsImagesDimensions = yup.object({
-  menuLogo: yup.object({
-    width: yup.number().max(MAX_IMAGE_WIDTH),
-    height: yup.number().max(MAX_IMAGE_HEIGHT),
-  }),
+const logoDimensions = yup.object({
+  width: yup.number().max(MAX_IMAGE_WIDTH),
+  height: yup.number().max(MAX_IMAGE_HEIGHT),
 });
+
+const updateProjectSettingsImagesDimensions = yup
+  .object({
+    menuLogo: logoDimensions,
+    authLogo: logoDimensions,
+  })
+  .noUnknown();
 
 module.exports = {
   validateUpdateProjectSettings: validateYupSchemaSync(updateProjectSettings),

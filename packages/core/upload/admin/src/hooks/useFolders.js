@@ -1,18 +1,17 @@
+import { useNotifyAT } from '@strapi/design-system';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
-import { useQuery } from 'react-query';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
 
 export const useFolders = ({ enabled = true, query = {} }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const dataRequestURL = getRequestUrl('folders');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
+  const { get } = useFetchClient();
 
   let params;
 
@@ -47,9 +46,9 @@ export const useFolders = ({ enabled = true, query = {} }) => {
 
   const fetchFolders = async () => {
     try {
-      const { data } = await axiosInstance.get(
-        `${dataRequestURL}?${stringify(params, { encode: false })}`
-      );
+      const {
+        data: { data },
+      } = await get('/upload/folders', { params });
 
       notifyStatus(
         formatMessage({
@@ -58,7 +57,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
         })
       );
 
-      return data.data;
+      return data;
     } catch (err) {
       toggleNotification({
         type: 'warning',

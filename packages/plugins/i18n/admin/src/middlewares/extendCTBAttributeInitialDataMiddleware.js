@@ -53,6 +53,14 @@ const extendCTBAttributeInitialDataMiddleware = () => {
       }
 
       if (
+        action.type === 'ContentTypeBuilder/FormModal/SET_CUSTOM_FIELD_DATA_SCHEMA' &&
+        action.forTarget === 'contentType' &&
+        !action.isEditing
+      ) {
+        return enhanceAction();
+      }
+
+      if (
         (action.type ===
           'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO' ||
           action.type === 'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SAVE_CURRENT_DATA') &&

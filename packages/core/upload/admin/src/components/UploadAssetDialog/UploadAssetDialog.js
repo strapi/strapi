@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+
+import { ModalLayout } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { ModalLayout } from '@strapi/design-system/ModalLayout';
 import { useIntl } from 'react-intl';
+
+import { AssetDefinition } from '../../constants';
+import { EditAssetDialog } from '../EditAssetDialog';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
-import { EditAssetDialog } from '../EditAssetDialog';
-import { AssetDefinition } from '../../constants';
 
 const Steps = {
   AddAsset: 'AddAsset',
@@ -19,6 +21,7 @@ export const UploadAssetDialog = ({
   onClose,
   addUploadedFiles,
   trackedLocation,
+  validateAssetsTypes = (_, cb) => cb(),
 }) => {
   const { formatMessage } = useIntl();
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
@@ -26,8 +29,10 @@ export const UploadAssetDialog = ({
   const [assetToEdit, setAssetToEdit] = useState(undefined);
 
   const handleAddToPendingAssets = (nextAssets) => {
-    setAssets((prevAssets) => prevAssets.concat(nextAssets));
-    setStep(Steps.PendingAsset);
+    validateAssetsTypes(nextAssets, () => {
+      setAssets((prevAssets) => prevAssets.concat(nextAssets));
+      setStep(Steps.PendingAsset);
+    });
   };
 
   const moveToAddAsset = () => {
@@ -130,6 +135,7 @@ UploadAssetDialog.defaultProps = {
   folderId: null,
   initialAssetsToAdd: undefined,
   trackedLocation: undefined,
+  validateAssetsTypes: undefined,
 };
 
 UploadAssetDialog.propTypes = {
@@ -138,4 +144,5 @@ UploadAssetDialog.propTypes = {
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
   onClose: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
+  validateAssetsTypes: PropTypes.func,
 };

@@ -1,0 +1,97 @@
+<!--- ConfirmDialog.stories.mdx --->
+
+import { useState } from 'react';
+import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
+import { Button } from '@strapi/design-system';
+import { Check, Information } from '@strapi/icons';
+import ConfirmDialog from './index';
+
+<Meta title="components/ConfirmDialog" />
+
+# ConfirmDialog
+
+TODO
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [dialogOpen, setDialogOpen] = useState(false);
+      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleDelete = () => {
+        handleToggle();
+        alert('you deleted your item');
+      };
+      const isLoading = false;
+      return (
+        <>
+          <Button onClick={handleToggle}>Click me</Button>
+          <ConfirmDialog
+            isConfirmButtonLoading={isLoading}
+            isOpen={dialogOpen}
+            onToggleDialog={handleToggle}
+            onConfirm={handleDelete}
+          />
+        </>
+      );
+    }}
+  </Story>
+  <Story name="confirm-loading">
+    {() => {
+      const [dialogOpen, setDialogOpen] = useState(false);
+      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleDelete = () => {
+        handleToggle();
+        alert('you deleted your item');
+      };
+      const isLoading = true;
+      return (
+        <>
+          <Button onClick={handleToggle}>Click me</Button>
+          <ConfirmDialog
+            isConfirmButtonLoading={true}
+            isOpen={dialogOpen}
+            onToggleDialog={handleToggle}
+            onConfirm={handleDelete}
+          />
+        </>
+      );
+    }}
+  </Story>
+  <Story name="confirm-custom">
+    {() => {
+      const [dialogOpen, setDialogOpen] = useState(false);
+      const handleToggle = () => setDialogOpen((prev) => !prev);
+      const handleDelete = () => {
+        handleToggle();
+        alert('you deleted your item');
+      };
+      const isLoading = false;
+      return (
+        <>
+          <Button onClick={handleToggle}>Click me</Button>
+          <ConfirmDialog
+            bodyText={{
+              id: 'app.components',
+              defaultMessage: 'Are you sure you want to unpublish it?',
+            }}
+            iconBody={<Information />}
+            iconRightButton={<Check />}
+            isConfirmButtonLoading={isLoading}
+            isOpen={dialogOpen}
+            onToggleDialog={handleToggle}
+            onConfirm={handleDelete}
+            title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
+            rightButtonText={{ id: 'app.components.Button.save', defaultMessage: 'Save' }}
+            variantRightButton="success-light"
+          />
+        </>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={ConfirmDialog} />

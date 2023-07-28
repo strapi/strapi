@@ -1,18 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  Field,
+  FieldError,
+  FieldInput,
+  Flex,
+  Icon,
+  ModalFooter,
+  Typography,
+} from '@strapi/design-system';
+import { PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
-import { Typography } from '@strapi/design-system/Typography';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Button } from '@strapi/design-system/Button';
-import { Field, FieldError, FieldInput } from '@strapi/design-system/Field';
-import PicturePlus from '@strapi/icons/PicturePlus';
+
+import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../../utils/constants';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
-import { ACCEPTED_FORMAT, SIZE, DIMENSION } from '../../utils/constants';
 
 const FileInput = styled(FieldInput)`
   opacity: 0;
@@ -77,7 +82,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
         <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
           <Field name="logo-upload" error={fileError}>
             <label htmlFor="logo-upload">
-              <Stack spacing={2}>
+              <Flex direction="column" alignItems="stretch" gap={2}>
                 <Flex
                   paddingTop={9}
                   paddingBottom={7}
@@ -143,7 +148,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
                   </Box>
                 </Flex>
                 <FieldError />
-              </Stack>
+              </Flex>
             </label>
           </Field>
         </Box>

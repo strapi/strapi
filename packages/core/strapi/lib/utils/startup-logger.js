@@ -4,7 +4,6 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const _ = require('lodash/fp');
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
-const ee = require('./ee');
 
 module.exports = (app) => {
   return {
@@ -19,15 +18,14 @@ module.exports = (app) => {
         chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       });
 
-      const isEE = app.EE === true && ee.isEE === true;
-
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
         [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
         [chalk.blue('Environment'), app.config.environment],
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
-        [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
+        [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
+        [chalk.blue('Database'), app.db.dialect.client]
       );
 
       console.log(infoTable.toString());

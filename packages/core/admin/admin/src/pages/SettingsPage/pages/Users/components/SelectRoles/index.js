@@ -1,11 +1,12 @@
 import React from 'react';
+
+import { Option, Select } from '@strapi/design-system';
+import { getFetchClient } from '@strapi/helper-plugin';
+import { Loader as LoadingIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/design-system/Select';
 import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
-import LoadingIcon from '@strapi/icons/Loader';
-import { axiosInstance } from '../../../../../../core/utils';
 
 const rotation = keyframes`
   from {
@@ -27,7 +28,8 @@ const Loader = () => (
 );
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get('/admin/roles');
+  const { get } = getFetchClient();
+  const { data } = await get('/admin/roles');
 
   return data.data;
 };
@@ -66,13 +68,13 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       placeholder={placeholder}
       multi
       startIcon={startIcon}
-      value={value}
+      value={value.map((v) => v.toString())}
       withTags
       required
     >
       {(data || []).map((role) => {
         return (
-          <Option key={role.id} value={role.id}>
+          <Option key={role.id} value={role.id.toString()}>
             {formatMessage({
               id: `global.${role.code}`,
               defaultMessage: role.name,

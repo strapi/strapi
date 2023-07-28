@@ -1,10 +1,12 @@
 /* eslint-disable react/jsx-indent */
 import React from 'react';
-import { ComboboxOption, Combobox } from '@strapi/design-system/Combobox';
-import { useIntl } from 'react-intl';
+
+import { Combobox, ComboboxOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import useLocales from '../../hooks/useLocales';
+import { useIntl } from 'react-intl';
+
 import useDefaultLocales from '../../hooks/useDefaultLocales';
+import useLocales from '../../hooks/useLocales';
 import { getTrad } from '../../utils';
 
 /**

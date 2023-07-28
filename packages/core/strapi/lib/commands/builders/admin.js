@@ -30,7 +30,7 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
   // Always remove the .cache and build folders
   await strapiAdmin.clean({ appDir: srcDir, buildDestDir });
 
-  ee({ dir: srcDir });
+  ee.init(srcDir);
 
   return strapiAdmin
     .build({
@@ -44,6 +44,7 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
       options: {
         backend: serverUrl,
         adminPath: addSlash(adminPath),
+        telemetryIsDisabled: strapiInstance.telemetry.isDisabled,
       },
     })
     .then(() => {

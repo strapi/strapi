@@ -4,47 +4,80 @@
  *
  */
 
-import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+
+import { SkipToContent } from '@strapi/design-system';
 import {
-  LoadingIndicatorPage,
   auth,
-  request,
-  useNotification,
-  TrackingProvider,
+  LoadingIndicatorPage,
   prefixFileUrlWithBackendUrl,
-  useAppInfos,
+  TrackingProvider,
+  useAppInfo,
+  useFetchClient,
+  useNotification,
 } from '@strapi/helper-plugin';
-import axios from 'axios';
-import { SkipToContent } from '@strapi/design-system/Main';
+import merge from 'lodash/merge';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
+import { Route, Switch } from 'react-router-dom';
+
 import PrivateRoute from '../../components/PrivateRoute';
+import { ADMIN_PERMISSIONS_CE } from '../../constants';
+import { useConfigurations } from '../../hooks';
+import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
-import { getUID } from './utils';
-import routes from './utils/routes';
-import { useConfigurations } from '../../hooks';
+
+import { ROUTES_CE, SET_ADMIN_PERMISSIONS } from './constants';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
 );
 
 function App() {
+  const adminPermissions = useEnterprise(
+    ADMIN_PERMISSIONS_CE,
+    async () => (await import('../../../../ee/admin/constants')).ADMIN_PERMISSIONS_EE,
+    {
+      combine(cePermissions, eePermissions) {
+        // the `settings` NS e.g. are deep nested objects, that need a deep merge
+        return merge({}, cePermissions, eePermissions);
+      },
+
+      defaultValue: ADMIN_PERMISSIONS_CE,
+    }
+  );
+  const routes = useEnterprise(
+    ROUTES_CE,
+    async () => (await import('../../../../ee/admin/pages/App/constants')).ROUTES_EE,
+    {
+      defaultValue: [],
+    }
+  );
   const toggleNotification = useNotification();
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
-  const appInfo = useAppInfos();
+  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
+    isLoading: true,
+    hasAdmin: false,
+  });
+  const dispatch = useDispatch();
+  const appInfo = useAppInfo();
+  const { get, post } = useFetchClient();
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
-  }, []);
+  }, [routes]);
 
   const [telemetryProperties, setTelemetryProperties] = useState(null);
+
+  useEffect(() => {
+    dispatch({ type: SET_ADMIN_PERMISSIONS, payload: adminPermissions });
+  }, [adminPermissions, dispatch]);
 
   useEffect(() => {
     const currentToken = auth.getToken();
@@ -52,11 +85,10 @@ function App() {
     const renewToken = async () => {
       try {
         const {
-          data: { token },
-        } = await request('/admin/renew-token', {
-          method: 'POST',
-          body: { token: currentToken },
-        });
+          data: {
+            data: { token },
+          },
+        } = await post('/admin/renew-token', { token: currentToken });
         auth.updateToken(token);
       } catch (err) {
         // Refresh app
@@ -68,50 +100,57 @@ function App() {
     if (currentToken) {
       renewToken();
     }
-  }, []);
+  }, [post]);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const {
           data: {
-            data: { hasAdmin, uuid, menuLogo },
+            data: { hasAdmin, uuid, menuLogo, authLogo },
           },
-        } = await axios.get(`${strapi.backendURL}/admin/init`);
+        } = await get(`/admin/init`);
 
-        updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
+        updateProjectSettings({
+          menuLogo: prefixFileUrlWithBackendUrl(menuLogo),
+          authLogo: prefixFileUrlWithBackendUrl(authLogo),
+        });
 
         if (uuid) {
           const {
             data: { data: properties },
-          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+          } = await get(`/admin/telemetry-properties`, {
+            // NOTE: needed because the interceptors of the fetchClient redirect to /login when receive a 401 and it would end up in an infinite loop when the user doesn't have a session.
+            validateStatus: (status) => status < 500,
+          });
 
           setTelemetryProperties(properties);
 
           try {
-            const deviceId = await getUID();
-
-            fetch('https://analytics.strapi.io/track', {
-              method: 'POST',
-              body: JSON.stringify({
-                event: 'didInitializeAdministration',
-                uuid,
+            const event = 'didInitializeAdministration';
+            await post(
+              'https://analytics.strapi.io/api/v2/track',
+              {
+                // This event is anonymous
+                event,
+                userId: '',
                 deviceId,
-                properties: {
-                  ...properties,
-                  environment: appInfo.currentEnvironment,
-                },
-              }),
-              headers: {
-                'Content-Type': 'application/json',
+                eventPropeties: {},
+                userProperties: { environment: appInfo.currentEnvironment },
+                groupProperties: { ...properties, projectId: uuid },
               },
-            });
+              {
+                headers: {
+                  'X-Strapi-Event': event,
+                },
+              }
+            );
           } catch (e) {
             // Silent.
           }
         }
 
-        setState({ isLoading: false, hasAdmin, uuid });
+        setState({ isLoading: false, hasAdmin, uuid, deviceId });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -130,8 +169,9 @@ function App() {
     () => ({
       uuid,
       telemetryProperties,
+      deviceId,
     }),
-    [uuid, telemetryProperties]
+    [uuid, telemetryProperties, deviceId]
   );
 
   if (isLoading) {

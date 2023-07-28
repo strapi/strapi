@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { useTracking } from '@strapi/helper-plugin';
+import { useEffect, useState } from 'react';
 
+import { useTracking } from '@strapi/helper-plugin';
 import { stringify } from 'qs';
+
+import { useConfig } from './useConfig';
 
 const useModalQueryParams = (initialState) => {
   const { trackUsage } = useTracking();
+  const {
+    config: { data: config },
+  } = useConfig();
+
   const [queryObject, setQueryObject] = useState({
     page: 1,
     sort: 'updatedAt:DESC',
@@ -14,6 +20,16 @@ const useModalQueryParams = (initialState) => {
     },
     ...initialState,
   });
+
+  useEffect(() => {
+    if (config) {
+      setQueryObject((prevQuery) => ({
+        ...prevQuery,
+        sort: config.sort,
+        pageSize: config.pageSize,
+      }));
+    }
+  }, [config]);
 
   const handleChangeFilters = (nextFilters) => {
     trackUsage('didFilterMediaLibraryElements', {
@@ -55,8 +71,8 @@ const useModalQueryParams = (initialState) => {
     }
   };
 
-  const handleChangeFolder = (folder) => {
-    setQueryObject((prev) => ({ ...prev, folder: folder ?? null }));
+  const handleChangeFolder = (folder, folderPath) => {
+    setQueryObject((prev) => ({ ...prev, folder: folder ?? null, folderPath }));
   };
 
   return [

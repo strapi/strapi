@@ -1,7 +1,8 @@
-import { useEffect, useReducer, useCallback } from 'react';
-import { useNotification } from '@strapi/helper-plugin';
+import { useCallback, useEffect, useReducer } from 'react';
+
+import { getFetchClient, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
-import { axiosInstance } from '../../core/utils';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -19,6 +20,9 @@ const useRolesList = (shouldFetchData = true) => {
   }, [shouldFetchData]);
 
   const fetchRolesList = useCallback(async () => {
+    // TODO: evaluate to replace it with a useFetchClient when we work on the useCallback to remove
+    const fetchClient = getFetchClient();
+
     try {
       dispatch({
         type: 'GET_DATA',
@@ -26,7 +30,7 @@ const useRolesList = (shouldFetchData = true) => {
 
       const {
         data: { data },
-      } = await axiosInstance.get('/admin/roles');
+      } = await fetchClient.get('/admin/roles');
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',

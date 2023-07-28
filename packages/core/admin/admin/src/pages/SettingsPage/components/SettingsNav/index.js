@@ -1,18 +1,23 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+
 import {
   SubNav,
   SubNavHeader,
+  SubNavLink,
   SubNavSection,
   SubNavSections,
-  SubNavLink,
-} from '@strapi/design-system/v2/SubNav';
+} from '@strapi/design-system/v2';
+import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { getSectionsToDisplay } from '../../utils';
 
 const SettingsNav = ({ menu }) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
 
   const filteredMenu = getSectionsToDisplay(menu);
 
@@ -35,17 +40,29 @@ const SettingsNav = ({ menu }) => {
     defaultMessage: 'Settings',
   });
 
+  const handleClickOnLink = (destination = null) => {
+    trackUsage('willNavigate', { from: pathname, to: destination });
+  };
+
   return (
     <SubNav ariaLabel={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map((link) => (
-              <SubNavLink as={NavLink} withBullet={link.hasNotification} to={link.to} key={link.id}>
-                {formatMessage(link.intlLabel)}
-              </SubNavLink>
-            ))}
+            {section.links.map((link) => {
+              return (
+                <SubNavLink
+                  as={NavLink}
+                  withBullet={link.hasNotification}
+                  to={link.to}
+                  onClick={() => handleClickOnLink(link.to)}
+                  key={link.id}
+                >
+                  {formatMessage(link.intlLabel)}
+                </SubNavLink>
+              );
+            })}
           </SubNavSection>
         ))}
       </SubNavSections>

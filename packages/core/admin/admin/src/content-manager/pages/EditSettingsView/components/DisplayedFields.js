@@ -1,22 +1,21 @@
 import React from 'react';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
+import { Menu } from '@strapi/design-system/v2';
+import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
-import { Flex } from '@strapi/design-system/Flex';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
-import Plus from '@strapi/icons/Plus';
-import { getTrad } from '../../../utils';
-import RowsLayout from './RowsLayout';
-import LinkToCTB from './LinkToCTB';
 
-const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField, onAddField }) => {
+import { getTrad } from '../../../utils';
+
+import LinkToCTB from './LinkToCTB';
+import RowsLayout from './RowsLayout';
+
+const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={4}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
       <Flex justifyContent="space-between">
         <div>
           <Box>
@@ -39,39 +38,40 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
         <LinkToCTB />
       </Flex>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Stack spacing={2}>
+        <Flex direction="column" alignItems="stretch" gap={2}>
           {editLayout.map((row, index) => (
             <RowsLayout key={row.rowId} row={row} rowIndex={index} onRemoveField={onRemoveField} />
           ))}
-          <SimpleMenu
-            id="label"
-            label={formatMessage({
-              id: getTrad('containers.SettingPage.add.field'),
-              defaultMessage: 'Insert another field',
-            })}
-            as={Button}
-            data-testid="add-field"
-            fullWidth
-            startIcon={<Plus />}
-            endIcon={null}
-            variant="secondary"
-            disabled={editLayoutRemainingFields.length === 0}
-          >
-            {editLayoutRemainingFields.map((field) => (
-              <MenuItem key={field} onClick={() => onAddField(field)}>
-                {field}
-              </MenuItem>
-            ))}
-          </SimpleMenu>
-        </Stack>
+          <Menu.Root>
+            <Menu.Trigger
+              startIcon={<Plus />}
+              endIcon={null}
+              disabled={fields.length === 0}
+              fullWidth
+              variant="secondary"
+            >
+              {formatMessage({
+                id: getTrad('containers.SettingPage.add.field'),
+                defaultMessage: 'Insert another field',
+              })}
+            </Menu.Trigger>
+            <Menu.Content>
+              {fields.map((field) => (
+                <Menu.Item key={field} onSelect={() => onAddField(field)}>
+                  {field}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Root>
+        </Flex>
       </Box>
-    </Stack>
+    </Flex>
   );
 };
 
 DisplayedFields.propTypes = {
   editLayout: PropTypes.array.isRequired,
-  editLayoutRemainingFields: PropTypes.array.isRequired,
+  fields: PropTypes.array.isRequired,
   onAddField: PropTypes.func.isRequired,
   onRemoveField: PropTypes.func.isRequired,
 };

@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { MultiSelectNested } from '@strapi/design-system';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { MultiSelectNested } from '@strapi/design-system/Select';
-import upperFirst from 'lodash/upperFirst';
 
 const options = [
   {

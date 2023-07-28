@@ -1,7 +1,9 @@
 'use strict';
 
 const strapiUtils = require('@strapi/utils');
-const { YupValidationError } = require('@strapi/utils/lib/errors');
+const {
+  errors: { YupValidationError },
+} = require('@strapi/utils');
 const validators = require('../validators');
 
 describe('Integer validator', () => {
@@ -25,7 +27,6 @@ describe('Integer validator', () => {
       kind: 'contentType',
       uid: 'test-uid',
       modelName: 'test-model',
-      privateAttributes: [],
       options: {},
       attributes: {
         attrIntegerUnique: { type: 'integer', unique: true },

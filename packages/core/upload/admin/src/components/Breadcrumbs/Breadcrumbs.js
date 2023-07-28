@@ -1,15 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom';
-import { useIntl } from 'react-intl';
 
-import {
-  Crumb,
-  CrumbLink,
-  Breadcrumbs as BaseBreadcrumbs,
-} from '@strapi/design-system/v2/Breadcrumbs';
-import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
+import { Breadcrumbs as BaseBreadcrumbs, Crumb, CrumbLink } from '@strapi/design-system/v2';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
+
 import { BreadcrumbsDefinition } from '../../constants';
+
+import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 
 export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...props }) => {
   const { formatMessage } = useIntl();
@@ -39,7 +37,7 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
               as={onChangeFolder ? 'button' : NavLink}
               type={onChangeFolder && 'button'}
               to={onChangeFolder ? undefined : crumb.href}
-              onClick={onChangeFolder && (() => onChangeFolder(crumb.id))}
+              onClick={onChangeFolder && (() => onChangeFolder(crumb.id, crumb.path))}
             >
               {crumb.label?.id ? formatMessage(crumb.label) : crumb.label}
             </CrumbLink>

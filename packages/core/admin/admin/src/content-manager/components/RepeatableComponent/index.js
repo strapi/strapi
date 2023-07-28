@@ -1,24 +1,21 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
 /* eslint-disable import/no-cycle */
-import { useDrop } from 'react-dnd';
+import React, { memo, useMemo, useState } from 'react';
+
+import { Box, Flex, TextButton, VisuallyHidden } from '@strapi/design-system';
+import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
+import get from 'lodash/get';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import get from 'lodash/get';
-import { useNotification } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { TextButton } from '@strapi/design-system/TextButton';
-import Plus from '@strapi/icons/Plus';
-import { getMaxTempKey, getTrad } from '../../utils';
+
 import { useContentTypeLayout } from '../../hooks';
-import ItemTypes from '../../utils/ItemTypes';
+import { getMaxTempKey, getTrad } from '../../utils';
 import ComponentInitializer from '../ComponentInitializer';
-import connect from './utils/connect';
-import select from './utils/select';
+
+import * as Accordion from './components/Accordion';
+import Component from './components/Component';
 import getComponentErrorKeys from './utils/getComponentErrorKeys';
-import DraggedItem from './DraggedItem';
-import AccordionGroupCustom from './AccordionGroupCustom';
 
 const TextButtonCustom = styled(TextButton)`
   height: 100%;
@@ -33,8 +30,6 @@ const TextButtonCustom = styled(TextButton)`
 `;
 
 const RepeatableComponent = ({
-  addRepeatableComponentToField,
-  formErrors,
   componentUid,
   componentValue,
   componentValueLength,
@@ -43,37 +38,36 @@ const RepeatableComponent = ({
   min,
   name,
 }) => {
+  const { addRepeatableComponentToField, formErrors, moveComponentField } =
+    useCMEditViewDataManager();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
-  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
-  const { getComponentLayout } = useContentTypeLayout();
+  const [liveText, setLiveText] = useState('');
+  const { getComponentLayout, components } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
     [componentUid, getComponentLayout]
   );
 
-  const nextTempKey = useMemo(() => {
-    return getMaxTempKey(componentValue || []) + 1;
-  }, [componentValue]);
+  const nextTempKey = useMemo(() => getMaxTempKey(componentValue || []) + 1, [componentValue]);
 
   const componentErrorKeys = getComponentErrorKeys(name, formErrors);
-
-  const toggleCollapses = () => {
-    setCollapseToOpen('');
-  };
 
   const missingComponentsValue = min - componentValueLength;
 
   const hasMinError = get(formErrors, name, { id: '' }).id.includes('min');
 
-  const handleClick = useCallback(() => {
+  const toggleCollapses = () => {
+    setCollapseToOpen('');
+  };
+
+  const handleClick = () => {
     if (!isReadOnly) {
       if (componentValueLength < max) {
         const shouldCheckErrors = hasMinError;
 
-        addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+        addRepeatableComponentToField(name, componentLayoutData, components, shouldCheckErrors);
 
         setCollapseToOpen(nextTempKey);
       } else if (componentValueLength >= max) {
@@ -83,17 +77,89 @@ const RepeatableComponent = ({
         });
       }
     }
-  }, [
-    addRepeatableComponentToField,
-    componentUid,
-    componentValueLength,
-    hasMinError,
-    isReadOnly,
-    max,
-    name,
-    nextTempKey,
-    toggleNotification,
-  ]);
+  };
+
+  const handleMoveComponentField = (newIndex, currentIndex) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in list: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex}`,
+          position: getItemPos(newIndex),
+        }
+      )
+    );
+
+    moveComponentField({
+      name,
+      newIndex,
+      currentIndex,
+    });
+  };
+
+  const mainField = get(componentLayoutData, ['settings', 'mainField'], 'id');
+
+  const handleToggle = (key) => () => {
+    if (collapseToOpen === key) {
+      setCollapseToOpen('');
+    } else {
+      setCollapseToOpen(key);
+    }
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${componentValueLength}`;
+
+  const handleCancel = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.cancel-item'),
+          defaultMessage: '{item}, dropped. Re-order cancelled.',
+        },
+        {
+          item: `${name}.${index}`,
+        }
+      )
+    );
+  };
+
+  const handleGrabItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.grab-item'),
+          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
+
+  const handleDropItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.drop-item'),
+          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
+        }
+      )
+    );
+  };
 
   let errorMessage = formErrors[name];
 
@@ -104,6 +170,11 @@ const RepeatableComponent = ({
         'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
       values: { number: missingComponentsValue },
     };
+  } else if (componentErrorKeys.some((error) => error.split('.').length > 1) && !hasMinError) {
+    errorMessage = {
+      id: getTrad('components.RepeatableComponent.error-message'),
+      defaultMessage: 'The component(s) contain error(s)',
+    };
   }
 
   if (componentValueLength === 0) {
@@ -112,22 +183,39 @@ const RepeatableComponent = ({
     );
   }
 
-  const doesRepComponentHasChildError = componentErrorKeys.some(
-    (error) => error.split('.').length > 1
-  );
-
-  if (doesRepComponentHasChildError && !hasMinError) {
-    errorMessage = {
-      id: getTrad('components.RepeatableComponent.error-message'),
-      defaultMessage: 'The component(s) contain error(s)',
-    };
-  }
+  const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
-    <Box hasRadius ref={drop}>
-      <AccordionGroupCustom
-        error={errorMessage}
-        footer={
+    <Box hasRadius>
+      <VisuallyHidden id={ariaDescriptionId}>
+        {formatMessage({
+          id: getTrad('dnd.instructions'),
+          defaultMessage: `Press spacebar to grab and re-order`,
+        })}
+      </VisuallyHidden>
+      <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+      <Accordion.Group error={errorMessage} ariaDescribedBy={ariaDescriptionId}>
+        <Accordion.Content aria-describedby={ariaDescriptionId}>
+          {componentValue.map(({ __temp_key__: key }, index) => (
+            <Component
+              componentFieldName={`${name}.${index}`}
+              componentUid={componentUid}
+              fields={componentLayoutData.layouts.edit}
+              key={key}
+              index={index}
+              isOpen={collapseToOpen === key}
+              isReadOnly={isReadOnly}
+              mainField={mainField}
+              moveComponentField={handleMoveComponentField}
+              onClickToggle={handleToggle(key)}
+              toggleCollapses={toggleCollapses}
+              onCancel={handleCancel}
+              onDropItem={handleDropItem}
+              onGrabItem={handleGrabItem}
+            />
+          ))}
+        </Accordion.Content>
+        <Accordion.Footer>
           <Flex justifyContent="center" height="48px" background="neutral0">
             <TextButtonCustom disabled={isReadOnly} onClick={handleClick} startIcon={<Plus />}>
               {formatMessage({
@@ -136,39 +224,8 @@ const RepeatableComponent = ({
               })}
             </TextButtonCustom>
           </Flex>
-        }
-      >
-        {componentValue.map((data, index) => {
-          const key = data.__temp_key__;
-          const isOpen = collapseToOpen === key;
-          const componentFieldName = `${name}.${index}`;
-          const hasErrors = componentErrorKeys.includes(componentFieldName);
-
-          return (
-            <DraggedItem
-              componentFieldName={componentFieldName}
-              componentUid={componentUid}
-              hasErrors={hasErrors}
-              hasMinError={hasMinError}
-              isDraggingSibling={isDraggingSibling}
-              isOpen={isOpen}
-              isReadOnly={isReadOnly}
-              key={key}
-              onClickToggle={() => {
-                if (isOpen) {
-                  setCollapseToOpen('');
-                } else {
-                  setCollapseToOpen(key);
-                }
-              }}
-              parentName={name}
-              schema={componentLayoutData}
-              setIsDraggingSibling={setIsDraggingSibling}
-              toggleCollapses={toggleCollapses}
-            />
-          );
-        })}
-      </AccordionGroupCustom>
+        </Accordion.Footer>
+      </Accordion.Group>
     </Box>
   );
 };
@@ -176,25 +233,21 @@ const RepeatableComponent = ({
 RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
-  formErrors: {},
+  isReadOnly: false,
   max: Infinity,
   min: 0,
 };
 
 RepeatableComponent.propTypes = {
-  addRepeatableComponentToField: PropTypes.func.isRequired,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
-  formErrors: PropTypes.object,
-  isReadOnly: PropTypes.bool.isRequired,
+  isReadOnly: PropTypes.bool,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 
-const Memoized = memo(RepeatableComponent);
-
-export default connect(Memoized, select);
+export default memo(RepeatableComponent);
 
 export { RepeatableComponent };

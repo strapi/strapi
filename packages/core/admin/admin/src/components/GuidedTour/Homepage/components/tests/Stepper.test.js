@@ -1,7 +1,9 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+
 import Stepper from '../Stepper';
 
 const sections = [
@@ -46,29 +48,30 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s1" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c4 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c5 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
         min-width: 1.875rem;
-      }
-
-      .c8 {
-        background: #7b79ff;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 5.3125rem;
-      }
-
-      .c9 {
-        margin-top: 8px;
-      }
-
-      .c12 {
-        background: #c0c0cf;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 4.0625rem;
       }
 
       .c2 {
@@ -86,6 +89,18 @@ describe('GuidedTour Stepper', () => {
         min-width: 1.875rem;
       }
 
+      .c8 {
+        background: #7b79ff;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 5.3125rem;
+      }
+
+      .c9 {
+        margin-top: 8px;
+      }
+
       .c10 {
         padding: 8px;
         border-radius: 50%;
@@ -94,6 +109,14 @@ describe('GuidedTour Stepper', () => {
         border-color: #8e8ea9;
         width: 1.875rem;
         height: 1.875rem;
+      }
+
+      .c12 {
+        background: #c0c0cf;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 4.0625rem;
       }
 
       .c0 {
@@ -142,27 +165,6 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c5 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c11 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       <div
         class=""
       >
@@ -177,8 +179,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c4"
@@ -201,8 +201,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c8"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -225,8 +223,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -249,8 +245,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -269,8 +263,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c10 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -306,8 +298,49 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} currentSectionKey="s2" />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .c14 {
+        font-size: 0.875rem;
+        line-height: 1.43;
+        font-weight: 500;
+        color: #666687;
+      }
+
       .c1 {
         margin-right: 20px;
+        min-width: 1.875rem;
+      }
+
+      .c2 {
+        background: #4945ff;
+        padding: 8px;
+        border-radius: 50%;
+        width: 1.875rem;
+        height: 1.875rem;
+      }
+
+      .c4 {
+        color: #ffffff;
+        width: 1rem;
+      }
+
+      .c8 {
+        margin-right: 20px;
+        margin-top: 12px;
+        margin-bottom: 12px;
         min-width: 1.875rem;
       }
 
@@ -329,21 +362,6 @@ describe('GuidedTour Stepper', () => {
         width: 0.125rem;
         height: 100%;
         min-height: 5.3125rem;
-      }
-
-      .c2 {
-        background: #4945ff;
-        padding: 8px;
-        border-radius: 50%;
-        width: 1.875rem;
-        height: 1.875rem;
-      }
-
-      .c8 {
-        margin-right: 20px;
-        margin-top: 12px;
-        margin-bottom: 12px;
-        min-width: 1.875rem;
       }
 
       .c13 {
@@ -402,34 +420,8 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #ffffff;
-        width: 1rem;
-      }
-
       .c5 path {
         fill: #ffffff;
-      }
-
-      .c6 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c11 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c14 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
       }
 
       <div
@@ -446,20 +438,18 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
                   class="c4 c5"
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
                   width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>
@@ -479,8 +469,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -499,8 +487,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c11"
@@ -523,8 +509,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c12"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -547,8 +531,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c13 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <span
                   class="c14"
@@ -584,8 +566,35 @@ describe('GuidedTour Stepper', () => {
     } = render(App(<Stepper sections={sections} />));
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c6 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
       .c1 {
         margin-right: 20px;
+        min-width: 1.875rem;
+      }
+
+      .c2 {
+        background: #4945ff;
+        padding: 8px;
+        border-radius: 50%;
+        width: 1.875rem;
+        height: 1.875rem;
+      }
+
+      .c4 {
+        color: #ffffff;
+        width: 1rem;
+      }
+
+      .c8 {
+        margin-right: 20px;
+        margin-top: 12px;
+        margin-bottom: 12px;
         min-width: 1.875rem;
       }
 
@@ -599,21 +608,6 @@ describe('GuidedTour Stepper', () => {
 
       .c10 {
         margin-top: 8px;
-      }
-
-      .c2 {
-        background: #4945ff;
-        padding: 8px;
-        border-radius: 50%;
-        width: 1.875rem;
-        height: 1.875rem;
-      }
-
-      .c8 {
-        margin-right: 20px;
-        margin-top: 12px;
-        margin-bottom: 12px;
-        min-width: 1.875rem;
       }
 
       .c0 {
@@ -662,20 +656,8 @@ describe('GuidedTour Stepper', () => {
         flex-direction: row;
       }
 
-      .c4 {
-        color: #ffffff;
-        width: 1rem;
-      }
-
       .c5 path {
         fill: #ffffff;
-      }
-
-      .c6 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       <div
@@ -692,20 +674,18 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
                   class="c4 c5"
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
                   width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>
@@ -725,8 +705,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -745,20 +723,18 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
                   class="c4 c5"
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
                   width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>
@@ -778,8 +754,6 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c9"
-                height="100%"
-                width="0.125rem"
               />
             </div>
             <div
@@ -798,20 +772,18 @@ describe('GuidedTour Stepper', () => {
             >
               <div
                 class="c2 c3"
-                height="1.875rem"
-                width="1.875rem"
               >
                 <svg
                   aria-hidden="true"
                   class="c4 c5"
                   fill="none"
-                  height="1em"
+                  height="1rem"
                   viewBox="0 0 24 24"
                   width="1rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
                     fill="#212134"
                   />
                 </svg>

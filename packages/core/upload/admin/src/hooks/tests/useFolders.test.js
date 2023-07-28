@@ -1,34 +1,21 @@
 import React from 'react';
-import { stringify } from 'qs';
+
+import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-
-import { axiosInstance } from '../../utils';
 import { useFolders } from '../useFolders';
 
 const notifyStatusMock = jest.fn();
 
-jest.mock('@strapi/design-system/LiveRegions', () => ({
-  ...jest.requireActual('@strapi/design-system/LiveRegions'),
+jest.mock('@strapi/design-system', () => ({
+  ...jest.requireActual('@strapi/design-system'),
   useNotifyAT: () => ({
     notifyStatus: notifyStatusMock,
   }),
-}));
-
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
-    get: jest.fn().mockResolvedValue({
-      data: {
-        id: 1,
-      },
-    }),
-  },
 }));
 
 const notificationStatusMock = jest.fn();
@@ -36,6 +23,13 @@ const notificationStatusMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockResolvedValue({
+      data: {
+        id: 1,
+      },
+    }),
+  }),
 }));
 
 const client = new QueryClient({
@@ -52,11 +46,13 @@ function ComponentFixture({ children }) {
     <Router>
       <Route>
         <QueryClientProvider client={client}>
-          <NotificationsProvider toggleNotification={() => jest.fn()}>
-            <IntlProvider locale="en" messages={{}}>
-              {children}
-            </IntlProvider>
-          </NotificationsProvider>
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </NotificationsProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </Route>
     </Router>
@@ -77,10 +73,10 @@ describe('useFolders', () => {
   });
 
   test('fetches data from the right URL if no query param was set', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({});
+    const { get } = useFetchClient();
+    const { result } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -99,18 +95,19 @@ describe('useFolders', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?${stringify(expected, { encode: false })}`
+    await waitFor(() =>
+      expect(get).toBeCalledWith(`/upload/folders`, {
+        params: expected,
+      })
     );
   });
 
   test('does not use parent filter in params if _q', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    const { get } = useFetchClient();
+
+    await setup({
       query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
-
-    await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -126,16 +123,16 @@ describe('useFolders', () => {
       _q: 'something',
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?${stringify(expected, { encode: false })}`
-    );
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
+    const { get } = useFetchClient();
+    const { result } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -152,24 +149,22 @@ describe('useFolders', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?${stringify(expected, { encode: false })}`
-    );
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
-    const { result, waitFor, waitForNextUpdate } = await setup({
+    const { get } = useFetchClient();
+    await setup({
       query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
     });
-
-    await waitFor(() => result.current.isSuccess);
-    await waitForNextUpdate();
 
     const expected = {
       filters: {
         $and: [
           {
-            something: true,
+            something: 'true',
           },
           {
             parent: {
@@ -183,39 +178,42 @@ describe('useFolders', () => {
       },
     };
 
-    expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?${stringify(expected, { encode: false })}`
-    );
+    expect(get).toBeCalledWith(`/upload/folders`, {
+      params: expected,
+    });
   });
 
   test('it does not fetch, if enabled is set to false', async () => {
-    const { result, waitFor } = await setup({ enabled: false });
+    const { get } = useFetchClient();
+    const { result } = await setup({ enabled: false });
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(axiosInstance.get).toBeCalledTimes(0);
+    expect(get).toBeCalledTimes(0);
   });
 
   test('calls notifyStatus in case of success', async () => {
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitForNextUpdate } = await setup({});
+    await setup({});
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(notifyStatus).toBeCalledWith('The folders have finished loading.');
+    });
 
-    expect(notifyStatus).toBeCalledWith('The folders have finished loading.');
     expect(toggleNotification).toBeCalledTimes(0);
   });
 
   test('calls toggleNotification in case of error', async () => {
+    const { get } = useFetchClient();
     const originalConsoleError = console.error;
     console.error = jest.fn();
 
-    axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
+    get.mockRejectedValueOnce(new Error('Jest mock error'));
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitFor } = await setup({});
+    await setup({});
 
     await waitFor(() => expect(toggleNotification).toBeCalled());
     await waitFor(() => expect(notifyStatus).not.toBeCalled());

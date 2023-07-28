@@ -1,8 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { isNil } = require('lodash/fp');
-const { omit, difference, isEmpty, map, isArray, uniq } = require('lodash/fp');
+const { omit, difference, isNil, isEmpty, map, isArray, uniq } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
 
@@ -78,7 +77,7 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
 };
 
 /**
- * Assert that a token's permissions attribute is valid for its type
+ * Assert that a token's lifespan is valid
  *
  * @param {ApiToken} token
  */

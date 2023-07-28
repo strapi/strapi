@@ -1,14 +1,16 @@
-import React, { useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import React, { useCallback, useMemo } from 'react';
+
+import { GridItem, Option, Select } from '@strapi/design-system';
 import get from 'lodash/get';
-import { GridItem } from '@strapi/design-system/Grid';
-import { Select, Option } from '@strapi/design-system/Select';
-import { useSelector, shallowEqual } from 'react-redux';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useLayoutDnd } from '../../../hooks';
-import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
-import { makeSelectModelAndComponentSchemas } from '../../App/selectors';
+import { shallowEqual, useSelector } from 'react-redux';
+
 import getTrad from '../../../utils/getTrad';
+import { makeSelectModelAndComponentSchemas, selectFieldSizes } from '../../App/selectors';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
+import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from '../utils';
+
 import GenericInput from './GenericInput';
 
 const FIELD_SIZES = [
@@ -18,17 +20,12 @@ const FIELD_SIZES = [
   [12, '100%'],
 ];
 
-const NON_RESIZABLE_FIELD_TYPES = ['dynamiczone', 'component', 'json', 'richtext'];
-
-const TIME_FIELD_OPTIONS = [1, 5, 10, 15, 30, 60];
-
-const TIME_FIELD_TYPES = ['datetime', 'time'];
-
 const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
+  const fieldSizes = useSelector(selectFieldSizes);
 
   const formToDisplay = useMemo(() => {
     if (!selectedField) {
@@ -104,57 +101,34 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     );
   });
 
-  const canResize = !NON_RESIZABLE_FIELD_TYPES.includes(attributes[selectedField].type);
-
-  const sizeField = (
-    <GridItem col={6} key="size">
-      <Select
-        value={fieldForm?.size}
-        name="size"
-        onChange={(value) => {
-          onSizeChange({ name: selectedField, value });
-        }}
-        label={formatMessage({
-          id: getTrad('containers.SettingPage.editSettings.size.label'),
-          defaultMessage: 'Size',
-        })}
-      >
-        {FIELD_SIZES.map(([value, label]) => (
-          <Option key={value} value={value}>
-            {label}
-          </Option>
-        ))}
-      </Select>
-    </GridItem>
-  );
-
-  const hasTimePicker = TIME_FIELD_TYPES.includes(attributes[selectedField].type);
-
-  const timeStepField = (
-    <GridItem col={6} key="step">
-      <Select
-        value={get(fieldForm, ['metadata', 'step'], 1)}
-        name="step"
-        onChange={(value) => onMetaChange({ target: { name: 'step', value } })}
-        label={formatMessage({
-          id: getTrad('containers.SettingPage.editSettings.step.label'),
-          defaultMessage: 'Time interval (minutes)',
-        })}
-      >
-        {TIME_FIELD_OPTIONS.map((value) => (
-          <Option key={value} value={value}>
-            {value}
-          </Option>
-        ))}
-      </Select>
-    </GridItem>
-  );
+  // Check for a custom input provided by a custom field, or use the default one for that type
+  const { type, customField } = attributes[selectedField];
+  const { isResizable } = fieldSizes[customField] ?? fieldSizes[type];
 
   return (
     <>
       {metaFields}
-      {canResize && sizeField}
-      {hasTimePicker && timeStepField}
+      {isResizable && (
+        <GridItem col={6} key="size">
+          <Select
+            value={fieldForm?.size}
+            name="size"
+            onChange={(value) => {
+              onSizeChange({ name: selectedField, value });
+            }}
+            label={formatMessage({
+              id: getTrad('containers.SettingPage.editSettings.size.label'),
+              defaultMessage: 'Size',
+            })}
+          >
+            {FIELD_SIZES.map(([value, label]) => (
+              <Option key={value} value={value}>
+                {label}
+              </Option>
+            ))}
+          </Select>
+        </GridItem>
+      )}
     </>
   );
 };

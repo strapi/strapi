@@ -1,18 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { Box, Divider, Flex, Option, Select, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
-import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
-import { Select, Option } from '@strapi/design-system/Select';
-import { Typography } from '@strapi/design-system/Typography';
-import { Stack } from '@strapi/design-system/Stack';
+import PropTypes from 'prop-types';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { stringify } from 'qs';
+
 import { getTrad } from '../../../utils';
-import { createLocalesOption } from './utils';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
+
 import Bullet from './Bullet';
+import { createLocalesOption } from './utils';
 
 const CMEditViewLocalePicker = ({
   appLocales,
@@ -102,47 +101,41 @@ const CMEditViewLocalePicker = ({
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
       </Typography>
-      <Box paddingTop={2} paddingBottom={6}>
-        <Divider />
-      </Box>
-      <Stack spacing={2}>
-        <Box>
-          <Select
-            label={formatMessage({
-              id: getTrad('Settings.locales.modal.locales.label'),
-            })}
-            onChange={handleChange}
+      <Divider unsetMargin={false} marginTop={2} marginBottom={6} />
+      <Flex direction="column" alignItems="stretch" gap={2}>
+        <Select
+          label={formatMessage({
+            id: getTrad('Settings.locales.modal.locales.label'),
+          })}
+          onChange={handleChange}
+          value={value?.value}
+        >
+          <Option
             value={value?.value}
+            disabled
+            startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
           >
-            <Option
-              value={value?.value}
-              disabled
-              startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
-            >
-              {value?.label}
-            </Option>
-            {filteredOptions.map((option) => {
-              return (
-                <Option
-                  key={option.value}
-                  value={option.value}
-                  startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
-                >
-                  {option.label}
-                </Option>
-              );
-            })}
-          </Select>
-        </Box>
-        <Box>
-          <CMEditViewCopyLocale
-            appLocales={appLocales}
-            currentLocale={currentLocale}
-            localizations={localizations}
-            readPermissions={readPermissions}
-          />
-        </Box>
-      </Stack>
+            {value?.label}
+          </Option>
+          {filteredOptions.map((option) => {
+            return (
+              <Option
+                key={option.value}
+                value={option.value}
+                startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
+              >
+                {option.label}
+              </Option>
+            );
+          })}
+        </Select>
+        <CMEditViewCopyLocale
+          appLocales={appLocales}
+          currentLocale={currentLocale}
+          localizations={localizations}
+          readPermissions={readPermissions}
+        />
+      </Flex>
     </Box>
   );
 };

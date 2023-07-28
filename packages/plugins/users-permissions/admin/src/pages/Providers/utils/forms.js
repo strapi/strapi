@@ -1,5 +1,5 @@
-import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
+import * as yup from 'yup';
 
 import { getTrad } from '../../../utils';
 
@@ -170,6 +170,21 @@ const forms = {
           size: 12,
           validations: {
             required: true,
+          },
+        },
+      ],
+      [
+        {
+          intlLabel: {
+            id: getTrad({ id: 'PopUpForm.Providers.jwksurl.label' }),
+            defaultMessage: 'JWKS URL',
+          },
+          name: 'jwksurl',
+          type: 'text',
+          placeholder: textPlaceholder,
+          size: 12,
+          validations: {
+            required: false,
           },
         },
       ],

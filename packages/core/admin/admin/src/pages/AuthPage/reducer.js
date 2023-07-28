@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { set } from 'lodash';
+import set from 'lodash/set';
 /* eslint-disable consistent-return */
 
 const initialState = {

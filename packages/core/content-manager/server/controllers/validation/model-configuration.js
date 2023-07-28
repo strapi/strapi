@@ -1,9 +1,9 @@
 'use strict';
 
 const { yup } = require('@strapi/utils');
+const { getService } = require('../../utils');
 const {
   isListable,
-  hasRelationAttribute,
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
 /**
@@ -16,6 +16,7 @@ module.exports = (schema, opts = {}) =>
       settings: createSettingsSchema(schema).default(null).nullable(),
       metadatas: createMetadasSchema(schema).default(null).nullable(),
       layouts: createLayoutsSchema(schema, opts).default(null).nullable(),
+      options: yup.object().optional(),
     })
     .noUnknown();
 
@@ -52,16 +53,25 @@ const createMetadasSchema = (schema) => {
               placeholder: yup.string(),
               editable: yup.boolean(),
               visible: yup.boolean(),
-              mainField: yup.string(),
-              step: yup
-                .number()
-                .integer()
-                .positive()
-                .test(
-                  'isDivisibleBy60',
-                  'Step must be either 1 or divisible by 60',
-                  (value) => !value || value === 1 || (value * 24) % 60 === 0
-                ),
+              mainField: yup.lazy((value) => {
+                if (!value) {
+                  return yup.string();
+                }
+
+                const targetSchema = getService('content-types').findContentType(
+                  schema.attributes[key].targetModel
+                );
+
+                if (!targetSchema) {
+                  return yup.string();
+                }
+
+                const validAttributes = Object.keys(targetSchema.attributes).filter((key) =>
+                  isListable(targetSchema, key)
+                );
+
+                return yup.string().oneOf(validAttributes.concat('id')).default('id');
+              }),
             })
             .noUnknown()
             .required(),
@@ -95,10 +105,6 @@ const createLayoutsSchema = (schema, opts = {}) => {
     hasEditableAttribute(schema, key)
   );
 
-  const relationAttributes = Object.keys(schema.attributes).filter((key) =>
-    hasRelationAttribute(schema, key)
-  );
-
   return yup.object().shape({
     edit: yup
       .array()
@@ -115,9 +121,5 @@ const createLayoutsSchema = (schema, opts = {}) => {
       )
       .test(createArrayTest(opts)),
     list: yup.array().of(yup.string().oneOf(validAttributes)).test(createArrayTest(opts)),
-    editRelations: yup
-      .array()
-      .of(yup.string().oneOf(relationAttributes))
-      .test(createArrayTest(opts)),
   });
 };

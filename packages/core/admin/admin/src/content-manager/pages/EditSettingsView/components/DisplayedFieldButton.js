@@ -1,15 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { Box, Flex, GridItem } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { useDrop, useDrag } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
-import { GridItem } from '@strapi/design-system/Grid';
-import Drag from '@strapi/icons/Drag';
+import styled from 'styled-components';
+
 import { ItemTypes } from '../../../utils';
+import { useLayoutDnd } from '../hooks/useLayoutDnd';
+
 import FieldButtonContent from './FieldButtonContent';
-import { useLayoutDnd } from '../../../hooks';
 
 const Wrapper = styled(Flex)`
   position: relative;

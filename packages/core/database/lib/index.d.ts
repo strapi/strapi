@@ -1,6 +1,9 @@
+import { Knex } from 'knex';
 import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
-import { SchemaProvideer } from './schema';
+import { SchemaProvider } from './schema';
+
+type ID = number | string;
 
 type LogicalOperators<T> = {
   $and?: WhereParams<T>[];
@@ -31,8 +34,7 @@ type AttributeOperators<T, K extends keyof T> = {
 
 export type WhereParams<T> = {
   [K in keyof T]?: T[K] | T[K][] | AttributeOperators<T, K>;
-} &
-  LogicalOperators<T>;
+} & LogicalOperators<T>;
 
 type Sortables<T> = {
   // check sortable
@@ -84,7 +86,7 @@ interface EntityManager {
   createMany<K extends keyof AllTypes>(
     uid: K,
     params: CreateManyParams<AllTypes[K]>
-  ): Promise<{ count: number }>;
+  ): Promise<{ count: number; ids: ID[] }>;
 
   update<K extends keyof AllTypes>(uid: K, params: any): Promise<any>;
   updateMany<K extends keyof AllTypes>(uid: K, params: any): Promise<{ count: number }>;
@@ -119,7 +121,7 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
 
   create(params: CreateParams<AllTypes[T]>): Promise<any>;
-  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number }>;
+  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number; ids: ID[] }>;
 
   update(params: any): Promise<any>;
   updateMany(params: any): Promise<{ count: number }>;
@@ -154,12 +156,26 @@ interface DatabaseConfig {
   models: ModelConfig[];
 }
 export interface Database {
-  schema: SchemaProvideer;
+  schema: SchemaProvider;
   lifecycles: LifecycleProvider;
   migrations: MigrationProvider;
   entityManager: EntityManager;
+  queryBuilder: any;
+  metadata: any;
+  connection: Knex;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  transaction(
+    cb?: (params: {
+      trx: Knex.Transaction;
+      rollback: () => Promise<void>;
+      commit: () => Promise<void>;
+      onCommit: (cb) => void;
+      onRollback: (cb) => void;
+    }) => Promise<unknown>
+  ):
+    | Promise<unknown>
+    | { get: () => Knex.Transaction; rollback: () => Promise<void>; commit: () => Promise<void> };
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];

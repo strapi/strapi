@@ -1,6 +1,8 @@
 import React from 'react';
+
+import { Grid } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import { Grid } from '@strapi/design-system/Grid';
+
 import RowItemsLayout from './RowItemsLayout';
 
 const RowsLayout = ({ row, onRemoveField, rowIndex }) => {

@@ -13,7 +13,7 @@
     "**/dist/*",
     "**/build/*",
     "**/*.test.js",
-    "**/*.test.e2e.js",
+    "**/*.test.api.js",
     "**/examples/getstarted/*",
     "**/examples/kitchensink/*"
   ]

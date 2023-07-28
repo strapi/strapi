@@ -1,15 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { CarouselActions } from '@strapi/design-system/CarouselInput';
-import { IconButton } from '@strapi/design-system/IconButton';
+
+import { CarouselActions, IconButton } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import { Pencil, Plus, Trash } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import PlusIcon from '@strapi/icons/Plus';
-import TrashIcon from '@strapi/icons/Trash';
-import PencilIcon from '@strapi/icons/Pencil';
+
+import { AssetDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
-import { AssetDefinition } from '../../../constants';
 
 export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {
   const { formatMessage } = useIntl();
@@ -22,7 +21,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.add'),
             defaultMessage: 'Add',
           })}
-          icon={<PlusIcon />}
+          icon={<Plus />}
           onClick={() => onAddAsset(asset)}
         />
       )}
@@ -35,7 +34,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: 'global.delete',
             defaultMessage: 'Delete',
           })}
-          icon={<TrashIcon />}
+          icon={<Trash />}
           onClick={() => onDeleteAsset(asset)}
         />
       )}
@@ -43,10 +42,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
       {onEditAsset && (
         <IconButton
           label={formatMessage({
-            id: getTrad('app.utils.edit'),
+            id: getTrad('control-card.edit'),
             defaultMessage: 'edit',
           })}
-          icon={<PencilIcon />}
+          icon={<Pencil />}
           onClick={onEditAsset}
         />
       )}

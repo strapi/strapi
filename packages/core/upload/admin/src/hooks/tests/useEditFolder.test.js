@@ -1,12 +1,12 @@
 import React from 'react';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { QueryClientProvider, QueryClient, useQueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
-
-import { axiosInstance } from '../../utils';
 import { useEditFolder } from '../useEditFolder';
 
 const FOLDER_CREATE_FIXTURE = {
@@ -20,19 +20,15 @@ const FOLDER_EDIT_FIXTURE = {
   parent: 1,
 };
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
-    put: jest.fn().mockResolvedValue({ name: 'folder-edited' }),
-    post: jest.fn().mockResolvedValue({ name: 'folder-created' }),
-  },
-}));
-
 const notificationStatusMock = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
+  useFetchClient: jest.fn().mockReturnValue({
+    put: jest.fn().mockResolvedValue({ name: 'folder-edited' }),
+    post: jest.fn().mockResolvedValue({ name: 'folder-created' }),
+  }),
 }));
 
 const refetchQueriesMock = jest.fn();
@@ -58,11 +54,13 @@ function ComponentFixture({ children }) {
     <Router>
       <Route>
         <QueryClientProvider client={client}>
-          <NotificationsProvider toggleNotification={() => jest.fn()}>
-            <IntlProvider locale="en" messages={{}}>
-              {children}
-            </IntlProvider>
-          </NotificationsProvider>
+          <ThemeProvider theme={lightTheme}>
+            <NotificationsProvider>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </NotificationsProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </Route>
     </Router>
@@ -83,6 +81,7 @@ describe('useEditFolder', () => {
   });
 
   test('calls the proper endpoint when creating a folder (post)', async () => {
+    const { post } = useFetchClient();
     const {
       result: { current },
     } = await setup();
@@ -92,10 +91,12 @@ describe('useEditFolder', () => {
       await editFolder(FOLDER_CREATE_FIXTURE);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders/', expect.any(Object));
+    expect(post).toHaveBeenCalledWith('/upload/folders/', expect.any(Object));
   });
 
   test('calls the proper endpoint when creating a folder (put)', async () => {
+    const { put } = useFetchClient();
+
     const {
       result: { current },
     } = await setup();
@@ -111,10 +112,11 @@ describe('useEditFolder', () => {
       );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
+    expect(put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('calls the proper endpoint when editing a folder', async () => {
+    const { put } = useFetchClient();
     const {
       result: { current },
     } = await setup();
@@ -130,7 +132,7 @@ describe('useEditFolder', () => {
       );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
+    expect(put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('does not call toggleNotification in case of success', async () => {
@@ -157,7 +159,6 @@ describe('useEditFolder', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-      waitFor,
     } = await setup();
     const { editFolder } = current;
 

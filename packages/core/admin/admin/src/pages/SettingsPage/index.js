@@ -10,29 +10,44 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React, { memo, useMemo } from 'react';
+
+import { Layout } from '@strapi/design-system';
 import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
-import { Switch, Redirect, Route, useParams } from 'react-router-dom';
-import { Layout } from '@strapi/design-system/Layout';
-import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
+import { useIntl } from 'react-intl';
+import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+
 import { useSettingsMenu } from '../../hooks';
+import { useEnterprise } from '../../hooks/useEnterprise';
 import { createRoute, makeUniqueRoutes } from '../../utils';
-import ApplicationInfosPage from './pages/ApplicationInfosPage';
-import { createSectionsRoutes, routes } from './utils';
+
 import SettingsNav from './components/SettingsNav';
+import { ROUTES_CE } from './constants';
+import ApplicationInfosPage from './pages/ApplicationInfosPage';
+import { createSectionsRoutes } from './utils';
 
 function SettingsPage() {
   const { settingId } = useParams();
   const { settings } = useStrapiApp();
   const { formatMessage } = useIntl();
   const { isLoading, menu } = useSettingsMenu();
+  const routes = useEnterprise(
+    ROUTES_CE,
+    async () => (await import('../../../../ee/admin/pages/SettingsPage/constants')).ROUTES_EE,
+    {
+      combine(ceRoutes, eeRoutes) {
+        return [...ceRoutes, ...eeRoutes];
+      },
+      defaultValue: [],
+    }
+  );
 
   // Creates the admin routes
   const adminRoutes = useMemo(() => {
     return makeUniqueRoutes(
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
-  }, []);
+  }, [routes]);
 
   const pluginsRoutes = createSectionsRoutes(settings);
 

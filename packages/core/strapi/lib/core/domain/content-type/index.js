@@ -2,7 +2,7 @@
 
 const { cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
-const { hasDraftAndPublish, getPrivateAttributes } = require('@strapi/utils').contentTypes;
+const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
@@ -54,15 +54,9 @@ const createContentType = (uid, definition) => {
     });
   } else {
     throw new Error(
-      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or strapi::.`
+      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or admin::.`
     );
   }
-
-  Object.defineProperty(schema, 'privateAttributes', {
-    get() {
-      return getPrivateAttributes(schema);
-    },
-  });
 
   // attributes
   Object.assign(schema.attributes, {

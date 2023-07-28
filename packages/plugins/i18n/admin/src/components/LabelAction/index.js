@@ -1,8 +1,9 @@
 import React from 'react';
+
+import { Tooltip } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Tooltip } from '@strapi/design-system/Tooltip';
 
 const Button = styled.button`
   border: none;

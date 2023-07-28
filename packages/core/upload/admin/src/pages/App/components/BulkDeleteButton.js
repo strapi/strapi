@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+
+import { Button } from '@strapi/design-system';
+import { ConfirmDialog } from '@strapi/helper-plugin';
+import { Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Button } from '@strapi/design-system/Button';
-import Trash from '@strapi/icons/Trash';
-import { ConfirmDialog } from '@strapi/helper-plugin';
 
 import { AssetDefinition, FolderDefinition } from '../../../constants';
 import { useBulkRemove } from '../../../hooks/useBulkRemove';

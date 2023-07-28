@@ -92,8 +92,8 @@ const createServer = (strapi) => {
       return this;
     },
 
-    async initRouting() {
-      await registerAllRoutes(strapi);
+    initRouting() {
+      registerAllRoutes(strapi);
 
       return this;
     },
@@ -106,10 +106,6 @@ const createServer = (strapi) => {
 
     listRoutes() {
       const allRoutes = [...router.stack];
-
-      Object.values(apis).forEach((api) => {
-        allRoutes.push(...api.listRoutes());
-      });
 
       return allRoutes;
     },

@@ -1,19 +1,22 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Box } from '@strapi/design-system/Box';
+
+import { Box } from '@strapi/design-system';
 import { useCustomFields } from '@strapi/helper-plugin';
-import Date from '@strapi/icons/Date';
-import Boolean from '@strapi/icons/Boolean';
-import Email from '@strapi/icons/Email';
-import Enumeration from '@strapi/icons/Enumeration';
-import Media from '@strapi/icons/Media';
-import Relation from '@strapi/icons/Relation';
-import Text from '@strapi/icons/Text';
-import Uid from '@strapi/icons/Uid';
-import Number from '@strapi/icons/Number';
-import Json from '@strapi/icons/Json';
-import Component from '@strapi/icons/Component';
-import DynamicZone from '@strapi/icons/DynamicZone';
+import {
+  Boolean,
+  Component,
+  Date,
+  DynamicZone,
+  Email,
+  Enumeration,
+  Json,
+  Media,
+  Number,
+  Relation,
+  Text,
+  Uid,
+} from '@strapi/icons';
+import PropTypes from 'prop-types';
 
 const iconByTypes = {
   biginteger: <Number />,

@@ -1,38 +1,39 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { lightTheme, darkTheme } from '@strapi/design-system/themes';
+
+import { darkTheme, lightTheme } from '@strapi/design-system';
+import invariant from 'invariant';
+import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
-import isFunction from 'lodash/isFunction';
-import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
-import { basename, createHook } from './core/utils';
-import configureStore from './core/store/configureStore';
-import { customFields, Plugin } from './core/apis';
-import App from './pages/App';
-import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
-import MenuLogo from './assets/images/logo_strapi_menu.png';
+import { BrowserRouter } from 'react-router-dom';
+
+import Logo from './assets/images/logo-strapi-2022.svg';
+import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 import Providers from './components/Providers';
-import languageNativeNames from './translations/languageNativeNames';
+import { customFields, Plugin } from './core/apis';
+import configureStore from './core/store/configureStore';
+import { basename, createHook } from './core/utils';
 import {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
+import favicon from './favicon.png';
 import injectionZones from './injectionZones';
-import favicon from './favicon.ico';
-import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
+import App from './pages/App';
+import languageNativeNames from './translations/languageNativeNames';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
-      authLogo: AuthLogo,
+      authLogo: Logo,
       head: { favicon },
       locales: ['en'],
-      menuLogo: MenuLogo,
+      menuLogo: Logo,
       notifications: { releases: true },
       themes: { light: lightTheme, dark: darkTheme },
       translations: {},
@@ -227,7 +228,19 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      merge(this.configurations.themes.light, this.customConfigurations.theme);
+      const darkTheme = this.customConfigurations.theme.dark;
+      const lightTheme = this.customConfigurations.theme.light;
+
+      if (!darkTheme && !lightTheme) {
+        console.warn(
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+        );
+        merge(this.configurations.themes.light, this.customConfigurations.theme);
+      }
+
+      if (lightTheme) merge(this.configurations.themes.light, lightTheme);
+
+      if (darkTheme) merge(this.configurations.themes.dark, darkTheme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {

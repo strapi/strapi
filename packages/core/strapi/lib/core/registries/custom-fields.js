@@ -1,7 +1,25 @@
 'use strict';
 
-const { has } = require('lodash/fp');
-const validators = require('../../services/entity-validator/validators');
+const { has, isPlainObject } = require('lodash/fp');
+
+const ALLOWED_TYPES = [
+  'biginteger',
+  'boolean',
+  'date',
+  'datetime',
+  'decimal',
+  'email',
+  'enumeration',
+  'float',
+  'integer',
+  'json',
+  'password',
+  'richtext',
+  'string',
+  'text',
+  'time',
+  'uid',
+];
 
 const customFieldsRegistry = (strapi) => {
   const customFields = {};
@@ -26,8 +44,8 @@ const customFieldsRegistry = (strapi) => {
           throw new Error(`Custom fields require a 'name' and 'type' key`);
         }
 
-        const { name, plugin, type } = cf;
-        if (!has(type, validators)) {
+        const { name, plugin, type, inputSize } = cf;
+        if (!ALLOWED_TYPES.includes(type)) {
           throw new Error(
             `Custom field type: '${type}' is not a valid Strapi type or it can't be used with a Custom Field`
           );
@@ -36,6 +54,23 @@ const customFieldsRegistry = (strapi) => {
         const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;
         if (!isValidObjectKey.test(name)) {
           throw new Error(`Custom field name: '${name}' is not a valid object key`);
+        }
+
+        // Validate inputSize when provided
+        if (inputSize) {
+          if (
+            !isPlainObject(inputSize) ||
+            !has('default', inputSize) ||
+            !has('isResizable', inputSize)
+          ) {
+            throw new Error(`inputSize should be an object with 'default' and 'isResizable' keys`);
+          }
+          if (![4, 6, 8, 12].includes(inputSize.default)) {
+            throw new Error('Custom fields require a valid default input size');
+          }
+          if (typeof inputSize.isResizable !== 'boolean') {
+            throw new Error('Custom fields should specify if their input is resizable');
+          }
         }
 
         // When no plugin is specified, or it isn't found in Strapi, default to global

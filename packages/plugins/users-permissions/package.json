@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.4.3",
+  "version": "4.12.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -20,41 +20,54 @@
     }
   ],
   "scripts": {
-    "test:unit": "jest --verbose",
-    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
-    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.4.3",
-    "@strapi/utils": "4.4.3",
+    "@strapi/design-system": "1.8.2",
+    "@strapi/helper-plugin": "4.12.0",
+    "@strapi/icons": "1.8.2",
+    "@strapi/utils": "4.12.0",
     "bcryptjs": "2.4.3",
+    "formik": "2.4.0",
     "grant-koa": "5.4.8",
-    "jsonwebtoken": "^8.1.0",
-    "koa": "^2.13.4",
-    "koa2-ratelimit": "^1.1.1",
+    "immer": "9.0.19",
+    "jsonwebtoken": "9.0.0",
+    "jwk-to-pem": "2.0.5",
+    "koa": "2.13.4",
+    "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
+    "prop-types": "^15.8.1",
     "purest": "4.0.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-intl": "5.25.1",
-    "react-redux": "7.2.8",
-    "react-router": "^5.2.0",
-    "react-router-dom": "5.2.0",
-    "request": "^2.83.0",
-    "url-join": "4.0.1"
+    "react-intl": "6.4.1",
+    "react-query": "3.39.3",
+    "react-redux": "8.1.1",
+    "url-join": "4.0.1",
+    "yup": "0.32.9"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.17.1",
-    "@testing-library/react": "12.1.4",
-    "@testing-library/react-hooks": "8.0.1",
-    "@testing-library/user-event": "14.4.2",
-    "msw": "0.42.3",
-    "react-test-renderer": "^17.0.2"
+    "@testing-library/dom": "9.2.0",
+    "@testing-library/react": "14.0.0",
+    "@testing-library/user-event": "14.4.3",
+    "msw": "1.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "5.3.4",
+    "styled-components": "5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

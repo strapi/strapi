@@ -1,44 +1,55 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  ModalBody,
+  ModalFooter,
+  ModalLayout,
+  Tab,
+  TabGroup,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@strapi/design-system';
 import {
   getYupInnerErrors,
-  useTracking,
+  useCustomFields,
   useNotification,
   useStrapiApp,
-  useCustomFields,
+  useTracking,
 } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import has from 'lodash/has';
+import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import { Divider } from '@strapi/design-system/Divider';
-import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import pluginId from '../../pluginId';
+import { useIntl } from 'react-intl';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import useDataManager from '../../hooks/useDataManager';
 import useFormModalNavigation from '../../hooks/useFormModalNavigation';
+import pluginId from '../../pluginId';
+import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
+import findAttribute from '../../utils/findAttribute';
 // New compos
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import AttributeOptions from '../AttributeOptions';
-import DraftAndPublishToggle from '../DraftAndPublishToggle';
-import FormModalHeader from '../FormModalHeader';
-import FormModalEndActions from '../FormModalEndActions';
-import FormModalSubHeader from '../FormModalSubHeader';
-
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
 import CheckboxWithNumberField from '../CheckboxWithNumberField';
-import CustomRadioGroup from '../CustomRadioGroup';
 import ContentTypeRadioGroup from '../ContentTypeRadioGroup';
-import ComponentIconPicker from '../ComponentIconPicker';
-import Relation from '../Relation';
+import CustomRadioGroup from '../CustomRadioGroup';
+import DraftAndPublishToggle from '../DraftAndPublishToggle';
+import FormModalEndActions from '../FormModalEndActions';
+import FormModalHeader from '../FormModalHeader';
+import FormModalSubHeader from '../FormModalSubHeader';
+import IconPicker from '../IconPicker';
 import PluralName from '../PluralName';
+import Relation from '../Relation';
 import SelectCategory from '../SelectCategory';
 import SelectComponent from '../SelectComponent';
 import SelectComponents from '../SelectComponents';
@@ -47,24 +58,23 @@ import SelectNumber from '../SelectNumber';
 import SingularName from '../SingularName';
 import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
-import findAttribute from '../../utils/findAttribute';
-import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
-import forms from './forms';
-import { createComponentUid, createUid } from './utils/createUid';
 
-import makeSelectFormModal from './selectors';
 import {
+  ON_CHANGE,
+  RESET_PROPS,
+  RESET_PROPS_AND_SAVE_CURRENT_DATA,
+  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
+  SET_ATTRIBUTE_DATA_SCHEMA,
+  SET_CUSTOM_FIELD_DATA_SCHEMA,
   SET_DATA_TO_EDIT,
   SET_DYNAMIC_ZONE_DATA_SCHEMA,
-  SET_ATTRIBUTE_DATA_SCHEMA,
   SET_ERRORS,
-  ON_CHANGE,
-  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
-  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
-  RESET_PROPS_AND_SAVE_CURRENT_DATA,
-  RESET_PROPS,
 } from './constants';
+import forms from './forms';
+import makeSelectFormModal from './selectors';
+import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
+import { createComponentUid, createUid } from './utils/createUid';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -84,6 +94,7 @@ const FormModal = () => {
     forTarget,
     modalType,
     isOpen,
+    showBackLink,
     kind,
     step,
     targetUid,
@@ -189,16 +200,20 @@ const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
-          {
-            displayName: null,
-            pluginOptions: {},
-            singularName: null,
-            pluralName: null,
-          }
-        );
+        const {
+          displayName,
+          draftAndPublish,
+          kind,
+          pluginOptions,
+          pluralName,
+          reviewWorkflows,
+          singularName,
+        } = get(allDataSchema, [...pathToSchema, 'schema'], {
+          displayName: null,
+          pluginOptions: {},
+          singularName: null,
+          pluralName: null,
+        });
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -210,6 +225,10 @@ const FormModal = () => {
             kind,
             pluginOptions,
             pluralName,
+            // because review-workflows is an EE feature the attribute does
+            // not always exist, but the component prop-types expect a boolean,
+            // so we have to ensure undefined is casted to false
+            reviewWorkflows: reviewWorkflows ?? false,
             singularName,
           },
         });
@@ -268,16 +287,27 @@ const FormModal = () => {
           }
         }
 
-        dispatch({
-          type: SET_ATTRIBUTE_DATA_SCHEMA,
-          attributeType,
-          nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
-          targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
-          isEditing: actionType === 'edit',
-          modifiedDataToSetForEditing: attributeToEdit,
-          step,
-          forTarget,
-        });
+        if (modalType === 'customField') {
+          dispatch({
+            type: SET_CUSTOM_FIELD_DATA_SCHEMA,
+            customField,
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            // NOTE: forTarget is used in the i18n middleware
+            forTarget,
+          });
+        } else {
+          dispatch({
+            type: SET_ATTRIBUTE_DATA_SCHEMA,
+            attributeType,
+            nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+            targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
+            isEditing: actionType === 'edit',
+            modifiedDataToSetForEditing: attributeToEdit,
+            step,
+            forTarget,
+          });
+        }
       }
     } else {
       dispatch({ type: RESET_PROPS });
@@ -348,6 +378,7 @@ const FormModal = () => {
         ctbFormsAPI,
         customFieldValidator: customField.options?.validator,
       });
+
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
       // Since we temporarily store the component info in another object
@@ -551,7 +582,7 @@ const FormModal = () => {
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingCustomFieldAttribute) {
         const customFieldAttributeUpdate = {
-          attributeToSet: { ...modifiedData, customField: customFieldUid, type: customField.type },
+          attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
           initialAttribute: initialData,
@@ -779,13 +810,35 @@ const FormModal = () => {
     }
   };
 
+  const handleConfirmClose = () => {
+    // eslint-disable-next-line no-alert
+    const confirm = window.confirm(
+      formatMessage({
+        id: 'window.confirm.close-modal.file',
+        defaultMessage: 'Are you sure? Your changes will be lost.',
+      })
+    );
+
+    if (confirm) {
+      onCloseModal();
+
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
+  };
+
   const handleClosed = () => {
     // Close the modal
-    onCloseModal();
-    // Reset the reducer
-    dispatch({
-      type: RESET_PROPS,
-    });
+    if (!isEqual(modifiedData, initialData)) {
+      handleConfirmClose();
+    } else {
+      onCloseModal();
+      // Reset the reducer
+      dispatch({
+        type: RESET_PROPS,
+      });
+    }
   };
 
   const sendAdvancedTabEvent = (tab) => {
@@ -864,7 +917,7 @@ const FormModal = () => {
       'allowed-types-select': AllowedTypesSelect,
       'boolean-radio-group': BooleanRadioGroup,
       'checkbox-with-number-field': CheckboxWithNumberField,
-      'component-icon-picker': ComponentIconPicker,
+      'icon-picker': IconPicker,
       'content-type-radio-group': ContentTypeRadioGroup,
       'radio-group': CustomRadioGroup,
       relation: Relation,
@@ -929,6 +982,15 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
+  const checkIsEditingFieldName = () =>
+    actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);
+
+  const handleClickFinish = () => {
+    if (checkIsEditingFieldName()) {
+      trackUsage('didEditFieldNameOnContentType');
+    }
+  };
+
   return (
     <ModalLayout onClose={handleClosed} labelledBy="title">
       <FormModalHeader
@@ -942,6 +1004,7 @@ const FormModal = () => {
         targetUid={targetUid}
         attributeType={attributeType}
         customFieldUid={customFieldUid}
+        showBackLink={showBackLink}
       />
       {isPickingAttribute && (
         <AttributeOptions
@@ -1000,7 +1063,7 @@ const FormModal = () => {
               <Box paddingTop={6}>
                 <TabPanels>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={baseForm}
                         formErrors={formErrors}
@@ -1008,10 +1071,10 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                   <TabPanel>
-                    <Stack spacing={6}>
+                    <Flex direction="column" alignItems="stretch" gap={6}>
                       <TabForm
                         form={advancedForm}
                         formErrors={formErrors}
@@ -1019,7 +1082,7 @@ const FormModal = () => {
                         modifiedData={modifiedData}
                         onChange={handleChange}
                       />
-                    </Stack>
+                    </Flex>
                   </TabPanel>
                 </TabPanels>
               </Box>
@@ -1059,6 +1122,7 @@ const FormModal = () => {
                 onSubmitEditContentType={handleSubmit}
                 onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
+                onClickFinish={handleClickFinish}
               />
             }
             startActions={

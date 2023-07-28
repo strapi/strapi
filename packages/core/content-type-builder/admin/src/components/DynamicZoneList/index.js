@@ -6,14 +6,14 @@
 
 /* eslint-disable import/no-cycle */
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import Plus from '@strapi/icons/Plus';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
+import { Plus } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import ComponentCard from '../ComponentCard';
@@ -39,7 +39,7 @@ const FixedBox = styled(Box)`
   left: 0;
 `;
 
-const ScrollableStack = styled(Stack)`
+const ScrollableStack = styled(Flex)`
   width: 100%;
   overflow-x: auto;
 `;
@@ -48,7 +48,7 @@ const ComponentContentBox = styled(Box)`
   padding-top: ${pxToRem(90)};
 `;
 
-const ComponentStack = styled(Stack)`
+const ComponentStack = styled(Flex)`
   flex-shrink: 0;
   width: ${pxToRem(140)};
   height: ${pxToRem(80)};
@@ -75,10 +75,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
     <Tr className="dynamiczone-row" isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
-          <ScrollableStack horizontal spacing={2}>
+          <ScrollableStack gap={2}>
             {isInDevelopmentMode && (
               <button type="button" onClick={handleClickAdd}>
-                <ComponentStack spacing={1}>
+                <ComponentStack direction="column" alignItems="stretch" gap={1}>
                   <StyledAddIcon />
                   <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
@@ -89,19 +89,21 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
                 </ComponentStack>
               </button>
             )}
-            {components.map((component, index) => {
-              return (
-                <ComponentCard
-                  key={component}
-                  dzName={name}
-                  index={index}
-                  component={component}
-                  isActive={activeTab === index}
-                  isInDevelopmentMode={isInDevelopmentMode}
-                  onClick={() => toggle(index)}
-                />
-              );
-            })}
+            <Flex role="tablist" gap={2}>
+              {components.map((component, index) => {
+                return (
+                  <ComponentCard
+                    key={component}
+                    dzName={name}
+                    index={index}
+                    component={component}
+                    isActive={activeTab === index}
+                    isInDevelopmentMode={isInDevelopmentMode}
+                    onClick={() => toggle(index)}
+                  />
+                );
+              })}
+            </Flex>
           </ScrollableStack>
         </FixedBox>
         <ComponentContentBox>
@@ -113,7 +115,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
 
             return (
               <Box
-                tabId={`${index}`}
+                id={`dz-${name}-panel-${index}`}
+                role="tabpanel"
+                tabindex={0}
+                aria-labelledby={`dz-${name}-tab-${index}`}
                 key={component}
                 style={{ display: activeTab === index ? 'block' : 'none' }}
               >

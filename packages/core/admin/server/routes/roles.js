@@ -2,14 +2,6 @@
 
 module.exports = [
   {
-    method: 'POST',
-    path: '/users/batch-delete',
-    handler: 'user.deleteMany',
-    config: {
-      policies: [{ name: 'admin::hasPermissions', config: { actions: ['admin::users.delete'] } }],
-    },
-  },
-  {
     method: 'GET',
     path: '/roles/:id/permissions',
     handler: 'role.getPermissions',
@@ -54,6 +46,22 @@ module.exports = [
     },
   },
   {
+    method: 'POST',
+    path: '/roles',
+    handler: 'role.create',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['admin::roles.create'],
+          },
+        },
+      ],
+    },
+  },
+  {
     method: 'PUT',
     path: '/roles/:id',
     handler: 'role.update',
@@ -61,6 +69,38 @@ module.exports = [
       policies: [
         'admin::isAuthenticatedAdmin',
         { name: 'admin::hasPermissions', config: { actions: ['admin::roles.update'] } },
+      ],
+    },
+  },
+  {
+    method: 'DELETE',
+    path: '/roles/:id',
+    handler: 'role.deleteOne',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['admin::roles.delete'],
+          },
+        },
+      ],
+    },
+  },
+  {
+    method: 'POST',
+    path: '/roles/batch-delete',
+    handler: 'role.deleteMany',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: {
+            actions: ['admin::roles.delete'],
+          },
+        },
       ],
     },
   },

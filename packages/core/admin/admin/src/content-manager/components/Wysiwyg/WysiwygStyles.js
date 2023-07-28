@@ -1,6 +1,5 @@
+import { BaseButton, IconButton, IconButtonGroup } from '@strapi/design-system';
 import styled from 'styled-components';
-import { IconButtonGroup, IconButton } from '@strapi/design-system/IconButton';
-import { BaseButton } from '@strapi/design-system/BaseButton';
 
 // NAV BUTTONS
 export const CustomIconButton = styled(IconButton)`

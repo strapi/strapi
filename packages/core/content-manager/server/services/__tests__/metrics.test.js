@@ -66,14 +66,15 @@ describe('metrics', () => {
       global.strapi = { telemetry: { send } };
       metricsService = metricsServiceLoader({ strapi });
       const [containsRelationalFields, displayedFields, displayedRelationalFields] = expectedResult;
-
       await metricsService.sendDidConfigureListView(contentType, { layouts: { list } });
 
       expect(send).toHaveBeenCalledTimes(1);
       expect(send).toHaveBeenCalledWith('didConfigureListView', {
-        displayedFields,
-        containsRelationalFields,
-        displayedRelationalFields,
+        eventProperties: {
+          containsRelationalFields,
+          displayedFields,
+          displayedRelationalFields,
+        },
       });
     });
   });

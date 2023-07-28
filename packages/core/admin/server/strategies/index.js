@@ -21,5 +21,6 @@
  */
 module.exports = {
   admin: require('./admin'),
+  'data-transfer': require('./data-transfer'),
   'api-token': require('./api-token'),
 };

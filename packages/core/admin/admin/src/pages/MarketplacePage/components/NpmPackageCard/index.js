@@ -1,20 +1,18 @@
 import React from 'react';
+
+import { Box, Flex, Icon, Tooltip, Typography } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
+import { useTracking } from '@strapi/helper-plugin';
+import { CheckCircle, ExternalLink } from '@strapi/icons';
+import pluralize from 'pluralize';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import pluralize from 'pluralize';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/v2/LinkButton';
-import { Flex } from '@strapi/design-system/Flex';
-import { Icon } from '@strapi/design-system/Icon';
-import { Tooltip } from '@strapi/design-system/Tooltip';
-import ExternalLink from '@strapi/icons/ExternalLink';
-import CheckCircle from '@strapi/icons/CheckCircle';
-import { useTracking } from '@strapi/helper-plugin';
-import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+
+import StrapiLogo from '../../../../assets/images/logo-strapi-2022.svg';
+
 import InstallPluginButton from './InstallPluginButton';
+import PackageStats from './PackageStats';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
@@ -32,6 +30,7 @@ const NpmPackageCard = ({
   useYarn,
   isInDevelopmentMode,
   npmPackageType,
+  strapiAppVersion,
 }) => {
   const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
@@ -66,14 +65,21 @@ const NpmPackageCard = ({
       data-testid="npm-package-card"
     >
       <Box>
-        <Box
-          as="img"
-          src={attributes.logo.url}
-          alt={`${attributes.name} logo`}
-          hasRadius
-          width={11}
-          height={11}
-        />
+        <Flex direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box
+            as="img"
+            src={attributes.logo.url}
+            alt={`${attributes.name} logo`}
+            hasRadius
+            width={11}
+            height={11}
+          />
+          <PackageStats
+            githubStars={attributes.githubStars}
+            npmDownloads={attributes.npmDownloads}
+            npmPackageType={npmPackageType}
+          />
+        </Flex>
         <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
             <Flex alignItems="center">
@@ -95,7 +101,7 @@ const NpmPackageCard = ({
                   <Flex>
                     <Box
                       as="img"
-                      src={madeByStrapiIcon}
+                      src={StrapiLogo}
                       alt={madeByStrapiMessage}
                       marginLeft={1}
                       width={6}
@@ -114,7 +120,7 @@ const NpmPackageCard = ({
         </Box>
       </Box>
 
-      <Stack horizontal spacing={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
+      <Flex gap={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
         <LinkButton
           size="S"
           href={npmPackageHref}
@@ -132,21 +138,25 @@ const NpmPackageCard = ({
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
-            defaultMessage: 'Learn more',
+            defaultMessage: 'More',
           })}
         </LinkButton>
         <InstallPluginButton
           isInstalled={isInstalled}
           isInDevelopmentMode={isInDevelopmentMode}
           commandToCopy={commandToCopy}
+          strapiAppVersion={strapiAppVersion}
+          strapiPeerDepVersion={attributes.strapiVersion}
+          pluginName={attributes.name}
         />
-      </Stack>
+      </Flex>
     </Flex>
   );
 };
 
 NpmPackageCard.defaultProps = {
   isInDevelopmentMode: false,
+  strapiAppVersion: null,
 };
 
 NpmPackageCard.propTypes = {
@@ -164,12 +174,16 @@ NpmPackageCard.propTypes = {
       validated: PropTypes.bool.isRequired,
       madeByStrapi: PropTypes.bool.isRequired,
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
+      strapiVersion: PropTypes.string,
+      githubStars: PropTypes.number,
+      npmDownloads: PropTypes.number,
     }).isRequired,
   }).isRequired,
   isInstalled: PropTypes.bool.isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
   npmPackageType: PropTypes.string.isRequired,
+  strapiAppVersion: PropTypes.string,
 };
 
 export default NpmPackageCard;

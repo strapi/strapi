@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
+
+import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { CardAsset, CardTimer } from '@strapi/design-system/Card';
-import { Box } from '@strapi/design-system/Box';
-
-import { VideoPreview } from './VideoPreview';
-import { AssetCardBase } from './AssetCardBase';
 
 import { formatDuration } from '../../utils';
+
+import { AssetCardBase } from './AssetCardBase';
+import { VideoPreview } from './VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
   canvas,
   video {
     display: block;
+    pointer-events: none;
     max-width: 100%;
     max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
   }

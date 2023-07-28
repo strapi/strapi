@@ -41,15 +41,19 @@ module.exports = ({ strapi }) => {
           usePagination: true,
         });
 
+        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
+          auth,
+        });
+
         const data = await strapi.entityService.load(
           contentTypeUID,
           parent,
           attributeName,
-          transformedArgs
+          sanitizedQuery
         );
 
         const info = {
-          args: transformedArgs,
+          args: sanitizedQuery,
           resourceUID: targetUID,
         };
 

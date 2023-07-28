@@ -1,12 +1,10 @@
 import React from 'react';
+
+import { Box, Button, Flex, ModalFooter, Typography } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { pxToRem } from '@strapi/helper-plugin';
-import { Box } from '@strapi/design-system/Box';
-import { Flex } from '@strapi/design-system/Flex';
-import { Button } from '@strapi/design-system/Button';
-import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
+
 import ImageCardAsset from './ImageCardAsset';
 
 const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, onChangeLogo }) => {
@@ -47,9 +45,7 @@ const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, on
             })}
           </Button>
         </Flex>
-        <Box maxWidth={pxToRem(180)}>
-          <ImageCardAsset asset={asset} />
-        </Box>
+        <Box maxWidth={pxToRem(180)}>{asset.url ? <ImageCardAsset asset={asset} /> : null}</Box>
       </Box>
       <ModalFooter
         startActions={

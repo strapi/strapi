@@ -5,3 +5,5 @@ export const RESET_PROPS = 'ContentManager/CrudReducer/RESET_PROPS';
 export const SET_DATA_STRUCTURES = 'ContentManager/CrudReducer/SET_DATA_STRUCTURES';
 export const SET_STATUS = 'ContentManager/CrudReducer/SET_STATUS';
 export const SUBMIT_SUCCEEDED = 'ContentManager/CrudReducer/SUBMIT_SUCCEEDED';
+export const CLEAR_SET_MODIFIED_DATA_ONLY =
+  'ContentManager/CrudReducer/CLEAR_SET_MODIFIED_DATA_ONLY';

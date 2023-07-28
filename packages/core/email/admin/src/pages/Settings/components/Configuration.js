@@ -1,14 +1,12 @@
 /* eslint-disable no-useless-escape */
 
 import React from 'react';
+
+import { Flex, Grid, GridItem, Option, Select, TextInput, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Typography } from '@strapi/design-system/Typography';
-import { TextInput } from '@strapi/design-system/TextInput';
-import { Select, Option } from '@strapi/design-system/Select';
+import styled from 'styled-components';
+
 import getTrad from '../../../utils/getTrad';
 
 const DocumentationLink = styled.a`
@@ -19,8 +17,8 @@ const Configuration = ({ config }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack spacing={4}>
-      <Stack spacing={1}>
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
         <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('Settings.email.plugin.title.config'),
@@ -51,7 +49,7 @@ const Configuration = ({ config }) => {
             }
           )}
         </Typography>
-      </Stack>
+      </Flex>
       <Grid gap={5}>
         <GridItem col={6} s={12}>
           <TextInput
@@ -62,7 +60,7 @@ const Configuration = ({ config }) => {
             })}
             placeholder={formatMessage({
               id: getTrad('Settings.email.plugin.placeholder.defaultFrom'),
-              defaultMessage: `ex: Strapi No-Reply \<no-reply@strapi.io\>`,
+              defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
             })}
             disabled
             onChange={() => {}}
@@ -78,7 +76,7 @@ const Configuration = ({ config }) => {
             })}
             placeholder={formatMessage({
               id: getTrad('Settings.email.plugin.placeholder.defaultReplyTo'),
-              defaultMessage: `ex: Strapi \<example@strapi.io\>`,
+              defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
             })}
             disabled
             onChange={() => {}}
@@ -100,7 +98,7 @@ const Configuration = ({ config }) => {
           </Select>
         </GridItem>
       </Grid>
-    </Stack>
+    </Flex>
   );
 };
 

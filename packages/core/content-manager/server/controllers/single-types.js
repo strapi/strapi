@@ -2,12 +2,18 @@
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
-const { getService, pickWritableAttributes } = require('../utils');
+const { getService } = require('../utils');
 
 const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
-  const entity = await entityManager.find(query, model);
-  return entityManager.assocCreatorRoles(entity);
+
+  const populate = await getService('populate-builder')(model)
+    .populateFromQuery(query)
+    .populateDeep(Infinity)
+    .countRelations()
+    .build();
+
+  return entityManager.find(query, model, { populate });
 };
 
 module.exports = {
@@ -22,7 +28,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
+    const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
 
     const entity = await findEntity(permissionQuery, model);
 
@@ -54,9 +60,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
-
-    const pickWritables = pickWritableAttributes({ model });
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
+    const entity = await findEntity(sanitizedQuery, model);
 
     const pickPermittedFields = entity
       ? permissionChecker.sanitizeUpdateInput(entity)
@@ -66,14 +71,18 @@ module.exports = {
       ? setCreatorFields({ user, isEdition: true })
       : setCreatorFields({ user });
 
-    const sanitizeFn = pipeAsync(pickWritables, pickPermittedFields, setCreator);
+    const sanitizeFn = pipeAsync(pickPermittedFields, setCreator);
 
     if (!entity) {
       const sanitizedBody = await sanitizeFn(body);
-      const newEntity = await entityManager.create(sanitizedBody, model, { params: query });
+      const newEntity = await entityManager.create(sanitizedBody, model, {
+        params: sanitizedQuery,
+      });
       ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      await strapi.telemetry.send('didCreateFirstContentTypeEntry', {
+        eventProperties: { model },
+      });
       return;
     }
 
@@ -98,7 +107,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -125,7 +136,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.publish(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -137,8 +150,8 @@ module.exports = {
 
     const publishedEntity = await entityManager.publish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(publishedEntity);
@@ -156,7 +169,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(query, model);
+    const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
+
+    const entity = await findEntity(sanitizedQuery, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -168,10 +183,37 @@ module.exports = {
 
     const unpublishedEntity = await entityManager.unpublish(
       entity,
-      setCreatorFields({ user, isEdition: true })({}),
-      model
+      model,
+      setCreatorFields({ user, isEdition: true })({})
     );
 
     ctx.body = await permissionChecker.sanitizeOutput(unpublishedEntity);
+  },
+
+  async countDraftRelations(ctx) {
+    const { userAbility } = ctx.state;
+    const { model } = ctx.params;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const entity = await findEntity({}, model);
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.read(entity)) {
+      return ctx.forbidden();
+    }
+
+    const number = await entityManager.countDraftRelations(entity.id, model);
+
+    return {
+      data: number,
+    };
   },
 };

@@ -1,28 +1,40 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Router } from 'react-router-dom';
+
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { NotificationsProvider } from '@strapi/helper-plugin';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { lightTheme, darkTheme } from '@strapi/design-system';
-import en from '../../../../../../../../translations/en.json';
-import Theme from '../../../../../../../../components/Theme';
-import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Router } from 'react-router-dom';
+
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
+import en from '../../../../../../../../translations/en.json';
 import WebhookForm from '../index';
 
+jest.mock('../../../../../../../../hooks/useContentTypes');
+
 const makeApp = (component) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };
 
   return (
-    <LanguageProvider messages={messages} localeNames={localeNames}>
-      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-        <Theme>
-          <Router history={history}>{component}</Router>
-        </Theme>
-      </ThemeToggleProvider>
-    </LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
+        <ThemeProvider theme={lightTheme}>
+          <Router history={history}>
+            <NotificationsProvider toggleNotification={() => {}}>{component}</NotificationsProvider>
+          </Router>
+        </ThemeProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -37,8 +49,10 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
@@ -57,18 +71,21 @@ describe('Create Webhook', () => {
         isCreating={false}
         isTriggering={false}
         isTriggerIdle={false}
-        isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
     render(App);
 
-    userEvent.type(screen.getByLabelText(/name/i), 'My webhook');
-    userEvent.type(screen.getByLabelText(/url/i), 'https://google.fr');
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'My webhook' } });
+    fireEvent.change(screen.getByLabelText(/url/i), { target: { value: 'https://google.fr' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /entry.create/i }));
 
-    userEvent.click(screen.getByRole('button', { name: /Save/i }));
+    const saveButton = screen.getByRole('button', { name: /Save/i });
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledTimes(1);
@@ -79,5 +96,7 @@ describe('Create Webhook', () => {
         headers: [{ key: '', value: '' }],
       });
     });
+
+    expect(saveButton).toHaveAttribute('aria-disabled', 'true');
   });
 });

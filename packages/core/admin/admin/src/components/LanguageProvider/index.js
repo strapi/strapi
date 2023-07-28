@@ -7,13 +7,16 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
+
+import defaultsDeep from 'lodash/defaultsDeep';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
-import defaultsDeep from 'lodash/defaultsDeep';
+
 import LocalesProvider from '../LocalesProvider';
-import localStorageKey from './utils/localStorageKey';
+
 import init from './init';
 import reducer, { initialState } from './reducer';
+import localStorageKey from './utils/localStorageKey';
 
 const LanguageProvider = ({ children, localeNames, messages }) => {
   const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localeNames));
@@ -35,7 +38,7 @@ const LanguageProvider = ({ children, localeNames, messages }) => {
 
   return (
     <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
-      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames} messages={appMessages}>
+      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames}>
         {children}
       </LocalesProvider>
     </IntlProvider>

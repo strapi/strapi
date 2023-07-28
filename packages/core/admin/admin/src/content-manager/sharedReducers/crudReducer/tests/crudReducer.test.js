@@ -1,4 +1,5 @@
 import produce from 'immer';
+
 import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
@@ -18,6 +19,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
       contentTypeDataStructure: {},
       isLoading: true,
       data: {},
+      setModifiedDataOnly: false,
       status: 'resolved',
     };
   });
@@ -94,7 +96,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
     expect(crudReducer(state, action)).toEqual(expected);
   });
 
-  it('should handle the SUBMIt_SUCCEEDED action correctly', () => {
+  it('should handle the SUBMIT_SUCCEEDED action correctly', () => {
     const action = { type: SUBMIT_SUCCEEDED, data: 'test' };
 
     const expected = produce(state, (draft) => {

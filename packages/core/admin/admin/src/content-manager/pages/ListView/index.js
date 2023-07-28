@@ -1,55 +1,64 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { connect } from 'react-redux';
-import isEqual from 'react-fast-compare';
-import { bindActionCreators, compose } from 'redux';
-import { useIntl } from 'react-intl';
-import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
-import get from 'lodash/get';
-import { stringify } from 'qs';
-import axios from 'axios';
+import * as React from 'react';
 
+import {
+  IconButton,
+  Main,
+  Box,
+  ActionLayout,
+  Button,
+  ContentLayout,
+  HeaderLayout,
+  useNotifyAT,
+  Flex,
+  Td,
+  Tr,
+  Typography,
+  Status,
+  lightTheme,
+} from '@strapi/design-system';
 import {
   NoPermissions,
   CheckPermissions,
   SearchURLQuery,
+  useFetchClient,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBACProvider,
   useTracking,
   Link,
+  useAPIErrorHandler,
+  useStrapiApp,
+  Table,
+  PaginationURLQuery,
+  PageSizeURLQuery,
 } from '@strapi/helper-plugin';
+import { ArrowLeft, Cog, Plus } from '@strapi/icons';
+import axios, { AxiosError } from 'axios';
+import isEqual from 'lodash/isEqual';
+import PropTypes from 'prop-types';
+import { stringify } from 'qs';
+import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
+import { connect, useSelector } from 'react-redux';
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
+import { bindActionCreators, compose } from 'redux';
+import styled from 'styled-components';
 
-import { IconButton } from '@strapi/design-system/IconButton';
-import { Main } from '@strapi/design-system/Main';
-import { Box } from '@strapi/design-system/Box';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { Button } from '@strapi/design-system/Button';
-
-import ArrowLeft from '@strapi/icons/ArrowLeft';
-import Plus from '@strapi/icons/Plus';
-import Cog from '@strapi/icons/Cog';
-
-import { axiosInstance } from '../../../core/utils';
-
-import DynamicTable from '../../components/DynamicTable';
-import AttributeFilter from '../../components/AttributeFilter';
+import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { useEnterprise } from '../../../hooks/useEnterprise';
+import { selectAdminPermissions } from '../../../pages/App/selectors';
 import { InjectionZone } from '../../../shared/components';
+import AttributeFilter from '../../components/AttributeFilter';
+import { getTrad } from '../../utils';
 
-import permissions from '../../../permissions';
-
-import { getRequestUrl, getTrad } from '../../utils';
-
-import FieldPicker from './FieldPicker';
-import PaginationFooter from './PaginationFooter';
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
-import makeSelectListView from './selectors';
-import { buildQueryString } from './utils';
-
-const cmPermissions = permissions.contentManager;
+import { Body } from './components/Body';
+import BulkActionButtons from './components/BulkActionButtons';
+import CellContent from './components/CellContent';
+import { FieldPicker } from './components/FieldPicker';
+import makeSelectListView, { selectDisplayedHeaders } from './selectors';
+import { buildValidGetParams } from './utils';
 
 const ConfigureLayoutBox = styled(Box)`
   svg {
@@ -59,10 +68,14 @@ const ConfigureLayoutBox = styled(Box)`
   }
 `;
 
+const REVIEW_WORKFLOW_COLUMNS_CE = null;
+const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
+
 function ListView({
   canCreate,
   canDelete,
   canRead,
+  canPublish,
   data,
   getData,
   getDataSucceeded,
@@ -72,47 +85,100 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
+  const { contentType } = layout;
   const {
-    contentType: {
-      metadatas,
-      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-    },
-  } = layout;
-
+    info,
+    options,
+    metadatas,
+    settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+  } = contentType;
+  const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-  const trackUsageRef = useRef(trackUsage);
-  const fetchPermissionsRef = useRef(refetchPermissions);
+  const trackUsageRef = React.useRef(trackUsage);
+  const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const permissions = useSelector(selectAdminPermissions);
 
   useFocusWhenNavigate();
 
   const [{ query }] = useQueryParams();
-  const params = buildQueryString(query);
+  const params = React.useMemo(() => buildValidGetParams(query), [query]);
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const contentType = layout.contentType;
-  const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  const fetchClient = useFetchClient();
+
+  const hasDraftAndPublish = options?.draftAndPublish ?? false;
+  const hasReviewWorkflows = options?.reviewWorkflows ?? false;
+
+  const reviewWorkflowColumns = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CE,
+    async () =>
+      (
+        await import(
+          '../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn/constants'
+        )
+      ).REVIEW_WORKFLOW_COLUMNS_EE,
+    {
+      enabled: !!options?.reviewWorkflows,
+    }
+  );
+  const ReviewWorkflowsStage = useEnterprise(
+    REVIEW_WORKFLOW_COLUMNS_CELL_CE,
+    async () =>
+      (await import('../../../../../ee/admin/content-manager/pages/ListView/ReviewWorkflowsColumn'))
+        .ReviewWorkflowsStageEE,
+    {
+      enabled: hasReviewWorkflows,
+    }
+  );
+
+  const { post, del } = fetchClient;
+
+  const bulkUnpublishMutation = useMutation(
+    (data) =>
+      post(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, data),
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: {
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          },
+        });
+
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
-  const requestUrlRef = useRef('');
-
-  const fetchData = useCallback(
-    async (endPoint, source) => {
+  const requestUrlRef = React.useRef('');
+  /**
+   * TODO: re-write all of this, it's a mess.
+   */
+  const fetchData = React.useCallback(
+    async (endPoint, options) => {
       getData();
 
       try {
-        const opts = source ? { cancelToken: source.token } : null;
-
         const {
           data: { results, pagination: paginationResult },
-        } = await axiosInstance.get(endPoint, opts);
+        } = await fetchClient.get(endPoint, options);
 
         notifyStatus(
           formatMessage(
@@ -132,7 +198,7 @@ function ListView({
           return;
         }
 
-        const resStatus = get(err, 'response.status', null);
+        const resStatus = err?.response?.status ?? null;
 
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
@@ -147,73 +213,70 @@ function ListView({
           return;
         }
 
-        console.error(err);
         toggleNotification({
           type: 'warning',
           message: { id: getTrad('error.model.fetch') },
         });
       }
     },
-    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification]
+    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification, fetchClient]
   );
 
-  const handleConfirmDeleteAllData = useCallback(
+  const handleConfirmDeleteAllData = React.useCallback(
     async (ids) => {
       try {
-        await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        await post(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
           ids,
         });
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        fetchData(`/content-manager/collection-types/${slug}`, { params });
+
         trackUsageRef.current('didBulkDeleteEntries');
       } catch (err) {
         toggleNotification({
           type: 'warning',
-          message: { id: getTrad('error.record.delete') },
+          message: formatAPIError(err),
         });
       }
     },
-    [fetchData, params, slug, toggleNotification]
+    [slug, toggleNotification, formatAPIError, post, fetchData, params]
   );
 
-  const handleConfirmDeleteData = useCallback(
+  const handleConfirmDeleteData = React.useCallback(
     async (idToDelete) => {
       try {
-        await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        await del(`/content-manager/collection-types/${slug}/${idToDelete}`);
 
-        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-        fetchData(requestUrl);
+        const requestUrl = `/content-manager/collection-types/${slug}`;
+        fetchData(requestUrl, { params });
 
         toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
       } catch (err) {
-        const errorMessage = get(
-          err,
-          'response.payload.message',
-          formatMessage({ id: getTrad('error.record.delete') })
-        );
-
         toggleNotification({
           type: 'warning',
-          message: errorMessage,
+          message: formatAPIError(err),
         });
       }
     },
-    [slug, params, fetchData, toggleNotification, formatMessage]
+    [slug, toggleNotification, formatAPIError, del, fetchData, params]
   );
 
-  useEffect(() => {
+  const handleConfirmUnpublishAllData = (selectedEntries) => {
+    return bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
+  };
+
+  React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+    const requestUrl = `/content-manager/collection-types/${slug}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, source);
+      fetchData(requestUrl, { cancelToken: source.token, params });
     }
 
     return () => {
@@ -221,7 +284,6 @@ function ListView({
 
       source.cancel('Operation canceled by the user.');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const defaultHeaderLayoutTitle = formatMessage({
@@ -229,9 +291,88 @@ function ListView({
     defaultMessage: 'Content',
   });
   const headerLayoutTitle = formatMessage({
-    id: contentType.info.displayName,
-    defaultMessage: contentType.info.displayName || defaultHeaderLayoutTitle,
+    id: info.displayName,
+    defaultMessage: info.displayName || defaultHeaderLayoutTitle,
   });
+
+  const { runHookWaterfall } = useStrapiApp();
+  const displayedHeaders = useSelector(selectDisplayedHeaders);
+
+  const tableHeaders = React.useMemo(() => {
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
+      displayedHeaders,
+      layout,
+    });
+
+    const formattedHeaders = headers.displayedHeaders.map((header) => {
+      const { metadatas } = header;
+
+      if (header.fieldSchema.type === 'relation') {
+        const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
+
+        return {
+          ...header,
+          metadatas: {
+            ...metadatas,
+            label: formatMessage({
+              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+              defaultMessage: metadatas.label,
+            }),
+          },
+          name: sortFieldValue,
+        };
+      }
+
+      return {
+        ...header,
+        metadatas: {
+          ...metadatas,
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            defaultMessage: metadatas.label,
+          }),
+        },
+      };
+    });
+
+    if (hasDraftAndPublish) {
+      formattedHeaders.push({
+        key: '__published_at_temp_key__',
+        name: 'publishedAt',
+        fieldSchema: {
+          type: 'custom',
+        },
+        metadatas: {
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+            defaultMessage: 'publishedAt',
+          }),
+          searchable: false,
+          sortable: true,
+        },
+      });
+    }
+
+    if (reviewWorkflowColumns) {
+      // Make sure the column header label is translated
+      if (typeof reviewWorkflowColumns.metadatas.label !== 'string') {
+        reviewWorkflowColumns.metadatas.label = formatMessage(
+          reviewWorkflowColumns.metadatas.label
+        );
+      }
+
+      formattedHeaders.push(reviewWorkflowColumns);
+    }
+
+    return formattedHeaders;
+  }, [
+    runHookWaterfall,
+    displayedHeaders,
+    layout,
+    reviewWorkflowColumns,
+    hasDraftAndPublish,
+    formatMessage,
+  ]);
 
   const subtitle = canRead
     ? formatMessage(
@@ -267,6 +408,57 @@ function ListView({
       </Button>
     ) : null;
 
+  /**
+   *
+   * @param {string} id
+   * @returns void
+   */
+  const handleRowClick = (id) => () => {
+    trackUsage('willEditEntryFromList');
+    push({
+      pathname: `${pathname}/${id}`,
+      state: { from: pathname },
+      search: pluginsQueryParams,
+    });
+  };
+
+  const handleCloneClick = (id) => async () => {
+    try {
+      const { data } = await post(
+        `/content-manager/collection-types/${contentType.uid}/auto-clone/${id}?${pluginsQueryParams}`
+      );
+
+      if ('id' in data) {
+        push({
+          pathname: `${pathname}/${data.id}`,
+          state: { from: pathname },
+          search: pluginsQueryParams,
+        });
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        push({
+          pathname: `${pathname}/create/clone/${id}`,
+          state: { from: pathname, error: formatAPIError(err) },
+          search: pluginsQueryParams,
+        });
+      }
+    }
+  };
+
+  // Add 1 column for the checkbox and 1 for the actions
+  const colCount = tableHeaders.length + 2;
+
+  // We have this function to refetch data when selected entries modal is closed
+  const refetchData = () => {
+    fetchData(`/content-manager/collection-types/${slug}`, { params });
+  };
+
+  // Block rendering until the review stage component is fully loaded in EE
+  if (!ReviewWorkflowsStage) {
+    return null;
+  }
+
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
@@ -291,7 +483,9 @@ function ListView({
             <>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
-              <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
+              <CheckPermissions
+                permissions={permissions.contentManager.collectionTypesConfigurations}
+              >
                 <ConfigureLayoutBox paddingTop={1} paddingBottom={1}>
                   <IconButton
                     onClick={() => {
@@ -333,22 +527,135 @@ function ListView({
       )}
       <ContentLayout>
         {canRead ? (
-          <>
-            <DynamicTable
-              canCreate={canCreate}
-              canDelete={canDelete}
-              contentTypeName={headerLayoutTitle}
-              onConfirmDeleteAll={handleConfirmDeleteAllData}
-              onConfirmDelete={handleConfirmDeleteData}
-              isBulkable={isBulkable}
-              isLoading={isLoading}
-              // FIXME: remove the layout props drilling
-              layout={layout}
-              rows={data}
-              action={getCreateAction({ variant: 'secondary' })}
-            />
-            <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
-          </>
+          <Flex gap={4} direction="column" alignItems="stretch">
+            <Table.Root rows={data} isLoading={isLoading} colCount={colCount}>
+              <Table.ActionBar>
+                <BulkActionButtons
+                  showPublish={canPublish && hasDraftAndPublish}
+                  showDelete={canDelete}
+                  onConfirmDeleteAll={handleConfirmDeleteAllData}
+                  onConfirmUnpublishAll={handleConfirmUnpublishAllData}
+                  refetchData={refetchData}
+                />
+              </Table.ActionBar>
+              <Table.Content>
+                <Table.Head>
+                  {/* Bulk action select all checkbox */}
+                  <Table.HeaderCheckboxCell />
+                  {/* Dynamic headers based on fields */}
+                  {tableHeaders.map(({ fieldSchema, key, name, metadatas }) => (
+                    <Table.HeaderCell
+                      key={key}
+                      name={name}
+                      fieldSchemaType={fieldSchema.type}
+                      relationFieldName={metadatas.mainField?.name}
+                      isSortable={metadatas.sortable}
+                      label={metadatas.label}
+                    />
+                  ))}
+                  {/* Visually hidden header for actions */}
+                  <Table.HeaderHiddenActionsCell />
+                </Table.Head>
+                {/* Loading content */}
+                <Table.LoadingBody />
+                {/* Empty content */}
+                <Table.EmptyBody
+                  contentType={headerLayoutTitle}
+                  aciton={getCreateAction({ variant: 'secondary' })}
+                />
+                {/* Content */}
+                <Body.Root
+                  onConfirmDelete={handleConfirmDeleteData}
+                  isConfirmDeleteRowOpen={isConfirmDeleteRowOpen}
+                  setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                >
+                  {data.map((rowData, index) => {
+                    return (
+                      <Tr cursor="pointer" key={data.id} onClick={handleRowClick(rowData.id)}>
+                        {/* Bulk action row checkbox */}
+                        <Body.CheckboxDataCell rowId={rowData.id} index={index} />
+                        {/* Field data */}
+                        {tableHeaders.map(({ key, name, ...rest }) => {
+                          if (hasDraftAndPublish && name === 'publishedAt') {
+                            return (
+                              <Td key={key}>
+                                <Status
+                                  width="min-content"
+                                  showBullet={false}
+                                  variant={rowData.publishedAt ? 'success' : 'secondary'}
+                                  size="S"
+                                >
+                                  <Typography
+                                    fontWeight="bold"
+                                    textColor={`${
+                                      rowData.publishedAt ? 'success' : 'secondary'
+                                    }700`}
+                                  >
+                                    {formatMessage({
+                                      id: getTrad(
+                                        `containers.List.${
+                                          rowData.publishedAt ? 'published' : 'draft'
+                                        }`
+                                      ),
+                                      defaultMessage: rowData.publishedAt ? 'Published' : 'Draft',
+                                    })}
+                                  </Typography>
+                                </Status>
+                              </Td>
+                            );
+                          }
+
+                          if (hasReviewWorkflows && name === 'strapi_stage') {
+                            return (
+                              <Td key={key}>
+                                {rowData.strapi_stage ? (
+                                  <ReviewWorkflowsStage
+                                    color={
+                                      rowData.strapi_stage.color ?? lightTheme.colors.primary600
+                                    }
+                                    name={rowData.strapi_stage.name}
+                                  />
+                                ) : (
+                                  <Typography textColor="neutral800">-</Typography>
+                                )}
+                              </Td>
+                            );
+                          }
+
+                          return (
+                            <Td key={key}>
+                              <CellContent
+                                content={rowData[name.split('.')[0]]}
+                                name={name}
+                                contentType={layout.contentType}
+                                {...rest}
+                                rowId={rowData.id}
+                              />
+                            </Td>
+                          );
+                        })}
+                        {/* Actions: edit, duplicate, delete */}
+                        {(canDelete || canPublish) && isBulkable && (
+                          <Body.EntityActionsDataCell
+                            rowId={rowData.id}
+                            index={index}
+                            setIsConfirmDeleteRowOpen={setIsConfirmDeleteRowOpen}
+                            canCreate={canCreate}
+                            canDelete={canDelete}
+                            handleCloneClick={handleCloneClick}
+                          />
+                        )}
+                      </Tr>
+                    );
+                  })}
+                </Body.Root>
+              </Table.Content>
+            </Table.Root>
+            <Flex alignItems="flex-end" justifyContent="space-between">
+              <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+              <PaginationURLQuery pagination={{ pageCount: pagination?.pageCount || 1 }} />
+            </Flex>
+          </Flex>
         ) : (
           <NoPermissions />
         )}
@@ -361,16 +668,17 @@ ListView.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
+  canPublish: PropTypes.bool.isRequired,
   data: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
+      uid: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
       info: PropTypes.shape({ displayName: PropTypes.string.isRequired }).isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,
@@ -399,4 +707,4 @@ export function mapDispatchToProps(dispatch) {
 }
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect)(memo(ListView, isEqual));
+export default compose(withConnect)(React.memo(ListView, isEqual));

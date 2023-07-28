@@ -40,5 +40,6 @@
   "relation.manyToOne": "يملك الكثير",
   "relation.oneToMany": "ينتمي للكثير",
   "relation.oneToOne": "يتشارك بواحد",
-  "relation.oneWay": "يمتلك واحد"
+  "relation.oneWay": "يمتلك واحد",
+  "modalForm.header.back": "خلف"
 }

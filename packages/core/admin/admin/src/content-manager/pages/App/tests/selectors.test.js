@@ -1,4 +1,5 @@
-import { fixtures } from '@strapi/admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils';
+
 import { makeSelectModels } from '../selectors';
 
 describe('Content Manager | App | selectors', () => {

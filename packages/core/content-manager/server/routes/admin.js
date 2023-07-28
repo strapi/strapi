@@ -7,6 +7,14 @@ module.exports = {
   routes: [
     {
       method: 'GET',
+      path: '/init',
+      handler: 'init.getInitData',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/content-types',
       handler: 'content-types.findContentTypes',
       config: {
@@ -80,23 +88,19 @@ module.exports = {
       },
     },
     {
-      method: 'POST',
+      method: 'GET',
       path: '/relations/:model/:targetField',
-      handler: 'relations.find',
+      handler: 'relations.findAvailable',
       config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: {
-              actions: [
-                'plugin::content-manager.explorer.create',
-                'plugin::content-manager.explorer.update',
-              ],
-              hasAtLeastOne: true,
-            },
-          },
-        ],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/relations/:model/:id/:targetField',
+      handler: 'relations.findExisting',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
@@ -184,8 +188,8 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/collection-types/:model/:id/:targetField',
-      handler: 'collection-types.previewManyRelations',
+      path: '/single-types/:model/actions/countDraftRelations',
+      handler: 'single-types.countDraftRelations',
       config: {
         middlewares: [routing],
         policies: [
@@ -216,6 +220,36 @@ module.exports = {
       method: 'POST',
       path: '/collection-types/:model',
       handler: 'collection-types.create',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.create'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/clone/:sourceId',
+      handler: 'collection-types.clone',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.create'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/auto-clone/:sourceId',
+      handler: 'collection-types.autoClone',
       config: {
         middlewares: [routing],
         policies: [
@@ -315,6 +349,68 @@ module.exports = {
           {
             name: 'plugin::content-manager.hasPermissions',
             config: { actions: ['plugin::content-manager.explorer.delete'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/actions/bulkPublish',
+      handler: 'collection-types.bulkPublish',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'plugin::content-manager.has-draft-and-publish',
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/collection-types/:model/actions/bulkUnpublish',
+      handler: 'collection-types.bulkUnpublish',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'plugin::content-manager.has-draft-and-publish',
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.publish'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/collection-types/:model/:id/actions/countDraftRelations',
+      handler: 'collection-types.countDraftRelations',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/collection-types/:model/actions/countManyEntriesDraftRelations',
+      handler: 'collection-types.countManyEntriesDraftRelations',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },

@@ -1,0 +1,445 @@
+<!--- DynamicTable.stories.mdx --->
+
+import { useEffect } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import {
+  Main,
+  Button,
+  Box,
+  Flex,
+  BaseCheckbox,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Tbody,
+  Td,
+  Tr,
+  TFooter,
+  Typography,
+  IconButton,
+} from '@strapi/design-system';
+import { Plus, Pencil, Trash } from '@strapi/icons';
+import useQueryParams from '../../hooks/useQueryParams';
+import DynamicTable from './index';
+
+<Meta title="components/DynamicTable" />
+
+# DynamicTable
+
+TODO...
+
+## Imports
+
+```js
+import { DynamicTable } from '@strapi/helper-plugin';
+```
+
+## Usage Loading
+
+<Canvas>
+  <Story name="loading">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" isLoading />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage No content
+
+<Canvas>
+  <Story name="no-content">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage No content with footer
+
+<Canvas>
+  <Story name="no-content-with-footer">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const [{ query }, setQuery] = useQueryParams();
+      useEffect(() => {
+        setQuery({ filters: { $and: [{ firstname: { $eq: 'soupette' } }] } });
+      }, []);
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              footer={<TFooter icon={<Plus />}>Add another user</TFooter>}
+            />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage No content with filters
+
+<Canvas>
+  <Story name="no-content-with-filters">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const [{ query }, setQuery] = useQueryParams();
+      useEffect(() => {
+        setQuery({ filters: { $and: [{ firstname: { $eq: 'soupette' } }] } });
+      }, []);
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage with delete action
+
+<Canvas>
+  <Story name="delete">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const rows = [
+        { id: 1, firstname: 'soup', lastname: 'soup', email: 'soup@strapi.io' },
+        { id: 2, firstname: 'm', lastname: 'frachet', email: 'm@strapi.io' },
+        { id: 3, firstname: 'hicham', lastname: 'ELBSI', email: 'helbsi@strapi.io' },
+      ];
+      const TableRows = ({
+        headers,
+        entriesToDelete,
+        onClickDelete,
+        onSelectRow,
+        rows,
+        withMainAction,
+        withBulkActions,
+      }) => {
+        return (
+          <Tbody>
+            {rows.map((data) => {
+              const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
+              return (
+                <Tr key={data.id}>
+                  {withMainAction && (
+                    <Td>
+                      <BaseCheckbox
+                        aria-label={`Select ${data.firstname} ${data.lastname}`}
+                        checked={isChecked}
+                        onChange={() => {
+                          onSelectRow({ name: data.id, value: !isChecked });
+                        }}
+                      />
+                    </Td>
+                  )}
+                  {headers.map(({ key, cellFormatter, name, ...rest }) => {
+                    return (
+                      <Td key={key}>
+                        <Typography textColor="neutral800">{data[name] || '-'}</Typography>
+                      </Td>
+                    );
+                  })}
+                  {withBulkActions && (
+                    <Td>
+                      <Flex justifyContent="end">
+                        <IconButton
+                          onClick={() => console.log(`${pathname}/${data.id}`)}
+                          label={`Edit ${data.firstname} ${data.lastname}`}
+                          noBorder
+                          icon={<Pencil />}
+                        />
+                        <Box paddingLeft={1}>
+                          <IconButton
+                            onClick={() => onClickDelete(data.id)}
+                            label={`Delete ${data.firstname} ${data.lastname}`}
+                            noBorder
+                            icon={<Trash />}
+                          />
+                        </Box>
+                      </Flex>
+                    </Td>
+                  )}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        );
+      };
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              onConfirmDeleteAll={(ids) => {
+                alert(`Delete ${ids.join(' ')}`);
+              }}
+              onConfirmDelete={(id) => {
+                alert(`Delete ${id}`);
+              }}
+              rows={rows}
+              withMainAction
+              withBulkActions
+            >
+              <TableRows />
+            </DynamicTable>
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage with delete action with custom modal
+
+<Canvas>
+  <Story name="delete-custom-components">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const rows = [
+        { id: 1, firstname: 'soup', lastname: 'soup', email: 'soup@strapi.io' },
+        { id: 2, firstname: 'm', lastname: 'frachet', email: 'm@strapi.io' },
+        { id: 3, firstname: 'hicham', lastname: 'ELBSI', email: 'helbsi@strapi.io' },
+      ];
+      const TableRows = ({
+        headers,
+        entriesToDelete,
+        onClickDelete,
+        onSelectRow,
+        rows,
+        withMainAction,
+        withBulkActions,
+      }) => {
+        return (
+          <Tbody>
+            {rows.map((data) => {
+              const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
+              return (
+                <Tr key={data.id}>
+                  {withMainAction && (
+                    <Td>
+                      <BaseCheckbox
+                        aria-label={`Select ${data.firstname} ${data.lastname}`}
+                        checked={isChecked}
+                        onChange={() => {
+                          onSelectRow({ name: data.id, value: !isChecked });
+                        }}
+                      />
+                    </Td>
+                  )}
+                  {headers.map(({ key, cellFormatter, name, ...rest }) => {
+                    return (
+                      <Td key={key}>
+                        <Typography textColor="neutral800">{data[name] || '-'}</Typography>
+                      </Td>
+                    );
+                  })}
+                  {withBulkActions && (
+                    <Td>
+                      <Flex justifyContent="end">
+                        <IconButton
+                          onClick={() => console.log(`${pathname}/${data.id}`)}
+                          label={`Edit ${data.firstname} ${data.lastname}`}
+                          noBorder
+                          icon={<Pencil />}
+                        />
+                        <Box paddingLeft={1}>
+                          <IconButton
+                            onClick={() => onClickDelete(data.id)}
+                            label={`Delete ${data.firstname} ${data.lastname}`}
+                            noBorder
+                            icon={<Trash />}
+                          />
+                        </Box>
+                      </Flex>
+                    </Td>
+                  )}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        );
+      };
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              // custom modals
+              components={{
+                ConfirmDialogDeleteAll: ({
+                  isConfirmButtonLoading,
+                  onConfirm,
+                  onToggleDialog,
+                  isOpen,
+                }) => {
+                  return (
+                    <Dialog
+                      onClose={onToggleDialog}
+                      title="Confirm"
+                      labelledBy="confirmation"
+                      describedBy="confirm-description"
+                      isOpen={isOpen}
+                    >
+                      <DialogBody>
+                        <Flex justifyContent="center">Are you sure?</Flex>
+                      </DialogBody>
+                      <DialogFooter
+                        startAction={
+                          <Button onClick={onToggleDialog} variant="tertiary">
+                            Cancel
+                          </Button>
+                        }
+                        endAction={
+                          <Button
+                            onClick={onConfirm}
+                            variant="danger-light"
+                            id="confirm-delete"
+                            loading={isConfirmButtonLoading}
+                          >
+                            confirm
+                          </Button>
+                        }
+                      />
+                    </Dialog>
+                  );
+                },
+              }}
+              onConfirmDeleteAll={(ids) => {
+                alert(`Delete ${ids.join(' ')}`);
+              }}
+              onConfirmDelete={(id) => {
+                alert(`Delete ${id}`);
+              }}
+              rows={rows}
+              withMainAction
+              withBulkActions
+            >
+              <TableRows />
+            </DynamicTable>
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={DynamicTable} />

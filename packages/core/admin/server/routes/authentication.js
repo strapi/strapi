@@ -5,7 +5,10 @@ module.exports = [
     method: 'POST',
     path: '/login',
     handler: 'authentication.login',
-    config: { auth: false },
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
   },
   {
     method: 'POST',
@@ -42,5 +45,13 @@ module.exports = [
     path: '/reset-password',
     handler: 'authentication.resetPassword',
     config: { auth: false },
+  },
+  {
+    method: 'POST',
+    path: '/logout',
+    handler: 'authentication.logout',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
   },
 ];

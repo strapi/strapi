@@ -1,37 +1,42 @@
 import React from 'react';
+
+import { IconButton } from '@strapi/design-system';
+import { useClipboard, useNotification } from '@strapi/helper-plugin';
+import { Link as LinkIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { IconButton } from '@strapi/design-system/IconButton';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useNotification } from '@strapi/helper-plugin';
-import LinkIcon from '@strapi/icons/Link';
+
 import getTrad from '../../utils/getTrad';
 
 export const CopyLinkButton = ({ url }) => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
+  const { copy } = useClipboard();
+
+  const handleClick = async () => {
+    const didCopy = await copy(url);
+
+    if (didCopy) {
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: 'notification.link-copied',
+          defaultMessage: 'Link copied into the clipboard',
+        },
+      });
+    }
+  };
 
   return (
-    <CopyToClipboard
-      text={url}
-      onCopy={() => {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'notification.link-copied',
-            defaultMessage: 'Link copied into the clipboard',
-          },
-        });
-      }}
+    <IconButton
+      label={formatMessage({
+        id: getTrad('control-card.copy-link'),
+        defaultMessage: 'Copy link',
+      })}
+      onClick={handleClick}
     >
-      <IconButton
-        label={formatMessage({
-          id: getTrad('control-card.copy-link'),
-          defaultMessage: 'Copy link',
-        })}
-        icon={<LinkIcon />}
-      />
-    </CopyToClipboard>
+      <LinkIcon />
+    </IconButton>
   );
 };
 

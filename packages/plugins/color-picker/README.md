@@ -1,6 +1,6 @@
 # Strapi plugin Color Picker
 
-A Strapi-maintainted color picker custom field
+A Strapi-maintained color picker custom field.
 
 ## Installation
 

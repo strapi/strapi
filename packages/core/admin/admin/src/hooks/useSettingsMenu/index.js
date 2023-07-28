@@ -1,57 +1,125 @@
-import { useEffect, useReducer } from 'react';
-import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfos } from '@strapi/helper-plugin';
+import { useState, useEffect, useCallback } from 'react';
 
-import reducer, { initialState } from './reducer';
-import init from './init';
+import { hasPermissions, useRBACProvider, useStrapiApp, useAppInfo } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 
-const useSettingsMenu = (noCheck = false) => {
-  const { allPermissions: permissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfos();
+import { selectAdminPermissions } from '../../pages/App/selectors';
+import { useEnterprise } from '../useEnterprise';
+
+import { LINKS_CE } from './constants';
+import formatLinks from './utils/formatLinks';
+import sortLinks from './utils/sortLinks';
+
+const useSettingsMenu = () => {
+  const [{ isLoading, menu }, setData] = useState({
+    isLoading: true,
+    menu: [],
+  });
+  const { allPermissions: userPermissions } = useRBACProvider();
+  const { shouldUpdateStrapi } = useAppInfo();
   const { settings } = useStrapiApp();
+  const permissions = useSelector(selectAdminPermissions);
 
-  const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, { settings, shouldUpdateStrapi })
+  const { global: globalLinks, admin: adminLinks } = useEnterprise(
+    LINKS_CE,
+    async () => (await import('../../../../ee/admin/hooks/useSettingsMenu/constants')).LINKS_EE,
+    {
+      combine(ceLinks, eeLinks) {
+        return {
+          admin: [...eeLinks.admin, ...ceLinks.admin],
+          global: [...ceLinks.global, ...eeLinks.global],
+        };
+      },
+      defaultValue: {
+        admin: [],
+        global: [],
+      },
+    }
+  );
+
+  const addPermissions = useCallback(
+    (link) => {
+      if (!link.id) {
+        throw new Error('The settings menu item must have an id attribute.');
+      }
+
+      return {
+        ...link,
+        permissions: permissions.settings?.[link.id]?.main,
+      };
+    },
+    [permissions.settings]
   );
 
   useEffect(() => {
     const getData = async () => {
-      const checkPermissions = async (permissionsToCheck, path) => {
-        const hasPermission = await hasPermissions(permissions, permissionsToCheck);
+      const buildMenuPermissions = (sections) =>
+        Promise.all(
+          sections.reduce((acc, section, sectionIndex) => {
+            const buildMenuPermissions = (links) =>
+              links.map(async (link, linkIndex) => ({
+                hasPermission: await hasPermissions(userPermissions, link.permissions),
+                sectionIndex,
+                linkIndex,
+              }));
 
-        return { hasPermission, path };
-      };
+            return [...acc, ...buildMenuPermissions(section.links)];
+          }, [])
+        );
 
-      const generateArrayOfPromises = (array) => {
-        return array.reduce((acc, current, sectionIndex) => {
-          const generateArrayOfPromises = (array) =>
-            array.map((link, index) =>
-              checkPermissions(array[index].permissions, `${sectionIndex}.links.${index}`)
+      const menuPermissions = await buildMenuPermissions(sections);
+
+      setData((prev) => ({
+        ...prev,
+        isLoading: false,
+        menu: sections.map((section, sectionIndex) => ({
+          ...section,
+          links: section.links.map((link, linkIndex) => {
+            const permission = menuPermissions.find(
+              (permission) =>
+                permission.sectionIndex === sectionIndex && permission.linkIndex === linkIndex
             );
 
-          return [...acc, ...generateArrayOfPromises(current.links)];
-        }, []);
-      };
-
-      const generalSectionLinksArrayOfPromises = generateArrayOfPromises(menu);
-
-      const data = await Promise.all(generalSectionLinksArrayOfPromises);
-
-      dispatch({
-        type: 'CHECK_PERMISSIONS_SUCCEEDED',
-        data,
-      });
+            return {
+              ...link,
+              isDisplayed: Boolean(permission.hasPermission),
+            };
+          }),
+        })),
+      }));
     };
 
-    // This hook is also used by the main LeftMenu component in order to know which sections it needs to display/hide
-    // Therefore, we don't need to make the checking all the times when the hook is used.
-    if (!noCheck) {
-      getData();
-    }
+    const { global, ...otherSections } = settings;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [permissions, noCheck]);
+    const sections = formatLinks([
+      {
+        ...settings.global,
+        links: sortLinks([...settings.global.links, ...globalLinks.map(addPermissions)]).map(
+          (link) => ({
+            ...link,
+            hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
+          })
+        ),
+      },
+      {
+        id: 'permissions',
+        intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
+        links: adminLinks.map(addPermissions),
+      },
+      ...Object.values(otherSections),
+    ]);
 
-  return { isLoading, menu };
+    getData();
+  }, [adminLinks, globalLinks, userPermissions, settings, shouldUpdateStrapi, addPermissions]);
+
+  const filterMenu = (menuItem) => {
+    return {
+      ...menuItem,
+      links: menuItem.links.filter((link) => link.isDisplayed),
+    };
+  };
+
+  return { isLoading, menu: menu.map(filterMenu) };
 };
 
 export default useSettingsMenu;

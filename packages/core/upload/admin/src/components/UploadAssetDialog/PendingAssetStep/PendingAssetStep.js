@@ -1,19 +1,24 @@
-import React, { useState, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { useTracking } from '@strapi/helper-plugin';
-import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
-import { Button } from '@strapi/design-system/Button';
-import { useIntl } from 'react-intl';
-import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import React, { useRef, useState } from 'react';
 
+import {
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  KeyboardNavigable,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Typography,
+} from '@strapi/design-system';
+import { useTracking } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+
+import { AssetDefinition } from '../../../constants';
+import getTrad from '../../../utils/getTrad';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
-import getTrad from '../../../utils/getTrad';
-import { AssetDefinition } from '../../../constants';
 
 const Status = {
   Idle: 'IDLE',
@@ -93,9 +98,9 @@ export const PendingAssetStep = ({
       </ModalHeader>
 
       <ModalBody>
-        <Stack spacing={7}>
+        <Flex direction="column" alignItems="stretch" gap={7}>
           <Flex justifyContent="space-between">
-            <Stack spacing={0}>
+            <Flex direction="column" alignItems="stretch" gap={0}>
               <Typography variant="pi" fontWeight="bold" textColor="neutral800">
                 {formatMessage(
                   {
@@ -112,7 +117,7 @@ export const PendingAssetStep = ({
                   defaultMessage: 'Manage the assets before adding them to the Media Library',
                 })}
               </Typography>
-            </Stack>
+            </Flex>
             <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
                 id: getTrad('header.actions.add-assets'),
@@ -158,7 +163,7 @@ export const PendingAssetStep = ({
               })}
             </Grid>
           </KeyboardNavigable>
-        </Stack>
+        </Flex>
       </ModalBody>
 
       <ModalFooter

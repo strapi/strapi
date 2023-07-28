@@ -28,7 +28,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
-          icon: 'american-sign-language-interpreting',
+          icon: 'calendar',
           attributes: {
             title: {
               type: 'string',
@@ -50,7 +50,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
-          icon: 'american-sign-language-interpreting',
+          icon: 'calendar',
           attributes: {
             title: {
               type: 'string',
@@ -74,7 +74,7 @@ describe('Component validator', () => {
         component: {
           category: 'default',
           displayName: 'mycompo',
-          icon: 'american-sign-language-interpreting',
+          icon: 'calendar',
           attributes: {
             title: {
               type: 'string',

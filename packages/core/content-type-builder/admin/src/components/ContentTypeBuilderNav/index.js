@@ -1,9 +1,6 @@
 import React from 'react';
-import upperFirst from 'lodash/upperFirst';
-import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
-import Plus from '@strapi/icons/Plus';
-import { Box } from '@strapi/design-system/Box';
+
+import { Box, Icon, TextButton } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
@@ -11,10 +8,16 @@ import {
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2/SubNav';
-import { TextButton } from '@strapi/design-system/TextButton';
-import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
+} from '@strapi/design-system/v2';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Plus } from '@strapi/icons';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
+
 import getTrad from '../../utils/getTrad';
+
+import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
 
 const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
@@ -82,7 +85,11 @@ const ContentTypeBuilderNav = () => {
             </SubNavSection>
             {section.customLink && (
               <Box paddingLeft={7}>
-                <TextButton onClick={section.customLink.onClick} startIcon={<Plus />} marginTop={2}>
+                <TextButton
+                  onClick={section.customLink.onClick}
+                  startIcon={<Icon as={Plus} width={pxToRem(8)} height={pxToRem(8)} />}
+                  marginTop={2}
+                >
                   {formatMessage({
                     id: section.customLink.id,
                     defaultMessage: section.customLink.defaultMessage,

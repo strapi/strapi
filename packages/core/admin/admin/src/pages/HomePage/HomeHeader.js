@@ -1,20 +1,14 @@
 import React from 'react';
-import styled from 'styled-components';
+
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
+import { ArrowRight } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Link } from '@strapi/design-system/v2/Link';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { Button } from '@strapi/design-system/Button';
-import ArrowRight from '@strapi/icons/ArrowRight';
+import styled from 'styled-components';
 
 const WordWrap = styled(Typography)`
   word-break: break-word;
-`;
-
-const StackCustom = styled(Stack)`
-  align-items: flex-start;
 `;
 
 const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
@@ -23,7 +17,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
-        <StackCustom spacing={5}>
+        <Flex direction="column" alignItems="flex-start" gap={5}>
           <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({
@@ -63,7 +57,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
               })}
             </Button>
           )}
-        </StackCustom>
+        </Flex>
       </Box>
     </div>
   );

@@ -1,13 +1,16 @@
-import { axiosInstance, getRequestURL } from '../../../utils';
+import { getFetchClient } from '@strapi/helper-plugin';
 
 const fetchData = async () => {
-  const { data } = await axiosInstance.get(getRequestURL('email-templates'));
+  const { get } = getFetchClient();
+  const { data } = await get('/users-permissions/email-templates');
 
   return data;
 };
 
 const putEmailTemplate = (body) => {
-  return axiosInstance.put(getRequestURL('email-templates'), body);
+  const { put } = getFetchClient();
+
+  return put('/users-permissions/email-templates', body);
 };
 
 export { fetchData, putEmailTemplate };

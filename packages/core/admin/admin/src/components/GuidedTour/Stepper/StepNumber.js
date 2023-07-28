@@ -1,11 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { Flex, Icon, Typography } from '@strapi/design-system';
 import { pxToRem } from '@strapi/helper-plugin';
-import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-import { Icon } from '@strapi/design-system/Icon';
-import Check from '@strapi/icons/Check';
-import { IS_DONE, IS_ACTIVE, IS_NOT_DONE } from '../constants';
+import { Check } from '@strapi/icons';
+import PropTypes from 'prop-types';
+
+import { IS_ACTIVE, IS_DONE, IS_NOT_DONE } from '../constants';
 
 const StepNumber = ({ type, number }) => {
   if (type === IS_DONE) {

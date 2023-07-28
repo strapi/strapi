@@ -1,17 +1,25 @@
 'use strict';
 
-const { prop, isNil, isEmpty } = require('lodash/fp');
+const { prop, isNil, isEmpty, isArray } = require('lodash/fp');
 
+const { mapAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
+
+const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
 
 /**
  * Adds the default locale to an object if it isn't defined yet
  * @param {Object} data a data object before being persisted into db
  */
-const assignDefaultLocale = async (data) => {
+const assignDefaultLocaleToEntries = async (data) => {
   const { getDefaultLocale } = getService('locales');
 
-  if (isNil(data.locale)) {
+  if (isArray(data) && data.some((entry) => !entry.locale)) {
+    const defaultLocale = await getDefaultLocale();
+    data.forEach((entry) => {
+      entry.locale = entry.locale || defaultLocale;
+    });
+  } else if (!isArray(data) && isNil(data.locale)) {
     data.locale = await getDefaultLocale();
   }
 };
@@ -23,7 +31,7 @@ const assignDefaultLocale = async (data) => {
  * @param {Object} options.model corresponding model
  */
 const syncLocalizations = async (entry, { model }) => {
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
 
     const updateLocalization = (id) => {
@@ -32,7 +40,11 @@ const syncLocalizations = async (entry, { model }) => {
       return strapi.query(model.uid).update({ where: { id }, data: { localizations } });
     };
 
-    await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
+    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
+    await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
+    });
   }
 };
 
@@ -45,7 +57,7 @@ const syncLocalizations = async (entry, { model }) => {
 const syncNonLocalizedAttributes = async (entry, { model }) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  if (Array.isArray(entry.localizations)) {
+  if (Array.isArray(entry?.localizations)) {
     const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
 
     if (isEmpty(nonLocalizedAttributes)) {
@@ -56,12 +68,16 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
       return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
     };
 
-    await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
+    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
+    // TODO: use a transaction to avoid deadlocks
+    await mapAsync(entry.localizations, (localization) => updateLocalization(localization.id), {
+      concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
+    });
   }
 };
 
 module.exports = () => ({
-  assignDefaultLocale,
+  assignDefaultLocaleToEntries,
   syncLocalizations,
   syncNonLocalizedAttributes,
 });

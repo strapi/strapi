@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+
 import useLocalesProvider from '../../../components/LocalesProvider/useLocalesProvider';
 
 const LocaleToggle = () => {
@@ -14,13 +16,13 @@ const LocaleToggle = () => {
   const { locale } = useIntl();
 
   return (
-    <SimpleMenu label={localeNames[locale]}>
-      {Object.keys(localeNames).map((lang) => (
-        <MenuItem onClick={() => changeLocale(lang)} key={lang}>
-          {localeNames[lang]}
-        </MenuItem>
+    <SingleSelect value={locale} onChange={(language) => changeLocale(language)}>
+      {Object.entries(localeNames).map(([language, name]) => (
+        <SingleSelectOption key={language} value={language}>
+          {name}
+        </SingleSelectOption>
       ))}
-    </SimpleMenu>
+    </SingleSelect>
   );
 };
 

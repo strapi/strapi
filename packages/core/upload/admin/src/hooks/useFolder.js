@@ -1,20 +1,29 @@
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
-import { useNotification } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl, getTrad } from '../utils';
+import { getTrad } from '../utils';
 
 export const useFolder = (id, { enabled = true }) => {
   const toggleNotification = useNotification();
-  const dataRequestURL = getRequestUrl('folders');
+  const { get } = useFetchClient();
 
   const fetchFolder = async () => {
     try {
-      const { data } = await axiosInstance.get(
-        `${dataRequestURL}/${id}?populate[parent][populate][parent]=*`
-      );
+      const params = {
+        populate: {
+          parent: {
+            populate: {
+              parent: '*',
+            },
+          },
+        },
+      };
+      const {
+        data: { data },
+      } = await get(`/upload/folders/${id}`, { params });
 
-      return data.data;
+      return data;
     } catch (err) {
       toggleNotification({
         type: 'warning',

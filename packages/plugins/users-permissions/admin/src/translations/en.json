@@ -54,7 +54,6 @@
   "PopUpForm.header.edit.email-templates": "Edit email template",
   "PopUpForm.header.edit.providers": "Edit Provider",
   "Providers.data.loaded": "Providers have been loaded",
-  "Providers.image": "Image",
   "Providers.status": "Status",
   "Roles.empty": "You don't have any roles yet.",
   "Roles.empty.search": "No roles match the search.",

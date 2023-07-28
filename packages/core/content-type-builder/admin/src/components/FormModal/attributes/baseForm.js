@@ -2,6 +2,7 @@
 // import { FormattedMessage } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 import { componentField, componentForm } from '../component';
+
 import { nameField } from './nameField';
 
 const baseForm = {
@@ -415,7 +416,7 @@ const baseForm = {
               ...nameField,
               placeholder: {
                 id: getTrad('modalForm.attribute.form.base.name.placeholder'),
-                defaultMessage: 'e.g. Slug, SEO URL, Canonical URL',
+                defaultMessage: 'e.g. slug, seoUrl, canonicalUrl',
               },
             },
             {

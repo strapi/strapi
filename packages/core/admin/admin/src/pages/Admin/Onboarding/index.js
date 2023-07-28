@@ -1,136 +1,225 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useRef, useState } from 'react';
+
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Icon,
+  PopoverPrimitives,
+  Portal,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { useAppInfo } from '@strapi/helper-plugin';
+import { Cross, Message, Play, Question } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Box } from '@strapi/design-system/Box';
-import { Typography } from '@strapi/design-system/Typography';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import { useConfigurations } from '../../../hooks';
+import styled from 'styled-components';
 
-const OnboardingWrapper = styled(Box)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[2]};
-  right: ${({ theme }) => theme.spaces[2]};
-`;
+import onboardingPreview from '../../../assets/images/onboarding-preview.png';
 
-const Button = styled.button`
-  width: ${({ theme }) => theme.spaces[8]};
-  height: ${({ theme }) => theme.spaces[8]};
-  background: ${({ theme }) => theme.colors.primary600};
-  box-shadow: ${({ theme }) => theme.shadows.tableShadow};
+import { DOCUMENTATION_LINKS, VIDEO_LINKS, WATCH_MORE } from './constants';
+
+// TODO: use new Button props derived from Box props with next DS release
+const HelperButton = styled(Button)`
   border-radius: 50%;
-  svg {
-    color: ${({ theme }) => theme.colors.buttonNeutral0};
-  }
+  padding: ${({ theme }) => theme.spaces[3]};
+  /* Resetting 2rem height defined by Button component */
+  height: 100%;
 `;
 
-const LinksWrapper = styled(Box)`
-  position: absolute;
-  bottom: ${({ theme }) => `${theme.spaces[9]}`};
-  right: 0;
-  width: ${200 / 16}rem;
+const IconWrapper = styled(Flex)`
+  transform: translate(-50%, -50%);
 `;
 
-const StyledLink = styled.a`
-  display: flex;
-  align-items: center;
+const VideoLinkWrapper = styled(Flex)`
   text-decoration: none;
-  padding: ${({ theme }) => theme.spaces[2]};
-  padding-left: ${({ theme }) => theme.spaces[5]};
 
-  svg {
-    color: ${({ theme }) => theme.colors.neutral600};
-    margin-right: ${({ theme }) => theme.spaces[2]};
+  :focus-visible {
+    outline-offset: ${({ theme }) => `-${theme.spaces[1]}`};
   }
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
-    color: ${({ theme }) => theme.colors.neutral500};
+  :hover {
+    background: ${({ theme }) => theme.colors.primary100};
 
-    svg {
-      color: ${({ theme }) => theme.colors.neutral700};
+    /* Hover style for the number displayed */
+    ${Typography}:first-child {
+      color: ${({ theme }) => theme.colors.primary500};
     }
 
-    ${[Typography]} {
-      color: ${({ theme }) => theme.colors.neutral700};
+    /* Hover style for the label */
+    ${Typography}:nth-child(1) {
+      color: ${({ theme }) => theme.colors.primary600};
     }
   }
+`;
 
-  ${[Typography]} {
-    color: ${({ theme }) => theme.colors.neutral600};
+const Preview = styled.img`
+  width: ${({ theme }) => theme.spaces[10]};
+  height: ${({ theme }) => theme.spaces[8]};
+  /* Same overlay used in ModalLayout */
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
+  border-radius: ${({ theme }) => theme.borderRadius};
+`;
+
+const TypographyLineHeight = styled(Typography)`
+  /* line height of label and watch more to 1 so they can be better aligned visually */
+  line-height: 1;
+`;
+
+const TextLink = styled(TypographyLineHeight)`
+  text-decoration: none;
+
+  :hover {
+    text-decoration: underline;
   }
 `;
 
 const Onboarding = () => {
+  const triggerRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
-  const { showTutorials } = useConfigurations();
+  const { communityEdition } = useAppInfo();
 
-  if (!showTutorials) {
-    return null;
-  }
-
-  const staticLinks = [
-    {
-      icon: 'book',
-      label: formatMessage({
-        id: 'global.documentation',
-        defaultMessage: 'Documentation',
-      }),
-      destination: 'https://docs.strapi.io',
-    },
-    {
-      icon: 'file',
-      label: formatMessage({ id: 'app.static.links.cheatsheet', defaultMessage: 'CheatSheet' }),
-      destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
-    },
-  ];
-
-  const handleClick = () => {
+  const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);
   };
 
-  return (
-    <OnboardingWrapper as="aside">
-      <Button
-        id="onboarding"
-        aria-label={formatMessage({
-          id: 'app.components.Onboarding.help.button',
-          defaultMessage: 'Help button',
-        })}
-        onClick={handleClick}
-      >
-        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-        {isOpen && <FontAwesomeIcon icon={faTimes} />}
-      </Button>
+  const docLinks = [
+    ...DOCUMENTATION_LINKS,
+    {
+      label: { id: 'Settings.application.get-help', defaultMessage: 'Get help' },
+      icon: Message,
+      href: communityEdition
+        ? 'https://discord.strapi.io'
+        : 'https://support.strapi.io/support/home',
+    },
+  ];
 
-      {/* FIX ME - replace with popover when overflow popover is fixed 
-       + when v4 mockups for onboarding component are ready */}
+  return (
+    <Box as="aside" position="fixed" bottom={2} right={2}>
+      <HelperButton
+        aria-label={formatMessage(
+          isOpen
+            ? {
+                id: 'app.components.Onboarding.help.button-close',
+                defaultMessage: 'Close help menu',
+              }
+            : {
+                id: 'app.components.Onboarding.help.button',
+                defaultMessage: 'Open help menu',
+              }
+        )}
+        onClick={handlePopoverVisibility}
+        ref={triggerRef}
+      >
+        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
+      </HelperButton>
+
       {isOpen && (
-        <FocusTrap onEscape={handleClick}>
-          <LinksWrapper
-            background="neutral0"
-            hasRadius
-            shadow="tableShadow"
-            paddingBottom={2}
-            paddingTop={2}
+        <Portal>
+          <PopoverPrimitives.Content
+            padding={0}
+            onDimiss={handlePopoverVisibility}
+            source={triggerRef}
+            placement="top-end"
+            spacing={12}
           >
-            {staticLinks.map((link) => (
-              <StyledLink
-                key={link.label}
-                rel="nofollow noreferrer noopener"
+            <Flex
+              justifyContent="space-between"
+              paddingBottom={5}
+              paddingRight={6}
+              paddingLeft={6}
+              paddingTop={6}
+            >
+              <TypographyLineHeight fontWeight="bold">
+                {formatMessage({
+                  id: 'app.components.Onboarding.title',
+                  defaultMessage: 'Get started videos',
+                })}
+              </TypographyLineHeight>
+              <TextLink
+                as="a"
+                href={WATCH_MORE.href}
                 target="_blank"
-                href={link.destination}
+                rel="noreferrer noopener"
+                variant="pi"
+                textColor="primary600"
               >
-                <FontAwesomeIcon icon={link.icon} />
-                <Typography>{link.label}</Typography>
-              </StyledLink>
+                {formatMessage(WATCH_MORE.label)}
+              </TextLink>
+            </Flex>
+            <Divider />
+            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+              <VideoLinkWrapper
+                as="a"
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                key={href}
+                hasRadius
+                paddingTop={4}
+                paddingBottom={4}
+                paddingLeft={6}
+                paddingRight={11}
+              >
+                <Box paddingRight={5}>
+                  <Typography textColor="neutral200" variant="alpha">
+                    {index + 1}
+                  </Typography>
+                </Box>
+                <Box position="relative">
+                  <Preview src={onboardingPreview} alt="" />
+                  <IconWrapper
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    background="primary600"
+                    borderRadius="50%"
+                    justifyContent="center"
+                    width={6}
+                    height={6}
+                  >
+                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                  </IconWrapper>
+                </Box>
+                <Flex direction="column" alignItems="start" paddingLeft={4}>
+                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                  <VisuallyHidden>:</VisuallyHidden>
+                  <Typography textColor="neutral600" variant="pi">
+                    {duration}
+                  </Typography>
+                </Flex>
+              </VideoLinkWrapper>
             ))}
-          </LinksWrapper>
-        </FocusTrap>
+            <Flex
+              direction="column"
+              alignItems="stretch"
+              gap={2}
+              paddingLeft={5}
+              paddingTop={2}
+              paddingBottom={5}
+            >
+              {docLinks.map(({ label, href, icon }) => (
+                <Flex gap={3} key={href}>
+                  <Icon as={icon} color="primary600" />
+                  <TextLink
+                    as="a"
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    variant="sigma"
+                    textColor="primary700"
+                  >
+                    {formatMessage(label)}
+                  </TextLink>
+                </Flex>
+              ))}
+            </Flex>
+          </PopoverPrimitives.Content>
+        </Portal>
       )}
-    </OnboardingWrapper>
+    </Box>
   );
 };
 

@@ -1,24 +1,24 @@
 import React, { useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
-import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { prefixFileUrlWithBackendUrl, useLibrary } from '@strapi/helper-plugin';
-import Editor from './Editor';
-import WysiwygNav from './WysiwygNav';
-import WysiwygFooter from './WysiwygFooter';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+
 import Hint from '../Hint';
 
-import {
-  markdownHandler,
-  listHandler,
-  titleHandler,
-  insertFile,
-  quoteAndCodeHandler,
-} from './utils/utils';
+import Editor from './Editor';
 import { EditorLayout } from './EditorLayout';
+import {
+  insertFile,
+  listHandler,
+  markdownHandler,
+  quoteAndCodeHandler,
+  titleHandler,
+} from './utils/utils';
+import WysiwygFooter from './WysiwygFooter';
+import WysiwygNav from './WysiwygNav';
 
 const LabelAction = styled(Box)`
   svg path {
@@ -31,7 +31,7 @@ const TypographyAsterisk = styled(Typography)`
 `;
 
 const Wysiwyg = ({
-  description,
+  hint,
   disabled,
   error,
   intlLabel,
@@ -127,14 +127,14 @@ const Wysiwyg = ({
 
   return (
     <>
-      <Stack spacing={1}>
-        <Stack horizontal spacing={1}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <Flex gap={1}>
           <Typography variant="pi" fontWeight="bold" textColor="neutral800">
             {label}
             {required && <TypographyAsterisk textColor="danger600">*</TypographyAsterisk>}
           </Typography>
           {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
-        </Stack>
+        </Flex>
 
         <EditorLayout
           isExpandMode={isExpandMode}
@@ -167,8 +167,8 @@ const Wysiwyg = ({
 
           {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
         </EditorLayout>
-        <Hint description={description} name={name} error={error} />
-      </Stack>
+        <Hint hint={hint} name={name} error={error} />
+      </Flex>
 
       {error && (
         <Box paddingTop={1}>
@@ -186,21 +186,17 @@ const Wysiwyg = ({
 };
 
 Wysiwyg.defaultProps = {
-  description: null,
   disabled: false,
   error: '',
   labelAction: undefined,
   placeholder: null,
   required: false,
   value: '',
+  hint: '',
 };
 
 Wysiwyg.propTypes = {
-  description: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
+  hint: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   disabled: PropTypes.bool,
   error: PropTypes.string,
   intlLabel: PropTypes.shape({

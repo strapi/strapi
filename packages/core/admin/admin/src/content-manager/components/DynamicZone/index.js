@@ -1,106 +1,110 @@
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import get from 'lodash/get';
-import isEqual from 'react-fast-compare';
+import React, { useMemo, useState } from 'react';
+
+import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
+import { NotAllowedInput, useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import { Stack } from '@strapi/design-system/Stack';
-import { Box } from '@strapi/design-system/Box';
-import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+
+import { useContentTypeLayout } from '../../hooks';
 import { getTrad } from '../../utils';
-import connect from './utils/connect';
-import select from './utils/select';
-import AddComponentButton from './components/AddComponentButton';
-import DzLabel from './components/DzLabel';
-import Component from './components/Component';
 
-import ComponentPicker from './components/ComponentPicker';
+import { AddComponentButton } from './components/AddComponentButton';
+import { ComponentPicker } from './components/ComponentPicker';
+import { DynamicComponent } from './components/DynamicComponent';
+import { DynamicZoneLabel } from './components/DynamicZoneLabel';
 
-/* eslint-disable react/no-array-index-key */
+const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }) => {
+  // We cannot use the default props here
+  const { max = Infinity, min = -Infinity, components = [], required = false } = fieldSchema;
 
-const createCollapses = (arrayLength) =>
-  Array.from({ length: arrayLength }).map(() => ({ isOpen: false }));
+  const [addComponentIsOpen, setAddComponentIsOpen] = useState(false);
+  const [liveText, setLiveText] = useState('');
 
-const DynamicZone = ({
-  name,
-  // Passed with the select function
-  addComponentToDynamicZone,
-  formErrors,
-  isCreatingEntry,
-  isFieldAllowed,
-  isFieldReadable,
-  labelAction,
-  moveComponentUp,
-  moveComponentDown,
-  removeComponentFromDynamicZone,
-  dynamicDisplayedComponents,
-  fieldSchema,
-  metadatas,
-}) => {
+  const {
+    addComponentToDynamicZone,
+    createActionAllowedFields,
+    isCreatingEntry,
+    formErrors,
+    modifiedData,
+    moveComponentField,
+    removeComponentFromDynamicZone,
+    readActionAllowedFields,
+    updateActionAllowedFields,
+  } = useCMEditViewDataManager();
+
+  const dynamicDisplayedComponents = useMemo(
+    () =>
+      (modifiedData?.[name] ?? []).map((data) => {
+        return {
+          componentUid: data.__component,
+          id: data.id ?? data.__temp_key__,
+        };
+      }),
+    [modifiedData, name]
+  );
+
+  const { getComponentLayout, components: allComponents } = useContentTypeLayout();
+
+  /**
+   * @type {Record<string, Array<{category: string; info: unknown, attributes: Record<string, unknown>}>>}
+   */
+  const dynamicComponentsByCategory = useMemo(() => {
+    return components.reduce((acc, componentUid) => {
+      const { category, info, attributes } = getComponentLayout(componentUid);
+      const component = { componentUid, info, attributes };
+
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+
+      acc[category] = [...acc[category], component];
+
+      return acc;
+    }, {});
+  }, [components, getComponentLayout]);
+
+  const { formatMessage } = useIntl();
+
   const toggleNotification = useNotification();
-  const [isOpen, setIsOpen] = useState(false);
-  const [shouldOpenAddedComponent, setShouldOpenAddedComponent] = useState(false);
+
+  const isFieldAllowed = useMemo(() => {
+    const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
+
+  const isFieldReadable = useMemo(() => {
+    const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
+
+    return allowedFields.includes(name);
+  }, [name, isCreatingEntry, readActionAllowedFields]);
+
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
   const intlDescription = metadatas.description
     ? { id: metadatas.description, defaultMessage: metadatas.description }
     : null;
 
-  const [componentCollapses, setComponentsCollapses] = useState(
-    createCollapses(dynamicDisplayedComponentsLength)
-  );
-
-  useEffect(() => {
-    setComponentsCollapses(createCollapses(dynamicDisplayedComponentsLength));
-  }, [dynamicDisplayedComponentsLength]);
-
-  useEffect(() => {
-    if (shouldOpenAddedComponent) {
-      setComponentsCollapses((prev) =>
-        prev.map((collapse, index) => {
-          if (index === prev.length - 1) {
-            return { ...collapse, isOpen: true };
-          }
-
-          return collapse;
-        })
-      );
-
-      setShouldOpenAddedComponent(false);
-    }
-  }, [shouldOpenAddedComponent]);
-
-  // We cannot use the default props here
-  const { max = Infinity, min = -Infinity } = fieldSchema;
-  const dynamicZoneErrors = useMemo(() => {
-    return Object.keys(formErrors)
-      .filter((key) => {
-        return key === name;
-      })
-      .map((key) => formErrors[key]);
-  }, [formErrors, name]);
-
-  const dynamicZoneAvailableComponents = useMemo(() => fieldSchema.components || [], [fieldSchema]);
+  const dynamicZoneError = formErrors[name];
 
   const missingComponentNumber = min - dynamicDisplayedComponentsLength;
-  const hasError = dynamicZoneErrors.length > 0;
+  const hasError = !!dynamicZoneError;
 
-  const hasMinError =
-    dynamicZoneErrors.length > 0 && get(dynamicZoneErrors, [0, 'id'], '').includes('min');
+  const handleAddComponent = (componentUid, position) => {
+    setAddComponentIsOpen(false);
 
-  const hasMaxError =
-    hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
+    const componentLayoutData = getComponentLayout(componentUid);
 
-  const handleAddComponent = useCallback(
-    (componentUid) => {
-      setIsOpen(false);
-
-      addComponentToDynamicZone(name, componentUid, hasError);
-      setShouldOpenAddedComponent(true);
-    },
-    [addComponentToDynamicZone, hasError, name]
-  );
+    /**
+     * You have to pass _every component_ because the EditViewDataManager is not part of redux
+     * and you could have a dynamic component option that contains a component that is not part
+     * of the former list. Therefore it's schema is inaccessible leading to a crash.
+     */
+    addComponentToDynamicZone(name, componentLayoutData, allComponents, hasError, position);
+  };
 
   const handleClickOpenPicker = () => {
     if (dynamicDisplayedComponentsLength < max) {
-      setIsOpen((prev) => !prev);
+      setAddComponentIsOpen((prev) => !prev);
     } else {
       toggleNotification({
         type: 'info',
@@ -109,57 +113,115 @@ const DynamicZone = ({
     }
   };
 
-  const handleToggleComponent = (indexToToggle) => {
-    setComponentsCollapses((prev) =>
-      prev.map(({ isOpen }, index) => {
-        if (index === indexToToggle) {
-          return { isOpen: !isOpen };
+  const handleMoveComponent = (newIndex, currentIndex) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in list: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex}`,
+          position: getItemPos(newIndex),
         }
+      )
+    );
 
-        return { isOpen };
-      })
+    moveComponentField({
+      name,
+      newIndex,
+      currentIndex,
+    });
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${dynamicDisplayedComponents.length}`;
+
+  const handleCancel = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.cancel-item'),
+          defaultMessage: '{item}, dropped. Re-order cancelled.',
+        },
+        {
+          item: `${name}.${index}`,
+        }
+      )
     );
   };
 
-  const handleMoveComponentDown = (name, currentIndex) => {
-    moveComponentDown(name, currentIndex);
-    setComponentsCollapses((prev) => {
-      return prev.map(({ isOpen }, index, refArray) => {
-        if (index === currentIndex + 1) {
-          return { isOpen: refArray[currentIndex].isOpen };
+  const handleGrabItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.grab-item'),
+          defaultMessage: `{item}, grabbed. Current position in list: {position}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
         }
-
-        if (index === currentIndex) {
-          return { isOpen: refArray[index + 1].isOpen };
-        }
-
-        return { isOpen };
-      });
-    });
+      )
+    );
   };
 
-  const handleMoveComponentUp = (name, currentIndex) => {
-    moveComponentUp(name, currentIndex);
-    setComponentsCollapses((prev) => {
-      return prev.map(({ isOpen }, index, refArray) => {
-        if (index === currentIndex - 1) {
-          return { isOpen: refArray[currentIndex].isOpen };
+  const handleDropItem = (index) => {
+    setLiveText(
+      formatMessage(
+        {
+          id: getTrad('dnd.drop-item'),
+          defaultMessage: `{item}, dropped. Final position in list: {position}.`,
+        },
+        {
+          item: `${name}.${index}`,
+          position: getItemPos(index),
         }
-
-        if (index === currentIndex) {
-          return { isOpen: refArray[index - 1].isOpen };
-        }
-
-        return { isOpen };
-      });
-    });
+      )
+    );
   };
 
-  const handleRemoveComponent = (name, currentIndex) => {
+  const handleRemoveComponent = (name, currentIndex) => () => {
     removeComponentFromDynamicZone(name, currentIndex);
   };
 
-  if (!isFieldAllowed && isCreatingEntry) {
+  const renderButtonLabel = () => {
+    if (addComponentIsOpen) {
+      return formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
+    }
+
+    if (hasError && dynamicZoneError.id.includes('max')) {
+      return formatMessage({
+        id: 'components.Input.error.validation.max',
+        defaultMessage: 'The value is too high.',
+      });
+    }
+
+    if (hasError && dynamicZoneError.id.includes('min')) {
+      return formatMessage(
+        {
+          id: getTrad(`components.DynamicZone.missing-components`),
+          defaultMessage:
+            'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+        },
+        { number: missingComponentNumber }
+      );
+    }
+
+    return formatMessage(
+      {
+        id: getTrad('components.DynamicZone.add-component'),
+        defaultMessage: 'Add a component to {componentName}',
+      },
+      { componentName: metadatas.label || name }
+    );
+  };
+
+  if (!isFieldAllowed && (isCreatingEntry || (!isFieldReadable && !isCreatingEntry))) {
     return (
       <NotAllowedInput
         description={intlDescription}
@@ -170,113 +232,85 @@ const DynamicZone = ({
     );
   }
 
-  if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
-    return (
-      <NotAllowedInput
-        description={intlDescription}
-        intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
-        labelAction={labelAction}
-        name={name}
-      />
-    );
-  }
+  const ariaDescriptionId = `${name}-item-instructions`;
 
   return (
-    <Stack spacing={6}>
+    <Flex direction="column" alignItems="stretch" gap={6}>
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
-          <DzLabel
+          <DynamicZoneLabel
             intlDescription={intlDescription}
             label={metadatas.label}
             labelAction={labelAction}
             name={name}
             numberOfComponents={dynamicDisplayedComponentsLength}
-            required={fieldSchema.required || false}
+            required={required}
           />
-          {dynamicDisplayedComponents.map((componentUid, index) => {
-            const showDownIcon =
-              isFieldAllowed &&
-              dynamicDisplayedComponentsLength > 0 &&
-              index < dynamicDisplayedComponentsLength - 1;
-            const showUpIcon = isFieldAllowed && dynamicDisplayedComponentsLength > 0 && index > 0;
-            const isOpen = componentCollapses[index]?.isOpen || false;
-
-            return (
-              <Component
+          <VisuallyHidden id={ariaDescriptionId}>
+            {formatMessage({
+              id: getTrad('dnd.instructions'),
+              defaultMessage: `Press spacebar to grab and re-order`,
+            })}
+          </VisuallyHidden>
+          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
+          <ol aria-describedby={ariaDescriptionId}>
+            {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
+              <DynamicComponent
                 componentUid={componentUid}
                 formErrors={formErrors}
-                key={index}
+                key={`${componentUid}-${id}`}
                 index={index}
-                isOpen={isOpen}
                 isFieldAllowed={isFieldAllowed}
-                moveComponentDown={handleMoveComponentDown}
-                moveComponentUp={handleMoveComponentUp}
-                onToggle={handleToggleComponent}
                 name={name}
-                removeComponentFromDynamicZone={handleRemoveComponent}
-                showDownIcon={showDownIcon}
-                showUpIcon={showUpIcon}
+                onMoveComponent={handleMoveComponent}
+                onRemoveComponentClick={handleRemoveComponent(name, index)}
+                onCancel={handleCancel}
+                onDropItem={handleDropItem}
+                onGrabItem={handleGrabItem}
+                onAddComponent={handleAddComponent}
+                dynamicComponentsByCategory={dynamicComponentsByCategory}
               />
-            );
-          })}
+            ))}
+          </ol>
         </Box>
       )}
-
-      <AddComponentButton
-        hasError={hasError}
-        hasMaxError={hasMaxError}
-        hasMinError={hasMinError}
-        isDisabled={!isFieldAllowed}
-        label={metadatas.label}
-        missingComponentNumber={missingComponentNumber}
-        isOpen={isOpen}
-        name={name}
-        onClick={handleClickOpenPicker}
-      />
+      <Flex justifyContent="center">
+        <AddComponentButton
+          hasError={hasError}
+          isDisabled={!isFieldAllowed}
+          isOpen={addComponentIsOpen}
+          onClick={handleClickOpenPicker}
+        >
+          {renderButtonLabel()}
+        </AddComponentButton>
+      </Flex>
       <ComponentPicker
-        isOpen={isOpen}
-        components={dynamicZoneAvailableComponents}
+        dynamicComponentsByCategory={dynamicComponentsByCategory}
+        isOpen={addComponentIsOpen}
         onClickAddComponent={handleAddComponent}
       />
-    </Stack>
+    </Flex>
   );
 };
 
 DynamicZone.defaultProps = {
-  dynamicDisplayedComponents: [],
-  fieldSchema: {
-    max: Infinity,
-    min: -Infinity,
-  },
+  fieldSchema: {},
   labelAction: null,
 };
 
 DynamicZone.propTypes = {
-  addComponentToDynamicZone: PropTypes.func.isRequired,
-  dynamicDisplayedComponents: PropTypes.array,
   fieldSchema: PropTypes.shape({
-    components: PropTypes.array.isRequired,
+    components: PropTypes.array,
     max: PropTypes.number,
     min: PropTypes.number,
     required: PropTypes.bool,
   }),
-  formErrors: PropTypes.object.isRequired,
-  isCreatingEntry: PropTypes.bool.isRequired,
-  isFieldAllowed: PropTypes.bool.isRequired,
-  isFieldReadable: PropTypes.bool.isRequired,
   labelAction: PropTypes.element,
   metadatas: PropTypes.shape({
     description: PropTypes.string,
     label: PropTypes.string,
   }).isRequired,
-  moveComponentUp: PropTypes.func.isRequired,
-  moveComponentDown: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
-  removeComponentFromDynamicZone: PropTypes.func.isRequired,
 };
-
-const Memoized = memo(DynamicZone, isEqual);
-
-export default connect(Memoized, select);
 
 export { DynamicZone };

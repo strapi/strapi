@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "4.4.3",
+  "version": "4.12.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -28,18 +28,22 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test:unit": "jest --verbose"
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "lint": "run -T eslint ."
   },
   "dependencies": {
-    "date-fns": "2.29.2",
-    "debug": "4.3.1",
+    "@strapi/utils": "4.12.0",
+    "date-fns": "2.30.0",
+    "debug": "4.3.4",
     "fs-extra": "10.0.0",
-    "knex": "1.0.7",
+    "knex": "2.5.0",
     "lodash": "4.17.21",
-    "umzug": "3.1.1"
+    "semver": "7.5.4",
+    "umzug": "3.2.1"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

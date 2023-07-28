@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
-import { useIntl } from 'react-intl';
+
+import { Button } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import { Button } from '@strapi/design-system/Button';
-import Plus from '@strapi/icons/Plus';
+import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../utils';
 
 const FormModalEndActions = ({
@@ -43,6 +45,7 @@ const FormModalEndActions = ({
   onSubmitEditContentType,
   onSubmitEditCustomFieldAttribute,
   onSubmitEditDz,
+  onClickFinish,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -93,6 +96,7 @@ const FormModalEndActions = ({
         onClick={(e) => {
           e.preventDefault();
 
+          onClickFinish();
           onSubmitEditDz(e, false);
         }}
       >
@@ -194,6 +198,7 @@ const FormModalEndActions = ({
           onClick={(e) => {
             e.preventDefault();
 
+            onClickFinish();
             onSubmitAddComponentAttribute(e, false);
           }}
         >
@@ -230,6 +235,7 @@ const FormModalEndActions = ({
           onClick={(e) => {
             e.preventDefault();
 
+            onClickFinish();
             onSubmitEditAttribute(e, false);
           }}
         >
@@ -409,6 +415,7 @@ const FormModalEndActions = ({
           onClick={(e) => {
             e.preventDefault();
 
+            onClickFinish();
             onSubmitEditCustomFieldAttribute(e, false);
           }}
         >
@@ -426,6 +433,7 @@ const FormModalEndActions = ({
 
 FormModalEndActions.defaultProps = {
   categoryName: null,
+  onClickFinish() {},
 };
 
 FormModalEndActions.propTypes = {
@@ -460,6 +468,7 @@ FormModalEndActions.propTypes = {
   onSubmitEditContentType: PropTypes.func.isRequired,
   onSubmitEditCustomFieldAttribute: PropTypes.func.isRequired,
   onSubmitEditDz: PropTypes.func.isRequired,
+  onClickFinish: PropTypes.func,
 };
 
 export default FormModalEndActions;

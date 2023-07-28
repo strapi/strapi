@@ -1,14 +1,15 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { IntlProvider } from 'react-intl';
 
-import { axiosInstance } from '../../utils';
+import { useFetchClient } from '@strapi/helper-plugin';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
 import { useFolderStructure } from '../useFolderStructure';
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
         data: [
@@ -32,7 +33,7 @@ jest.mock('../../utils', () => ({
         ],
       },
     }),
-  },
+  }),
 }));
 
 const client = new QueryClient({
@@ -64,42 +65,44 @@ function setup(...args) {
 
 describe('useFolderStructure', () => {
   test('fetches data from the right URL', async () => {
-    const { waitForNextUpdate } = await setup();
+    const { get } = useFetchClient();
 
-    await waitForNextUpdate();
+    await setup();
 
-    expect(axiosInstance.get).toBeCalledWith('/upload/folder-structure');
+    await waitFor(() => {
+      expect(get).toBeCalledWith('/upload/folder-structure');
+    });
   });
 
   test('transforms the required object keys', async () => {
-    const { result, waitForNextUpdate } = await setup({});
+    const { result } = await setup({});
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data).toStrictEqual([
+        {
+          label: 'Media Library',
+          value: null,
+          children: [
+            {
+              value: 1,
+              label: '1',
+              children: [],
+            },
 
-    expect(result.current.data).toStrictEqual([
-      {
-        label: 'Media Library',
-        value: null,
-        children: [
-          {
-            value: 1,
-            label: '1',
-            children: [],
-          },
-
-          {
-            value: 2,
-            label: '2',
-            children: [
-              {
-                value: 21,
-                label: '21',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
+            {
+              value: 2,
+              label: '2',
+              children: [
+                {
+                  value: 21,
+                  label: '21',
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
   });
 });

@@ -1,10 +1,10 @@
 'use strict';
 
-const baseConfig = require('../../../jest.base-config');
-const pkg = require('./package.json');
-
 module.exports = {
-  ...baseConfig,
-  displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
-  roots: [__dirname],
+  preset: '../../../jest-preset.unit.js',
+  transform: {
+    '^.+\\.ts$': ['@swc/jest'],
+  },
+  testMatch: ['<rootDir>/**/*.test.ts'],
+  displayName: 'Core utils',
 };

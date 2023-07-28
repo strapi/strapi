@@ -24,4 +24,14 @@ module.exports = {
     DAYS_30: 30 * DAY_IN_MS,
     DAYS_90: 90 * DAY_IN_MS,
   },
+  TRANSFER_TOKEN_TYPE: {
+    PUSH: 'push',
+    PULL: 'pull',
+  },
+  TRANSFER_TOKEN_LIFESPANS: {
+    UNLIMITED: null,
+    DAYS_7: 7 * DAY_IN_MS,
+    DAYS_30: 30 * DAY_IN_MS,
+    DAYS_90: 90 * DAY_IN_MS,
+  },
 };

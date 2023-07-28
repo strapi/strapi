@@ -1,42 +1,68 @@
 import React, { useState } from 'react';
+
+import { ActionLayout, ContentLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
   DynamicTable,
+  NoPermissions,
   SearchURLQuery,
   SettingsPageTitle,
-  useRBAC,
-  useNotification,
+  useAPIErrorHandler,
+  useFetchClient,
   useFocusWhenNavigate,
-  NoPermissions,
+  useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
-import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
-import { Button } from '@strapi/design-system/Button';
-import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Envelop from '@strapi/icons/Envelop';
-import { useLocation } from 'react-router-dom';
+import qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import adminPermissions from '../../../../../permissions';
+import { useMutation, useQueryClient } from 'react-query';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+
+import { useAdminUsers } from '../../../../../hooks/useAdminUsers';
+import { useEnterprise } from '../../../../../hooks/useEnterprise';
+import { selectAdminPermissions } from '../../../../App/selectors';
+import Filters from '../../../components/Filters';
+
+import { CreateActionCE } from './CreateAction';
 import TableRows from './DynamicTable/TableRows';
-import Filters from './Filters';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
-import { deleteData, fetchData } from './utils/api';
 import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
-const ListPage = () => {
+const EE_LICENSE_LIMIT_QUERY_KEY = ['ee', 'license-limit-info'];
+
+export const UserListPageCE = () => {
+  const { post } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = useState(false);
+  const permissions = useSelector(selectAdminPermissions);
   const {
     allowedActions: { canCreate, canDelete, canRead },
-  } = useRBAC(adminPermissions.settings.users);
+  } = useRBAC(permissions.settings.users);
   const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
-  const { notifyStatus } = useNotifyAT();
-  const queryName = ['users', search];
+  const {
+    users,
+    pagination,
+    isError,
+    isLoading,
+    refetch: refetchAdminUsers,
+  } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }), {
+    enabled: canRead,
+  });
+  const CreateAction = useEnterprise(
+    CreateActionCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage/CreateAction'
+        )
+      ).CreateActionEE
+  );
 
   const headers = tableHeaders.map((header) => ({
     ...header,
@@ -51,74 +77,44 @@ const ListPage = () => {
     defaultMessage: 'Users',
   });
 
-  const notifyLoad = () => {
-    notifyStatus(
-      formatMessage(
-        {
-          id: 'app.utils.notify.data-loaded',
-          defaultMessage: 'The {target} has loaded',
-        },
-        { target: title }
-      )
-    );
-  };
-
-  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
-    enabled: canRead,
-    keepPreviousData: true,
-    retry: false,
-    staleTime: 1000 * 20,
-    onError() {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    },
-  });
-
   const handleToggle = () => {
     setIsModalOpen((prev) => !prev);
   };
 
-  const deleteAllMutation = useMutation((ids) => deleteData(ids), {
-    async onSuccess() {
-      await queryClient.invalidateQueries(queryName);
+  const deleteAllMutation = useMutation(
+    async (ids) => {
+      await post('/admin/users/batch-delete', { ids });
     },
-    onError(err) {
-      if (err?.response?.data?.data) {
-        toggleNotification({ type: 'warning', message: err.response.data.data });
-      } else {
+    {
+      async onSuccess() {
+        await refetchAdminUsers();
+
+        // Toggle enabled/ disabled state on the invite button
+        await queryClient.refetchQueries(EE_LICENSE_LIMIT_QUERY_KEY);
+      },
+      onError(error) {
         toggleNotification({
           type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          message: {
+            id: 'notification.error',
+            message: formatAPIError(error),
+            defaultMessage: 'An error occured',
+          },
         });
-      }
-    },
-  });
+      },
+    }
+  );
 
-  // This can be improved but we need to show an something to the user
-  const isLoading =
-    (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
-
-  const createAction = canCreate ? (
-    <Button
-      data-testid="create-user-button"
-      onClick={handleToggle}
-      startIcon={<Envelop />}
-      size="S"
-    >
-      {formatMessage({
-        id: 'Settings.permissions.users.create',
-        defaultMessage: 'Invite new user',
-      })}
-    </Button>
-  ) : undefined;
+  // block rendering until the EE component is fully loaded
+  if (!CreateAction) {
+    return null;
+  }
 
   return (
     <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        primaryAction={createAction}
+        primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
         subtitle={formatMessage({
           id: 'Settings.permissions.users.listview.header.subtitle',
@@ -143,7 +139,8 @@ const ListPage = () => {
 
       <ContentLayout canRead={canRead}>
         {!canRead && <NoPermissions />}
-        {status === 'error' && <div>TODO: An error occurred</div>}
+        {/* TODO: Replace error message with something better */}
+        {isError && <div>TODO: An error occurred</div>}
         {canRead && (
           <>
             <DynamicTable
@@ -152,25 +149,52 @@ const ListPage = () => {
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               onConfirmDelete={(id) => deleteAllMutation.mutateAsync([id])}
               headers={headers}
-              rows={data?.results}
+              rows={users}
               withBulkActions
               withMainAction={canDelete}
             >
               <TableRows
                 canDelete={canDelete}
                 headers={headers}
-                rows={data?.results || []}
+                rows={users}
                 withBulkActions
                 withMainAction={canDelete}
               />
             </DynamicTable>
-            <PaginationFooter pagination={data?.pagination} />
+
+            {pagination && <PaginationFooter pagination={pagination} />}
           </>
         )}
       </ContentLayout>
-      {isModalOpened && <ModalForm onToggle={handleToggle} queryName={queryName} />}
+      {isModalOpened && (
+        <ModalForm
+          onSuccess={async () => {
+            await refetchAdminUsers();
+            await queryClient.refetchQueries(EE_LICENSE_LIMIT_QUERY_KEY);
+          }}
+          onToggle={handleToggle}
+        />
+      )}
     </Main>
   );
 };
 
-export default ListPage;
+// component which determines whether this page should render the CE or EE page
+const UsersListPageSwitch = () => {
+  const UsersListPage = useEnterprise(
+    UserListPageCE,
+    async () =>
+      // eslint-disable-next-line import/no-cycle
+      (await import('../../../../../../../ee/admin/pages/SettingsPage/pages/Users/ListPage'))
+        .UserListPageEE
+  );
+
+  // block rendering until the EE component is fully loaded
+  if (!UsersListPage) {
+    return null;
+  }
+
+  return <UsersListPage />;
+};
+
+export default UsersListPageSwitch;

@@ -9,8 +9,8 @@
     "name": "Category"
   },
   "options": {
-    "draftAndPublish": true,
-    "comment": ""
+    "reviewWorkflows": true,
+    "draftAndPublish": true
   },
   "pluginOptions": {
     "i18n": {
@@ -53,6 +53,12 @@
         }
       },
       "type": "date"
+    },
+    "relation_locales": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-locale.relation-locale",
+      "mappedBy": "categories"
     }
   }
 }

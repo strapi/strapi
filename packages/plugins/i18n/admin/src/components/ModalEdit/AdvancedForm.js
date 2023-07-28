@@ -1,8 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { Checkbox } from '@strapi/design-system';
 import { useFormikContext } from 'formik';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Checkbox } from '@strapi/design-system/Checkbox';
+
 import { getTrad } from '../../utils';
 
 const AdvancedForm = ({ isDefaultLocale }) => {
