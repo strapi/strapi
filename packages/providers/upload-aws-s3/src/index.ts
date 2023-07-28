@@ -96,6 +96,9 @@ export = {
           if (baseUrl) {
             // Construct the url with the baseUrl
             file.url = `${baseUrl}/${fileKey}`;
+          } else if (data.Location[0] === '/') {
+            // If data.Location starts with a "/" --> add the protocol and the bucket name and endpoint before it to create complete URL
+            file.url = `https://${config.params.Bucket}.${config.endpoint}${data.Location}`;
           } else {
             // Add the protocol if it is missing
             // Some providers like DigitalOcean Spaces return the url without the protocol

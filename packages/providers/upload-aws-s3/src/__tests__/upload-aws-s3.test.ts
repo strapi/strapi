@@ -79,6 +79,37 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toEqual('https://uri.test/tmp/test.json');
     });
 
+    test('Should add to the url the https protocol, bucket and endpoint if it is missing', async () => {
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          endpoint: 's3.fr-par.scw.cloud',
+          params: {
+            Bucket: 'test',
+          },
+        },
+      });
+
+      S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
+        callback(null, { Location: '/test.json' })
+      );
+      const file: File = {
+        name: 'test',
+        size: 100,
+        url: '',
+        path: 'tmp',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
+      await providerInstance.upload(file);
+
+      expect(S3InstanceMock.upload).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://test.s3.fr-par.scw.cloud/test.json');
+    });
+
     test('Should prepend the baseUrl to the url of the file object', async () => {
       const providerInstance = awsProvider.init({
         baseUrl: 'https://cdn.test',
