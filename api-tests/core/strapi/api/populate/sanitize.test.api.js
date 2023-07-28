@@ -10,7 +10,7 @@ const { createContentAPIRequest, createAuthRequest } = require('api-tests/reques
 const builder = createTestBuilder();
 
 let strapi;
-let rq;
+let file;
 
 const schemas = {
   contentTypes: {
@@ -31,6 +31,8 @@ const schemas = {
       attributes: {
         name: { type: 'string' },
         number: { type: 'integer' },
+        restricted: { type: 'string', private: true },
+        password: { type: 'password' },
         relA: { type: 'relation', relation: 'oneToOne', target: 'api::a.a' },
         cp: { type: 'component', repeatable: false, component: 'default.cp-a' },
         dz: { type: 'dynamiczone', components: ['default.cp-a', 'default.cp-b'] },
@@ -67,6 +69,8 @@ const fixtures = {
         {
           name: 'one',
           number: 1,
+          restricted: 'restricted',
+          password: 'password',
           relA: a[0].id,
           cp: { name: 'cp_one' },
           dz: [
@@ -97,7 +101,7 @@ const uploadFile = async () => {
 
 describe('Sanitize populated entries', () => {
   beforeAll(async () => {
-    const file = await uploadFile();
+    file = await uploadFile();
 
     await builder
       .addComponent(schemas.components.cpA)
@@ -133,10 +137,29 @@ describe('Sanitize populated entries', () => {
       expect(body.data[0].attributes.cover.data.attributes.createdBy).toBeUndefined();
       expect(body.data[0].attributes.cover.data.attributes.updatedBy).toBeUndefined();
     });
+
+    test("Media's relations (from related) can be populated without restricted attributes", async () => {
+      const { status, body } = await rq.get(`/upload/files/${file.id}`, {
+        qs: { populate: { related: { populate: '*' } } },
+      });
+
+      expect(status).toBe(200);
+      expect(body.related).toBeDefined();
+      expect(Array.isArray(body.related)).toBeTruthy();
+      expect(body.related).toHaveLength(2);
+
+      const [a, b] = body.related;
+
+      expect(a.__type).toBe('api::a.a');
+      expect(b.__type).toBe('api::b.b');
+
+      expect(b).not.toHaveProperty('restricted');
+      expect(b).not.toHaveProperty('password');
+    });
   });
 
   describe('Wildcard Populate', () => {
-    test('Wildcard populate is transformed to ane exhaustive list of populatable fields', async () => {
+    test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
       const findManyMock = jest.spyOn(strapi.entityService, 'findMany');
 
       const { status } = await rq.get(`/${schemas.contentTypes.b.pluralName}`, {
