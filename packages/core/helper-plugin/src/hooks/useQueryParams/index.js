@@ -18,7 +18,7 @@ const useQueryParams = (initialParams) => {
   }, [search, initialParams]);
 
   const setQuery = useCallback(
-    (nextParams, method = 'push') => {
+    (nextParams, method = 'push', arrayFormat = 'indices') => {
       let nextQuery = { ...query };
 
       if (method === 'remove') {
@@ -29,7 +29,7 @@ const useQueryParams = (initialParams) => {
         nextQuery = { ...query, ...nextParams };
       }
 
-      push({ search: stringify(nextQuery, { encode: false }) });
+      push({ search: stringify(nextQuery, { encode: false, arrayFormat }) });
     },
     [push, query]
   );

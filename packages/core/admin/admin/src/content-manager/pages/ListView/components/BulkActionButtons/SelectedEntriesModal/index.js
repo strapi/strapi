@@ -146,11 +146,11 @@ const SelectedEntriesTableContent = ({
     <Table.Content>
       <Table.Head>
         <Table.HeaderCheckboxCell />
-        <Table.HeaderCell fieldSchemaType="number" label="id" name="id" />
+        <Table.HeaderCell fieldSchemaType="number" metadatas={{ label: 'id' }} name="id" />
         {shouldDisplayMainField && (
-          <Table.HeaderCell fieldSchemaType="string" label="name" name="name" />
+          <Table.HeaderCell fieldSchemaType="string" metadatas={{ label: 'name' }} name="name" />
         )}
-        <Table.HeaderCell fieldSchemaType="string" label="status" name="status" />
+        <Table.HeaderCell fieldSchemaType="string" metadatas={{ label: 'status' }} name="status" />
       </Table.Head>
       <Table.LoadingBody />
       <Table.Body>

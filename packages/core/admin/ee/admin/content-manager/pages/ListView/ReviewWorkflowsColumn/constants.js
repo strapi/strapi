@@ -40,12 +40,28 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
       },
       searchable: false,
       sortable: true,
-      mainField: {
-        name: 'firstname',
-        schema: {
-          type: 'string',
+      mainField: [
+        {
+          name: 'username',
+          schema: {
+            type: 'string',
+          },
         },
-      },
+
+        {
+          name: 'lastname',
+          schema: {
+            type: 'string',
+          },
+        },
+
+        {
+          name: 'firstname',
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
     },
   },
 ];

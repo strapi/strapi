@@ -3,18 +3,20 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderRTL, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
+import { Router } from 'react-router-dom';
 
 import { Table, useTableContext } from '../index';
 
-jest.mock('../../../hooks/useQueryParams', () => jest.fn().mockReturnValue([{}, jest.fn()]));
 jest.mock('../../../features/Tracking', () => ({
   useTracking: jest.fn(() => ({
     trackUsage: jest.fn(),
   })),
 }));
 
-const mockHeaders = [
+const HEADERS_MOCK = [
   {
     key: '__id_key__',
     name: 'id',
@@ -43,11 +45,13 @@ const mockHeaders = [
 
 const mockRows = [{ id: 1 }, { id: 2 }];
 
+const history = createMemoryHistory();
+
 // eslint-disable-next-line react/prop-types
 const Wrapper = ({ children }) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en">
-      {children}
+      <Router history={history}>{children}</Router>
     </IntlProvider>
   </ThemeProvider>
 );
@@ -56,6 +60,7 @@ const render = (props) => ({
   ...renderRTL(<Table.Root {...props} />, {
     wrapper: Wrapper,
   }),
+  user: userEvent.setup(),
 });
 
 describe('Table', () => {
@@ -112,14 +117,12 @@ describe('Table', () => {
           <Table.Head>
             {/* Bulk action select all checkbox */}
             <Table.HeaderCheckboxCell />
-            {mockHeaders.map(({ fieldSchema, key, name, metadatas }) => (
+            {HEADERS_MOCK.map(({ fieldSchema, key, name, metadatas }) => (
               <Table.HeaderCell
                 key={key}
                 name={name}
                 fieldSchemaType={fieldSchema.type}
-                relationFieldName={metadatas.mainField?.name}
-                isSortable={metadatas.sortable}
-                label={metadatas.label}
+                metadatas={metadatas}
               />
             ))}
             {/* Visually hidden header for actions */}
@@ -132,6 +135,73 @@ describe('Table', () => {
     expect(screen.getByRole('button', { name: 'Sort on id' })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Select all entries' })).toBeInTheDocument();
     expect(screen.getByText('Actions')).toBeInTheDocument();
+  });
+
+  it('should sort relational headers using sortPriority', async () => {
+    const { user, getByRole } = render({
+      rows: mockRows,
+      colCount: 1,
+      children: (
+        <Table.Content>
+          <Table.Head>
+            <Table.HeaderCheckboxCell />
+            {[
+              ...HEADERS_MOCK,
+              {
+                key: `__rel_temp_key__`,
+                name: 'relation',
+                fieldSchema: {
+                  type: 'relation',
+                },
+                metadatas: {
+                  label: 'relation',
+                  searchable: false,
+                  sortable: true,
+                  mainField: [
+                    {
+                      name: 'prop1',
+                      schema: {
+                        type: 'string',
+                      },
+                    },
+
+                    {
+                      name: 'prop2',
+                      schema: {
+                        type: 'string',
+                      },
+                    },
+
+                    {
+                      name: 'prop3',
+                      schema: {
+                        type: 'string',
+                      },
+                    },
+                  ],
+                },
+              },
+            ].map(({ fieldSchema, key, name, metadatas }) => (
+              <Table.HeaderCell
+                key={key}
+                name={name}
+                fieldSchemaType={fieldSchema.type}
+                metadatas={metadatas}
+              />
+            ))}
+          </Table.Head>
+        </Table.Content>
+      ),
+    });
+
+    const sortButton = getByRole('button', { name: 'Sort on relation' });
+    expect(sortButton).toBeInTheDocument();
+
+    await user.click(sortButton);
+
+    expect(history.location.search).toBe(
+      '?sort=relation[prop1]:ASC&sort=relation[prop2]:ASC&sort=relation[prop3]:ASC'
+    );
   });
 
   it('should render the bulk action bar with bulk delete button after updating the selectedEntries state', () => {

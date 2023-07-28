@@ -201,20 +201,19 @@ const HeaderHiddenActionsCell = () => {
  * HeaderCell
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, label }) => {
-  const [{ query }, setQuery] = useQueryParams();
-  const sort = query?.sort || '';
-  const [sortBy, sortOrder] = sort.split(':');
+const HeaderCell = ({ fieldSchemaType, name, metadatas }) => {
   const { formatMessage } = useIntl();
+  const [{ query }, setQuery] = useQueryParams();
 
-  let isSorted = sortBy === name;
-  const isUp = sortOrder === 'ASC';
+  const { label, mainField, sortable: isSortable = false } = metadatas ?? {};
+  const sort = Array.isArray(query?.sort) ? query.sort : [query?.sort || ''];
+  const sortOrder = sort[0].split(':')[1];
+  const sortedBy = sort.map((s) => s.split(':')[0]);
 
-  // relations always have to be sorted by their main field instead of only the
-  // attribute name; sortBy e.g. looks like: &sortBy=attributeName[mainField]:ASC
-  if (fieldSchemaType === 'relation' && relationFieldName) {
-    isSorted = sortBy === `${name.split('.')[0]}[${relationFieldName}]`;
-  }
+  // sortedBy is always an array, but could either be
+  // - [name]: for non relational attributes
+  // - [name[mainField.name], ...]: for relational fields that use support mulitple fields (e.g. users)
+  let isSorted = sortedBy.every((param) => param.split('[')[0] === name);
 
   const sortLabel = formatMessage(
     { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
@@ -223,17 +222,29 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
 
   const handleClickSort = (shouldAllowClick = true) => {
     if (isSortable && shouldAllowClick) {
-      let nextSort = name;
+      // reverse the current sort order
+      const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
 
       // relations always have to be sorted by their main field instead of only the
-      // attribute name; nextSort e.g. looks like: &nextSort=attributeName[mainField]:ASC
-      if (fieldSchemaType === 'relation' && relationFieldName) {
-        nextSort = `${name.split('.')[0]}[${relationFieldName}]`;
-      }
+      // attribute name. They either use a single mainField or an array of mainFields, which
+      // translates into the following query params:
+      // - single main field: &sort=attributeName[mainField.name]:ASC
+      // - array of main fields: &sort=attributeName[mainField.name]:ASC&sort=attributeName[mainField2.name]
+      const nextSort =
+        fieldSchemaType === 'relation'
+          ? (Array.isArray(mainField)
+              ? mainField.map((mainField) => mainField.name)
+              : [mainField.name]
+            ).map((fieldName) => `${name.split('.')[0]}[${fieldName}]:${nextSortOrder}`)
+          : `${name}:${nextSortOrder}`;
 
-      setQuery({
-        sort: `${nextSort}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-      });
+      setQuery(
+        {
+          sort: nextSort,
+        },
+        'push',
+        'repeat'
+      );
     }
   };
 
@@ -246,7 +257,7 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
           <IconButton
             label={sortLabel}
             onClick={handleClickSort}
-            icon={<SortIcon isUp={isUp} />}
+            icon={<SortIcon isUp={sortOrder === 'ASC'} />}
             noBorder
           />
         )
@@ -267,17 +278,28 @@ const HeaderCell = ({ fieldSchemaType, name, relationFieldName, isSortable, labe
   );
 };
 
+const MainFieldShape = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  schema: PropTypes.shape({
+    type: PropTypes.string,
+  }).isRequired,
+});
+
 HeaderCell.defaultProps = {
-  isSortable: false,
-  relationFieldName: null,
+  metadatas: {
+    mainField: undefined,
+    sortable: false,
+  },
 };
 
 HeaderCell.propTypes = {
   name: PropTypes.string.isRequired,
   fieldSchemaType: PropTypes.string.isRequired,
-  relationFieldName: PropTypes.string,
-  isSortable: PropTypes.bool,
-  label: PropTypes.string.isRequired,
+  metadatas: PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    sortable: PropTypes.bool,
+    mainField: PropTypes.oneOfType([PropTypes.arrayOf(MainFieldShape), MainFieldShape]),
+  }),
 };
 
 /* -------------------------------------------------------------------------------------------------

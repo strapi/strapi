@@ -554,9 +554,7 @@ function ListView({
                       key={key}
                       name={name}
                       fieldSchemaType={fieldSchema.type}
-                      relationFieldName={metadatas.mainField?.name}
-                      isSortable={metadatas.sortable}
-                      label={metadatas.label}
+                      metadatas={metadatas}
                     />
                   ))}
                   {/* Visually hidden header for actions */}
