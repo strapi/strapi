@@ -28,7 +28,7 @@ module.exports = {
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.js$': [
+    '^.+\\.(j|t)s(x)?$': [
       '@swc/jest',
       {
         env: {
