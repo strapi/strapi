@@ -107,7 +107,19 @@ const createServer = (strapi) => {
     listRoutes() {
       const allRoutes = [...router.stack];
 
-      return allRoutes;
+      Object.values(apis).forEach((api) => {
+        allRoutes.push(...api.listRoutes());
+      });
+
+      const uniqueRoutes = new Map();
+      allRoutes.forEach((route) => {
+        if (!uniqueRoutes.has(route.path)) return uniqueRoutes.set(route.path, route);
+        const existingRoute = uniqueRoutes.get(route.path);
+        const methods = new Set([...existingRoute.methods, ...route.methods]);
+        uniqueRoutes.set(route.path, { ...route, methods: [...methods] });
+      });
+
+      return [...uniqueRoutes.values()];
     },
 
     listen(...args) {
