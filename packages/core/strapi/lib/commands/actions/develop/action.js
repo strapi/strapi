@@ -11,7 +11,7 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('../../../core/app-configuration');
 const strapi = require('../../../index');
-const { buildTypeScript, buildAdmin } = require('../../builders');
+const { buildTypeScript, buildAdmin, typecheck } = require('../../builders');
 
 /**
  * `$ strapi develop`
@@ -127,6 +127,10 @@ const workerProcess = async ({ appDir, distDir, watchAdmin, polling, isTSProject
     logger: { silent: true, debug: false },
     artifacts: { contentTypes: true, components: true },
   });
+
+  if (isTSProject) {
+    await typecheck({ srcDir: appDir });
+  }
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
   watchFileChanges({
