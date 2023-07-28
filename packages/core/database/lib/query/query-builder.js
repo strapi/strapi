@@ -384,7 +384,6 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
           if (db.connection.client.config.client === 'sqlite3') {
             for (const [key, value] of Object.entries(state.data)) {
               if (value instanceof Date) {
-                console.log('Converting date', key, value);
                 state.data[key] = value.toISOString();
               }
             }
