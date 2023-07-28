@@ -1,6 +1,6 @@
 module.exports = {
   parser: '@babel/eslint-parser',
-  extends: ['@strapi/eslint-config/front'],
+  extends: ['@strapi/eslint-config/front/javascript'],
   env: {
     browser: true,
     commonjs: true,
