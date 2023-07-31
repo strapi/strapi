@@ -1,5 +1,5 @@
-import { chain } from 'stream-chain';
 import { Readable } from 'stream';
+import { chain } from 'stream-chain';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';

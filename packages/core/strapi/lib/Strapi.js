@@ -311,6 +311,7 @@ class Strapi {
         this.server.listen(listenSocket, onListen);
       } else {
         const { host, port } = this.config.get('server');
+
         this.server.listen(port, host, onListen);
       }
     });

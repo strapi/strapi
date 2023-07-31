@@ -28,12 +28,7 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import {
-  createDefaultForm,
-  getRequestUrl,
-  getTrad,
-  removePasswordFieldsFromData,
-} from '../../utils';
+import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -60,7 +55,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const isCreatingEntry = id === null;
 
   const requestURL =
-    isCreatingEntry && !origin ? null : getRequestUrl(`collection-types/${slug}/${origin || id}`);
+    isCreatingEntry && !origin ? null : `/content-manager/collection-types/${slug}/${origin || id}`;
 
   const cleanReceivedData = useCallback((data) => {
     const cleaned = removePasswordFieldsFromData(
@@ -190,7 +185,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await del(getRequestUrl(`collection-types/${slug}/${id}`));
+        const { data } = await del(`/content-manager/collection-types/${slug}/${id}`);
 
         toggleNotification({
           type: 'success',
@@ -220,8 +215,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
        * are correctly attached to the entry.
        */
       const endPoint = isCloning
-        ? getRequestUrl(`collection-types/${slug}/clone/${origin}`)
-        : getRequestUrl(`collection-types/${slug}`);
+        ? `/content-manager/collection-types/${slug}/clone/${origin}`
+        : `/content-manager/collection-types/${slug}`;
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
@@ -279,7 +274,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willCheckDraftRelations');
 
-      const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/countDraftRelations`);
+      const endPoint = `/content-manager/collection-types/${slug}/${id}/actions/countDraftRelations`;
       dispatch(setStatus('draft-relation-check-pending'));
 
       const numberOfDraftRelations = await fetchClient.get(endPoint);
@@ -299,7 +294,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/publish`);
+      const endPoint = `/content-manager/collection-types/${slug}/${id}/actions/publish`;
 
       dispatch(setStatus('publish-pending'));
 
@@ -326,7 +321,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`collection-types/${slug}/${id}`);
+      const endPoint = `/content-manager/collection-types/${slug}/${id}`;
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
@@ -362,7 +357,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   );
 
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/unpublish`);
+    const endPoint = `/content-manager/collection-types/${slug}/${id}/actions/unpublish`;
 
     dispatch(setStatus('unpublish-pending'));
 

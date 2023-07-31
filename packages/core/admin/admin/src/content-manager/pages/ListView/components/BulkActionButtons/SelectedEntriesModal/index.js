@@ -77,8 +77,8 @@ const EntryValidationText = ({ validationErrors, isPublished }) => {
         <Icon color="success600" as={CheckCircle} />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
-            id: 'app.utils.published',
-            defaultMessage: 'Published',
+            id: 'content-manager.bulk-publish.already-published',
+            defaultMessage: 'Already Published',
           })}
         </Typography>
       </Flex>
@@ -196,6 +196,7 @@ const SelectedEntriesTableContent = ({
                 )}
                 noBorder
                 target="_blank"
+                marginLeft="auto"
               >
                 <Pencil />
               </IconButton>

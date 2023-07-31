@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.11.7",
+  "version": "4.12.0",
   "description": "Strapi maintained Custom Fields",
   "strapi": {
     "name": "color-picker",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.8.2",
-    "@strapi/helper-plugin": "4.11.7",
+    "@strapi/helper-plugin": "4.12.0",
     "@strapi/icons": "1.8.2",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
@@ -30,7 +30,18 @@
     "react-router-dom": "5.3.4",
     "styled-components": "5.3.3"
   },
+  "files": [
+    "./dist",
+    "./admin",
+    "strapi-admin.js",
+    "strapi-server.js"
+  ],
   "scripts": {
+    "build": "run -T tsc -p server/tsconfig.json --outDir ./dist/server",
+    "build:ts": "run build",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
@@ -56,7 +67,7 @@
     }
   ],
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   }
 }

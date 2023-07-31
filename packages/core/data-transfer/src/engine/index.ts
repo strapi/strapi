@@ -1,7 +1,7 @@
-import type Chain from 'stream-chain';
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
+import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
@@ -26,6 +26,10 @@ import type {
   StreamItem,
   SchemaDiffHandler,
   SchemaDiffHandlerContext,
+  ErrorHandler,
+  ErrorHandlerContext,
+  ErrorHandlers,
+  ErrorCode,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -39,6 +43,7 @@ import {
 } from './diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
+import { ProviderTransferError } from '../errors/providers';
 
 export const TRANSFER_STAGES: ReadonlyArray<TransferStage> = Object.freeze([
   'entities',
@@ -108,12 +113,34 @@ class TransferEngine<
 
   #handlers: {
     schemaDiff: SchemaDiffHandler[];
+    errors: Partial<ErrorHandlers>;
   } = {
     schemaDiff: [],
+    errors: {},
   };
 
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
+  }
+
+  addErrorHandler(handlerName: ErrorCode, handler: ErrorHandler) {
+    if (!this.#handlers.errors[handlerName]) {
+      this.#handlers.errors[handlerName] = [];
+    }
+    this.#handlers.errors[handlerName]?.push(handler);
+  }
+
+  async attemptResolveError(error: Error) {
+    const context: ErrorHandlerContext = {};
+    if (error instanceof ProviderTransferError && error.details?.details.code) {
+      const errorCode = error.details?.details.code as ErrorCode;
+      if (!this.#handlers.errors[errorCode]) {
+        this.#handlers.errors[errorCode] = [];
+      }
+      await utils.middleware.runMiddleware(context ?? {}, this.#handlers.errors[errorCode] ?? []);
+    }
+
+    return !!context.ignore;
   }
 
   // Save the currently open stream so that we can access it at any time
@@ -745,8 +772,12 @@ class TransferEngine<
       try {
         await provider.beforeTransfer?.();
       } catch (error) {
-        // Error happening during the before transfer step should be considered fatal errors
         if (error instanceof Error) {
+          const resolved = await this.attemptResolveError(error);
+
+          if (resolved) {
+            return;
+          }
           this.panic(error);
         } else {
           this.panic(
