@@ -8,24 +8,20 @@ import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
-import { ReviewWorkflowsFilter } from '../ReviewWorkflowsFilter';
+import { AssigneeFilter } from '../AssigneeFilter';
 
 const server = setupServer(
-  rest.get('*/admin/review-workflows/workflows', (req, res, ctx) => {
+  rest.get('*/admin/users', (req, res, ctx) => {
+    const mockUsers = [
+      { id: 1, firstname: 'John', lastname: 'Doe' },
+      { id: 2, firstname: 'Kai', lastname: 'Doe' },
+    ];
+
     return res(
       ctx.json({
-        data: [
-          {
-            id: 1,
-            stages: [
-              {
-                id: 1,
-                name: 'To Review',
-                color: '#FFFFFF',
-              },
-            ],
-          },
-        ],
+        data: {
+          results: mockUsers,
+        },
       })
     );
   })
@@ -35,7 +31,7 @@ const queryClient = new QueryClient();
 
 const setup = (props) => {
   return {
-    ...render(<ReviewWorkflowsFilter uid="api::address.address" onChange={() => {}} {...props} />, {
+    ...render(<AssigneeFilter {...props} />, {
       wrapper: ({ children }) => (
         <ThemeProvider theme={lightTheme}>
           <QueryClientProvider client={queryClient}>
@@ -50,7 +46,7 @@ const setup = (props) => {
   };
 };
 
-describe('Content-Manger | List View | Filter | ReviewWorkflowsFilter', () => {
+describe('Content-Manager | List-view | AssigneeFilter', () => {
   beforeAll(() => {
     server.listen();
   });
@@ -59,25 +55,30 @@ describe('Content-Manger | List View | Filter | ReviewWorkflowsFilter', () => {
     server.close();
   });
 
-  it('should display stages', async () => {
-    const { getByText, user, getByRole } = setup();
+  it('should render all the options fetched from the API', async () => {
+    const mockOnChange = jest.fn();
+    const { getByText, user, getByRole } = setup({ onChange: mockOnChange });
 
     await user.click(getByRole('combobox'));
 
     await waitFor(() => {
-      expect(getByText('To Review')).toBeInTheDocument();
+      expect(getByText('John Doe')).toBeInTheDocument();
+      expect(getByText('Kai Doe')).toBeInTheDocument();
     });
   });
 
-  it('should use the stage name as filter value', async () => {
-    const spy = jest.fn();
-    const { getByText, user, getByRole } = setup({ onChange: spy });
+  it('should call the onChange function with the selected value', async () => {
+    const mockOnChange = jest.fn();
+    const { getByText, user, getByRole } = setup({ onChange: mockOnChange });
 
     await user.click(getByRole('combobox'));
-    await user.click(getByText('To Review'));
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith('To Review');
-    });
+    await waitFor(() => expect(getByText('John Doe')).toBeInTheDocument());
+
+    const option = getByText('John Doe');
+
+    await user.click(option);
+
+    expect(mockOnChange).toHaveBeenCalledWith('1');
   });
 });
