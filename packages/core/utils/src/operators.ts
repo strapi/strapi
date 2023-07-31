@@ -7,6 +7,7 @@ const WHERE_OPERATORS = [
   '$eq',
   '$eqi',
   '$ne',
+  '$nei',
   '$gt',
   '$gte',
   '$lt',
