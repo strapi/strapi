@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = ({ strapi }) => {
+export const register = ({ strapi }: any) => {
   strapi.customFields.register({
     name: 'color',
     plugin: 'color-picker',

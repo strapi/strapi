@@ -1,11 +1,11 @@
 'use strict';
 
+const path = require('path');
+const assert = require('assert');
 const ts = require('typescript');
 const prettier = require('prettier');
 const fse = require('fs-extra');
-const path = require('path');
 const chalk = require('chalk');
-const assert = require('assert');
 
 const { factory } = ts;
 

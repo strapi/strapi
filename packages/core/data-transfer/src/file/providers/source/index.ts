@@ -1,12 +1,12 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs-extra';
 import zip from 'zlib';
-import tar from 'tar';
 import path from 'path';
+import { pipeline, PassThrough } from 'stream';
+import fs from 'fs-extra';
+import tar from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
-import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Schema } from '@strapi/strapi';
 
