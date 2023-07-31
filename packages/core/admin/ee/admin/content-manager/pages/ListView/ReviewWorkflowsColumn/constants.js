@@ -39,7 +39,13 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
         defaultMessage: 'Assignee',
       },
       searchable: false,
-      sortable: false,
+      sortable: true,
+      mainField: {
+        name: 'firstname',
+        schema: {
+          type: 'string',
+        },
+      },
     },
   },
 ];
