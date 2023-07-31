@@ -1,5 +1,5 @@
-import { machineIdSync } from 'node-machine-id';
 import { randomUUID } from 'crypto';
+import { machineIdSync } from 'node-machine-id';
 
 export default () => {
   try {
