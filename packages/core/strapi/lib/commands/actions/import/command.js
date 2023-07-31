@@ -1,7 +1,7 @@
 'use strict';
 
-const { Option } = require('commander');
 const path = require('path');
+const { Option } = require('commander');
 const inquirer = require('inquirer');
 const {
   excludeOption,
