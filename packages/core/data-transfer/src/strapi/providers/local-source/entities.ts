@@ -1,4 +1,4 @@
-import { Readable, PassThrough } from 'stream';
+import { Readable, Transform } from 'stream';
 import type { Schema } from '@strapi/strapi';
 
 import * as shared from '../../queries';
@@ -52,8 +52,8 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Readable => {
  * Create an entity transform stream which convert the output of
  * the multi-content-types stream to the transfer entity format
  */
-export const createEntitiesTransformStream = (): PassThrough => {
-  return new PassThrough({
+export const createEntitiesTransformStream = (): Transform => {
+  return new Transform({
     objectMode: true,
     transform(data, _encoding, callback) {
       const { entity, contentType } = data;
