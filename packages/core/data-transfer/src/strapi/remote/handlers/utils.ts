@@ -1,7 +1,7 @@
-import type { Context } from 'koa';
 import type { IncomingMessage } from 'http';
-import type { RawData, ServerOptions } from 'ws';
 import { randomUUID } from 'crypto';
+import type { Context } from 'koa';
+import type { RawData, ServerOptions } from 'ws';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import type { Handler, TransferState } from './abstract';

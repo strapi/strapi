@@ -1,7 +1,7 @@
 import { join } from 'path';
 import https from 'https';
-import { stat, createReadStream, ReadStream } from 'fs-extra';
 import { Duplex, PassThrough, Readable } from 'stream';
+import { stat, createReadStream, ReadStream } from 'fs-extra';
 
 import type { IAsset } from '../../../../types';
 

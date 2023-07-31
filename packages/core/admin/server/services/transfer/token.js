@@ -1,8 +1,8 @@
 'use strict';
 
-const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 const crypto = require('crypto');
 const assert = require('assert');
+const { map, isArray, omit, uniq, isNil, difference, isEmpty } = require('lodash/fp');
 
 const {
   errors: { ValidationError, NotFoundError },
