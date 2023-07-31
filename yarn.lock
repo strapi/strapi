@@ -14256,10 +14256,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.31.0":
-  version: 3.31.0
-  resolution: "core-js@npm:3.31.0"
-  checksum: f7cf9b3010f7ca99c026d95b61743baca1a85512742ed2b67e8f65a72ac4f4fe0b90b00057783e886bdd39d3a295f42f845d33e7cba3973ed263df978343ab79
+"core-js@npm:3.32.0":
+  version: 3.32.0
+  resolution: "core-js@npm:3.32.0"
+  checksum: 52921395028550e4c9d21d47b9836439bb5b6b9eefc34d45a3948a68d81fdd093acc0fadf69f9cf632b82f01f95f22f484408a93dd9e940b19119ac204cd2925
   languageName: node
   linkType: hard
 
@@ -30063,7 +30063,7 @@ __metadata:
     babel-eslint: 10.1.0
     chalk: 4.1.2
     chokidar: 3.5.3
-    core-js: 3.31.0
+    core-js: 3.32.0
     cross-env: 7.0.3
     dotenv: 14.2.0
     eslint: 8.45.0
