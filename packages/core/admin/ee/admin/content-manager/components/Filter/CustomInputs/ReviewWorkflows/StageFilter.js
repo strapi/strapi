@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { useReviewWorkflows } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/hooks/useReviewWorkflows';
 import { getStageColorByHex } from '../../../../../pages/SettingsPage/pages/ReviewWorkflows/utils/colors';
 
-export const ReviewWorkflowsFilter = ({ value, onChange, uid }) => {
+export const StageFilter = ({ value, onChange, uid }) => {
   const { formatMessage } = useIntl();
   const {
     workflows: [workflow],
@@ -59,11 +59,11 @@ export const ReviewWorkflowsFilter = ({ value, onChange, uid }) => {
   );
 };
 
-ReviewWorkflowsFilter.defaultProps = {
+StageFilter.defaultProps = {
   value: '',
 };
 
-ReviewWorkflowsFilter.propTypes = {
+StageFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
   uid: PropTypes.string.isRequired,
   value: PropTypes.string,
