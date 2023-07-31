@@ -17,4 +17,4 @@ plugins/
 ├─ i18n/
 ```
 
-This helps keep the documentation organised according to the file structure of the `packages` folder within the monorepo. From there however, is dependant on the documentation written, it will most likely change over time when the documentation grows and develops.
+This helps keep the documentation organized according to the file structure of the `packages` folder within the monorepo. From there however, is dependant on the documentation written, it will most likely change over time when the documentation grows and develops.

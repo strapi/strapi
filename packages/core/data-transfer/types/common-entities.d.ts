@@ -1,5 +1,5 @@
-import type { Attribute, Common } from '@strapi/strapi';
 import type { Readable } from 'stream';
+import type { Attribute, Common } from '@strapi/strapi';
 
 export interface IMetadata {
   strapi?: {

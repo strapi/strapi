@@ -690,7 +690,7 @@ const FormModal = () => {
           onCloseModal();
         }
 
-        // We don't need to end the loop here we want the reducer to be reinitialised
+        // We don't need to end the loop here we want the reducer to be reinitialized
 
         // Logic for creating a component without clicking on the link in
         // the left menu

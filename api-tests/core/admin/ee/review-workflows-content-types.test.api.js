@@ -262,7 +262,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       });
 
       test('It should steal content types from other workflows', async () => {
-        // There could be concurrency issues, so assert all workflows are transfered
+        // There could be concurrency issues, so assert all workflows are transferred
         const res = await updateWorkflow(workflow2.id, {
           contentTypes: [productUID, articleUID],
         });
