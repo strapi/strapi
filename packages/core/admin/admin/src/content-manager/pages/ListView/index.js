@@ -17,6 +17,7 @@ import {
   lightTheme,
 } from '@strapi/design-system';
 import {
+  findMatchingPermissions,
   NoPermissions,
   CheckPermissions,
   SearchURLQuery,
@@ -76,6 +77,7 @@ const REVIEW_WORKFLOW_COLUMNS_CE = null;
 const REVIEW_WORKFLOW_COLUMNS_CELL_CE = () => null;
 const REVIEW_WORKFLOW_FILTER_CE = [];
 const CREATOR_ATTRIBUTES = ['createdBy', 'updatedBy'];
+const USER_FILTER_ATTRIBUTES = [...CREATOR_ATTRIBUTES, 'strapi_assignee'];
 
 function ListView({
   canCreate,
@@ -101,7 +103,7 @@ function ListView({
   const [isConfirmDeleteRowOpen, setIsConfirmDeleteRowOpen] = React.useState(false);
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
-  const { refetchPermissions } = useRBACProvider();
+  const { allPermissions, refetchPermissions } = useRBACProvider();
   const trackUsageRef = React.useRef(trackUsage);
   const fetchPermissionsRef = React.useRef(refetchPermissions);
   const { notifyStatus } = useNotifyAT();
@@ -122,7 +124,9 @@ function ListView({
       const [key, value] = Object.entries(filter)[0];
       const id = value.id?.$eq || value.id?.$ne;
 
-      if (CREATOR_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+      // TODO: strapi_assignee should not be in here and rather defined
+      // in the ee directory.
+      if (USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
         acc.push(id);
       }
 
@@ -132,7 +136,16 @@ function ListView({
   const { users, isLoading: isLoadingAdminUsers } = useAdminUsers(
     { filter: { id: { in: selectedUserIds } } },
     {
-      enabled: selectedUserIds.length > 0,
+      // fetch the list of admin users only if the filter contains users and the
+      // current user has permissions to display users
+      enabled:
+        selectedUserIds.length > 0 &&
+        findMatchingPermissions(allPermissions, [
+          {
+            action: 'admin::users.read',
+            subject: null,
+          },
+        ]).length > 0,
     }
   );
 
@@ -228,24 +241,58 @@ function ListView({
         await import(
           '../../../../../ee/admin/content-manager/components/Filter/CustomInputs/ReviewWorkflows/constants'
         )
-      ).REVIEW_WORKFLOW_STAGE_FILTER,
+      ).REVIEW_WORKFLOW_FILTERS,
     {
-      combine(ceFilters, eeFilter) {
+      combine(ceFilters, eeFilters) {
         return [
           ...ceFilters,
-          {
-            ...eeFilter,
-            metadatas: {
-              ...eeFilter.metadatas,
-              label: formatMessage(eeFilter.metadatas.label),
-              uid: contentType.uid,
-            },
-          },
+          ...eeFilters
+            .filter((eeFilter) => {
+              // do not display the filter at all, if the current user does
+              // not have permissions to read admin users
+              if (eeFilter.name === 'strapi_assignee') {
+                return (
+                  findMatchingPermissions(allPermissions, [
+                    {
+                      action: 'admin::users.read',
+                      subject: null,
+                    },
+                  ]).length > 0
+                );
+              }
+
+              return true;
+            })
+            .map((eeFilter) => ({
+              ...eeFilter,
+              metadatas: {
+                ...eeFilter.metadatas,
+                // the stage filter needs the current content-type uid to fetch
+                // the list of stages that can be assigned to this content-type
+                ...(eeFilter.name === 'strapi_stage' ? { uid: contentType.uid } : {}),
+
+                // translate the filter label
+                label: formatMessage(eeFilter.metadatas.label),
+
+                // `options` allows the filter-tag to render the displayname
+                // of a user over a plain id
+                options:
+                  eeFilter.name === 'strapi_assignee' &&
+                  users.map((user) => ({
+                    label: getDisplayName(user, formatMessage),
+                    customValue: user.id.toString(),
+                  })),
+              },
+            })),
         ];
       },
 
       defaultValue: [],
-      enabled: hasReviewWorkflows,
+
+      // we have to wait for admin users to be fully loaded, because otherwise
+      // combine is called to early and does not contain the latest state of
+      // the users array
+      enabled: hasReviewWorkflows && !isLoadingAdminUsers,
     }
   );
 

@@ -4,10 +4,10 @@ import { Combobox, ComboboxOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useAdminUsers } from '../../../../hooks/useAdminUsers';
-import { getDisplayName } from '../../../utils';
+import { getDisplayName } from '../../../../../../../admin/src/content-manager/utils/getDisplayName';
+import { useAdminUsers } from '../../../../../../../admin/src/hooks/useAdminUsers';
 
-export const AdminUsersFilter = ({ value, onChange }) => {
+export const AssigneeFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();
   const { users, isLoading } = useAdminUsers();
 
@@ -32,11 +32,11 @@ export const AdminUsersFilter = ({ value, onChange }) => {
   );
 };
 
-AdminUsersFilter.propTypes = {
+AssigneeFilter.propTypes = {
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
 };
 
-AdminUsersFilter.defaultProps = {
+AssigneeFilter.defaultProps = {
   value: '',
 };
