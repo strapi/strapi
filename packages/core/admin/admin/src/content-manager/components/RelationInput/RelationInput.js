@@ -373,7 +373,7 @@ RelationInput.propTypes = {
 };
 
 /**
- * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * This is in a separate component to enforce passing all the props the component requires to react-window
  * to ensure drag & drop correctly works.
  */
 const ListItem = ({ data, index, style }) => {

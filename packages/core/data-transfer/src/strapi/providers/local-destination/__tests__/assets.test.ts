@@ -1,5 +1,5 @@
-import fse from 'fs-extra';
 import { Writable, Readable } from 'stream';
+import fse from 'fs-extra';
 import type { IAsset } from '../../../../../types';
 
 import { getStrapiFactory } from '../../../../__tests__/test-utils';

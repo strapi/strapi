@@ -142,7 +142,7 @@ The permissions are modified in the admin panel (on the [edit page](http://local
 | -------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------------------------- |
 | **action**     | Id of the action that will be permitted.                                                                                   | string | required | `'plugin::content-manager.explorer.update'`                   |
 | **subject**    | Id of the subject on which the action will be permitted.                                                                   | string | -        | `'api::article.article'`                                      |
-| **properties** | List of the properties of the subject on wich the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
+| **properties** | List of the properties of the subject on which the action will be permitted                                                 | object | -        | `{ fields: ['title', 'description'], locales: ['en', 'fr'] }` |
 | **conditions** | List of the conditions that will be ran against an entry to determine whether the action on this entry is permitted or not | array  | -        | `['admin::is-creator']`                                       |
 
 A permission contains all needed information for the backend and the frontend to prevent users to perform non-permitted action.

@@ -1,6 +1,6 @@
+import { Readable, Transform } from 'stream';
 import type { Schema } from '@strapi/strapi';
 
-import { Readable, Transform } from 'stream';
 import * as shared from '../../queries';
 import { IEntity } from '../../../../types';
 

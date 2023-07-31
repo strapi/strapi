@@ -1,10 +1,10 @@
 'use strict';
 
 const { resolve } = require('path');
+const { randomUUID } = require('crypto');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const fetch = require('node-fetch');
-const { randomUUID } = require('crypto');
 const machineID = require('../../../../utils/machine-id');
 
 const readPackageJSON = async (path) => {

@@ -1,7 +1,7 @@
-import type Chain from 'stream-chain';
 import { PassThrough, Transform, Readable, Writable } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
+import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
 import { isEmpty, uniq, last, isNumber, difference, set, omit } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
