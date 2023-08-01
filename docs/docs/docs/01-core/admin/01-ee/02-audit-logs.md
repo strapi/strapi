@@ -1,6 +1,5 @@
 ---
 title: Audit Logs
-slug: /settings/audit-logs
 description: Guide for Audit Logs
 tags:
   - settings
@@ -11,7 +10,7 @@ tags:
 
 ## Summary
 
-Audit Logs provide a way to view the history of all user actions in a Strapi application. This includes actions related to entries (including publish actions), media (including its folders), users, login & logout of admin users, components, roles, and permissions.
+Audit Logs provide a way to view the history of all user actions at Admin API level. This includes actions related to entries (including publish actions), media (including its folders), users, login & logout of admin users, components, roles, and permissions, you can see the list of all the default events [here](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/services/audit-logs.js#L9).
 
 ## Backend design
 
@@ -19,7 +18,7 @@ The Audit Logs feature was built to take advantage of the eventHub. You can find
 
 ### Subscribing to all events
 
-The Audit Logs feature adds a subscriber to the [EventHub](/strapi/event-hub), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).
+The Audit Logs feature adds a subscriber to the [EventHub](/docs/core/strapi/event-hub), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).
 
 ### Retention days
 
@@ -29,23 +28,25 @@ By default, the retention days are set to 90 days, but this value can be changed
 
 For cloud projects, the retention days are determined by the license. In a cloud project, users can set a custom retention days in the configuration, but this value cannot exceed the retention days defined by the license.
 
+In both cases, if we want to set a custom retention days we can modify the Admin Panel API config file (`./config/admin.js`). You can find all the possible options as well as other configurations for the Admin Panel on the [documentation page](https://docs.strapi.io/dev-docs/configurations/admin-panel#available-options).
+
 ### Audit Logs format
 
 Every Audit Log has the following format:
 
-```js
-const event = {
-  action, // Name of the event
-  date, // When the event happens
-  userId, // Id of the user that trigger the event
-  payload, // Extra info of the event
+```typescript
+type Event {
+  action: string, // Name of the event
+  date: Date, // When the event happens
+  userId: number, // Id of the user that trigger the event
+  payload?: Object, // Extra info of the event
 };
 ```
 
-To understand how we obtain this information, we need to know how we emit an event with the Event Hub. To emit an event, we use the following function: (To see more info about the EventHub, click [here](/strapi/event-hub))
+To understand how we obtain this information, we need to know how we emit an event with the Event Hub. To emit an event, we use the following function: (To see more info about the EventHub, click [here](/docs/core/strapi/event-hub)
 
-```js
-strapi.eventHub.emit('some.event', { meta: 'data' });
+```typescript
+strapi.eventHub.emit(name: Pick<Event, 'name'>, payload: Pick<Event, 'payload'>);
 ```
 
 When creating our Audit Log, we retrieve the action and payload from this emitted event, where the first argument is the action or event name, and the second one is the payload. We obtain the user from the requestContext.
