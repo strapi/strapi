@@ -8,9 +8,19 @@ export * from './plugin';
 export interface EntityService {
   findMany<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params?: Omit<
-      EntityService.Params.Read<TContentTypeUID>,
-      keyof EntityService.Params.Pagination.PageNotation
+    params?: EntityService.Params.Pick<
+      TContentTypeUID,
+      'fields' | 'filters' | 'pagination:offset' | 'sort' | 'populate' | 'publicationState'
     >
   ): Promise<Attribute.GetValues<TContentTypeUID>[]>;
+  findOne<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    entityId: number,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
+  delete<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    entityId: number,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
 }
