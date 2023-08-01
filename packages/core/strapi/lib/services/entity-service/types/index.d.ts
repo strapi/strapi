@@ -16,4 +16,8 @@ export interface EntityService {
     entityId: number,
     params?: EntityService.Params.Pick<TContentTypeUID, 'fields' | 'populate'>
   ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
+  create<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID>>;
 }
