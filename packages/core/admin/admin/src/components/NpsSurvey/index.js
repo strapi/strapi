@@ -60,7 +60,7 @@ const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
-  display: 1000, // 5 minutes in ms
+  display: 5 * 60 * 1000, // 5 minutes in ms
 };
 
 const ratingArray = [...Array(11).keys()];
