@@ -1,4 +1,4 @@
-import type { Attribute, Common, Utils } from '@strapi/strapi';
+import type { Attribute, Common, EntityService, Utils } from '@strapi/strapi';
 import type * as Params from './index';
 
 /**
@@ -52,14 +52,14 @@ type GetPopulatableKeysWithoutTarget<TSchemaUID extends Common.UID.Schema> = Exc
  * Fragment populate notation for polymorphic attributes
  */
 type PopulateFragment<TMaybeTargets extends Common.UID.Schema> = {
-  on?: { [TSchemaUID in TMaybeTargets]?: boolean | Params.Read<TSchemaUID> };
+  on?: { [TSchemaUID in TMaybeTargets]?: boolean | NestedParams<TSchemaUID> };
 };
 
 type PopulateClause<
   TSchemaUID extends Common.UID.Schema,
   TKeys extends Attribute.GetPopulatableKeys<TSchemaUID>
 > = {
-  [TKey in TKeys]?: boolean | Params.Read<Attribute.GetTarget<TSchemaUID, TKey>>;
+  [TKey in TKeys]?: boolean | NestedParams<Attribute.GetTarget<TSchemaUID, TKey>>;
 };
 
 /**
@@ -100,7 +100,7 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
                   Utils.Guard.Never<Attribute.GetMorphTargets<TSchemaUID, TKey>, Common.UID.Schema>
                 >
               // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
-              | Params.Read<Common.UID.Schema>;
+              | NestedParams<Common.UID.Schema>;
           }
         >,
       // Loose fallback when registries are not extended
@@ -110,10 +110,15 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
             | boolean
             | PopulateFragment<Common.UID.Schema>
             // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
-            | Params.Read<Common.UID.Schema>;
+            | NestedParams<Common.UID.Schema>;
         }
     >
   : never;
+
+type NestedParams<TSchemaUID extends Common.UID.Schema> = EntityService.Params.Pick<
+  TSchemaUID,
+  'fields' | 'filters' | 'populate' | 'sort' | 'plugin' | 'publicationState'
+>;
 
 export type Any<TSchemaUID extends Common.UID.Schema> =
   | StringNotation<TSchemaUID>
