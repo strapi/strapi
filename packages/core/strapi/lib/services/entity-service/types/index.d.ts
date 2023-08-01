@@ -10,7 +10,7 @@ export interface EntityService {
     uid: TContentTypeUID,
     params?: EntityService.Params.Pick<
       TContentTypeUID,
-      'fields' | 'filters' | 'pagination:offset' | 'sort' | 'populate' | 'publicationState'
+      'fields' | 'filters' | 'pagination:offset' | 'sort' | 'populate' | 'publicationState' | 'plugin'
     >
   ): Promise<Attribute.GetValues<TContentTypeUID>[]>;
   findOne<TContentTypeUID extends Common.UID.ContentType>(
