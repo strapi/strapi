@@ -26,7 +26,7 @@ type Write<TSchemaUID extends Common.UID.Schema> = {
 
 type SelectRead<TContentTypeUID extends Common.UID.ContentType> = {
   fields?: Fields.Any<TContentTypeUID>;
-  populate?: Fields.Any<TContentTypeUID>;
+  populate?: Populate.Any<TContentTypeUID>;
 };
 
 type SelectWrite<TContentTypeUID extends Common.UID.ContentType> = {
