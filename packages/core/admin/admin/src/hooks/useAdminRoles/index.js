@@ -31,7 +31,7 @@ export const useAdminRoles = (params = {}, queryOptions = {}) => {
   }
 
   return {
-    roles: roles.sort((a, b) => formatter.compare(a.name, b.name)),
+    roles: [...roles].sort((a, b) => formatter.compare(a.name, b.name)),
     error,
     isError,
     isLoading,
