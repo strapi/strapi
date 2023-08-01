@@ -43,3 +43,15 @@ export type KeysExcept<TValue, TTest> = {
  * // { foo: { x: 'foo' }, bar: { x: 'bar' } }
  */
 export type PickBy<TValue, TTest> = Pick<TValue, KeysBy<TValue, TTest>>;
+
+/**
+ * Retrieve object's (`TObject`) values
+ *
+ * @example
+ * type X = Values<{ foo: 'bar', bar: 'foo', foobar: 2 }>
+ * // 'bar' | 'foo' | 2
+ *
+ * type Y = Values<{ foo: { x: 'foo' }, bar: { x: 'bar' }, other: { x: '42' } }>
+ * // { x: 'foo' } | { x: 'bar' } | { x: '42' }
+ */
+export type Values<TObject extends object> = TObject[keyof TObject];
