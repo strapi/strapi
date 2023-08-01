@@ -9,6 +9,6 @@ export interface EntityService {
   findOne<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     entityId: number,
-    params?: EntityService.Params.Read<TContentTypeUID>
+    params?: EntityService.Params.SelectRead<TContentTypeUID>
   ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
 }

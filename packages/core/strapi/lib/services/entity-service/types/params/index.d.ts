@@ -24,6 +24,19 @@ type Write<TSchemaUID extends Common.UID.Schema> = {
   files?: unknown; // TODO
 } & EntityService.GetPluginWriteParams<TSchemaUID>;
 
+type SelectRead<TContentTypeUID extends Common.UID.ContentType> = {
+  fields?: Fields.Any<TContentTypeUID>;
+  populate?: Fields.Any<TContentTypeUID>;
+};
+
+type SelectWrite<TContentTypeUID extends Common.UID.ContentType> = {
+  data?: Data.Input<TContentTypeUID>;
+  files?: unknown; // TODO
+};
+
+type SelectReadWrite<TContentTypeUID extends Common.UID.ContentType> = SelectRead<TContentTypeUID> &
+  SelectWrite<TContentTypeUID>;
+
 type ReadWrite<TSchemaUID extends Common.UID.Schema> = Read<TSchemaUID> & Write<TSchemaUID>;
 
 export type {
@@ -31,6 +44,9 @@ export type {
   Read,
   Write,
   ReadWrite,
+  SelectRead,
+  SelectWrite,
+  SelectReadWrite,
   // re-exports
   Pagination,
   Fields,
