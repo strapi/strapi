@@ -1,7 +1,3 @@
-export interface EntityServicePluginReadParams {
-  [key: keyof any]: object;
-}
-
-export interface EntityServicePluginWriteParams {
+export interface EntityServicePluginParams {
   [key: keyof any]: object;
 }
