@@ -480,6 +480,7 @@
   "app.components.NotFoundPage.back": "Back to homepage",
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.NpsSurvey.banner-title": "How likely are you to recommend Strapi to a friend or colleague?",
+  "app.components.NpsSurvey.feedback-response": "Thank you very much for your feedback!",
   "app.components.NpsSurvey.feedback-question": "Do you have any suggestion for improvements?",
   "app.components.NpsSurvey.submit-feedback": "Submit Feedback",
   "app.components.NpsSurvey.dismiss-survey-label": "Dismiss survey",

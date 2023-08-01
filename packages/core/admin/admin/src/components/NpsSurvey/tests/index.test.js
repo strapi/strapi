@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
@@ -40,8 +40,8 @@ describe('NPS survey', () => {
   it('renders survey if enabled', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
-    expect(screen.getByRole('button', { name: 0 })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 10 })).toBeInTheDocument();
+    expect(screen.getByLabelText('0')).toBeInTheDocument();
+    expect(screen.getByLabelText('10')).toBeInTheDocument();
     expect(screen.getByText(/not at all likely/i)).toBeInTheDocument();
     expect(screen.getByText(/extremely likely/i)).toBeInTheDocument();
   });
@@ -56,9 +56,17 @@ describe('NPS survey', () => {
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
     setup();
 
-    await user.click(screen.getByRole('button', { name: 10 }));
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
-    expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: '10' }));
+    expect(screen.getByRole('button', { name: /submit feedback/i }));
+
+    act(() => {
+      fireEvent.submit(screen.getByRole('form'));
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText(/not at all likely/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/thank you very much for your feedback!/i)).toBeInTheDocument();
+    });
 
     const storedData = JSON.parse(localStorageMock.setItem.mock.calls.at(-1).at(1));
     expect(storedData).toEqual({
