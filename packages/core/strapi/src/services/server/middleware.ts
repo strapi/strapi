@@ -1,0 +1,143 @@
+import path from 'path';
+import { isArray, isNil } from 'lodash/fp';
+import { importDefault } from '@strapi/utils';
+import { Common } from '../../types';
+import type { Strapi } from '../../Strapi';
+
+const instantiateMiddleware = (
+  middlewareFactory: Common.MiddlewareFactory,
+  name: string,
+  config: unknown,
+  strapi: Strapi
+) => {
+  try {
+    return middlewareFactory(config, { strapi });
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new Error(`Middleware "${name}": ${e.message}`);
+    }
+  }
+};
+
+const resolveRouteMiddlewares = (route: Common.Route, strapi: Strapi) => {
+  const middlewaresConfig = route?.config?.middlewares ?? [];
+
+  if (!isArray(middlewaresConfig)) {
+    throw new Error('Route middlewares config must be an array');
+  }
+
+  const middlewares = resolveMiddlewares(middlewaresConfig, strapi);
+
+  return middlewares.map(({ handler }) => handler);
+};
+
+/**
+ * Initialize every configured middlewares
+ */
+const resolveMiddlewares = (
+  config: Array<
+    | string
+    | {
+        name?: string;
+        resolve?: string;
+        config?: unknown;
+      }
+    | Common.MiddlewareHandler
+  >,
+  strapi: Strapi
+) => {
+  const middlewares: {
+    name: string | null;
+    handler: Common.MiddlewareHandler | void;
+  }[] = [];
+
+  for (const item of config) {
+    if (typeof item === 'function') {
+      middlewares.push({
+        name: null,
+        handler: item,
+      });
+
+      continue;
+    }
+
+    if (typeof item === 'string') {
+      const middlewareFactory = strapi.middleware(item);
+
+      if (!middlewareFactory) {
+        throw new Error(`Middleware ${item} not found.`);
+      }
+
+      middlewares.push({
+        name: item,
+        handler: instantiateMiddleware(middlewareFactory, item, {}, strapi),
+      });
+
+      continue;
+    }
+
+    if (typeof item === 'object' && item !== null) {
+      const { name, resolve, config = {} } = item;
+
+      if (name) {
+        const middlewareFactory = strapi.middleware(name);
+        middlewares.push({
+          name,
+          handler: instantiateMiddleware(middlewareFactory, name, config, strapi),
+        });
+
+        continue;
+      }
+
+      if (resolve) {
+        const resolvedMiddlewareFactory = resolveCustomMiddleware(resolve, strapi);
+        middlewares.push({
+          name: resolve,
+          handler: instantiateMiddleware(resolvedMiddlewareFactory, resolve, config, strapi),
+        });
+
+        continue;
+      }
+
+      throw new Error('Invalid middleware configuration. Missing name or resolve properties.');
+    }
+
+    throw new Error(
+      'Middleware config must either be a string or an object {name?: string, resolve?: string, config: any}.'
+    );
+  }
+
+  middlewares.forEach((middleware) => {
+    // NOTE: we replace null middlewares by a dumb one to avoid having to filter later on
+    if (isNil(middleware.handler)) {
+      middleware.handler = (_, next) => next();
+    }
+  });
+
+  return middlewares;
+};
+
+/**
+ * Resolve middleware from package name or path
+ */
+const resolveCustomMiddleware = (resolve: string, strapi: Strapi) => {
+  let modulePath;
+
+  try {
+    modulePath = require.resolve(resolve);
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND') {
+      modulePath = path.resolve(strapi.dirs.dist.root, resolve);
+    } else {
+      throw error;
+    }
+  }
+
+  try {
+    return importDefault(modulePath);
+  } catch (err) {
+    throw new Error(`Could not load middleware "${modulePath}".`);
+  }
+};
+
+export { resolveRouteMiddlewares, resolveMiddlewares };

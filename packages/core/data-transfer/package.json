@@ -59,7 +59,7 @@
     "@tsconfig/node16": "1.0.3",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
-    "@types/koa": "2.13.4",
+    "@types/koa": "*",
     "@types/lodash": "^4.14.191",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",

@@ -64,15 +64,18 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": "./bin/strapi.js",
-  "directories": {
-    "lib": "./lib",
-    "bin": "./bin",
-    "ee": "./ee"
-  },
+  "files": [
+    "./dist"
+  ],
   "scripts": {
+    "build": "run -T tsc",
+    "build:ts": "run build",
+    "watch": "run -T tsc -w --preserveWatchOutput",
+    "clean": "run -T rimraf ./dist",
+    "prepublishOnly": "yarn clean && yarn build",
     "postinstall": "node lib/utils/success.js",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
@@ -135,7 +138,21 @@
     "statuses": "2.0.1"
   },
   "devDependencies": {
+    "@types/configstore": "6.0.0",
+    "@types/delegates": "1.0.0",
+    "@types/koa": "2.13.8",
+    "@types/koa-compress": "4.0.3",
+    "@types/koa-session": "6.4.1",
+    "@types/koa-static": "4.0.2",
+    "@types/koa__router": "12.0.0",
+    "@types/lodash": "^4.14.191",
+    "@types/mime-types": "2.1.1",
+    "@types/node": "16",
+    "@types/node-schedule": "2.1.0",
+    "@types/statuses": "2.0.1",
+    "eslint-config-custom": "4.12.1",
     "supertest": "6.3.3",
+    "tsconfig": "4.12.1",
     "typescript": "5.1.3"
   },
   "engines": {

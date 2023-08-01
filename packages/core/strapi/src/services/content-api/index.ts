@@ -1,0 +1,74 @@
+import _ from 'lodash';
+import instantiatePermissionsUtilities from './permissions';
+import { Common } from '../../types';
+import type { Strapi } from '../../Strapi';
+
+const transformRoutePrefixFor = (pluginName: string) => (route: Common.Route) => {
+  const prefix = route.config && route.config.prefix;
+  const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
+
+  return {
+    ...route,
+    path,
+  };
+};
+
+/**
+ * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
+ */
+const createContentAPI = (strapi: Strapi) => {
+  const getRoutesMap = async () => {
+    const routesMap: Record<string, Common.Route[]> = {};
+
+    _.forEach(strapi.api, (api, apiName) => {
+      const routes = _.flatMap(api.routes, (route) => {
+        if ('routes' in route) {
+          return route.routes;
+        }
+
+        return route;
+      }).filter((route) => route.info.type === 'content-api');
+
+      if (routes.length === 0) {
+        return;
+      }
+
+      const apiPrefix = strapi.config.get('api.rest.prefix');
+      routesMap[`api::${apiName}`] = routes.map((route) => ({
+        ...route,
+        path: `${apiPrefix}${route.path}`,
+      }));
+    });
+
+    _.forEach(strapi.plugins, (plugin, pluginName) => {
+      const transformPrefix = transformRoutePrefixFor(pluginName);
+
+      const routes = _.flatMap(plugin.routes, (route) => {
+        if ('routes' in route) {
+          return route.routes.map(transformPrefix);
+        }
+
+        return route.map(transformPrefix);
+      }).filter((route) => route.info.type === 'content-api');
+
+      if (routes.length === 0) {
+        return;
+      }
+
+      const apiPrefix = strapi.config.get('api.rest.prefix');
+      routesMap[`plugin::${pluginName}`] = routes.map((route) => ({
+        ...route,
+        path: `${apiPrefix}${route.path}`,
+      }));
+    });
+
+    return routesMap;
+  };
+
+  return {
+    permissions: instantiatePermissionsUtilities(strapi),
+    getRoutesMap,
+  };
+};
+
+export default createContentAPI;

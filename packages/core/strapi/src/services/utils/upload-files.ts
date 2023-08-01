@@ -1,0 +1,78 @@
+import _ from 'lodash';
+import { Common, CoreApi } from '../../types';
+
+/**
+ * Upload files and link them to an entity
+ */
+export default async (
+  uid: Common.UID.ContentType | Common.UID.Component,
+  entity: CoreApi.Service.Entity,
+  files: { [key: string]: unknown }
+) => {
+  const modelDef = strapi.getModel(uid);
+
+  if (!_.has(strapi.plugins, 'upload')) {
+    return;
+  }
+
+  const uploadService = strapi.plugin('upload').service('upload');
+
+  const findModelFromUploadPath = (path: string[]) => {
+    if (path.length === 0) {
+      return uid;
+    }
+
+    const currentPath = [];
+    let tmpModel = modelDef;
+    let modelUID = uid;
+
+    for (let i = 0; i < path.length; i += 1) {
+      if (!tmpModel) return {};
+      const part = path[i];
+      const attr = tmpModel.attributes[part];
+
+      currentPath.push(part);
+
+      // ignore array indexes => handled in the dynamic zone section
+      if (_.isFinite(_.toNumber(path[i]))) {
+        continue;
+      }
+
+      if (!attr) return {};
+
+      if (attr.type === 'component') {
+        modelUID = attr.component;
+        tmpModel = strapi.components[attr.component];
+      } else if (attr.type === 'dynamiczone') {
+        const entryIdx = path[i + 1]; // get component index
+        const value = _.get(entity, [...currentPath, entryIdx]);
+
+        if (!value) return {};
+
+        modelUID = value.__component; // get component type
+        tmpModel = strapi.components[modelUID];
+      } else if (attr.type === 'relation') {
+        modelUID = attr.target;
+        tmpModel = strapi.getModel(modelUID);
+      } else {
+        return;
+      }
+    }
+
+    return modelUID;
+  };
+
+  const doUpload = async (key: string, files: unknown) => {
+    const parts = key.split('.');
+    const [path, field] = [_.initial(parts), _.last(parts)];
+
+    const modelUID = findModelFromUploadPath(path);
+
+    if (modelUID) {
+      const id = _.get(entity, path.concat('id'));
+      return uploadService.uploadToEntity({ id, model: modelUID, field }, files);
+    }
+  };
+
+  await Promise.all(Object.keys(files).map((key) => doUpload(key, files[key])));
+};

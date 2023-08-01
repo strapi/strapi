@@ -130,7 +130,7 @@ interface QueryFromContentType<T extends keyof AllTypes> {
   delete(params: any): Promise<any>;
   deleteMany(params: any): Promise<{ count: number }>;
 
-  count(params: any): Promise<number>;
+  count(params?: any): Promise<number>;
 
   attachRelations(id: ID, data: any): Promise<any>;
   updateRelations(id: ID, data: any): Promise<any>;
@@ -165,7 +165,7 @@ export interface Database {
   metadata: any;
   connection: Knex;
 
-  query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  query: <T extends keyof AllTypes>(uid: T) => QueryFromContentType<T>;
   transaction(
     cb?: (params: {
       trx: Knex.Transaction;

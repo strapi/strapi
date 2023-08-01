@@ -6,6 +6,7 @@ import parseType from './parse-type';
 import * as policy from './policy';
 import templateConfiguration from './template-configuration';
 import { yup, handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
+
 import * as errors from './errors';
 import {
   nameToSlug,

@@ -33,9 +33,9 @@ export interface Model {
     singularName: string;
     pluralName: string;
   };
-  options: {
-    populateCreatorFields: boolean;
-    draftAndPublish: boolean;
+  options?: {
+    populateCreatorFields?: boolean;
+    draftAndPublish?: boolean;
   };
   privateAttributes?: string[];
   attributes: Record<string, Attribute>;

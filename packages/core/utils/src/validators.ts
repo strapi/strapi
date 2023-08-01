@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-template-curly-in-string */
 import * as yup from 'yup';
 import _ from 'lodash';
@@ -5,6 +6,8 @@ import { defaults, isNumber, isInteger, get } from 'lodash/fp';
 import * as utils from './string-formatting';
 import { YupValidationError } from './errors';
 import printValue from './print-value';
+
+export * as yup from 'yup';
 
 const MixedSchemaType = yup.MixedSchema;
 
@@ -99,6 +102,9 @@ class StrapiIDSchema extends MixedSchemaType {
   }
 }
 
+// @ts-ignore
+yup.strapiID = (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema();
+
 const handleYupError = (error: yup.ValidationError, errorMessage: string) => {
   throw new YupValidationError(error, errorMessage);
 };
@@ -165,14 +171,23 @@ yup.setLocale({
   },
 });
 
-const customYup = Object.assign(yup, {
-  strapiID: (): InstanceType<typeof StrapiIDSchema> => new StrapiIDSchema(),
-});
+declare module 'yup' {
+  const strapiID: () => InstanceType<typeof StrapiIDSchema>;
 
-export {
-  customYup as yup,
-  StrapiIDSchema,
-  handleYupError,
-  validateYupSchema,
-  validateYupSchemaSync,
-};
+  interface BaseSchema {
+    isFunction(message?: string): this;
+    notNil(message?: string): this;
+    notNull(message?: string): this;
+  }
+
+  interface StringSchema {
+    isCamelCase(message?: string): this;
+    isKebabCase(message?: string): this;
+  }
+
+  interface ObjectSchema<TShape> {
+    onlyContainsFunctions(message?: string): this;
+  }
+}
+
+export { StrapiIDSchema, handleYupError, validateYupSchema, validateYupSchemaSync };

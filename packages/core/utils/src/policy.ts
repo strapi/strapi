@@ -64,13 +64,13 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }: RouteInf
   };
 };
 
-const resolvePolicies = (config: PolicyInfo[], policyContext: PolicyContext) => {
+const resolvePolicies = (config: PolicyConfig[], policyContext: PolicyContext) => {
   const { pluginName, apiName } = policyContext ?? {};
 
   return config.map((policyConfig) => {
     return {
       handler: getPolicy(policyConfig, { pluginName, apiName }),
-      config: policyConfig.config || {},
+      config: (typeof policyConfig === 'object' && policyConfig.config) || {},
     };
   });
 };
