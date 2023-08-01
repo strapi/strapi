@@ -16,36 +16,14 @@ import {
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
 
 import { useNpsSurveySettings } from './hooks/useNpsSurveySettings';
 
-const BannerWrapper = styled(Flex)`
-  border: 1px solid ${({ theme }) => theme.colors.primary200};
-  background: ${({ theme }) => theme.colors.neutral0};
-  box-shadow: ${({ theme }) => theme.shadows.popupShadow};
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: ${({ theme }) => theme.zIndices[2]};
-  width: 50%;
-`;
-
-const Header = styled(Box)`
-  margin: 0 auto;
-`;
-
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;
   width: ${32 / 16}rem;
-  border-radius: ${({ theme }) => theme.spaces[1]};
-  background-color: ${({ theme }) => theme.colors.primary100};
-  border: 1px solid ${({ theme }) => theme.colors.primary200};
-  color: ${({ theme }) => theme.colors.primary600};
-  position: relative;
-  cursor: pointer;
 
   > label,
   ~ input {
@@ -82,7 +60,7 @@ const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
-  display: 5 * 60 * 1000, // 5 minutes in ms
+  display: 1000, // 5 minutes in ms
 };
 
 const ratingArray = [...Array(11).keys()];
@@ -142,6 +120,7 @@ const checkIfShouldShowSurvey = (settings) => {
 };
 
 const NpsSurvey = () => {
+  const theme = useTheme();
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
@@ -180,8 +159,11 @@ const NpsSurvey = () => {
       lastDismissalDate: null,
     }));
     // TODO: send response to the backend
+
+    // if success show thank you message
     setIsFeedbackResponse(true);
 
+    // Thank you message displayed in the banner should disappear after few seconds.
     setTimeout(() => {
       setSurveyIsShown(false);
     }, 3000);
@@ -215,12 +197,25 @@ const NpsSurvey = () => {
         onSubmit={handleSubmitResponse}
         validationSchema={yup.object({
           feedback: yup.string(),
-          selectedRating: yup.number(),
+          selectedRating: yup.number().required(),
         })}
       >
-        {({ handleSubmit, values, handleChange, setFieldValue }) => (
-          <Form name="npsSurveyForm" noValidate onSubmit={handleSubmit}>
-            <BannerWrapper hasRadius direction="column" padding={4}>
+        {({ values, handleChange, setFieldValue }) => (
+          <Form name="npsSurveyForm">
+            <Flex
+              hasRadius
+              direction="column"
+              padding={4}
+              borderColor="primary200"
+              background="neutral0"
+              shadow="popupShadow"
+              position="fixed"
+              bottom={0}
+              left="50%"
+              transform="translateX(-50%)"
+              zIndex={theme.zIndices[2]}
+              width="50%"
+            >
               {isFeedbackResponse ? (
                 <Typography fontWeight="semiBold">
                   {formatMessage({
@@ -231,7 +226,7 @@ const NpsSurvey = () => {
               ) : (
                 <>
                   <Flex justifyContent="space-between" width="100%">
-                    <Header>
+                    <Box marginLeft="auto" marginRight="auto">
                       <Typography fontWeight="semiBold">
                         {formatMessage({
                           id: 'app.components.NpsSurvey.banner-title',
@@ -239,7 +234,7 @@ const NpsSurvey = () => {
                             'How likely are you to recommend Strapi to a friend or colleague?',
                         })}
                       </Typography>
-                    </Header>
+                    </Box>
                     <IconButton
                       onClick={handleDismiss}
                       aria-label={formatMessage({
@@ -261,18 +256,29 @@ const NpsSurvey = () => {
                         <FieldWrapper
                           key={number}
                           className={values.selectedRating === number ? 'selected' : null}
+                          borderRadius={theme.spaces[1]}
+                          background="primary100"
+                          borderColor="primary200"
+                          color="primary600"
+                          position="relative"
+                          cursor="pointer"
                         >
-                          <FieldLabel htmlFor={number} id={`${number}-rating`}>
+                          <FieldLabel
+                            htmlFor={`nps-survey-rating-${number}-input`}
+                            id={`nps-survey-rating-${number}`}
+                          >
                             <VisuallyHidden>
                               <FieldInput
                                 type="radio"
-                                id={number}
+                                id={`nps-survey-rating-${number}-input`}
                                 name="selectedRating"
                                 checked={values.selectedRating === number}
-                                onChange={() => setFieldValue('selectedRating', number)}
+                                onChange={(e) =>
+                                  setFieldValue('selectedRating', parseInt(e.target.value, 10))
+                                }
                                 value={number}
                                 aria-checked={values.selectedRating === number}
-                                aria-labelledby={`${number}-rating`}
+                                aria-labelledby={`nps-survey-rating-${number}`}
                               />
                             </VisuallyHidden>
                             {number}
@@ -287,7 +293,7 @@ const NpsSurvey = () => {
                       })}
                     </Typography>
                   </Flex>
-                  {(values.selectedRating || values.selectedRating === 0) && (
+                  {values.selectedRating !== null && (
                     <>
                       <Box marginTop={2}>
                         <Typography fontWeight="semiBold">
@@ -318,7 +324,7 @@ const NpsSurvey = () => {
                   )}
                 </>
               )}
-            </BannerWrapper>
+            </Flex>
           </Form>
         )}
       </Formik>
