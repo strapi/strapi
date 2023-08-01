@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 
-export function useLicenseLimits({ enabled } = { enabled: true }) {
+export function useLicenseLimits(queryOptions = {}) {
   const { get } = useFetchClient();
   const { data, isError, isLoading } = useQuery(
     ['ee', 'license-limit-info'],
@@ -15,11 +15,17 @@ export function useLicenseLimits({ enabled } = { enabled: true }) {
       return data;
     },
     {
-      enabled,
+      ...queryOptions,
+
+      // the request is expected to fail sometimes if a user does not
+      // have permissions
+      retry: false,
     }
   );
 
-  const license = data ?? {};
+  const license = React.useMemo(() => {
+    return data ?? {};
+  }, [data]);
 
   const getFeature = React.useCallback(
     (name) => {
