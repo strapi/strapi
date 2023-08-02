@@ -111,7 +111,8 @@ const find = (params = {}, populate) => {
  * @returns {Promise<array>}
  */
 const findAllWithUsersCount = async (populate) => {
-  const roles = await strapi.query('admin::role').findMany({ populate });
+  const roles = await strapi.entityService.findMany('admin::role', populate);
+
   for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);
   }
