@@ -6,7 +6,7 @@ import { stat, createReadStream, ReadStream } from 'fs-extra';
 
 import type { IAsset } from '../../../../types';
 
-const httpMethod = (filepath: string) => {
+const protocolForPath = (filepath: string) => {
   return filepath?.startsWith('https') ? https : http;
 };
 
@@ -17,7 +17,7 @@ function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStr
 
   const readableStream = new PassThrough();
 
-  httpMethod(filepath)
+  protocolForPath(filepath)
     .get(filepath, (res) => {
       if (res.statusCode !== 200) {
         readableStream.emit(
@@ -41,7 +41,7 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    httpMethod(filepath)
+    protocolForPath(filepath)
       .get(filepath, (res) => {
         if (res.statusCode !== 200) {
           reject(new Error(`Request failed with status code ${res.statusCode}`));
