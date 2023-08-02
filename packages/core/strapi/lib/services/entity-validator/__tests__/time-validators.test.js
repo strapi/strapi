@@ -175,7 +175,16 @@ describe('Time validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrTimeUnique: '00:00:00.000Z' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrTimeUnique: '00:00:00.000Z' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

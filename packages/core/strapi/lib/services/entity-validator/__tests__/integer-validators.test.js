@@ -176,7 +176,16 @@ describe('Integer validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrIntegerUnique: 5 }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrIntegerUnique: 5 },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

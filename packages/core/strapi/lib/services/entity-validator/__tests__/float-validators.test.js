@@ -176,7 +176,16 @@ describe('Float validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrFloatUnique: 5 }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrFloatUnique: 5 },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

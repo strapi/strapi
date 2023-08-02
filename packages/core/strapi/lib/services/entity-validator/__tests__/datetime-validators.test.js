@@ -175,7 +175,16 @@ describe('Datetime validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrDateTimeUnique: '2021-11-29T00:00:00.000Z' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

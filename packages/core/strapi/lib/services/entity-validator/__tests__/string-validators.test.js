@@ -197,7 +197,16 @@ describe('String validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrStringUnique: 'test-data' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrStringUnique: 'test-data' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

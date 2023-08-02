@@ -196,7 +196,16 @@ describe('Time validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrTimestampUnique: '1638140400' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrTimestampUnique: '1638140400' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

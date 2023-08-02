@@ -197,7 +197,16 @@ describe('BigInteger validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrBigIntegerUnique: 5 }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrBigIntegerUnique: 5 },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

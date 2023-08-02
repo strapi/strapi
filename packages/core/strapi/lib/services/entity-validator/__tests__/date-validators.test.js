@@ -175,7 +175,16 @@ describe('Date validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrDateUnique: '2021-11-29' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrDateUnique: '2021-11-29' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

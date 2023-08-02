@@ -178,7 +178,16 @@ describe('UID validator', () => {
 
       expect(fakeFindOne).toHaveBeenCalledWith({
         select: ['id'],
-        where: { $and: [{ attrUidUnique: 'unique-uid' }, { $not: { id: 1 } }] },
+        where: {
+          $and: [
+            { attrUidUnique: 'unique-uid' },
+            {
+              id: {
+                $notIn: [1],
+              },
+            },
+          ],
+        },
       });
     });
   });

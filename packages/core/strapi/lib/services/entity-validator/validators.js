@@ -181,6 +181,7 @@ const stringValidator = composeValidators(
 );
 
 const emailValidator = composeValidators(stringValidator, (validator) =>
+  // eslint-disable-next-line no-template-curly-in-string
   validator.email().min(1, '${path} cannot be empty')
 );
 
