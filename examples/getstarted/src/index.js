@@ -20,18 +20,29 @@ module.exports = {
     const roleService = strapi.service(`admin::role`);
     const permissionService = strapi.service(`admin::permission`);
 
-    // roleService.assignPermissions('1', [
-    //   {
-    //     uid: 'review-workflows.change-stage',
-    //     displayName: 'Change stage',
-    //     pluginName: 'admin',
-    //     section: 'internal',
-    //     actionParameters: {
-    //       from: 1,
-    //       to: 2,
-    //     },
-    //   },
-    // ]);
+    // TODO: Remove - only for testing
+    await roleService.assignPermissions(2, [
+      {
+        action: 'admin::review-workflows.change-stage',
+        actionParameters: { from: 1, to: 2 },
+      },
+    ]);
+
+
+    const user = await strapi
+      .query('admin::user')
+      .findOne({ where: { id: 2 }, populate: ['roles'] });
+
+    if (!user || !(user.isActive === true)) {
+      return { authenticated: false };
+    }
+
+    const userAbility = await permissionService.engine.generateUserAbility(user);
+
+    console.log(userAbility.can({
+      name: 'admin::review-workflows.change-stage',
+      params: { from: 1, to: 2 }
+    }, 'all'));
   },
 
   /**
