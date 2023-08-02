@@ -41,6 +41,9 @@ export interface EntityService {
   ): Promise<Attribute.GetValues<TContentTypeUID>>;
   findPage<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params?: EntityService.Params
-  ): Promise<{ results: Attribute.GetValues<TContentTypeUID>[]; pagination: Pagination } | null>;
+    params?: EntityService.Params.Pick<
+      TContentTypeUID,
+      'fields' | 'filters' | 'pagination' | 'sort' | 'populate' | 'publicationState' | 'plugin'
+    >
+  ): Promise<{ results: Attribute.GetValues<TContentTypeUID>[]; pagination: Pagination }>;
 }
