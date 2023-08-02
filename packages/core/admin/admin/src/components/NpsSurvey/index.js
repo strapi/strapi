@@ -224,7 +224,7 @@ const NpsSurvey = () => {
                   })}
                 </Typography>
               ) : (
-                <Flex direction="column" as="fieldset">
+                <Box as="fieldset" width="100%">
                   <Flex justifyContent="space-between" width="100%">
                     <Box marginLeft="auto" marginRight="auto">
                       <Typography fontWeight="semiBold" as="legend">
@@ -244,7 +244,7 @@ const NpsSurvey = () => {
                       icon={<Cross />}
                     />
                   </Flex>
-                  <Flex gap={2} marginLeft={8} marginRight={8} marginTop={2} marginBottom={2}>
+                  <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
                     <Typography variant="pi" textColor="neutral600">
                       {formatMessage({
                         id: 'app.components.NpsSurvey.no-recommendation',
@@ -315,7 +315,7 @@ const NpsSurvey = () => {
                       </Button>
                     </>
                   )}
-                </Flex>
+                </Box>
               )}
             </Flex>
           </Form>
