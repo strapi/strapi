@@ -145,7 +145,7 @@ describe('UploadAssetDialog', () => {
       fireEvent.change(screen.getByLabelText('URL'), { target: { value: urls } });
       fireEvent.click(screen.getByText('Next'));
 
-      await waitFor(() => expect(screen.getByText('Network Error')).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText('Failed to fetch')).toBeInTheDocument());
     });
 
     it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {

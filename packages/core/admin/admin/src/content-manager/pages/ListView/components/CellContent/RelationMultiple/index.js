@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 
-import { getRequestUrl, getTrad } from '../../../../../utils';
+import { getTrad } from '../../../../../utils';
 import CellValue from '../CellValue';
 
 const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
@@ -24,7 +24,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
       const {
         data: { results, pagination },
       } = await get(
-        getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`)
+        `/content-manager/relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`
       );
 
       return { results, pagination };

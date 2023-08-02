@@ -55,7 +55,7 @@ export const FORMS = {
     fieldsToOmit: ['userInfo.confirmPassword', 'userInfo.news', 'userInfo.email'],
     schema: yup.object().shape({
       firstname: yup.string().trim().required(translatedErrors.required),
-      lastname: yup.string(),
+      lastname: yup.string().nullable(),
       password: yup
         .string()
         .min(8, translatedErrors.minLength)
@@ -79,7 +79,7 @@ export const FORMS = {
     fieldsToOmit: ['confirmPassword', 'news'],
     schema: yup.object().shape({
       firstname: yup.string().trim().required(translatedErrors.required),
-      lastname: yup.string(),
+      lastname: yup.string().nullable(),
       password: yup
         .string()
         .min(8, translatedErrors.minLength)

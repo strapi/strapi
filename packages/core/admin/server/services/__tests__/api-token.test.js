@@ -1,9 +1,9 @@
 'use strict';
 
+const crypto = require('crypto');
 const {
   errors: { NotFoundError, ApplicationError },
 } = require('@strapi/utils');
-const crypto = require('crypto');
 const { omit, uniq } = require('lodash/fp');
 const apiTokenService = require('../api-token');
 const constants = require('../constants');

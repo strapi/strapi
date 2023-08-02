@@ -1,7 +1,7 @@
 'use strict';
 
-const { machineIdSync } = require('node-machine-id');
 const { randomUUID } = require('crypto');
+const { machineIdSync } = require('node-machine-id');
 
 module.exports = () => {
   try {

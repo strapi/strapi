@@ -1,6 +1,6 @@
 import { Writable, Readable } from 'stream';
-import * as fse from 'fs-extra';
 import path from 'path';
+import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
 import type {
   IAsset,

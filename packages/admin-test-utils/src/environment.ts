@@ -1,5 +1,5 @@
-import { ResizeObserver } from '@juggle/resize-observer';
 import { format } from 'util';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 /* -------------------------------------------------------------------------------------------------
  * IntersectionObserver
