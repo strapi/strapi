@@ -121,3 +121,23 @@ export type GetOptionalKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object
   GetAll<TSchemaUID>,
   Attribute.Required
 >;
+
+export type HasTarget<
+  TSchemaUID extends Common.UID.Schema,
+  TField extends Attribute.GetKeys<TSchemaUID>
+> = GetTarget<TSchemaUID, TField> extends infer TTarget
+  ? Utils.Expression.And<
+      Utils.Expression.IsNotNever<TTarget>,
+      Utils.Expression.Extends<TTarget, Common.UID.Schema>
+    >
+  : Utils.Expression.False;
+
+export type HasMorphTargets<
+  TSchemaUID extends Common.UID.Schema,
+  TField extends Attribute.GetKeys<TSchemaUID>
+> = GetMorphTargets<TSchemaUID, TField> extends infer TMaybeTargets
+  ? Utils.Expression.And<
+      Utils.Expression.IsNotNever<TMaybeTargets>,
+      Utils.Expression.Extends<TMaybeTargets, Common.UID.Schema>
+    >
+  : Utils.Expression.False;

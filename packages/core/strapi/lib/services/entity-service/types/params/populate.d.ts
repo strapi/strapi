@@ -51,7 +51,7 @@ type GetPopulatableKeysWithoutTarget<TSchemaUID extends Common.UID.Schema> = Exc
 /**
  * Fragment populate notation for polymorphic attributes
  */
-type PopulateFragment<TMaybeTargets extends Common.UID.Schema> = {
+export type Fragment<TMaybeTargets extends Common.UID.Schema> = {
   on?: { [TSchemaUID in TMaybeTargets]?: boolean | NestedParams<TSchemaUID> };
 };
 
@@ -96,7 +96,7 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
           {
             [TKey in TKeysWithoutTarget]?:
               | boolean
-              | PopulateFragment<
+              | Fragment<
                   Utils.Guard.Never<Attribute.GetMorphTargets<TSchemaUID, TKey>, Common.UID.Schema>
                 >
               // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
@@ -104,18 +104,18 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = [
           }
         >,
       // Loose fallback when registries are not extended
-      | { [TKey in string]?: boolean | Params.Read<Common.UID.Schema> }
+      | { [TKey in string]?: boolean | NestedParams<Common.UID.Schema> }
       | {
           [TKey in string]?:
             | boolean
-            | PopulateFragment<Common.UID.Schema>
+            | Fragment<Common.UID.Schema>
             // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
             | NestedParams<Common.UID.Schema>;
         }
     >
   : never;
 
-type NestedParams<TSchemaUID extends Common.UID.Schema> = EntityService.Params.Pick<
+export type NestedParams<TSchemaUID extends Common.UID.Schema> = EntityService.Params.Pick<
   TSchemaUID,
   'fields' | 'filters' | 'populate' | 'sort' | 'plugin' | 'publicationState'
 >;
