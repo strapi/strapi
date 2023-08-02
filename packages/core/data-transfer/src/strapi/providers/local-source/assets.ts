@@ -6,7 +6,7 @@ import { stat, createReadStream, ReadStream } from 'fs-extra';
 
 import type { IAsset } from '../../../../types';
 
-const httpMethod = (filepath) => {
+const httpMethod = (filepath: string) => {
   return filepath?.startsWith('https') ? https : http;
 };
 
