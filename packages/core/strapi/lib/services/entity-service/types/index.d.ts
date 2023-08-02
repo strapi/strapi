@@ -11,10 +11,36 @@ type Pagination = {
   pageCount: number;
   total: number;
 };
-
 export interface EntityService {
+  findMany<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    params?: EntityService.Params.Pick<
+      TContentTypeUID,
+      | 'fields'
+      | 'filters'
+      | 'pagination:offset'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
+    >
+  ): Promise<Attribute.GetValues<TContentTypeUID>[]>;
+  findOne<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    entityId: number,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
+  delete<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    entityId: number,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID> | null>;
+  create<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID>>;
   findPage<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params?: EntityService.Params.Read<TContentTypeUID>
+    params?: EntityService.Params
   ): Promise<{ results: Attribute.GetValues<TContentTypeUID>[]; pagination: Pagination } | null>;
 }
