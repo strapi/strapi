@@ -60,12 +60,8 @@ export type Any =
   | Attribute.Password
   // Necessary to reference "any" relation
   | (
-      | Attribute.Relation<
-          Common.UID.Schema,
-          Attribute.RelationKind.BiDirectional,
-          Common.UID.Schema
-        >
-      | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.UniDirectional>
+      | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.WithTarget, Common.UID.Schema>
+      | Attribute.Relation<Common.UID.Schema, Attribute.RelationKind.WithoutTarget>
     )
   | Attribute.RichText
   | Attribute.String
