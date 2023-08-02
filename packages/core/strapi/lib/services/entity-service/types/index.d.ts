@@ -10,7 +10,13 @@ export interface EntityService {
     uid: TContentTypeUID,
     params?: EntityService.Params.Pick<
       TContentTypeUID,
-      'fields' | 'filters' | 'pagination:offset' | 'sort' | 'populate' | 'publicationState' | 'plugin'
+      | 'fields'
+      | 'filters'
+      | 'pagination:offset'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
     >
   ): Promise<Attribute.GetValues<TContentTypeUID>[]>;
   findOne<TContentTypeUID extends Common.UID.ContentType>(
@@ -26,5 +32,10 @@ export interface EntityService {
   create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     params?: EntityService.Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  ): Promise<Attribute.GetValues<TContentTypeUID>>;
+  update<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    entityId: number,
+    params?: EntityService.Params.Pick<TContentTypeUID, 'data' | 'fields' | 'populate'>
   ): Promise<Attribute.GetValues<TContentTypeUID>>;
 }
