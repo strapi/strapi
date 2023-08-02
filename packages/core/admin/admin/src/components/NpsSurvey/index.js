@@ -193,11 +193,11 @@ const NpsSurvey = () => {
   return (
     <Portal>
       <Formik
-        initialValues={{ feedback: '', selectedRating: null }}
+        initialValues={{ npsSurveyFeedback: '', npsSurveyRating: null }}
         onSubmit={handleSubmitResponse}
         validationSchema={yup.object({
-          feedback: yup.string(),
-          selectedRating: yup.number().required(),
+          npsSurveyFeedback: yup.string(),
+          npsSurveyRating: yup.number().required(),
         })}
       >
         {({ values, handleChange, setFieldValue }) => (
@@ -224,10 +224,10 @@ const NpsSurvey = () => {
                   })}
                 </Typography>
               ) : (
-                <>
+                <Flex direction="column" as="fieldset">
                   <Flex justifyContent="space-between" width="100%">
                     <Box marginLeft="auto" marginRight="auto">
-                      <Typography fontWeight="semiBold">
+                      <Typography fontWeight="semiBold" as="legend">
                         {formatMessage({
                           id: 'app.components.NpsSurvey.banner-title',
                           defaultMessage:
@@ -255,30 +255,25 @@ const NpsSurvey = () => {
                       return (
                         <FieldWrapper
                           key={number}
-                          className={values.selectedRating === number ? 'selected' : null}
-                          borderRadius={theme.spaces[1]}
+                          className={values.npsSurveyRating === number ? 'selected' : null} // "selected" class added when child radio button is checked
+                          hasRadius
                           background="primary100"
                           borderColor="primary200"
                           color="primary600"
                           position="relative"
                           cursor="pointer"
                         >
-                          <FieldLabel
-                            htmlFor={`nps-survey-rating-${number}-input`}
-                            id={`nps-survey-rating-${number}`}
-                          >
+                          <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
                             <VisuallyHidden>
                               <FieldInput
                                 type="radio"
                                 id={`nps-survey-rating-${number}-input`}
-                                name="selectedRating"
-                                checked={values.selectedRating === number}
+                                name="npsSurveyRating"
+                                checked={values.npsSurveyRating === number}
                                 onChange={(e) =>
-                                  setFieldValue('selectedRating', parseInt(e.target.value, 10))
+                                  setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
                                 }
                                 value={number}
-                                aria-checked={values.selectedRating === number}
-                                aria-labelledby={`nps-survey-rating-${number}`}
                               />
                             </VisuallyHidden>
                             {number}
@@ -293,25 +288,23 @@ const NpsSurvey = () => {
                       })}
                     </Typography>
                   </Flex>
-                  {values.selectedRating !== null && (
+                  {values.npsSurveyRating !== null && (
                     <>
                       <Box marginTop={2}>
-                        <Typography fontWeight="semiBold">
+                        <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
                             id: 'app.components.NpsSurvey.feedback-question',
                             defaultMessage: 'Do you have any suggestion for improvements?',
                           })}
-                        </Typography>
+                        </FieldLabel>
                       </Box>
                       <Box width="62%" marginTop={3} marginBottom={4}>
                         <Textarea
-                          id="feedback"
-                          name="feedback"
+                          id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
                           width="100%"
-                          value={values.feedback}
                           onChange={handleChange}
                         >
-                          {values.feedback}
+                          {values.npsSurveyFeedback}
                         </Textarea>
                       </Box>
                       <Button marginBottom={2} type="submit">
@@ -322,7 +315,7 @@ const NpsSurvey = () => {
                       </Button>
                     </>
                   )}
-                </>
+                </Flex>
               )}
             </Flex>
           </Form>
