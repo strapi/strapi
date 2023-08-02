@@ -1,4 +1,5 @@
 import _ from 'lodash/fp';
+import qs from 'qs';
 import { Ability } from '@casl/ability';
 import { providerFactory } from '@strapi/utils';
 
@@ -93,7 +94,13 @@ const newEngine = (params: EngineParams): Engine => {
 
     await state.hooks['before-evaluate.permission'].call(createBeforeEvaluateContext(permission));
 
-    const { action, subject, properties, conditions = [] } = permission;
+    const { action: actionName, subject, properties, conditions = [], actionParameters = {} } = permission;
+
+    let action = actionName;
+
+    if (Object.keys(actionParameters).length > 0) {
+      action = `${actionName}?${qs.stringify(actionParameters)}`;
+    }
 
     if (conditions.length === 0) {
       return register({ action, subject, properties });
