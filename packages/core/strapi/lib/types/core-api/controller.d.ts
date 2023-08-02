@@ -18,27 +18,27 @@ export interface Base {
  * Generic controller structure
  */
 export type Generic = {
-  [name: string]: Common.ControllerHandler<unknown>;
+  [name: string]: Common.ControllerHandler;
 };
 
 /**
  * Core-API collection type controller
  */
 export interface CollectionType extends Base {
-  find?: Common.ControllerHandler<unknown>;
-  findOne?: Common.ControllerHandler<unknown>;
-  create?: Common.ControllerHandler<unknown>;
-  update?: Common.ControllerHandler<unknown>;
-  delete?: Common.ControllerHandler<unknown>;
+  find?: Common.ControllerHandler;
+  findOne?: Common.ControllerHandler;
+  create?: Common.ControllerHandler;
+  update?: Common.ControllerHandler;
+  delete?: Common.ControllerHandler;
 }
 
 /**
  * Core-API single type controller
  */
 export interface SingleType extends Base {
-  find?: Common.ControllerHandler<unknown>;
-  update?: Common.ControllerHandler<unknown>;
-  delete?: Common.ControllerHandler<unknown>;
+  find?: Common.ControllerHandler;
+  update?: Common.ControllerHandler;
+  delete?: Common.ControllerHandler;
 }
 
 export type ContentType<T extends Common.UID.ContentType> = Utils.Expression.MatchFirst<
