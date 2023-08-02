@@ -6,6 +6,13 @@ export * as Params from './params';
 export * from './plugin';
 
 export interface EntityService {
+  findMany<TContentTypeUID extends Common.UID.ContentType>(
+    uid: TContentTypeUID,
+    params?: EntityService.Params.Pick<
+      TContentTypeUID,
+      'fields' | 'filters' | 'pagination:offset' | 'sort' | 'populate' | 'publicationState' | 'plugin'
+    >
+  ): Promise<Attribute.GetValues<TContentTypeUID>[]>;
   findOne<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     entityId: number,
