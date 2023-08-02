@@ -21,7 +21,7 @@ const Filters = ({ displayedFilters }) => {
 
   return (
     <>
-      <Box paddingTop={1} paddingBottom={1}>
+      <Box>
         <Button
           variant="tertiary"
           ref={buttonRef}
