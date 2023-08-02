@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { Box, Button } from '@strapi/design-system';
+import { Button } from '@strapi/design-system';
 import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
 import { Filter } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -21,25 +21,23 @@ const Filters = ({ displayedFilters }) => {
 
   return (
     <>
-      <Box paddingTop={1} paddingBottom={1}>
-        <Button
-          variant="tertiary"
-          ref={buttonRef}
-          startIcon={<Filter />}
-          onClick={handleToggle}
-          size="S"
-        >
-          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-        </Button>
-        {isVisible && (
-          <FilterPopoverURLQuery
-            displayedFilters={displayedFilters}
-            isVisible={isVisible}
-            onToggle={handleToggle}
-            source={buttonRef}
-          />
-        )}
-      </Box>
+      <Button
+        variant="tertiary"
+        ref={buttonRef}
+        startIcon={<Filter />}
+        onClick={handleToggle}
+        size="S"
+      >
+        {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+      </Button>
+      {isVisible && (
+        <FilterPopoverURLQuery
+          displayedFilters={displayedFilters}
+          isVisible={isVisible}
+          onToggle={handleToggle}
+          source={buttonRef}
+        />
+      )}
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
   );
