@@ -1,7 +1,60 @@
 import * as React from 'react';
 
-import { Flex, Button, Typography } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Button,
+  Typography,
+  Textarea,
+  Portal,
+  Field,
+  FieldLabel,
+  FieldInput,
+  VisuallyHidden,
+} from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
+import { Formik, Form } from 'formik';
+import { useIntl } from 'react-intl';
+import styled, { useTheme } from 'styled-components';
+import * as yup from 'yup';
+
+import { useNpsSurveySettings } from './hooks/useNpsSurveySettings';
+
+const FieldWrapper = styled(Field)`
+  height: ${32 / 16}rem;
+  width: ${32 / 16}rem;
+
+  > label,
+  ~ input {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  > label {
+    color: inherit;
+    cursor: pointer;
+    padding: ${({ theme }) => theme.spaces[2]};
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  &:hover,
+  &:focus-within {
+    background-color: ${({ theme }) => theme.colors.neutral0};
+  }
+
+  &:active,
+  &.selected {
+    color: ${({ theme }) => theme.colors.primary700};
+    background-color: ${({ theme }) => theme.colors.neutral0};
+    border-color: ${({ theme }) => theme.colors.primary700};
+  }
+`;
 
 const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
@@ -9,6 +62,8 @@ const delays = {
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   display: 5 * 60 * 1000, // 5 minutes in ms
 };
+
+const ratingArray = [...Array(11).keys()];
 
 const checkIfShouldShowSurvey = (settings) => {
   const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
@@ -64,24 +119,11 @@ const checkIfShouldShowSurvey = (settings) => {
   return true;
 };
 
-// Exported to make it available during admin user registration.
-// Because we only enable the NPS for users who subscribe to the newsletter when signing up
-export function useNpsSurveySettings() {
-  const [npsSurveySettings, setNpsSurveySettings] = usePersistentState(
-    'STRAPI_NPS_SURVEY_SETTINGS',
-    {
-      enabled: true,
-      lastResponseDate: null,
-      firstDismissalDate: null,
-      lastDismissalDate: null,
-    }
-  );
-
-  return { npsSurveySettings, setNpsSurveySettings };
-}
-
 const NpsSurvey = () => {
+  const theme = useTheme();
+  const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
+  const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
 
   // Only check on first render if the survey should be shown
   const [surveyIsShown, setSurveyIsShown] = React.useState(
@@ -89,11 +131,11 @@ const NpsSurvey = () => {
   );
 
   // Set a cooldown to show the survey when session begins
-  const [showSurvey, setShowSurvey] = React.useState(false);
+  const [displaySurvey, setDisplaySurvey] = React.useState(false);
 
   React.useEffect(() => {
     const displayTime = setTimeout(() => {
-      setShowSurvey(true);
+      setDisplaySurvey(true);
     }, delays.display);
 
     return () => {
@@ -101,7 +143,7 @@ const NpsSurvey = () => {
     };
   }, []);
 
-  if (!showSurvey) {
+  if (!displaySurvey) {
     return null;
   }
 
@@ -117,7 +159,14 @@ const NpsSurvey = () => {
       lastDismissalDate: null,
     }));
     // TODO: send response to the backend
-    setSurveyIsShown(false);
+
+    // if success show thank you message
+    setIsFeedbackResponse(true);
+
+    // Thank you message displayed in the banner should disappear after few seconds.
+    setTimeout(() => {
+      setSurveyIsShown(false);
+    }, 3000);
   };
 
   const handleDismiss = () => {
@@ -141,13 +190,138 @@ const NpsSurvey = () => {
     setSurveyIsShown(false);
   };
 
-  // TODO: replace with the proper UI
   return (
-    <Flex gap={2} padding={2}>
-      <Typography>NPS SURVEY</Typography>
-      <Button onClick={handleDismiss}>Dismiss</Button>
-      <Button onClick={handleSubmitResponse}>Submit</Button>
-    </Flex>
+    <Portal>
+      <Formik
+        initialValues={{ npsSurveyFeedback: '', npsSurveyRating: null }}
+        onSubmit={handleSubmitResponse}
+        validationSchema={yup.object({
+          npsSurveyFeedback: yup.string(),
+          npsSurveyRating: yup.number().required(),
+        })}
+      >
+        {({ values, handleChange, setFieldValue }) => (
+          <Form name="npsSurveyForm">
+            <Flex
+              hasRadius
+              direction="column"
+              padding={4}
+              borderColor="primary200"
+              background="neutral0"
+              shadow="popupShadow"
+              position="fixed"
+              bottom={0}
+              left="50%"
+              transform="translateX(-50%)"
+              zIndex={theme.zIndices[2]}
+              width="50%"
+            >
+              {isFeedbackResponse ? (
+                <Typography fontWeight="semiBold">
+                  {formatMessage({
+                    id: 'app.components.NpsSurvey.feedback-response',
+                    defaultMessage: 'Thank you very much for your feedback!',
+                  })}
+                </Typography>
+              ) : (
+                <Box as="fieldset" width="100%">
+                  <Flex justifyContent="space-between" width="100%">
+                    <Box marginLeft="auto" marginRight="auto">
+                      <Typography fontWeight="semiBold" as="legend">
+                        {formatMessage({
+                          id: 'app.components.NpsSurvey.banner-title',
+                          defaultMessage:
+                            'How likely are you to recommend Strapi to a friend or colleague?',
+                        })}
+                      </Typography>
+                    </Box>
+                    <IconButton
+                      onClick={handleDismiss}
+                      aria-label={formatMessage({
+                        id: 'app.components.NpsSurvey.dismiss-survey-label',
+                        defaultMessage: 'Dismiss survey',
+                      })}
+                      icon={<Cross />}
+                    />
+                  </Flex>
+                  <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage({
+                        id: 'app.components.NpsSurvey.no-recommendation',
+                        defaultMessage: 'Not at all likely',
+                      })}
+                    </Typography>
+                    {ratingArray.map((number) => {
+                      return (
+                        <FieldWrapper
+                          key={number}
+                          className={values.npsSurveyRating === number ? 'selected' : null} // "selected" class added when child radio button is checked
+                          hasRadius
+                          background="primary100"
+                          borderColor="primary200"
+                          color="primary600"
+                          position="relative"
+                          cursor="pointer"
+                        >
+                          <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
+                            <VisuallyHidden>
+                              <FieldInput
+                                type="radio"
+                                id={`nps-survey-rating-${number}-input`}
+                                name="npsSurveyRating"
+                                checked={values.npsSurveyRating === number}
+                                onChange={(e) =>
+                                  setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
+                                }
+                                value={number}
+                              />
+                            </VisuallyHidden>
+                            {number}
+                          </FieldLabel>
+                        </FieldWrapper>
+                      );
+                    })}
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage({
+                        id: 'app.components.NpsSurvey.happy-to-recommend',
+                        defaultMessage: 'Extremely likely',
+                      })}
+                    </Typography>
+                  </Flex>
+                  {values.npsSurveyRating !== null && (
+                    <>
+                      <Box marginTop={2}>
+                        <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
+                          {formatMessage({
+                            id: 'app.components.NpsSurvey.feedback-question',
+                            defaultMessage: 'Do you have any suggestion for improvements?',
+                          })}
+                        </FieldLabel>
+                      </Box>
+                      <Box width="62%" marginTop={3} marginBottom={4}>
+                        <Textarea
+                          id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
+                          width="100%"
+                          onChange={handleChange}
+                        >
+                          {values.npsSurveyFeedback}
+                        </Textarea>
+                      </Box>
+                      <Button marginBottom={2} type="submit">
+                        {formatMessage({
+                          id: 'app.components.NpsSurvey.submit-feedback',
+                          defaultMessage: 'Submit Feedback',
+                        })}
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              )}
+            </Flex>
+          </Form>
+        )}
+      </Formik>
+    </Portal>
   );
 };
 
