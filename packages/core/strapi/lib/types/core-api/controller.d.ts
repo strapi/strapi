@@ -11,7 +11,7 @@ export interface Base {
   transformResponse<TData, TResponse>(data: TData, meta: object): TResponse;
   sanitizeOutput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
   sanitizeInput<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
-  sanitizeQuery<TData>(data: TData, ctx: ExtendableContext): Promise<TData>;
+  sanitizeQuery<TData>(ctx: ExtendableContext): Promise<TData>;
 }
 
 /**
