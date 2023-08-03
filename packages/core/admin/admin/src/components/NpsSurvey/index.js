@@ -13,6 +13,7 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
+import { auth } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -151,16 +152,28 @@ const NpsSurvey = () => {
     return null;
   }
 
-  const handleSubmitResponse = () => {
+  const handleSubmitResponse = ({ npsSurveyRating: rating, npsSurveyFeedback: comment }) => {
     setNpsSurveySettings((settings) => ({
       ...settings,
       lastResponseDate: new Date(),
       firstDismissalDate: null,
       lastDismissalDate: null,
     }));
-    // TODO: send response to the backend
 
-    // if success show thank you message
+    const { email } = auth.getUserInfo();
+    try {
+      fetch('https://analytics.strapi.io/submit-nps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, rating, comment }),
+      });
+    } catch {
+      // silent
+    }
+
+    // The request is sent and it happens in the background, so we always display the thank you message
     setIsFeedbackResponse(true);
 
     // Thank you message displayed in the banner should disappear after few seconds.
@@ -289,7 +302,7 @@ const NpsSurvey = () => {
                     </Typography>
                   </Flex>
                   {values.npsSurveyRating !== null && (
-                    <>
+                    <Flex direction="column">
                       <Box marginTop={2}>
                         <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
@@ -313,7 +326,7 @@ const NpsSurvey = () => {
                           defaultMessage: 'Submit Feedback',
                         })}
                       </Button>
-                    </>
+                    </Flex>
                   )}
                 </Box>
               )}

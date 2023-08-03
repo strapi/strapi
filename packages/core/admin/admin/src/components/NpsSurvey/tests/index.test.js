@@ -7,6 +7,17 @@ import { IntlProvider } from 'react-intl';
 
 import NpsSurvey from '..';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  auth: {
+    getUserInfo: jest.fn(() => ({
+      email: 'john@doe.com',
+    })),
+  },
+}));
+
+global.fetch = jest.fn();
+
 const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
