@@ -21,20 +21,21 @@ export type RelationProperties<
   TTarget extends Common.UID.Schema
 > = Utils.Expression.MatchFirst<
   [
-    Utils.Expression.Test<
+    [
       Utils.Expression.Extends<TRelationKind, RelationKind.BiDirectional>,
       {
         relation: TRelationKind;
         target: TTarget;
-        inversedBy?: string;
-        mappedBy?: string;
+      } & Utils.XOR<{ inversedBy?: string }, { mappedBy?: string }>
+    ],
+    [
+      Utils.Expression.Extends<TRelationKind, RelationKind.XWay>,
+      {
+        relation: TRelationKind;
+        target: TTarget;
       }
-    >,
-    Utils.Expression.Test<
-      Utils.Expression.Extends<TRelationKind, RelationKind.UniDirectional>,
-      { relation: TRelationKind }
-    >,
-    Utils.Expression.Test<
+    ],
+    [
       Utils.Expression.Extends<TRelationKind, RelationKind.MorphReference>,
       {
         relation: TRelationKind;
@@ -44,7 +45,8 @@ export type RelationProperties<
           string
         >;
       }
-    >
+    ],
+    [Utils.Expression.Extends<TRelationKind, RelationKind.MorphOwner>, { relation: TRelationKind }]
   ]
 >;
 
@@ -104,9 +106,16 @@ export module RelationKind {
   export type XWay = `${RelationKind.Left}Way`;
 
   export type BiDirectional = `${RelationKind.Left}To${RelationKind.Right}`;
-  export type UniDirectional = RelationKind.Morph | RelationKind.XWay;
+  export type UniDirectional = RelationKind.MorphReference | RelationKind.XWay;
 
-  export type Any = RelationKind.BiDirectional | RelationKind.UniDirectional;
+  export type Any = RelationKind.BiDirectional | RelationKind.Morph | RelationKind.XWay;
+
+  export type WithTarget =
+    | RelationKind.BiDirectional
+    | RelationKind.XWay
+    | RelationKind.MorphReference;
+
+  export type WithoutTarget = RelationKind.MorphOwner;
 
   export type Reverse<TRelationKind extends RelationKind.Any> =
     TRelationKind extends `${infer TLeft extends RelationKind.Left}To${infer TRight extends RelationKind.Right}`
