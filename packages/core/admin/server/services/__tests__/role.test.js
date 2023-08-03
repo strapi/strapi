@@ -114,7 +114,7 @@ describe('Role', () => {
         },
       };
 
-      const populate = {
+      const params = {
         filters: {
           $and: [
             {
@@ -126,9 +126,9 @@ describe('Role', () => {
         },
       };
 
-      const foundRoles = await roleService.findAllWithUsersCount(populate);
+      const foundRoles = await roleService.findAllWithUsersCount(params);
 
-      expect(findMany).toHaveBeenCalledWith('admin::role', populate);
+      expect(findMany).toHaveBeenCalledWith('admin::role', params);
       expect(foundRoles).toStrictEqual(roles);
     });
   });
