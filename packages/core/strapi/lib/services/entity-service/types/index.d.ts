@@ -24,7 +24,7 @@ export interface EntityService {
 
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    event: Event,
+    event: string,
     entity: Attribute.GetValues<TContentTypeUID> // double check
   ): Promise<void>;
 
@@ -105,7 +105,7 @@ export interface EntityService {
       TContentTypeUID,
       'fields' | 'populate' | 'sort' | 'filters' | 'plugin' | 'pagination' | 'publicationState'
     >
-  ): PaginatedResult<TContentTypeUID>;
+  ): Promise<PaginatedResult<TContentTypeUID>>;
 
   count<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
