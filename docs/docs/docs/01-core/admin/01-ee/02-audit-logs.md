@@ -16,6 +16,16 @@ Audit Logs provide a way to view the history of all user actions at Admin API le
 
 The Audit Logs feature was built to take advantage of the eventHub. You can find the service and its core code at `packages/core/admin/ee/server/services`.
 
+### Audit Logs Local Provider
+
+To save audit log data, we utilize an Audit Logs local provider responsible for interacting with the database. This provider should return an object with a `register` function, and this function should return an object with functions to handle `saveEvent`, `findMany`, `findOne`, and `deleteExpiredEvents`.
+
+### Content types
+
+#### strapi_audit_logs
+
+This content type stores all the audit logs. For each allowed event, we save an entry in the audit logs content type.
+
 ### Subscribing to all events
 
 The Audit Logs feature adds a subscriber to the [EventHub](/docs/core/strapi/event-hub), allowing it to listen to all events in the application. However, we don't save every event in the audit logs; we only save the default ones (see the defaultEvents array in the service file).
@@ -49,4 +59,4 @@ To understand how we obtain this information, we need to know how we emit an eve
 strapi.eventHub.emit(name: Pick<Event, 'name'>, payload: Pick<Event, 'payload'>);
 ```
 
-When creating our Audit Log, we retrieve the action and payload from this emitted event, where the first argument is the action or event name, and the second one is the payload. We obtain the user from the requestContext.
+First, we check the event is coming from admin requests and it's on our [default events](https://github.com/strapi/strapi/blob/main/packages/core/admin/ee/server/services/audit-logs.js#L9) list, then when creating our Audit Log, we retrieve the action and payload from this emitted event, where the first argument is the action or event name, and the second one is the payload. We obtain the user from the requestContext.
