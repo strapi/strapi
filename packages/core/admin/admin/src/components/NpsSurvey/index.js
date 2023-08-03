@@ -17,6 +17,7 @@ import { auth, useNotification } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
+import { useMutation } from 'react-query';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
 
@@ -61,7 +62,7 @@ const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
   postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
-  display: 1000, // 5 minutes in ms
+  display: 5 * 60 * 1000, // 5 minutes in ms
 };
 
 const ratingArray = [...Array(11).keys()];
@@ -125,8 +126,46 @@ const NpsSurvey = () => {
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
-  const [isSendingSurvey, setIsSendingSurvey] = React.useState(false);
   const toggleNotification = useNotification();
+
+  const { mutate, isLoading } = useMutation(
+    async (form) => {
+      const res = await fetch('https://analytics.strapi.io/submit-nps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit NPS survey');
+      }
+
+      return res;
+    },
+    {
+      onSuccess() {
+        setNpsSurveySettings((settings) => ({
+          ...settings,
+          lastResponseDate: new Date(),
+          firstDismissalDate: null,
+          lastDismissalDate: null,
+        }));
+        setIsFeedbackResponse(true);
+        // Thank you message displayed in the banner should disappear after few seconds.
+        setTimeout(() => {
+          setSurveyIsShown(false);
+        }, 3000);
+      },
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage({ id: 'notification.error' }),
+        });
+      },
+    }
+  );
 
   // Only check on first render if the survey should be shown
   const [surveyIsShown, setSurveyIsShown] = React.useState(
@@ -155,43 +194,8 @@ const NpsSurvey = () => {
   }
 
   const handleSubmitResponse = async ({ npsSurveyRating: rating, npsSurveyFeedback: comment }) => {
-    setIsSendingSurvey(true);
-    try {
-      const { email } = auth.getUserInfo();
-
-      const res = await fetch('https://analytics.strapi.io/submit-nps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, rating, comment }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to submit NPS survey');
-      }
-
-      setNpsSurveySettings((settings) => ({
-        ...settings,
-        lastResponseDate: new Date(),
-        firstDismissalDate: null,
-        lastDismissalDate: null,
-      }));
-
-      setIsFeedbackResponse(true);
-
-      // Thank you message displayed in the banner should disappear after few seconds.
-      setTimeout(() => {
-        setSurveyIsShown(false);
-      }, 3000);
-    } catch {
-      toggleNotification({
-        type: 'warning',
-        message: formatMessage({ id: 'notification.error' }),
-      });
-      setSurveyIsShown(false);
-    }
-    setIsSendingSurvey(false);
+    const { email } = auth.getUserInfo();
+    mutate({ email, rating, comment });
   };
 
   const handleDismiss = () => {
@@ -332,7 +336,7 @@ const NpsSurvey = () => {
                           {values.npsSurveyFeedback}
                         </Textarea>
                       </Box>
-                      <Button marginBottom={2} type="submit" loading={isSendingSurvey}>
+                      <Button marginBottom={2} type="submit" loading={isLoading}>
                         {formatMessage({
                           id: 'app.components.NpsSurvey.submit-feedback',
                           defaultMessage: 'Submit Feedback',

@@ -4,8 +4,11 @@ import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import NpsSurvey from '..';
+
+const toggleNotification = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -14,9 +17,12 @@ jest.mock('@strapi/helper-plugin', () => ({
       email: 'john@doe.com',
     })),
   },
+  useNotification: jest.fn().mockImplementation(() => toggleNotification),
 }));
 
-global.fetch = jest.fn();
+global.fetch = jest.fn(() => ({
+  ok: true,
+}));
 
 const localStorageMock = {
   getItem: jest.fn(),
@@ -28,12 +34,16 @@ const originalLocalStorage = global.localStorage;
 
 const user = userEvent.setup({ delay: null });
 
+const queryClient = new QueryClient();
+
 const setup = () =>
   render(<NpsSurvey />, {
     wrapper({ children }) {
       return (
         <IntlProvider locale="en" defaultLocale="en">
-          <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+          </QueryClientProvider>
         </IntlProvider>
       );
     },
@@ -95,6 +105,31 @@ describe('NPS survey', () => {
       lastDismissalDate: null,
     });
     expect(new Date(storedData.lastResponseDate)).toBeInstanceOf(Date);
+  });
+
+  it('show error message if request fails and keep survey open', async () => {
+    localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
+    global.fetch = jest.fn(() => ({
+      ok: false,
+    }));
+    setup();
+    act(() => jest.runAllTimers());
+
+    fireEvent.click(screen.getByRole('radio', { name: '10' }));
+    expect(screen.getByRole('button', { name: /submit feedback/i }));
+
+    act(() => {
+      fireEvent.submit(screen.getByRole('form'));
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText(/not at all likely/i)).toBeInTheDocument();
+      expect(screen.queryByText(/thank you very much for your feedback!/i)).not.toBeInTheDocument();
+      expect(toggleNotification).toHaveBeenCalledWith({
+        type: 'warning',
+        message: 'notification.error',
+      });
+    });
   });
 
   it('saves first user dismissal', async () => {
