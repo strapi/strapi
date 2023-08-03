@@ -81,7 +81,7 @@ export interface EntityService {
 
   deleteMany<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params: Params.Pick<TContentTypeUID, 'populate'>
+    params: Params.Pick<TContentTypeUID, 'filters' | 'populate'>
   ): Promise<{ count: number }>;
 
   // TODO: What difference with findMany?? Not returning count by default
