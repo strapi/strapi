@@ -51,7 +51,7 @@ module.exports = {
   async findAll(ctx) {
     const { query } = ctx.request;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = getService('permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: 'admin::role',
     });
