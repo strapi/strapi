@@ -4,7 +4,7 @@ export type True = true;
 export type False = false;
 export type BooleanValue = True | False;
 
-export type IsNever<TValue> = [TValue] extends [never] ? True : False;
+export type IsNever<TValue> = StrictEqual<TValue, never>;
 
 export type IsNotNever<TValue> = Not<IsNever<TValue>>;
 
@@ -68,11 +68,10 @@ export type Every<TExpressions extends BooleanValue[]> = TExpressions extends [
   ? If<Utils.Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, True>>
   : never;
 
-export type And<TLeft extends BooleanValue, TRight extends BooleanValue> = Extends<
-  Extends<TLeft, True> | Extends<TRight, True>,
-  True
+export type And<TLeft extends BooleanValue, TRight extends BooleanValue> = IsTrue<
+  IsTrue<TLeft> | IsTrue<TRight>
 >;
 
 export type Or<TLeft extends BooleanValue, TRight extends BooleanValue> = Not<
-  Extends<Extends<TLeft, True> | Extends<TRight, True>, False>
+  IsFalse<IsTrue<TLeft> | IsTrue<TRight>>
 >;
