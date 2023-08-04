@@ -9,6 +9,15 @@ const stageObject = yup.object().shape({
   id: yup.number().integer().min(1),
   name: yup.string().max(255).required(),
   color: yup.string().matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/i), // hex color
+  permission: yup.object().shape({
+    role: yup.number().integer().min(1).required(),
+    action: yup.string().oneOf(['admin::review-workflow.stage.transition']).required(),
+    // TODO: Validate format
+    actionParameters: yup.object().shape({
+      from: yup.number().integer().min(1).required(),
+      to: yup.number().integer().min(1),
+    }),
+  }),
 });
 
 const validateUpdateStageOnEntity = yup

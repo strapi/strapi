@@ -2,15 +2,20 @@
 
 const {
   mapAsync,
+  reduceAsync,
   errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
-const { map } = require('lodash/fp');
+const { map, pick } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
 
+const sanitizedStageFields = ['id', 'name', 'workflow'];
+const sanitizeStageFields = pick(sanitizedStageFields);
+
 module.exports = ({ strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
+  const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
@@ -32,11 +37,40 @@ module.exports = ({ strapi }) => {
     async createMany(stagesList, { fields } = {}) {
       const params = { select: fields ?? '*' };
 
+      // TODO: pick the fields from the stage
       const stages = await Promise.all(
         stagesList.map((stage) =>
-          strapi.entityService.create(STAGE_MODEL_UID, { data: stage, ...params })
+          strapi.entityService.create(STAGE_MODEL_UID, {
+            data: sanitizeStageFields(stage),
+            ...params,
+          })
         )
       );
+
+      // Create stage permissions
+      await reduceAsync(stagesList)(async (_, stage, idx) => {
+        // Ignore stages without permissions
+        if (!stage.permissions || stage.permissions.length === 0) {
+          return;
+        }
+
+        const stagePermissions = stage.permissions;
+        const stageId = stages[idx].id;
+
+        const permissions = await mapAsync(
+          stagePermissions,
+          // Register each stage permission
+          (permission) =>
+            stagePermissionsService.register(permission.role, permission.action, stageId)
+        );
+
+        // Update stage with the new permissions
+        await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
+          data: {
+            permissions: permissions.flat().map((p) => p.id),
+          },
+        });
+      }, []);
 
       metrics.sendDidCreateStage();
 
@@ -44,8 +78,24 @@ module.exports = ({ strapi }) => {
     },
 
     async update(stageId, stageData) {
+      let stagePermissions = [];
+
+      // TODO: Do not delete permissions if they are not changed
+      // Delete old permissions
+      await this.deleteStagePermissions(stageId);
+
+      if (stageData.permissions) {
+        const permissions = await mapAsync(stageData.permissions, (permission) =>
+          stagePermissionsService.register(permission.role, permission.action, stageId)
+        );
+        stagePermissions = permissions.flat().map((p) => p.id);
+      }
+
       const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
-        data: stageData,
+        data: {
+          ...stageData,
+          permissions: stagePermissions,
+        },
       });
 
       metrics.sendDidEditStage();
@@ -53,18 +103,29 @@ module.exports = ({ strapi }) => {
       return stage;
     },
 
-    async delete(stageId) {
-      const stage = await strapi.entityService.delete(STAGE_MODEL_UID, stageId);
+    async delete(stage) {
+      // Unregister all permissions related to this stage id
+      await this.deleteStagePermissions([stage]);
+
+      const deletedStage = await strapi.entityService.delete(STAGE_MODEL_UID, stage.id);
 
       metrics.sendDidDeleteStage();
 
-      return stage;
+      return deletedStage;
     },
 
-    async deleteMany(stagesId) {
+    async deleteMany(stages) {
+      await this.deleteStagePermissions(stages);
+
       return strapi.entityService.deleteMany(STAGE_MODEL_UID, {
-        filters: { id: { $in: stagesId } },
+        filters: { id: { $in: stages.map((s) => s.id) } },
       });
+    },
+
+    async deleteStagePermissions(stages) {
+      // TODO: Find another way to do this for when we use the "to" parameter.
+      const permissions = stages.map((s) => s.permissions).flat();
+      await stagePermissionsService.unregister(permissions || []);
     },
 
     count({ workflowId } = {}) {
@@ -114,7 +175,7 @@ module.exports = ({ strapi }) => {
             });
           });
 
-          return this.delete(stage.id);
+          return this.delete(stage);
         });
 
         return destStages.map((stage) => ({ ...stage, id: stage.id ?? createdStagesIds.shift() }));
