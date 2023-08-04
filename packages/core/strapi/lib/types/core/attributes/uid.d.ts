@@ -16,9 +16,6 @@ export interface UIDProperties<
   options: UIDOptions & TOptions;
 }
 
-/**
- * @param {Common.UID.Schema} [_TOrigin]
- */
 export type UID<
   // TODO: V5:
   // The TOrigin was used to narrow down the list of possible target attribute for a
