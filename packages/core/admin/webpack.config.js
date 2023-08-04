@@ -28,6 +28,7 @@ module.exports = ({
     features: [],
   },
   tsConfigFilePath,
+  enforceSourceMaps,
 }) => {
   const isProduction = env === 'production';
 
@@ -54,7 +55,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
-    devtool: isProduction ? false : 'eval-source-map',
+    devtool: isProduction && !enforceSourceMaps ? false : 'source-map',
     experiments: {
       topLevelAwait: true,
     },
