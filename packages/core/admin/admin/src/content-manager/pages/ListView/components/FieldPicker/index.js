@@ -12,6 +12,13 @@ import { onChangeListHeaders, onResetListHeaders } from '../../actions';
 import { selectDisplayedHeaders } from '../../selectors';
 
 const StyledCheckboxLabel = styled(Box)`
+  label {
+    font-size: 0.75rem;
+    div {
+      flex-wrap: wrap;
+      display: flex;
+    }
+  }
   :hover {
     background-color: ${(props) => props.theme.colors.primary100};
   }
