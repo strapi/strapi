@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Flex, Checkbox, TextButton, Typography } from '@strapi/design-system';
+import { Box, Flex, BaseCheckbox, TextButton, Typography } from '@strapi/design-system';
 import { useCollator, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -12,13 +12,6 @@ import { onChangeListHeaders, onResetListHeaders } from '../../actions';
 import { selectDisplayedHeaders } from '../../selectors';
 
 const StyledCheckboxLabel = styled(Box)`
-  label {
-    font-size: 0.75rem;
-    div {
-      flex-wrap: wrap;
-      display: flex;
-    }
-  }
   :hover {
     background-color: ${(props) => props.theme.colors.primary100};
   }
@@ -82,13 +75,14 @@ export const FieldPicker = ({ layout }) => {
               padding={2}
               key={header.name}
             >
-              <Checkbox
-                onChange={() => handleChange(header.name)}
-                value={isActive}
-                name={header.name}
-              >
-                {header.label}
-              </Checkbox>
+              <Flex wrap="wrap" gap={2}>
+                <BaseCheckbox
+                  onChange={() => handleChange(header.name)}
+                  value={isActive}
+                  name={header.name}
+                />
+                <Typography fontSize={1}>{header.label}</Typography>
+              </Flex>
             </StyledCheckboxLabel>
           );
         })}
