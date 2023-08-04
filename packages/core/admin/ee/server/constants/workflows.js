@@ -16,4 +16,16 @@ module.exports = {
       'You’ve reached the limit of stages for this workflow in your plan. Try deleting some stages or contact Sales to enable more stages.',
     DUPLICATED_STAGE_NAME: 'Stage names must be unique.',
   },
+  WORKFLOW_POPULATE: {
+    stages: {
+      populate: {
+        permissions: {
+          fields: ["action", "actionParameters"],
+          populate: {
+            role: { fields: ["id", "name"] },
+          }
+        }
+      }
+    }
+  },
 };

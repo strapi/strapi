@@ -7,7 +7,7 @@ const {
   validateWorkflowCreate,
   validateWorkflowUpdate,
 } = require('../../validation/review-workflows');
-const { WORKFLOW_MODEL_UID } = require('../../constants/workflows');
+const { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } = require('../../constants/workflows');
 
 /**
  *
@@ -61,22 +61,25 @@ module.exports = {
       ctx.state.userAbility
     );
     const { populate } = await sanitizedQuery.update(query);
-
     const workflowBody = await validateWorkflowUpdate(body.data);
 
-    const workflow = await workflowService.findById(id, { populate: ['stages'] });
+    // Find if workflow exists
+    const workflow = await workflowService.findById(id, { populate: WORKFLOW_POPULATE });
     if (!workflow) {
       return ctx.notFound();
     }
-    const getPermittedFieldToUpdate = sanitizeUpdateInput(workflow);
 
+    // Sanitize input data
+    const getPermittedFieldToUpdate = sanitizeUpdateInput(workflow);
     const dataToUpdate = await getPermittedFieldToUpdate(workflowBody);
 
+    // Update workflow
     const updatedWorkflow = await workflowService.update(workflow, {
       data: dataToUpdate,
       populate,
     });
 
+    // Send sanitized response
     ctx.body = {
       data: await sanitizeOutput(updatedWorkflow),
     };
@@ -96,7 +99,7 @@ module.exports = {
     );
     const { populate } = await sanitizedQuery.delete(query);
 
-    const workflow = await workflowService.findById(id, { populate: ['stages'] });
+    const workflow = await workflowService.findById(id, { populate: WORKFLOW_POPULATE });
     if (!workflow) {
       return ctx.notFound("Workflow doesn't exist");
     }
