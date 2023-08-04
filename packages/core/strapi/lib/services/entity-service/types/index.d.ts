@@ -1,5 +1,5 @@
 import type { Attribute, Common, Utils } from '@strapi/strapi';
-import type { Result, PaginatedResult } from './result';
+import type { Entity, PaginatedResult } from './result';
 
 import type * as Params from './params';
 
@@ -15,17 +15,17 @@ export interface EntityService {
   wrapParams<TContentTypeUID extends Common.UID.ContentType, TParams extends object>(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): unknown;
+  ): Promise<unknown> | unknown;
 
   wrapResult<TContentTypeUID extends Common.UID.ContentType>(
-    result: any,
+    result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction }
-  ): any;
+  ): Promise<unknown> | unknown;
 
   emitEvent<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     event: string,
-    entity: Attribute.GetValues<TContentTypeUID> // double check
+    entity: Entity<TContentTypeUID>
   ): Promise<void>;
 
   findMany<TContentTypeUID extends Common.UID.ContentType>(
@@ -34,85 +34,113 @@ export interface EntityService {
       TContentTypeUID,
       | 'fields'
       | 'filters'
+      | '_q'
       | 'pagination:offset'
       | 'sort'
       | 'populate'
       | 'publicationState'
       | 'plugin'
     >
-  ): Promise<Result<TContentTypeUID>[]>;
+  ): Utils.Expression.MatchFirst<
+    [
+      [Common.UID.IsCollectionType<TContentTypeUID>, Promise<Entity<TContentTypeUID>[]>],
+      [Common.UID.IsSingleType<TContentTypeUID>, Promise<Entity<TContentTypeUID> | null>]
+    ],
+    Promise<(Entity<TContentTypeUID> | null) | Entity<TContentTypeUID>[]>
+  >;
 
   findOne<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    entityId: number,
+    entityId: Params.Attribute.ID,
     params?: Params.Pick<TContentTypeUID, 'fields' | 'populate'>
-  ): Promise<Result<TContentTypeUID> | null>;
+  ): Promise<Entity<TContentTypeUID> | null>;
 
   delete<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    entityId: number,
+    entityId: Params.Attribute.ID,
     params?: Params.Pick<TContentTypeUID, 'fields' | 'populate'>
-  ): Promise<Result<TContentTypeUID> | null>;
+  ): Promise<Entity<TContentTypeUID> | null>;
 
   create<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
-  ): Promise<Result<TContentTypeUID>>;
+  ): Promise<Entity<TContentTypeUID>>;
 
   update<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    entityId: number,
+    entityId: Params.Attribute.ID,
     params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
-  ): Promise<Result<TContentTypeUID>>;
+  ): Promise<Entity<TContentTypeUID> | null>;
 
   findPage<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
     params?: Params.Pick<
       TContentTypeUID,
-      'fields' | 'filters' | 'pagination' | 'sort' | 'populate' | 'publicationState' | 'plugin'
+      | 'fields'
+      | 'populate'
+      | 'pagination'
+      | 'sort'
+      | 'filters'
+      | '_q'
+      | 'publicationState'
+      | 'plugin'
     >
   ): Promise<PaginatedResult<TContentTypeUID>>;
 
   clone<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    cloneId: number,
-    params?: Params.Pick<TContentTypeUID, 'fields' | 'populate' | 'data' | 'files'>
-  ): Promise<Result<TContentTypeUID> | null>;
+    cloneId: Params.Attribute.ID,
+    params?: Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+  ): Promise<Entity<TContentTypeUID> | null>;
 
+  /**
+   * @deprecated
+   */
   deleteMany<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params: Params.Pick<TContentTypeUID, 'filters' | 'populate'>
+    params: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<{ count: number }>;
 
-  // TODO: What difference with findMany?? Not returning count by default
+  /**
+   * TODO: seems the same as findMany, it's not returning count by default
+   * @deprecated
+   */
   findWithRelationCounts<TContentTypeUID extends Common.UID.Schema>(
     uid: TContentTypeUID,
     params?: Params.Pick<
       TContentTypeUID,
       | 'fields'
-      | 'populate'
-      | 'sort'
       | 'filters'
-      | 'plugin'
+      | '_q'
       | 'pagination:offset'
+      | 'sort'
+      | 'populate'
       | 'publicationState'
+      | 'plugin'
     >
-  ): Promise<Result<TContentTypeUID>[]>;
+  ): Promise<Entity<TContentTypeUID>[]>;
 
+  /**
+   * @deprecated
+   */
   findWithRelationCountsPage<TContentTypeUID extends Common.UID.Schema>(
     uid: TContentTypeUID,
     params?: Params.Pick<
       TContentTypeUID,
-      'fields' | 'populate' | 'sort' | 'filters' | 'plugin' | 'pagination' | 'publicationState'
+      | 'fields'
+      | 'filters'
+      | '_q'
+      | 'pagination'
+      | 'sort'
+      | 'populate'
+      | 'publicationState'
+      | 'plugin'
     >
   ): Promise<PaginatedResult<TContentTypeUID>>;
 
   count<TContentTypeUID extends Common.UID.ContentType>(
     uid: TContentTypeUID,
-    params?: Params.Pick<
-      TContentTypeUID,
-      'fields' | 'populate' | 'sort' | 'filters' | 'plugin' | 'pagination' | 'publicationState'
-    >
+    params?: Params.Pick<TContentTypeUID, 'filters' | '_q'>
   ): Promise<number>;
 
   load<
@@ -120,19 +148,20 @@ export interface EntityService {
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    entity: Attribute.GetValues<TContentTypeUID>,
+    entity: Entity<TContentTypeUID>,
     field: Utils.Guard.Never<TField, string>,
     params?: GetPopulatableFieldParams<TContentTypeUID, TField>
-  ): Promise<Result<TContentTypeUID>>;
+  ): Promise<Entity<TContentTypeUID> | Entity<TContentTypeUID>[]>;
 
   loadPages<
     TContentTypeUID extends Common.UID.ContentType,
     TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
   >(
     uid: TContentTypeUID,
-    entity: Attribute.GetValues<TContentTypeUID>,
+    entity: Entity<TContentTypeUID>,
     field: Utils.Guard.Never<TField, string>,
-    params?: GetPopulatableFieldParams<TContentTypeUID, TField>
+    params?: GetPopulatableFieldParams<TContentTypeUID, TField>,
+    pagination?: Params.Pagination.Any
   ): Promise<PaginatedResult<TContentTypeUID>>;
 }
 

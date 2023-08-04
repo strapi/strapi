@@ -7,13 +7,15 @@ import type * as Filters from './filters';
 import type * as Populate from './populate';
 import type * as PublicationState from './publication-state';
 import type * as Data from './data';
+import type * as Search from './search';
+
 // Utils
 import type * as Attribute from './attributes';
 
 export type Pick<
   TSchemaUID extends Common.UID.Schema,
-  TKind extends ParamKind
-> = Utils.Expression.MatchAll<
+  TKind extends Kind
+> = Utils.Expression.MatchAllIntersect<
   [
     // Sort
     [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
@@ -42,11 +44,13 @@ export type Pick<
     // Data
     [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
     // Files
-    [HasMember<TKind, 'files'>, { files?: unknown }] // TODO
+    [HasMember<TKind, 'files'>, { files?: unknown }], // TODO
+    // Search
+    [HasMember<TKind, '_q'>, { _q?: Search.Q }]
   ]
 >;
 
-type ParamKind =
+export type Kind =
   | 'sort'
   | 'sort:string'
   | 'sort:array'
@@ -65,11 +69,9 @@ type ParamKind =
   | 'publicationState'
   | 'plugin'
   | 'data'
-  | 'files';
+  | 'files'
+  | '_q';
 
-type HasMember<TValue extends ParamKind, TTest extends ParamKind> = Utils.Expression.Extends<
-  TTest,
-  TValue
->;
+type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
 
 export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };
