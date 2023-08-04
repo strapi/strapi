@@ -733,7 +733,7 @@
   "content-manager.containers.ListPage.items": "{number, plural, =0 {items} one {item} other {items}}",
   "content-manager.containers.ListPage.table-headers.publishedAt": "State",
   "content-manager.containers.ListPage.selectedEntriesModal.title": "Publish entries",
-  "content-manager.containers.ListPage.selectedEntriesModal.selectedCount": "<b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.",
+  "content-manager.containers.ListPage.selectedEntriesModal.selectedCount": "<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.",
   "content-manager.containers.ListPage.selectedEntriesModal.publishedCount": "<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Edit {fieldName}",
   "content-manager.containers.SettingPage.add.field": "Insert another field",
