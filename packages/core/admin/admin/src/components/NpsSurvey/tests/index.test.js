@@ -3,6 +3,8 @@ import React from 'react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -20,9 +22,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   useNotification: jest.fn().mockImplementation(() => toggleNotification),
 }));
 
-global.fetch = jest.fn(() => ({
-  ok: true,
-}));
+const handlers = [
+  rest.post('*/submit-nps', (req, res, ctx) => {
+    return res.once(ctx.status(200));
+  }),
+];
+
+const server = setupServer(...handlers);
 
 const localStorageMock = {
   getItem: jest.fn(),
@@ -52,6 +58,11 @@ const setup = () =>
 describe('NPS survey', () => {
   beforeAll(() => {
     global.localStorage = localStorageMock;
+    server.listen();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   afterEach(() => {
@@ -108,10 +119,13 @@ describe('NPS survey', () => {
   });
 
   it('show error message if request fails and keep survey open', async () => {
+    server.use(
+      rest.post('*/submit-nps', (req, res, ctx) => {
+        return res.once(ctx.status(500));
+      })
+    );
+
     localStorageMock.getItem.mockReturnValueOnce({ enabled: true });
-    global.fetch = jest.fn(() => ({
-      ok: false,
-    }));
     setup();
     act(() => jest.runAllTimers());
 
