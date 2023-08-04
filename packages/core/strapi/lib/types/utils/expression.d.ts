@@ -4,6 +4,16 @@ export type True = true;
 export type False = false;
 export type BooleanValue = True | False;
 
+export type IsNever<TValue> = [TValue] extends [never] ? True : False;
+
+export type IsNotNever<TValue> = Not<IsNever<TValue>>;
+
+export type IsTrue<TValue> = [TValue] extends [True] ? True : False;
+
+export type IsFalse<TValue> = [TValue] extends [False] ? True : False;
+
+export type StrictEqual<TValue, TMatch> = And<Extends<TValue, TMatch>, Extends<TMatch, TValue>>;
+
 export type Extends<TLeft, TRight> = [TLeft] extends [TRight] ? True : False;
 
 export type Not<TExpression extends BooleanValue> = If<TExpression, False, True>;
