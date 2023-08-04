@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Flex, BaseCheckbox, TextButton, Typography } from '@strapi/design-system';
+import { Flex, BaseCheckbox, TextButton, Typography } from '@strapi/design-system';
 import { useCollator, useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -11,7 +11,7 @@ import { checkIfAttributeIsDisplayable } from '../../../../utils';
 import { onChangeListHeaders, onResetListHeaders } from '../../actions';
 import { selectDisplayedHeaders } from '../../selectors';
 
-const StyledCheckboxLabel = styled(Box)`
+const ChackboxWrapper = styled(Flex)`
   :hover {
     background-color: ${(props) => props.theme.colors.primary100};
   }
@@ -68,22 +68,22 @@ export const FieldPicker = ({ layout }) => {
           const isActive = displayedHeaderKeys.includes(header.name);
 
           return (
-            <StyledCheckboxLabel
+            <ChackboxWrapper
+              wrap="wrap"
+              gap={2}
               as="label"
               background={isActive ? 'primary100' : 'transparent'}
               hasRadius
               padding={2}
               key={header.name}
             >
-              <Flex wrap="wrap" gap={2}>
-                <BaseCheckbox
-                  onChange={() => handleChange(header.name)}
-                  value={isActive}
-                  name={header.name}
-                />
-                <Typography fontSize={1}>{header.label}</Typography>
-              </Flex>
-            </StyledCheckboxLabel>
+              <BaseCheckbox
+                onChange={() => handleChange(header.name)}
+                value={isActive}
+                name={header.name}
+              />
+              <Typography fontSize={1}>{header.label}</Typography>
+            </ChackboxWrapper>
           );
         })}
       </Flex>
