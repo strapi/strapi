@@ -25,6 +25,7 @@ describe('Transfer', () => {
     }),
     exitMessageText: jest.fn(),
     getDiffHandler: jest.fn(),
+    getAssetsBackupHandler: jest.fn(),
     setSignalHandler: jest.fn(),
   };
   jest.mock(
@@ -69,6 +70,7 @@ describe('Transfer', () => {
             onDiagnostic: jest.fn().mockReturnThis(),
           },
           onSchemaDiff: jest.fn(),
+          addErrorHandler: jest.fn(),
         };
       },
     },

@@ -1,11 +1,25 @@
 import React from 'react';
 
+import { fixtures } from '@strapi/admin-test-utils';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
 import { AdminSeatInfoEE } from '..';
-import { useLicenseLimits } from '../../../../../../../hooks';
+import { useLicenseLimits } from '../../../../../../../hooks/useLicenseLimits';
+
+jest.mock('../../../../../../../hooks/useLicenseLimits');
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useRBAC: jest.fn().mockReturnValue({
+    isLoading: false,
+    allowedActions: { canRead: true, canCreate: true, canUpdate: true, canDelete: true },
+  }),
+}));
 
 const LICENSE_MOCK = {
   isLoading: false,
@@ -26,20 +40,31 @@ const withMarkup = (query) => (text) =>
     return hasText(node) && childrenDontHaveText;
   });
 
-jest.mock('../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../hooks'),
-  useLicenseLimits: jest.fn(() => LICENSE_MOCK),
-}));
-
 const setup = (props) =>
   render(<AdminSeatInfoEE {...props} />, {
     wrapper({ children }) {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+      });
+
       return (
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={{}}>
-            {children}
-          </IntlProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={client}>
+          <Provider
+            store={createStore((state) => state, {
+              admin_app: { permissions: fixtures.permissions.app },
+            })}
+          >
+            <ThemeProvider theme={lightTheme}>
+              <IntlProvider locale="en" messages={{}}>
+                {children}
+              </IntlProvider>
+            </ThemeProvider>
+          </Provider>
+        </QueryClientProvider>
       );
     },
   });
@@ -64,6 +89,8 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render seat info', () => {
+    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+
     const { getByText } = setup();
 
     const getByTextWithMarkup = withMarkup(getByText);
@@ -73,6 +100,8 @@ describe('<AdminSeatInfo />', () => {
   });
 
   test('Render billing link (not on strapi cloud)', () => {
+    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+
     const { getByText } = setup();
 
     expect(getByText('Contact sales')).toBeInTheDocument();

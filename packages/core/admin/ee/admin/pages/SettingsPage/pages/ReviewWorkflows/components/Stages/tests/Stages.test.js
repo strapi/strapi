@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 
 import configureStore from '../../../../../../../../../admin/src/core/store/configureStore';
 import * as actions from '../../../actions';
-import { ACTION_SET_WORKFLOWS, STAGE_COLOR_DEFAULT } from '../../../constants';
+import { ACTION_SET_WORKFLOW, STAGE_COLOR_DEFAULT } from '../../../constants';
 import { reducer } from '../../../reducer';
 import { Stages } from '../Stages';
 
@@ -45,7 +45,7 @@ const WORKFLOWS_FIXTURE = [
 const ComponentFixture = (props) => {
   const store = configureStore([], [reducer]);
 
-  store.dispatch({ type: ACTION_SET_WORKFLOWS, payload: { workflows: WORKFLOWS_FIXTURE } });
+  store.dispatch({ type: ACTION_SET_WORKFLOW, payload: { workflows: WORKFLOWS_FIXTURE } });
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -121,5 +121,11 @@ describe('Admin | Settings | Review Workflow | Stages', () => {
     expect(spy).toBeCalledWith(2, {
       name: 'New name',
     });
+  });
+
+  it('should not render the "add stage" button if canUpdate = false', () => {
+    const { queryByText } = setup({ canUpdate: false });
+
+    expect(queryByText('Add new stage')).not.toBeInTheDocument();
   });
 });

@@ -17,8 +17,22 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
           value: '$eq',
         },
         {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$eqi',
+            defaultMessage: 'is (case insensitive)',
+          },
+          value: '$eqi',
+        },
+        {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },
           value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$nei',
+            defaultMessage: 'is not (case insensitive)',
+          },
+          value: '$nei',
         },
         {
           intlLabel: {
@@ -37,16 +51,30 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         {
           intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$contains',
-            defaultMessage: 'contains (sensitive)',
+            defaultMessage: 'contains',
           },
           value: '$contains',
         },
         {
           intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$containsi',
+            defaultMessage: 'contains (case insensitive)',
+          },
+          value: '$containsi',
+        },
+        {
+          intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$notContains',
-            defaultMessage: 'not contains (sensitive)',
+            defaultMessage: 'not contains',
           },
           value: '$notContains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notContainsi',
+            defaultMessage: 'not contains (case insensitive)',
+          },
+          value: '$notContainsi',
         },
         {
           intlLabel: {
@@ -57,10 +85,24 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         },
         {
           intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$startsWithi',
+            defaultMessage: 'starts with (case insensitive)',
+          },
+          value: '$startsWithi',
+        },
+        {
+          intlLabel: {
             id: 'components.FilterOptions.FILTER_TYPES.$endsWith',
             defaultMessage: 'ends with',
           },
           value: '$endsWith',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$endsWithi',
+            defaultMessage: 'ends with (case insensitive)',
+          },
+          value: '$endsWithi',
         },
       ];
     }
@@ -252,6 +294,13 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
           value: '$eq',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$eqi',
+            defaultMessage: 'is (case insensitive)',
+          },
+          value: '$eqi',
         },
         {
           intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$ne', defaultMessage: 'is not' },

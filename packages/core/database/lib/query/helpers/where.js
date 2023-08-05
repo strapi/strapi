@@ -204,6 +204,14 @@ const applyOperator = (qb, column, operator, value) => {
       qb.where(column, '<>', value);
       break;
     }
+    case '$nei': {
+      if (value === null) {
+        qb.whereNotNull(column);
+        break;
+      }
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      break;
+    }
     case '$gt': {
       qb.where(column, '>', value);
       break;
@@ -276,7 +284,15 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
 
-    // TODO: json operators
+    // Experimental, only for internal use
+    // Only on MySQL, PostgreSQL and CockroachDB.
+    // https://knexjs.org/guide/query-builder.html#wherejsonsupersetof
+    case '$jsonSupersetOf': {
+      qb.whereJsonSupersetOf(column, value);
+      break;
+    }
+
+    // TODO: Add more JSON operators: whereJsonObject, whereJsonPath, whereJsonSubsetOf
 
     // TODO: relational operators every/some/exists/size ...
 

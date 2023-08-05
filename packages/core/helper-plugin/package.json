@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.11.5",
+  "version": "4.12.1",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
   "dependencies": {
     "axios": "1.4.0",
     "date-fns": "2.30.0",
-    "formik": "^2.4.0",
+    "formik": "2.4.0",
     "immer": "9.0.19",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
@@ -89,7 +89,7 @@
     "styled-components": "^5.3.3"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
   "nx": {
