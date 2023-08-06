@@ -18326,7 +18326,7 @@ __metadata:
     better-sqlite3: 8.5.0
     lodash: 4.17.21
     mysql: 2.18.1
-    mysql2: 3.5.1
+    mysql2: 3.6.0
     passport-google-oauth2: 0.2.0
     pg: 8.11.1
     react: ^18.2.0
@@ -24297,9 +24297,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:3.5.1":
-  version: 3.5.1
-  resolution: "mysql2@npm:3.5.1"
+"mysql2@npm:3.6.0":
+  version: 3.6.0
+  resolution: "mysql2@npm:3.6.0"
   dependencies:
     denque: ^2.1.0
     generate-function: ^2.3.1
@@ -24309,7 +24309,7 @@ __metadata:
     named-placeholders: ^1.1.3
     seq-queue: ^0.0.5
     sqlstring: ^2.3.2
-  checksum: 93c88c88ae374504dc07e5ac1370e74f86f560962d41f7e674a933110167d01023e02947199f6d0be06e75a234c3c19bc9ada8db449a9ebddd928e11357891d3
+  checksum: 3c0f6102ce76314b3a0789626bf49beccf4e51cba72dc8509e631ccd47f12d23020832468b6e30db513e73bd2ed72b6e0e6b118a7ad808f9e32f2e3dc744ffc8
   languageName: node
   linkType: hard
 
