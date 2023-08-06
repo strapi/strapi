@@ -1,9 +1,11 @@
-import { Event, Action } from '../';
+import { Event, BeforeEvent, AfterEvent, BeforeAction, AfterAction } from '../';
 
-type SubscriberFn = (event: Event) => Promise<void> | void;
+type SubscriberFn<T> = (event: T) => Promise<void> | void;
 
-type SubscriberMap = {
-  [k in Action]: SubscriberFn;
-};
+type BaseSubscriberMap = { models?: string[] };
+type BeforeSubscriberMap = { [k in BeforeAction]?: SubscriberFn<BeforeEvent> };
+type AfterSubscriberMap = { [k in AfterAction]?: SubscriberFn<AfterEvent> };
 
-export type Subscriber = SubscriberFn | SubscriberMap;
+type SubscriberMap = BaseSubscriberMap & BeforeSubscriberMap & AfterSubscriberMap;
+
+export type Subscriber = SubscriberFn<Event> | SubscriberMap;

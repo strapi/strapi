@@ -2,25 +2,29 @@ import { Database } from '../';
 import { Model } from '../schema';
 import { Subscriber } from './subscribers';
 
-export type Action =
+export type BeforeAction =
   | 'beforeCreate'
-  | 'afterCreate'
   | 'beforeFindOne'
-  | 'afterFindOne'
   | 'beforeFindMany'
-  | 'afterFindMany'
   | 'beforeCount'
-  | 'afterCount'
   | 'beforeCreateMany'
-  | 'afterCreateMany'
   | 'beforeUpdate'
-  | 'afterUpdate'
   | 'beforeUpdateMany'
-  | 'afterUpdateMany'
   | 'beforeDelete'
+  | 'beforeDeleteMany';
+
+export type AfterAction =
+  | 'afterCreate'
+  | 'afterFindOne'
+  | 'afterFindMany'
+  | 'afterCount'
+  | 'afterCreateMany'
+  | 'afterUpdate'
+  | 'afterUpdateMany'
   | 'afterDelete'
-  | 'beforeDeleteMany'
   | 'afterDeleteMany';
+
+export type Action = BeforeAction | AfterAction;
 
 export interface Params {
   select?: any;
@@ -34,11 +38,23 @@ export interface Params {
   data?: any;
 }
 
-export interface Event {
+export interface BaseEvent {
   action: Action;
   model: Model;
   params: Params;
+  state: Record<string, any>;
 }
+
+export interface BeforeEvent extends BaseEvent {
+  action: BeforeAction;
+}
+
+export interface AfterEvent extends BaseEvent {
+  action: AfterAction;
+  result: Record<string, any>;
+}
+
+export type Event = BeforeEvent | AfterEvent;
 
 export interface LifecycleProvider {
   subscribe(subscriber: Subscriber): () => void;
