@@ -133,7 +133,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       return put(
         isContentTypeView
           ? `/content-manager/content-types/${slug}/configuration`
-          : `components/${slug}/configuration`,
+          : `/content-manager/components/${slug}/configuration`,
         body
       );
     },
