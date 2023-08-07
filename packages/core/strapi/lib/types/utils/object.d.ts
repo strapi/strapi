@@ -55,3 +55,9 @@ export type PickBy<TValue, TTest> = Pick<TValue, KeysBy<TValue, TTest>>;
  * // { x: 'foo' } | { x: 'bar' } | { x: '42' }
  */
 export type Values<TObject extends object> = TObject[keyof TObject];
+
+export type DeepPartial<TObject> = TObject extends object
+  ? {
+      [TKey in keyof TObject]?: DeepPartial<TObject[TKey]>;
+    }
+  : TObject;
