@@ -1,9 +1,7 @@
-const path = require('path');
-
 module.exports = {
   root: true,
   extends: [
-    '@strapi/eslint-config/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
+    '@strapi/eslint-config/back/typescript' /*'plugin:@typescript-eslint/recommended-requiring-type-checking'*/,
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
@@ -17,7 +15,7 @@ module.exports = {
     ...require('../back').rules,
     'node/no-unsupported-features/es-syntax': 'off',
     'node/no-missing-import': 'off',
-    // TODO: The following rules from @strapi/eslint-config/typescript are disabled because they're causing problems we need to solve or fix
+    // TODO: The following rules from @strapi/eslint-config/back/typescript are disabled because they're causing problems we need to solve or fix
     // to be solved in configuration
     'node/no-unsupported-features/es-syntax': 'off',
     'import/prefer-default-export': 'off',

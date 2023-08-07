@@ -1,5 +1,5 @@
 module.exports = {
-  extends: '@strapi/eslint-config/back',
+  extends: '@strapi/eslint-config/back/javascript',
   parserOptions: {
     ecmaVersion: 2021,
   },
