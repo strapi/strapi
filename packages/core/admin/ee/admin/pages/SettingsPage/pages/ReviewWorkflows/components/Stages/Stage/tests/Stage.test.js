@@ -125,8 +125,8 @@ const ComponentFixture = ({
   );
 };
 
-const setup = ({ roles, ...props } = {}) =>
-  render(<ComponentFixture {...props} />, {
+const setup = ({ roles, ...props } = {}) => ({
+  ...render(<ComponentFixture {...props} />, {
     wrapper({ children }) {
       const store = createStore(reducer, {
         [REDUX_NAMESPACE]: {
@@ -155,9 +155,10 @@ const setup = ({ roles, ...props } = {}) =>
         </DndProvider>
       );
     },
-  });
+  }),
 
-const user = userEvent.setup();
+  user: userEvent.setup(),
+});
 
 describe('Admin | Settings | Review Workflow | Stage', () => {
   beforeEach(() => {
@@ -165,7 +166,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a stage', async () => {
-    const { container, getByRole, queryByRole } = setup();
+    const { container, getByRole, queryByRole, user } = setup();
 
     expect(queryByRole('textbox')).not.toBeInTheDocument();
 
@@ -194,12 +195,6 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     );
 
     expect(getByRole('button', { name: /apply to all stages/i })).toBeInTheDocument();
-
-    expect(
-      queryByRole('button', {
-        name: /delete stage/i,
-      })
-    ).not.toBeInTheDocument();
   });
 
   it('should open the accordion panel if isOpen = true', async () => {
@@ -232,6 +227,22 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     );
   });
 
+  it('should render duplicate stage if canUpdate = true', async () => {
+    const { getByRole, getByText, user } = setup({ isOpen: true, canUpdate: true });
+
+    await user.click(getByRole('button', { name: /more actions/i }));
+
+    await waitFor(() => expect(getByText('Duplicate stage')).toBeInTheDocument());
+  });
+
+  it('should render delete if canDelete = true', async () => {
+    const { getByRole, getByText, user } = setup({ isOpen: true, canDelete: true });
+
+    await user.click(getByRole('button', { name: /more actions/i }));
+
+    await waitFor(() => expect(getByText('Delete')).toBeInTheDocument());
+  });
+
   it('should not crash on a custom color code', async () => {
     const { getByRole } = setup({
       isOpen: true,
@@ -251,7 +262,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     const { getByRole } = setup({ canUpdate: false, isOpen: true });
 
     // Name
-    expect(getByRole('textbox')).toHaveAttribute('disabled');
+    await waitFor(() => expect(getByRole('textbox')).toHaveAttribute('disabled'));
 
     // Color
     expect(getByRole('combobox', { name: /color/i })).toHaveAttribute('data-disabled');
@@ -265,7 +276,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a list of all available roles (except super admins)', async () => {
-    const { getByRole, queryByRole } = setup({ canUpdate: true, isOpen: true });
+    const { getByRole, queryByRole, user } = setup({ canUpdate: true, isOpen: true });
 
     await waitFor(() =>
       expect(

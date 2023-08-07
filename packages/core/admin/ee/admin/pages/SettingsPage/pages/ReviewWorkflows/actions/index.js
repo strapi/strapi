@@ -1,5 +1,6 @@
 import {
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
   ACTION_SET_CONTENT_TYPES,
@@ -12,6 +13,13 @@ import {
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
 } from '../constants';
+
+export function cloneStage(id) {
+  return {
+    type: ACTION_CLONE_STAGE,
+    payload: { id },
+  };
+}
 
 export function setWorkflow({ workflow }) {
   return {

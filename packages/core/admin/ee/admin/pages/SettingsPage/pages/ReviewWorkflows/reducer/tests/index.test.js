@@ -1,6 +1,7 @@
 import { initialState, reducer } from '..';
 import {
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
   ACTION_SET_CONTENT_TYPES,
@@ -169,6 +170,47 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
                   name: 'something',
                 },
               ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_CLONE_STAGE', () => {
+    const action = {
+      type: ACTION_CLONE_STAGE,
+      payload: { id: 1 },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: expect.any(Object),
+      clientState: {
+        currentWorkflow: { data: WORKFLOW_FIXTURE },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: [
+                expect.objectContaining({
+                  id: 1,
+                }),
+
+                expect.objectContaining({
+                  id: undefined,
+                  __temp_key__: 3,
+                  name: 'stage-1',
+                }),
+
+                expect.objectContaining({
+                  id: 2,
+                }),
+              ],
             }),
           }),
         }),
