@@ -21,25 +21,23 @@ const Filters = ({ displayedFilters }) => {
 
   return (
     <>
-      <Box>
-        <Button
-          variant="tertiary"
-          ref={buttonRef}
-          startIcon={<Filter />}
-          onClick={handleToggle}
-          size="S"
-        >
-          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-        </Button>
-        {isVisible && (
-          <FilterPopoverURLQuery
-            displayedFilters={displayedFilters}
-            isVisible={isVisible}
-            onToggle={handleToggle}
-            source={buttonRef}
-          />
-        )}
-      </Box>
+      <Button
+        variant="tertiary"
+        ref={buttonRef}
+        startIcon={<Filter />}
+        onClick={handleToggle}
+        size="S"
+      >
+        {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+      </Button>
+      {isVisible && (
+        <FilterPopoverURLQuery
+          displayedFilters={displayedFilters}
+          isVisible={isVisible}
+          onToggle={handleToggle}
+          source={buttonRef}
+        />
+      )}
       <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
   );
