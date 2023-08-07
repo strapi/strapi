@@ -5,7 +5,7 @@ const {
   reduceAsync,
   errors: { ApplicationError, ValidationError },
 } = require('@strapi/utils');
-const { map, pick } = require('lodash/fp');
+const { map, pick, isEqual } = require('lodash/fp');
 
 const { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } = require('../../constants/workflows');
 const { getService } = require('../../utils');
@@ -77,15 +77,16 @@ module.exports = ({ strapi }) => {
       return stages;
     },
 
-    async update(stageId, stageData) {
+    async update(srcStage, destStage) {
       let stagePermissions = [];
+      const stageId = destStage.id;
 
       // TODO: Do not delete permissions if they are not changed
       // Delete old permissions
-      await this.deleteStagePermissions(stageId);
+      await this.deleteStagePermissions([srcStage]);
 
-      if (stageData.permissions) {
-        const permissions = await mapAsync(stageData.permissions, (permission) =>
+      if (destStage.permissions) {
+        const permissions = await mapAsync(destStage.permissions, (permission) =>
           stagePermissionsService.register(permission.role, permission.action, stageId)
         );
         stagePermissions = permissions.flat().map((p) => p.id);
@@ -93,7 +94,7 @@ module.exports = ({ strapi }) => {
 
       const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
         data: {
-          ...stageData,
+          ...destStage,
           permissions: stagePermissions,
         },
       });
@@ -152,7 +153,10 @@ module.exports = ({ strapi }) => {
         const createdStagesIds = map('id', createdStages);
 
         // Update the workflow stages
-        await mapAsync(updated, (stage) => this.update(stage.id, stage));
+        await mapAsync(updated, (destStage) => {
+          const srcStage = srcStages.find((s) => s.id === destStage.id);
+          return this.update(srcStage, destStage);
+        });
 
         // Delete the stages that are not in the new stages list
         await mapAsync(deleted, async (stage) => {
@@ -302,12 +306,19 @@ module.exports = ({ strapi }) => {
  */
 function getDiffBetweenStages(sourceStages, comparisonStages) {
   const result = comparisonStages.reduce(
+    // ...
+
     (acc, stageToCompare) => {
       const srcStage = sourceStages.find((stage) => stage.id === stageToCompare.id);
 
       if (!srcStage) {
         acc.created.push(stageToCompare);
-      } else if (srcStage.name !== stageToCompare.name || srcStage.color !== stageToCompare.color) {
+      } else if (
+        !isEqual(
+          pick(['name', 'color', 'permissions'], srcStage),
+          pick(['name', 'color', 'permissions'], stageToCompare)
+        )
+      ) {
         acc.updated.push(stageToCompare);
       }
       return acc;
