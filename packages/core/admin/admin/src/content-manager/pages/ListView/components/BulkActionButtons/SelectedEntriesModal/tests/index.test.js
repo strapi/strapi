@@ -235,7 +235,7 @@ describe('Bulk publish selected entries modal', () => {
 
     expect(publishDialog).not.toBeInTheDocument();
 
-    waitFor(async () => {
+    await waitFor(async () => {
       expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
       expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
       expect(screen.queryByRole('gridcell', { name: 'Entry 3' })).not.toBeInTheDocument();
