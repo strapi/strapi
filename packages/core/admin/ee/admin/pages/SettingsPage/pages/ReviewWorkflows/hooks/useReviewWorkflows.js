@@ -30,7 +30,8 @@ export function useReviewWorkflows(params = {}) {
   const workflows = React.useMemo(() => {
     if (id && data?.data) {
       return [data.data];
-    } else if (Array.isArray(data?.data)) {
+    }
+    if (Array.isArray(data?.data)) {
       return data.data;
     }
 

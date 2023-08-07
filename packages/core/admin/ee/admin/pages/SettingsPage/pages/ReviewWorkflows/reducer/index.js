@@ -10,6 +10,7 @@ import {
   ACTION_SET_WORKFLOW,
   ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGES,
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
   STAGE_COLOR_DEFAULT,
@@ -129,6 +130,19 @@ export function reducer(state = initialState, action) {
                 ...modified,
               }
             : stage
+        );
+
+        break;
+      }
+
+      case ACTION_UPDATE_STAGES: {
+        const { currentWorkflow } = state.clientState;
+
+        draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.map(
+          (stage) => ({
+            ...stage,
+            ...payload,
+          })
         );
 
         break;
