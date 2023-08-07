@@ -4,7 +4,7 @@ import { useQueries } from 'react-query';
 
 import { useRBACProvider } from '../features/RBAC';
 
-import useFetchClient from './useFetchClient';
+import { useFetchClient } from './useFetchClient';
 
 /**
  * @typedef {Object} Permission

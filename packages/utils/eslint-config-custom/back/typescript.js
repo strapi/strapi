@@ -12,7 +12,7 @@ module.exports = {
     strapi: false,
   },
   rules: {
-    ...require('../back').rules,
+    ...require('./index').rules,
     'node/no-unsupported-features/es-syntax': 'off',
     'node/no-missing-import': 'off',
     // TODO: The following rules from @strapi/eslint-config/back/typescript are disabled because they're causing problems we need to solve or fix
