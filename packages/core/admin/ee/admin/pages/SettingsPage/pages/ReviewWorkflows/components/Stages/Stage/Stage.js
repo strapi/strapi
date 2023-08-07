@@ -19,8 +19,14 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ConfirmDialog, useNotification, NotAllowedInput, useTracking } from '@strapi/helper-plugin';
-import { Drag, Trash } from '@strapi/icons';
+import { Menu, MenuItem } from '@strapi/design-system/v2';
+import {
+  ConfirmDialog,
+  useNotification,
+  NotAllowedInput,
+  useTracking,
+} from '@strapi/helper-plugin';
+import { Drag, More } from '@strapi/icons';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -30,7 +36,13 @@ import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../../admin/src/content-manager/hooks';
 import { composeRefs } from '../../../../../../../../../admin/src/content-manager/utils';
-import { deleteStage, updateStage, updateStagePosition, updateStages } from '../../../actions';
+import {
+  cloneStage,
+  deleteStage,
+  updateStage,
+  updateStagePosition,
+  updateStages,
+} from '../../../actions';
 import { DRAG_DROP_TYPES } from '../../../constants';
 import { selectRoles } from '../../../selectors';
 import { getAvailableStageColors, getStageColorByHex } from '../../../utils/colors';
@@ -231,18 +243,41 @@ export function Stage({
             action={
               (canDelete || canUpdate) && (
                 <Flex>
-                  {canDelete && (
-                    <IconButton
-                      background="transparent"
-                      icon={<Trash />}
-                      label={formatMessage({
-                        id: 'Settings.review-workflows.stage.delete',
-                        defaultMessage: 'Delete stage',
-                      })}
-                      noBorder
-                      onClick={() => dispatch(deleteStage(id))}
-                    />
-                  )}
+                  <Menu.Root>
+                    <Menu.Trigger size="S" endIcon={undefined} paddingLeft={2} paddingRight={2}>
+                      <More aria-hidden focusable={false} />
+                      <VisuallyHidden as="span">
+                        {formatMessage({
+                          id: '[tbdb].components.DynamicZone.more-actions',
+                          defaultMessage: 'More actions',
+                        })}
+                      </VisuallyHidden>
+                    </Menu.Trigger>
+                    {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
+                     * disappears behind the accordion
+                     */}
+                    <Menu.Content zIndex={2}>
+                      <Menu.SubRoot>
+                        {canUpdate && (
+                          <MenuItem onClick={() => dispatch(cloneStage(id))}>
+                            {formatMessage({
+                              id: 'Settings.review-workflows.stage.delete',
+                              defaultMessage: 'Duplicate stage',
+                            })}
+                          </MenuItem>
+                        )}
+
+                        {canDelete && (
+                          <MenuItem onClick={() => dispatch(deleteStage(id))}>
+                            {formatMessage({
+                              id: 'Settings.review-workflows.stage.delete',
+                              defaultMessage: 'Delete',
+                            })}
+                          </MenuItem>
+                        )}
+                      </Menu.SubRoot>
+                    </Menu.Content>
+                  </Menu.Root>
 
                   {canUpdate && (
                     <IconButton
@@ -384,7 +419,9 @@ export function Stage({
                       })}
                       required
                       // The Select component expects strings for values
-                      value={(permissionsField.value ?? []).map((permission) => `${permission.role}`)}
+                      value={(permissionsField.value ?? []).map(
+                        (permission) => `${permission.role}`
+                      )}
                       withTags
                     >
                       {[
@@ -418,27 +455,27 @@ export function Stage({
                           );
                         }
 
-                      return (
-                        <MultiSelectOption key={role.value} value={role.value}>
-                          {role.label}
-                        </MultiSelectOption>
-                      );
-                    })}
-                  </MultiSelect>
+                        return (
+                          <MultiSelectOption key={role.value} value={role.value}>
+                            {role.label}
+                          </MultiSelectOption>
+                        );
+                      })}
+                    </MultiSelect>
 
-                  <Button
-                    disabled={!canUpdate}
-                    size="L"
-                    type="button"
-                    variant="secondary"
-                    onClick={() => handleApplyPermissionsToAllStages(permissionsField.value)}
-                  >
-                    {formatMessage({
-                      id: 'Settings.review-workflows.stage.permissions.apply.label',
-                      defaultMessage: 'Apply to all stages',
-                    })}
-                  </Button>
-                </Flex>
+                    <Button
+                      disabled={!canUpdate}
+                      size="L"
+                      type="button"
+                      variant="secondary"
+                      onClick={() => handleApplyPermissionsToAllStages(permissionsField.value)}
+                    >
+                      {formatMessage({
+                        id: 'Settings.review-workflows.stage.permissions.apply.label',
+                        defaultMessage: 'Apply to all stages',
+                      })}
+                    </Button>
+                  </Flex>
                 )}
               </GridItem>
             </Grid>

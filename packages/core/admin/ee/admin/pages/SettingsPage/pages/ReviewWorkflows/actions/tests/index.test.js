@@ -1,5 +1,6 @@
 import {
   addStage,
+  cloneStage,
   deleteStage,
   setWorkflow,
   setWorkflows,
@@ -16,6 +17,7 @@ import {
   ACTION_SET_WORKFLOW,
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_UPDATE_STAGE,
   ACTION_UPDATE_STAGES,
   ACTION_SET_CONTENT_TYPES,
@@ -62,6 +64,15 @@ describe('Admin | Settings | Review Workflow | actions', () => {
     expect(addStage()).toStrictEqual({
       type: ACTION_ADD_STAGE,
       payload: {},
+    });
+  });
+
+  test('cloneStage()', () => {
+    expect(cloneStage(1)).toStrictEqual({
+      type: ACTION_CLONE_STAGE,
+      payload: {
+        id: 1,
+      },
     });
   });
 

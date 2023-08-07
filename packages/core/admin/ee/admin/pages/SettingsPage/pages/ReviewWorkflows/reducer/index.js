@@ -2,6 +2,7 @@ import { produce } from 'immer';
 
 import {
   ACTION_ADD_STAGE,
+  ACTION_CLONE_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
   ACTION_SET_CONTENT_TYPES,
@@ -114,6 +115,22 @@ export function reducer(state = initialState, action) {
           ...payload,
           color: payload?.color ?? STAGE_COLOR_DEFAULT,
           __temp_key__: newTempKey,
+        });
+
+        break;
+      }
+
+      case ACTION_CLONE_STAGE: {
+        const { currentWorkflow } = state.clientState;
+        const { id } = payload;
+
+        const sourceStageIndex = currentWorkflow.data.stages.findIndex((stage) => stage.id === id);
+        const sourceStage = currentWorkflow.data.stages[sourceStageIndex];
+
+        draft.clientState.currentWorkflow.data.stages.splice(sourceStageIndex + 1, 0, {
+          ...sourceStage,
+          id: undefined,
+          __temp_key__: getMaxTempKey(draft.clientState.currentWorkflow.data.stages),
         });
 
         break;
