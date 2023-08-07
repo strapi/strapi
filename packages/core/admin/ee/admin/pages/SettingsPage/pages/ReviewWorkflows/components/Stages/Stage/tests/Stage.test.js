@@ -14,6 +14,11 @@ import { REDUX_NAMESPACE, STAGE_COLOR_DEFAULT } from '../../../../constants';
 import { reducer } from '../../../../reducer';
 import { Stage } from '../Stage';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(() => jest.fn()),
+}));
+
 const STAGES_FIXTURE = {
   id: 1,
   index: 0,
@@ -24,7 +29,13 @@ const WORKFLOWS_FIXTURE = [
     id: 1,
     name: 'Default',
     contentTypes: ['uid1'],
-    stages: [],
+    stages: [
+      {
+        id: 1,
+        name: 'Stage 1',
+        permissions: [],
+      },
+    ],
   },
 
   {
@@ -121,7 +132,7 @@ const setup = ({ roles, ...props } = {}) =>
         [REDUX_NAMESPACE]: {
           serverState: {
             contentTypes: CONTENT_TYPES_FIXTURE,
-            roles: roles || ROLES_FIXTURE,
+            roles: roles ?? ROLES_FIXTURE,
             workflow: WORKFLOWS_FIXTURE[0],
             workflows: WORKFLOWS_FIXTURE,
           },
@@ -182,6 +193,8 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
       ).toHaveTextContent('Editor')
     );
 
+    expect(getByRole('button', { name: /apply to all stages/i })).toBeInTheDocument();
+
     expect(
       queryByRole('button', {
         name: /delete stage/i,
@@ -235,9 +248,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('disables all input fields, if canUpdate = false', async () => {
-    const { container, getByRole } = setup({ canUpdate: false });
-
-    await user.click(container.querySelector('button[aria-expanded]'));
+    const { getByRole } = setup({ canUpdate: false, isOpen: true });
 
     // Name
     expect(getByRole('textbox')).toHaveAttribute('disabled');
@@ -249,12 +260,12 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
     expect(getByRole('combobox', { name: /roles that can change this stage/i })).toHaveAttribute(
       'data-disabled'
     );
+
+    expect(getByRole('button', { name: /apply to all stages/i })).toHaveAttribute('disabled');
   });
 
   it('should render a list of all available roles (except super admins)', async () => {
-    const { container, getByRole, queryByRole } = setup({ canUpdate: true });
-
-    await user.click(container.querySelector('button[aria-expanded]'));
+    const { getByRole, queryByRole } = setup({ canUpdate: true, isOpen: true });
 
     await waitFor(() =>
       expect(
@@ -273,12 +284,11 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
   });
 
   it('should render a no permissions fallback, if no roles are available', async () => {
-    const { container, getByText } = setup({
+    const { getByText } = setup({
       canUpdate: true,
+      isOpen: true,
       roles: [...ROLES_FIXTURE].filter((role) => role.code === 'strapi-super-admin'),
     });
-
-    await user.click(container.querySelector('button[aria-expanded]'));
 
     await waitFor(() =>
       expect(getByText(/you don’t have the permission to see roles/i)).toBeInTheDocument()

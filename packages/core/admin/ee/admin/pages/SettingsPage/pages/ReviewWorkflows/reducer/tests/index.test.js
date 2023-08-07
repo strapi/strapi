@@ -8,6 +8,7 @@ import {
   ACTION_SET_ROLES,
   ACTION_SET_WORKFLOW,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGES,
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
 } from '../../constants';
@@ -281,6 +282,40 @@ describe('Admin | Settings | Review Workflows | reducer', () => {
                   color: '#4945FF',
                   name: 'stage-1-modified',
                 },
+              ]),
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  test('ACTION_UPDATE_STAGES', () => {
+    const action = {
+      type: ACTION_UPDATE_STAGES,
+      payload: { permissions: [1, 2, 3] },
+    };
+
+    state = {
+      status: expect.any(String),
+      serverState: expect.any(Object),
+      clientState: {
+        currentWorkflow: { data: WORKFLOW_FIXTURE },
+      },
+    };
+
+    expect(reducer(state, action)).toStrictEqual(
+      expect.objectContaining({
+        clientState: expect.objectContaining({
+          currentWorkflow: expect.objectContaining({
+            data: expect.objectContaining({
+              stages: expect.arrayContaining([
+                expect.objectContaining({
+                  permissions: [1, 2, 3],
+                }),
+                expect.objectContaining({
+                  permissions: [1, 2, 3],
+                }),
               ]),
             }),
           }),

@@ -4,6 +4,7 @@ import {
   setWorkflow,
   setWorkflows,
   updateStage,
+  updateStages,
   updateStagePosition,
   updateWorkflow,
   resetWorkflow,
@@ -16,6 +17,7 @@ import {
   ACTION_DELETE_STAGE,
   ACTION_ADD_STAGE,
   ACTION_UPDATE_STAGE,
+  ACTION_UPDATE_STAGES,
   ACTION_SET_CONTENT_TYPES,
   ACTION_SET_IS_LOADING,
   ACTION_SET_ROLES,
@@ -68,6 +70,15 @@ describe('Admin | Settings | Review Workflow | actions', () => {
       type: ACTION_UPDATE_STAGE,
       payload: {
         stageId: 1,
+        something: '',
+      },
+    });
+  });
+
+  test('updateStages()', () => {
+    expect(updateStages({ something: '' })).toStrictEqual({
+      type: ACTION_UPDATE_STAGES,
+      payload: {
         something: '',
       },
     });

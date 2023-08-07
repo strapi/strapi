@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionToggle,
   Box,
+  Button,
   Flex,
   Grid,
   GridItem,
@@ -15,9 +16,10 @@ import {
   SingleSelect,
   SingleSelectOption,
   TextInput,
+  Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { NotAllowedInput, useTracking } from '@strapi/helper-plugin';
+import { ConfirmDialog, useNotification, NotAllowedInput, useTracking } from '@strapi/helper-plugin';
 import { Drag, Trash } from '@strapi/icons';
 import { useField } from 'formik';
 import PropTypes from 'prop-types';
@@ -28,7 +30,7 @@ import styled from 'styled-components';
 
 import { useDragAndDrop } from '../../../../../../../../../admin/src/content-manager/hooks';
 import { composeRefs } from '../../../../../../../../../admin/src/content-manager/utils';
-import { deleteStage, updateStage, updateStagePosition } from '../../../actions';
+import { deleteStage, updateStage, updateStagePosition, updateStages } from '../../../actions';
 import { DRAG_DROP_TYPES } from '../../../constants';
 import { selectRoles } from '../../../selectors';
 import { getAvailableStageColors, getStageColorByHex } from '../../../utils/colors';
@@ -146,11 +148,17 @@ export function Stage({
     dispatch(updateStagePosition(oldIndex, newIndex));
   };
 
+  const handleApplyPermissionsToAllStages = () => {
+    setIsApplyAllConfirmationOpen(true);
+  };
+
   const [liveText, setLiveText] = React.useState(null);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const dispatch = useDispatch();
+  const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = React.useState(isOpenDefault);
+  const [isApplyAllConfirmationOpen, setIsApplyAllConfirmationOpen] = React.useState(false);
   const [nameField, nameMeta, nameHelper] = useField(`stages.${index}.name`);
   const [colorField, colorMeta, colorHelper] = useField(`stages.${index}.color`);
   const [permissionsField, permissionsMeta, permissionsHelper] = useField(
@@ -348,66 +356,67 @@ export function Stage({
                     name={permissionsField.name}
                   />
                 ) : (
-                  <MultiSelect
-                    {...permissionsField}
-                    disabled={!canUpdate}
-                    error={permissionsMeta.error ?? false}
-                    id={permissionsField.name}
-                    label={formatMessage({
-                      id: 'Settings.review-workflows.stage.permissions.label',
-                      defaultMessage: 'Roles that can change this stage',
-                    })}
-                    onChange={(values) => {
-                      // Because the select components expects strings for values, but
-                      // the yup schema validates we are sending full permission objects to the API,
-                      // we must coerce the string value back to an object
-                      const permissions = values.map((value) => ({
-                        role: parseInt(value, 10),
-                        action: 'admin::review-workflows.stage.transition',
-                      }));
+                  <Flex alignItems="flex-end" gap={3}>
+                    <MultiSelect
+                      {...permissionsField}
+                      disabled={!canUpdate}
+                      error={permissionsMeta.error ?? false}
+                      id={permissionsField.name}
+                      label={formatMessage({
+                        id: 'Settings.review-workflows.stage.permissions.label',
+                        defaultMessage: 'Roles that can change this stage',
+                      })}
+                      onChange={(values) => {
+                        // Because the select components expects strings for values, but
+                        // the yup schema validates we are sending full permission objects to the API,
+                        // we must coerce the string value back to an object
+                        const permissions = values.map((value) => ({
+                          role: parseInt(value, 10),
+                          action: 'admin::review-workflows.stage.transition',
+                        }));
 
-                      permissionsHelper.setValue(permissions);
-                      dispatch(updateStage(id, { permissions }));
-                    }}
-                    placeholder={formatMessage({
-                      id: 'Settings.review-workflows.stage.permissions.placeholder',
-                      defaultMessage: 'Select a role',
-                    })}
-                    required
-                    // The Select component expects strings for values
-                    value={(permissionsField.value ?? []).map((permission) => `${permission.role}`)}
-                    withTags
-                  >
-                    {[
-                      {
-                        label: formatMessage({
-                          id: 'Settings.review-workflows.stage.permissions.allRoles.label',
-                          defaultMessage: 'All roles',
-                        }),
+                        permissionsHelper.setValue(permissions);
+                        dispatch(updateStage(id, { permissions }));
+                      }}
+                      placeholder={formatMessage({
+                        id: 'Settings.review-workflows.stage.permissions.placeholder',
+                        defaultMessage: 'Select a role',
+                      })}
+                      required
+                      // The Select component expects strings for values
+                      value={(permissionsField.value ?? []).map((permission) => `${permission.role}`)}
+                      withTags
+                    >
+                      {[
+                        {
+                          label: formatMessage({
+                            id: 'Settings.review-workflows.stage.permissions.allRoles.label',
+                            defaultMessage: 'All roles',
+                          }),
 
-                        children: filteredRoles.map((role) => ({
-                          value: `${role.id}`,
-                          label: role.name,
-                        })),
-                      },
-                    ].map((role) => {
-                      if ('children' in role) {
-                        return (
-                          <MultiSelectGroup
-                            key={role.label}
-                            label={role.label}
-                            values={role.children.map((child) => child.value)}
-                          >
-                            {role.children.map((role) => {
-                              return (
-                                <NestedOption key={role.value} value={role.value}>
-                                  {role.label}
-                                </NestedOption>
-                              );
-                            })}
-                          </MultiSelectGroup>
-                        );
-                      }
+                          children: filteredRoles.map((role) => ({
+                            value: `${role.id}`,
+                            label: role.name,
+                          })),
+                        },
+                      ].map((role) => {
+                        if ('children' in role) {
+                          return (
+                            <MultiSelectGroup
+                              key={role.label}
+                              label={role.label}
+                              values={role.children.map((child) => child.value)}
+                            >
+                              {role.children.map((role) => {
+                                return (
+                                  <NestedOption key={role.value} value={role.value}>
+                                    {role.label}
+                                  </NestedOption>
+                                );
+                              })}
+                            </MultiSelectGroup>
+                          );
+                        }
 
                       return (
                         <MultiSelectOption key={role.value} value={role.value}>
@@ -416,12 +425,52 @@ export function Stage({
                       );
                     })}
                   </MultiSelect>
+
+                  <Button
+                    disabled={!canUpdate}
+                    size="L"
+                    type="button"
+                    variant="secondary"
+                    onClick={() => handleApplyPermissionsToAllStages(permissionsField.value)}
+                  >
+                    {formatMessage({
+                      id: 'Settings.review-workflows.stage.permissions.apply.label',
+                      defaultMessage: 'Apply to all stages',
+                    })}
+                  </Button>
+                </Flex>
                 )}
               </GridItem>
             </Grid>
           </AccordionContent>
         </Accordion>
       )}
+
+      <ConfirmDialog.Root
+        isOpen={isApplyAllConfirmationOpen}
+        onToggleDialog={() => setIsApplyAllConfirmationOpen(false)}
+        onConfirm={() => {
+          dispatch(updateStages({ permissions: permissionsField.value }));
+          setIsApplyAllConfirmationOpen(false);
+          toggleNotification({
+            type: 'success',
+            message: formatMessage({
+              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy.success',
+              defaultMessage: 'Applied roles to all other stages of the workflow',
+            }),
+          });
+        }}
+      >
+        <ConfirmDialog.Body>
+          <Typography textAlign="center" variant="omega">
+            {formatMessage({
+              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
+              defaultMessage:
+                'Roles that can change that stage will be applied to all the other stages.',
+            })}
+          </Typography>
+        </ConfirmDialog.Body>
+      </ConfirmDialog.Root>
     </Box>
   );
 }

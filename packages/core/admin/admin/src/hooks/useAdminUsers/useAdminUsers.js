@@ -29,7 +29,8 @@ export function useAdminUsers(params = {}, queryOptions = {}) {
   const users = React.useMemo(() => {
     if (id && data) {
       return [data];
-    } else if (Array.isArray(data?.results)) {
+    }
+    if (Array.isArray(data?.results)) {
       return data.results;
     }
 
