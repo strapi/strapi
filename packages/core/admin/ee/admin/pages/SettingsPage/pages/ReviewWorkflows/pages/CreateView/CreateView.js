@@ -38,7 +38,12 @@ import {
 } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
 import { reducer } from '../../reducer';
-import { selectIsLoading, selectIsWorkflowDirty, selectCurrentWorkflow } from '../../selectors';
+import {
+  selectIsLoading,
+  selectIsWorkflowDirty,
+  selectCurrentWorkflow,
+  selectRoles,
+} from '../../selectors';
 import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsCreateView() {
@@ -50,10 +55,13 @@ export function ReviewWorkflowsCreateView() {
   const toggleNotification = useNotification();
   const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
   const { isLoading: isLoadingWorkflow, meta, workflows } = useReviewWorkflows();
-  const { isLoading: isLoadingRoles, roles } = useAdminRoles();
+  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles(undefined, {
+    retry: false,
+  });
   const isLoading = useSelector(selectIsLoading);
   const currentWorkflowIsDirty = useSelector(selectIsWorkflowDirty);
   const currentWorkflow = useSelector(selectCurrentWorkflow);
+  const roles = useSelector(selectRoles);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const [initialErrors, setInitialErrors] = React.useState(null);
@@ -184,7 +192,7 @@ export function ReviewWorkflowsCreateView() {
     }
 
     if (!isLoadingRoles) {
-      dispatch(setRoles(roles));
+      dispatch(setRoles(serverRoles));
     }
 
     dispatch(setIsLoading(isLoadingContentTypes || isLoadingRoles));
@@ -201,7 +209,7 @@ export function ReviewWorkflowsCreateView() {
     isLoadingContentTypes,
     isLoadingRoles,
     isLoadingWorkflow,
-    roles,
+    serverRoles,
     singleTypes,
     workflows,
   ]);
@@ -241,6 +249,21 @@ export function ReviewWorkflowsCreateView() {
     meta?.workflowsTotal,
     currentWorkflow.stages.length,
   ]);
+
+  React.useEffect(() => {
+    const filteredRoles = roles.filter((role) => role.code !== 'strapi-super-admin');
+
+    if (!isLoading && filteredRoles.length === 0) {
+      toggleNotification({
+        blockTransition: true,
+        type: 'warning',
+        message: formatMessage({
+          id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
+          defaultMessage: 'You don’t have the permission to see roles',
+        }),
+      });
+    }
+  }, [formatMessage, isLoading, roles, toggleNotification]);
 
   return (
     <>

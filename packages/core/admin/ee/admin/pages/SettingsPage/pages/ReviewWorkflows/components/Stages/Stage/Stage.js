@@ -184,16 +184,16 @@ export function Stage({
     color: hex,
   }));
 
-  React.useEffect(() => {
-    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef, index]);
-
   const { themeColorName } = getStageColorByHex(colorField.value) ?? {};
 
   const filteredRoles = roles
     // Super admins always have permissions to do everything and therefore
-    // there is no point in removing permissions for the role
+    // there is no point for this role to show up in the role combobox
     .filter((role) => role.code !== 'strapi-super-admin');
+
+  React.useEffect(() => {
+    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [dragPreviewRef, index]);
 
   return (
     <Box ref={composedRef}>
@@ -363,7 +363,7 @@ export function Stage({
                       // to coerce the string value back to a number
                       const nextValues = values.map((value) => ({
                         role: parseInt(value, 10),
-                        action: 'admin::review-workflow.stage.transition',
+                        action: 'admin::review-workflows.stage.transition',
                       }));
 
                       permissionsHelper.setValue(nextValues);

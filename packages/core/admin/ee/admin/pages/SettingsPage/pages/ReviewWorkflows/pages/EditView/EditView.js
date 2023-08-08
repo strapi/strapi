@@ -45,6 +45,7 @@ import {
   selectCurrentWorkflow,
   selectHasDeletedServerStages,
   selectIsLoading,
+  selectRoles,
   selectServerState,
 } from '../../selectors';
 import { validateWorkflow } from '../../utils/validateWorkflow';
@@ -63,13 +64,16 @@ export function ReviewWorkflowsEditView() {
   const currentWorkflowIsDirty = useSelector(selectIsWorkflowDirty);
   const currentWorkflow = useSelector(selectCurrentWorkflow);
   const hasDeletedServerStages = useSelector(selectHasDeletedServerStages);
+  const roles = useSelector(selectRoles);
   const isLoading = useSelector(selectIsLoading);
   const {
     allowedActions: { canDelete, canUpdate },
   } = useRBAC(permissions.settings['review-workflows']);
   const [savePrompts, setSavePrompts] = React.useState({});
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
-  const { isLoading: isLoadingRoles, roles } = useAdminRoles();
+  const { isLoading: isLoadingRoles, roles: serverRoles } = useAdminRoles(undefined, {
+    retry: false,
+  });
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const [initialErrors, setInitialErrors] = React.useState(null);
 
@@ -231,7 +235,7 @@ export function ReviewWorkflowsEditView() {
     }
 
     if (!isLoadingRoles) {
-      dispatch(setRoles(roles));
+      dispatch(setRoles(serverRoles));
     }
 
     dispatch(setIsLoading(isLoadingWorkflow || isLoadingContentTypes || isLoadingRoles));
@@ -247,7 +251,7 @@ export function ReviewWorkflowsEditView() {
     isLoadingContentTypes,
     isLoadingWorkflow,
     isLoadingRoles,
-    roles,
+    serverRoles,
     singleTypes,
     workflow,
     workflows,
@@ -289,6 +293,21 @@ export function ReviewWorkflowsEditView() {
     meta?.workflowCount,
     meta.workflowsTotal,
   ]);
+
+  React.useEffect(() => {
+    const filteredRoles = roles.filter((role) => role.code !== 'strapi-super-admin');
+
+    if (!isLoading && filteredRoles.length === 0) {
+      toggleNotification({
+        blockTransition: true,
+        type: 'warning',
+        message: formatMessage({
+          id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
+          defaultMessage: 'You don’t have the permission to see roles',
+        }),
+      });
+    }
+  }, [formatMessage, isLoading, roles, toggleNotification]);
 
   // TODO: redirect back to list-view if workflow is not found?
 

@@ -94,7 +94,7 @@ const ComponentFixture = ({
     {
       color: STAGE_COLOR_DEFAULT,
       name: 'something',
-      permissions: [{ role: 1, action: 'admin::review-workflow.stage.transition' }],
+      permissions: [{ role: 1, action: 'admin::review-workflows.stage.transition' }],
     },
   ],
   ...props
