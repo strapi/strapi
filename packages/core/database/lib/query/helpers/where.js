@@ -204,6 +204,14 @@ const applyOperator = (qb, column, operator, value) => {
       qb.where(column, '<>', value);
       break;
     }
+    case '$nei': {
+      if (value === null) {
+        qb.whereNotNull(column);
+        break;
+      }
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `${value}`]);
+      break;
+    }
     case '$gt': {
       qb.where(column, '>', value);
       break;

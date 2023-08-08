@@ -2,19 +2,27 @@ import {
   ACTION_ADD_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
+  ACTION_SET_CONTENT_TYPES,
+  ACTION_SET_IS_LOADING,
+  ACTION_SET_ROLES,
   ACTION_SET_WORKFLOW,
+  ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
 } from '../constants';
 
-export function setWorkflow({ status, data }) {
+export function setWorkflow({ workflow }) {
   return {
     type: ACTION_SET_WORKFLOW,
-    payload: {
-      status,
-      workflow: data,
-    },
+    payload: workflow,
+  };
+}
+
+export function setWorkflows({ workflows }) {
+  return {
+    type: ACTION_SET_WORKFLOWS,
+    payload: workflows,
   };
 }
 
@@ -64,5 +72,26 @@ export function updateWorkflow(payload) {
 export function resetWorkflow() {
   return {
     type: ACTION_RESET_WORKFLOW,
+  };
+}
+
+export function setContentTypes(payload) {
+  return {
+    type: ACTION_SET_CONTENT_TYPES,
+    payload,
+  };
+}
+
+export function setRoles(payload) {
+  return {
+    type: ACTION_SET_ROLES,
+    payload,
+  };
+}
+
+export function setIsLoading(isLoading) {
+  return {
+    type: ACTION_SET_IS_LOADING,
+    payload: isLoading,
   };
 }

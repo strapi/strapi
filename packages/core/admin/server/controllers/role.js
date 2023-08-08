@@ -49,7 +49,15 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async findAll(ctx) {
-    const roles = await getService('role').findAllWithUsersCount();
+    const { query } = ctx.request;
+
+    const permissionsManager = getService('permission').createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: 'admin::role',
+    });
+    const sanitizedQuery = await permissionsManager.sanitizeQuery(query);
+
+    const roles = await getService('role').findAllWithUsersCount(sanitizedQuery);
 
     ctx.body = {
       data: roles,

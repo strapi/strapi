@@ -1,11 +1,14 @@
-import { current, produce } from 'immer';
-import isEqual from 'lodash/isEqual';
+import { produce } from 'immer';
 
 import {
   ACTION_ADD_STAGE,
   ACTION_DELETE_STAGE,
   ACTION_RESET_WORKFLOW,
+  ACTION_SET_CONTENT_TYPES,
+  ACTION_SET_IS_LOADING,
+  ACTION_SET_ROLES,
   ACTION_SET_WORKFLOW,
+  ACTION_SET_WORKFLOWS,
   ACTION_UPDATE_STAGE,
   ACTION_UPDATE_STAGE_POSITION,
   ACTION_UPDATE_WORKFLOW,
@@ -13,9 +16,14 @@ import {
 } from '../constants';
 
 export const initialState = {
-  status: 'loading',
   serverState: {
+    contentTypes: {
+      collectionTypes: [],
+      singleTypes: [],
+    },
+    roles: [],
     workflow: null,
+    workflows: [],
   },
   clientState: {
     currentWorkflow: {
@@ -23,10 +31,10 @@ export const initialState = {
         name: '',
         contentTypes: [],
         stages: [],
+        permissions: undefined,
       },
-      isDirty: false,
-      hasDeletedServerStages: false,
     },
+    isLoading: true,
   },
 };
 
@@ -35,10 +43,23 @@ export function reducer(state = initialState, action) {
     const { payload } = action;
 
     switch (action.type) {
-      case ACTION_SET_WORKFLOW: {
-        const { status, workflow } = payload;
+      case ACTION_SET_CONTENT_TYPES: {
+        draft.serverState.contentTypes = payload;
+        break;
+      }
 
-        draft.status = status;
+      case ACTION_SET_IS_LOADING: {
+        draft.clientState.isLoading = payload;
+        break;
+      }
+
+      case ACTION_SET_ROLES: {
+        draft.serverState.roles = payload;
+        break;
+      }
+
+      case ACTION_SET_WORKFLOW: {
+        const workflow = payload;
 
         if (workflow) {
           draft.serverState.workflow = workflow;
@@ -47,13 +68,16 @@ export function reducer(state = initialState, action) {
             stages: workflow.stages.map((stage) => ({
               ...stage,
               // A safety net in case a stage does not have a color assigned;
-              // this normallly should not happen
+              // this should not happen
               color: stage?.color ?? STAGE_COLOR_DEFAULT,
             })),
           };
         }
+        break;
+      }
 
-        draft.clientState.currentWorkflow.hasDeletedServerStages = false;
+      case ACTION_SET_WORKFLOWS: {
+        draft.serverState.workflows = payload;
         break;
       }
 
@@ -70,12 +94,6 @@ export function reducer(state = initialState, action) {
         draft.clientState.currentWorkflow.data.stages = currentWorkflow.data.stages.filter(
           (stage) => (stage?.id ?? stage.__temp_key__) !== stageId
         );
-
-        if (!currentWorkflow.hasDeletedServerStages) {
-          draft.clientState.currentWorkflow.hasDeletedServerStages = !!(
-            state.serverState.workflow?.stages ?? []
-          ).find((stage) => stage.id === stageId);
-        }
 
         break;
       }
@@ -148,16 +166,6 @@ export function reducer(state = initialState, action) {
 
       default:
         break;
-    }
-
-    if (state.clientState.currentWorkflow.data && draft.serverState.workflow) {
-      draft.clientState.currentWorkflow.isDirty = !isEqual(
-        current(draft.clientState.currentWorkflow).data,
-        draft.serverState.workflow
-      );
-    } else {
-      // if there is no workflow on the server, the workflow is awalys considered dirty
-      draft.clientState.currentWorkflow.isDirty = true;
     }
   });
 }

@@ -15,10 +15,18 @@ import { useMutation } from 'react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { useAdminRoles } from '../../../../../../../../admin/src/hooks/useAdminRoles';
 import { useContentTypes } from '../../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../../admin/src/hooks/useInjectReducer';
 import { useLicenseLimits } from '../../../../../../hooks';
-import { addStage, resetWorkflow } from '../../actions';
+import {
+  addStage,
+  resetWorkflow,
+  setContentTypes,
+  setIsLoading,
+  setRoles,
+  setWorkflows,
+} from '../../actions';
 import * as Layout from '../../components/Layout';
 import * as LimitsModal from '../../components/LimitsModal';
 import { Stages } from '../../components/Stages';
@@ -29,7 +37,8 @@ import {
   REDUX_NAMESPACE,
 } from '../../constants';
 import { useReviewWorkflows } from '../../hooks/useReviewWorkflows';
-import { reducer, initialState } from '../../reducer';
+import { reducer } from '../../reducer';
+import { selectIsLoading, selectIsWorkflowDirty, selectCurrentWorkflow } from '../../selectors';
 import { validateWorkflow } from '../../utils/validateWorkflow';
 
 export function ReviewWorkflowsCreateView() {
@@ -39,13 +48,12 @@ export function ReviewWorkflowsCreateView() {
   const { formatAPIError } = useAPIErrorHandler();
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-  const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
-  const { isLoading: isWorkflowLoading, meta, workflows } = useReviewWorkflows();
-  const {
-    clientState: {
-      currentWorkflow: { data: currentWorkflow, isDirty: currentWorkflowIsDirty },
-    },
-  } = useSelector((state) => state?.[REDUX_NAMESPACE] ?? initialState);
+  const { collectionTypes, singleTypes, isLoading: isLoadingContentTypes } = useContentTypes();
+  const { isLoading: isLoadingWorkflow, meta, workflows } = useReviewWorkflows();
+  const { isLoading: isLoadingRoles, roles } = useAdminRoles();
+  const isLoading = useSelector(selectIsLoading);
+  const currentWorkflowIsDirty = useSelector(selectIsWorkflowDirty);
+  const currentWorkflow = useSelector(selectCurrentWorkflow);
   const [showLimitModal, setShowLimitModal] = React.useState(false);
   const { isLoading: isLicenseLoading, getFeature } = useLicenseLimits();
   const [initialErrors, setInitialErrors] = React.useState(null);
@@ -54,7 +62,7 @@ export function ReviewWorkflowsCreateView() {
   const limits = getFeature('review-workflows');
   const contentTypesFromOtherWorkflows = workflows.flatMap((workflow) => workflow.contentTypes);
 
-  const { mutateAsync, isLoading } = useMutation(
+  const { mutateAsync, isLoading: isLoadingMutation } = useMutation(
     async ({ workflow }) => {
       const {
         data: { data },
@@ -167,13 +175,36 @@ export function ReviewWorkflowsCreateView() {
   React.useEffect(() => {
     dispatch(resetWorkflow());
 
+    if (!isLoadingWorkflow) {
+      dispatch(setWorkflows({ workflows }));
+    }
+
+    if (!isLoadingContentTypes) {
+      dispatch(setContentTypes({ collectionTypes, singleTypes }));
+    }
+
+    if (!isLoadingRoles) {
+      dispatch(setRoles(roles));
+    }
+
+    dispatch(setIsLoading(isLoadingContentTypes || isLoadingRoles));
+
     // Create an empty default stage
     dispatch(
       addStage({
         name: '',
       })
     );
-  }, [dispatch]);
+  }, [
+    collectionTypes,
+    dispatch,
+    isLoadingContentTypes,
+    isLoadingRoles,
+    isLoadingWorkflow,
+    roles,
+    singleTypes,
+    workflows,
+  ]);
 
   /**
    * If the current license has a limit:
@@ -189,7 +220,7 @@ export function ReviewWorkflowsCreateView() {
    */
 
   React.useEffect(() => {
-    if (!isWorkflowLoading && !isLicenseLoading) {
+    if (!isLoadingWorkflow && !isLicenseLoading) {
       if (
         limits?.[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME] &&
         meta?.workflowsTotal >= parseInt(limits[CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME], 10)
@@ -205,7 +236,7 @@ export function ReviewWorkflowsCreateView() {
     }
   }, [
     isLicenseLoading,
-    isWorkflowLoading,
+    isLoadingWorkflow,
     limits,
     meta?.workflowsTotal,
     currentWorkflow.stages.length,
@@ -225,7 +256,7 @@ export function ReviewWorkflowsCreateView() {
                 type="submit"
                 size="M"
                 disabled={!currentWorkflowIsDirty}
-                isLoading={isLoading}
+                isLoading={isLoadingMutation}
               >
                 {formatMessage({
                   id: 'global.save',
@@ -247,7 +278,7 @@ export function ReviewWorkflowsCreateView() {
           />
           <Layout.Root>
             <Flex alignItems="stretch" direction="column" gap={7}>
-              {isLoadingModels ? (
+              {isLoading ? (
                 <Loader>
                   {formatMessage({
                     id: 'Settings.review-workflows.page.isLoading',
@@ -256,10 +287,7 @@ export function ReviewWorkflowsCreateView() {
                 </Loader>
               ) : (
                 <Flex alignItems="stretch" direction="column" gap={7}>
-                  <WorkflowAttributes
-                    contentTypes={{ collectionTypes, singleTypes }}
-                    workflows={workflows}
-                  />
+                  <WorkflowAttributes />
                   <Stages stages={formik.values?.stages} />
                 </Flex>
               )}
