@@ -13,8 +13,8 @@ import Permissions from './Permissions';
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const { replace } = useHistory();
-  const [{ rawQuery }] = useQueryParams();
-  const permissions = useSyncRbac(props.slug);
+  const [{ query, rawQuery }] = useQueryParams();
+  const permissions = useSyncRbac(query, props.slug, 'listView');
   const redirectionLink = useFindRedirectionLink(props.slug);
 
   useEffect(() => {

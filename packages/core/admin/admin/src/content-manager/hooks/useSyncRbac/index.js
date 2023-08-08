@@ -1,12 +1,28 @@
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
-import { selectCollectionTypePermissions } from './selectors';
+import { useDispatch, useSelector } from 'react-redux';
 
-const useSyncRbac = (collectionTypeUID) => {
-  const relatedPermissions = useSelector((state) =>
-    selectCollectionTypePermissions(state, collectionTypeUID)
-  );
-  const permissions = [].concat(...Object.values(relatedPermissions));
+import { resetPermissions, setPermissions } from './actions';
+import { selectCollectionTypePermissions, selectPermissions } from './selectors';
+
+const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
+  const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
+  const permissions = useSelector(selectPermissions);
+  const dispatch = useDispatch();
+
+  const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
+
+  useEffect(() => {
+    if (relatedPermissions) {
+      dispatch(setPermissions(relatedPermissions, query ? query.plugins : null, containerName));
+
+      return () => {
+        dispatch(resetPermissions());
+      };
+    }
+
+    return () => {};
+  }, [relatedPermissions, dispatch, query, containerName]);
 
   return permissions;
 };

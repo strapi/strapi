@@ -1,6 +1,6 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
-import { selectCollectionTypePermissions } from '../selectors';
+import { selectCollectionTypePermissions, selectPermissions } from '../selectors';
 
 describe('Admin | content manager | hooks | useSyncRbac | selectors', () => {
   let store;
@@ -9,13 +9,31 @@ describe('Admin | content manager | hooks | useSyncRbac | selectors', () => {
     store = { ...fixtures.store.state };
   });
 
+  describe('selectPermissions', () => {
+    it('resolves the permissions key of the "content-manager_rbacManager" store key', () => {
+      store['content-manager_rbacManager'] = {
+        permissions: {
+          some: 'permission',
+        },
+      };
+
+      const actual = selectPermissions(store);
+      const expected = {
+        some: 'permission',
+      };
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('selectCollectionTypePermissions', () => {
     it('resolves the permissions key of the "rbacProvider" store key', () => {
-      const uid = 'uid';
-      store.rbacProvider.collectionTypesRelatedPermissions[uid] = { permission: true };
+      store.rbacProvider.collectionTypesRelatedPermissions.some = 'permission again';
 
-      const actual = selectCollectionTypePermissions(store, uid);
-      const expected = { permission: true };
+      const actual = selectCollectionTypePermissions(store);
+      const expected = {
+        some: 'permission again',
+      };
 
       expect(actual).toEqual(expected);
     });
