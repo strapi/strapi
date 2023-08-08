@@ -1,4 +1,2 @@
-export const selectPermissions = (state) => state['content-manager_rbacManager'].permissions;
-
-export const selectCollectionTypePermissions = (state) =>
-  state.rbacProvider.collectionTypesRelatedPermissions;
+export const selectCollectionTypePermissions = (state, collectionTypeUID) =>
+  state.rbacProvider.collectionTypesRelatedPermissions[collectionTypeUID];

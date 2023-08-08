@@ -20,7 +20,6 @@ const reducers = {
       total: 0,
     },
   })),
-  'content-manager_rbacManager': jest.fn(() => ({ permissions: null })),
   'content-manager_editViewLayoutManager': jest.fn(() => ({ currentLayout: null })),
   'content-manager_editViewCrudReducer': jest.fn(() => ({
     componentsDataStructure: {},
