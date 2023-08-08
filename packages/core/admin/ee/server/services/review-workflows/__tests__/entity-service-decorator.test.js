@@ -88,7 +88,7 @@ describe('Entity service decorator', () => {
         ...input,
         data: {
           ...input.data,
-          strapi_stage: 1,
+          [ENTITY_STAGE_ATTRIBUTE]: 1,
         },
       });
     });
@@ -160,7 +160,7 @@ describe('Entity service decorator', () => {
 
       const service = decorator(defaultService);
 
-      const input = { data: { title: 'title ', strapi_reviewWorkflows_stage: stageToId } };
+      const input = { data: { title: 'title ', [ENTITY_STAGE_ATTRIBUTE]: stageToId } };
       await service.update(uid, entityId, input);
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, entityId, input);
@@ -197,13 +197,13 @@ describe('Entity service decorator', () => {
       const service = decorator(defaultService);
 
       const id = 1;
-      const input = { data: { title: 'title ', strapi_stage: null } };
+      const input = { data: { title: 'title ', [ENTITY_STAGE_ATTRIBUTE]: null } };
       await service.update(uid, id, input);
 
       expect(defaultService.update).toHaveBeenCalledWith(uid, id, {
         ...input,
         data: {
-          ...omit('strapi_stage', input.data),
+          ...omit(ENTITY_STAGE_ATTRIBUTE, input.data),
         },
       });
     });

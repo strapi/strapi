@@ -65,4 +65,4 @@ const formatContentTypeData = (data, ct, composSchema) => {
   return recursiveFormatData(data, ct);
 };
 
-export default formatContentTypeData;
+export { formatContentTypeData };
