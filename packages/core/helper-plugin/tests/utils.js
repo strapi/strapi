@@ -26,6 +26,7 @@ const Providers = ({ children, initialEntries }) => {
       queries: {
         retry: false,
         // no more errors on the console for tests
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         error() {},
       },
     },

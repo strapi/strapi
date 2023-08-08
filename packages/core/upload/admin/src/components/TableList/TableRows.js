@@ -22,18 +22,18 @@ export const TableRows = ({
 }) => {
   const { formatMessage } = useIntl();
 
-  const handleRowClickFn = (element, elementType, id) => {
+  const handleRowClickFn = (element, elementType, id, path) => {
     if (elementType === 'asset') {
       onEditAsset(element);
     } else {
-      onChangeFolder(id);
+      onChangeFolder(id, path);
     }
   };
 
   return (
     <Tbody>
       {rows.map((element) => {
-        const { id, isSelectable, name, folderURL, type: contentType } = element;
+        const { path, id, isSelectable, name, folderURL, type: contentType } = element;
 
         const isSelected = !!selected.find(
           (currentRow) => currentRow.id === id && currentRow.type === contentType
@@ -43,7 +43,7 @@ export const TableRows = ({
           <Tr
             key={id}
             {...onRowClick({
-              fn: () => handleRowClickFn(element, contentType, id),
+              fn: () => handleRowClickFn(element, contentType, id, path),
             })}
           >
             <Td {...stopPropagation}>

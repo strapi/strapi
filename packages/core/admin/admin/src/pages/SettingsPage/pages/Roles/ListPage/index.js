@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 
 import {
   ActionLayout,
@@ -21,78 +21,27 @@ import {
   LoadingIndicatorPage,
   SearchURLQuery,
   SettingsPageTitle,
-  useCollator,
-  useFilter,
+  useAPIErrorHandler,
   useFocusWhenNavigate,
-  useNotification,
   useQueryParams,
+  useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
-import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { useRolesList } from '../../../../../hooks';
+import { useAdminRoles } from '../../../../../hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../App/selectors';
 
 import EmptyRole from './components/EmptyRole';
 import BaseRoleRow from './components/RoleRow';
 import reducer, { initialState } from './reducer';
 
-const useSortedRoles = () => {
-  useFocusWhenNavigate();
-  const { locale } = useIntl();
-  const permissions = useSelector(selectAdminPermissions);
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useRBAC(permissions.settings.roles);
-
-  const { getData, roles, isLoading } = useRolesList(false);
-  const [{ query }] = useQueryParams();
-  const _q = query?._q || '';
-
-  const { includes } = useFilter(locale, {
-    sensitivity: 'base',
-  });
-
-  /**
-   * @type {Intl.Collator}
-   */
-  const formatter = useCollator(locale, {
-    sensitivity: 'base',
-  });
-
-  const sortedRoles = (roles || [])
-    .filter((role) => includes(role.name, _q) || includes(role.description, _q))
-    .sort(
-      (a, b) => formatter.compare(a.name, b.name) || formatter.compare(a.description, b.description)
-    );
-
-  useEffect(() => {
-    if (!isLoadingForPermissions && canRead) {
-      getData();
-    }
-  }, [isLoadingForPermissions, canRead, getData]);
-
-  return {
-    isLoadingForPermissions,
-    canCreate,
-    canDelete,
-    canRead,
-    canUpdate,
-    isLoading,
-    getData,
-    sortedRoles,
-    roles,
-  };
-};
-
-const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
+const useRoleActions = ({ canCreate, canDelete, canUpdate, refetchRoles }) => {
   const { formatMessage } = useIntl();
-
+  const { formatAPIError } = useAPIErrorHandler();
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
@@ -113,26 +62,16 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
         ids: [roleToDelete],
       });
 
-      await getData();
+      await refetchRoles();
 
       dispatch({
         type: 'RESET_DATA_TO_DELETE',
       });
-    } catch (err) {
-      const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
-
-      if (errorIds && Array.isArray(errorIds)) {
-        const errorsMsg = errorIds.join('\n');
-        toggleNotification({
-          type: 'warning',
-          message: errorsMsg,
-        });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     }
     handleToggleModal();
   };
@@ -244,17 +183,25 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
+  const permissions = useSelector(selectAdminPermissions);
+  const [{ query }] = useQueryParams();
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canCreate, canDelete, canRead, canUpdate },
+  } = useRBAC(permissions.settings.roles);
 
   const {
-    isLoadingForPermissions,
-    canCreate,
-    canRead,
-    canDelete,
-    canUpdate,
+    roles,
     isLoading,
-    getData,
-    sortedRoles,
-  } = useSortedRoles();
+    refetch: refetchRoles,
+  } = useAdminRoles(
+    { filters: query?._q ? { name: { $containsi: query._q } } : undefined },
+    {
+      cacheTime: 0,
+      enabled: !isLoadingForPermissions && canRead,
+    }
+  );
 
   const {
     handleNewRoleClick,
@@ -263,12 +210,12 @@ const RoleListPage = () => {
     showModalConfirmButtonLoading,
     handleToggleModal,
     handleDeleteData,
-  } = useRoleActions({ getData, canCreate, canDelete, canUpdate });
+  } = useRoleActions({ refetchRoles, canCreate, canDelete, canUpdate });
 
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
   // canRead
 
-  const rowCount = sortedRoles.length + 1;
+  const rowCount = roles.length + 1;
   const colCount = 6;
 
   if (isLoadingForPermissions) {
@@ -370,7 +317,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedRoles?.map((role, index) => (
+              {roles?.map((role, index) => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}

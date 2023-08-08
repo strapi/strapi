@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Button,
@@ -28,17 +28,20 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
-import { useRolesList, useSettingsForm } from '../../../../../../admin/src/hooks';
+import { useSettingsForm } from '../../../../../../admin/src/hooks';
+import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import { selectAdminPermissions } from '../../../../../../admin/src/pages/App/selectors';
 
 import schema from './utils/schema';
 
 export const SingleSignOn = () => {
+  useFocusWhenNavigate();
+
   const { formatMessage } = useIntl();
   const permissions = useSelector(selectAdminPermissions);
 
   const {
-    isLoading: isLoadingForPermissions,
+    isLoading: isLoadingPermissions,
     allowedActions: { canUpdate, canReadRoles },
   } = useRBAC({
     ...permissions.settings.sso,
@@ -46,44 +49,32 @@ export const SingleSignOn = () => {
   });
 
   const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },
-    // eslint-disable-next-line no-unused-vars
-    dispatch,
+    { formErrors, initialData, isLoading: isLoadingForm, modifiedData, showHeaderButtonLoader },
+    ,
     { handleChange, handleSubmit },
   ] = useSettingsForm('/admin/providers/options', schema, () => {}, [
     'autoRegister',
     'defaultRole',
     'ssoLockedRoles',
   ]);
-  const { roles } = useRolesList(canReadRoles);
 
-  useFocusWhenNavigate();
+  const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
+    enabled: canReadRoles,
+  });
 
-  const showLoader = isLoadingForPermissions || isLoading;
-
+  const isLoading = isLoadingPermissions || isLoadingRoles || isLoadingForm;
   // TODO: focus() first error field, but it looks like that requires refactoring from useSettingsForm to Formik
-
-  const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
   return (
     <Layout>
       <SettingsPageTitle name="SSO" />
       <Main tabIndex={-1}>
-        <form
-          onSubmit={(e) => {
-            if (isHeaderButtonDisabled) {
-              e.preventDefault();
-
-              return;
-            }
-            handleSubmit(e);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <HeaderLayout
             primaryAction={
               <Button
                 data-testid="save-button"
-                disabled={isHeaderButtonDisabled}
+                disabled={isEqual(initialData, modifiedData)}
                 loading={showHeaderButtonLoader}
                 startIcon={<Check />}
                 type="submit"
@@ -102,7 +93,7 @@ export const SingleSignOn = () => {
             })}
           />
           <ContentLayout>
-            {showLoader ? (
+            {isLoading ? (
               <LoadingIndicatorPage />
             ) : (
               <Flex

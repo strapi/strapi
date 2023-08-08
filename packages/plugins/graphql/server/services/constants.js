@@ -87,6 +87,7 @@ const allOperators = [
   'eq',
   'eqi',
   'ne',
+  'nei',
 
   'startsWith',
   'endsWith',

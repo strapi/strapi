@@ -27,16 +27,16 @@ import {
 import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
 import { Formik } from 'formik';
-import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useFetchPermissionsLayout, useFetchRole } from '../../../../../hooks';
+import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
 import { selectAdminPermissions } from '../../../../App/selectors';
 import Permissions from '../EditPage/components/Permissions';
+import { useAdminRolePermissionLayout } from '../hooks/useAdminRolePermissionLayout';
 
 import schema from './utils/schema';
 
@@ -51,6 +51,7 @@ const UsersRoleNumber = styled.div`
 `;
 
 const CreatePage = () => {
+  const route = useRouteMatch('/settings/roles/duplicate/:id');
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
@@ -58,17 +59,30 @@ const CreatePage = () => {
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
-  const params = useRouteMatch('/settings/roles/duplicate/:id');
-  const id = get(params, 'params.id', null);
-  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
-  const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
   const { post, put } = useFetchClient();
+
+  const { params } = route ?? {};
+
+  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+    useAdminRolePermissionLayout(params?.id, {
+      cacheTime: 0,
+    });
+
+  const { permissions: rolePermissions, isLoading: isLoadingRole } = useAdminRolePermissions(
+    { id: params?.id },
+    {
+      cacheTime: 0,
+
+      // only fetch permissions if a role is cloned
+      enabled: !!params?.id,
+    }
+  );
 
   const handleCreateRoleSubmit = (data) => {
     lockApp();
     setIsSubmiting(true);
 
-    if (id) {
+    if (params?.id) {
       trackUsage('willDuplicateRole');
     } else {
       trackUsage('willCreateNewRole');
@@ -78,7 +92,7 @@ const CreatePage = () => {
       .then(async ({ data: res }) => {
         const { permissionsToSend } = permissionsRef.current.getPermissions();
 
-        if (id) {
+        if (params?.id) {
           trackUsage('didDuplicateRole');
         } else {
           trackUsage('didCreateNewRole');
@@ -213,6 +227,7 @@ const CreatePage = () => {
                               defaultMessage: 'Name',
                             })}
                             onChange={handleChange}
+                            required
                             value={values.name}
                           />
                         </GridItem>
@@ -232,7 +247,7 @@ const CreatePage = () => {
                       </Grid>
                     </Flex>
                   </Box>
-                  {!isLayoutLoading && !isRoleLoading ? (
+                  {!isLoadingPermissionsLayout && !isLoadingRole ? (
                     <Box shadow="filterShadow" hasRadius>
                       <Permissions
                         isFormDisabled={false}

@@ -67,11 +67,7 @@ describe('Migration - draft and publish', () => {
     });
 
     afterAll(async () => {
-      try {
-        await strapi.destroy();
-      } catch (e) {
-        // ignore destroy errors
-      }
+      await strapi.destroy();
       await builder.cleanup();
     });
 

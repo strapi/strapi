@@ -14,6 +14,7 @@ type LogicalOperators<T> = {
 type AttributeOperators<T, K extends keyof T> = {
   $eq?: T[K] | Array<T[K]>;
   $ne?: T[K] | Array<T[K]>;
+  $nei?: T[K] | Array<T[K]>;
   $in?: T[K][];
   $notIn?: T[K][];
   $lt?: T[K];

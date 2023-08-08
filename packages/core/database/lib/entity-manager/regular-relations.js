@@ -1,7 +1,7 @@
 'use strict';
 
-const { map, isEmpty } = require('lodash/fp');
 const { randomBytes } = require('crypto');
+const { map, isEmpty } = require('lodash/fp');
 
 const {
   isBidirectional,

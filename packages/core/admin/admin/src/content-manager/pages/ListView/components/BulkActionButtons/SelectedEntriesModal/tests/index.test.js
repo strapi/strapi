@@ -6,6 +6,7 @@ import {
   render as renderRTL,
   screen,
   waitForElementToBeRemoved,
+  waitFor,
   fireEvent,
   within,
 } from '@testing-library/react';
@@ -48,17 +49,17 @@ const handlers = [
           {
             id: 1,
             name: 'Entry 1',
-            publishAt: null,
+            publishedAt: null,
           },
           {
             id: 2,
             name: 'Entry 2',
-            publishAt: null,
+            publishedAt: null,
           },
           {
             id: 3,
             name: 'Entry 3',
-            publishAt: null,
+            publishedAt: null,
           },
         ],
       })
@@ -172,9 +173,9 @@ describe('Bulk publish selected entries modal', () => {
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
     // User can toggle selected entries in the modal
-    const checkboxEntry1 = screen.getByRole('checkbox', { name: 'Select 1' });
-    const checkboxEntry2 = screen.getByRole('checkbox', { name: 'Select 2' });
-    const checkboxEntry3 = screen.getByRole('checkbox', { name: 'Select 3' });
+    const checkboxEntry1 = await screen.findByRole('checkbox', { name: 'Select 1' });
+    const checkboxEntry2 = await screen.findByRole('checkbox', { name: 'Select 2' });
+    const checkboxEntry3 = await screen.findByRole('checkbox', { name: 'Select 3' });
 
     // All table items should be selected by default
     expect(checkboxEntry1).toBeChecked();
@@ -183,11 +184,19 @@ describe('Bulk publish selected entries modal', () => {
 
     // User can unselect items
     fireEvent.click(checkboxEntry1);
-    expect(checkboxEntry1).not.toBeChecked();
+    await waitFor(() => {
+      expect(checkboxEntry1).not.toBeChecked();
+    });
+
     fireEvent.click(checkboxEntry2);
-    expect(checkboxEntry2).not.toBeChecked();
+    await waitFor(() => {
+      expect(checkboxEntry2).not.toBeChecked();
+    });
+
     fireEvent.click(checkboxEntry3);
-    expect(checkboxEntry3).not.toBeChecked();
+    await waitFor(() => {
+      expect(checkboxEntry3).not.toBeChecked();
+    });
 
     // Publish button should be disabled if no items are selected
     const count = screen.getByText('entries ready to publish', { exact: false });
@@ -197,8 +206,10 @@ describe('Bulk publish selected entries modal', () => {
 
     // If at least one item is selected, the publish button should work
     fireEvent.click(checkboxEntry1);
-    expect(count).toHaveTextContent('1 entry ready to publish');
-    expect(publishButton).not.toBeDisabled();
+    await waitFor(() => {
+      expect(count).toHaveTextContent('1 entry ready to publish');
+      expect(publishButton).not.toBeDisabled();
+    });
   });
 
   it('should publish valid entries after confirming and close the modal', async () => {
@@ -210,20 +221,24 @@ describe('Bulk publish selected entries modal', () => {
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
-    const publishButton = screen.getByRole('button', { name: /publish/i });
+    const publishButton = await screen.findByRole('button', { name: /publish/i });
     await user.click(publishButton);
-    const publishDialog = screen.getByRole('dialog', { name: /confirmation?/i });
-    const publishDialogButton = within(publishDialog).getByRole('button', { name: /publish/i });
+    const publishDialog = await screen.findByRole('dialog', { name: /confirmation?/i });
+    const publishDialogButton = await within(publishDialog).findByRole('button', {
+      name: /publish/i,
+    });
 
     expect(publishDialog).toBeInTheDocument();
     expect(publishDialogButton).toBeInTheDocument();
 
     await user.click(publishDialogButton);
 
-    expect(publishDialog).not.toBeInTheDocument();
-    expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('gridcell', { name: 'Entry 3' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(publishDialog).not.toBeInTheDocument();
+      expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('gridcell', { name: 'Entry 3' })).not.toBeInTheDocument();
+    });
   });
 
   it('should only keep entries with validation errors in the modal after publish', async () => {
@@ -258,23 +273,27 @@ describe('Bulk publish selected entries modal', () => {
 
     await waitForElementToBeRemoved(() => queryByText('Loading content'));
 
-    const publishButton = screen.getByRole('button', { name: /publish/i });
+    const publishButton = await screen.findByRole('button', { name: /publish/i });
     await user.click(publishButton);
-    const publishDialog = screen.getByRole('dialog', { name: /confirmation?/i });
-    const publishDialogButton = within(publishDialog).getByRole('button', { name: /publish/i });
+    const publishDialog = await screen.findByRole('dialog', { name: /confirmation?/i });
+    const publishDialogButton = await within(publishDialog).findByRole('button', {
+      name: /publish/i,
+    });
 
     expect(publishDialog).toBeInTheDocument();
     expect(publishDialogButton).toBeInTheDocument();
 
     await user.click(publishDialogButton);
 
-    expect(publishDialog).not.toBeInTheDocument();
-    expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
-    expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(publishDialog).not.toBeInTheDocument();
+      expect(screen.queryByRole('gridcell', { name: 'Entry 1' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('gridcell', { name: 'Entry 2' })).not.toBeInTheDocument();
+      expect(screen.getByRole('gridcell', { name: '3' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
+      ).toBeInTheDocument();
+    });
   });
 
   it('should show validation errors if there is an error', async () => {
@@ -311,18 +330,71 @@ describe('Bulk publish selected entries modal', () => {
 
     // Is showing the error message
     expect(
-      screen.getByRole('gridcell', { name: 'components.Input.error.validation.required' })
+      await screen.findByRole('gridcell', { name: 'components.Input.error.validation.required' })
     ).toBeInTheDocument();
 
     // Publish button is enabled if at least one selected entry is valid
-    const publishButton = screen.getByRole('button', { name: /publish/i });
+    const publishButton = await screen.findByRole('button', { name: /publish/i });
     expect(publishButton).not.toBeDisabled();
-
     // Publish button is disabled if all selected entries have errors
-    const checkboxEntry1 = screen.getByRole('checkbox', { name: 'Select 1' });
+    const checkboxEntry1 = await screen.findByRole('checkbox', { name: 'Select 1' });
     fireEvent.click(checkboxEntry1);
-    const checkboxEntry2 = screen.getByRole('checkbox', { name: 'Select 2' });
+    const checkboxEntry2 = await screen.findByRole('checkbox', { name: 'Select 2' });
     fireEvent.click(checkboxEntry2);
-    expect(publishButton).toBeDisabled();
+    await waitFor(() => {
+      expect(publishButton).toBeDisabled();
+    });
+  });
+
+  it('should show the correct messages above the table in the selected entries modal', async () => {
+    server.use(
+      rest.get('*/content-manager/collection-types/:apiId', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            results: [
+              {
+                id: 1,
+                name: 'Entry 1',
+                publishedAt: '2023-08-03T08:14:08.324Z',
+              },
+              {
+                id: 2,
+                name: 'Entry 2',
+              },
+              {
+                id: 3,
+                name: '',
+              },
+            ],
+          })
+        );
+      })
+    );
+
+    const { queryByText } = render(
+      <Table.Root defaultSelectedEntries={[1, 2, 3]} colCount={4}>
+        <SelectedEntriesModal onToggle={jest.fn()} />
+      </Table.Root>
+    );
+
+    await waitForElementToBeRemoved(() => queryByText('Loading content'));
+
+    // Should show a message with the entries already published
+    const countAlreadyPublished = await screen.findByText('entry already published', {
+      exact: false,
+    });
+
+    expect(countAlreadyPublished).toHaveTextContent('1 entry already published');
+    // Should show a message with the entries ready to be published
+    const countReadyToBePublished = await screen.findByText('entry ready to publish', {
+      exact: false,
+    });
+
+    expect(countReadyToBePublished).toHaveTextContent('1 entry ready to publish');
+    // Should show a message with the entries with errors to fix
+    const countWithErrors = await screen.findByText('entry waiting for action', {
+      exact: false,
+    });
+    expect(countWithErrors).toHaveTextContent('1 entry waiting for action');
   });
 });

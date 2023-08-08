@@ -1,6 +1,6 @@
-import formatContentTypeData from '../formatContentTypeData';
+import { formatContentTypeData } from '../formatContentTypeData';
 
-import testData from './testData';
+import { testData } from './testData';
 
 const { contentType, components, modifiedData } = testData;
 
