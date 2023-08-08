@@ -232,6 +232,7 @@ describe('Content-Type', () => {
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name', 'code'] },
           conditions: [],
@@ -253,12 +254,14 @@ describe('Content-Type', () => {
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'user',
           properties: { fields: ['firstname', 'restaurant', 'car'] },
           conditions: [],
@@ -280,12 +283,14 @@ describe('Content-Type', () => {
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'user',
           properties: {
             fields: [
@@ -312,12 +317,14 @@ describe('Content-Type', () => {
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'user',
           properties: {
             fields: [
@@ -387,6 +394,7 @@ describe('Content-Type', () => {
       expect(res).toEqual([
         {
           action: 'foo',
+          actionParameters: {},
           subject: 'user',
           properties: { fields: expectedFields },
           conditions: [],

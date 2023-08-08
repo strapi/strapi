@@ -404,6 +404,7 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name'] },
           conditions: [],
@@ -413,36 +414,42 @@ describe('Role', () => {
       const defaultPermissions = [
         {
           action: 'plugin::upload.read',
+          actionParameters: {},
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.configure-view',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.create',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.update',
+          actionParameters: {},
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.download',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
         },
         {
           action: 'plugin::upload.assets.copy-link',
+          actionParameters: {},
           conditions: [],
           properties: {},
           subject: null,
@@ -625,24 +632,28 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'action-1',
+          actionParameters: {},
           subject: 'country',
           properties: { fields: ['name'] },
           conditions: [],
         },
         {
           action: 'action-test2',
+          actionParameters: {},
           subject: 'test-subject1',
           properties: {},
           conditions: [],
         },
         {
           action: 'action-test2',
+          actionParameters: {},
           subject: 'test-subject2',
           properties: {},
           conditions: [],
         },
         {
           action: 'action-test3',
+          actionParameters: {},
           subject: null,
           properties: {},
           conditions: [],
@@ -759,11 +770,46 @@ describe('Role', () => {
 
       expect(createMany).toHaveBeenCalledTimes(1);
       expect(createMany).toHaveBeenCalledWith([
-        { action: 'action-0', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-1', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-2', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-3', conditions: [], properties: {}, role: 1, subject: null },
-        { action: 'action-4', conditions: ['cond'], properties: {}, role: 1, subject: null },
+        {
+          action: 'action-0',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-1',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-2',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-3',
+          actionParameters: {},
+          conditions: [],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
+        {
+          action: 'action-4',
+          actionParameters: {},
+          conditions: ['cond'],
+          properties: {},
+          role: 1,
+          subject: null,
+        },
       ]);
     });
   });
@@ -775,6 +821,7 @@ describe('Role', () => {
       const permissions = [
         {
           action: 'someAction',
+          actionParameters: {},
           conditions: [],
           properties: { fields: null },
           subject: null,

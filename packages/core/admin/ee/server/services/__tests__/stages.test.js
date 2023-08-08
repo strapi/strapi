@@ -78,6 +78,12 @@ const servicesMock = {
     validateWorkflowCount: jest.fn().mockResolvedValue(true),
     validateWorkflowStages: jest.fn(),
   },
+  'admin::stage-permissions': {
+    register: jest.fn(),
+    registerMany: jest.fn(),
+    unregister: jest.fn(),
+    can: jest.fn(() => true),
+  },
 };
 
 const queryUpdateMock = jest.fn(() => Promise.resolve());

@@ -81,7 +81,6 @@ module.exports = ({ strapi }) => {
       let stagePermissions = [];
       const stageId = destStage.id;
 
-      // TODO: Do not delete permissions if they are not changed
       await this.deleteStagePermissions([srcStage]);
 
       if (destStage.permissions) {
